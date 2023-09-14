@@ -7,6 +7,7 @@ import { SettingsStackParamList } from '../app/App';
 import useAuth from 'homebase-feed-app/hooks/auth/useAuth';
 import { SafeAreaView } from '../components/ui/SafeAreaView/SafeAreaView';
 import { Container } from '../components/ui/Container/Container';
+import { Profile } from '../components/ui/Icons/icons';
 
 type SettingsProps = NativeStackScreenProps<SettingsStackParamList, 'Profile'>;
 
@@ -33,8 +34,10 @@ const SettingsPage = (_props: SettingsProps) => {
             style={{
               display: 'flex',
               flexDirection: 'row',
+              alignItems: 'center',
               paddingVertical: 12,
             }}>
+            <Profile size={'lg'} />
             <Text
               style={{
                 marginLeft: 16,

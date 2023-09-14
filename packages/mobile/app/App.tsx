@@ -10,6 +10,8 @@ import SettingsPage from '../pages/settings-page';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useAuth } from 'homebase-feed-app';
 import LoginPage from '../pages/login-page';
+import { Cog, Feed, Images } from '../components/ui/Icons/icons';
+import FeedPage from '../pages/feed-page';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -17,6 +19,7 @@ export type AuthStackParamList = {
 };
 
 export type TabStackParamList = {
+  Feed: undefined;
   Settings: undefined;
 };
 
@@ -100,12 +103,35 @@ const AuthenticatedStack = () => {
   );
 };
 
+type TabIconProps = {
+  focused: boolean;
+  color: string;
+  size: number;
+};
+
 const TabStack = () => {
   const Tab = createBottomTabNavigator<TabStackParamList>();
 
+  const photosIcon = (props: TabIconProps) => <Feed {...props} />;
+  const settingsIcon = (props: TabIconProps) => <Cog {...props} />;
+
   return (
     <Tab.Navigator>
-      <Tab.Screen name="Settings" component={SettingsStack} />
+      <Tab.Screen
+        name="Feed"
+        component={FeedPage}
+        options={{
+          headerShown: false,
+          tabBarIcon: photosIcon,
+        }}
+      />
+      <Tab.Screen
+        name="Settings"
+        component={SettingsStack}
+        options={{
+          tabBarIcon: settingsIcon,
+        }}
+      />
     </Tab.Navigator>
   );
 };
