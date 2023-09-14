@@ -8,7 +8,7 @@ import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SettingsPage from '../pages/settings-page';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { useAuth } from 'rn-template-app';
+import { useAuth } from 'homebase-feed-app';
 import LoginPage from '../pages/login-page';
 
 export type AuthStackParamList = {

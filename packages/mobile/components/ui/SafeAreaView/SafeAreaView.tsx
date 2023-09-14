@@ -1,4 +1,4 @@
-import { useDarkMode } from 'rn-template-app';
+import { useDarkMode } from 'homebase-feed-app';
 import { Colors } from '../../../app/Colors';
 import { SafeAreaView, ViewProps, ViewStyle } from 'react-native';
 

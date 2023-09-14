@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Button, TextInput, View, Linking } from 'react-native';
 import { Text } from '../components/ui/Text/Text';
 import { AuthStackParamList } from '../app/App';
-import useAuth from 'rn-template-app/hooks/auth/useAuth';
+import useAuth from 'homebase-feed-app/hooks/auth/useAuth';
 import { Container } from '../components/ui/Container/Container';
 import { SafeAreaView } from '../components/ui/SafeAreaView/SafeAreaView';
 import { Colors } from '../app/Colors';
@@ -33,8 +33,8 @@ const useFinalize = () => {
 
     // Finalize
     (async () => {
-      if (url?.startsWith('rn-template://auth/finalize/')) {
-        const dataParams = url?.split('rn-template://auth/finalize/')[1];
+      if (url?.startsWith('homebase-feed://auth/finalize/')) {
+        const dataParams = url?.split('homebase-feed://auth/finalize/')[1];
         const params = new URLSearchParams(dataParams);
 
         const identity = params.get('identity');

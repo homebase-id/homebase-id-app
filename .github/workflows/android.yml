@@ -42,5 +42,5 @@ jobs:
 
             - uses: actions/upload-artifact@v3
               with:
-                  name: rn-template
+                  name: homebase-feed
                   path: packages/mobile/android/app/build/outputs/bundle/release/

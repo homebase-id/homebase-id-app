@@ -4,7 +4,7 @@ import { TouchableOpacity, View } from 'react-native';
 import { Text } from '../components/ui/Text/Text';
 
 import { SettingsStackParamList } from '../app/App';
-import useAuth from 'rn-template-app/hooks/auth/useAuth';
+import useAuth from 'homebase-feed-app/hooks/auth/useAuth';
 import { SafeAreaView } from '../components/ui/SafeAreaView/SafeAreaView';
 import { Container } from '../components/ui/Container/Container';
 

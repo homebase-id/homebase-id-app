@@ -1,5 +1,6 @@
 {
-    "name": "rn-template-app",
+    "name": "homebase-feed-app",
+    "version": "0.0.1",
     "private": true,
     "main": "index.ts",
     "peerDependencies": {

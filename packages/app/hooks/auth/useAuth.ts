@@ -20,13 +20,13 @@ export const drives = [
   // {
   //   a: '6483b7b1f71bd43eb6896c86148668cc',
   //   t: '2af68fe72fb84896f39f97c59d60813a',
-  //   n: 'RN Template',
+  //   n: 'Feed',
   //   d: 'Place for your memories',
   //   p: 3,
   // },
 ];
-export const appName = 'RN Template';
-export const appId = '96d04b2f-b68c-440f-914e-01d6f6ab945e';
+export const appName = 'Homebase Feed';
+export const appId = '5d3489e9-84d0-46a8-ac75-6a348e3d586b';
 
 // Adapted to work in react-native; With no fallbacks to web support; If we someday merge this with the web version, we should add the fallbacks
 const useAuth = () => {
@@ -54,12 +54,12 @@ const useAuth = () => {
 
     // Get params with publicKey embedded
     return await getRegistrationParamsYouAuth(
-      'rn-template://auth/finalize/',
+      'homebase-feed://auth/finalize/',
       appName,
       appId,
       drives,
       uint8ArrayToBase64(stringToUint8Array(JSON.stringify(publicKeyJwk))),
-      'template.homebase.id',
+      'feed.homebase.id',
       `${
         Platform.OS === 'ios'
           ? 'iOS'

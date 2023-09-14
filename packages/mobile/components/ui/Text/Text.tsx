@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { useDarkMode } from 'rn-template-app';
+import { useDarkMode } from 'homebase-feed-app';
 import { Colors } from '../../../app/Colors';
 import { Text, TextProps, TextStyle } from 'react-native';
 
