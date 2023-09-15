@@ -22,7 +22,7 @@ export const drives = [
     t: 'a3227ffba87608beeb24fee9b70d92a6',
     n: 'Feed',
     d: '',
-    p: 3,
+    p: 7,
   },
 ];
 export const appName = 'Odin - Feed';
