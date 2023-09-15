@@ -44,7 +44,12 @@ export const getRegistrationParams = async (
   returnUrl: string,
   appName: string,
   appId: string,
+  permissionKeys: number[] | undefined,
+  circlePermissionKeys: number[] | undefined,
   drives: { a: string; t: string; n: string; d: string; p: number }[],
+  circleDrives:
+    | { a: string; t: string; n: string; d: string; p: number }[]
+    | undefined,
   eccPublicKey: string,
   host?: string,
   clientFriendlyName?: string,
@@ -57,7 +62,10 @@ export const getRegistrationParams = async (
     n: appName,
     appId: appId,
     fn: clientFriendly,
+    p: permissionKeys?.join(','),
+    cp: circlePermissionKeys?.join(','),
     d: JSON.stringify(drives),
+    cd: circleDrives ? JSON.stringify(circleDrives) : undefined,
     return: 'backend-will-decide',
     o: undefined,
   };

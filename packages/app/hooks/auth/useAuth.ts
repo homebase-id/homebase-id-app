@@ -17,16 +17,16 @@ import { useEncrtypedStorage } from './useEncryptedStorage';
 import { Platform } from 'react-native';
 
 export const drives = [
-  // {
-  //   a: '6483b7b1f71bd43eb6896c86148668cc',
-  //   t: '2af68fe72fb84896f39f97c59d60813a',
-  //   n: 'Feed',
-  //   d: 'Place for your memories',
-  //   p: 3,
-  // },
+  {
+    a: '4db49422ebad02e99ab96e9c477d1e08',
+    t: 'a3227ffba87608beeb24fee9b70d92a6',
+    n: 'Feed',
+    d: '',
+    p: 3,
+  },
 ];
-export const appName = 'Homebase Feed';
-export const appId = '5d3489e9-84d0-46a8-ac75-6a348e3d586b';
+export const appName = 'Odin - Feed';
+export const appId = '5f887d80-0132-4294-ba40-bda79155551d';
 
 // Adapted to work in react-native; With no fallbacks to web support; If we someday merge this with the web version, we should add the fallbacks
 const useAuth = () => {
@@ -57,9 +57,13 @@ const useAuth = () => {
       'homebase-feed://auth/finalize/',
       appName,
       appId,
+      [10, 30, 50, 80, 130, 210],
+      undefined,
       drives,
+      undefined,
       uint8ArrayToBase64(stringToUint8Array(JSON.stringify(publicKeyJwk))),
-      'feed.homebase.id',
+      // 'feed.homebase.id',
+      'dev.dotyou.cloud:3002',
       `${
         Platform.OS === 'ios'
           ? 'iOS'
@@ -173,7 +177,8 @@ const useAuth = () => {
     finalizeAuthentication,
     logout,
     getDotYouClient,
-    getSharedSecret: () => sharedSecret && base64ToUint8Array(sharedSecret),
+    getSharedSecret: () =>
+      sharedSecret ? base64ToUint8Array(sharedSecret) : undefined,
     authToken,
     getIdentity: () => identity,
     isAuthenticated: authenticationState !== 'anonymous',

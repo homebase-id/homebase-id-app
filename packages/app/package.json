@@ -10,7 +10,7 @@
         "react-native": "*"
     },
     "dependencies": {
-        "@youfoundation/js-lib": "0.0.1-alpha.94",
+        "@youfoundation/js-lib": "0.0.1-alpha.95",
         "axios": "^1.4.0"
     },
     "devDependencies": {
