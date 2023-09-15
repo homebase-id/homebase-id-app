@@ -7,7 +7,8 @@ import { SettingsStackParamList } from '../app/App';
 import useAuth from 'homebase-feed-app/hooks/auth/useAuth';
 import { SafeAreaView } from '../components/ui/SafeAreaView/SafeAreaView';
 import { Container } from '../components/ui/Container/Container';
-import { Profile } from '../components/ui/Icons/icons';
+import { Download, Profile } from '../components/ui/Icons/icons';
+import codePush from 'react-native-code-push';
 
 type SettingsProps = NativeStackScreenProps<SettingsStackParamList, 'Profile'>;
 
@@ -15,6 +16,12 @@ const SettingsPage = (_props: SettingsProps) => {
   const { logout, getIdentity } = useAuth();
 
   const doLogout = async () => logout();
+  const doCheckForUpdate = async () => {
+    codePush.sync({
+      updateDialog: {},
+      installMode: codePush.InstallMode.IMMEDIATE,
+    });
+  };
 
   return (
     <SafeAreaView>
@@ -43,6 +50,23 @@ const SettingsPage = (_props: SettingsProps) => {
                 marginLeft: 16,
               }}>
               Logout
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => doCheckForUpdate()}
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+              paddingVertical: 12,
+              width: '100%',
+            }}>
+            <Download size={'lg'} />
+            <Text
+              style={{
+                marginLeft: 16,
+              }}>
+              Check for app updates
             </Text>
           </TouchableOpacity>
         </View>

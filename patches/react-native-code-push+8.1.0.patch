@@ -1,0 +1,19 @@
+diff --git a/node_modules/react-native-code-push/android/codepush.gradle b/node_modules/react-native-code-push/android/codepush.gradle
+index a0f9d27..590dfaa 100644
+--- a/node_modules/react-native-code-push/android/codepush.gradle
++++ b/node_modules/react-native-code-push/android/codepush.gradle
+@@ -33,10 +33,11 @@ gradle.projectsEvaluated {
+         }
+
+         def nodeModulesPath;
+-        if (config.root) {
+-            nodeModulesPath = Paths.get(config.root.asFile.get().absolutePath, "/node_modules");
+-        } else if (project.hasProperty('nodeModulesPath')) {
++
++        if (project.hasProperty('nodeModulesPath')) {
+             nodeModulesPath = project.nodeModulesPath
++        } else if (config.root) {
++            nodeModulesPath = Paths.get(config.root, "/node_modules");
+         } else {
+             nodeModulesPath = "../../node_modules";
+         }

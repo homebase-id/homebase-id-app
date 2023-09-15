@@ -3,6 +3,7 @@
 #import <React/RCTBundleURLProvider.h>
 // iOS 9.x or newer
 #import <React/RCTLinkingManager.h>
+#import <CodePush/CodePush.h>
 
 @implementation AppDelegate
 
@@ -21,7 +22,8 @@
 #if DEBUG
   return [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"packages/mobile/index"];
 #else
-  return [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
+  // return [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
+  return [CodePush bundleURL];
 #endif
 }
 

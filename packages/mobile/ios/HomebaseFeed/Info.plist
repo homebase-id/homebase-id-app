@@ -60,5 +60,7 @@
 				</array>
 			</dict>
 		</array>
+		<key>CodePushDeploymentKey</key>
+		<string>TODO-add-codepush-deployment-key-here</string>
 	</dict>
 </plist>

@@ -12,6 +12,7 @@ import { useAuth } from 'homebase-feed-app';
 import LoginPage from '../pages/login-page';
 import { Cog, Feed, Images } from '../components/ui/Icons/icons';
 import FeedPage from '../pages/feed-page';
+import CodePush from 'react-native-code-push';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -45,7 +46,7 @@ const asyncPersist = createAsyncStoragePersister({
   throttleTime: 1000,
 });
 
-const App = () => {
+let App = () => {
   return (
     <PersistQueryClientProvider
       client={queryClient}
@@ -62,6 +63,9 @@ const App = () => {
     </PersistQueryClientProvider>
   );
 };
+
+const codePushOptions = { checkFrequency: CodePush.CheckFrequency.MANUAL };
+App = CodePush(codePushOptions)(App);
 
 const RootStack = () => {
   const Stack = createNativeStackNavigator<AuthStackParamList>();

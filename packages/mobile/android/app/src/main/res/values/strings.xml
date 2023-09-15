@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Feed</string>
+    <string moduleConfig="true" name="CodePushDeploymentKey">TODO-add-codepush-deployment-key-here</string>
 </resources>
