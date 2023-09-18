@@ -10,7 +10,7 @@
     "start": "react-native start",
     "test": "jest",
     "build:android-codepush": "rm -rf codepush && mkdir codepush && react-native bundle --platform ios --dev false --entry-file packages/mobile/index.js --bundle-output codepush/main.jsbundle --assets-dest codepush",
-    "release:android-codepush": "appcenter codepush release -a odinops/Homebase-Photo -d Staging -c ./codepush -t 0.0.x && rm -rf codepush"
+    "release:android-codepush": "appcenter codepush release -a odinops/Homebase-Feed -d Staging -c ./codepush -t 0.0.x && rm -rf codepush"
   },
   "dependencies": {
     "@bam.tech/react-native-image-resizer": "^3.0.5",
