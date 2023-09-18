@@ -6,10 +6,14 @@ import { SafeAreaView } from '../components/ui/SafeAreaView/SafeAreaView';
 import WebView from 'react-native-webview';
 import { useAuth } from 'homebase-feed-app';
 import { uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
+import { Linking } from 'react-native';
 
 type FeedProps = NativeStackScreenProps<TabStackParamList, 'Feed'>;
 
+const uri = 'https://dev.dotyou.cloud:3002/';
+
 const FeedPage = (_props: FeedProps) => {
+  let webviewRef: WebView | null = null;
   const { authToken, getIdentity, getSharedSecret } = useAuth();
 
   const sharedSecret = getSharedSecret();
@@ -31,12 +35,34 @@ const FeedPage = (_props: FeedProps) => {
         window.localStorage.setItem(IDENTITY_KEY, IDENTITY);
       })();`;
 
+  // // Debug for webview
+  // console = new Object();
+  // console.log = function(log) {
+  //   // window.webViewBridge.send("console", log);
+  // };
+  // console.debug = console.log;
+  // console.info = console.log;
+  // console.warn = console.log;
+  // console.error = console.log;
+
   return (
     <SafeAreaView>
       <WebView
-        source={{ uri: 'https://dev.dotyou.cloud:3002/' }}
+        ref={ref => {
+          webviewRef = ref;
+        }}
+        source={{ uri: uri }}
         injectedJavaScriptBeforeContentLoaded={INJECTED_JAVASCRIPT}
         style={{ flex: 1 }}
+        pullToRefreshEnabled={true}
+        onNavigationStateChange={navState => {
+          if (!navState.url.startsWith(uri)) {
+            if (webviewRef) webviewRef.stopLoading();
+            Linking.openURL(navState.url);
+            return;
+          }
+        }}
+        onMessage={event => console.warn(event)}
       />
     </SafeAreaView>
   );
