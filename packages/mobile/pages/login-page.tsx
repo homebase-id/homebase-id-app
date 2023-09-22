@@ -73,7 +73,7 @@ const LoginPage = (_props: LoginProps) => {
         <View style={{ paddingHorizontal: 12, paddingVertical: 15 }}>
           <Text style={{ fontSize: 18 }}>Homebase id</Text>
           <TextInput
-            placeholder="Odin id"
+            placeholder="Homebase id"
             style={{
               height: 40,
               marginVertical: 12,
