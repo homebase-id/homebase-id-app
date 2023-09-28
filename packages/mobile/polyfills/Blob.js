@@ -52,11 +52,8 @@ import type {
  *
  * Reference: https://developer.mozilla.org/en-US/docs/Web/API/Blob
  */
-import {
-  getBlobForArrayBuffer,
-  getArrayBufferForBlob,
-} from 'react-native-blob-jsi-helper';
-import { uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
+import { getNewId, uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
+import { Dirs, FileSystem } from 'react-native-file-access';
 
 class Blob {
   _data: ?BlobData;
@@ -76,12 +73,23 @@ class Blob {
       parts.length === 1 &&
       parts[0] instanceof Uint8Array
     ) {
-      const innerBlob = getBlobForArrayBuffer(parts[0].buffer);
-      // this.data = BlobManager.createFromParts([innerBlob], options).data;
+      const id = getNewId();
+      this.data = {
+        blobId: id,
+        offset: 0,
+        size: parts[0].length,
+        type: options?.type || 'application/octet-stream',
+        __collector: null,
+      };
 
-      this.data = innerBlob.data;
+      const localPath = Dirs.CacheDir + `/${id}`;
+      FileSystem.writeFile(localPath, uint8ArrayToBase64(parts[0]), 'base64');
+
+      // We need to convert to a cached file on the system, as RN is dumb that way... It can't handle blobs in a data uri, as it will always load it as a bitmap... 🤷
+      // See getFileInputStream in RequestBodyUtil.class within RN for more info
+      this.uri = `file://${localPath}`;
     } else {
-      this.data = BlobManager.createFromParts(parts, options).data;
+      this.data = BlobManager.createFromParts(parts, options)?.data;
     }
   }
 
@@ -92,10 +100,6 @@ class Blob {
    */
   // $FlowFixMe[unsafe-getters-setters]
   set data(data: ?BlobData) {
-    const buffer = getArrayBufferForBlob({ _data: data });
-    const uri = `data:${data.type};base64,${uint8ArrayToBase64(buffer)}`;
-    this.uri = uri;
-
     this._data = data;
   }
 
