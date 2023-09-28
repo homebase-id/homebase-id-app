@@ -57,7 +57,7 @@ const useAuth = () => {
       'homebase-feed://auth/finalize/',
       appName,
       appId,
-      [10, 30, 50, 80, 130, 210],
+      [10, 30, 50, 80, 130, 210, 305],
       undefined,
       drives,
       undefined,
