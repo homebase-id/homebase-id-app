@@ -4,11 +4,11 @@ import { TouchableOpacity, View } from 'react-native';
 import { Text } from '../components/ui/Text/Text';
 
 import { SettingsStackParamList } from '../app/App';
-import useAuth from 'homebase-feed-app/hooks/auth/useAuth';
 import { SafeAreaView } from '../components/ui/SafeAreaView/SafeAreaView';
 import { Container } from '../components/ui/Container/Container';
 import { Download, Profile } from '../components/ui/Icons/icons';
 import codePush from 'react-native-code-push';
+import useAuth from '../hooks/auth/useAuth';
 
 type SettingsProps = NativeStackScreenProps<SettingsStackParamList, 'Profile'>;
 

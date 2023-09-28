@@ -8,11 +8,11 @@ import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SettingsPage from '../pages/settings-page';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { useAuth } from 'homebase-feed-app';
 import LoginPage from '../pages/login-page';
-import { Cog, Feed, Images } from '../components/ui/Icons/icons';
+import { Cog, Feed } from '../components/ui/Icons/icons';
 import FeedPage from '../pages/feed-page';
 import CodePush from 'react-native-code-push';
+import useAuth from '../hooks/auth/useAuth';
 
 export type AuthStackParamList = {
   Login: undefined;

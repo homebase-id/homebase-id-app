@@ -4,9 +4,9 @@ import React from 'react';
 import { TabStackParamList } from '../app/App';
 import { SafeAreaView } from '../components/ui/SafeAreaView/SafeAreaView';
 import WebView from 'react-native-webview';
-import { useAuth } from 'homebase-feed-app';
 import { uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
 import { Linking } from 'react-native';
+import useAuth from '../hooks/auth/useAuth';
 
 type FeedProps = NativeStackScreenProps<TabStackParamList, 'Feed'>;
 

@@ -3,11 +3,12 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Button, TextInput, View, Linking } from 'react-native';
 import { Text } from '../components/ui/Text/Text';
 import { AuthStackParamList } from '../app/App';
-import useAuth from 'homebase-feed-app/hooks/auth/useAuth';
+import useAuth from '../hooks/auth/useAuth';
 import { Container } from '../components/ui/Container/Container';
 import { SafeAreaView } from '../components/ui/SafeAreaView/SafeAreaView';
 import { Colors } from '../app/Colors';
 import { stringifyToQueryParams } from '@youfoundation/js-lib/helpers';
+import { useCheckIdentity } from '../hooks/checkIdentity/useCheckIdentity';
 
 type LoginProps = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 
@@ -53,10 +54,24 @@ const LoginPage = (_props: LoginProps) => {
   // LoginPage is the only page where you can be when unauthenticated; So only page where we listen for a finalize return link
   useFinalize();
 
+  const [invalid, setInvalid] = useState<boolean>(true);
   const [odinId, setOdinId] = useState<string>('');
   const { getRegistrationParams } = useAuth();
 
+  const { data: isValid, refetch: refreshValidCheck } =
+    useCheckIdentity(odinId);
+
+  useEffect(() => {
+    setInvalid(false);
+  }, [odinId]);
+
   const onLogin = useCallback(async () => {
+    if (!isValid) {
+      setInvalid(true);
+      refreshValidCheck();
+      return;
+    }
+
     const params = await getRegistrationParams();
 
     stringifyToQueryParams(params as any);
@@ -65,7 +80,7 @@ const LoginPage = (_props: LoginProps) => {
       odinId || ''
     }/api/owner/v1/youauth/authorize?${stringifyToQueryParams(params as any)}`;
     await Linking.openURL(url);
-  }, [odinId, getRegistrationParams]);
+  }, [isValid, refreshValidCheck, getRegistrationParams, odinId]);
 
   return (
     <SafeAreaView>
@@ -87,6 +102,9 @@ const LoginPage = (_props: LoginProps) => {
             autoCorrect={false}
             onSubmitEditing={onLogin}
           />
+          {invalid ? (
+            <Text style={{ color: Colors.red[500] }}>Invalid homebase id</Text>
+          ) : null}
           <Button title="Login" disabled={!odinId} onPress={onLogin} />
         </View>
       </Container>

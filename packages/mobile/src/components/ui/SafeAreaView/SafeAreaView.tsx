@@ -1,6 +1,6 @@
-import { useDarkMode } from 'homebase-feed-app';
 import { Colors } from '../../../app/Colors';
 import { SafeAreaView, ViewProps, ViewStyle } from 'react-native';
+import { useDarkMode } from '../../../hooks/useDarkMode';
 
 interface SaferAreaViewProps extends Omit<ViewProps, 'style'> {
   style?: ViewStyle;

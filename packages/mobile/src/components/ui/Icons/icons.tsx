@@ -1,7 +1,7 @@
-import { useDarkMode } from 'homebase-feed-app';
 import { Path, Svg } from 'react-native-svg';
 import { ReactNode } from 'react';
 import { View } from 'react-native';
+import { useDarkMode } from '../../../hooks/useDarkMode';
 
 const sizes = {
   '2xs': 2,

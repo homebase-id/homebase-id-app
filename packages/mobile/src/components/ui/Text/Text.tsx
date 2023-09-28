@@ -1,8 +1,8 @@
 import React from 'react';
 
-import { useDarkMode } from 'homebase-feed-app';
 import { Colors } from '../../../app/Colors';
 import { Text, TextProps, TextStyle } from 'react-native';
+import { useDarkMode } from '../../../hooks/useDarkMode';
 
 interface OurTextProps extends Omit<TextProps, 'style'> {
   style?: TextStyle;
