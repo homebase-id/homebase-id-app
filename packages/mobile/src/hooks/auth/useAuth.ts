@@ -15,6 +15,10 @@ import {
 import { logout as logoutYouauth } from '@youfoundation/js-lib/auth';
 import { useEncrtypedStorage } from './useEncryptedStorage';
 import { Platform } from 'react-native';
+import {
+  AppPermissionType,
+  DrivePermissionType,
+} from '@youfoundation/js-lib/network';
 
 export const drives = [
   {
@@ -22,7 +26,31 @@ export const drives = [
     t: 'a3227ffba87608beeb24fee9b70d92a6',
     n: 'Feed',
     d: '',
-    p: 7,
+    p: DrivePermissionType.Reader,
+  },
+  {
+    // Standard profile Info
+    a: '8f12d8c4933813d378488d91ed23b64c',
+    t: '597241530e3ef24b28b9a75ec3a5c45c',
+    n: '',
+    d: '',
+    p: DrivePermissionType.Reader,
+  },
+  {
+    // Homepage Config
+    a: 'ec83345af6a747d4404ef8b0f8844caa',
+    t: '597241530e3ef24b28b9a75ec3a5c45c',
+    n: '',
+    d: '',
+    p: DrivePermissionType.Reader,
+  },
+  {
+    // Public posts
+    a: 'e8475dc46cb4b6651c2d0dbd0f3aad5f',
+    t: '8f448716e34cedf9014145e043ca6612',
+    n: '',
+    d: '',
+    p: DrivePermissionType.Editor,
   },
 ];
 export const appName = 'Odin - Feed';
@@ -57,7 +85,15 @@ const useAuth = () => {
       'homebase-feed://auth/finalize/',
       appName,
       appId,
-      [10, 30, 50, 80, 130, 210, 305],
+      [
+        AppPermissionType.ReadConnections,
+        AppPermissionType.ManageConnectionRequests,
+        AppPermissionType.ReadCircleMembers,
+        AppPermissionType.ReadWhoIFollow,
+        AppPermissionType.ReadMyFollowers,
+        AppPermissionType.SendDataToOtherIdentitiesOnMyBehalf,
+        AppPermissionType.ReceiveDataFromOtherIdentitiesOnMyBehalf,
+      ],
       undefined,
       drives,
       undefined,
