@@ -15,10 +15,8 @@ import {
 import { logout as logoutYouauth } from '@youfoundation/js-lib/auth';
 import { useEncrtypedStorage } from './useEncryptedStorage';
 import { Platform } from 'react-native';
-import {
-  AppPermissionType,
-  DrivePermissionType,
-} from '@youfoundation/js-lib/network';
+import { DrivePermissionType } from '@youfoundation/js-lib/core';
+import { AppPermissionType } from '@youfoundation/js-lib/network';
 
 export const drives = [
   {
@@ -26,7 +24,7 @@ export const drives = [
     t: 'a3227ffba87608beeb24fee9b70d92a6',
     n: 'Feed',
     d: '',
-    p: DrivePermissionType.Reader,
+    p: DrivePermissionType.Read,
   },
   {
     // Standard profile Info
@@ -34,7 +32,7 @@ export const drives = [
     t: '597241530e3ef24b28b9a75ec3a5c45c',
     n: '',
     d: '',
-    p: DrivePermissionType.Reader,
+    p: DrivePermissionType.Read,
   },
   {
     // Homepage Config
@@ -42,7 +40,7 @@ export const drives = [
     t: '597241530e3ef24b28b9a75ec3a5c45c',
     n: '',
     d: '',
-    p: DrivePermissionType.Reader,
+    p: DrivePermissionType.Read,
   },
   {
     // Public posts
@@ -50,7 +48,7 @@ export const drives = [
     t: '8f448716e34cedf9014145e043ca6612',
     n: '',
     d: '',
-    p: DrivePermissionType.Editor,
+    p: DrivePermissionType.Read + DrivePermissionType.Write,
   },
 ];
 export const appName = 'Odin - Feed';
