@@ -6,10 +6,10 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { QueryClient } from '@tanstack/react-query';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import SettingsPage from '../pages/settings-page';
+import ProfilePage from '../pages/profile-page';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LoginPage from '../pages/login-page';
-import { Cog, Feed } from '../components/ui/Icons/icons';
+import { Cog, Feed, Profile } from '../components/ui/Icons/icons';
 import FeedPage from '../pages/feed-page';
 import CodePush from 'react-native-code-push';
 import useAuth from '../hooks/auth/useAuth';
@@ -21,7 +21,7 @@ export type AuthStackParamList = {
 
 export type TabStackParamList = {
   Feed: undefined;
-  Settings: undefined;
+  Profile: undefined;
 };
 
 export type RootStackParamList = {
@@ -117,7 +117,7 @@ const TabStack = () => {
   const Tab = createBottomTabNavigator<TabStackParamList>();
 
   const photosIcon = (props: TabIconProps) => <Feed {...props} />;
-  const settingsIcon = (props: TabIconProps) => <Cog {...props} />;
+  const settingsIcon = (props: TabIconProps) => <Profile {...props} />;
 
   return (
     <Tab.Navigator>
@@ -130,10 +130,11 @@ const TabStack = () => {
         }}
       />
       <Tab.Screen
-        name="Settings"
-        component={SettingsStack}
+        name="Profile"
+        component={ProfilePage}
         options={{
           tabBarIcon: settingsIcon,
+          headerShown: false,
         }}
       />
     </Tab.Navigator>
@@ -142,20 +143,6 @@ const TabStack = () => {
 
 export type SettingsStackParamList = {
   Profile: undefined;
-};
-
-const SettingsStack = () => {
-  const Stack = createNativeStackNavigator<SettingsStackParamList>();
-
-  return (
-    <Stack.Navigator>
-      <Stack.Screen
-        name="Profile"
-        component={SettingsPage}
-        options={{ headerShown: false }}
-      />
-    </Stack.Navigator>
-  );
 };
 
 export default App;

@@ -1,4 +1,4 @@
-import { Path, Svg } from 'react-native-svg';
+import { Circle, Path, Svg } from 'react-native-svg';
 import { ReactNode } from 'react';
 import { View } from 'react-native';
 import { useDarkMode } from '../../../hooks/useDarkMode';
@@ -313,6 +313,40 @@ export const Feed = (props: IconProps) => {
         color={props.color || (isDarkMode ? 'white' : 'black')}
         viewBox="0 0 448 512">
         <Path d="M0 64C0 46.3 14.3 32 32 32c229.8 0 416 186.2 416 416c0 17.7-14.3 32-32 32s-32-14.3-32-32C384 253.6 226.4 96 32 96C14.3 96 0 81.7 0 64zM0 416a64 64 0 1 1 128 0A64 64 0 1 1 0 416zM32 160c159.1 0 288 128.9 288 288c0 17.7-14.3 32-32 32s-32-14.3-32-32c0-123.7-100.3-224-224-224c-17.7 0-32-14.3-32-32s14.3-32 32-32z" />
+      </Svg>
+    </Center>
+  );
+};
+
+export const AddressBook = (props: IconProps) => {
+  const { isDarkMode } = useDarkMode();
+  return (
+    <Center>
+      <Svg
+        {...getSize(props.size || 'md')}
+        color={props.color || (isDarkMode ? 'white' : 'black')}
+        viewBox="0 0 512 512">
+        <Path d="M96 0C60.7 0 32 28.7 32 64V448c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V64c0-35.3-28.7-64-64-64H96zM208 288h64c44.2 0 80 35.8 80 80c0 8.8-7.2 16-16 16H144c-8.8 0-16-7.2-16-16c0-44.2 35.8-80 80-80zm96-96c0 35.3-28.7 64-64 64s-64-28.7-64-64s28.7-64 64-64s64 28.7 64 64zM512 80c0-8.8-7.2-16-16-16s-16 7.2-16 16v64c0 8.8 7.2 16 16 16s16-7.2 16-16V80zM496 192c-8.8 0-16 7.2-16 16v64c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm16 144c0-8.8-7.2-16-16-16s-16 7.2-16 16v64c0 8.8 7.2 16 16 16s16-7.2 16-16V336z" />
+      </Svg>
+    </Center>
+  );
+};
+
+export const People = (props: IconProps) => {
+  const { isDarkMode } = useDarkMode();
+  return (
+    <Center>
+      <Svg
+        {...getSize(props.size || 'md')}
+        viewBox="0 0 24 24"
+        strokeLinecap="round"
+        stroke={props.color || (isDarkMode ? 'white' : 'black')}
+        strokeLinejoin="round"
+        strokeWidth={2}
+        fill={'none'}>
+        <Path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+        <Circle cx="9" cy="7" r="4" />
+        <Path d="M23 21v-2a4 4 0 00-3-3.87m-4-12a4 4 0 010 7.75" />
       </Svg>
     </Center>
   );
