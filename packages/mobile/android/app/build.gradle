@@ -80,7 +80,7 @@ android {
 
     namespace "com.homebasefeed"
     defaultConfig {
-        applicationId "com.homebasefeed"
+        applicationId "id.homebase.feed"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
