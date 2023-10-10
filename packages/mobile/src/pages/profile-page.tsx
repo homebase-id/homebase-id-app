@@ -15,11 +15,18 @@ import {
 import codePush from 'react-native-code-push';
 import useAuth from '../hooks/auth/useAuth';
 import { Colors } from '../app/Colors';
+import { OdinImage } from '../components/ui/OdinImage/OdinImage';
+import {
+  BuiltInProfiles,
+  GetTargetDriveFromProfileId,
+} from '@youfoundation/js-lib/profile';
+import { useProfile } from '../hooks/profile/useProfile';
 
 type SettingsProps = NativeStackScreenProps<SettingsStackParamList, 'Profile'>;
 
 const SettingsPage = (_props: SettingsProps) => {
   const { logout, getIdentity } = useAuth();
+  const { data: profile } = useProfile();
 
   const doLogout = async () => logout();
   const doCheckForUpdate = async () => {
@@ -40,15 +47,17 @@ const SettingsPage = (_props: SettingsProps) => {
               alignItems: 'center',
               borderBottomWidth: 1,
               borderBottomColor: Colors.slate[200],
+              width: '100%',
+              height: 200,
             }}>
-            <Image
-              source={{
-                uri: 'https://frodo.dotyou.cloud/pub/image',
-                width: 200,
-                height: 200,
-              }}
-              resizeMode="cover"
-              style={{ width: 200, height: 200, minWidth: 200, minHeight: 200 }}
+            <OdinImage
+              fit="contain"
+              targetDrive={GetTargetDriveFromProfileId(
+                BuiltInProfiles.StandardProfileId,
+              )}
+              fileId={profile?.profileImageId}
+              imageSize={{ width: 160, height: 160 }}
+              style={{ borderRadius: 160 / 2 }}
             />
             <Text
               style={{
@@ -57,7 +66,9 @@ const SettingsPage = (_props: SettingsProps) => {
                 marginBottom: 8,
                 paddingTop: 4,
               }}>
-              {getIdentity()}
+              {profile?.firstName || profile?.surName
+                ? `${profile.firstName} ${profile.surName}`
+                : getIdentity()}
             </Text>
           </View>
 

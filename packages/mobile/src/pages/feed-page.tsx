@@ -6,11 +6,11 @@ import { SafeAreaView } from '../components/ui/SafeAreaView/SafeAreaView';
 import WebView from 'react-native-webview';
 import { uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
 import { Linking } from 'react-native';
-import useAuth from '../hooks/auth/useAuth';
+import useAuth, { feedHost } from '../hooks/auth/useAuth';
 
 type FeedProps = NativeStackScreenProps<TabStackParamList, 'Feed'>;
 
-const uri = 'https://dev.dotyou.cloud:3002/';
+const uri = `https://${feedHost}`;
 
 const FeedPage = (_props: FeedProps) => {
   let webviewRef: WebView | null = null;
