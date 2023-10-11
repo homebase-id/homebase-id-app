@@ -2,7 +2,11 @@ import {
   TargetDrive,
   EmbeddedThumb,
   ImageSize,
-} from '@youfoundation/js-lib/dist';
+} from '@youfoundation/js-lib/core';
+import {
+  base64ToUint8Array,
+  byteArrayToString,
+} from '@youfoundation/js-lib/helpers';
 import React, { useMemo } from 'react';
 import {
   View,
@@ -10,10 +14,12 @@ import {
   ActivityIndicator,
   StyleProp,
   ImageStyle,
+  ViewStyle,
 } from 'react-native';
 import useImage from './hooks/useImage';
 import useTinyThumb from './hooks/useTinyThumb';
 import useAuth from '../../../hooks/auth/useAuth';
+import { SvgUri, SvgXml } from 'react-native-svg';
 
 export interface OdinImageProps {
   odinId?: string;
@@ -129,6 +135,8 @@ export const OdinImage = ({
           }}>
           <ActivityIndicator style={{}} size="large" />
         </View>
+      ) : imageData?.url.indexOf('svg') !== -1 ? (
+        <SvgImage style={style} imageSize={imageSize} uri={imageData.url} />
       ) : (
         <Image
           source={{ uri: imageData.url }}
@@ -141,5 +149,29 @@ export const OdinImage = ({
         />
       )}
     </View>
+  );
+};
+
+const SvgImage = ({
+  uri,
+  style,
+  imageSize,
+}: {
+  uri: string;
+  style: StyleProp<ViewStyle>;
+  imageSize: { width: number; height: number } | undefined;
+}) => {
+  const base64Data = uri.split('base64,').pop();
+  if (!base64Data) return;
+  const xmlString = byteArrayToString(base64ToUint8Array(base64Data));
+  if (!xmlString) return;
+
+  return (
+    <SvgXml
+      style={style}
+      xml={xmlString}
+      width={imageSize?.width}
+      height={imageSize?.height}
+    />
   );
 };
