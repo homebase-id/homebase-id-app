@@ -3,7 +3,7 @@ import React from 'react';
 import { Image, TouchableOpacity, View } from 'react-native';
 import { Text } from '../components/ui/Text/Text';
 
-import { SettingsStackParamList } from '../app/App';
+import { ProfileStackParamList } from '../app/App';
 import { SafeAreaView } from '../components/ui/SafeAreaView/SafeAreaView';
 import { Container } from '../components/ui/Container/Container';
 import {
@@ -22,7 +22,7 @@ import {
 } from '@youfoundation/js-lib/profile';
 import { useProfile } from '../hooks/profile/useProfile';
 
-type SettingsProps = NativeStackScreenProps<SettingsStackParamList, 'Profile'>;
+type SettingsProps = NativeStackScreenProps<ProfileStackParamList, 'Overview'>;
 
 const SettingsPage = (_props: SettingsProps) => {
   const { logout, getIdentity } = useAuth();
@@ -35,6 +35,9 @@ const SettingsPage = (_props: SettingsProps) => {
       installMode: codePush.InstallMode.IMMEDIATE,
     });
   };
+
+  const navigate = (target: keyof ProfileStackParamList) =>
+    _props.navigation.navigate(target);
 
   return (
     <SafeAreaView>
@@ -73,7 +76,7 @@ const SettingsPage = (_props: SettingsProps) => {
           </View>
 
           <TouchableOpacity
-            // onPress={() => doCheckForUpdate()}
+            onPress={() => navigate('Followers')}
             style={{
               display: 'flex',
               flexDirection: 'row',
@@ -91,7 +94,7 @@ const SettingsPage = (_props: SettingsProps) => {
           </TouchableOpacity>
 
           <TouchableOpacity
-            // onPress={() => doCheckForUpdate()}
+            onPress={() => navigate('Connections')}
             style={{
               display: 'flex',
               flexDirection: 'row',
@@ -108,7 +111,7 @@ const SettingsPage = (_props: SettingsProps) => {
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            // onPress={() => doCheckForUpdate()}
+            onPress={() => navigate('Following')}
             style={{
               display: 'flex',
               flexDirection: 'row',

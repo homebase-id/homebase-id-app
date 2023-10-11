@@ -13,6 +13,9 @@ import { Cog, Feed, Profile } from '../components/ui/Icons/icons';
 import FeedPage from '../pages/feed-page';
 import CodePush from 'react-native-code-push';
 import useAuth from '../hooks/auth/useAuth';
+import FollowersPage from '../pages/profile/followers-page';
+import ConnectionsPage from '../pages/profile/connections-page';
+import FollowingPage from '../pages/profile/following-page';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -26,6 +29,13 @@ export type TabStackParamList = {
 
 export type RootStackParamList = {
   Home: undefined;
+};
+
+export type ProfileStackParamList = {
+  Overview: undefined;
+  Followers: undefined;
+  Connections: undefined;
+  Following: undefined;
 };
 
 const queryClient = new QueryClient({
@@ -117,7 +127,7 @@ const TabStack = () => {
   const Tab = createBottomTabNavigator<TabStackParamList>();
 
   const photosIcon = (props: TabIconProps) => <Feed {...props} />;
-  const settingsIcon = (props: TabIconProps) => <Profile {...props} />;
+  const profileIcon = (props: TabIconProps) => <Profile {...props} />;
 
   return (
     <Tab.Navigator>
@@ -131,13 +141,32 @@ const TabStack = () => {
       />
       <Tab.Screen
         name="Profile"
-        component={ProfilePage}
+        component={ProfileStack}
         options={{
-          tabBarIcon: settingsIcon,
+          tabBarIcon: profileIcon,
           headerShown: false,
         }}
       />
     </Tab.Navigator>
+  );
+};
+
+const ProfileStack = () => {
+  const Stack = createNativeStackNavigator<ProfileStackParamList>();
+
+  return (
+    <Stack.Navigator screenOptions={{ headerBackTitle: 'Profile' }}>
+      <Stack.Screen
+        name="Overview"
+        component={ProfilePage}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen name="Followers" component={FollowersPage} />
+      <Stack.Screen name="Connections" component={ConnectionsPage} />
+      <Stack.Screen name="Following" component={FollowingPage} />
+    </Stack.Navigator>
   );
 };
 
