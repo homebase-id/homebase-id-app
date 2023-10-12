@@ -1,0 +1,51 @@
+name: react-native-ios-build
+on:
+  workflow_dispatch:
+
+jobs:
+  build-ios:
+    runs-on: macOS-latest
+
+    steps: 
+      - uses: actions/checkout@v3
+
+      - name: Authenticate to Github packages
+        run: |
+          echo "@youfoundation:registry=https://npm.pkg.github.com" > .npmrc
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.PACKAGES_PAT }}" >> .npmrc    
+
+      - name: Install npm dependencies
+        run: npm ci
+        
+      - name: Setup Ruby (bundle)
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 2.7.4
+          bundler-cache: true
+
+      - name: Install Pods
+        run: pod install --repo-update
+        working-directory: packages/mobile/ios
+
+      - name: Build IOS App
+        uses: yukiarrr/ios-build-action@v1.4.0
+        working-directory: packages/mobile/ios
+        with:
+          # project-path: packages/mobile/ios/${{ secrets.APP_PROJECT_NAME }}.xcodeproj
+          project-path: ${{ secrets.APP_PROJECT_NAME }}.xcodeproj
+          p12-base64: ${{ secrets.IOS_P12_BASE64 }}
+          mobileprovision-base64: ${{ secrets.IOS_MOBILE_PROVISION_BASE64 }}
+          code-signing-identity: 'iPhone Distribution'
+          team-id: ${{ secrets.IOS_TEAM_ID }}
+          certificate-password: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
+          workspace-path: ios/${{ secrets.APP_PROJECT_NAME }}.xcworkspace
+          scheme: ${{ secrets.APP_PROJECT_NAME }}
+
+      - name: 'Upload app to TestFlight'
+        working-directory: packages/mobile/ios
+        uses: apple-actions/upload-testflight-build@v1
+        with:
+          app-path: 'output.ipa'
+          issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
+          api-key-id: ${{ secrets.APPSTORE_API_KEY_ID }}
+          api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
