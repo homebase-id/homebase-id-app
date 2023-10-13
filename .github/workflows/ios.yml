@@ -1,6 +1,9 @@
 name: react-native-ios-build
+# name: release // TODO: Merge the ios and android release flows
 on:
   workflow_dispatch:
+  release:
+    types: [published]
 
 jobs:
   build-ios:
