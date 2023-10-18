@@ -1,0 +1,115 @@
+name: release
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+jobs:
+  build-ios:
+    runs-on: macOS-latest
+
+    steps: 
+      - uses: actions/checkout@v3
+
+      - name: get-npm-version
+        id: package-version
+        uses: Saionaro/extract-package-version@v1.2.1
+        with:
+          path: packages/mobile
+
+      - name: Authenticate to Github packages
+        run: |
+          echo "@youfoundation:registry=https://npm.pkg.github.com" > .npmrc
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.PACKAGES_PAT }}" >> .npmrc    
+
+      - name: Install npm dependencies
+        run: npm ci
+        
+      - name: Setup Ruby (bundle)
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 2.7.4
+          bundler-cache: true
+
+      - name: Bump version
+        uses: yanamura/ios-bump-version@v1
+        with:
+          version: ${{ steps.package-version.outputs.version}}
+          build-number: ${{github.run_number}}
+          project-path: packages/mobile/ios
+
+      - name: Install Pods
+        run: pod install --repo-update
+        working-directory: packages/mobile/ios
+
+      - name: Build IOS App
+        uses: yukiarrr/ios-build-action@v1.11.0
+        with:
+          project-path: packages/mobile/ios/HomebaseFeed.xcodeproj
+          p12-base64: ${{ secrets.IOS_P12_BASE64 }}
+          mobileprovision-base64: ${{ secrets.PHOTOS_IOS_MOBILE_PROVISION_BASE64 }}
+          code-signing-identity: 'iPhone Distribution'
+          team-id: ${{ secrets.IOS_TEAM_ID }}
+          certificate-password: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
+          workspace-path: packages/mobile/ios/HomebaseFeed.xcworkspace
+          scheme: HomebaseFeed
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: homebase-feed-app-ios
+          path: output.ipa
+
+  build-android:
+    runs-on: ubuntu-latest
+    steps: 
+      - uses: actions/checkout@v3
+
+      - name: get-npm-version
+        id: package-version
+        uses: Saionaro/extract-package-version@v1.2.1
+        with:
+          path: packages/mobile
+
+      - name: Set up JDK 1.11
+        uses: actions/setup-java@v1
+        with:
+          java-version: '11'
+
+      - name: Bump version
+        uses: chkfung/android-version-actions@v1.2.1
+        with:
+          gradlePath: packages/mobile/android/app/build.gradle
+          versionCode: ${{github.run_number}}
+          versionName: ${{ steps.package-version.outputs.version }}
+
+      - name: Authenticate to Github packages
+        run: |
+          echo "@youfoundation:registry=https://npm.pkg.github.com" > .npmrc
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.PACKAGES_PAT }}" >> .npmrc    
+
+      - name: Install npm dependencies
+        run: npm ci
+        
+      - name: Decode Homebase Keystore to file
+        id: decode_keystore_file
+        env:
+          ENCODED_STRING: ${{ secrets.ANDROID_KEYSTORE_FILE_BASE64_ENCODED }}
+        run: |
+          TMP_KEYSTORE_FILE_PATH="${RUNNER_TEMP}"/keystore
+          mkdir "${TMP_KEYSTORE_FILE_PATH}"
+          KEYSTORE_FILE_PATH="${TMP_KEYSTORE_FILE_PATH}"/homebase.keystore
+          echo $ENCODED_STRING | base64 -di > "${KEYSTORE_FILE_PATH}"
+          echo "KEYSTORE_FILE_PATH=$KEYSTORE_FILE_PATH" >> $GITHUB_OUTPUT
+        
+      - name: Build Android Bundle
+        run: cd packages/mobile/android && ./gradlew bundleRelease
+        env:
+          SIGNING_KEYSTORE_FILE_PATH: ${{ steps.decode_keystore_file.outputs.KEYSTORE_FILE_PATH }}
+          SIGNING_KEY_ALIAS: ${{ secrets.ANDROID_KEYSTORE_ALIAS }}
+          SIGNING_STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_STORE_PASSWORD }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_KEY_PASSWORD }}
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: homebase-feed-app-android
+          path: packages/mobile/android/app/build/outputs/bundle/release/
