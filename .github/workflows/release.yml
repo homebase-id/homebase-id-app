@@ -8,7 +8,7 @@ jobs:
   build-ios:
     runs-on: macOS-latest
 
-    steps: 
+    steps:
       - uses: actions/checkout@v3
 
       - name: get-npm-version
@@ -20,11 +20,11 @@ jobs:
       - name: Authenticate to Github packages
         run: |
           echo "@youfoundation:registry=https://npm.pkg.github.com" > .npmrc
-          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> .npmrc    
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> .npmrc
 
       - name: Install npm dependencies
         run: npm ci
-        
+
       - name: Setup Ruby (bundle)
         uses: ruby/setup-ruby@v1
         with:
@@ -47,7 +47,7 @@ jobs:
         with:
           project-path: packages/mobile/ios/HomebaseFeed.xcodeproj
           p12-base64: ${{ secrets.IOS_P12_BASE64 }}
-          mobileprovision-base64: ${{ secrets.PHOTOS_IOS_MOBILE_PROVISION_BASE64 }}
+          mobileprovision-base64: ${{ secrets.FEED_IOS_MOBILE_PROVISION_BASE64 }}
           code-signing-identity: 'iPhone Distribution'
           team-id: ${{ secrets.IOS_TEAM_ID }}
           certificate-password: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
@@ -61,7 +61,7 @@ jobs:
 
   build-android:
     runs-on: ubuntu-latest
-    steps: 
+    steps:
       - uses: actions/checkout@v3
 
       - name: get-npm-version
@@ -85,11 +85,11 @@ jobs:
       - name: Authenticate to Github packages
         run: |
           echo "@youfoundation:registry=https://npm.pkg.github.com" > .npmrc
-          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> .npmrc    
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> .npmrc
 
       - name: Install npm dependencies
         run: npm ci
-        
+
       - name: Decode Homebase Keystore to file
         id: decode_keystore_file
         env:
@@ -100,7 +100,7 @@ jobs:
           KEYSTORE_FILE_PATH="${TMP_KEYSTORE_FILE_PATH}"/homebase.keystore
           echo $ENCODED_STRING | base64 -di > "${KEYSTORE_FILE_PATH}"
           echo "KEYSTORE_FILE_PATH=$KEYSTORE_FILE_PATH" >> $GITHUB_OUTPUT
-        
+
       - name: Build Android Bundle
         run: cd packages/mobile/android && ./gradlew bundleRelease
         env:
