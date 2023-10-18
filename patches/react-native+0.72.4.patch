@@ -1,11 +1,78 @@
+diff --git a/node_modules/react-native/Libraries/Blob/Blob.js b/node_modules/react-native/Libraries/Blob/Blob.js
+index a75fb1b..6736d61 100644
+--- a/node_modules/react-native/Libraries/Blob/Blob.js
++++ b/node_modules/react-native/Libraries/Blob/Blob.js
+@@ -11,6 +11,8 @@
+ 'use strict';
+
+ import type {BlobData, BlobOptions} from './BlobTypes';
++import { getNewId, uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
++import { Dirs, FileSystem } from 'react-native-file-access';
+
+ /**
+  * Opaque JS representation of some binary data in native.
+@@ -57,9 +59,34 @@ class Blob {
+    * Currently we only support creating Blobs from other Blobs.
+    * Reference: https://developer.mozilla.org/en-US/docs/Web/API/Blob/Blob
+    */
+-  constructor(parts: Array<Blob | string> = [], options?: BlobOptions) {
++  constructor(
++    parts: Array<$ArrayBufferView | ArrayBuffer | Blob | string> = [],
++    options?: BlobOptions,
++  ) {
+     const BlobManager = require('./BlobManager');
+-    this.data = BlobManager.createFromParts(parts, options).data;
++    if (
++      Array.isArray(parts) &&
++      parts.length === 1 &&
++      parts[0] instanceof Uint8Array
++    ) {
++      const id = getNewId();
++      this.data = {
++        blobId: id,
++        offset: 0,
++        size: parts[0].length,
++        type: options?.type || 'application/octet-stream',
++        __collector: null,
++      };
++
++      const localPath = Dirs.CacheDir + `/${id}`;
++      FileSystem.writeFile(localPath, uint8ArrayToBase64(parts[0]), 'base64');
++
++      // We need to convert to a cached file on the system, as RN is dumb that way... It can't handle blobs in a data uri, as it will always load it as a bitmap... 🤷
++      // See getFileInputStream in RequestBodyUtil.class within RN for more info
++      this.uri = `file://${localPath}`;
++    } else {
++      this.data = BlobManager.createFromParts(parts, options)?.data;
++    }
+   }
+
+   /*
+@@ -81,7 +108,7 @@ class Blob {
+     return this._data;
+   }
+
+-  slice(start?: number, end?: number): Blob {
++  slice(start?: number, end?: number, contentType: string = ''): Blob {
+     const BlobManager = require('./BlobManager');
+     let {offset, size} = this.data;
+
+@@ -109,6 +136,7 @@ class Blob {
+       blobId: this.data.blobId,
+       offset,
+       size,
++      type: contentType,
+       /* Since `blob.slice()` creates a new view onto the same binary
+        * data as the original blob, we should re-use the same collector
+        * object so that the underlying resource gets deallocated when
 diff --git a/node_modules/react-native/Libraries/Network/FormData.js b/node_modules/react-native/Libraries/Network/FormData.js
-index d1ec811..4619919 100644
+index d1ec811..b06706f 100644
 --- a/node_modules/react-native/Libraries/Network/FormData.js
 +++ b/node_modules/react-native/Libraries/Network/FormData.js
 @@ -55,13 +55,13 @@ class FormData {
      this._parts = [];
    }
- 
+
 -  append(key: string, value: FormDataValue) {
 +  append(key: string, value: FormDataValue, filename?: string) {
      // The XMLHttpRequest spec doesn't specify if duplicate keys are allowed.
@@ -16,19 +83,19 @@ index d1ec811..4619919 100644
 -    this._parts.push([key, value]);
 +    this._parts.push([key, value, filename]);
    }
- 
+
    getAll(key: string): Array<FormDataValue> {
-@@ -71,26 +71,27 @@ class FormData {
+@@ -71,26 +71,26 @@ class FormData {
    }
- 
+
    getParts(): Array<FormDataPart> {
 -    return this._parts.map(([name, value]) => {
 +    return this._parts.map(([name, value, filename]) => {
        const contentDisposition = 'form-data; name="' + name + '"';
- 
+
 -      const headers: Headers = {'content-disposition': contentDisposition};
 +      const headers: Headers = { 'content-disposition': contentDisposition };
- 
+
        // The body part is a "blob", which in React Native just means
        // an object with a `uri` attribute. Optionally, it can also
        // have a `name` and `type` attribute to specify filename and
@@ -38,14 +105,14 @@ index d1ec811..4619919 100644
 -          headers['content-disposition'] += '; filename="' + value.name + '"';
 -        }
 -        if (typeof value.type === 'string') {
+-          headers['content-type'] = value.type;
+-        }
+-        return {...value, headers, fieldName: name};
 +        if (typeof filename === 'string' || typeof value.name === 'string')
 +          headers['content-disposition'] +=
 +            '; filename="' + (filename || value.name) + '"';
 +
-+        if (typeof value.type === 'string')
-           headers['content-type'] = value.type;
--        }
--        return {...value, headers, fieldName: name};
++        headers['content-type'] = value.type && typeof value.type === 'string' ? value.type : 'application/octet-stream';
 +
 +        return { ...value, headers, fieldName: name };
        }

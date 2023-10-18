@@ -31,8 +31,8 @@ if (!global.crypto?.subtle)
   };
 
 // Blob Polyfill
-import Blob from './polyfills/Blob';
-global.Blob = Blob;
+import { default as internalBlob } from 'react-native/Libraries/Blob/Blob';
+window.Blob = internalBlob;
 
 // FormData within react-native is always used by the network polyfills.. No way to polyfill without overriding the network polyfills or the direct pacakge;
 // FormData Polyfill => Done with package-update
