@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">Homebase Secure Photos</string>
+    <!-- Production: tr_XtE_iZ6R8ImyHJT0P02RsqncylBEZQg9qE -->
     <string moduleConfig="true" name="CodePushDeploymentKey">tr_XtE_iZ6R8ImyHJT0P02RsqncylBEZQg9qE</string>
+    <!-- Staging: giF42g_718BKQMRJCBDisE08VsIKixbFOb_oc -->
+    <!-- <string moduleConfig="true" name="CodePushDeploymentKey">giF42g_718BKQMRJCBDisE08VsIKixbFOb_oc</string> -->
 </resources>

@@ -1,5 +1,5 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, TextInput, View, Linking } from 'react-native';
 import { Text } from '../components/ui/Text/Text';
 import { AuthStackParamList } from '../app/App';
@@ -9,6 +9,7 @@ import { SafeAreaView } from '../components/ui/SafeAreaView/SafeAreaView';
 import { Colors } from '../app/Colors';
 import { stringifyToQueryParams } from '@youfoundation/js-lib/helpers';
 import { useCheckIdentity } from '../hooks/checkIdentity/useCheckIdentity';
+import { useQuery } from '@tanstack/react-query';
 
 type LoginProps = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 
@@ -50,13 +51,21 @@ const useFinalize = () => {
   }, [canFinzalizeAuthentication, url, finalizeAuthentication]);
 };
 
+const useParams = () => {
+  const { getRegistrationParams } = useAuth();
+  return useQuery(['params'], () => getRegistrationParams(), {
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
+};
+
 const LoginPage = (_props: LoginProps) => {
   // LoginPage is the only page where you can be when unauthenticated; So only page where we listen for a finalize return link
   useFinalize();
 
   const [invalid, setInvalid] = useState<boolean>(true);
   const [odinId, setOdinId] = useState<string>('');
-  const { getRegistrationParams } = useAuth();
+  const { data: authParams } = useParams();
 
   const { data: isValid, refetch: refreshValidCheck } =
     useCheckIdentity(odinId);
@@ -65,22 +74,20 @@ const LoginPage = (_props: LoginProps) => {
     setInvalid(false);
   }, [odinId]);
 
-  const onLogin = useCallback(async () => {
+  const onLogin = async () => {
     if (!isValid) {
       setInvalid(true);
       refreshValidCheck();
       return;
     }
 
-    const params = await getRegistrationParams();
-
-    stringifyToQueryParams(params as any);
-
     const url = `https://${
       odinId || ''
-    }/api/owner/v1/youauth/authorize?${stringifyToQueryParams(params as any)}`;
+    }/api/owner/v1/youauth/authorize?${stringifyToQueryParams(
+      authParams as any,
+    )}`;
     await Linking.openURL(url);
-  }, [isValid, refreshValidCheck, getRegistrationParams, odinId]);
+  };
 
   return (
     <SafeAreaView>

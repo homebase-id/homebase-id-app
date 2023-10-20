@@ -73,7 +73,7 @@ export const drives = [
 ];
 export const appName = 'Odin - Feed';
 export const appId = '5f887d80-0132-4294-ba40-bda79155551d';
-export const feedHost = 'dev.dotyou.cloud:3002';
+export const feedHost = 'feed.homebase.id';
 
 // Adapted to work in react-native; With no fallbacks to web support; If we someday merge this with the web version, we should add the fallbacks
 const useAuth = () => {
