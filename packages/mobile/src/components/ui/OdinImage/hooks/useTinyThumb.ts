@@ -6,7 +6,6 @@ import {
   getDecryptedThumbnailMeta,
 } from '@youfoundation/js-lib/core';
 import { base64ToUint8Array } from '@youfoundation/js-lib/helpers';
-import { GetFileEntryFromCache } from '@youfoundation/js-lib/public';
 
 const useTinyThumb = (
   dotYouClient: DotYouClient,
@@ -20,28 +19,6 @@ const useTinyThumb = (
     imageDrive?: TargetDrive,
   ) => {
     if (imageFileId === undefined || imageFileId === '' || !imageDrive) return;
-
-    // Look for tiny thumb in already fetched data:
-    const thumbFromStaticFile = await GetFileEntryFromCache(imageFileId);
-    if (
-      thumbFromStaticFile?.[0]?.header.fileMetadata.appData.previewThumbnail
-    ) {
-      const previewThumbnail =
-        thumbFromStaticFile[0].header.fileMetadata.appData.previewThumbnail;
-      const buffer = base64ToUint8Array(previewThumbnail.content);
-      const url = URL.createObjectURL(new Blob([buffer as any]));
-
-      return {
-        naturalSize: {
-          width: previewThumbnail.pixelWidth,
-          height: previewThumbnail.pixelHeight,
-        },
-        sizes:
-          thumbFromStaticFile[0].header.fileMetadata.appData
-            .additionalThumbnails ?? [],
-        url,
-      };
-    }
 
     return (
       (await getDecryptedThumbnailMeta(
