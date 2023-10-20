@@ -54,10 +54,13 @@ jobs:
           workspace-path: packages/mobile/ios/HomebaseFeed.xcworkspace
           scheme: HomebaseFeed
 
+      - name: Rename output
+        run: mv output.ipa homebase-feed-bundle.ipa
+
       - uses: actions/upload-artifact@v3
         with:
           name: homebase-feed-app-ios
-          path: output.ipa
+          path: homebase-feed-bundle.ipa
 
   build-android:
     runs-on: ubuntu-latest
@@ -109,7 +112,10 @@ jobs:
           SIGNING_STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_STORE_PASSWORD }}
           SIGNING_KEY_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_KEY_PASSWORD }}
 
+      - name: Rename output
+        run: mv packages/mobile/android/app/build/outputs/bundle/release/app-release.aab packages/mobile/android/app/build/outputs/bundle/release/homebase-feed-bundle.aab
+
       - uses: actions/upload-artifact@v3
         with:
           name: homebase-feed-app-android
-          path: packages/mobile/android/app/build/outputs/bundle/release/
+          path: packages/mobile/android/app/build/outputs/bundle/release/homebase-feed-bundle.aab
