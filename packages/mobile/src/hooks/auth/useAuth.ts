@@ -78,7 +78,6 @@ export const feedHost = 'feed.homebase.id';
 // Adapted to work in react-native; With no fallbacks to web support; If we someday merge this with the web version, we should add the fallbacks
 const useAuth = () => {
   const {
-    privateKey: privateKeyFromLocalStorage,
     setPrivateKey,
     sharedSecret,
     setSharedSecret,
@@ -88,11 +87,87 @@ const useAuth = () => {
     setIdentity,
   } = useEncrtypedStorage();
 
-  const throwAwayTheKey = async () => await setPrivateKey('');
-
   const [authenticationState, setAuthenticationState] = useState<
     'unknown' | 'anonymous' | 'authenticated'
   >(sharedSecret ? 'unknown' : 'anonymous');
+
+  const logout = useCallback(async (): Promise<void> => {
+    await logoutYouauth(getDotYouClient());
+
+    setAuthenticationState('anonymous');
+
+    setPrivateKey('');
+    setSharedSecret('');
+    setAuthToken('');
+    setIdentity('');
+  }, []);
+
+  const getDotYouClient = () => {
+    if (!sharedSecret || !identity)
+      return new DotYouClient({
+        api: ApiType.App,
+      });
+
+    const headers: Record<string, string> = {};
+    if (authToken) headers.bx0900 = authToken;
+
+    return new DotYouClient({
+      sharedSecret: base64ToUint8Array(sharedSecret),
+      api: ApiType.App,
+      identity: identity,
+      headers: headers,
+    });
+  };
+
+  const { data: hasValidToken, isFetchedAfterMount } = useVerifyToken(
+    getDotYouClient(),
+  );
+
+  useEffect(() => {
+    if (
+      !!identity &&
+      !!sharedSecret &&
+      isFetchedAfterMount &&
+      hasValidToken !== undefined
+    ) {
+      setAuthenticationState(hasValidToken ? 'authenticated' : 'anonymous');
+
+      if (!hasValidToken) {
+        setAuthenticationState('anonymous');
+        if (sharedSecret) {
+          console.log('Token is invalid, logging out..');
+          logout();
+        }
+      }
+    }
+  }, [identity, sharedSecret, hasValidToken, isFetchedAfterMount, logout]);
+
+  useEffect(() => {
+    if (authenticationState === 'authenticated' && !sharedSecret)
+      setAuthenticationState('anonymous');
+  }, [sharedSecret, authenticationState]);
+
+  return {
+    logout,
+    getDotYouClient,
+    getSharedSecret: () =>
+      sharedSecret ? base64ToUint8Array(sharedSecret) : undefined,
+    authToken,
+    getIdentity: () => identity,
+    isAuthenticated: authenticationState !== 'anonymous',
+  };
+};
+
+export const useYouAuthAuthorization = () => {
+  const {
+    privateKey: privateKeyFromLocalStorage,
+    setPrivateKey,
+    setSharedSecret,
+    setAuthToken,
+    setIdentity,
+  } = useEncrtypedStorage();
+
+  // const throwAwayTheKey = async () => await setPrivateKey('');
 
   const getRegistrationParams = async () => {
     const { privateKeyHex, publicKeyJwk } = await createEccPair();
@@ -155,7 +230,7 @@ const useAuth = () => {
           salt,
         );
 
-      await throwAwayTheKey();
+      // await throwAwayTheKey();
 
       // Store all data in secure storage
       await setAuthToken(uint8ArrayToBase64(clientAuthToken));
@@ -169,74 +244,7 @@ const useAuth = () => {
     return true;
   };
 
-  const logout = useCallback(async (): Promise<void> => {
-    await logoutYouauth(getDotYouClient());
-
-    setAuthenticationState('anonymous');
-
-    setPrivateKey('');
-    setSharedSecret('');
-    setAuthToken('');
-    setIdentity('');
-  }, []);
-
-  const getDotYouClient = () => {
-    if (!sharedSecret || !identity)
-      return new DotYouClient({
-        api: ApiType.App,
-      });
-
-    const headers: Record<string, string> = {};
-    if (authToken) headers.bx0900 = authToken;
-
-    return new DotYouClient({
-      sharedSecret: base64ToUint8Array(sharedSecret),
-      api: ApiType.App,
-      identity: identity,
-      headers: headers,
-    });
-  };
-
-  const { data: hasValidToken, isFetchedAfterMount } = useVerifyToken(
-    getDotYouClient(),
-  );
-
-  useEffect(() => {
-    if (
-      !!identity &&
-      !!sharedSecret &&
-      isFetchedAfterMount &&
-      hasValidToken !== undefined
-    ) {
-      setAuthenticationState(hasValidToken ? 'authenticated' : 'anonymous');
-
-      if (!hasValidToken) {
-        setAuthenticationState('anonymous');
-        if (sharedSecret) {
-          console.log('Token is invalid, logging out..');
-          logout();
-        }
-      }
-    }
-  }, [identity, sharedSecret, hasValidToken, isFetchedAfterMount, logout]);
-
-  useEffect(() => {
-    if (authenticationState === 'authenticated' && !sharedSecret)
-      setAuthenticationState('anonymous');
-  }, [sharedSecret, authenticationState]);
-
-  return {
-    getRegistrationParams,
-    canFinzalizeAuthentication: !!privateKeyFromLocalStorage,
-    finalizeAuthentication,
-    logout,
-    getDotYouClient,
-    getSharedSecret: () =>
-      sharedSecret ? base64ToUint8Array(sharedSecret) : undefined,
-    authToken,
-    getIdentity: () => identity,
-    isAuthenticated: authenticationState !== 'anonymous',
-  };
+  return { getRegistrationParams, finalizeAuthentication };
 };
 
 export default useAuth;
