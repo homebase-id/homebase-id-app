@@ -60,7 +60,11 @@ export const drives = [
     t: BlogConfig.PublicChannelDrive.type,
     n: '',
     d: '',
-    p: DrivePermissionType.Read + DrivePermissionType.Write,
+    p:
+      DrivePermissionType.Read +
+      DrivePermissionType.Write +
+      DrivePermissionType.React +
+      DrivePermissionType.Comment,
   },
   {
     // Contacts drive
