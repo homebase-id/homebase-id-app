@@ -2,14 +2,12 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { QueryClient } from '@tanstack/react-query';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ProfilePage from '../pages/profile-page';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LoginPage from '../pages/login-page';
-import { Cog, Feed, Profile } from '../components/ui/Icons/icons';
 import FeedPage from '../pages/feed-page';
 import CodePush from 'react-native-code-push';
 import useAuth from '../hooks/auth/useAuth';
@@ -117,37 +115,14 @@ const AuthenticatedStack = () => {
   );
 };
 
-type TabIconProps = {
-  focused: boolean;
-  color: string;
-  size: number;
-};
-
 const TabStack = () => {
-  const Tab = createBottomTabNavigator<TabStackParamList>();
-
-  const photosIcon = (props: TabIconProps) => <Feed {...props} />;
-  const profileIcon = (props: TabIconProps) => <Profile {...props} />;
+  const Stack = createNativeStackNavigator<TabStackParamList>();
 
   return (
-    <Tab.Navigator>
-      <Tab.Screen
-        name="Feed"
-        component={FeedPage}
-        options={{
-          headerShown: false,
-          tabBarIcon: photosIcon,
-        }}
-      />
-      <Tab.Screen
-        name="Profile"
-        component={ProfileStack}
-        options={{
-          tabBarIcon: profileIcon,
-          headerShown: false,
-        }}
-      />
-    </Tab.Navigator>
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Feed" component={FeedPage} />
+      <Stack.Screen name="Profile" component={ProfileStack} />
+    </Stack.Navigator>
   );
 };
 

@@ -19,6 +19,7 @@ import {
   Download,
   People,
   Profile,
+  Times,
 } from '../components/ui/Icons/icons';
 import codePush from 'react-native-code-push';
 import useAuth from '../hooks/auth/useAuth';
@@ -45,6 +46,13 @@ const SettingsPage = (_props: SettingsProps) => {
     <SafeAreaView>
       <Container>
         <View style={{ display: 'flex', flexDirection: 'column' }}>
+          <View style={{ flexDirection: 'row-reverse' }}>
+            <TouchableOpacity
+              onPress={() => _props.navigation.goBack()}
+              style={{ padding: 6 }}>
+              <Times size={'lg'} />
+            </TouchableOpacity>
+          </View>
           <View
             style={{
               display: 'flex',
