@@ -75,7 +75,7 @@ export const drives = [
     p: DrivePermissionType.Read + DrivePermissionType.Write,
   },
 ];
-export const appName = 'Odin - Feed';
+export const appName = 'Homebase - Feed';
 export const appId = '5f887d80-0132-4294-ba40-bda79155551d';
 export const feedHost = 'feed.homebase.id';
 
