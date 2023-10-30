@@ -16,7 +16,8 @@
         "axios": "^1.4.0",
         "react": "18.2.0",
         "react-native": "0.72.4",
-        "patch-package": "8.0.0"
+        "patch-package": "8.0.0",
+        "@youfoundation/js-lib": "0.0.1-alpha.155"
     },
     "devDependencies": {}
 }
