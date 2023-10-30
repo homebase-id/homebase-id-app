@@ -123,13 +123,7 @@ const FeedPage = (_props: FeedProps) => {
           paddingTop: hideHeader ? 0 : insets.top + headerHeight,
         }}
         style={{ backgroundColor: Colors.slate[50] }}
-        onNavigationStateChange={navState => {
-          if (!navState.url.startsWith(uri)) {
-            if (webviewRef) webviewRef.stopLoading();
-            Linking.openURL(navState.url);
-            return;
-          }
-        }}
+        originWhitelist={[uri]} // Keeps the WebView from navigating away from the feed-app; Any links that don't match will be opened by the system.. Eg: open in the browser
         onMessage={event => console.warn(event)}
         onScroll={event => {
           const scrollOffset = event.nativeEvent.contentOffset.y;
