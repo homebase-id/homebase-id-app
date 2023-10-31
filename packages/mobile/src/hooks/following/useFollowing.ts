@@ -21,19 +21,17 @@ export const useFollowingInfinite = ({
   };
 
   return {
-    fetch: useInfiniteQuery(
-      ['following'],
-      ({ pageParam }) => fetchFollowingInternal({ pageParam }),
-      {
-        getNextPageParam: lastPage =>
-          (lastPage?.results?.length &&
-            lastPage?.results?.length >= pageSize &&
-            lastPage?.cursorState) ||
-          undefined,
-        refetchOnMount: false,
-        refetchOnWindowFocus: false,
-        staleTime: Infinity,
-      },
-    ),
+    fetch: useInfiniteQuery({
+      queryKey: ['following'],
+      initialPageParam: undefined as string | undefined,
+      queryFn: ({ pageParam }) => fetchFollowingInternal({ pageParam }),
+      getNextPageParam: lastPage =>
+        lastPage?.results?.length && lastPage?.results?.length >= pageSize
+          ? lastPage?.cursorState
+          : undefined,
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+      staleTime: Infinity,
+    }),
   };
 };

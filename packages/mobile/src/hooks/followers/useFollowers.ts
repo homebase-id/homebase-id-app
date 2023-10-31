@@ -17,19 +17,17 @@ export const useFollowerInfinite = ({
   };
 
   return {
-    fetch: useInfiniteQuery(
-      ['followers'],
-      ({ pageParam }) => fetchBlogData({ pageParam }),
-      {
-        getNextPageParam: lastPage =>
-          (lastPage?.results &&
-            lastPage.results.length >= pageSize &&
-            lastPage?.cursorState) ??
-          undefined,
-        refetchOnMount: false,
-        refetchOnWindowFocus: false,
-        staleTime: Infinity,
-      },
-    ),
+    fetch: useInfiniteQuery({
+      queryKey: ['followers'],
+      initialPageParam: undefined as string | undefined,
+      queryFn: ({ pageParam }) => fetchBlogData({ pageParam }),
+      getNextPageParam: lastPage =>
+        lastPage?.results && lastPage.results.length >= pageSize
+          ? lastPage?.cursorState
+          : undefined,
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+      staleTime: Infinity,
+    }),
   };
 };

@@ -13,7 +13,9 @@ const useVerifyToken = (dotYouClient: DotYouClient) => {
 
     return await hasValidToken(dotYouClient);
   };
-  return useQuery(['verifyToken'], fetchData, {
+  return useQuery({
+    queryKey: ['verifyToken'],
+    queryFn: fetchData,
     refetchOnMount: false,
     staleTime: MINUTE_IN_MS * 10,
     enabled: !!sharedSecret && !!identity,

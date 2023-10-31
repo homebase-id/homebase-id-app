@@ -31,7 +31,7 @@ const useProfile = () => {
     };
   };
 
-  return useQuery(['profile-data'], fetchProfile);
+  return useQuery({ queryKey: ['profile-data'], queryFn: fetchProfile });
 };
 
 export { useProfile };

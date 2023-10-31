@@ -32,18 +32,17 @@ export const useConnections = (
   };
 
   return {
-    fetch: useInfiniteQuery(
-      ['activeConnections', activePageSize],
-      ({ pageParam }) =>
+    fetch: useInfiniteQuery({
+      queryKey: ['activeConnections', activePageSize],
+      initialPageParam: undefined as number | undefined,
+      queryFn: ({ pageParam }) =>
         fetchConnections({ pageSize: activePageSize, cursor: pageParam }),
-      {
-        getNextPageParam: lastPage =>
-          (lastPage.results?.length >= activePageSize && lastPage.cursor) ??
-          undefined,
-        refetchOnWindowFocus: false,
-        keepPreviousData: true,
-        onError: err => console.error(err),
-      },
-    ),
+
+      getNextPageParam: lastPage =>
+        lastPage.results?.length >= activePageSize
+          ? lastPage.cursor
+          : undefined,
+      refetchOnWindowFocus: false,
+    }),
   };
 };

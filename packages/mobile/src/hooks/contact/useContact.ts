@@ -14,9 +14,10 @@ const useContact = (odinId?: string) => {
   };
 
   return {
-    fetch: useQuery(['contact', odinId], () => fetchSingle(odinId as string), {
+    fetch: useQuery({
+      queryKey: ['contact', odinId],
+      queryFn: () => fetchSingle(odinId as string),
       refetchOnWindowFocus: false,
-      onError: err => console.error(err),
       retry: false,
       enabled: !!odinId,
     }),

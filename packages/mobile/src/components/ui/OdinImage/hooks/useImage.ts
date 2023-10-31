@@ -36,7 +36,8 @@ const useImage = (
   ) => {
     const cachedEntries = queryClient
       .getQueryCache()
-      .findAll(['image', odinId, imageDrive?.alias, imageFileId], {
+      .findAll({
+        queryKey: ['image', odinId, imageDrive?.alias, imageFileId],
         exact: false,
       })
       .filter(query => query.state.status !== 'error');
@@ -142,8 +143,8 @@ const useImage = (
   };
 
   return {
-    fetch: useQuery(
-      [
+    fetch: useQuery({
+      queryKey: [
         'image',
         odinId,
         imageDrive?.alias,
@@ -155,7 +156,7 @@ const useImage = (
             }`
           : undefined,
       ],
-      () =>
+      queryFn: () =>
         fetchImageData(
           odinId,
           imageFileId,
@@ -164,17 +165,13 @@ const useImage = (
           probablyEncrypted,
           naturalSize,
         ),
-      {
-        refetchOnMount: true,
-        refetchOnWindowFocus: false,
-        staleTime: 1000 * 60, // 1 min
-        cacheTime: Infinity,
-        enabled: !!imageFileId && imageFileId !== '',
-        onError: error => {
-          console.error(error);
-        },
-      },
-    ),
+
+      refetchOnMount: true,
+      refetchOnWindowFocus: false,
+      staleTime: 1000 * 60, // 1 min
+      gcTime: Infinity,
+      enabled: !!imageFileId && imageFileId !== '',
+    }),
     getFromCache: (
       odinId: string | undefined,
       imageFileId: string,
@@ -182,7 +179,8 @@ const useImage = (
     ) => {
       const cachedEntries = queryClient
         .getQueryCache()
-        .findAll(['image', odinId, imageDrive?.alias, imageFileId], {
+        .findAll({
+          queryKey: ['image', odinId, imageDrive?.alias, imageFileId],
           exact: false,
         })
         .filter(query => query.state.status === 'success');
@@ -192,20 +190,23 @@ const useImage = (
           cachedEntries[0].queryKey,
         );
     },
-    save: useMutation(saveImageFile, {
+    save: useMutation({
+      mutationFn: saveImageFile,
       onSuccess: (_data, variables) => {
         // Boom baby!
         if (variables.fileId)
-          queryClient.invalidateQueries([
-            'image',
-            odinId,
-            variables.targetDrive.alias,
-            variables.fileId,
-          ]);
-        else queryClient.removeQueries(['image']);
+          queryClient.invalidateQueries({
+            queryKey: [
+              'image',
+              odinId,
+              variables.targetDrive.alias,
+              variables.fileId,
+            ],
+          });
+        else queryClient.removeQueries({ queryKey: ['image'] });
       },
     }),
-    remove: useMutation(removeImageFile),
+    remove: useMutation({ mutationFn: removeImageFile }),
   };
 };
 
