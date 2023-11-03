@@ -87,6 +87,7 @@ const useFinalize = () => {
       const initialUrl = await Linking.getInitialURL();
       setUrl(initialUrl);
       if (!initialUrl) setState(null);
+      setState(null);
     };
 
     getUrlAsync();
