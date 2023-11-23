@@ -2,14 +2,17 @@ import { useQuery } from '@tanstack/react-query';
 import { hasValidToken } from '@youfoundation/js-lib/auth';
 import { useEncrtypedStorage } from './useEncryptedStorage';
 import { DotYouClient } from '@youfoundation/js-lib/core';
+import { useNetInfo } from '@react-native-community/netinfo';
 
 const MINUTE_IN_MS = 60000;
 
 const useVerifyToken = (dotYouClient: DotYouClient) => {
   const { sharedSecret, identity } = useEncrtypedStorage();
+  const netinfo = useNetInfo();
 
   const fetchData = async () => {
     if (!sharedSecret) return false;
+    if (netinfo.isConnected === false) return true;
 
     return await hasValidToken(dotYouClient);
   };
