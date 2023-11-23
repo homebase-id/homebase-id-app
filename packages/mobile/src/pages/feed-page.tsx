@@ -96,7 +96,8 @@ const FeedPage = (_props: FeedProps) => {
               targetDrive={GetTargetDriveFromProfileId(
                 BuiltInProfiles.StandardProfileId,
               )}
-              fileId={profile?.profileImageId}
+              fileId={profile?.profileImageFileId}
+              fileKey={profile?.profileImageFileKey}
               imageSize={{ width: 30, height: 30 }}
               style={{ borderRadius: 30 / 2 }}
             />

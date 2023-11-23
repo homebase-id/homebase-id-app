@@ -1,7 +1,7 @@
 import { View, Text } from 'react-native';
 import useContact from '../../hooks/contact/useContact';
 import { OdinImage } from '../ui/OdinImage/OdinImage';
-import { ContactConfig } from '@youfoundation/js-lib/network';
+import { CONTACT_PROFILE_IMAGE_KEY, ContactConfig } from '@youfoundation/js-lib/network';
 
 export const IdentityItem = ({ odinId }: { odinId: string }) => {
   const { data: contact } = useContact(odinId).fetch;
@@ -15,7 +15,8 @@ export const IdentityItem = ({ odinId }: { odinId: string }) => {
         alignItems: 'center',
       }}>
       <OdinImage
-        fileId={contact?.imageFileId}
+        fileId={contact?.fileId}
+        fileKey={CONTACT_PROFILE_IMAGE_KEY}
         targetDrive={ContactConfig.ContactTargetDrive}
         imageSize={{ width: 50, height: 50 }}
       />

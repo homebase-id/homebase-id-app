@@ -391,6 +391,8 @@ PODS:
   - react-native-mmkv-storage (0.9.1):
     - MMKV (= 1.2.13)
     - React-Core
+  - react-native-netinfo (11.1.0):
+    - React-Core
   - react-native-quick-crypto (0.6.1):
     - OpenSSL-Universal
     - React
@@ -580,6 +582,7 @@ DEPENDENCIES:
   - React-logger (from `../../../node_modules/react-native/ReactCommon/logger`)
   - "react-native-image-resizer (from `../../../node_modules/@bam.tech/react-native-image-resizer`)"
   - react-native-mmkv-storage (from `../../../node_modules/react-native-mmkv-storage`)
+  - "react-native-netinfo (from `../../../node_modules/@react-native-community/netinfo`)"
   - react-native-quick-crypto (from `../../../node_modules/react-native-quick-crypto`)
   - react-native-quick-sqlite (from `../../../node_modules/react-native-quick-sqlite`)
   - react-native-safe-area-context (from `../../../node_modules/react-native-safe-area-context`)
@@ -680,6 +683,8 @@ EXTERNAL SOURCES:
     :path: "../../../node_modules/@bam.tech/react-native-image-resizer"
   react-native-mmkv-storage:
     :path: "../../../node_modules/react-native-mmkv-storage"
+  react-native-netinfo:
+    :path: "../../../node_modules/@react-native-community/netinfo"
   react-native-quick-crypto:
     :path: "../../../node_modules/react-native-quick-crypto"
   react-native-quick-sqlite:
@@ -774,6 +779,7 @@ SPEC CHECKSUMS:
   React-logger: da1ebe05ae06eb6db4b162202faeafac4b435e77
   react-native-image-resizer: 681f7607418b97c084ba2d0999b153b103040d8a
   react-native-mmkv-storage: cfb6854594cfdc5f7383a9e464bb025417d1721c
+  react-native-netinfo: 3aa5637c18834966e0c932de8ae1ae56fea20a97
   react-native-quick-crypto: 455c1b411db006dba1026a30681ececb19180187
   react-native-quick-sqlite: 9daf75c171e3d0bad2011f95cb501303e4a28363
   react-native-safe-area-context: 7aa8e6d9d0f3100a820efb1a98af68aa747f9284

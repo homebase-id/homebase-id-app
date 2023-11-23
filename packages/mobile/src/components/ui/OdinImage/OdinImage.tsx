@@ -19,12 +19,13 @@ import {
 import useImage from './hooks/useImage';
 import useTinyThumb from './hooks/useTinyThumb';
 import useAuth from '../../../hooks/auth/useAuth';
-import { SvgUri, SvgXml } from 'react-native-svg';
+import { SvgXml } from 'react-native-svg';
 
 export interface OdinImageProps {
   odinId?: string;
   targetDrive: TargetDrive;
   fileId: string | undefined;
+  fileKey: string | undefined;
   fit?: 'cover' | 'contain';
   imageSize?: { width: number; height: number };
   alt?: string;
@@ -38,6 +39,7 @@ export const OdinImage = ({
   odinId,
   targetDrive,
   fileId,
+  fileKey,
   fit,
   imageSize,
   alt,
@@ -73,6 +75,7 @@ export const OdinImage = ({
     dotYouClient,
     odinId,
     !skipTiny ? fileId : undefined,
+    fileKey,
     targetDrive,
   );
   const previewUrl = cachedImage?.url || embeddedThumbUrl || tinyThumb?.url;
@@ -90,6 +93,7 @@ export const OdinImage = ({
     dotYouClient,
     odinId,
     loadSize !== undefined ? fileId : undefined,
+    fileKey,
     targetDrive,
     avoidPayload ? { pixelHeight: 200, pixelWidth: 200 } : loadSize,
     probablyEncrypted,

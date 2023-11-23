@@ -21,6 +21,7 @@ const useImage = (
   dotYouClient: DotYouClient,
   odinId?: string,
   imageFileId?: string | undefined,
+  imageFileKey?: string | undefined,
   imageDrive?: TargetDrive,
   size?: ImageSize,
   probablyEncrypted?: boolean,
@@ -31,19 +32,20 @@ const useImage = (
   const checkIfWeHaveLargerCachedImage = (
     odinId: string | undefined,
     imageFileId: string,
+    imageFileKey: string,
     imageDrive: TargetDrive,
     size?: ImageSize,
   ) => {
     const cachedEntries = queryClient
       .getQueryCache()
       .findAll({
-        queryKey: ['image', odinId, imageDrive?.alias, imageFileId],
+        queryKey: ['image', odinId, imageDrive?.alias, imageFileId, imageFileKey],
         exact: false,
       })
       .filter(query => query.state.status !== 'error');
 
     const cachedEntriesWithSize = cachedEntries.map(entry => {
-      const sizeParts = (entry.queryKey[4] as string)?.split('x');
+      const sizeParts = (entry.queryKey[5] as string)?.split('x');
       const size = sizeParts
         ? {
             pixelHeight: parseInt(sizeParts[0]),
@@ -74,16 +76,18 @@ const useImage = (
   const fetchImageData = async (
     odinId: string | undefined,
     imageFileId: string | undefined,
+    imageFileKey: string | undefined,
     imageDrive?: TargetDrive,
     size?: ImageSize,
     probablyEncrypted?: boolean,
     naturalSize?: ImageSize,
   ): Promise<ImageData | undefined> => {
-    if (imageFileId === undefined || imageFileId === '' || !imageDrive) return;
+    if (imageFileId === undefined || imageFileId === '' || !imageDrive || !imageFileKey) return;
 
     const cachedEntry = checkIfWeHaveLargerCachedImage(
       odinId,
       imageFileId,
+      imageFileKey,
       imageDrive,
       size,
     );
@@ -100,6 +104,7 @@ const useImage = (
           dotYouClient,
           imageDrive,
           imageFileId,
+          imageFileKey,
           size,
           probablyEncrypted,
         ),
@@ -125,11 +130,17 @@ const useImage = (
     fileId?: string;
     versionTag?: string;
   }) => {
-    return await uploadImage(dotYouClient, targetDrive, acl, bytes, undefined, {
-      fileId,
-      versionTag,
-      type,
-    });
+    return await uploadImage(
+      dotYouClient,
+      targetDrive,
+      acl,
+      new Blob([bytes], { type }),
+      undefined,
+      {
+        fileId,
+        versionTag,
+      },
+    );
   };
 
   const removeImageFile = async ({
@@ -149,6 +160,7 @@ const useImage = (
         odinId,
         imageDrive?.alias,
         imageFileId,
+        imageFileKey,
         // Rounding the cache key of the size so close enough sizes will be cached together
         size
           ? `${Math.round(size.pixelHeight / 25) * 25}x${
@@ -160,17 +172,17 @@ const useImage = (
         fetchImageData(
           odinId,
           imageFileId,
+          imageFileKey,
           imageDrive,
           size,
           probablyEncrypted,
           naturalSize,
         ),
-
       refetchOnMount: true,
       refetchOnWindowFocus: false,
       staleTime: 1000 * 60, // 1 min
       gcTime: Infinity,
-      enabled: !!imageFileId && imageFileId !== '',
+      enabled: !!imageFileId && imageFileId !== '' && !!imageFileKey,
     }),
     getFromCache: (
       odinId: string | undefined,
@@ -180,7 +192,7 @@ const useImage = (
       const cachedEntries = queryClient
         .getQueryCache()
         .findAll({
-          queryKey: ['image', odinId, imageDrive?.alias, imageFileId],
+          queryKey: ['image', odinId, imageDrive?.alias, imageFileId, imageFileKey],
           exact: false,
         })
         .filter(query => query.state.status === 'success');

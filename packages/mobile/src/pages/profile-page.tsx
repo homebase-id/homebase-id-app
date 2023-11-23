@@ -68,7 +68,8 @@ const SettingsPage = (_props: SettingsProps) => {
               targetDrive={GetTargetDriveFromProfileId(
                 BuiltInProfiles.StandardProfileId,
               )}
-              fileId={profile?.profileImageId}
+              fileId={profile?.profileImageFileId}
+              fileKey={profile?.profileImageFileKey}
               imageSize={{ width: 160, height: 160 }}
               style={{ borderRadius: 160 / 2 }}
             />

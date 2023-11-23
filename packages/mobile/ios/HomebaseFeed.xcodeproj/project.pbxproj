@@ -453,7 +453,7 @@
 					"-lc++",
 					"$(inherited)",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "id.homebase.feed";
+				PRODUCT_BUNDLE_IDENTIFIER = id.homebase.feed;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/HomebaseFeed.app/HomebaseFeed";
 			};
@@ -477,7 +477,7 @@
 					"-lc++",
 					"$(inherited)",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "id.homebase.feed";
+				PRODUCT_BUNDLE_IDENTIFIER = id.homebase.feed;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/HomebaseFeed.app/HomebaseFeed";
 			};
@@ -561,7 +561,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "id.homebase.feed";
+				PRODUCT_BUNDLE_IDENTIFIER = id.homebase.feed;
 				PRODUCT_NAME = HomebaseFeed;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -657,7 +657,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "id.homebase.feed";
+				PRODUCT_BUNDLE_IDENTIFIER = id.homebase.feed;
 				PRODUCT_NAME = HomebaseFeed;
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";

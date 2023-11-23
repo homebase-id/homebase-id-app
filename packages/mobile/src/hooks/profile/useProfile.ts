@@ -17,17 +17,21 @@ const useProfile = () => {
       [BuiltInAttributes.Name, BuiltInAttributes.Photo],
     );
 
-    const nameAttr = attributes?.filter(
-      attr => attr.type === BuiltInAttributes.Name,
-    )[0];
-    const photoAttr = attributes?.filter(
-      attr => attr.type === BuiltInAttributes.Photo,
-    )[0];
+    const nameDsr = attributes?.find(
+      (attr) => attr.fileMetadata.appData.content.type === BuiltInAttributes.Name
+    );
+    const nameAttr = nameDsr?.fileMetadata.appData.content;
+
+    const photoDsr = attributes?.find(
+        (attr) => attr.fileMetadata.appData.content.type === BuiltInAttributes.Photo
+      );
+      const photoAttr = photoDsr?.fileMetadata.appData.content;
 
     return {
       firstName: nameAttr?.data.givenName,
       surName: nameAttr?.data.surname,
-      profileImageId: photoAttr?.data.profileImageId,
+      profileImageFileId: photoDsr?.fileId,
+      profileImageFileKey: photoAttr?.data.profileImageKey,
     };
   };
 
