@@ -113,9 +113,9 @@ jobs:
           SIGNING_KEY_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_KEY_PASSWORD }}
 
       - name: Rename output
-        run: mv packages/mobile/android/app/build/outputs/bundle/release/app-release.aab packages/mobile/android/app/build/outputs/bundle/release/homebase-feed-bundle.aab
+        run: mv packages/mobile/android/app/build/outputs/bundle/release/app-release.aab packages/mobile/android/app/build/outputs/bundle/release/homebase-feed.aab
 
       - uses: actions/upload-artifact@v3
         with:
           name: homebase-feed-app-android
-          path: packages/mobile/android/app/build/outputs/bundle/release/homebase-feed-bundle.aab
+          path: packages/mobile/android/app/build/outputs/bundle/release/homebase-feed.aab
