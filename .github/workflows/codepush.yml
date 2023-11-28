@@ -33,15 +33,15 @@ jobs:
 
       - name: Deploy to CodePush Android
         working-directory: packages/mobile
-        run: appcenter codepush release -a odinops/Homebase-Photo -d Production -c ./codepush -t ${{ steps.package-version.outputs.version }} && rm -rf codepush
+        run: appcenter codepush release -a odinops/Homebase-Feed -d Production -c ./codepush -t ${{ steps.package-version.outputs.version }} && rm -rf codepush
         env:
           APPCENTER_ACCESS_TOKEN: ${{ secrets.APPCENTER_ACCESS_TOKEN_ANDROID }}
 
       - name: Build iOS package
         run: npm run build:ios-codepush -w packages/mobile
 
-      - name: Deploy to CodePush Android
+      - name: Deploy to CodePush iOS
         working-directory: packages/mobile
-        run: appcenter codepush release -a odinops/Homebase-Photo -d Production -c ./codepush -t ${{ steps.package-version.outputs.version }} && rm -rf codepush
+        run: appcenter codepush release -a odinops/Homebase-Feed-ios -d Production -c ./codepush -t ${{ steps.package-version.outputs.version }} && rm -rf codepush
         env:
           APPCENTER_ACCESS_TOKEN: ${{ secrets.APPCENTER_ACCESS_TOKEN_IOS }}
