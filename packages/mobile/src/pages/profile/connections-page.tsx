@@ -28,7 +28,6 @@ const ConnectionsPage = (_props: ConnectionsProps) => {
   const doRefresh = async () => {
     setRefreshing(true);
 
-    // Refetch photos;
     await refetchIdentities();
     setRefreshing(false);
   };

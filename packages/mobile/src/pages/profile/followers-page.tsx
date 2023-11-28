@@ -27,7 +27,6 @@ const FollowersPage = (_props: FollowersProps) => {
   const doRefresh = async () => {
     setRefreshing(true);
 
-    // Refetch photos;
     await refetchIdentities();
     setRefreshing(false);
   };
