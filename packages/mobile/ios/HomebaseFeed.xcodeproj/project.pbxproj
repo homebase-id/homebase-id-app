@@ -9,12 +9,13 @@
 /* Begin PBXBuildFile section */
 		00E356F31AD99517003FC87E /* HomebaseFeedTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* HomebaseFeedTests.m */; };
 		0C80B921A6F3F58F76C31292 /* libPods-HomebaseFeed.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5DCACB8F33CDC322A6C60F78 /* libPods-HomebaseFeed.a */; };
-		126C1ABA2A5598D7001C5F3F /* OpenSSL.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 126C1AB92A5598D7001C5F3F /* OpenSSL.xcframework */; };
 		13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		7699B88040F8A987B510C191 /* libPods-HomebaseFeed-HomebaseFeedTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 19F6CBCC0A4E27FBF8BF4A61 /* libPods-HomebaseFeed-HomebaseFeedTests.a */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
+		C288F53A2B1A4CB700290A42 /* OpenSSL.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 126C1AB92A5598D7001C5F3F /* OpenSSL.xcframework */; };
+		C288F53B2B1A4CB700290A42 /* OpenSSL.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 126C1AB92A5598D7001C5F3F /* OpenSSL.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -26,6 +27,20 @@
 			remoteInfo = HomebaseFeed;
 		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		C288F53C2B1A4CB700290A42 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				C288F53B2B1A4CB700290A42 /* OpenSSL.xcframework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		00E356EE1AD99517003FC87E /* HomebaseFeedTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HomebaseFeedTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -61,7 +76,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				126C1ABA2A5598D7001C5F3F /* OpenSSL.xcframework in Frameworks */,
+				C288F53A2B1A4CB700290A42 /* OpenSSL.xcframework in Frameworks */,
 				0C80B921A6F3F58F76C31292 /* libPods-HomebaseFeed.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -188,6 +203,7 @@
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				00EEFC60759A1932668264C0 /* [CP] Embed Pods Frameworks */,
 				E235C05ADACE081382539298 /* [CP] Copy Pods Resources */,
+				C288F53C2B1A4CB700290A42 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
