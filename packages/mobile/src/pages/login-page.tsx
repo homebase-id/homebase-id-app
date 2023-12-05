@@ -147,7 +147,7 @@ const LoginComponent = () => {
   // LoginPage is the only page where you can be when unauthenticated; So only page where we listen for a finalize return link
   const finalizeState = useFinalize();
 
-  const [invalid, setInvalid] = useState<boolean>(true);
+  const [invalid, setInvalid] = useState<boolean>(false);
   const [odinId, setOdinId] = useState<string>('');
   const { data: authParams } = useParams();
 
