@@ -18,6 +18,7 @@ import { Colors } from '../app/Colors';
 import { stringifyToQueryParams } from '@youfoundation/js-lib/helpers';
 import { useCheckIdentity } from '../hooks/checkIdentity/useCheckIdentity';
 import { CheckForUpdates, VersionInfo } from './profile-page';
+import { InAppBrowser } from 'react-native-inappbrowser-reborn';
 
 import logo from './homebase-feed.png';
 import { YouAuthorizationParams } from '@youfoundation/js-lib/auth';
@@ -36,7 +37,8 @@ const LoginPage = (_props: LoginProps) => {
             minHeight: 120,
             flexDirection: 'row',
             justifyContent: 'center',
-          }}>
+          }}
+        >
           <Image source={logo} style={{ width: 40, height: 40 }} />
           <Text style={{ fontSize: 25 }}>Homebase Feed</Text>
         </View>
@@ -45,7 +47,8 @@ const LoginPage = (_props: LoginProps) => {
             paddingHorizontal: 12,
             paddingVertical: 15,
             marginTop: 'auto',
-          }}>
+          }}
+        >
           <LoginComponent />
         </View>
 
@@ -58,7 +61,8 @@ const LoginPage = (_props: LoginProps) => {
             alignItems: 'center',
             justifyContent: 'flex-end',
             minHeight: 120,
-          }}>
+          }}
+        >
           <VersionInfo />
           <CheckForUpdates
             hideIcon={true}
@@ -75,9 +79,7 @@ const LoginPage = (_props: LoginProps) => {
 
 const FINALIZE_PATH = 'homebase-feed://auth/finalize/';
 const useFinalize = () => {
-  const [state, setState] = useState<
-    'preparing' | 'loading' | 'success' | 'error' | null
-  >(null);
+  const [state, setState] = useState<'preparing' | 'loading' | 'success' | 'error' | null>(null);
   const [url, setUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -158,15 +160,29 @@ const LoginComponent = () => {
       return;
     }
 
-    await Linking.openURL(
-      `https://${odinId}/api/owner/v1/youauth/authorize?${stringifyToQueryParams(
-        authParams as any,
-      )}`,
-    );
+    const url = `https://${odinId}/api/owner/v1/youauth/authorize?${stringifyToQueryParams(
+      authParams as any
+    )}`;
+    if (await InAppBrowser.isAvailable()) {
+      const result = await InAppBrowser.openAuth(url, '', {
+        enableUrlBarHiding: false,
+        enableDefaultShare: false,
+        forceCloseOnRedirection: true,
+        // Specify full animation resource identifier(package:anim/name)
+        // or only resource name(in case of animation bundled with app).
+        animations: {
+          startEnter: 'slide_in_right',
+          startExit: 'slide_out_left',
+          endEnter: 'slide_in_left',
+          endExit: 'slide_out_right',
+        },
+      });
+
+      if (result.type === 'success' && result.url) Linking.openURL(result.url);
+    } else await Linking.openURL(url);
   };
 
-  if (finalizeState === 'loading' || finalizeState === 'preparing')
-    return <ActivityIndicator />;
+  if (finalizeState === 'loading' || finalizeState === 'preparing') return <ActivityIndicator />;
 
   return (
     <>
@@ -187,14 +203,10 @@ const LoginComponent = () => {
         onSubmitEditing={onLogin}
       />
 
-      {invalid ? (
-        <Text style={{ color: Colors.red[500] }}>Invalid homebase id</Text>
-      ) : null}
+      {invalid ? <Text style={{ color: Colors.red[500] }}>Invalid homebase id</Text> : null}
 
       {finalizeState === 'error' ? (
-        <Text style={{ color: Colors.red[500] }}>
-          Something went wrong, please try again
-        </Text>
+        <Text style={{ color: Colors.red[500] }}>Something went wrong, please try again</Text>
       ) : null}
 
       <Button title="Login" disabled={!odinId} onPress={onLogin} />
@@ -206,10 +218,10 @@ const LoginComponent = () => {
           justifyContent: 'center',
           alignItems: 'center',
           gap: 5,
-        }}>
+        }}
+      >
         <Text>Don't have an account?</Text>
-        <TouchableOpacity
-          onPress={() => Linking.openURL('https://homebase.id/sign-up')}>
+        <TouchableOpacity onPress={() => Linking.openURL('https://homebase.id/sign-up')}>
           <Text style={{ textDecorationLine: 'underline' }}>Sign up</Text>
         </TouchableOpacity>
       </View>
