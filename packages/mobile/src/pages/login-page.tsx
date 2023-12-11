@@ -220,9 +220,8 @@ const LoginComponent = () => {
           gap: 5,
         }}
       >
-        <Text>Don't have an account?</Text>
-        <TouchableOpacity onPress={() => Linking.openURL('https://homebase.id/sign-up')}>
-          <Text style={{ textDecorationLine: 'underline' }}>Sign up</Text>
+        <TouchableOpacity onPress={() => Linking.openURL('https://homebase.id')}>
+          <Text style={{ textDecorationLine: 'underline' }}>Homebase.id</Text>
         </TouchableOpacity>
       </View>
     </>
