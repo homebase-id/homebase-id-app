@@ -17,7 +17,23 @@ prepare_react_native_project!
 #   dependencies: {
 #     ...(process.env.NO_FLIPPER ? { 'react-native-flipper': { platforms: { ios: null } } } : {}),
 # ```
-flipper_config = ENV['NO_FLIPPER'] == "1" ? FlipperConfiguration.disabled : FlipperConfiguration.enabled
+#
+# SEB:NOTE
+#
+# We need to embed framework OpenSSL-Universal.
+#
+# Flipper brings in OpenSSL-Universal, but only in debug builds.
+# Even if we do "pod 'OpenSSL-Universal', '1.1.1100'", it is somehow removed again in release builds.
+# (see: ios/Pods/Target Support Files/Pods-HomebasePhotos/Pods-HomebasePhotos-frameworks-Release-output-files.xcfilelist)
+#
+# Debugging React Native apps with Flipper is deprecated in React Native 0.73:
+# https://github.com/react-native-community/discussions-and-proposals/pull/641
+#
+# So,
+# FUCK OFF, Flipper!
+flipper_config = FlipperConfiguration.disabled
+
+# NO!!! flipper_config = ENV['NO_FLIPPER'] == "1" ? FlipperConfiguration.disabled : FlipperConfiguration.enabled
 
 linkage = ENV['USE_FRAMEWORKS']
 if linkage != nil

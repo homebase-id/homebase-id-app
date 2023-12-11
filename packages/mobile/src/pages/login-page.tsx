@@ -22,6 +22,7 @@ import { InAppBrowser } from 'react-native-inappbrowser-reborn';
 
 import logo from './homebase-feed.png';
 import { YouAuthorizationParams } from '@youfoundation/js-lib/auth';
+import { useDarkMode } from '../hooks/useDarkMode';
 
 type LoginProps = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 
@@ -146,6 +147,7 @@ const useParams = () => {
 const LoginComponent = () => {
   // LoginPage is the only page where you can be when unauthenticated; So only page where we listen for a finalize return link
   const finalizeState = useFinalize();
+  const { isDarkMode } = useDarkMode();
 
   const [invalid, setInvalid] = useState<boolean>(false);
   const [odinId, setOdinId] = useState<string>('');
@@ -193,9 +195,10 @@ const LoginComponent = () => {
           height: 40,
           marginVertical: 12,
           borderWidth: 1,
-          borderColor: Colors.slate[300],
+          borderColor: isDarkMode ? Colors.slate[700] : Colors.slate[300],
           borderRadius: 4,
           padding: 10,
+          color: isDarkMode ? Colors.white : Colors.black,
         }}
         onChangeText={setOdinId}
         autoCapitalize="none"
