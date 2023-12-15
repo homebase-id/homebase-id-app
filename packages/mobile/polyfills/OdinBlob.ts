@@ -10,11 +10,8 @@
 
 'use strict';
 
-import type {
-  BlobData,
-  BlobOptions,
-} from 'react-native/Libraries/Blob/BlobTypes';
-
+type BlobData = any;
+type BlobOptions = any;
 /**
  * Opaque JS representation of some binary data in native.
  *
@@ -22,57 +19,23 @@ import type {
  * regarding explicit deallocation. Refer to the `close()`
  * method for further details.
  *
- * Example usage in a React component:
- *
- *   class WebSocketImage extends React.Component {
- *      state = {blob: null};
- *      componentDidMount() {
- *        let ws = this.ws = new WebSocket(...);
- *        ws.binaryType = 'blob';
- *        ws.onmessage = (event) => {
- *          if (this.state.blob) {
- *            this.state.blob.close();
- *          }
- *          this.setState({blob: event.data});
- *        };
- *      }
- *      componentUnmount() {
- *        if (this.state.blob) {
- *          this.state.blob.close();
- *        }
- *        this.ws.close();
- *      }
- *      render() {
- *        if (!this.state.blob) {
- *          return <View />;
- *        }
- *        return <Image source={{uri: URL.createObjectURL(this.state.blob)}} />;
- *      }
- *   }
- *
  * Reference: https://developer.mozilla.org/en-US/docs/Web/API/Blob
  */
 import { getNewId, uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
 import { Dirs, FileSystem } from 'react-native-file-access';
 
-class Blob {
-  _data: ?BlobData;
+export class OdinBlob {
+  _data: BlobData;
+  uri: string;
 
   /**
    * Constructor for JS consumers.
-   * Currently we only support creating Blobs from other Blobs.
+   * RN: Currently we only support creating Blobs from other Blobs.
+   * Homebase: We support creating Blobs from Uint8Arrays by converting them to base64 and writing them to a file.
    * Reference: https://developer.mozilla.org/en-US/docs/Web/API/Blob/Blob
    */
-  constructor(
-    parts: Array<Blob | string | Uint8Array> = [],
-    options?: BlobOptions,
-  ) {
-    const BlobManager = require('react-native/Libraries/Blob/BlobManager');
-    if (
-      Array.isArray(parts) &&
-      parts.length === 1 &&
-      parts[0] instanceof Uint8Array
-    ) {
+  constructor(parts: Array<Blob | string | Uint8Array> = [], options?: BlobOptions) {
+    if (Array.isArray(parts) && parts.length === 1 && parts[0] instanceof Uint8Array) {
       const id = getNewId();
       this.data = {
         blobId: id,
@@ -88,9 +51,7 @@ class Blob {
       // We need to convert to a cached file on the system, as RN is dumb that way... It can't handle blobs in a data uri, as it will always load it as a bitmap... 🤷
       // See getFileInputStream in RequestBodyUtil.class within RN for more info
       this.uri = `file://${localPath}`;
-    } else {
-      this.data = BlobManager.createFromParts(parts, options)?.data;
-    }
+    } else throw new Error('Unsupported Blob constructor arguments');
   }
 
   /*
@@ -99,54 +60,15 @@ class Blob {
    * Reference: https://developer.mozilla.org/en-US/docs/Web/API/Blob/slice
    */
   // $FlowFixMe[unsafe-getters-setters]
-  set data(data: ?BlobData) {
+  set data(data: BlobData) {
     this._data = data;
   }
 
   // $FlowFixMe[unsafe-getters-setters]
   get data(): BlobData {
-    if (!this._data) {
-      throw new Error('Blob has been closed and is no longer available');
-    }
+    if (!this._data) throw new Error('Blob has been closed and is no longer available');
 
     return this._data;
-  }
-
-  slice(start?: number, end?: number): Blob {
-    const BlobManager = require('react-native/Libraries/Blob/BlobManager');
-    let { offset, size } = this.data;
-
-    if (typeof start === 'number') {
-      if (start > size) {
-        // $FlowFixMe[reassign-const]
-        start = size;
-      }
-      offset += start;
-      size -= start;
-
-      if (typeof end === 'number') {
-        if (end < 0) {
-          // $FlowFixMe[reassign-const]
-          end = this.size + end;
-        }
-        if (end > this.size) {
-          // $FlowFixMe[reassign-const]
-          end = this.size;
-        }
-        size = end - start;
-      }
-    }
-    return BlobManager.createFromOptions({
-      blobId: this.data.blobId,
-      offset,
-      size,
-      /* Since `blob.slice()` creates a new view onto the same binary
-       * data as the original blob, we should re-use the same collector
-       * object so that the underlying resource gets deallocated when
-       * the last view into the data is released, not the first.
-       */
-      __collector: this.data.__collector,
-    });
   }
 
   /**
@@ -162,8 +84,8 @@ class Blob {
    * `new Blob([blob, ...])` actually copies the data in memory.
    */
   close() {
-    const BlobManager = require('react-native/Libraries/Blob/BlobManager');
-    BlobManager.release(this.data.blobId);
+    // const BlobManager = require('react-native/Libraries/Blob/BlobManager');
+    // BlobManager.release(this.data.blobId);
     this.data = null;
   }
 
@@ -184,5 +106,3 @@ class Blob {
     return this.data.type || '';
   }
 }
-
-module.exports = Blob;

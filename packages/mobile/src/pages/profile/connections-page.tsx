@@ -6,10 +6,7 @@ import { useConnections } from '../../hooks/connections/useConnections';
 import NoItems from '../../components/list/noItems';
 import IdentityItem from '../../components/list/identityItem';
 
-type ConnectionsProps = NativeStackScreenProps<
-  ProfileStackParamList,
-  'Connections'
->;
+type ConnectionsProps = NativeStackScreenProps<ProfileStackParamList, 'Connections'>;
 
 const ConnectionsPage = (_props: ConnectionsProps) => {
   const {
@@ -20,8 +17,8 @@ const ConnectionsPage = (_props: ConnectionsProps) => {
   } = useConnections({}).fetch;
   const flatIdentities =
     identities?.pages
-      .flatMap(page => page?.results)
-      .map(profile => profile?.odinId)
+      .flatMap((page) => page?.results)
+      .map((profile) => profile?.odinId)
       .filter(Boolean) ?? [];
 
   const [refreshing, setRefreshing] = useState(false);
@@ -36,16 +33,15 @@ const ConnectionsPage = (_props: ConnectionsProps) => {
     <View style={{ position: 'relative', minHeight: '100%' }}>
       {flatIdentities?.length ? (
         <FlatList
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={doRefresh} />
-          }
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={doRefresh} />}
           data={flatIdentities}
-          renderItem={item => (
+          renderItem={(item) => (
             <View
               key={item.item}
               style={{
                 padding: 1,
-              }}>
+              }}
+            >
               <IdentityItem odinId={item.item} key={item.item} />
             </View>
           )}

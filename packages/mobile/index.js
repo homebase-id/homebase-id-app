@@ -24,15 +24,16 @@ if (!global.TextDecoder) global.TextDecoder = TextDecoder;
 // => https://github.com/PeculiarVentures/webcrypto and https://github.com/margelo/react-native-quick-crypto
 import { Crypto as webcrypto } from './polyfills/webcrypto';
 import { getRandomValues } from 'react-native-quick-crypto';
-if (!global.crypto?.subtle)
+if (!global.crypto?.subtle) {
   global.crypto = {
     subtle: new webcrypto().subtle,
     getRandomValues: getRandomValues,
   };
+}
 
 // Blob Polyfill
-import { default as internalBlob } from 'react-native/Libraries/Blob/Blob';
-window.Blob = internalBlob;
+import { OdinBlob } from './polyfills/OdinBlob';
+global.CustomBlob = OdinBlob;
 
 // FormData within react-native is always used by the network polyfills.. No way to polyfill without overriding the network polyfills or the direct pacakge;
 // FormData Polyfill => Done with package-update

@@ -9,14 +9,14 @@ interface useConnectionsProps {
 export const useConnections = (
   { pageSize: activePageSize = 30 }: useConnectionsProps = {
     pageSize: 10,
-  },
+  }
 ) => {
   const dotYouClient = useAuth().getDotYouClient();
 
   const fetchConnections = async (
     { pageSize, cursor }: { pageSize: number; cursor?: number } = {
       pageSize: 10,
-    },
+    }
   ) => {
     try {
       return await getConnections(dotYouClient, {
@@ -35,13 +35,10 @@ export const useConnections = (
     fetch: useInfiniteQuery({
       queryKey: ['activeConnections', activePageSize],
       initialPageParam: undefined as number | undefined,
-      queryFn: ({ pageParam }) =>
-        fetchConnections({ pageSize: activePageSize, cursor: pageParam }),
+      queryFn: ({ pageParam }) => fetchConnections({ pageSize: activePageSize, cursor: pageParam }),
 
-      getNextPageParam: lastPage =>
-        lastPage.results?.length >= activePageSize
-          ? lastPage.cursor
-          : undefined,
+      getNextPageParam: (lastPage) =>
+        lastPage.results?.length >= activePageSize ? lastPage.cursor : undefined,
       refetchOnWindowFocus: false,
     }),
   };

@@ -2,7 +2,6 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
 import {
   Button,
-  TextInput,
   View,
   Linking,
   Image,

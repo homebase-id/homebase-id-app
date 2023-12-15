@@ -401,9 +401,10 @@ export const People = (props: IconProps) => {
         strokeLinejoin="round"
         strokeWidth={2}
         fill={'none'}
+        color={props.color || (isDarkMode ? 'white' : 'black')}
       >
         <Path fill="currentColor" d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
-        <Circle cx="9" cy="7" r="4" />
+        <Circle cx="9" cy="7" r="4" fill="currentColor" />
         <Path fill="currentColor" d="M23 21v-2a4 4 0 00-3-3.87m-4-12a4 4 0 010 7.75" />
       </Svg>
     </Center>
