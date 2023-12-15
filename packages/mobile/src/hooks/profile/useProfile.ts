@@ -14,7 +14,7 @@ const useProfile = () => {
       dotYouClient,
       BuiltInProfiles.StandardProfileId,
       undefined,
-      [BuiltInAttributes.Name, BuiltInAttributes.Photo],
+      [BuiltInAttributes.Name, BuiltInAttributes.Photo]
     );
 
     const nameDsr = attributes?.find(
@@ -23,9 +23,9 @@ const useProfile = () => {
     const nameAttr = nameDsr?.fileMetadata.appData.content;
 
     const photoDsr = attributes?.find(
-        (attr) => attr.fileMetadata.appData.content.type === BuiltInAttributes.Photo
-      );
-      const photoAttr = photoDsr?.fileMetadata.appData.content;
+      (attr) => attr.fileMetadata.appData.content.type === BuiltInAttributes.Photo
+    );
+    const photoAttr = photoDsr?.fileMetadata.appData.content;
 
     return {
       firstName: nameAttr?.data.givenName,

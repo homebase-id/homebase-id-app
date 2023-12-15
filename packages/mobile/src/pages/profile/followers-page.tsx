@@ -6,10 +6,7 @@ import { useFollowerInfinite } from '../../hooks/followers/useFollowers';
 import NoItems from '../../components/list/noItems';
 import IdentityItem from '../../components/list/identityItem';
 
-type FollowersProps = NativeStackScreenProps<
-  ProfileStackParamList,
-  'Followers'
->;
+type FollowersProps = NativeStackScreenProps<ProfileStackParamList, 'Followers'>;
 
 const FollowersPage = (_props: FollowersProps) => {
   const {
@@ -19,9 +16,7 @@ const FollowersPage = (_props: FollowersProps) => {
     refetch: refetchIdentities,
   } = useFollowerInfinite({}).fetch;
   const flatIdentities =
-    (identities?.pages
-      .flatMap(page => page?.results)
-      .filter(Boolean) as string[]) ?? [];
+    (identities?.pages.flatMap((page) => page?.results).filter(Boolean) as string[]) ?? [];
 
   const [refreshing, setRefreshing] = useState(false);
   const doRefresh = async () => {
@@ -35,16 +30,15 @@ const FollowersPage = (_props: FollowersProps) => {
     <View style={{ position: 'relative', minHeight: '100%' }}>
       {flatIdentities?.length ? (
         <FlatList
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={doRefresh} />
-          }
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={doRefresh} />}
           data={flatIdentities}
-          renderItem={item => (
+          renderItem={(item) => (
             <View
               key={item.item}
               style={{
                 padding: 1,
-              }}>
+              }}
+            >
               <IdentityItem odinId={item.item} key={item.item} />
             </View>
           )}

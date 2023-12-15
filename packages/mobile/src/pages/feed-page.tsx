@@ -11,10 +11,7 @@ import { Text } from '../components/ui/Text/Text';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors } from '../app/Colors';
 import { useProfile } from '../hooks/profile/useProfile';
-import {
-  GetTargetDriveFromProfileId,
-  BuiltInProfiles,
-} from '@youfoundation/js-lib/profile';
+import { GetTargetDriveFromProfileId, BuiltInProfiles } from '@youfoundation/js-lib/profile';
 import { OdinImage } from '../components/ui/OdinImage/OdinImage';
 import { Bars } from '../components/ui/Icons/icons';
 
@@ -27,9 +24,7 @@ const FeedPage = (_props: FeedProps) => {
   const { authToken, getIdentity, getSharedSecret } = useAuth();
 
   const sharedSecret = getSharedSecret();
-  const base64SharedSecret = sharedSecret
-    ? uint8ArrayToBase64(sharedSecret)
-    : '';
+  const base64SharedSecret = sharedSecret ? uint8ArrayToBase64(sharedSecret) : '';
 
   const INJECTED_JAVASCRIPT = `(function() {
         const APP_SHARED_SECRET_KEY = 'APSS';
@@ -82,7 +77,8 @@ const FeedPage = (_props: FeedProps) => {
             shadowOpacity: 0.1,
             shadowRadius: 10,
             minHeight: headerHeight,
-          }}>
+          }}
+        >
           <View
             style={{
               padding: 10,
@@ -90,12 +86,11 @@ const FeedPage = (_props: FeedProps) => {
               flexDirection: 'row',
               alignItems: 'center',
               gap: 10,
-            }}>
+            }}
+          >
             <OdinImage
               fit="contain"
-              targetDrive={GetTargetDriveFromProfileId(
-                BuiltInProfiles.StandardProfileId,
-              )}
+              targetDrive={GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId)}
               fileId={profile?.profileImageFileId}
               fileKey={profile?.profileImageFileKey}
               imageSize={{ width: 30, height: 30 }}
@@ -109,14 +104,15 @@ const FeedPage = (_props: FeedProps) => {
             </View>
             <TouchableOpacity
               style={{ marginLeft: 'auto' }}
-              onPress={() => _props.navigation.navigate('Profile')}>
+              onPress={() => _props.navigation.navigate('Profile')}
+            >
               <Bars size={'lg'} />
             </TouchableOpacity>
           </View>
         </View>
       )}
       <WebView
-        ref={ref => (webviewRef = ref)}
+        ref={(ref) => (webviewRef = ref)}
         source={{ uri: uri }}
         injectedJavaScriptBeforeContentLoaded={INJECTED_JAVASCRIPT}
         pullToRefreshEnabled={true}
@@ -125,8 +121,8 @@ const FeedPage = (_props: FeedProps) => {
         }}
         style={{ backgroundColor: Colors.slate[50] }}
         originWhitelist={[uri]} // Keeps the WebView from navigating away from the feed-app; Any links that don't match will be opened by the system.. Eg: open in the browser
-        onMessage={event => console.warn(event)}
-        onScroll={event => {
+        onMessage={(event) => console.warn(event)}
+        onScroll={(event) => {
           const scrollOffset = event.nativeEvent.contentOffset.y;
           if (scrollOffset > 20) setHideHeader(true);
           else setHideHeader(false);

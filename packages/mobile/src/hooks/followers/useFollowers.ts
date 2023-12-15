@@ -6,9 +6,7 @@ type useFollowerInfiniteProps = {
   pageSize?: number;
 };
 
-export const useFollowerInfinite = ({
-  pageSize = 30,
-}: useFollowerInfiniteProps) => {
+export const useFollowerInfinite = ({ pageSize = 30 }: useFollowerInfiniteProps) => {
   const dotYouClient = useAuth().getDotYouClient();
 
   const fetchBlogData = async ({ pageParam }: { pageParam?: string }) => {
@@ -21,7 +19,7 @@ export const useFollowerInfinite = ({
       queryKey: ['followers'],
       initialPageParam: undefined as string | undefined,
       queryFn: ({ pageParam }) => fetchBlogData({ pageParam }),
-      getNextPageParam: lastPage =>
+      getNextPageParam: (lastPage) =>
         lastPage?.results && lastPage.results.length >= pageSize
           ? lastPage?.cursorState
           : undefined,

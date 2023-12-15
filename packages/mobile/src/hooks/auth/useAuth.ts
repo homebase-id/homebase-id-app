@@ -91,10 +91,11 @@ const useAuth = () => {
   const queryClient = useQueryClient();
 
   const getDotYouClient = useCallback(() => {
-    if (!sharedSecret || !identity)
+    if (!sharedSecret || !identity) {
       return new DotYouClient({
         api: ApiType.App,
       });
+    }
 
     const headers: Record<string, string> = {};
     if (authToken) headers.bx0900 = authToken;
@@ -137,8 +138,9 @@ const useAuth = () => {
   }, [identity, sharedSecret, hasValidToken, isFetchedAfterMount, logout]);
 
   useEffect(() => {
-    if (authenticationState === 'authenticated' && !sharedSecret)
+    if (authenticationState === 'authenticated' && !sharedSecret) {
       setAuthenticationState('anonymous');
+    }
   }, [sharedSecret, authenticationState]);
 
   return {

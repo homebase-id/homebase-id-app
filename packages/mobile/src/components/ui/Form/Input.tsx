@@ -1,6 +1,6 @@
 import { TextInput, TextInputProps } from 'react-native';
 import { useDarkMode } from '../../../hooks/useDarkMode';
-import { Colors } from 'react-native/Libraries/NewAppScreen';
+import { Colors } from '../../../app/Colors';
 
 export const Input = (props: TextInputProps) => {
   const { isDarkMode } = useDarkMode();

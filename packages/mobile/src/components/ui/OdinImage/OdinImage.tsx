@@ -1,21 +1,7 @@
-import {
-  TargetDrive,
-  EmbeddedThumb,
-  ImageSize,
-} from '@youfoundation/js-lib/core';
-import {
-  base64ToUint8Array,
-  byteArrayToString,
-} from '@youfoundation/js-lib/helpers';
+import { TargetDrive, EmbeddedThumb, ImageSize } from '@youfoundation/js-lib/core';
+import { base64ToUint8Array, byteArrayToString } from '@youfoundation/js-lib/helpers';
 import React, { useMemo } from 'react';
-import {
-  View,
-  Image,
-  ActivityIndicator,
-  StyleProp,
-  ImageStyle,
-  ViewStyle,
-} from 'react-native';
+import { View, Image, ActivityIndicator, StyleProp, ImageStyle, ViewStyle } from 'react-native';
 import useImage from './hooks/useImage';
 import useTinyThumb from './hooks/useTinyThumb';
 import useAuth from '../../../hooks/auth/useAuth';
@@ -51,11 +37,8 @@ export const OdinImage = ({
   const dotYouClient = useAuth().getDotYouClient();
 
   const loadSize = {
-    pixelHeight:
-      (imageSize?.height ? Math.round(imageSize?.height * 1) : undefined) ||
-      800,
-    pixelWidth:
-      (imageSize?.width ? Math.round(imageSize?.width * 1) : undefined) || 800,
+    pixelHeight: (imageSize?.height ? Math.round(imageSize?.height * 1) : undefined) || 800,
+    pixelWidth: (imageSize?.width ? Math.round(imageSize?.width * 1) : undefined) || 800,
   };
 
   const embeddedThumbUrl = useMemo(() => {
@@ -67,7 +50,7 @@ export const OdinImage = ({
   const { getFromCache } = useImage(dotYouClient);
   const cachedImage = useMemo(
     () => (fileId ? getFromCache(odinId, fileId, targetDrive) : undefined),
-    [fileId, getFromCache, odinId, targetDrive],
+    [fileId, getFromCache, odinId, targetDrive]
   );
   const skipTiny = !!previewThumbnail || !!cachedImage;
 
@@ -76,7 +59,7 @@ export const OdinImage = ({
     odinId,
     !skipTiny ? fileId : undefined,
     fileKey,
-    targetDrive,
+    targetDrive
   );
   const previewUrl = cachedImage?.url || embeddedThumbUrl || tinyThumb?.url;
 
@@ -97,7 +80,7 @@ export const OdinImage = ({
     targetDrive,
     avoidPayload ? { pixelHeight: 200, pixelWidth: 200 } : loadSize,
     probablyEncrypted,
-    naturalSize,
+    naturalSize
   );
 
   return (
@@ -106,7 +89,8 @@ export const OdinImage = ({
         position: 'relative',
         width: imageSize?.width,
         height: imageSize?.height,
-      }}>
+      }}
+    >
       {/* Blurry image */}
       {previewUrl ? (
         <Image
@@ -136,7 +120,8 @@ export const OdinImage = ({
             ...imageSize,
             justifyContent: 'center',
             alignItems: 'center',
-          }}>
+          }}
+        >
           <ActivityIndicator style={{}} size="large" />
         </View>
       ) : imageData?.url.indexOf('svg') !== -1 ? (
@@ -171,11 +156,6 @@ const SvgImage = ({
   if (!xmlString) return;
 
   return (
-    <SvgXml
-      style={style}
-      xml={xmlString}
-      width={imageSize?.width}
-      height={imageSize?.height}
-    />
+    <SvgXml style={style} xml={xmlString} width={imageSize?.width} height={imageSize?.height} />
   );
 };
