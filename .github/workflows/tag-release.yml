@@ -1,0 +1,20 @@
+name: Tag for new release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  tag-and-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Fetch all history so we can see all tags
+
+      - name: Execute versioning script
+        run: |
+          output=$(./.github/scripts/increment-version-tag-on-git-tip.sh)
+          echo "Tagging output: $output"
+          echo "NEW_VERSION_TAG=${output}" >> $GITHUB_ENV
