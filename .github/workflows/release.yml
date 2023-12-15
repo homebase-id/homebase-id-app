@@ -55,12 +55,20 @@ jobs:
           scheme: HomebaseFeed
 
       - name: Rename output
-        run: mv output.ipa homebase-feed-bundle.ipa
+        run: mv output.ipa homebase-feed.ipa
 
-      - uses: actions/upload-artifact@v3
+      # - uses: actions/upload-artifact@v3
+      #   with:
+      #     name: homebase-feed-app-ios
+      #     path: homebase-feed.ipa
+
+      - name: Create Github Release
+        uses: softprops/action-gh-release@v1
         with:
-          name: homebase-feed-app-ios
-          path: homebase-feed-bundle.ipa
+          files: |
+            homebase-feed.ipa
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-android:
     runs-on: ubuntu-latest
@@ -115,7 +123,15 @@ jobs:
       - name: Rename output
         run: mv packages/mobile/android/app/build/outputs/bundle/release/app-release.aab packages/mobile/android/app/build/outputs/bundle/release/homebase-feed.aab
 
-      - uses: actions/upload-artifact@v3
+      # - uses: actions/upload-artifact@v3
+      #   with:
+      #     name: homebase-feed-app-android
+      #     path: packages/mobile/android/app/build/outputs/bundle/release/homebase-feed.aab
+
+      - name: Create Github Release
+        uses: softprops/action-gh-release@v1
         with:
-          name: homebase-feed-app-android
-          path: packages/mobile/android/app/build/outputs/bundle/release/homebase-feed.aab
+          files: |
+            packages/mobile/android/app/build/outputs/bundle/release/homebase-feed.aab
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
