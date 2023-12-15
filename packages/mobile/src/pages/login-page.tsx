@@ -8,6 +8,7 @@ import {
   Image,
   TouchableOpacity,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { Text } from '../components/ui/Text/Text';
 import { AuthStackParamList } from '../app/App';
@@ -23,6 +24,7 @@ import { InAppBrowser } from 'react-native-inappbrowser-reborn';
 import logo from './homebase-feed.png';
 import { YouAuthorizationParams } from '@youfoundation/js-lib/auth';
 import { useDarkMode } from '../hooks/useDarkMode';
+import { Input } from '../components/ui/Form/Input';
 
 type LoginProps = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 
@@ -189,16 +191,10 @@ const LoginComponent = () => {
   return (
     <>
       <Text style={{ fontSize: 18 }}>Your Homebase id</Text>
-      <TextInput
+      <Input
         placeholder="Homebase id"
         style={{
           height: 40,
-          marginVertical: 12,
-          borderWidth: 1,
-          borderColor: isDarkMode ? Colors.slate[700] : Colors.slate[300],
-          borderRadius: 4,
-          padding: 10,
-          color: isDarkMode ? Colors.white : Colors.black,
         }}
         onChangeText={setOdinId}
         autoCapitalize="none"
@@ -223,8 +219,26 @@ const LoginComponent = () => {
           gap: 5,
         }}
       >
-        <TouchableOpacity onPress={() => Linking.openURL('https://homebase.id')}>
-          <Text style={{ textDecorationLine: 'underline' }}>Homebase.id</Text>
+        <TouchableOpacity
+          onPress={() => {
+            Alert.alert(
+              "Don't have an account yet?",
+              'Your account is much more than just this app. You own your account. Find out more about Homebase and create your account.',
+              [
+                {
+                  text: 'Homebase.id',
+                  onPress: () => Linking.openURL('https://homebase.id'),
+                },
+                {
+                  text: 'Cancel',
+                  onPress: () => console.log('Cancel Pressed'),
+                  style: 'cancel',
+                },
+              ]
+            );
+          }}
+        >
+          <Text style={{ textDecorationLine: 'underline' }}>Don't have an account?</Text>
         </TouchableOpacity>
       </View>
     </>

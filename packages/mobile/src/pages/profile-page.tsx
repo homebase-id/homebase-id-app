@@ -1,6 +1,14 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, StyleProp, TouchableOpacity, View, ViewStyle } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  Linking,
+  StyleProp,
+  TouchableOpacity,
+  View,
+  ViewStyle,
+} from 'react-native';
 import { Text } from '../components/ui/Text/Text';
 
 import { version as appVersion } from '../../package.json';
@@ -8,7 +16,14 @@ import { version as appVersion } from '../../package.json';
 import { ProfileStackParamList } from '../app/App';
 import { SafeAreaView } from '../components/ui/SafeAreaView/SafeAreaView';
 import { Container } from '../components/ui/Container/Container';
-import { AddressBook, Download, People, Profile, Times } from '../components/ui/Icons/icons';
+import {
+  AddressBook,
+  Download,
+  People,
+  Profile,
+  RecycleBin,
+  Times,
+} from '../components/ui/Icons/icons';
 import codePush from 'react-native-code-push';
 import useAuth from '../hooks/auth/useAuth';
 import { Colors } from '../app/Colors';
@@ -146,6 +161,42 @@ const SettingsPage = (_props: SettingsProps) => {
               }}
             >
               Logout
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              Alert.alert(
+                'Delete your account?',
+                'Your account is much more than only this app. If you want to remove your account, you can do so by going to your owner console, and requesting accoutn deletion from there.',
+                [
+                  {
+                    text: 'Open owner console',
+                    onPress: () =>
+                      Linking.openURL(`https://${getIdentity()}/owner/settings/delete`),
+                  },
+                  {
+                    text: 'Cancel',
+                    onPress: () => console.log('Cancel Pressed'),
+                    style: 'cancel',
+                  },
+                ]
+              );
+            }}
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+              paddingVertical: 12,
+              width: '100%',
+            }}
+          >
+            <RecycleBin size={'lg'} />
+            <Text
+              style={{
+                marginLeft: 16,
+              }}
+            >
+              Delete my account
             </Text>
           </TouchableOpacity>
           <CheckForUpdates

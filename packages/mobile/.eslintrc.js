@@ -13,7 +13,7 @@ module.exports = {
   rules: {
     'react/no-children-prop': 'off',
     'prettier/prettier': 0,
-    curly: ['error', 'multi'],
+    curly: ['error', 'multi-line'],
     radix: ['error', 'as-needed'],
     'no-unused-vars': 'off',
     '@typescript-eslint/no-unused-vars': 'warn',
