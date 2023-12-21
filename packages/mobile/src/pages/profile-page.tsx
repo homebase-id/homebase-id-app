@@ -30,6 +30,7 @@ import { Colors } from '../app/Colors';
 import { OdinImage } from '../components/ui/OdinImage/OdinImage';
 import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
 import { useProfile } from '../hooks/profile/useProfile';
+import InAppBrowser from 'react-native-inappbrowser-reborn';
 
 type SettingsProps = NativeStackScreenProps<ProfileStackParamList, 'Overview'>;
 
@@ -170,8 +171,14 @@ const SettingsPage = (_props: SettingsProps) => {
                 [
                   {
                     text: 'Open owner console',
-                    onPress: () =>
-                      Linking.openURL(`https://${getIdentity()}/owner/settings/delete`),
+                    onPress: async () => {
+                      if (await InAppBrowser.isAvailable()) {
+                        await InAppBrowser.open(`https://${getIdentity()}/owner/settings/delete`, {
+                          enableUrlBarHiding: false,
+                          enableDefaultShare: false,
+                        });
+                      } else Linking.openURL(`https://${getIdentity()}/owner/settings/delete`);
+                    },
                   },
                   {
                     text: 'Cancel',
