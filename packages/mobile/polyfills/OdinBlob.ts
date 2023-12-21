@@ -21,10 +21,10 @@ type BlobOptions = any;
  *
  * Reference: https://developer.mozilla.org/en-US/docs/Web/API/Blob
  */
-import { getNewId, uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
+import { base64ToUint8Array, getNewId, uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
 import { Dirs, FileSystem } from 'react-native-file-access';
 
-export class OdinBlob {
+class Blob {
   _data: BlobData;
   uri: string;
 
@@ -35,6 +35,7 @@ export class OdinBlob {
    * Reference: https://developer.mozilla.org/en-US/docs/Web/API/Blob/Blob
    */
   constructor(parts: Array<Blob | string | Uint8Array> = [], options?: BlobOptions) {
+    console.log('new OdinBlob');
     if (Array.isArray(parts) && parts.length === 1 && parts[0] instanceof Uint8Array) {
       const id = getNewId();
       this.data = {
@@ -86,8 +87,43 @@ export class OdinBlob {
   close() {
     // const BlobManager = require('react-native/Libraries/Blob/BlobManager');
     // BlobManager.release(this.data.blobId);
+    FileSystem.unlink(this.uri);
     this.data = null;
   }
+
+  arrayBuffer(): Promise<ArrayBuffer> {
+    return FileSystem.readFile(this.uri, 'base64')
+      .then((base64) => {
+        if (!base64) return new Uint8Array(0).buffer;
+        console.log('base64', base64.slice(0, 10));
+
+        return base64ToUint8Array(base64).buffer;
+      })
+      .catch((err) => {
+        console.log('err', err);
+        return new Uint8Array(0).buffer;
+      });
+  }
+
+  // arrayBuffer(): Promise<ArrayBuffer> {
+  //   console.log('arrayBuffer', this.uri);
+
+  //   return FileSystem.exists(this.uri)
+  //     .then((exists) => {
+  //       console.log('exists', exists);
+  //       return FileSystem.readFile(this.uri, 'base64');
+  //     })
+  //     .then((base64) => {
+  //       if (!base64) return new Uint8Array(0).buffer;
+  //       console.log('base64', base64.slice(0, 10));
+
+  //       return base64ToUint8Array(base64).buffer;
+  //     })
+  //     .catch((err) => {
+  //       console.log('err', err);
+  //       return new Uint8Array(0).buffer;
+  //     });
+  // }
 
   /**
    * Size of the data contained in the Blob object, in bytes.
@@ -106,3 +142,5 @@ export class OdinBlob {
     return this.data.type || '';
   }
 }
+
+export { Blob as OdinBlob };

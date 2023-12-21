@@ -16,13 +16,12 @@ import { Container } from '../components/ui/Container/Container';
 import { SafeAreaView } from '../components/ui/SafeAreaView/SafeAreaView';
 import { Colors } from '../app/Colors';
 import { stringifyToQueryParams } from '@youfoundation/js-lib/helpers';
-import { useCheckIdentity } from '../hooks/checkIdentity/useCheckIdentity';
+import { doCheckIdentity } from '../hooks/checkIdentity/useCheckIdentity';
 import { CheckForUpdates, VersionInfo } from './profile-page';
 import { InAppBrowser } from 'react-native-inappbrowser-reborn';
 
 import logo from './homebase-feed.png';
 import { YouAuthorizationParams } from '@youfoundation/js-lib/auth';
-import { useDarkMode } from '../hooks/useDarkMode';
 import { Input } from '../components/ui/Form/Input';
 
 type LoginProps = NativeStackScreenProps<AuthStackParamList, 'Login'>;
@@ -148,17 +147,21 @@ const useParams = () => {
 const LoginComponent = () => {
   // LoginPage is the only page where you can be when unauthenticated; So only page where we listen for a finalize return link
   const finalizeState = useFinalize();
-  const { isDarkMode } = useDarkMode();
 
   const [invalid, setInvalid] = useState<boolean>(false);
   const [odinId, setOdinId] = useState<string>('');
   const { data: authParams } = useParams();
 
-  const { data: isValid } = useCheckIdentity(odinId);
   useEffect(() => setInvalid(false), [odinId]);
 
   const onLogin = async () => {
-    if (!isValid || !odinId) {
+    if (!odinId) {
+      setInvalid(true);
+      return;
+    }
+
+    const identityReachable = await doCheckIdentity(odinId);
+    if (!identityReachable) {
       setInvalid(true);
       return;
     }

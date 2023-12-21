@@ -26,9 +26,9 @@ export const drives = [
   {
     a: BlogConfig.FeedDrive.alias,
     t: BlogConfig.FeedDrive.type,
-    n: 'Feed',
+    n: '',
     d: '',
-    p: DrivePermissionType.Read,
+    p: DrivePermissionType.Read + DrivePermissionType.Write,
   },
   {
     // Standard profile Info
@@ -180,6 +180,7 @@ export const useYouAuthAuthorization = () => {
         AppPermissionType.ReadCircleMembers,
         AppPermissionType.ReadWhoIFollow,
         AppPermissionType.ReadMyFollowers,
+        AppPermissionType.ManageFeed,
         AppPermissionType.SendDataToOtherIdentitiesOnMyBehalf,
         AppPermissionType.ReceiveDataFromOtherIdentitiesOnMyBehalf,
       ],

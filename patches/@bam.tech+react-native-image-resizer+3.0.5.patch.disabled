@@ -1,0 +1,14 @@
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/ios/ImageResizer.mm b/node_modules/@bam.tech/react-native-image-resizer/ios/ImageResizer.mm
+index 694f8ba..45d049c 100644
+--- a/node_modules/@bam.tech/react-native-image-resizer/ios/ImageResizer.mm
++++ b/node_modules/@bam.tech/react-native-image-resizer/ios/ImageResizer.mm
+@@ -39,7 +39,8 @@ RCT_REMAP_METHOD(createResizedImage, uri:(NSString *)uri width:(double)width hei
+                 [NSException raise:moduleName format:@"Invalid output path."];
+             }
+
+-            NSURL * fileURL = [[NSURL alloc] initWithString:uri];
++            NSURL *baseURL = [NSURL fileURLWithPath:@"file://"];
++            NSURL * fileURL = [[NSURL alloc] initWithString:uri relativeToURL:baseURL];
+
+             NSError *err;
+             if ([fileURL checkResourceIsReachableAndReturnError:&err] == NO){
