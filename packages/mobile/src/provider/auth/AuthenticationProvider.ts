@@ -6,11 +6,7 @@ import {
   getOperatingSystem,
 } from '@youfoundation/js-lib/auth';
 import { DotYouClient, ApiType } from '@youfoundation/js-lib/core';
-import {
-  base64ToUint8Array,
-  uint8ArrayToBase64,
-  cbcDecrypt,
-} from '@youfoundation/js-lib/helpers';
+import { base64ToUint8Array, uint8ArrayToBase64, cbcDecrypt } from '@youfoundation/js-lib/helpers';
 
 import crypto from 'react-native-quick-crypto';
 (globalThis as any).crypto.getRandomValues = crypto.getRandomValues;
@@ -47,16 +43,13 @@ export const getRegistrationParams = async (
   permissionKeys: number[] | undefined,
   circlePermissionKeys: number[] | undefined,
   drives: { a: string; t: string; n: string; d: string; p: number }[],
-  circleDrives:
-    | { a: string; t: string; n: string; d: string; p: number }[]
-    | undefined,
+  circleDrives: { a: string; t: string; n: string; d: string; p: number }[] | undefined,
   eccPublicKey: string,
   host?: string,
   clientFriendlyName?: string,
-  state?: string,
+  state?: string
 ): Promise<YouAuthorizationParams> => {
-  const clientFriendly =
-    clientFriendlyName || `${getBrowser()} | ${getOperatingSystem()}`;
+  const clientFriendly = clientFriendlyName || `${getBrowser()} | ${getOperatingSystem().name}`;
 
   const permissionRequest: AppAuthorizationParams = {
     n: appName,
@@ -87,19 +80,15 @@ export const finalizeAuthentication = async (
   identity: string,
   privateKeyHex: string,
   publicKeyJwk: { x: string; y: string },
-  salt: string,
+  salt: string
 ) => {
   const privateCurve = new elliptic.ec('p384');
   const privateKey = privateCurve.keyFromPrivate(privateKeyHex, 'hex');
 
   const curve = new elliptic.ec('p384');
   const remotePublicKey = curve.keyFromPublic({
-    x: Buffer.from(
-      base64ToUint8Array(publicKeyJwk.x.replace(/-/g, '+').replace(/_/g, '/')),
-    ) as any,
-    y: Buffer.from(
-      base64ToUint8Array(publicKeyJwk.y.replace(/-/g, '+').replace(/_/g, '/')),
-    ) as any,
+    x: Buffer.from(base64ToUint8Array(publicKeyJwk.x.replace(/-/g, '+').replace(/_/g, '/'))) as any,
+    y: Buffer.from(base64ToUint8Array(publicKeyJwk.y.replace(/-/g, '+').replace(/_/g, '/'))) as any,
   });
 
   const derivedBits = privateKey.derive(remotePublicKey.getPublic()).toArray();
@@ -110,15 +99,12 @@ export const finalizeAuthentication = async (
       'SHA-256',
       16,
       undefined,
-      base64ToUint8Array(salt),
+      base64ToUint8Array(salt)
     )
   ).key;
 
   const exchangedSecretDigest = new Uint8Array(
-    crypto
-      .createHash('sha256')
-      .update(new Uint8Array(exchangedSecret))
-      .digest(),
+    crypto.createHash('sha256').update(new Uint8Array(exchangedSecret)).digest()
   );
 
   const base64ExchangedSecretDigest = uint8ArrayToBase64(exchangedSecretDigest);
@@ -128,27 +114,18 @@ export const finalizeAuthentication = async (
     identity: identity,
   });
 
-  const token = await exchangeDigestForToken(
-    dotYouClient,
-    base64ExchangedSecretDigest,
-  );
+  const token = await exchangeDigestForToken(dotYouClient, base64ExchangedSecretDigest);
 
   const sharedSecretCipher = base64ToUint8Array(token.base64SharedSecretCipher);
   const sharedSecretIv = base64ToUint8Array(token.base64SharedSecretIv);
-  const sharedSecret = await cbcDecrypt(
-    sharedSecretCipher,
-    sharedSecretIv,
-    exchangedSecret,
-  );
+  const sharedSecret = await cbcDecrypt(sharedSecretCipher, sharedSecretIv, exchangedSecret);
 
-  const clientAuthTokenCipher = base64ToUint8Array(
-    token.base64ClientAuthTokenCipher,
-  );
+  const clientAuthTokenCipher = base64ToUint8Array(token.base64ClientAuthTokenCipher);
   const clientAuthTokenIv = base64ToUint8Array(token.base64ClientAuthTokenIv);
   const clientAuthToken = await cbcDecrypt(
     clientAuthTokenCipher,
     clientAuthTokenIv,
-    exchangedSecret,
+    exchangedSecret
   );
 
   return { clientAuthToken, sharedSecret };

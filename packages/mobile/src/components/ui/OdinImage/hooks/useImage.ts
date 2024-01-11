@@ -176,7 +176,7 @@ const useImage = (
       refetchOnMount: true,
       refetchOnWindowFocus: false,
       staleTime: 1000 * 60, // 1 min
-      gcTime: Infinity,
+      gcTime: 1000 * 60 * 60 * 24, // 24h
       enabled: !!imageFileId && imageFileId !== '' && !!imageFileKey,
     }),
     getFromCache: (odinId: string | undefined, imageFileId: string, imageDrive: TargetDrive) => {
