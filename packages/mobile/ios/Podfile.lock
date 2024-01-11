@@ -462,6 +462,8 @@ PODS:
     - ZIPFoundation (= 0.9.11)
   - RNCAsyncStorage (1.19.3):
     - React-Core
+  - RNDeviceInfo (10.12.0):
+    - React-Core
   - RNInAppBrowser (3.7.0):
     - React-Core
   - RNScreens (3.25.0):
@@ -525,6 +527,7 @@ DEPENDENCIES:
   - ReactCommon/turbomodule/core (from `../../../node_modules/react-native/ReactCommon`)
   - ReactNativeFileAccess (from `../../../node_modules/react-native-file-access`)
   - "RNCAsyncStorage (from `../../../node_modules/@react-native-async-storage/async-storage`)"
+  - RNDeviceInfo (from `../../../node_modules/react-native-device-info`)
   - RNInAppBrowser (from `../../../node_modules/react-native-inappbrowser-reborn`)
   - RNScreens (from `../../../node_modules/react-native-screens`)
   - RNSVG (from `../../../node_modules/react-native-svg`)
@@ -641,6 +644,8 @@ EXTERNAL SOURCES:
     :path: "../../../node_modules/react-native-file-access"
   RNCAsyncStorage:
     :path: "../../../node_modules/@react-native-async-storage/async-storage"
+  RNDeviceInfo:
+    :path: "../../../node_modules/react-native-device-info"
   RNInAppBrowser:
     :path: "../../../node_modules/react-native-inappbrowser-reborn"
   RNScreens:
@@ -706,6 +711,7 @@ SPEC CHECKSUMS:
   ReactCommon: 4b2bdcb50a3543e1c2b2849ad44533686610826d
   ReactNativeFileAccess: 4530e3be4d5069454c6c6389096d8cb78c897f2c
   RNCAsyncStorage: c913ede1fa163a71cea118ed4670bbaaa4b511bb
+  RNDeviceInfo: db5c64a060e66e5db3102d041ebe3ef307a85120
   RNInAppBrowser: e36d6935517101ccba0e875bac8ad7b0cb655364
   RNScreens: 85d3880b52d34db7b8eeebe2f1a0e807c05e69fa
   RNSVG: ed492aaf3af9ca01bc945f7a149d76d62e73ec82

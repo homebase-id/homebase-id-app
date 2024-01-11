@@ -20,6 +20,7 @@ import { AppPermissionType, ContactConfig } from '@youfoundation/js-lib/network'
 import { BlogConfig, HomePageConfig } from '@youfoundation/js-lib/public';
 import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
 import { useQueryClient } from '@tanstack/react-query';
+import { identity } from 'lodash-es';
 
 const StandardProfileDrive = GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId);
 export const drives = [
@@ -70,7 +71,6 @@ export const drives = [
 ];
 export const appName = 'Homebase - Feed';
 export const appId = '5f887d80-0132-4294-ba40-bda79155551d';
-export const feedHost = 'feed.homebase.id';
 
 // Adapted to work in react-native; With no fallbacks to web support; If we someday merge this with the web version, we should add the fallbacks
 const useAuth = () => {
@@ -183,12 +183,14 @@ export const useYouAuthAuthorization = () => {
         AppPermissionType.ManageFeed,
         AppPermissionType.SendDataToOtherIdentitiesOnMyBehalf,
         AppPermissionType.ReceiveDataFromOtherIdentitiesOnMyBehalf,
+        AppPermissionType.PublishStaticContent,
+        AppPermissionType.SendPushNotifications,
       ],
       undefined,
       drives,
       undefined,
       uint8ArrayToBase64(stringToUint8Array(JSON.stringify(publicKeyJwk))),
-      feedHost,
+      undefined,
       `${Platform.OS === 'ios' ? 'iOS' : Platform.OS === 'android' ? 'Android' : Platform.OS} | ${
         Platform.Version
       }`
