@@ -5,7 +5,7 @@ import { TabStackParamList } from '../app/App';
 import { SafeAreaView } from '../components/ui/SafeAreaView/SafeAreaView';
 import WebView from 'react-native-webview';
 import { uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
-import { Linking, TouchableOpacity, View } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
 import useAuth from '../hooks/auth/useAuth';
 import { Text } from '../components/ui/Text/Text';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -32,14 +32,17 @@ const FeedPage = (_props: FeedProps) => {
         const APP_SHARED_SECRET_KEY = 'APPS_feed';
         const APP_AUTH_TOKEN_KEY = 'BX0900_feed';
         const IDENTITY_KEY = 'identity';
+        const APP_CLIENT_TYPE_KEY = 'client_type';
 
         const APP_SHARED_SECRET = '${base64SharedSecret}';
         const APP_AUTH_TOKEN = '${authToken}';
         const IDENTITY = '${identity}';
+        const APP_CLIENT_TYPE = 'react-native';
 
         window.localStorage.setItem(APP_SHARED_SECRET_KEY, APP_SHARED_SECRET);
         window.localStorage.setItem(APP_AUTH_TOKEN_KEY, APP_AUTH_TOKEN);
         window.localStorage.setItem(IDENTITY_KEY, IDENTITY);
+        window.localStorage.setItem(APP_CLIENT_TYPE_KEY, APP_CLIENT_TYPE);
       })();`;
 
   // // Debug for webview
