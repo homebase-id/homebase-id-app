@@ -10,8 +10,7 @@ import {
   ViewStyle,
 } from 'react-native';
 import { Text } from '../components/ui/Text/Text';
-
-import { version as appVersion } from '../../package.json';
+import { getVersion, getBuildNumber } from 'react-native-device-info';
 
 import { ProfileStackParamList } from '../app/App';
 import { SafeAreaView } from '../components/ui/SafeAreaView/SafeAreaView';
@@ -220,6 +219,7 @@ const SettingsPage = (_props: SettingsProps) => {
 };
 
 const getVersionInfo = async () => {
+  const appVersion = `${getVersion()} (${getBuildNumber()})`;
   const update = await codePush.getUpdateMetadata();
 
   if (!update) return `v${appVersion}`;
