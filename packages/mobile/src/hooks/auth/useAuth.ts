@@ -20,7 +20,6 @@ import { AppPermissionType, ContactConfig } from '@youfoundation/js-lib/network'
 import { BlogConfig, HomePageConfig } from '@youfoundation/js-lib/public';
 import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
 import { useQueryClient } from '@tanstack/react-query';
-import { identity } from 'lodash-es';
 
 const StandardProfileDrive = GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId);
 export const drives = [
@@ -48,8 +47,15 @@ export const drives = [
     p: DrivePermissionType.Read,
   },
   {
+    // Contacts drive
+    a: ContactConfig.ContactTargetDrive.alias,
+    t: ContactConfig.ContactTargetDrive.type,
+    n: '',
+    d: '',
+    p: DrivePermissionType.Read + DrivePermissionType.Write,
+  },
+  {
     // Public posts
-
     a: BlogConfig.PublicChannelDrive.alias,
     t: BlogConfig.PublicChannelDrive.type,
     n: '',
@@ -59,14 +65,6 @@ export const drives = [
       DrivePermissionType.Write +
       DrivePermissionType.React +
       DrivePermissionType.Comment,
-  },
-  {
-    // Contacts drive
-    a: ContactConfig.ContactTargetDrive.alias,
-    t: ContactConfig.ContactTargetDrive.type,
-    n: '',
-    d: '',
-    p: DrivePermissionType.Read + DrivePermissionType.Write,
   },
 ];
 export const appName = 'Homebase - Feed';
