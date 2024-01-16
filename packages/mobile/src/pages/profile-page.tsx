@@ -1,8 +1,9 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  InteractionManager,
   Linking,
   StyleProp,
   TouchableOpacity,
@@ -35,11 +36,13 @@ type SettingsProps = NativeStackScreenProps<ProfileStackParamList, 'Overview'>;
 
 const SettingsPage = (_props: SettingsProps) => {
   const { logout, getIdentity } = useAuth();
+  const [logoutPending, setLogoutPending] = useState(false);
+
   const { data: profile } = useProfile();
 
   const doLogout = async () => {
+    setLogoutPending(true);
     logout();
-    navigate('Feed' as any);
   };
 
   const navigate = (target: keyof ProfileStackParamList) => _props.navigation.navigate(target);
@@ -161,6 +164,7 @@ const SettingsPage = (_props: SettingsProps) => {
             >
               Logout
             </Text>
+            {logoutPending ? <ActivityIndicator style={{ marginLeft: 'auto' }} /> : null}
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => {
@@ -231,9 +235,9 @@ const getVersionInfo = async () => {
 export const VersionInfo = () => {
   const [version, setVersion] = useState<string>('');
 
-  useEffect(() => {
+  InteractionManager.runAfterInteractions(() => {
     getVersionInfo().then((v) => setVersion(v));
-  }, []);
+  });
 
   return <Text style={{ paddingTop: 10 }}>{version}</Text>;
 };
