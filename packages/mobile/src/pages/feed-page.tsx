@@ -14,11 +14,14 @@ import { useProfile } from '../hooks/profile/useProfile';
 import { GetTargetDriveFromProfileId, BuiltInProfiles } from '@youfoundation/js-lib/profile';
 import { OdinImage } from '../components/ui/OdinImage/OdinImage';
 import { Bars } from '../components/ui/Icons/icons';
+import { useDarkMode } from '../hooks/useDarkMode';
 
 type FeedProps = NativeStackScreenProps<TabStackParamList, 'Feed'>;
 
 const FeedPage = (_props: FeedProps) => {
   let webviewRef: WebView | null = null;
+
+  const { isDarkMode } = useDarkMode();
   const { authToken, getIdentity, getSharedSecret } = useAuth();
   const identity = getIdentity();
 
@@ -71,7 +74,7 @@ const FeedPage = (_props: FeedProps) => {
             left: 0,
             right: 0,
             paddingTop: insets.top,
-            backgroundColor: 'white',
+            backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
             zIndex: 10,
             opacity: hideHeader ? 0 : 1,
             shadowColor: '#000',
@@ -133,6 +136,7 @@ const FeedPage = (_props: FeedProps) => {
             if (scrollOffset > 20) setHideHeader(true);
             else setHideHeader(false);
           }}
+          forceDarkOn={isDarkMode}
         />
       ) : null}
     </SafeAreaView>

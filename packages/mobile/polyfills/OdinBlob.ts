@@ -35,7 +35,6 @@ class Blob {
    * Reference: https://developer.mozilla.org/en-US/docs/Web/API/Blob/Blob
    */
   constructor(parts: Array<Blob | string | Uint8Array> = [], options?: BlobOptions) {
-    console.log('new OdinBlob');
     if (Array.isArray(parts) && parts.length === 1 && parts[0] instanceof Uint8Array) {
       const id = getNewId();
       this.data = {
