@@ -1,4 +1,3 @@
-import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
@@ -63,10 +62,9 @@ let App = () => {
         persister: asyncPersist,
       }}
       onSuccess={() =>
-        queryClient
-          .resumePausedMutations()
-          .then(() => queryClient.invalidateQueries())
-      }>
+        queryClient.resumePausedMutations().then(() => queryClient.invalidateQueries())
+      }
+    >
       <RootStack />
     </PersistQueryClientProvider>
   );
@@ -86,11 +84,7 @@ const RootStack = () => {
           <Stack.Screen name="Authenticated" component={AuthenticatedStack} />
         ) : (
           <>
-            <Stack.Screen
-              name="Login"
-              component={LoginPage}
-              options={{ headerShown: false }}
-            />
+            <Stack.Screen name="Login" component={LoginPage} options={{ headerShown: false }} />
           </>
         )}
       </Stack.Navigator>
@@ -105,12 +99,9 @@ const AuthenticatedStack = () => {
     <Stack.Navigator
       screenOptions={{
         headerShadowVisible: false,
-      }}>
-      <Stack.Screen
-        name="Home"
-        component={TabStack}
-        options={{ headerShown: false }}
-      />
+      }}
+    >
+      <Stack.Screen name="Home" component={TabStack} options={{ headerShown: false }} />
     </Stack.Navigator>
   );
 };

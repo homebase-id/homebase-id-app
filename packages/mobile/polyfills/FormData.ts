@@ -63,9 +63,7 @@ const CustomFormData = class CustomFormData {
   }
 
   getAll(key: string): Array<FormDataValue> {
-    return this._parts
-      .filter(([name]) => name === key)
-      .map(([, value]) => value);
+    return this._parts.filter(([name]) => name === key).map(([, value]) => value);
   }
 
   getParts(): Array<FormDataPart> {
@@ -79,12 +77,13 @@ const CustomFormData = class CustomFormData {
       // have a `name` and `type` attribute to specify filename and
       // content type (cf. web Blob interface.)
       if (typeof value === 'object' && !Array.isArray(value) && value) {
-        if (typeof filename === 'string' || typeof value.name === 'string')
-          headers['content-disposition'] +=
-            '; filename="' + (filename || value.name) + '"';
+        if (typeof filename === 'string' || typeof value.name === 'string') {
+          headers['content-disposition'] += '; filename="' + (filename || value.name) + '"';
+        }
 
-        if (typeof value.type === 'string')
+        if (typeof value.type === 'string') {
           headers['content-type'] = value.type;
+        }
 
         return { ...value, headers, fieldName: name };
       }

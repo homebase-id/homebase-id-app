@@ -1,5 +1,5 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -11,7 +11,8 @@ import {
   ViewStyle,
 } from 'react-native';
 import { Text } from '../components/ui/Text/Text';
-import { getVersion, getBuildNumber } from 'react-native-device-info';
+// import { getVersion, getBuildNumber } from 'react-native-device-info';
+import { version } from '../../package.json';
 
 import { ProfileStackParamList } from '../app/App';
 import { SafeAreaView } from '../components/ui/SafeAreaView/SafeAreaView';
@@ -143,7 +144,7 @@ const SettingsPage = (_props: SettingsProps) => {
                 marginLeft: 16,
               }}
             >
-              Who I'm folowing
+              Who I&apos;m folowing
             </Text>
           </TouchableOpacity>
 
@@ -223,7 +224,7 @@ const SettingsPage = (_props: SettingsProps) => {
 };
 
 const getVersionInfo = async () => {
-  const appVersion = `${getVersion()} (${getBuildNumber()})`;
+  const appVersion = `${version}`; //${getVersion()} (${getBuildNumber()})`;
   const update = await codePush.getUpdateMetadata();
 
   if (!update) return `v${appVersion}`;

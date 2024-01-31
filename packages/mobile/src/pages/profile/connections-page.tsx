@@ -48,7 +48,7 @@ const ConnectionsPage = (_props: ConnectionsProps) => {
           onEndReached={() => hasMoreIdentities && fetchNextPage()}
         />
       ) : (
-        <NoItems>You don't have any connections :-(</NoItems>
+        <NoItems>You don&apos;t have any connections :-(</NoItems>
       )}
     </View>
   );

@@ -1,7 +1,7 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ProfileStackParamList } from '../../app/App';
-import { FlatList, RefreshControl, Text, View } from 'react-native';
+import { FlatList, RefreshControl, View } from 'react-native';
 import { useFollowingInfinite } from '../../hooks/following/useFollowing';
 import NoItems from '../../components/list/noItems';
 import IdentityItem from '../../components/list/identityItem';
@@ -45,7 +45,7 @@ const FollowingPage = (_props: FollowingProps) => {
           onEndReached={() => hasMoreIdentities && fetchNextPage()}
         />
       ) : (
-        <NoItems>You're not following anyone :-(</NoItems>
+        <NoItems>You&apos;re not following anyone :-(</NoItems>
       )}
     </View>
   );

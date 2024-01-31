@@ -1,5 +1,5 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Button,
   View,
@@ -247,7 +247,7 @@ const LoginComponent = () => {
             );
           }}
         >
-          <Text style={{ textDecorationLine: 'underline' }}>Don't have an account?</Text>
+          <Text style={{ textDecorationLine: 'underline' }}>Don&apos;t have an account?</Text>
         </TouchableOpacity>
       </View>
     </>

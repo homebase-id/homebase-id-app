@@ -1,4 +1,3 @@
-import React from 'react';
 import { View, ViewProps, ViewStyle } from 'react-native';
 
 interface ContainerProps extends Omit<ViewProps, 'style'> {

@@ -1,5 +1,5 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { TabStackParamList } from '../app/App';
 import { SafeAreaView } from '../components/ui/SafeAreaView/SafeAreaView';
@@ -19,8 +19,6 @@ import { useDarkMode } from '../hooks/useDarkMode';
 type FeedProps = NativeStackScreenProps<TabStackParamList, 'Feed'>;
 
 const FeedPage = (_props: FeedProps) => {
-  let webviewRef: WebView | null = null;
-
   const { isDarkMode } = useDarkMode();
   const { authToken, getIdentity, getSharedSecret } = useAuth();
   const identity = getIdentity();

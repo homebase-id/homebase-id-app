@@ -1,6 +1,6 @@
 import { TargetDrive, EmbeddedThumb, ImageSize } from '@youfoundation/js-lib/core';
 import { base64ToUint8Array, byteArrayToString } from '@youfoundation/js-lib/helpers';
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { View, Image, ActivityIndicator, StyleProp, ImageStyle, ViewStyle } from 'react-native';
 import useImage from './hooks/useImage';
 import useTinyThumb from './hooks/useTinyThumb';

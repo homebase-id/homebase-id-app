@@ -1,0 +1,26 @@
+{
+  "parserOptions": {
+    "requireConfigFile": false
+  },
+  "plugins": ["@typescript-eslint"],
+  "extends": ["@react-native"],
+  "rules": {
+    "react/no-children-prop": "off",
+    "prettier/prettier": 0,
+    "curly": ["error", "multi-line"],
+    "radix": ["error", "as-needed"],
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": "warn",
+    "react-native/no-inline-styles": "off",
+    "react/jsx-uses-react": "off",
+    "react/react-in-jsx-scope": "off",
+    "@typescript-eslint/no-shadow": "off",
+    "react-hooks/exhaustive-deps": "warn"
+  },
+  "ignorePatterns": ["webcrypto.js", "metro.config.js"],
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
+  }
+}
