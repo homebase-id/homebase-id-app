@@ -1,4 +1,4 @@
-package com.homebasefeed;
+package id.homebase.feed;
 
 import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactActivityDelegate;

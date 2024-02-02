@@ -183,6 +183,7 @@ const SettingsPage = (_props: SettingsProps) => {
                         });
                       } else Linking.openURL(`https://${getIdentity()}/owner/settings/delete`);
                     },
+                    style: 'destructive',
                   },
                   {
                     text: 'Cancel',

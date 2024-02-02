@@ -78,7 +78,7 @@ android {
 
     compileSdkVersion rootProject.ext.compileSdkVersion
 
-    namespace "com.homebasefeed"
+    namespace "id.homebase.feed"
     defaultConfig {
         applicationId "id.homebase.feed"
         minSdkVersion rootProject.ext.minSdkVersion
