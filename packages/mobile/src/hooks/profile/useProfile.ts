@@ -28,10 +28,10 @@ const useProfile = () => {
     const photoAttr = photoDsr?.fileMetadata.appData.content;
 
     return {
-      firstName: nameAttr?.data.givenName,
-      surName: nameAttr?.data.surname,
+      firstName: nameAttr?.data?.givenName,
+      surName: nameAttr?.data?.surname,
       profileImageFileId: photoDsr?.fileId,
-      profileImageFileKey: photoAttr?.data.profileImageKey,
+      profileImageFileKey: photoAttr?.data?.profileImageKey,
     };
   };
 
