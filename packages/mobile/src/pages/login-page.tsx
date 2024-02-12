@@ -1,5 +1,5 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Button,
   View,
@@ -21,7 +21,6 @@ import { CheckForUpdates, VersionInfo } from './profile-page';
 import { InAppBrowser } from 'react-native-inappbrowser-reborn';
 
 import logo from './homebase-feed.png';
-import { YouAuthorizationParams } from '@youfoundation/js-lib/auth';
 import { Input } from '../components/ui/Form/Input';
 
 type LoginProps = NativeStackScreenProps<AuthStackParamList, 'Login'>;
@@ -84,16 +83,14 @@ const useFinalize = () => {
   const [url, setUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    const getUrlAsync = async () => {
-      setState('preparing');
+    (async () => {
       // Get the deep link used to open the app
       const initialUrl = await Linking.getInitialURL();
-      setUrl(initialUrl);
-      if (!initialUrl) setState(null);
-      setState(null);
-    };
-
-    getUrlAsync();
+      if (initialUrl) {
+        setUrl(initialUrl);
+        setState('preparing');
+      }
+    })();
 
     Linking.addEventListener('url', ({ url }) => setUrl(url));
   }, []);
@@ -131,17 +128,8 @@ const useFinalize = () => {
 };
 
 const useParams = () => {
-  const [params, setParams] = useState<YouAuthorizationParams | null>(null);
   const { getRegistrationParams } = useYouAuthAuthorization();
-
-  useEffect(() => {
-    (async () => {
-      if (params) return;
-      setParams(await getRegistrationParams());
-    })();
-  }, [getRegistrationParams, params]);
-
-  return { data: params };
+  return { data: useMemo(() => getRegistrationParams(), [getRegistrationParams]) };
 };
 
 const LoginComponent = () => {
@@ -154,7 +142,7 @@ const LoginComponent = () => {
 
   useEffect(() => setInvalid(false), [odinId]);
 
-  const onLogin = async () => {
+  const onLogin = useCallback(async () => {
     if (!odinId) {
       setInvalid(true);
       return;
@@ -186,7 +174,32 @@ const LoginComponent = () => {
 
       if (result.type === 'success' && result.url) Linking.openURL(result.url);
     } else await Linking.openURL(url);
-  };
+  }, [authParams, odinId]);
+
+  const showSignUpAlert = useCallback(() => {
+    Alert.alert(
+      "Don't have an account yet?",
+      'Your account is much more than just this app. You own your account. Find out more about Homebase and create your account.',
+      [
+        {
+          text: 'Homebase.id',
+          onPress: async () => {
+            if (await InAppBrowser.isAvailable()) {
+              await InAppBrowser.open('https://homebase.id', {
+                enableUrlBarHiding: false,
+                enableDefaultShare: false,
+              });
+            } else Linking.openURL('https://homebase.id');
+          },
+        },
+        {
+          text: 'Cancel',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel',
+        },
+      ]
+    );
+  }, []);
 
   if (finalizeState === 'loading' || finalizeState === 'preparing') return <ActivityIndicator />;
 
@@ -221,32 +234,7 @@ const LoginComponent = () => {
           gap: 5,
         }}
       >
-        <TouchableOpacity
-          onPress={() => {
-            Alert.alert(
-              "Don't have an account yet?",
-              'Your account is much more than just this app. You own your account. Find out more about Homebase and create your account.',
-              [
-                {
-                  text: 'Homebase.id',
-                  onPress: async () => {
-                    if (await InAppBrowser.isAvailable()) {
-                      await InAppBrowser.open('https://homebase.id', {
-                        enableUrlBarHiding: false,
-                        enableDefaultShare: false,
-                      });
-                    } else Linking.openURL('https://homebase.id');
-                  },
-                },
-                {
-                  text: 'Cancel',
-                  onPress: () => console.log('Cancel Pressed'),
-                  style: 'cancel',
-                },
-              ]
-            );
-          }}
-        >
+        <TouchableOpacity onPress={showSignUpAlert}>
           <Text style={{ textDecorationLine: 'underline' }}>Don&apos;t have an account?</Text>
         </TouchableOpacity>
       </View>
