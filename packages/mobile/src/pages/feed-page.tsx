@@ -6,7 +6,7 @@ import { SafeAreaView } from '../components/ui/SafeAreaView/SafeAreaView';
 import WebView from 'react-native-webview';
 import { uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
 import { TouchableOpacity, View } from 'react-native';
-import useAuth from '../hooks/auth/useAuth';
+import { useAuth } from '../hooks/auth/useAuth';
 import { Text } from '../components/ui/Text/Text';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors } from '../app/Colors';

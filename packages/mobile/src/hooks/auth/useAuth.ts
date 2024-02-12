@@ -5,7 +5,7 @@ import {
   stringToUint8Array,
   uint8ArrayToBase64,
 } from '@youfoundation/js-lib/helpers';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import useVerifyToken from './useVerifyToken';
 import {
   createEccPair,
@@ -67,11 +67,37 @@ export const drives = [
       DrivePermissionType.Comment,
   },
 ];
+export const permissionKeys = [
+  AppPermissionType.ReadConnections,
+  AppPermissionType.ManageConnectionRequests,
+  AppPermissionType.ReadCircleMembers,
+  AppPermissionType.ReadWhoIFollow,
+  AppPermissionType.ReadMyFollowers,
+  AppPermissionType.ManageFeed,
+  AppPermissionType.SendDataToOtherIdentitiesOnMyBehalf,
+  AppPermissionType.ReceiveDataFromOtherIdentitiesOnMyBehalf,
+  AppPermissionType.PublishStaticContent,
+  AppPermissionType.SendPushNotifications,
+];
 export const appName = 'Homebase - Feed';
 export const appId = '5f887d80-0132-4294-ba40-bda79155551d';
+export const corsHost = undefined;
 
-// Adapted to work in react-native; With no fallbacks to web support; If we someday merge this with the web version, we should add the fallbacks
-const useAuth = () => {
+// Split up, just checks if the token is valid, and logs out if not
+export const useValidTokenCheck = () => {
+  const { getDotYouClient, logout } = useAuth();
+  const dotYouClient = getDotYouClient();
+  const { data: hasValidToken, isFetchedAfterMount } = useVerifyToken(dotYouClient);
+
+  useEffect(() => {
+    if (isFetchedAfterMount && hasValidToken === false) {
+      console.log('Token is invalid, logging out..');
+      logout();
+    }
+  }, [hasValidToken, isFetchedAfterMount, logout]);
+};
+
+export const useAuth = () => {
   const {
     setPrivateKey,
     sharedSecret,
@@ -82,21 +108,26 @@ const useAuth = () => {
     setIdentity,
   } = useEncrtypedStorage();
 
-  const [authenticationState, setAuthenticationState] = useState<
-    'unknown' | 'anonymous' | 'authenticated'
-  >(sharedSecret ? 'unknown' : 'anonymous');
+  const [authenticationState, setAuthenticationState] = useState<'anonymous' | 'authenticated'>(
+    sharedSecret && identity ? 'authenticated' : 'anonymous'
+  );
 
-  const queryClient = useQueryClient();
+  // In react-native, if there's a sharedSecret and identity, we assume logged in state;
+  //   It's the responsibility of the `usevalidTokenCheck` to logout if it's not valid
+  useEffect(
+    () => setAuthenticationState(sharedSecret && identity ? 'authenticated' : 'anonymous'),
+    [sharedSecret, identity]
+  );
 
   const getDotYouClient = useCallback(() => {
-    if (!sharedSecret || !identity) {
+    if (!sharedSecret || !identity || !authToken) {
       return new DotYouClient({
         api: ApiType.App,
       });
     }
 
     const headers: Record<string, string> = {};
-    if (authToken) headers.bx0900 = authToken;
+    headers.bx0900 = authToken;
 
     return new DotYouClient({
       sharedSecret: base64ToUint8Array(sharedSecret),
@@ -106,8 +137,7 @@ const useAuth = () => {
     });
   }, [authToken, identity, sharedSecret]);
 
-  const { data: hasValidToken, isFetchedAfterMount } = useVerifyToken(getDotYouClient());
-
+  const queryClient = useQueryClient();
   const logout = useCallback(async (): Promise<void> => {
     await logoutYouauth(getDotYouClient());
 
@@ -118,118 +148,82 @@ const useAuth = () => {
     setAuthToken('');
     setIdentity('');
 
-    queryClient.refetchQueries();
+    queryClient.removeQueries();
   }, [getDotYouClient, queryClient, setAuthToken, setIdentity, setPrivateKey, setSharedSecret]);
-
-  useEffect(() => {
-    if (!!identity && !!sharedSecret && isFetchedAfterMount && hasValidToken !== undefined) {
-      setAuthenticationState(hasValidToken ? 'authenticated' : 'anonymous');
-
-      if (!hasValidToken) {
-        setAuthenticationState('anonymous');
-        if (sharedSecret) {
-          console.log('Token is invalid, logging out..');
-          logout();
-        }
-      }
-    }
-  }, [identity, sharedSecret, hasValidToken, isFetchedAfterMount, logout]);
-
-  useEffect(() => {
-    if (authenticationState === 'authenticated' && !sharedSecret) {
-      setAuthenticationState('anonymous');
-    }
-  }, [sharedSecret, authenticationState]);
 
   return {
     logout,
     getDotYouClient,
-    getSharedSecret: () => (sharedSecret ? base64ToUint8Array(sharedSecret) : undefined),
     authToken,
-    getIdentity: () => identity,
-    isAuthenticated: authenticationState !== 'anonymous',
+    getSharedSecret: useCallback(
+      () => sharedSecret && base64ToUint8Array(sharedSecret),
+      [sharedSecret]
+    ),
+    getIdentity: useCallback(() => identity, [identity]),
+    isAuthenticated: useMemo(() => authenticationState !== 'anonymous', [authenticationState]),
   };
 };
 
 export const useYouAuthAuthorization = () => {
-  const {
-    privateKey: privateKeyFromLocalStorage,
-    setPrivateKey,
-    setSharedSecret,
-    setAuthToken,
-    setIdentity,
-  } = useEncrtypedStorage();
+  const { privateKey, setPrivateKey, setSharedSecret, setAuthToken, setIdentity } =
+    useEncrtypedStorage();
 
-  // const throwAwayTheKey = async () => await setPrivateKey('');
-
-  const getRegistrationParams = async () => {
+  const getRegistrationParams = useCallback(async () => {
     const { privateKeyHex, publicKeyJwk } = await createEccPair();
     // Persist key for usage on finalize
-    await setPrivateKey(JSON.stringify(privateKeyHex) + '');
+    setPrivateKey(JSON.stringify(privateKeyHex) + '');
 
     // Get params with publicKey embedded
     return await getRegistrationParamsYouAuth(
       'homebase-feed://auth/finalize/',
       appName,
       appId,
-      [
-        AppPermissionType.ReadConnections,
-        AppPermissionType.ManageConnectionRequests,
-        AppPermissionType.ReadCircleMembers,
-        AppPermissionType.ReadWhoIFollow,
-        AppPermissionType.ReadMyFollowers,
-        AppPermissionType.ManageFeed,
-        AppPermissionType.SendDataToOtherIdentitiesOnMyBehalf,
-        AppPermissionType.ReceiveDataFromOtherIdentitiesOnMyBehalf,
-        AppPermissionType.PublishStaticContent,
-        AppPermissionType.SendPushNotifications,
-      ],
+      permissionKeys,
       undefined,
       drives,
       undefined,
       uint8ArrayToBase64(stringToUint8Array(JSON.stringify(publicKeyJwk))),
-      undefined,
+      corsHost,
       `${Platform.OS === 'ios' ? 'iOS' : Platform.OS === 'android' ? 'Android' : Platform.OS} | ${
         Platform.Version
       }`
     );
-  };
+  }, [setPrivateKey]);
 
-  const finalizeAuthentication = async (identity: string, publicKey: string, salt: string) => {
-    if (!identity || !publicKey || !salt) {
-      console.error('Missing data');
-      return false;
-    }
-    try {
-      const privateKeyHex = JSON.parse(privateKeyFromLocalStorage || '');
-      if (!privateKeyFromLocalStorage || !privateKeyHex) {
-        console.error('Missing key');
+  const finalizeAuthentication = useCallback(
+    async (identity: string, publicKey: string, salt: string) => {
+      if (!identity || !publicKey || !salt) {
+        console.error('Missing data');
         return false;
       }
-      const publicKeyJwk = JSON.parse(byteArrayToString(base64ToUint8Array(publicKey)));
+      try {
+        const privateKeyHex = JSON.parse(privateKey || '');
+        if (!privateKey || !privateKeyHex) {
+          console.error('Missing key');
+          return false;
+        }
+        const publicKeyJwk = JSON.parse(byteArrayToString(base64ToUint8Array(publicKey)));
 
-      const { clientAuthToken, sharedSecret } = await finalizeAuthenticationYouAuth(
-        identity,
-        privateKeyHex,
-        publicKeyJwk,
-        salt
-      );
+        const { clientAuthToken, sharedSecret } = await finalizeAuthenticationYouAuth(
+          identity,
+          privateKeyHex,
+          publicKeyJwk,
+          salt
+        );
 
-      // await throwAwayTheKey();
+        // Store all data in storage
+        setAuthToken(uint8ArrayToBase64(clientAuthToken));
+        setSharedSecret(uint8ArrayToBase64(sharedSecret));
+        setIdentity(identity);
+      } catch (ex) {
+        console.error(ex);
+        return false;
+      }
 
-      // Store all data in secure storage
-      await setAuthToken(uint8ArrayToBase64(clientAuthToken));
-      await setSharedSecret(uint8ArrayToBase64(sharedSecret));
-      await setIdentity(identity);
-    } catch (ex) {
-      console.error(ex);
-      return false;
-    }
-
-    return true;
-  };
+      return true;
+    },
+    [privateKey, setAuthToken, setIdentity, setSharedSecret]
+  );
 
   return { getRegistrationParams, finalizeAuthentication };
 };
-
-export default useAuth;

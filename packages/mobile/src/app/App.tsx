@@ -9,10 +9,11 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LoginPage from '../pages/login-page';
 import FeedPage from '../pages/feed-page';
 import CodePush from 'react-native-code-push';
-import useAuth from '../hooks/auth/useAuth';
+import { useAuth, useValidTokenCheck } from '../hooks/auth/useAuth';
 import FollowersPage from '../pages/profile/followers-page';
 import ConnectionsPage from '../pages/profile/connections-page';
 import FollowingPage from '../pages/profile/following-page';
+import { DotYouClientProvider } from '../components/Auth/DotYouClientProvider';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -73,66 +74,71 @@ let App = () => {
 const codePushOptions = { checkFrequency: CodePush.CheckFrequency.MANUAL };
 App = CodePush(codePushOptions)(App);
 
+const StackRoot = createNativeStackNavigator<AuthStackParamList>();
 const RootStack = () => {
-  const Stack = createNativeStackNavigator<AuthStackParamList>();
   const { isAuthenticated } = useAuth();
 
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <StackRoot.Navigator screenOptions={{ headerShown: false }}>
         {isAuthenticated ? (
-          <Stack.Screen name="Authenticated" component={AuthenticatedStack} />
+          <StackRoot.Screen name="Authenticated" component={AuthenticatedStack} />
         ) : (
           <>
-            <Stack.Screen name="Login" component={LoginPage} options={{ headerShown: false }} />
+            <StackRoot.Screen name="Login" component={LoginPage} options={{ headerShown: false }} />
           </>
         )}
-      </Stack.Navigator>
+      </StackRoot.Navigator>
     </NavigationContainer>
   );
 };
 
+const StackAuthenticated = createNativeStackNavigator<RootStackParamList>();
 const AuthenticatedStack = () => {
-  const Stack = createNativeStackNavigator<RootStackParamList>();
+  useValidTokenCheck();
 
   return (
-    <Stack.Navigator
-      screenOptions={{
-        headerShadowVisible: false,
-      }}
-    >
-      <Stack.Screen name="Home" component={TabStack} options={{ headerShown: false }} />
-    </Stack.Navigator>
+    <DotYouClientProvider>
+      <StackAuthenticated.Navigator
+        screenOptions={{
+          headerShadowVisible: false,
+        }}
+      >
+        <StackAuthenticated.Screen
+          name="Home"
+          component={TabStack}
+          options={{ headerShown: false }}
+        />
+      </StackAuthenticated.Navigator>
+    </DotYouClientProvider>
   );
 };
 
+const StackTab = createNativeStackNavigator<TabStackParamList>();
 const TabStack = () => {
-  const Stack = createNativeStackNavigator<TabStackParamList>();
-
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="Feed" component={FeedPage} />
-      <Stack.Screen name="Profile" component={ProfileStack} />
-    </Stack.Navigator>
+    <StackTab.Navigator screenOptions={{ headerShown: false }}>
+      <StackTab.Screen name="Feed" component={FeedPage} />
+      <StackTab.Screen name="Profile" component={ProfileStack} />
+    </StackTab.Navigator>
   );
 };
 
+const StackProfile = createNativeStackNavigator<ProfileStackParamList>();
 const ProfileStack = () => {
-  const Stack = createNativeStackNavigator<ProfileStackParamList>();
-
   return (
-    <Stack.Navigator screenOptions={{ headerBackTitle: 'Profile' }}>
-      <Stack.Screen
+    <StackProfile.Navigator screenOptions={{ headerBackTitle: 'Profile' }}>
+      <StackProfile.Screen
         name="Overview"
         component={ProfilePage}
         options={{
           headerShown: false,
         }}
       />
-      <Stack.Screen name="Followers" component={FollowersPage} />
-      <Stack.Screen name="Connections" component={ConnectionsPage} />
-      <Stack.Screen name="Following" component={FollowingPage} />
-    </Stack.Navigator>
+      <StackProfile.Screen name="Followers" component={FollowersPage} />
+      <StackProfile.Screen name="Connections" component={ConnectionsPage} />
+      <StackProfile.Screen name="Following" component={FollowingPage} />
+    </StackProfile.Navigator>
   );
 };
 

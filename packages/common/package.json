@@ -1,0 +1,19 @@
+{
+  "name": "feed-app-common",
+  "version": "0.0.1",
+  "author": "YouFoundation",
+  "description": "Common things for the Homebase Feed apps",
+  "files": [
+    "src"
+  ],
+  "type": "module",
+  "module": "./index.ts",
+  "types": "./index.ts",
+  "sideEffects": false,
+  "dependencies": {
+    "@youfoundation/js-lib": "*"
+  },
+  "peerDependencies": {
+    "@tanstack/react-query": "^5.4.3"
+  }
+}

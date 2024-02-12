@@ -26,7 +26,7 @@ import {
   Times,
 } from '../components/ui/Icons/icons';
 import codePush from 'react-native-code-push';
-import useAuth from '../hooks/auth/useAuth';
+import { useAuth } from '../hooks/auth/useAuth';
 import { Colors } from '../app/Colors';
 import { OdinImage } from '../components/ui/OdinImage/OdinImage';
 import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';

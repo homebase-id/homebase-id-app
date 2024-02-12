@@ -1,13 +1,14 @@
 import { useQuery } from '@tanstack/react-query';
-import useAuth from '../auth/useAuth';
+
 import {
   BuiltInAttributes,
   BuiltInProfiles,
   getAttributeVersions,
 } from '@youfoundation/js-lib/profile';
+import { useDotYouClientContext } from 'feed-app-common';
 
 const useProfile = () => {
-  const dotYouClient = useAuth().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   const fetchProfile = async () => {
     const attributes = await getAttributeVersions(

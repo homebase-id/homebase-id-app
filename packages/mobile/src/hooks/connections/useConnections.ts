@@ -1,6 +1,6 @@
 import { getConnections } from '@youfoundation/js-lib/network';
-import useAuth from '../auth/useAuth';
 import { useInfiniteQuery } from '@tanstack/react-query';
+import { useDotYouClientContext } from 'feed-app-common';
 
 interface useConnectionsProps {
   pageSize?: number;
@@ -11,7 +11,7 @@ export const useConnections = (
     pageSize: 10,
   }
 ) => {
-  const dotYouClient = useAuth().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   const fetchConnections = async (
     { pageSize, cursor }: { pageSize: number; cursor?: number } = {

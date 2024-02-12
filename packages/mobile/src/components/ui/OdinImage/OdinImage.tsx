@@ -4,8 +4,9 @@ import { useMemo } from 'react';
 import { View, Image, ActivityIndicator, StyleProp, ImageStyle, ViewStyle } from 'react-native';
 import useImage from './hooks/useImage';
 import useTinyThumb from './hooks/useTinyThumb';
-import useAuth from '../../../hooks/auth/useAuth';
+import { useAuth } from '../../../hooks/auth/useAuth';
 import { SvgXml } from 'react-native-svg';
+import { useDotYouClientContext } from 'feed-app-common';
 
 export interface OdinImageProps {
   odinId?: string;
@@ -34,7 +35,7 @@ export const OdinImage = ({
   avoidPayload,
   style,
 }: OdinImageProps) => {
-  const dotYouClient = useAuth().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   const loadSize = {
     pixelHeight: (imageSize?.height ? Math.round(imageSize?.height * 1) : undefined) || 800,

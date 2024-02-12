@@ -3,3 +3,5 @@ declare global {
     type RootParamList = RootStackParamList;
   }
 }
+
+declare module '*.png';
