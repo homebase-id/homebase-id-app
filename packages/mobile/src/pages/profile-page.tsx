@@ -3,7 +3,6 @@ import { useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
-  InteractionManager,
   Linking,
   StyleProp,
   TouchableOpacity,
