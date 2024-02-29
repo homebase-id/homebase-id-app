@@ -95,7 +95,7 @@ const FeedPage = (_props: FeedProps) => {
             }}
           >
             <OdinImage
-              fit="contain"
+              fit="cover"
               targetDrive={GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId)}
               fileId={profile?.profileImageFileId}
               fileKey={profile?.profileImageFileKey}

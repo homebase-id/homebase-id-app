@@ -143,6 +143,7 @@ export const OdinImage = memo(
             enableZoom={enableZoom}
             alt={alt || title}
             onClick={onClick}
+            style={style}
           />
         ) : null}
       </View>
