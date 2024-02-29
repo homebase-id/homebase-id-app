@@ -1,6 +1,6 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { View, StyleSheet, ActivityIndicator } from 'react-native';
-import { RootStackParamList } from '../app/App';
+import { ChatStackParamList } from '../app/App';
 import { useConversation } from '../hooks/chat/useConversation';
 import { useCallback, useEffect, useState } from 'react';
 import { GroupAvatar } from '../components/ui/Chat/Conversation-tile';
@@ -8,16 +8,12 @@ import { Input } from '../components/ui/Form/Input';
 import TextButton from '../components/ui/Text/Text-Button';
 import { Header, HeaderBackButton } from '@react-navigation/elements';
 
-export type EditGroupProp = NativeStackScreenProps<
-  RootStackParamList,
-  'EditGroup'
->;
+export type EditGroupProp = NativeStackScreenProps<ChatStackParamList, 'EditGroup'>;
 
 function EditGroupPage(props: EditGroupProp) {
   const { convoId: conversationId } = props.route.params;
   const { single: conversationFile } = useConversation({ conversationId });
-  const { mutate: updateGroupConversation, status: updateStatus } =
-    useConversation().update;
+  const { mutate: updateGroupConversation, status: updateStatus } = useConversation().update;
   const conversation = conversationFile.data;
   const conversationContent = conversation?.fileMetadata.appData.content;
   const [title, setTitle] = useState<string>(conversationContent?.title || '');
@@ -41,17 +37,11 @@ function EditGroupPage(props: EditGroupProp) {
   if (!conversation) return null;
 
   const headerLeft = () => (
-    <HeaderBackButton
-      canGoBack={true}
-      labelVisible={false}
-      onPress={props.navigation.goBack}
-    />
+    <HeaderBackButton canGoBack={true} labelVisible={false} onPress={props.navigation.goBack} />
   );
   const headerRight = () => {
     if (title !== conversationContent?.title && title?.length > 0) {
-      return (
-        <TextButton title="Save" style={{ marginRight: 8 }} onPress={save} />
-      );
+      return <TextButton title="Save" style={{ marginRight: 8 }} onPress={save} />;
     }
     if (updateStatus === 'pending') {
       return <ActivityIndicator size={'small'} style={{ marginRight: 8 }} />;
@@ -67,12 +57,9 @@ function EditGroupPage(props: EditGroupProp) {
             width: '100%',
             zIndex: 10,
           },
-        ]}>
-        <Header
-          title={'Edit Group Title'}
-          headerLeft={headerLeft}
-          headerRight={headerRight}
-        />
+        ]}
+      >
+        <Header title={'Edit Group Title'} headerLeft={headerLeft} headerRight={headerRight} />
       </View>
       <View style={styles.content}>
         <GroupAvatar style={styles.avatar} iconSize={'2xl'} />
@@ -84,7 +71,7 @@ function EditGroupPage(props: EditGroupProp) {
         /> */}
         <Input
           value={title}
-          onChangeText={title => setTitle(title)}
+          onChangeText={(title) => setTitle(title)}
           autoCorrect={false}
           autoFocus={true}
           autoCapitalize="sentences"

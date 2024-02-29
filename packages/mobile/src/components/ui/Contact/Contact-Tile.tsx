@@ -1,12 +1,11 @@
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
 import { useConversation } from '../../../hooks/chat/useConversation';
-import { OdinImage } from '../OdinImage/OdinImage';
 import { ContactConfig, ContactFile } from '@youfoundation/js-lib/network';
 import { CheckCircle, ChevronRight, CircleOutlined } from '../Icons/icons';
 import { useDarkMode } from 'feed-app-common';
 import { Colors } from '../../../app/Colors';
-
+import { OdinImage } from '../OdinImage/OdinImage';
 export const ContactTile = ({
   item: dsrContact,
   onOpen,

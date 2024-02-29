@@ -15,7 +15,7 @@ import ConnectionsPage from '../pages/profile/connections-page';
 import FollowingPage from '../pages/profile/following-page';
 import { DotYouClientProvider } from '../components/Auth/DotYouClientProvider';
 import ConversationPage from '../pages/conversation-page';
-import { BackButton, HeaderActions, ProfileAvatar } from '../components/ui/convo-app-bar';
+import { BackButton, HeaderActions } from '../components/ui/convo-app-bar';
 import { useLiveChatProcessor } from '../hooks/chat/useLiveChatProcessor';
 import ChatPage from '../pages/chat-page';
 import EditGroupPage from '../pages/edit-group-page';

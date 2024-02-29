@@ -9,7 +9,7 @@ import { Header, HeaderBackButtonProps } from '@react-navigation/elements';
 import { BackButton } from '../components/ui/convo-app-bar';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { RootStackParamList } from '../app/App';
+import { ChatStackParamList, RootStackParamList } from '../app/App';
 import { useConversation } from '../hooks/chat/useConversation';
 import Dialog from 'react-native-dialog';
 
@@ -18,7 +18,7 @@ export const NewGroupPage = () => {
   const [dialogVisible, setDialogVisible] = useState(false);
 
   const [selectedContacts, setSetselectedContacts] = useState<DriveSearchResult<ContactFile>[]>([]);
-  const navigation = useNavigation<NavigationProp<RootStackParamList, 'NewChat'>>();
+  const navigation = useNavigation<NavigationProp<ChatStackParamList, 'NewChat'>>();
   const { mutateAsync: createNew } = useConversation().create;
 
   let groupTitle: string | undefined;

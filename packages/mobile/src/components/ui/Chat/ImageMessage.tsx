@@ -7,8 +7,8 @@ import { PayloadDescriptor } from '@youfoundation/js-lib/dist';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { ChatStackParamList } from '../../../app/App';
 import { FlatList } from 'react-native-gesture-handler';
-import { OdinImage } from '../Media/PhotoWithLoader';
 import { VideoWithLoader } from '../Media/VideoWithLoader';
+import { OdinImage } from '../OdinImage/OdinImage';
 
 const ImageMessage = (props: MessageImageProps<IMessage>) => {
   const currentMessage = props.currentMessage as ChatMessageIMessage;

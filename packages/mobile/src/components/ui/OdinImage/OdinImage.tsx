@@ -1,11 +1,11 @@
 import {
-  TargetDrive,
   EmbeddedThumb,
-  ImageSize,
   ImageContentType,
+  ImageSize,
+  TargetDrive,
 } from '@youfoundation/js-lib/core';
 import { memo, useMemo } from 'react';
-import { View, Image, ActivityIndicator, TouchableWithoutFeedback } from 'react-native';
+import { ActivityIndicator, Image, ImageStyle, TouchableWithoutFeedback, View } from 'react-native';
 import useImage from './hooks/useImage';
 import useTinyThumb from './hooks/useTinyThumb';
 import { SvgUri } from 'react-native-svg';
@@ -15,7 +15,6 @@ export interface OdinImageProps {
   odinId?: string;
   targetDrive: TargetDrive;
   fileId: string | undefined;
-  fileKey: string | undefined;
   fit?: 'cover' | 'contain';
   imageSize?: { width: number; height: number };
   alt?: string;
@@ -23,6 +22,8 @@ export interface OdinImageProps {
   previewThumbnail?: EmbeddedThumb;
   avoidPayload?: boolean;
   enableZoom?: boolean;
+  fileKey?: string;
+  style?: ImageStyle;
   onClick?: () => void;
 }
 
@@ -39,6 +40,7 @@ export const OdinImage = memo(
     previewThumbnail,
     avoidPayload,
     enableZoom,
+    style,
     onClick,
   }: OdinImageProps) => {
     const loadSize = {
@@ -58,7 +60,7 @@ export const OdinImage = memo(
     const { getFromCache } = useImage();
     const cachedImage = useMemo(
       () => (fileId && fileKey ? getFromCache(odinId, fileId, fileKey, targetDrive) : undefined),
-      [fileId, getFromCache, odinId, targetDrive]
+      [fileId, getFromCache, odinId, targetDrive, fileKey]
     );
     const skipTiny = !!previewThumbnail || !!cachedImage;
 
@@ -107,8 +109,8 @@ export const OdinImage = memo(
               right: 0,
               bottom: 0,
               resizeMode: fit,
-
               ...imageSize,
+              ...style,
             }}
             blurRadius={hasCachedImage ? 0 : 2}
           />
@@ -152,7 +154,7 @@ const ZoomableImage = ({
   uri,
   alt,
   imageSize,
-
+  style,
   fit,
   enableZoom,
   onClick,
@@ -162,7 +164,7 @@ const ZoomableImage = ({
   uri: string;
   imageSize?: { width: number; height: number };
   alt?: string;
-
+  style?: ImageStyle;
   fit?: 'cover' | 'contain';
   enableZoom?: boolean;
   onClick?: () => void;
@@ -170,7 +172,6 @@ const ZoomableImage = ({
   contentType?: ImageContentType;
 }) => {
   if (!enableZoom) {
-    console.log(uri);
     return contentType === 'image/svg+xml' ? (
       <SvgUri width={imageSize?.width} height={imageSize?.height} uri={uri} />
     ) : (
@@ -179,8 +180,8 @@ const ZoomableImage = ({
         alt={alt}
         style={{
           resizeMode: fit,
-
           ...imageSize,
+          ...style,
         }}
       />
     );

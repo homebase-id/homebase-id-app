@@ -4,7 +4,7 @@ import { useDarkMode } from 'feed-app-common';
 import { ChatMessageIMessage } from '../../../pages/chat-page';
 import { ChatDrive } from '../../../provider/chat/ConversationProvider';
 import { Colors } from '../../../app/Colors';
-import { OdinImage } from '../Media/PhotoWithLoader';
+import { OdinImage } from '../OdinImage/OdinImage';
 
 type ReplyMessageBarProps = {
   clearReply: () => void;

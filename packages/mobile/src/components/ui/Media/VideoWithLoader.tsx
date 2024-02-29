@@ -6,8 +6,8 @@ import WebView from 'react-native-webview';
 import { TouchableWithoutFeedback } from 'react-native';
 import { useAuth } from '../../../hooks/auth/useAuth';
 import { uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
-import { OdinImage } from './PhotoWithLoader';
 import { Play } from '../Icons/icons';
+import { OdinImage } from '../OdinImage/OdinImage';
 
 // Memo to performance optimize the FlatList
 export const VideoWithLoader = memo(
