@@ -15,12 +15,11 @@ import {
 } from 'react-native-gifted-chat';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { RootStackParamList } from '../app/App';
+import { ChatStackParamList } from '../app/App';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   ImageBackground,
   Keyboard,
-  KeyboardAvoidingView,
   Platform,
   StatusBar,
   StyleSheet,
@@ -28,10 +27,10 @@ import {
   View,
 } from 'react-native';
 import { ChatAppBar } from '../components/ui/Chat/Chat-app-bar';
-import { Close, Images, SendChat } from '../components/ui/Icons/Icons';
+import { Close, Images, SendChat } from '../components/ui/Icons/icons';
 import ImageMessage from '../components/ui/Chat/ImageMessage';
 import { Asset, launchImageLibrary } from 'react-native-image-picker';
-import { ChatMessage } from '../providers/chat/ChatProvider';
+import { ChatMessage } from '../provider/chat/ChatProvider';
 import { useAuth } from '../hooks/auth/useAuth';
 import { useChatMessages } from '../hooks/chat/useChatMessages';
 import { useChatMessage } from '../hooks/chat/useChatMessage';
@@ -42,26 +41,22 @@ import {
   ConversationWithYourselfId,
   GroupConversation,
   SingleConversation,
-} from '../providers/chat/ConversationProvider';
-import { ImageSource } from '../providers/image/RNImageProvider';
+} from '../provider/chat/ConversationProvider';
+import { ImageSource } from '../provider/image/RNImageProvider';
 import { getNewId } from '@youfoundation/js-lib/helpers';
 import { Swipeable, TouchableOpacity } from 'react-native-gesture-handler';
-import { useDarkMode } from 'chat-app-common';
+import { useDarkMode } from 'feed-app-common';
 import { Colors } from '../app/Colors';
 import ReplyMessageBar from '../components/ui/Chat/Reply-Message-bar';
 import ChatMessageBox from '../components/ui/Chat/Chat-Message-box';
 import { OdinImage } from '../components/ui/OdinImage/OdinImage';
 
-export type ChatProp = NativeStackScreenProps<RootStackParamList, 'ChatScreen'>;
+export type ChatProp = NativeStackScreenProps<ChatStackParamList, 'ChatScreen'>;
 
-export interface ChatMessageIMessage
-  extends IMessage,
-    DriveSearchResult<ChatMessage> {}
+export interface ChatMessageIMessage extends IMessage, DriveSearchResult<ChatMessage> {}
 
 const ChatPage = ({ route, navigation }: ChatProp) => {
-  const [replyMessage, setReplyMessage] = useState<ChatMessageIMessage | null>(
-    null,
-  );
+  const [replyMessage, setReplyMessage] = useState<ChatMessageIMessage | null>(null);
   const swipeableRowRef = useRef<Swipeable | null>(null);
   const clearReplyMessage = () => setReplyMessage(null);
   const identity = useAuth().getIdentity();
@@ -80,40 +75,59 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
     conversationContent = ConversationWithYourself;
   }
 
-  const renderCustomInputToolbar = (
-    props: InputToolbarProps<ChatMessageIMessage>,
-  ) => (
-    <InputToolbar
-      {...props}
-      renderActions={() => (
-        <Actions
-          icon={PickImage}
-          onPressActionButton={async () => {
-            const medias = await launchImageLibrary({
-              mediaType: 'mixed',
-              selectionLimit: 10,
-            });
-            if (medias.didCancel) return;
-            setAssets(medias.assets ?? []);
-          }}
+  const renderCustomInputToolbar = (props: InputToolbarProps<IMessage>) => {
+    return (
+      <>
+        <InputToolbar
+          {...props}
+          renderAccessory={(props) =>
+            replyMessage ? (
+              <ReplyMessageBar message={replyMessage} clearReply={clearReplyMessage} {...props} />
+            ) : null
+          }
+          renderComposer={(props) => (
+            <Composer
+              {...props}
+              textInputStyle={{
+                color: isDarkMode ? 'white' : 'black',
+              }}
+            />
+          )}
+          renderSend={(props) => (
+            <Send
+              {...props}
+              disabled={!props.text && assets?.length === 0}
+              text={props.text || ' '}
+              containerStyle={styles.send}
+            >
+              <SendChat size={'md'} color={!props.text && assets?.length === 0 ? 'grey' : 'blue'} />
+            </Send>
+          )}
+          renderActions={() => (
+            <Actions
+              icon={PickImage}
+              onPressActionButton={async () => {
+                const medias = await launchImageLibrary({
+                  mediaType: 'mixed',
+                  selectionLimit: 10,
+                });
+                if (medias.didCancel) return;
+                setAssets(medias.assets ?? []);
+              }}
+            />
+          )}
+          containerStyle={[
+            styles.inputContainer,
+            {
+              backgroundColor: isDarkMode ? Colors.slate[900] : Colors.slate[100],
+              borderTopWidth: 0,
+              borderRadius: 10,
+            },
+          ]}
         />
-      )}
-      containerStyle={[
-        styles.inputContainer,
-        {
-          backgroundColor: isDarkMode ? Colors.slate[900] : Colors.slate[100],
-          borderTopWidth: 0,
-          borderRadius: 10,
-        },
-      ]}
-      accessoryStyle={styles.replyBarContainer}
-    />
-  );
-
-  const renderAccessory = () =>
-    replyMessage && (
-      <ReplyMessageBar message={replyMessage} clearReply={clearReplyMessage} />
+      </>
     );
+  };
 
   const updateRowRef = useCallback(
     (ref: any) => {
@@ -125,15 +139,11 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
         swipeableRowRef.current = ref;
       }
     },
-    [replyMessage],
+    [replyMessage]
   );
 
   const renderMessageBox = (props: MessageProps<ChatMessageIMessage>) => (
-    <ChatMessageBox
-      {...props}
-      setReplyOnSwipeOpen={setReplyMessage}
-      updateRowRef={updateRowRef}
-    />
+    <ChatMessageBox {...props} setReplyOnSwipeOpen={setReplyMessage} updateRowRef={updateRowRef} />
   );
 
   const renderMediaItems = () => {
@@ -142,7 +152,8 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
         key={'ftr_key'}
         style={{
           flexDirection: 'row',
-        }}>
+        }}
+      >
         {assets.map((value, index) => {
           const isVideo = value.type?.startsWith('video') ?? false;
           return (
@@ -150,7 +161,8 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
               key={index}
               style={{
                 borderRadius: 15,
-              }}>
+              }}
+            >
               <ImageBackground
                 key={index}
                 source={{ uri: value.uri || value.originalPath }}
@@ -161,11 +173,9 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
                   paddingRight: 2,
                   paddingTop: 2,
                   marginRight: 4,
-                }}>
-                <TouchableOpacity
-                  onPress={() =>
-                    setAssets(assets.filter((_, i) => i !== index))
-                  }>
+                }}
+              >
+                <TouchableOpacity onPress={() => setAssets(assets.filter((_, i) => i !== index))}>
                   <Close size={'sm'} color="white" />
                 </TouchableOpacity>
               </ImageBackground>
@@ -180,13 +190,12 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
     () =>
       (
         chatMessages?.pages
-          .flatMap(page => page.searchResults)
+          .flatMap((page) => page.searchResults)
           ?.filter(Boolean) as DriveSearchResult<ChatMessage>[]
-      )?.map<ChatMessageIMessage>(value => {
+      )?.map<ChatMessageIMessage>((value) => {
         // Mapping done here, because the chat component expects a different format
         return {
-          _id:
-            value.fileMetadata.appData.uniqueId ?? value.fileId ?? getNewId(),
+          _id: value.fileMetadata.appData.uniqueId ?? value.fileId ?? getNewId(),
           createdAt: value.fileMetadata.created,
           text: value.fileMetadata.appData.content.message,
           user: {
@@ -203,7 +212,7 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
           ...value,
         };
       }) || [],
-    [chatMessages, identity],
+    [chatMessages, identity]
   );
 
   const {
@@ -214,7 +223,7 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
   } = useChatMessage().send;
 
   useEffect(() => {
-    if (messages.length === 0) {
+    if (messages.length === 0 && conversationContent) {
       inviteRecipient({
         conversation: conversationContent,
       });
@@ -240,15 +249,12 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
         conversationId: route.params.convoId,
         message: message[0].text,
         replyId: replyMessage?.fileMetadata.appData.uniqueId,
-        files: assets.map<ImageSource>(value => {
+        files: assets.map<ImageSource>((value) => {
           return {
             height: value.height || 0,
             width: value.width || 0,
             name: value.fileName,
-            type:
-              value.type && value.type === 'image/jpg'
-                ? 'image/jpeg'
-                : value.type,
+            type: value.type && value.type === 'image/jpg' ? 'image/jpeg' : value.type,
             uri: value.uri,
             filename: value.fileName,
             date: Date.parse(value.timestamp || new Date().toUTCString()),
@@ -258,27 +264,15 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
           };
         }),
         recipients:
-          (
-            conversationContent?.fileMetadata.appData
-              .content as GroupConversation
-          ).recipients ||
+          (conversationContent?.fileMetadata.appData.content as GroupConversation).recipients ||
           [
-            (
-              conversationContent?.fileMetadata.appData
-                .content as SingleConversation
-            ).recipient,
+            (conversationContent?.fileMetadata.appData.content as SingleConversation).recipient,
           ].filter(Boolean),
       });
       setAssets([]);
       setReplyMessage(null);
     },
-    [
-      conversationContent,
-      route.params.convoId,
-      sendMessage,
-      assets,
-      replyMessage,
-    ],
+    [conversationContent, route.params.convoId, sendMessage, assets, replyMessage]
   );
 
   const { isDarkMode } = useDarkMode();
@@ -289,30 +283,22 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
   return (
     <View
       style={{
-        paddingBottom:
-          replyMessage && !Keyboard.isVisible() ? insets.bottom : 0,
+        paddingBottom: replyMessage && !Keyboard.isVisible() ? insets.bottom : 0,
         flex: 1,
-      }}>
+      }}
+    >
       <ChatAppBar
         title={conversationContent?.fileMetadata.appData.content.title}
         group={'recipients' in conversationContent.fileMetadata.appData.content}
         odinId={
           route.params.convoId === ConversationWithYourselfId
             ? identity || ''
-            : (
-                conversationContent?.fileMetadata.appData
-                  .content as SingleConversation
-              ).recipient
+            : (conversationContent?.fileMetadata.appData.content as SingleConversation).recipient
         }
         goBack={navigation.goBack}
-        onPress={() =>
-          navigation.navigate('ChatInfo', { convoId: route.params.convoId })
-        }
+        onPress={() => navigation.navigate('ChatInfo', { convoId: route.params.convoId })}
         isSelf={route.params.convoId === ConversationWithYourselfId}
       />
-      {/* <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.container}> */}
       <GiftedChat<ChatMessageIMessage>
         messages={messages}
         onSend={doSend}
@@ -322,11 +308,9 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
         alwaysShowSend
         isKeyboardInternallyHandled={true}
         keyboardShouldPersistTaps="never"
-        renderMessageImage={prop => {
-          return <ImageMessage {...prop} />;
-        }}
-        renderCustomView={prop => <RenderReplyMessageView {...prop} />}
-        renderBubble={props => {
+        renderMessageImage={(prop) => <ImageMessage {...prop} />}
+        renderCustomView={(prop) => <RenderReplyMessageView {...prop} />}
+        renderBubble={(props) => {
           const message = props.currentMessage as ChatMessageIMessage;
           const content = message?.fileMetadata.appData.content;
           const isEmojiOnly =
@@ -338,7 +322,7 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
           return (
             <Bubble
               {...props}
-              renderTime={props => {
+              renderTime={(props) => {
                 return (
                   <Time
                     {...props}
@@ -372,7 +356,7 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
             />
           );
         }}
-        renderMessageText={props => {
+        renderMessageText={(props) => {
           const message = props.currentMessage as ChatMessageIMessage;
           const content = message?.fileMetadata.appData.content;
           const isEmojiOnly =
@@ -395,37 +379,12 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
         }}
         renderMessage={renderMessageBox}
         renderFooter={renderMediaItems}
-        renderAccessory={renderAccessory}
+        renderAccessory={() => null}
         renderInputToolbar={renderCustomInputToolbar}
-        renderComposer={props => {
-          return (
-            <Composer
-              {...props}
-              textInputStyle={{
-                color: isDarkMode ? 'white' : 'black',
-              }}
-            />
-          );
-        }}
-        renderSend={props => {
-          return (
-            <Send
-              {...props}
-              disabled={!props.text && assets?.length === 0}
-              text={props.text || ' '}
-              containerStyle={styles.send}>
-              <SendChat
-                size={'md'}
-                color={!props.text && assets?.length === 0 ? 'grey' : 'blue'}
-              />
-            </Send>
-          );
-        }}
         user={{
           _id: '',
         }}
       />
-      {/* </KeyboardAvoidingView> */}
     </View>
   );
 };
@@ -441,17 +400,18 @@ const RenderReplyMessageView = (props: BubbleProps<ChatMessageIMessage>) => {
         style={[
           styles.replyMessageContainer,
           {
-            borderLeftColor:
-              props.position === 'left' ? Colors.blue[500] : Colors.purple[500],
+            borderLeftColor: props.position === 'left' ? Colors.blue[500] : Colors.purple[500],
             backgroundColor: Colors.blue[100],
           },
-        ]}>
+        ]}
+      >
         <View style={styles.replyText}>
           <Text
             style={{
               fontWeight: '600',
               fontSize: 15,
-            }}>
+            }}
+          >
             {props.currentMessage?.fileMetadata.senderOdinId?.length > 0
               ? props.currentMessage.fileMetadata.senderOdinId
               : 'You'}
@@ -460,7 +420,8 @@ const RenderReplyMessageView = (props: BubbleProps<ChatMessageIMessage>) => {
             style={{
               fontSize: 14,
               marginTop: 6,
-            }}>
+            }}
+          >
             {replyMessage?.fileMetadata.appData.content.message}
           </Text>
         </View>
@@ -490,9 +451,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
-  },
-  replyBarContainer: {
-    height: 'auto',
   },
 
   replyText: {

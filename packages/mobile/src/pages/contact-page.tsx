@@ -1,15 +1,15 @@
 import { FlatList } from 'react-native-gesture-handler';
 
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { RootStackParamList } from '../app/App';
+import { ChatStackParamList } from '../app/App';
 
-import { useAllContacts } from 'chat-app-common';
+import { useAllContacts } from 'feed-app-common';
 
 import { ContactTile, Tile } from '../components/ui/Contact/Contact-Tile';
-import { Globe, Users } from '../components/ui/Icons/Icons';
+import { Globe, Users } from '../components/ui/Icons/icons';
 
 const ListHeaderComponent = () => {
-  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
   return (
     <>
       <Tile
@@ -40,7 +40,7 @@ const ListHeaderComponent = () => {
 export const ContactPage = ({
   navigation,
 }: {
-  navigation: NavigationProp<RootStackParamList, 'NewChat'>;
+  navigation: NavigationProp<ChatStackParamList, 'NewChat'>;
 }) => {
   const contacts = useAllContacts(true).data;
   if (!contacts) return null;
@@ -48,12 +48,12 @@ export const ContactPage = ({
     <>
       <FlatList
         data={contacts}
-        keyExtractor={item => item.fileId}
+        keyExtractor={(item) => item.fileId}
         ListHeaderComponent={ListHeaderComponent}
         renderItem={({ item }) => (
           <ContactTile
             item={item}
-            onOpen={conversationId => {
+            onOpen={(conversationId) => {
               navigation.goBack();
               navigation.navigate('ChatScreen', {
                 convoId: conversationId,

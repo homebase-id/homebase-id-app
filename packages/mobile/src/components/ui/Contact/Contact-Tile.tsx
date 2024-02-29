@@ -3,8 +3,8 @@ import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
 import { useConversation } from '../../../hooks/chat/useConversation';
 import { OdinImage } from '../OdinImage/OdinImage';
 import { ContactConfig, ContactFile } from '@youfoundation/js-lib/network';
-import { CheckCircle, ChevronRight, CircleOutlined } from '../Icons/Icons';
-import { useDarkMode } from 'chat-app-common';
+import { CheckCircle, ChevronRight, CircleOutlined } from '../Icons/icons';
+import { useDarkMode } from 'feed-app-common';
 import { Colors } from '../../../app/Colors';
 
 export const ContactTile = ({
@@ -46,7 +46,8 @@ export const ContactTile = ({
           {
             backgroundColor: isDarkMode ? Colors.slate[900] : Colors.white,
           },
-        ]}>
+        ]}
+      >
         <OdinImage
           targetDrive={ContactConfig.ContactTargetDrive}
           fit="contain"
@@ -62,10 +63,9 @@ export const ContactTile = ({
               {
                 color: isDarkMode ? Colors.white : Colors.black,
               },
-            ]}>
-            {contact.name?.displayName ??
-              contact.name?.givenName ??
-              contact.name?.additionalName}
+            ]}
+          >
+            {contact.name?.displayName ?? contact.name?.givenName ?? contact.name?.additionalName}
           </Text>
           <Text
             style={[
@@ -73,7 +73,8 @@ export const ContactTile = ({
               {
                 color: isDarkMode ? Colors.white : Colors.black,
               },
-            ]}>
+            ]}
+          >
             {contact.odinId}
           </Text>
         </View>
@@ -83,12 +84,9 @@ export const ContactTile = ({
               position: 'absolute',
               right: 8,
               top: 8,
-            }}>
-            {isSelected ? (
-              <CheckCircle size={'lg'} />
-            ) : (
-              <CircleOutlined size={'lg'} />
-            )}
+            }}
+          >
+            {isSelected ? <CheckCircle size={'lg'} /> : <CircleOutlined size={'lg'} />}
           </View>
         )}
       </View>
@@ -116,11 +114,13 @@ export const Tile = ({
             marginTop: 2,
             backgroundColor: isDarkMode ? Colors.slate[800] : Colors.white,
           },
-        ]}>
+        ]}
+      >
         <View
           style={{
             marginRight: 16,
-          }}>
+          }}
+        >
           {icon}
         </View>
         <View
@@ -129,14 +129,16 @@ export const Tile = ({
             display: 'flex',
             justifyContent: 'space-between',
             flexGrow: 1,
-          }}>
+          }}
+        >
           <Text
             style={[
               styles.title1,
               {
                 color: isDarkMode ? Colors.white : Colors.black,
               },
-            ]}>
+            ]}
+          >
             {title}
           </Text>
           <ChevronRight size={'lg'} />

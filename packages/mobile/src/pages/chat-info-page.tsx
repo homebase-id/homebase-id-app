@@ -1,27 +1,21 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Linking, StyleSheet, Text, View } from 'react-native';
-import { RootStackParamList } from '../app/App';
+import { ChatStackParamList } from '../app/App';
 import { useConversation } from '../hooks/chat/useConversation';
 import { Avatar, GroupAvatar } from '../components/ui/Chat/Conversation-tile';
-import {
-  GroupConversation,
-  SingleConversation,
-} from '../providers/chat/ConversationProvider';
-import { Home } from '../components/ui/Icons/Icons';
+import { GroupConversation, SingleConversation } from '../provider/chat/ConversationProvider';
+import { Home } from '../components/ui/Icons/icons';
 
 import { useCallback } from 'react';
 import InAppBrowser from 'react-native-inappbrowser-reborn';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import { useDarkMode } from 'chat-app-common';
+import { useDarkMode } from 'feed-app-common';
 import { Colors } from '../app/Colors';
 import { useAuth } from '../hooks/auth/useAuth';
 import { Header, HeaderBackButton } from '@react-navigation/elements';
 import TextButton from '../components/ui/Text/Text-Button';
 
-export type ChatInfoProp = NativeStackScreenProps<
-  RootStackParamList,
-  'ChatInfo'
->;
+export type ChatInfoProp = NativeStackScreenProps<ChatStackParamList, 'ChatInfo'>;
 
 export function ChatInfoPage(prop: ChatInfoProp) {
   const { convoId: conversationId } = prop.route.params;
@@ -30,9 +24,7 @@ export function ChatInfoPage(prop: ChatInfoProp) {
   const identity = useAuth().getIdentity();
 
   const onPress = useCallback(async () => {
-    const recipient = (
-      conversation?.fileMetadata.appData.content as SingleConversation
-    ).recipient;
+    const recipient = (conversation?.fileMetadata.appData.content as SingleConversation).recipient;
     const url = `https://${recipient}/`;
     if (await InAppBrowser.isAvailable()) {
       await InAppBrowser.open(url, {
@@ -44,20 +36,14 @@ export function ChatInfoPage(prop: ChatInfoProp) {
   }, [conversation?.fileMetadata.appData.content]);
 
   const group =
-    (conversation &&
-      'recipients' in conversation.fileMetadata.appData.content) ||
-    false;
+    (conversation && 'recipients' in conversation.fileMetadata.appData.content) || false;
 
   if (!conversation) return null;
 
   const conversationContent = conversation.fileMetadata.appData.content;
 
   const headerLeft = () => (
-    <HeaderBackButton
-      canGoBack={true}
-      labelVisible={false}
-      onPress={prop.navigation.goBack}
-    />
+    <HeaderBackButton canGoBack={true} labelVisible={false} onPress={prop.navigation.goBack} />
   );
 
   const headerRight = () => (
@@ -81,7 +67,8 @@ export function ChatInfoPage(prop: ChatInfoProp) {
             width: '100%',
             zIndex: 10,
           },
-        ]}>
+        ]}
+      >
         <Header
           title={group ? 'Group Info' : 'Chat Info'}
           headerLeft={headerLeft}
@@ -103,7 +90,8 @@ export function ChatInfoPage(prop: ChatInfoProp) {
             {
               color: isDarkMode ? Colors.white : Colors.black,
             },
-          ]}>
+          ]}
+        >
           {conversationContent.title}
         </Text>
         {!group && (
@@ -112,7 +100,8 @@ export function ChatInfoPage(prop: ChatInfoProp) {
               display: 'flex',
               flexDirection: 'row',
               alignItems: 'flex-end',
-            }}>
+            }}
+          >
             <Home />
             <TouchableOpacity onPress={onPress}>
               <Text
@@ -121,7 +110,8 @@ export function ChatInfoPage(prop: ChatInfoProp) {
                   {
                     color: isDarkMode ? Colors.purple[300] : Colors.purple[800],
                   },
-                ]}>
+                ]}
+              >
                 {(conversationContent as SingleConversation).recipient}
               </Text>
             </TouchableOpacity>
@@ -134,54 +124,53 @@ export function ChatInfoPage(prop: ChatInfoProp) {
                 color: isDarkMode ? Colors.white : Colors.black,
                 fontSize: 22,
                 fontWeight: '500',
-              }}>
+              }}
+            >
               Recipients
             </Text>
-            {[
-              ...(conversationContent as GroupConversation).recipients,
-              identity as string,
-            ].map((recipient, index) => (
-              <View
-                key={index}
-                style={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  alignContent: 'center',
-                  backgroundColor: isDarkMode
-                    ? Colors.slate[900]
-                    : Colors.white,
-                  width: '100%',
-                  padding: 8,
-                  marginTop: 8,
-                }}>
-                <Avatar
-                  odinId={recipient}
+            {[...(conversationContent as GroupConversation).recipients, identity as string].map(
+              (recipient, index) => (
+                <View
+                  key={index}
                   style={{
-                    width: 50,
-                    height: 50,
+                    display: 'flex',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    alignContent: 'center',
+                    backgroundColor: isDarkMode ? Colors.slate[900] : Colors.white,
+                    width: '100%',
+                    padding: 8,
+                    marginTop: 8,
                   }}
-                />
-                <Text
-                  style={[
-                    {
-                      fontWeight: '400',
-                      fontSize: 18,
-                    },
-                    {
-                      color: isDarkMode ? Colors.white : Colors.black,
-                    },
-                  ]}>
-                  {recipient}
-                  <Text style={styles.you}>
-                    {index ===
-                    (conversationContent as GroupConversation).recipients.length
-                      ? ' (you)'
-                      : null}
+                >
+                  <Avatar
+                    odinId={recipient}
+                    style={{
+                      width: 50,
+                      height: 50,
+                    }}
+                  />
+                  <Text
+                    style={[
+                      {
+                        fontWeight: '400',
+                        fontSize: 18,
+                      },
+                      {
+                        color: isDarkMode ? Colors.white : Colors.black,
+                      },
+                    ]}
+                  >
+                    {recipient}
+                    <Text style={styles.you}>
+                      {index === (conversationContent as GroupConversation).recipients.length
+                        ? ' (you)'
+                        : null}
+                    </Text>
                   </Text>
-                </Text>
-              </View>
-            ))}
+                </View>
+              )
+            )}
           </View>
         )}
       </View>

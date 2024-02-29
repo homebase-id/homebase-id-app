@@ -2,32 +2,32 @@ import { FlatList } from 'react-native';
 import ConversationTile from '../components/ui/Chat/Conversation-tile';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { RootStackParamList } from '../app/App';
+import { ChatStackParamList, RootStackParamList } from '../app/App';
 import { useConversations } from '../hooks/chat/useConversations';
 import {
   Conversation,
   ConversationWithYourselfId,
   SingleConversation,
-} from '../providers/chat/ConversationProvider';
+} from '../provider/chat/ConversationProvider';
 import { useAuth } from '../hooks/auth/useAuth';
-import { useProfile } from 'chat-app-common';
+import { useProfile } from 'feed-app-common';
 
 const ConversationPage = ({
   navigation,
 }: {
-  navigation: NavigationProp<RootStackParamList, 'Home'>;
+  navigation: NavigationProp<ChatStackParamList, 'Conversation'>;
 }) => {
   const { data: conversations } = useConversations().all;
 
   const flatConversations =
     (conversations?.pages
-      ?.flatMap(page => page.searchResults)
+      ?.flatMap((page) => page.searchResults)
       ?.filter(Boolean) as DriveSearchResult<Conversation>[]) || [];
 
   return (
     <FlatList
       data={flatConversations}
-      keyExtractor={item => item.fileId}
+      keyExtractor={(item) => item.fileId}
       ListHeaderComponent={ConversationTileWithYourself}
       renderItem={({ item }) => (
         <ConversationTile
@@ -40,9 +40,7 @@ const ConversationPage = ({
               });
             }
           }}
-          odinId={
-            (item.fileMetadata.appData.content as SingleConversation).recipient
-          }
+          odinId={(item.fileMetadata.appData.content as SingleConversation).recipient}
         />
       )}
     />
@@ -52,7 +50,7 @@ const ConversationPage = ({
 const ConversationTileWithYourself = () => {
   const user = useProfile().data;
   const odinId = useAuth().getIdentity();
-  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
   return (
     <ConversationTile
       odinId={odinId || ''}

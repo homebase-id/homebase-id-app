@@ -11,9 +11,9 @@ import {
 import { FlatList } from 'react-native-gesture-handler';
 import { Avatar } from '../components/ui/Chat/Conversation-tile';
 import { Colors } from '../app/Colors';
-import { ExternalLink } from '../components/ui/Icons/Icons';
+import { ExternalLink } from '../components/ui/Icons/icons';
 import InAppBrowser from 'react-native-inappbrowser-reborn';
-import { usePendingConnections } from 'chat-app-common';
+import { usePendingConnections } from 'feed-app-common';
 import { useAuth } from '../hooks/auth/useAuth';
 
 export const PendingRequestPage = () => {
@@ -32,7 +32,8 @@ export const PendingRequestPage = () => {
             flex: 1,
             justifyContent: 'center',
             alignItems: 'center',
-          }}>
+          }}
+        >
           <ActivityIndicator />
         </View>
       )}
@@ -42,16 +43,15 @@ export const PendingRequestPage = () => {
             flex: 1,
             justifyContent: 'center',
             alignItems: 'center',
-          }}>
+          }}
+        >
           <Text>Something went wrong</Text>
         </View>
       )}
       {pendingReq.data?.results.length ? (
         <FlatList
           data={pendingReq.data.results}
-          keyExtractor={item =>
-            item.senderOdinId + item.receivedTimestampMilliseconds
-          }
+          keyExtractor={(item) => item.senderOdinId + item.receivedTimestampMilliseconds}
           renderItem={({ item }) => (
             <TouchableOpacity
               onPress={async () => {
@@ -63,17 +63,18 @@ export const PendingRequestPage = () => {
                     {
                       enableUrlBarHiding: false,
                       enableDefaultShare: false,
-                    },
+                    }
                   );
                 } else {
                   Linking.openURL(
                     `https://${getIdentity()}/owner/connections/${
                       item.senderOdinId
-                    }?ui=focus&return=homebase-chat://`,
+                    }?ui=focus&return=homebase-chat://`
                   );
                 }
                 await pendingReq.refetch();
-              }}>
+              }}
+            >
               <View style={styles.tile}>
                 <Avatar odinId={item.senderOdinId} style={styles.tinyLogo} />
                 <View style={styles.content}>
@@ -85,13 +86,13 @@ export const PendingRequestPage = () => {
           )}
         />
       ) : (
-        <View
-          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
           <Text
             style={{
               fontSize: 24,
               marginBottom: 16,
-            }}>
+            }}
+          >
             No pending requests
           </Text>
           <Button

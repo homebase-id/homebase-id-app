@@ -7,7 +7,7 @@ import { TouchableWithoutFeedback } from 'react-native';
 import { useAuth } from '../../../hooks/auth/useAuth';
 import { uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
 import { OdinImage } from './PhotoWithLoader';
-import { Play } from '../Icons/Icons';
+import { Play } from '../Icons/icons';
 
 // Memo to performance optimize the FlatList
 export const VideoWithLoader = memo(
@@ -41,7 +41,8 @@ export const VideoWithLoader = memo(
           backgroundColor: Colors.black,
           ...imageSize,
           position: 'relative',
-        }}>
+        }}
+      >
         {preview ? (
           <>
             <OdinImage
@@ -66,7 +67,8 @@ export const VideoWithLoader = memo(
                 alignItems: 'center',
                 justifyContent: 'center',
                 backgroundColor: 'rgba(0,0,0,0.4)',
-              }}>
+              }}
+            >
               <View
                 style={{
                   padding: 10,
@@ -74,17 +76,14 @@ export const VideoWithLoader = memo(
                   borderWidth: 1,
                   borderColor: 'white',
                   backgroundColor: 'rgba(255,255,255,0.2)',
-                }}>
+                }}
+              >
                 <Play size={'xl'} color={Colors.white} />
               </View>
             </View>
           </>
         ) : loadVideo ? (
-          <OdinVideo
-            targetDrive={targetDrive}
-            fileId={fileId}
-            fileKey={fileKey}
-          />
+          <OdinVideo targetDrive={targetDrive} fileId={fileId} fileKey={fileKey} />
         ) : (
           <>
             <OdinImage
@@ -108,7 +107,8 @@ export const VideoWithLoader = memo(
                 alignItems: 'center',
                 justifyContent: 'center',
                 backgroundColor: 'rgba(0,0,0,0.4)',
-              }}>
+              }}
+            >
               <TouchableOpacity
                 onPress={doLoadVideo}
                 style={{
@@ -117,7 +117,8 @@ export const VideoWithLoader = memo(
                   borderWidth: 1,
                   borderColor: 'white',
                   backgroundColor: 'rgba(255,255,255,0.2)',
-                }}>
+                }}
+              >
                 <Play size={'xl'} color={Colors.white} />
               </TouchableOpacity>
             </View>
@@ -125,7 +126,7 @@ export const VideoWithLoader = memo(
         )}
       </View>
     );
-  },
+  }
 );
 
 const OdinVideo = ({
@@ -141,13 +142,11 @@ const OdinVideo = ({
 
   const uri = useMemo(
     () => `https://${identity}/apps/chat/player/${fileId}/${fileKey}`,
-    [fileId, fileKey, identity],
+    [fileId, fileKey, identity]
   );
 
   const sharedSecret = getSharedSecret();
-  const base64SharedSecret = sharedSecret
-    ? uint8ArrayToBase64(sharedSecret)
-    : '';
+  const base64SharedSecret = sharedSecret ? uint8ArrayToBase64(sharedSecret) : '';
 
   const INJECTED_JAVASCRIPT = `(function() {
     const APP_SHARED_SECRET_KEY = 'APPS_chat';
@@ -189,16 +188,16 @@ const OdinVideo = ({
           allowsProtectedMedia={true}
           allowsAirPlayForMediaPlayback={true}
           allowsFullscreenVideo={true}
-          onError={syntheticEvent => {
+          onError={(syntheticEvent) => {
             console.log('onerror');
             const { nativeEvent } = syntheticEvent;
             console.warn('WebView error: ', nativeEvent);
           }}
-          onHttpError={syntheticEvent => {
+          onHttpError={(syntheticEvent) => {
             const { nativeEvent } = syntheticEvent;
             console.warn('WebView error: ', nativeEvent);
           }}
-          onMessage={_data => console.log(_data.nativeEvent.data)}
+          onMessage={(_data) => console.log(_data.nativeEvent.data)}
         />
       </TouchableWithoutFeedback>
     );

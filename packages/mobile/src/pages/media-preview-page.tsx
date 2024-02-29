@@ -1,14 +1,11 @@
 import { RootStackParamList } from '../app/App';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ChatDrive } from '../providers/chat/ConversationProvider';
+import { ChatDrive } from '../provider/chat/ConversationProvider';
 import { PhotoWithLoader } from '../components/ui/Media/PhotoWithLoader';
 import { VideoWithLoader } from '../components/ui/Media/VideoWithLoader';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-export type MediaProp = NativeStackScreenProps<
-  RootStackParamList,
-  'PreviewMedia'
->;
+export type MediaProp = NativeStackScreenProps<RootStackParamList, 'PreviewMedia'>;
 
 export const PreviewMedia = (prop: MediaProp) => {
   const fileId = prop.route.params.fileId;

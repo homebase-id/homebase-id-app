@@ -1,4 +1,4 @@
-import { useAllContacts } from 'chat-app-common';
+import { useAllContacts } from 'feed-app-common';
 import { ActivityIndicator, FlatList, Platform, Text } from 'react-native';
 import { ContactTile } from '../components/ui/Contact/Contact-Tile';
 
@@ -6,7 +6,7 @@ import { useCallback, useState } from 'react';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import { ContactFile } from '@youfoundation/js-lib/network';
 import { Header, HeaderBackButtonProps } from '@react-navigation/elements';
-import { BackButton } from '../components/ui/home-app-bar';
+import { BackButton } from '../components/ui/convo-app-bar';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { RootStackParamList } from '../app/App';
@@ -17,11 +17,8 @@ export const NewGroupPage = () => {
   const contacts = useAllContacts(true).data;
   const [dialogVisible, setDialogVisible] = useState(false);
 
-  const [selectedContacts, setSetselectedContacts] = useState<
-    DriveSearchResult<ContactFile>[]
-  >([]);
-  const navigation =
-    useNavigation<NavigationProp<RootStackParamList, 'NewChat'>>();
+  const [selectedContacts, setSetselectedContacts] = useState<DriveSearchResult<ContactFile>[]>([]);
+  const navigation = useNavigation<NavigationProp<RootStackParamList, 'NewChat'>>();
   const { mutateAsync: createNew } = useConversation().create;
 
   let groupTitle: string | undefined;
@@ -29,7 +26,7 @@ export const NewGroupPage = () => {
   const createGroupCallback = useCallback(async () => {
     const { newConversationId } = await createNew({
       recipients: selectedContacts.map(
-        contact => contact.fileMetadata.appData.content.odinId as string,
+        (contact) => contact.fileMetadata.appData.content.odinId as string
       ),
       title: groupTitle,
     });
@@ -70,7 +67,7 @@ export const NewGroupPage = () => {
       />
       <FlatList
         data={contacts}
-        keyExtractor={item => item.fileId}
+        keyExtractor={(item) => item.fileId}
         renderItem={({ item }) => (
           <ContactTile
             item={item}
@@ -78,29 +75,22 @@ export const NewGroupPage = () => {
             isSelected={selectedContacts.includes(item)}
             onPress={() => {
               if (selectedContacts.includes(item)) {
-                setSetselectedContacts(
-                  selectedContacts.filter(contact => contact !== item),
-                );
+                setSetselectedContacts(selectedContacts.filter((contact) => contact !== item));
               } else setSetselectedContacts([...selectedContacts, item]);
             }}
           />
         )}
       />
-      <Dialog.Container
-        visible={dialogVisible}
-        onBackdropPress={() => setDialogVisible(false)}>
+      <Dialog.Container visible={dialogVisible} onBackdropPress={() => setDialogVisible(false)}>
         <Dialog.Title>New Group Name</Dialog.Title>
-        <Dialog.Input onChangeText={value => (groupTitle = value)} />
+        <Dialog.Input onChangeText={(value) => (groupTitle = value)} />
         <Dialog.Button
           label="Cancel"
           onPress={() => {
             setDialogVisible(false);
           }}
         />
-        <Dialog.Button
-          label="Create"
-          onPress={async () => await createGroupCallback()}
-        />
+        <Dialog.Button label="Create" onPress={async () => await createGroupCallback()} />
       </Dialog.Container>
     </>
   );
@@ -112,8 +102,7 @@ function CreateGroup(props: {
   onPress: () => void;
 }) {
   const [loading, setloading] = useState(false);
-  const navigation =
-    useNavigation<NavigationProp<RootStackParamList, 'NewChat'>>();
+  const navigation = useNavigation<NavigationProp<RootStackParamList, 'NewChat'>>();
   if (loading) {
     return (
       <ActivityIndicator
@@ -148,7 +137,8 @@ function CreateGroup(props: {
             fontWeight: '500',
             marginRight: 10,
             color: props.disabled ? 'grey' : 'black',
-          }}>
+          }}
+        >
           Create
         </Text>
       </TouchableOpacity>

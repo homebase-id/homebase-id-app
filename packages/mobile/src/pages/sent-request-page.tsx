@@ -10,9 +10,9 @@ import {
 } from 'react-native';
 
 import { Colors } from '../app/Colors';
-import { ExternalLink } from '../components/ui/Icons/Icons';
+import { ExternalLink } from '../components/ui/Icons/icons';
 import InAppBrowser from 'react-native-inappbrowser-reborn';
-import { useSentConnections } from 'chat-app-common';
+import { useSentConnections } from 'feed-app-common';
 import { Avatar } from '../components/ui/Chat/Conversation-tile';
 import { useAuth } from '../hooks/auth/useAuth';
 
@@ -32,7 +32,8 @@ export const SentRequestPage = () => {
             flex: 1,
             justifyContent: 'center',
             alignItems: 'center',
-          }}>
+          }}
+        >
           <ActivityIndicator />
         </View>
       )}
@@ -42,16 +43,15 @@ export const SentRequestPage = () => {
             flex: 1,
             justifyContent: 'center',
             alignItems: 'center',
-          }}>
+          }}
+        >
           <Text>Something went wrong</Text>
         </View>
       )}
       {sentReq.data?.results.length ? (
         <FlatList
           data={sentReq.data.results}
-          keyExtractor={item =>
-            item.senderOdinId + item.receivedTimestampMilliseconds
-          }
+          keyExtractor={(item) => item.senderOdinId + item.receivedTimestampMilliseconds}
           renderItem={({ item }) => (
             <TouchableOpacity
               onPress={async () => {
@@ -63,17 +63,18 @@ export const SentRequestPage = () => {
                     {
                       enableUrlBarHiding: false,
                       enableDefaultShare: false,
-                    },
+                    }
                   );
                 } else {
                   Linking.openURL(
                     `https://${getIdentity()}/owner/connections/${
                       item.senderOdinId
-                    }?ui=focus&return=homebasechat://`,
+                    }?ui=focus&return=homebasechat://`
                   );
                 }
                 await sentReq.refetch();
-              }}>
+              }}
+            >
               <View style={styles.tile}>
                 <Avatar odinId={item.senderOdinId} style={styles.tinyLogo} />
                 <View style={styles.content}>
@@ -85,13 +86,13 @@ export const SentRequestPage = () => {
           )}
         />
       ) : (
-        <View
-          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
           <Text
             style={{
               fontSize: 24,
               marginBottom: 16,
-            }}>
+            }}
+          >
             No Sent requests
           </Text>
           <Button

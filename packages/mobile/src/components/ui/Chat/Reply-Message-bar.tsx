@@ -1,8 +1,8 @@
 import { Text, StyleSheet, View, TouchableOpacity } from 'react-native';
-import { Close, Reply } from '../Icons/Icons';
+import { Close, Reply } from '../Icons/icons';
 import { useDarkMode } from 'feed-app-common';
 import { ChatMessageIMessage } from '../../../pages/chat-page';
-import { ChatDrive } from '../../../providers/chat/ConversationProvider';
+import { ChatDrive } from '../../../provider/chat/ConversationProvider';
 import { Colors } from '../../../app/Colors';
 import { OdinImage } from '../Media/PhotoWithLoader';
 
@@ -25,15 +25,15 @@ const ReplyMessageBar = ({ clearReply, message }: ReplyMessageBarProps) => {
             color: isDarkMode ? Colors.white : Colors.black,
             fontWeight: '600',
             fontSize: 14,
-          }}>
-          {message.fileMetadata.senderOdinId.length > 0
-            ? message.fileMetadata.senderOdinId
-            : 'You'}
+          }}
+        >
+          {message.fileMetadata.senderOdinId.length > 0 ? message.fileMetadata.senderOdinId : 'You'}
         </Text>
         <Text
           style={{
             color: isDarkMode ? 'white' : 'black',
-          }}>
+          }}
+        >
           {message.text.length === 0 ? '📷 Media' : message.text}
         </Text>
       </View>
