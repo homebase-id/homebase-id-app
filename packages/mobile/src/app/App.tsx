@@ -1,4 +1,10 @@
-import { NavigationContainer, NavigationProp, useNavigation } from '@react-navigation/native';
+import {
+  DarkTheme,
+  DefaultTheme,
+  NavigationContainer,
+  NavigationProp,
+  useNavigation,
+} from '@react-navigation/native';
 
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
 import { QueryClient } from '@tanstack/react-query';
@@ -20,7 +26,7 @@ import { useLiveChatProcessor } from '../hooks/chat/useLiveChatProcessor';
 import ChatPage from '../pages/chat-page';
 import EditGroupPage from '../pages/edit-group-page';
 import { HeaderBackButton, HeaderBackButtonProps } from '@react-navigation/elements';
-import { Platform } from 'react-native';
+import { Platform, useColorScheme } from 'react-native';
 import { ChatInfoPage } from '../pages/chat-info-page';
 import { ContactPage } from '../pages/contact-page';
 import { NewGroupPage } from '../pages/new-group-page';
@@ -106,9 +112,10 @@ App = CodePush(codePushOptions)(App);
 const StackRoot = createNativeStackNavigator<AuthStackParamList>();
 const RootStack = () => {
   const { isAuthenticated } = useAuth();
+  const scheme = useColorScheme();
 
   return (
-    <NavigationContainer>
+    <NavigationContainer theme={scheme === 'dark' ? DarkTheme : DefaultTheme}>
       <StackRoot.Navigator screenOptions={{ headerShown: false }}>
         {isAuthenticated ? (
           <StackRoot.Screen name="Authenticated" component={AuthenticatedStack} />
