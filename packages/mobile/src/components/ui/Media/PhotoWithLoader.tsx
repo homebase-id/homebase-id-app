@@ -45,7 +45,7 @@ export const PhotoWithLoader = memo(
         onClick={onClick}
       />
     );
-  },
+  }
 );
 
 export interface OdinImageProps {
@@ -58,7 +58,6 @@ export interface OdinImageProps {
   title?: string;
   previewThumbnail?: EmbeddedThumb;
   avoidPayload?: boolean;
-  probablyEncrypted?: boolean;
   enableZoom?: boolean;
   fileKey?: string;
   onClick?: () => void;
@@ -76,19 +75,15 @@ export const OdinImage = memo(
     title,
     previewThumbnail,
     avoidPayload,
-    probablyEncrypted,
     enableZoom,
     onClick,
   }: OdinImageProps) => {
     const loadSize = {
       pixelHeight:
-        (imageSize?.height
-          ? Math.round(imageSize?.height * (enableZoom ? 4 : 1))
-          : undefined) || 800,
+        (imageSize?.height ? Math.round(imageSize?.height * (enableZoom ? 4 : 1)) : undefined) ||
+        800,
       pixelWidth:
-        (imageSize?.width
-          ? Math.round(imageSize?.width * (enableZoom ? 4 : 1))
-          : undefined) || 800,
+        (imageSize?.width ? Math.round(imageSize?.width * (enableZoom ? 4 : 1)) : undefined) || 800,
     };
 
     const embeddedThumbUrl = useMemo(() => {
@@ -99,8 +94,8 @@ export const OdinImage = memo(
 
     const { getFromCache } = useImage();
     const cachedImage = useMemo(
-      () => (fileId ? getFromCache(odinId, fileId, targetDrive) : undefined),
-      [fileId, getFromCache, odinId, targetDrive],
+      () => (fileId && fileKey ? getFromCache(odinId, fileId, fileKey, targetDrive) : undefined),
+      [fileId, getFromCache, odinId, targetDrive]
     );
     const skipTiny = !!previewThumbnail || !!cachedImage;
 
@@ -108,7 +103,7 @@ export const OdinImage = memo(
       odinId,
       !skipTiny ? fileId : undefined,
       fileKey,
-      targetDrive,
+      targetDrive
     );
     const previewUrl = cachedImage?.url || embeddedThumbUrl || tinyThumb?.url;
 
@@ -127,8 +122,7 @@ export const OdinImage = memo(
       fileKey,
       targetDrive,
       avoidPayload ? { pixelHeight: 200, pixelWidth: 200 } : loadSize,
-      probablyEncrypted,
-      naturalSize,
+      naturalSize
     );
 
     const hasCachedImage = !!cachedImage?.url;
@@ -137,7 +131,8 @@ export const OdinImage = memo(
       <View
         style={{
           position: 'relative',
-        }}>
+        }}
+      >
         {/* Blurry image */}
         {previewUrl ? (
           <Image
@@ -167,7 +162,8 @@ export const OdinImage = memo(
               ...imageSize,
               justifyContent: 'center',
               alignItems: 'center',
-            }}>
+            }}
+          >
             <ActivityIndicator style={{}} size="large" />
           </View>
         ) : null}
@@ -186,7 +182,7 @@ export const OdinImage = memo(
         ) : null}
       </View>
     );
-  },
+  }
 );
 
 const ZoomableImage = ({
@@ -231,7 +227,8 @@ const ZoomableImage = ({
       <View
         style={{
           ...imageSize,
-        }}>
+        }}
+      >
         <ImageZoom
           uri={uri}
           minScale={1}

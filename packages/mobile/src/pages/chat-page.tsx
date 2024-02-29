@@ -434,8 +434,6 @@ const RenderReplyMessageView = (props: BubbleProps<ChatMessageIMessage>) => {
               width: 60,
               height: 60,
             }}
-            avoidPayload
-            probablyEncrypted
           />
         )}
       </View>

@@ -112,7 +112,6 @@ const ImageMessage = (props: MessageImageProps<IMessage>) => {
                 borderRadius: 10,
                 aspectRatio: 1,
               }}
-              probablyEncrypted
             />
           </TouchableHighlight>
         ); */}

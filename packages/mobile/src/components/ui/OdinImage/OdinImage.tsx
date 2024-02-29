@@ -5,10 +5,11 @@ import {
   ImageContentType,
 } from '@youfoundation/js-lib/core';
 import { memo, useMemo } from 'react';
-import { View, Image, ActivityIndicator } from 'react-native';
+import { View, Image, ActivityIndicator, TouchableWithoutFeedback } from 'react-native';
 import useImage from './hooks/useImage';
 import useTinyThumb from './hooks/useTinyThumb';
 import { SvgUri } from 'react-native-svg';
+import { ImageZoom } from '@likashefqet/react-native-image-zoom';
 
 export interface OdinImageProps {
   odinId?: string;
@@ -20,8 +21,9 @@ export interface OdinImageProps {
   alt?: string;
   title?: string;
   previewThumbnail?: EmbeddedThumb;
-  probablyEncrypted?: boolean;
   avoidPayload?: boolean;
+  enableZoom?: boolean;
+  onClick?: () => void;
 }
 
 export const OdinImage = memo(
@@ -36,10 +38,15 @@ export const OdinImage = memo(
     title,
     previewThumbnail,
     avoidPayload,
+    enableZoom,
+    onClick,
   }: OdinImageProps) => {
     const loadSize = {
-      pixelHeight: (imageSize?.height ? Math.round(imageSize?.height * 1) : undefined) || 800,
-      pixelWidth: (imageSize?.width ? Math.round(imageSize?.width * 1) : undefined) || 800,
+      pixelHeight:
+        (imageSize?.height ? Math.round(imageSize?.height * (enableZoom ? 4 : 1)) : undefined) ||
+        800,
+      pixelWidth:
+        (imageSize?.width ? Math.round(imageSize?.width * (enableZoom ? 4 : 1)) : undefined) || 800,
     };
 
     const embeddedThumbUrl = useMemo(() => {
@@ -74,7 +81,7 @@ export const OdinImage = memo(
       fetch: { data: imageData },
     } = useImage(
       odinId,
-      loadSize !== undefined ? fileId : undefined,
+      enableZoom || loadSize !== undefined ? fileId : undefined,
       fileKey,
       targetDrive,
       avoidPayload ? { pixelHeight: 200, pixelWidth: 200 } : loadSize,
@@ -126,12 +133,14 @@ export const OdinImage = memo(
 
         {/* Actual image */}
         {imageData?.url ? (
-          <InnerImage
+          <ZoomableImage
             uri={imageData.url}
             contentType={imageData.type}
             fit={fit}
             imageSize={imageSize}
+            enableZoom={enableZoom}
             alt={alt || title}
+            onClick={onClick}
           />
         ) : null}
       </View>
@@ -139,12 +148,14 @@ export const OdinImage = memo(
   }
 );
 
-const InnerImage = ({
+const ZoomableImage = ({
   uri,
   alt,
   imageSize,
 
   fit,
+  enableZoom,
+  onClick,
 
   contentType,
 }: {
@@ -153,20 +164,45 @@ const InnerImage = ({
   alt?: string;
 
   fit?: 'cover' | 'contain';
+  enableZoom?: boolean;
+  onClick?: () => void;
 
   contentType?: ImageContentType;
 }) => {
-  return contentType === 'image/svg+xml' ? (
-    <SvgUri width={imageSize?.width} height={imageSize?.height} uri={uri} />
-  ) : (
-    <Image
-      source={{ uri }}
-      alt={alt}
-      style={{
-        resizeMode: fit,
+  if (!enableZoom) {
+    console.log(uri);
+    return contentType === 'image/svg+xml' ? (
+      <SvgUri width={imageSize?.width} height={imageSize?.height} uri={uri} />
+    ) : (
+      <Image
+        source={{ uri }}
+        alt={alt}
+        style={{
+          resizeMode: fit,
 
-        ...imageSize,
-      }}
-    />
+          ...imageSize,
+        }}
+      />
+    );
+  }
+
+  return (
+    <TouchableWithoutFeedback onPress={onClick}>
+      <View
+        style={{
+          ...imageSize,
+        }}
+      >
+        <ImageZoom
+          uri={uri}
+          minScale={1}
+          maxScale={3}
+          resizeMode="contain"
+          style={{
+            ...imageSize,
+          }}
+        />
+      </View>
+    </TouchableWithoutFeedback>
   );
 };
