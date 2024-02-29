@@ -39,6 +39,24 @@ const Center = ({ children }: { children: ReactNode }) => (
   </View>
 );
 
+export const ChatIcon = (props: IconProps) => {
+  const { isDarkMode } = useDarkMode();
+  return (
+    <Center>
+      <Svg
+        {...getSize(props.size || 'md')}
+        color={props.color || (isDarkMode ? 'white' : 'black')}
+        viewBox="0 0 512 512"
+      >
+        <Path
+          fill="currentColor"
+          d="M512 240c0 114.9-114.6 208-256 208c-37.1 0-72.3-6.4-104.1-17.9c-11.9 8.7-31.3 20.6-54.3 30.6C73.6 471.1 44.7 480 16 480c-6.5 0-12.3-3.9-14.8-9.9c-2.5-6-1.1-12.8 3.4-17.4l0 0 0 0 0 0 0 0 .3-.3c.3-.3 .7-.7 1.3-1.4c1.1-1.2 2.8-3.1 4.9-5.7c4.1-5 9.6-12.4 15.2-21.6c10-16.6 19.5-38.4 21.4-62.9C17.7 326.8 0 285.1 0 240C0 125.1 114.6 32 256 32s256 93.1 256 208z"
+        />
+      </Svg>
+    </Center>
+  );
+};
+
 export const RecycleBin = (props: IconProps) => {
   const { isDarkMode } = useDarkMode();
   return (
@@ -92,6 +110,48 @@ export const OpenHearth = (props: IconProps) => {
     </Center>
   );
 };
+
+export const Users = (props: IconProps) => {
+  const { isDarkMode } = useDarkMode();
+  return (
+    <Center>
+      <Svg
+        {...getSize(props.size || 'md')}
+        color={props.color || (isDarkMode ? 'white' : 'black')}
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+      >
+        <Path fill="currentColor" d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+        <Circle fill="currentColor" cx="9" cy="7" r="4" />
+        <Path fill="currentColor" d="M22 21v-2a4 4 0 0 0-3-3.87" />
+        <Path fill="currentColor" d="M16 3.13a4 4 0 0 1 0 7.75" />
+      </Svg>
+    </Center>
+  );
+};
+
+export const Close = (props: IconProps) => {
+  const { isDarkMode } = useDarkMode();
+  return (
+    <Center>
+      <Svg
+        {...getSize(props.size || 'md')}
+        color={props.color || (isDarkMode ? 'white' : 'black')}
+        viewBox="0 0 512 512"
+      >
+        <Path
+          fill="currentColor"
+          d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM175 175c9.4-9.4 24.6-9.4 33.9 0l47 47 47-47c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9l-47 47 47 47c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0l-47-47-47 47c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l47-47-47-47c-9.4-9.4-9.4-24.6 0-33.9z"
+        />
+      </Svg>
+    </Center>
+  );
+};
+
 export const SolidHearth = (props: IconProps) => {
   const { isDarkMode } = useDarkMode();
   return (
@@ -104,6 +164,24 @@ export const SolidHearth = (props: IconProps) => {
         <Path
           fill="currentColor"
           d="M47.6 300.4L228.3 469.1c7.5 7 17.4 10.9 27.7 10.9s20.2-3.9 27.7-10.9L464.4 300.4c30.4-28.3 47.6-68 47.6-109.5v-5.8c0-69.9-50.5-129.5-119.4-141C347 36.5 300.6 51.4 268 84L256 96 244 84c-32.6-32.6-79-47.5-124.6-39.9C50.5 55.6 0 115.2 0 185.1v5.8c0 41.5 17.2 81.2 47.6 109.5z"
+        />
+      </Svg>
+    </Center>
+  );
+};
+
+export const Reply = (props: IconProps) => {
+  const { isDarkMode } = useDarkMode();
+  return (
+    <Center>
+      <Svg
+        {...getSize(props.size || 'md')}
+        color={props.color || (isDarkMode ? 'white' : 'black')}
+        viewBox="0 0 512 512"
+      >
+        <Path
+          fill="currentColor"
+          d="M205 34.8c11.5 5.1 19 16.6 19 29.2v64H336c97.2 0 176 78.8 176 176c0 113.3-81.5 163.9-100.2 174.1c-2.5 1.4-5.3 1.9-8.1 1.9c-10.9 0-19.7-8.9-19.7-19.7c0-7.5 4.3-14.4 9.8-19.5c9.4-8.8 22.2-26.4 22.2-56.7c0-53-43-96-96-96H224v64c0 12.6-7.4 24.1-19 29.2s-25 3-34.4-5.4l-160-144C3.9 225.7 0 217.1 0 208s3.9-17.7 10.6-23.8l160-144c9.4-8.5 22.9-10.6 34.4-5.4z"
         />
       </Svg>
     </Center>

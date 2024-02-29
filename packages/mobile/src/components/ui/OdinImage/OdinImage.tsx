@@ -1,10 +1,23 @@
-import { TargetDrive, EmbeddedThumb, ImageSize } from '@youfoundation/js-lib/core';
-import { base64ToUint8Array, byteArrayToString } from '@youfoundation/js-lib/helpers';
+import {
+  TargetDrive,
+  EmbeddedThumb,
+  ImageSize,
+} from '@youfoundation/js-lib/core';
+import {
+  base64ToUint8Array,
+  byteArrayToString,
+} from '@youfoundation/js-lib/helpers';
 import { useMemo } from 'react';
-import { View, Image, ActivityIndicator, StyleProp, ImageStyle, ViewStyle } from 'react-native';
+import {
+  View,
+  Image,
+  ActivityIndicator,
+  StyleProp,
+  ImageStyle,
+  ViewStyle,
+} from 'react-native';
 import useImage from './hooks/useImage';
 import useTinyThumb from './hooks/useTinyThumb';
-import { useAuth } from '../../../hooks/auth/useAuth';
 import { SvgXml } from 'react-native-svg';
 import { useDotYouClientContext } from 'feed-app-common';
 
@@ -22,6 +35,9 @@ export interface OdinImageProps {
   style?: StyleProp<ImageStyle>;
 }
 
+/**
+ * @deprecated Use PhotowithLoader instead
+ */
 export const OdinImage = ({
   odinId,
   targetDrive,
@@ -36,10 +52,12 @@ export const OdinImage = ({
   style,
 }: OdinImageProps) => {
   const dotYouClient = useDotYouClientContext();
-
   const loadSize = {
-    pixelHeight: (imageSize?.height ? Math.round(imageSize?.height * 1) : undefined) || 800,
-    pixelWidth: (imageSize?.width ? Math.round(imageSize?.width * 1) : undefined) || 800,
+    pixelHeight:
+      (imageSize?.height ? Math.round(imageSize?.height * 1) : undefined) ||
+      800,
+    pixelWidth:
+      (imageSize?.width ? Math.round(imageSize?.width * 1) : undefined) || 800,
   };
 
   const embeddedThumbUrl = useMemo(() => {
@@ -48,19 +66,18 @@ export const OdinImage = ({
     return `data:${previewThumbnail.contentType};base64,${previewThumbnail.content}`;
   }, [previewThumbnail]);
 
-  const { getFromCache } = useImage(dotYouClient);
+  const { getFromCache } = useImage();
   const cachedImage = useMemo(
     () => (fileId ? getFromCache(odinId, fileId, targetDrive) : undefined),
-    [fileId, getFromCache, odinId, targetDrive]
+    [fileId, getFromCache, odinId, targetDrive],
   );
   const skipTiny = !!previewThumbnail || !!cachedImage;
 
   const { data: tinyThumb } = useTinyThumb(
-    dotYouClient,
     odinId,
     !skipTiny ? fileId : undefined,
     fileKey,
-    targetDrive
+    targetDrive,
   );
   const previewUrl = cachedImage?.url || embeddedThumbUrl || tinyThumb?.url;
 
@@ -74,14 +91,13 @@ export const OdinImage = ({
   const {
     fetch: { data: imageData },
   } = useImage(
-    dotYouClient,
     odinId,
     loadSize !== undefined ? fileId : undefined,
     fileKey,
     targetDrive,
     avoidPayload ? { pixelHeight: 200, pixelWidth: 200 } : loadSize,
     probablyEncrypted,
-    naturalSize
+    naturalSize,
   );
 
   return (
@@ -90,8 +106,7 @@ export const OdinImage = ({
         position: 'relative',
         width: imageSize?.width,
         height: imageSize?.height,
-      }}
-    >
+      }}>
       {/* Blurry image */}
       {previewUrl ? (
         <Image
@@ -121,8 +136,7 @@ export const OdinImage = ({
             ...imageSize,
             justifyContent: 'center',
             alignItems: 'center',
-          }}
-        >
+          }}>
           <ActivityIndicator style={{}} size="large" />
         </View>
       ) : imageData?.url.indexOf('svg') !== -1 ? (
@@ -131,11 +145,13 @@ export const OdinImage = ({
         <Image
           source={{ uri: imageData.url }}
           alt={alt}
-          style={{
-            resizeMode: fit,
-            ...imageSize,
-            ...style,
-          }}
+          style={[
+            {
+              resizeMode: fit,
+              ...imageSize,
+            },
+            style,
+          ]}
         />
       )}
     </View>
@@ -157,6 +173,11 @@ const SvgImage = ({
   if (!xmlString) return;
 
   return (
-    <SvgXml style={style} xml={xmlString} width={imageSize?.width} height={imageSize?.height} />
+    <SvgXml
+      style={style}
+      xml={xmlString}
+      width={imageSize?.width}
+      height={imageSize?.height}
+    />
   );
 };

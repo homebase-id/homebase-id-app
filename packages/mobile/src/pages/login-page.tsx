@@ -40,7 +40,7 @@ const LoginPage = (_props: LoginProps) => {
           }}
         >
           <Image source={logo} style={{ width: 40, height: 40 }} />
-          <Text style={{ fontSize: 25 }}>Homebase Feed</Text>
+          <Text style={{ fontSize: 25 }}>Homebase Nexus</Text>
         </View>
         <View
           style={{
@@ -77,7 +77,7 @@ const LoginPage = (_props: LoginProps) => {
   );
 };
 
-const FINALIZE_PATH = 'homebase-feed://auth/finalize/';
+const FINALIZE_PATH = 'homebase-nexus://auth/finalize/';
 const useFinalize = () => {
   const [state, setState] = useState<'preparing' | 'loading' | 'success' | 'error' | null>(null);
   const [url, setUrl] = useState<string | null>(null);

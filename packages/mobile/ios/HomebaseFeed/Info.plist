@@ -1,70 +1,74 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-<dict>
-	<key>ITSAppUsesNonExemptEncryption</key>
-	<false/>
-	<key>CFBundleDevelopmentRegion</key>
-	<string>en</string>
-	<key>CFBundleDisplayName</key>
-	<string>Homebase Feed</string>
-	<key>CFBundleExecutable</key>
-	<string>$(EXECUTABLE_NAME)</string>
-	<key>CFBundleIdentifier</key>
-	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
-	<key>CFBundleInfoDictionaryVersion</key>
-	<string>6.0</string>
-	<key>CFBundleName</key>
-	<string>$(PRODUCT_NAME)</string>
-	<key>CFBundlePackageType</key>
-	<string>APPL</string>
-	<key>CFBundleShortVersionString</key>
-	<string>$(MARKETING_VERSION)</string>
-	<key>CFBundleSignature</key>
-	<string>????</string>
-	<key>CFBundleVersion</key>
-	<string>$(CURRENT_PROJECT_VERSION)</string>
-	<key>LSRequiresIPhoneOS</key>
-	<true/>
-	<key>NSAppTransportSecurity</key>
 	<dict>
-		<key>NSExceptionDomains</key>
+		<key>ITSAppUsesNonExemptEncryption</key>
+		<false/>
+		<key>CFBundleDevelopmentRegion</key>
+		<string>en</string>
+		<key>CFBundleDisplayName</key>
+		<string>Homebase Feed</string>
+		<key>CFBundleExecutable</key>
+		<string>$(EXECUTABLE_NAME)</string>
+		<key>CFBundleIdentifier</key>
+		<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+		<key>CFBundleInfoDictionaryVersion</key>
+		<string>6.0</string>
+		<key>CFBundleName</key>
+		<string>$(PRODUCT_NAME)</string>
+		<key>CFBundlePackageType</key>
+		<string>APPL</string>
+		<key>CFBundleShortVersionString</key>
+		<string>$(MARKETING_VERSION)</string>
+		<key>CFBundleSignature</key>
+		<string>????</string>
+		<key>CFBundleVersion</key>
+		<string>$(CURRENT_PROJECT_VERSION)</string>
+		<key>LSRequiresIPhoneOS</key>
+		<true/>
+		<key>NSAppTransportSecurity</key>
 		<dict>
-			<key>localhost</key>
+			<key>NSExceptionDomains</key>
 			<dict>
-				<key>NSExceptionAllowsInsecureHTTPLoads</key>
-				<true/>
+				<key>localhost</key>
+				<dict>
+					<key>NSExceptionAllowsInsecureHTTPLoads</key>
+					<true/>
+				</dict>
 			</dict>
 		</dict>
+		<key>NSLocationWhenInUseUsageDescription</key>
+		<string></string>
+		<key>UILaunchStoryboardName</key>
+		<string>LaunchScreen</string>
+		<key>UIRequiredDeviceCapabilities</key>
+		<array>
+			<string>armv7</string>
+		</array>
+		<key>UISupportedInterfaceOrientations</key>
+		<array>
+			<string>UIInterfaceOrientationPortrait</string>
+			<string>UIInterfaceOrientationLandscapeLeft</string>
+			<string>UIInterfaceOrientationLandscapeRight</string>
+		</array>
+		<key>UIViewControllerBasedStatusBarAppearance</key>
+		<false/>
+		<key>CFBundleURLTypes</key>
+		<array>
+			<dict>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<string>homebase-nexus</string>
+				</array>
+			</dict>
+		</array>
+		<key>NSCameraUsageDescription</key>
+		<string>$(PRODUCT_NAME) would like access to your camera to take secure photos and video.</string>
+		<key>NSMicrophoneUsageDescription</key>
+		<string>$(PRODUCT_NAME) would like access to microphone to record audio</string>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>${PRODUCT_NAME} would like to access gallery</string>
+		<key>CodePushDeploymentKey</key>
+		<string>kYy4LXVHAvCCB4y_S548eV-7elorkgGinETxN</string>
 	</dict>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
-	<key>UILaunchStoryboardName</key>
-	<string>LaunchScreen</string>
-	<key>UIRequiredDeviceCapabilities</key>
-	<array>
-		<string>armv7</string>
-	</array>
-	<key>UISupportedInterfaceOrientations</key>
-	<array>
-		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
-	</array>
-	<key>UIViewControllerBasedStatusBarAppearance</key>
-	<false/>
-	<key>CFBundleURLTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>homebase-feed</string>
-			</array>
-		</dict>
-	</array>
-	<key>NSCameraUsageDescription</key>
-	<string>$(PRODUCT_NAME) would like access to your camera to take secure photos and video.</string>
-	<key>CodePushDeploymentKey</key>
-	<string>kYy4LXVHAvCCB4y_S548eV-7elorkgGinETxN</string>
-</dict>
 </plist>
