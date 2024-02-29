@@ -106,7 +106,7 @@ const circleDrives = [
     p: DrivePermissionType.Write,
   },
 ];
-export const appName = 'Homebase - Nexus';
+export const appName = 'Homebase - Feed & Chat';
 export const appId = 'b4a2a939-45d3-42af-95bf-7d241016e3bf';
 export const corsHost = undefined;
 
@@ -202,7 +202,7 @@ export const useYouAuthAuthorization = () => {
 
     // Get params with publicKey embedded
     return await getRegistrationParamsYouAuth(
-      'homebase-nexus://auth/finalize/',
+      'homebase-fchat://auth/finalize/',
       appName,
       appId,
       permissionKeys,
