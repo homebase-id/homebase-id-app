@@ -148,8 +148,9 @@ class Blob {
       }, 100);
     });
 
-    const destinationUri = `file://${RNFS.CachesDirectoryPath}/${this.data.blobId}-encrypted.${this.data.type.split('/')[1]
-      }`;
+    const destinationUri = `file://${RNFS.CachesDirectoryPath}/${this.data.blobId}-encrypted.${
+      this.data.type.split('/')[1]
+    }`;
 
     const encryptStatus = await OdinBlobModule.encryptFileWithAesCbc16(
       this.uri,
@@ -178,8 +179,9 @@ class Blob {
       }, 100);
     });
 
-    const destinationUri = `file://${RNFS.CachesDirectoryPath}/${this.data.blobId}.${this.data.type.split('/')[1]
-      }`;
+    const destinationUri = `file://${RNFS.CachesDirectoryPath}/${this.data.blobId}.${
+      this.data.type.split('/')[1]
+    }`;
 
     const decryptStatus = await OdinBlobModule.decryptFileWithAesCbc16(
       this.uri,

@@ -1,4 +1,4 @@
-package id.homebase.chat;
+package id.homebase.feed;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;

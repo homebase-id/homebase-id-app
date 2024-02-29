@@ -7,12 +7,10 @@ import {
 import { ThumbnailInstruction } from '@youfoundation/js-lib/media';
 import { base64ToUint8Array, uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
 import { Platform } from 'react-native';
-import { FileSystem } from 'react-native-file-access';
+import RNFS from 'react-native-fs';
 import ImageResizer, { ResizeFormat } from '@bam.tech/react-native-image-resizer';
 import { ImageSource } from './RNImageProvider';
 import { OdinBlob } from '../../../polyfills/OdinBlob';
-
-
 
 export const baseThumbSizes: ThumbnailInstruction[] = [
   { quality: 75, width: 250, height: 250 },
@@ -81,8 +79,9 @@ export const createThumbnails = async (
   const applicableThumbSizes = (thumbSizes || baseThumbSizes).reduce((currArray, thumbSize) => {
     if (tinyThumb.payload.type === svgType) return currArray;
 
-    if (naturalSize.pixelWidth < thumbSize.width && naturalSize.pixelHeight < thumbSize.height) { return currArray; }
-
+    if (naturalSize.pixelWidth < thumbSize.width && naturalSize.pixelHeight < thumbSize.height) {
+      return currArray;
+    }
 
     return [...currArray, thumbSize];
   }, [] as ThumbnailInstruction[]);
@@ -90,16 +89,14 @@ export const createThumbnails = async (
   if (
     applicableThumbSizes.length !== (thumbSizes || baseThumbSizes).length &&
     !applicableThumbSizes.some((thumbSize) => thumbSize.width === naturalSize.pixelWidth)
-  )
-  // Source image is too small for some of the requested sizes so we add the source dimensions as exact size
-  {
+  ) {
+    // Source image is too small for some of the requested sizes so we add the source dimensions as exact size
     applicableThumbSizes.push({
       quality: 100,
       width: naturalSize.pixelWidth,
       height: naturalSize.pixelHeight,
     });
   }
-
 
   // Create additionalThumbnails
   const additionalThumbnails: ThumbnailFile[] = [
@@ -110,7 +107,6 @@ export const createThumbnails = async (
       )
     )),
   ];
-
 
   return {
     naturalSize,
@@ -123,7 +119,7 @@ const createVectorThumbnail = async (
   imageFilePath: string,
   key: string
 ): Promise<{ naturalSize: ImageSize; thumb: ThumbnailFile }> => {
-  const imageBytes = base64ToUint8Array(await FileSystem.readFile(imageFilePath, 'base64'));
+  const imageBytes = base64ToUint8Array(await RNFS.readFile(imageFilePath, 'base64'));
 
   return {
     naturalSize: {
