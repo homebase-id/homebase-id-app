@@ -11,19 +11,21 @@ import {
 import { processInbox } from '@youfoundation/js-lib/peer';
 
 import { useNotificationSubscriber } from '../useNotificationSubscriber';
-import { preAuth } from '@youfoundation/js-lib/auth';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 import { hasDebugFlag, tryJsonParse } from '@youfoundation/js-lib/helpers';
 import { getSingleConversation, useConversation } from './useConversation';
 import { processCommand } from '../../provider/chat/ChatCommandProvider';
 import { useDotYouClientContext } from 'feed-app-common';
-import {
-  ChatMessageFileType,
-  MARK_CHAT_READ_COMMAND,
-} from '../../provider/chat/ChatProvider';
+import { ChatMessageFileType, MARK_CHAT_READ_COMMAND } from '../../provider/chat/ChatProvider';
 import { useAuth } from '../auth/useAuth';
-import { ChatDrive, Conversation, JOIN_CONVERSATION_COMMAND, JOIN_GROUP_CONVERSATION_COMMAND, UPDATE_GROUP_CONVERSATION_COMMAND } from '../../provider/chat/ConversationProvider';
+import {
+  ChatDrive,
+  Conversation,
+  JOIN_CONVERSATION_COMMAND,
+  JOIN_GROUP_CONVERSATION_COMMAND,
+  UPDATE_GROUP_CONVERSATION_COMMAND,
+} from '../../provider/chat/ConversationProvider';
 
 const MINUTE_IN_MS = 60000;
 
@@ -67,8 +69,6 @@ const useInboxProcessor = (connected?: boolean) => {
 const isDebug = hasDebugFlag();
 
 const useChatWebsocket = (isEnabled: boolean) => {
-  const [preAuthenticated, setIspreAuthenticated] = useState(false);
-
   const identity = useDotYouClientContext().getIdentity();
   const dotYouClient = useDotYouClientContext();
 
@@ -78,23 +78,13 @@ const useChatWebsocket = (isEnabled: boolean) => {
   } = useConversation();
   const queryClient = useQueryClient();
 
-  useEffect(() => {
-    (async () => {
-      if (!preAuthenticated) {
-        await preAuth(dotYouClient);
-        setIspreAuthenticated(true);
-      }
-    })();
-  }, [preAuthenticated, dotYouClient]);
-
   const handler = useCallback(
     async (notification: TypedConnectionNotification) => {
-      isDebug &&
-        console.debug('[ChatTransitProcessor] Got notification', notification);
+      isDebug && console.debug('[ChatTransitProcessor] Got notification', notification);
       if (notification.notificationType === 'transitFileReceived') {
         isDebug &&
           console.debug(
-            '[TransitProcessor] Replying to TransitFileReceived by sending processTransitInstructions for the targetDrive',
+            '[TransitProcessor] Replying to TransitFileReceived by sending processTransitInstructions for the targetDrive'
           );
 
         Notify({
@@ -112,31 +102,21 @@ const useChatWebsocket = (isEnabled: boolean) => {
         notification.targetDrive?.alias === ChatDrive.alias &&
         notification.targetDrive?.type === ChatDrive.type
       ) {
-        if (
-          notification.header.fileMetadata.appData.fileType ===
-          ChatMessageFileType
-        ) {
-          const conversationId =
-            notification.header.fileMetadata.appData.groupId;
+        if (notification.header.fileMetadata.appData.fileType === ChatMessageFileType) {
+          const conversationId = notification.header.fileMetadata.appData.groupId;
           console.log('invalidate chat', conversationId);
           queryClient.invalidateQueries({ queryKey: ['chat', conversationId] });
 
           // Check if the message is orphaned from a conversation
-          const conversation =
-            await queryClient.fetchQuery<DriveSearchResult<Conversation> | null>(
-              {
-                queryKey: ['conversation', conversationId],
-                queryFn: () =>
-                  getSingleConversation(dotYouClient, conversationId),
-              },
-            );
+          const conversation = await queryClient.fetchQuery<DriveSearchResult<Conversation> | null>(
+            {
+              queryKey: ['conversation', conversationId],
+              queryFn: () => getSingleConversation(dotYouClient, conversationId),
+            }
+          );
 
           if (!conversation) {
-            console.error(
-              'Orphaned message received',
-              notification.header.fileId,
-              conversation,
-            );
+            console.error('Orphaned message received', notification.header.fileId, conversation);
           }
           // Can't handle this one ATM.. How to resolve?
           else if (conversation.fileMetadata.appData.archivalStatus === 2) {
@@ -152,37 +132,34 @@ const useChatWebsocket = (isEnabled: boolean) => {
           identity
         ) {
           const command: ReceivedCommand = tryJsonParse<ReceivedCommand>(
-            notification.header.fileMetadata.appData.content,
+            notification.header.fileMetadata.appData.content
           );
           command.sender = notification.header.fileMetadata.senderOdinId;
-          command.clientCode =
-            notification.header.fileMetadata.appData.dataType;
+          command.clientCode = notification.header.fileMetadata.appData.dataType;
           command.id = notification.header.fileId;
 
           const processedCommand = await processCommand(
             dotYouClient,
             queryClient,
             command,
-            identity,
+            identity
           );
           if (processedCommand) {
-            await markCommandComplete(dotYouClient, ChatDrive, [
-              processedCommand,
-            ]);
+            await markCommandComplete(dotYouClient, ChatDrive, [processedCommand]);
           }
         }
       }
     },
-    [dotYouClient, identity, queryClient, restoreChat],
+    [dotYouClient, identity, queryClient, restoreChat]
   );
 
   return useNotificationSubscriber(
-    preAuthenticated && isEnabled ? handler : undefined,
+    isEnabled ? handler : undefined,
     ['transitFileReceived', 'fileAdded'],
     [ChatDrive],
     () => {
       queryClient.invalidateQueries({ queryKey: ['processInbox'] });
-    },
+    }
   );
 };
 
@@ -203,11 +180,11 @@ const useChatCommandProcessor = (isEnabled?: boolean) => {
       isProcessing.current = true;
       const commands = await getCommands(dotYouClient, ChatDrive);
       const filteredCommands = commands.receivedCommands.filter(
-        command =>
+        (command) =>
           command.clientCode === JOIN_CONVERSATION_COMMAND ||
           command.clientCode === MARK_CHAT_READ_COMMAND ||
           command.clientCode === JOIN_GROUP_CONVERSATION_COMMAND ||
-          command.clientCode === UPDATE_GROUP_CONVERSATION_COMMAND,
+          command.clientCode === UPDATE_GROUP_CONVERSATION_COMMAND
       );
 
       const completedCommands: string[] = [];
@@ -215,12 +192,7 @@ const useChatCommandProcessor = (isEnabled?: boolean) => {
       for (let i = 0; i < filteredCommands.length; i++) {
         const command = filteredCommands[i];
 
-        const completedCommand = await processCommand(
-          dotYouClient,
-          queryClient,
-          command,
-          identity,
-        );
+        const completedCommand = await processCommand(dotYouClient, queryClient, command, identity);
         if (completedCommand) completedCommands.push(completedCommand);
       }
 
@@ -228,7 +200,7 @@ const useChatCommandProcessor = (isEnabled?: boolean) => {
         await markCommandComplete(
           dotYouClient,
           ChatDrive,
-          completedCommands.filter(Boolean) as string[],
+          completedCommands.filter(Boolean) as string[]
         );
       }
 

@@ -20,7 +20,6 @@ const useTinyThumb = (
     if (imageFileId === undefined || imageFileId === '' || !imageDrive || !imageFileKey) {
       return;
     }
-
     return (
       (await getDecryptedThumbnailMeta(
         dotYouClient,
@@ -38,8 +37,7 @@ const useTinyThumb = (
       fetchImageData(odinId as string, imageFileId, imageFileKey as string, imageDrive),
     refetchOnMount: true,
     refetchOnWindowFocus: false,
-    staleTime: 1000 * 60 * 10, // 10min
-    gcTime: 1000 * 60 * 60 * 24, // 24h
+    staleTime: 1000 * 60 * 60 * 1, // 1h
     enabled: !!imageFileId && imageFileId !== '' && !!odinId && !!imageFileKey,
   });
 };

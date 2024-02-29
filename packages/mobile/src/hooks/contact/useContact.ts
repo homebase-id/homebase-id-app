@@ -7,11 +7,9 @@ import { useDotYouClientContext } from 'feed-app-common';
 const useContact = (odinId?: string) => {
   const dotYouClient = useDotYouClientContext();
 
-  const fetchSingle = async (
-    _odinId: string
-  ): Promise<DriveSearchResult<ContactFile> | undefined> => {
+  const fetchSingle = async (_odinId: string): Promise<DriveSearchResult<ContactFile> | null> => {
     // Direct fetch with odinId:
-    return await getContactByOdinId(dotYouClient, _odinId);
+    return (await getContactByOdinId(dotYouClient, _odinId)) || null;
   };
 
   return {

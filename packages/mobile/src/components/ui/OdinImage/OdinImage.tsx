@@ -2,24 +2,13 @@ import {
   TargetDrive,
   EmbeddedThumb,
   ImageSize,
+  ImageContentType,
 } from '@youfoundation/js-lib/core';
-import {
-  base64ToUint8Array,
-  byteArrayToString,
-} from '@youfoundation/js-lib/helpers';
-import { useMemo } from 'react';
-import {
-  View,
-  Image,
-  ActivityIndicator,
-  StyleProp,
-  ImageStyle,
-  ViewStyle,
-} from 'react-native';
+import { memo, useMemo } from 'react';
+import { View, Image, ActivityIndicator } from 'react-native';
 import useImage from './hooks/useImage';
 import useTinyThumb from './hooks/useTinyThumb';
-import { SvgXml } from 'react-native-svg';
-import { useDotYouClientContext } from 'feed-app-common';
+import { SvgUri } from 'react-native-svg';
 
 export interface OdinImageProps {
   odinId?: string;
@@ -29,155 +18,155 @@ export interface OdinImageProps {
   fit?: 'cover' | 'contain';
   imageSize?: { width: number; height: number };
   alt?: string;
+  title?: string;
   previewThumbnail?: EmbeddedThumb;
   probablyEncrypted?: boolean;
   avoidPayload?: boolean;
-  style?: StyleProp<ImageStyle>;
 }
 
-/**
- * @deprecated Use PhotowithLoader instead
- */
-export const OdinImage = ({
-  odinId,
-  targetDrive,
-  fileId,
-  fileKey,
-  fit,
-  imageSize,
-  alt,
-  previewThumbnail,
-  probablyEncrypted,
-  avoidPayload,
-  style,
-}: OdinImageProps) => {
-  const dotYouClient = useDotYouClientContext();
-  const loadSize = {
-    pixelHeight:
-      (imageSize?.height ? Math.round(imageSize?.height * 1) : undefined) ||
-      800,
-    pixelWidth:
-      (imageSize?.width ? Math.round(imageSize?.width * 1) : undefined) || 800,
-  };
-
-  const embeddedThumbUrl = useMemo(() => {
-    if (!previewThumbnail) return;
-
-    return `data:${previewThumbnail.contentType};base64,${previewThumbnail.content}`;
-  }, [previewThumbnail]);
-
-  const { getFromCache } = useImage();
-  const cachedImage = useMemo(
-    () => (fileId ? getFromCache(odinId, fileId, targetDrive) : undefined),
-    [fileId, getFromCache, odinId, targetDrive],
-  );
-  const skipTiny = !!previewThumbnail || !!cachedImage;
-
-  const { data: tinyThumb } = useTinyThumb(
+export const OdinImage = memo(
+  ({
     odinId,
-    !skipTiny ? fileId : undefined,
-    fileKey,
     targetDrive,
-  );
-  const previewUrl = cachedImage?.url || embeddedThumbUrl || tinyThumb?.url;
-
-  const naturalSize: ImageSize | undefined = tinyThumb
-    ? {
-        pixelHeight: tinyThumb.naturalSize.height,
-        pixelWidth: tinyThumb.naturalSize.width,
-      }
-    : cachedImage?.naturalSize || previewThumbnail;
-
-  const {
-    fetch: { data: imageData },
-  } = useImage(
-    odinId,
-    loadSize !== undefined ? fileId : undefined,
+    fileId,
     fileKey,
-    targetDrive,
-    avoidPayload ? { pixelHeight: 200, pixelWidth: 200 } : loadSize,
-    probablyEncrypted,
-    naturalSize,
-  );
+    fit,
+    imageSize,
+    alt,
+    title,
+    previewThumbnail,
+    avoidPayload,
+  }: OdinImageProps) => {
+    const loadSize = {
+      pixelHeight: (imageSize?.height ? Math.round(imageSize?.height * 1) : undefined) || 800,
+      pixelWidth: (imageSize?.width ? Math.round(imageSize?.width * 1) : undefined) || 800,
+    };
 
-  return (
-    <View
-      style={{
-        position: 'relative',
-        width: imageSize?.width,
-        height: imageSize?.height,
-      }}>
-      {/* Blurry image */}
-      {previewUrl ? (
-        <Image
-          source={{ uri: previewUrl }}
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            resizeMode: fit,
+    const embeddedThumbUrl = useMemo(() => {
+      if (!previewThumbnail) return;
 
-            ...imageSize,
-          }}
-          blurRadius={2}
-        />
-      ) : null}
+      return `data:${previewThumbnail.contentType};base64,${previewThumbnail.content}`;
+    }, [previewThumbnail]);
 
-      {!imageData?.url ? (
-        <View
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            ...imageSize,
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}>
-          <ActivityIndicator style={{}} size="large" />
-        </View>
-      ) : imageData?.url.indexOf('svg') !== -1 ? (
-        <SvgImage style={style} imageSize={imageSize} uri={imageData.url} />
-      ) : (
-        <Image
-          source={{ uri: imageData.url }}
-          alt={alt}
-          style={[
-            {
+    const { getFromCache } = useImage();
+    const cachedImage = useMemo(
+      () => (fileId && fileKey ? getFromCache(odinId, fileId, fileKey, targetDrive) : undefined),
+      [fileId, getFromCache, odinId, targetDrive]
+    );
+    const skipTiny = !!previewThumbnail || !!cachedImage;
+
+    const { data: tinyThumb } = useTinyThumb(
+      odinId,
+      !skipTiny ? fileId : undefined,
+      fileKey,
+      targetDrive
+    );
+    const previewUrl = cachedImage?.url || embeddedThumbUrl || tinyThumb?.url;
+
+    const naturalSize: ImageSize | undefined = tinyThumb
+      ? {
+          pixelHeight: tinyThumb.naturalSize.height,
+          pixelWidth: tinyThumb.naturalSize.width,
+        }
+      : cachedImage?.naturalSize || previewThumbnail;
+
+    const {
+      fetch: { data: imageData },
+    } = useImage(
+      odinId,
+      loadSize !== undefined ? fileId : undefined,
+      fileKey,
+      targetDrive,
+      avoidPayload ? { pixelHeight: 200, pixelWidth: 200 } : loadSize,
+      naturalSize
+    );
+
+    const hasCachedImage = !!cachedImage?.url;
+
+    return (
+      <View
+        style={{
+          position: 'relative',
+        }}
+      >
+        {/* Blurry image */}
+        {previewUrl ? (
+          <Image
+            source={{ uri: previewUrl }}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
               resizeMode: fit,
-              ...imageSize,
-            },
-            style,
-          ]}
-        />
-      )}
-    </View>
-  );
-};
 
-const SvgImage = ({
+              ...imageSize,
+            }}
+            blurRadius={hasCachedImage ? 0 : 2}
+          />
+        ) : null}
+
+        {!imageData?.url && !hasCachedImage ? (
+          <View
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              ...imageSize,
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <ActivityIndicator style={{}} size="large" />
+          </View>
+        ) : null}
+
+        {/* Actual image */}
+        {imageData?.url ? (
+          <InnerImage
+            uri={imageData.url}
+            contentType={imageData.type}
+            fit={fit}
+            imageSize={imageSize}
+            alt={alt || title}
+          />
+        ) : null}
+      </View>
+    );
+  }
+);
+
+const InnerImage = ({
   uri,
-  style,
+  alt,
   imageSize,
+
+  fit,
+
+  contentType,
 }: {
   uri: string;
-  style: StyleProp<ViewStyle>;
-  imageSize: { width: number; height: number } | undefined;
-}) => {
-  const base64Data = uri.split('base64,').pop();
-  if (!base64Data) return;
-  const xmlString = byteArrayToString(base64ToUint8Array(base64Data));
-  if (!xmlString) return;
+  imageSize?: { width: number; height: number };
+  alt?: string;
 
-  return (
-    <SvgXml
-      style={style}
-      xml={xmlString}
-      width={imageSize?.width}
-      height={imageSize?.height}
+  fit?: 'cover' | 'contain';
+
+  contentType?: ImageContentType;
+}) => {
+  return contentType === 'image/svg+xml' ? (
+    <SvgUri width={imageSize?.width} height={imageSize?.height} uri={uri} />
+  ) : (
+    <Image
+      source={{ uri }}
+      alt={alt}
+      style={{
+        resizeMode: fit,
+
+        ...imageSize,
+      }}
     />
   );
 };
