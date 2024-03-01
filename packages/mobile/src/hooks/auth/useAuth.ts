@@ -22,12 +22,29 @@ import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-
 import { useQueryClient } from '@tanstack/react-query';
 
 const StandardProfileDrive = GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId);
+
+export const ChatConfig = {
+  ChatDrive: {
+    alias: '9ff813aff2d61e2f9b9db189e72d1a11',
+    type: '66ea8355ae4155c39b5a719166b510e3',
+  },
+  name: 'Chat Drive',
+  description: 'Drive which contains all the chat messages',
+};
+
 export const drives = [
   {
     a: BlogConfig.FeedDrive.alias,
     t: BlogConfig.FeedDrive.type,
     n: '',
     d: '',
+    p: DrivePermissionType.Read + DrivePermissionType.Write,
+  },
+  {
+    a: ChatConfig.ChatDrive.alias,
+    t: ChatConfig.ChatDrive.type,
+    n: ChatConfig.name,
+    d: 'Drive which contains all the chat messages',
     p: DrivePermissionType.Read + DrivePermissionType.Write,
   },
   {
@@ -79,8 +96,18 @@ export const permissionKeys = [
   AppPermissionType.PublishStaticContent,
   AppPermissionType.SendPushNotifications,
 ];
-export const appName = 'Homebase - Feed';
-export const appId = '5f887d80-0132-4294-ba40-bda79155551d';
+
+const circleDrives = [
+  {
+    a: ChatConfig.ChatDrive.alias,
+    t: ChatConfig.ChatDrive.type,
+    n: ChatConfig.name,
+    d: '',
+    p: DrivePermissionType.Write,
+  },
+];
+export const appName = 'Homebase - Feed & Chat';
+export const appId = 'b4a2a939-45d3-42af-95bf-7d241016e3bf';
 export const corsHost = undefined;
 
 // Split up, just checks if the token is valid, and logs out if not
@@ -175,17 +202,16 @@ export const useYouAuthAuthorization = () => {
 
     // Get params with publicKey embedded
     return await getRegistrationParamsYouAuth(
-      'homebase-feed://auth/finalize/',
+      'homebase-fchat://auth/finalize/',
       appName,
       appId,
       permissionKeys,
       undefined,
       drives,
-      undefined,
+      circleDrives,
       uint8ArrayToBase64(stringToUint8Array(JSON.stringify(publicKeyJwk))),
       corsHost,
-      `${Platform.OS === 'ios' ? 'iOS' : Platform.OS === 'android' ? 'Android' : Platform.OS} | ${
-        Platform.Version
+      `${Platform.OS === 'ios' ? 'iOS' : Platform.OS === 'android' ? 'Android' : Platform.OS} | ${Platform.Version
       }`
     );
   }, [setPrivateKey]);

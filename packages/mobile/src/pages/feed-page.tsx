@@ -13,7 +13,7 @@ import { Colors } from '../app/Colors';
 import { useProfile } from '../hooks/profile/useProfile';
 import { GetTargetDriveFromProfileId, BuiltInProfiles } from '@youfoundation/js-lib/profile';
 import { OdinImage } from '../components/ui/OdinImage/OdinImage';
-import { Bars } from '../components/ui/Icons/icons';
+import { Bars, ChatIcon } from '../components/ui/Icons/icons';
 import { useDarkMode } from '../hooks/useDarkMode';
 
 type FeedProps = NativeStackScreenProps<TabStackParamList, 'Feed'>;
@@ -95,7 +95,7 @@ const FeedPage = (_props: FeedProps) => {
             }}
           >
             <OdinImage
-              fit="contain"
+              fit="cover"
               targetDrive={GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId)}
               fileId={profile?.profileImageFileId}
               fileKey={profile?.profileImageFileKey}
@@ -108,12 +108,27 @@ const FeedPage = (_props: FeedProps) => {
                 {profile?.firstName} {profile?.surName}
               </Text>
             </View>
-            <TouchableOpacity
-              style={{ marginLeft: 'auto' }}
-              onPress={() => _props.navigation.navigate('Profile')}
+            <View
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                gap: 20,
+                marginLeft: 'auto',
+              }}
             >
-              <Bars size={'lg'} />
-            </TouchableOpacity>
+              <TouchableOpacity
+                style={{ marginLeft: 'auto' }}
+                onPress={() => _props.navigation.navigate('Profile')}
+              >
+                <Bars size={'lg'} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{ marginLeft: 'auto' }}
+                onPress={() => _props.navigation.navigate('Chat')}
+              >
+                <ChatIcon size={'lg'} />
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       )}

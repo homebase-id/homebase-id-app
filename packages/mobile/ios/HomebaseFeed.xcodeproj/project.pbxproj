@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		00E356F31AD99517003FC87E /* HomebaseFeedTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* HomebaseFeedTests.m */; };
+		12A0DF8A2B909CAA00E1A798 /* RCTOdinBlobModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 12A0DF892B909CAA00E1A798 /* RCTOdinBlobModule.m */; };
+		12A0DF8B2B909CAA00E1A798 /* RCTOdinBlobModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 12A0DF892B909CAA00E1A798 /* RCTOdinBlobModule.m */; };
 		13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
@@ -30,6 +32,8 @@
 		00E356EE1AD99517003FC87E /* HomebaseFeedTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HomebaseFeedTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		00E356F11AD99517003FC87E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		00E356F21AD99517003FC87E /* HomebaseFeedTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HomebaseFeedTests.m; sourceTree = "<group>"; };
+		12A0DF882B909C8E00E1A798 /* RCTOdinBlobModule.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = RCTOdinBlobModule.h; path = OdinBlob/RCTOdinBlobModule.h; sourceTree = "<group>"; };
+		12A0DF892B909CAA00E1A798 /* RCTOdinBlobModule.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = RCTOdinBlobModule.m; path = OdinBlob/RCTOdinBlobModule.m; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* HomebaseFeed.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HomebaseFeed.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = HomebaseFeed/AppDelegate.h; sourceTree = "<group>"; };
 		13B07FB01A68108700A75B9A /* AppDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AppDelegate.mm; path = HomebaseFeed/AppDelegate.mm; sourceTree = "<group>"; };
@@ -109,6 +113,8 @@
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				12A0DF882B909C8E00E1A798 /* RCTOdinBlobModule.h */,
+				12A0DF892B909CAA00E1A798 /* RCTOdinBlobModule.m */,
 			);
 			name = Libraries;
 			sourceTree = "<group>";
@@ -404,6 +410,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				12A0DF8B2B909CAA00E1A798 /* RCTOdinBlobModule.m in Sources */,
 				00E356F31AD99517003FC87E /* HomebaseFeedTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -413,6 +420,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */,
+				12A0DF8A2B909CAA00E1A798 /* RCTOdinBlobModule.m in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

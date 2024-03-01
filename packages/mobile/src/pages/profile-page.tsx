@@ -67,7 +67,7 @@ const SettingsPage = (_props: SettingsProps) => {
             }}
           >
             <OdinImage
-              fit="contain"
+              fit="cover"
               targetDrive={GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId)}
               fileId={profile?.profileImageFileId}
               fileKey={profile?.profileImageFileKey}
