@@ -216,7 +216,17 @@ export const getThumbBytes = async (
       } else if (res.info().headers.payloadencrypted === 'True') {
         throw new Error("Can't decrypt; missing keyheader");
       } else {
-        return imageBlob;
+        // The downloaded file will be removed after this promise is resolved, so we need a copy
+        const newPath = `file://${RNFS.CachesDirectoryPath}/${fileId}@full.${
+          imageBlob.type.split('/')[1]
+        }`;
+        if (!(await RNFS.exists(newPath))) {
+          await RNFS.copyFile(res.path(), newPath);
+        }
+
+        return new OdinBlob(newPath, {
+          type: imageBlob.type,
+        });
       }
     })
     .catch((err) => {
@@ -293,7 +303,17 @@ export const getPayloadBytes = async (
       } else if (res.info().headers.payloadencrypted === 'True') {
         throw new Error("Can't decrypt; missing keyheader");
       } else {
-        return imageBlob;
+        // The downloaded file will be removed after this promise is resolved, so we need a copy
+        const newPath = `file://${RNFS.CachesDirectoryPath}/${fileId}@full.${
+          imageBlob.type.split('/')[1]
+        }`;
+        if (!(await RNFS.exists(newPath))) {
+          await RNFS.copyFile(res.path(), newPath);
+        }
+
+        return new OdinBlob(newPath, {
+          type: imageBlob.type,
+        });
       }
     })
     .catch((err) => {
