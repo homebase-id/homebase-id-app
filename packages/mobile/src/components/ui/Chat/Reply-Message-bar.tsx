@@ -30,6 +30,7 @@ const ReplyMessageBar = ({ clearReply, message }: ReplyMessageBarProps) => {
           {message.fileMetadata.senderOdinId.length > 0 ? message.fileMetadata.senderOdinId : 'You'}
         </Text>
         <Text
+          numberOfLines={1}
           style={{
             color: isDarkMode ? 'white' : 'black',
           }}

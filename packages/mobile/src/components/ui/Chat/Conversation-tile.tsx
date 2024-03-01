@@ -28,10 +28,7 @@ type ConversationTileProps = {
   isSelf?: boolean;
 };
 
-export const Avatar = (props: {
-  odinId: string | null;
-  style?: StyleProp<ImageStyle>;
-}) => {
+export const Avatar = (props: { odinId: string | null; style?: StyleProp<ImageStyle> }) => {
   return (
     <Image
       source={{
@@ -44,18 +41,7 @@ export const Avatar = (props: {
 
 export const GroupAvatar = (props: {
   style?: StyleProp<ViewStyle>;
-  iconSize?:
-    | 'xs'
-    | 'sm'
-    | 'md'
-    | 'lg'
-    | 'xl'
-    | '2xl'
-    | '3xl'
-    | '4xl'
-    | '5xl'
-    | '6xl'
-    | number;
+  iconSize?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl' | number;
 }) => {
   const darkMode = useDarkMode();
   return (
@@ -65,12 +51,11 @@ export const GroupAvatar = (props: {
         {
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: darkMode.isDarkMode
-            ? Colors.slate[800]
-            : Colors.purple[200],
+          backgroundColor: darkMode.isDarkMode ? Colors.slate[800] : Colors.purple[200],
         },
         props.style,
-      ]}>
+      ]}
+    >
       <Users size={props.iconSize} />
     </View>
   );
@@ -83,9 +68,9 @@ const ConversationTile = (props: ConversationTileProps) => {
   const flatMessages = useMemo(
     () =>
       data?.pages
-        .flatMap(page => page.searchResults)
+        .flatMap((page) => page.searchResults)
         ?.filter(Boolean) as DriveSearchResult<ChatMessage>[],
-    [data],
+    [data]
   );
   const darkMode = useDarkMode();
 
@@ -96,16 +81,13 @@ const ConversationTile = (props: ConversationTileProps) => {
         style={[
           styles.tile,
           {
-            backgroundColor: darkMode.isDarkMode
-              ? Colors.slate[900]
-              : Colors.white,
+            backgroundColor: darkMode.isDarkMode ? Colors.slate[900] : Colors.white,
           },
-        ]}>
-        {'recipient' in props.conversation &&
-        props.conversation.recipient !== undefined ? (
+        ]}
+      >
+        {'recipient' in props.conversation && props.conversation.recipient !== undefined ? (
           <Avatar odinId={props.odinId} />
-        ) : 'recipients' in props.conversation &&
-          props.conversation.recipients !== undefined ? (
+        ) : 'recipients' in props.conversation && props.conversation.recipients !== undefined ? (
           <GroupAvatar />
         ) : null}
 
@@ -116,19 +98,22 @@ const ConversationTile = (props: ConversationTileProps) => {
               {
                 color: darkMode.isDarkMode ? Colors.white : Colors.slate[900],
               },
-            ]}>
+            ]}
+          >
             {props.conversation.title}
             {props.isSelf ? <Text style={styles.you}>(you)</Text> : null}
           </Text>
 
           {lastMessage ? (
             <Text
+              numberOfLines={1}
               style={[
                 styles.description,
                 {
                   color: darkMode.isDarkMode ? Colors.white : Colors.slate[900],
                 },
-              ]}>
+              ]}
+            >
               {lastMessage.fileMetadata.appData.content.message || '📸 Media'}
             </Text>
           ) : null}

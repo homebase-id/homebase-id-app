@@ -58,6 +58,7 @@ const ConversationTileWithYourself = () => {
         title: `${user?.firstName} ${user?.surName} `,
         recipient: '',
       }}
+      conversationId={ConversationWithYourselfId}
       isSelf
       onPress={() =>
         navigation.navigate('ChatScreen', {
