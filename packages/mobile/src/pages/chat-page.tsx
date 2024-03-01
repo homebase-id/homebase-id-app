@@ -297,7 +297,7 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
       }}
     >
       <ChatAppBar
-        title={title}
+        title={title || ''}
         group={'recipients' in conversationContent.fileMetadata.appData.content}
         odinId={
           route.params.convoId === ConversationWithYourselfId
