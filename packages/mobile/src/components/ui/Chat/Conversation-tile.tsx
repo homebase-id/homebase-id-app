@@ -18,6 +18,7 @@ import { useChatMessages } from '../../../hooks/chat/useChatMessages';
 import { ChatMessage } from '../../../provider/chat/ChatProvider';
 import { Users } from '../Icons/icons';
 import { useDarkMode } from '../../../hooks/useDarkMode';
+import { useExternalOdinId } from '../../../hooks/connections/useExternalOdinId';
 
 type ConversationTileProps = {
   onPress?: () => void;
@@ -73,6 +74,11 @@ const ConversationTile = (props: ConversationTileProps) => {
     [data]
   );
   const darkMode = useDarkMode();
+  const { data: connectionDetails } = useExternalOdinId({
+    odinId: props.odinId,
+  }).fetch;
+
+  const isGroup = 'recipients' in props.conversation && props.conversation.recipients !== undefined;
 
   const lastMessage = flatMessages?.[0];
   return (
@@ -85,11 +91,7 @@ const ConversationTile = (props: ConversationTileProps) => {
           },
         ]}
       >
-        {'recipient' in props.conversation && props.conversation.recipient !== undefined ? (
-          <Avatar odinId={props.odinId} />
-        ) : 'recipients' in props.conversation && props.conversation.recipients !== undefined ? (
-          <GroupAvatar />
-        ) : null}
+        {!isGroup ? <Avatar odinId={props.odinId} /> : <GroupAvatar />}
 
         <View style={styles.content}>
           <Text
@@ -100,7 +102,9 @@ const ConversationTile = (props: ConversationTileProps) => {
               },
             ]}
           >
-            {props.conversation.title}
+            {isGroup || props.isSelf
+              ? props.conversation.title
+              : connectionDetails?.name ?? props.odinId}
             {props.isSelf ? <Text style={styles.you}>(you)</Text> : null}
           </Text>
 
