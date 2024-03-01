@@ -99,7 +99,7 @@ export const OdinImage = memo(
         }}
       >
         {/* Blurry image */}
-        {previewUrl ? (
+        {!enableZoom && previewUrl ? (
           <Image
             source={{ uri: previewUrl }}
             style={{

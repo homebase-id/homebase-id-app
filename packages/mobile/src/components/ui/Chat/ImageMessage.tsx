@@ -61,7 +61,6 @@ const ImageMessage = (props: MessageImageProps<IMessage>) => {
               <OdinImage
                 fileId={currentMessage.fileId}
                 fileKey={item.key}
-                // enableZoom={false}
                 key={item.key}
                 targetDrive={ChatDrive}
                 fit="cover"
@@ -70,11 +69,12 @@ const ImageMessage = (props: MessageImageProps<IMessage>) => {
                   height: 200,
                 }}
                 avoidPayload={true}
-                // style={{
-                //   borderRadius: 10,
-                //   flex: 1,
-                //   alignItems: 'stretch',
-                // }}
+                style={{
+                  borderRadius: 10,
+                  flex: 1,
+
+                  resizeMode: 'cover',
+                }}
                 // onClick={() => {
                 //   navigation.navigate('PreviewMedia', {
                 //     fileId: currentMessage.fileId,
