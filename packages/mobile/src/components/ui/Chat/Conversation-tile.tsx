@@ -16,8 +16,8 @@ import { Colors } from '../../../app/Colors';
 import { Conversation } from '../../../provider/chat/ConversationProvider';
 import { useChatMessages } from '../../../hooks/chat/useChatMessages';
 import { ChatMessage } from '../../../provider/chat/ChatProvider';
-import { useDarkMode } from 'feed-app-common';
 import { Users } from '../Icons/icons';
+import { useDarkMode } from '../../../hooks/useDarkMode';
 
 type ConversationTileProps = {
   onPress?: () => void;

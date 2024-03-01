@@ -3,7 +3,8 @@ import { ComposeChat } from './Icons/icons';
 import { Platform, StyleProp, TouchableOpacity, ViewStyle } from 'react-native';
 import { HeaderBackButton, HeaderBackButtonProps } from '@react-navigation/elements';
 import { Colors } from '../../app/Colors';
-import { useDarkMode, useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'feed-app-common';
+import { useDarkMode } from '../../hooks/useDarkMode';
 
 //TODO: Refactor
 export const ProfileAvatar = () => {

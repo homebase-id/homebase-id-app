@@ -6,7 +6,7 @@ import { ChatStackParamList } from '../app/App';
 import { useAllContacts } from 'feed-app-common';
 
 import { ContactTile, Tile } from '../components/ui/Contact/Contact-Tile';
-import { Globe, Users } from '../components/ui/Icons/icons';
+import { Users } from '../components/ui/Icons/icons';
 
 const ListHeaderComponent = () => {
   const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
@@ -19,20 +19,6 @@ const ListHeaderComponent = () => {
         }}
         icon={<Users size={'lg'} />}
       />
-      <Tile
-        title="Pending Requests"
-        onClick={() => {
-          navigation.navigate('PendingRequests');
-        }}
-        icon={<Globe size={'lg'} />}
-      />
-      <Tile
-        title="Sent Requests"
-        onClick={() => {
-          navigation.navigate('SentRequests');
-        }}
-        icon={<Globe size={'lg'} />}
-      />
     </>
   );
 };
@@ -44,6 +30,10 @@ export const ContactPage = ({
 }) => {
   const contacts = useAllContacts(true).data;
   if (!contacts) return null;
+  console.log(
+    'contacts',
+    contacts.map((c) => c.fileMetadata.appData.content.odinId)
+  );
   return (
     <>
       <FlatList

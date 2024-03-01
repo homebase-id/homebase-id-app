@@ -3,9 +3,9 @@ import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
 import { useConversation } from '../../../hooks/chat/useConversation';
 import { ContactConfig, ContactFile } from '@youfoundation/js-lib/network';
 import { CheckCircle, ChevronRight, CircleOutlined } from '../Icons/icons';
-import { useDarkMode } from 'feed-app-common';
 import { Colors } from '../../../app/Colors';
 import { OdinImage } from '../OdinImage/OdinImage';
+import { useDarkMode } from '../../../hooks/useDarkMode';
 export const ContactTile = ({
   item: dsrContact,
   onOpen,
@@ -49,9 +49,12 @@ export const ContactTile = ({
       >
         <OdinImage
           targetDrive={ContactConfig.ContactTargetDrive}
-          fit="contain"
+          fit="cover"
           alt={contact.name?.displayName}
           fileId={dsrContact.fileId}
+          enableZoom={false}
+          avoidPayload={true}
+          imageSize={{ width: 48, height: 48 }}
           fileKey={'prfl_pic'}
           style={styles.tinyLogo}
         />

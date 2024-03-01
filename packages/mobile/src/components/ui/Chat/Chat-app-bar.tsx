@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Avatar, GroupAvatar } from './Conversation-tile';
 import { Header, HeaderBackButton } from '@react-navigation/elements';
-import { useProfile } from 'feed-app-common';
+import { useProfile } from '../../../hooks/profile/useProfile';
 
 export const ChatAppBar = ({
   odinId,

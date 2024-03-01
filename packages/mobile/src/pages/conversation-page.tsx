@@ -2,7 +2,7 @@ import { FlatList } from 'react-native';
 import ConversationTile from '../components/ui/Chat/Conversation-tile';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { ChatStackParamList, RootStackParamList } from '../app/App';
+import { ChatStackParamList } from '../app/App';
 import { useConversations } from '../hooks/chat/useConversations';
 import {
   Conversation,
@@ -10,7 +10,7 @@ import {
   SingleConversation,
 } from '../provider/chat/ConversationProvider';
 import { useAuth } from '../hooks/auth/useAuth';
-import { useProfile } from 'feed-app-common';
+import { useProfile } from '../hooks/profile/useProfile';
 
 const ConversationPage = ({
   navigation,

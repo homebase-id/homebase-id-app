@@ -30,8 +30,7 @@ import { Platform, useColorScheme } from 'react-native';
 import { ChatInfoPage } from '../pages/chat-info-page';
 import { ContactPage } from '../pages/contact-page';
 import { NewGroupPage } from '../pages/new-group-page';
-import { PendingRequestPage } from '../pages/pending-request-page';
-import { SentRequestPage } from '../pages/sent-request-page';
+
 import { PreviewMedia } from '../pages/media-preview-page';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
@@ -61,8 +60,6 @@ export type ChatStackParamList = {
   Conversation: undefined;
   ChatScreen: { convoId: string };
   NewChat: undefined;
-  PendingRequests: undefined;
-  SentRequests: undefined;
   NewGroup: undefined;
   PreviewMedia: { fileId: string; payloadKey: string; type?: string };
   ChatInfo: { convoId: string };
@@ -260,40 +257,6 @@ const ChatStack = ({ navigation: nav }: NativeStackScreenProps<TabStackParamList
                 label: '',
               });
             },
-          }}
-        />
-        <StackChat.Screen
-          name="PendingRequests"
-          component={PendingRequestPage}
-          options={{
-            headerTitle: 'Pending Requests',
-            headerLeft:
-              Platform.OS === 'ios'
-                ? (props: HeaderBackButtonProps) => {
-                    return BackButton({
-                      onPress: () => nav.goBack(),
-                      prop: props,
-                      label: '',
-                    });
-                  }
-                : undefined,
-          }}
-        />
-        <StackChat.Screen
-          name="SentRequests"
-          component={SentRequestPage}
-          options={{
-            headerTitle: 'Sent Requests',
-            headerLeft:
-              Platform.OS === 'ios'
-                ? (props: HeaderBackButtonProps) => {
-                    return BackButton({
-                      onPress: () => nav.goBack(),
-                      prop: props,
-                      label: '',
-                    });
-                  }
-                : undefined,
           }}
         />
       </StackChat.Group>

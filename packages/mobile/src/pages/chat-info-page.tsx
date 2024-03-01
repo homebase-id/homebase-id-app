@@ -9,11 +9,12 @@ import { Home } from '../components/ui/Icons/icons';
 import { useCallback } from 'react';
 import InAppBrowser from 'react-native-inappbrowser-reborn';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import { useDarkMode } from 'feed-app-common';
+
 import { Colors } from '../app/Colors';
 import { useAuth } from '../hooks/auth/useAuth';
 import { Header, HeaderBackButton } from '@react-navigation/elements';
 import TextButton from '../components/ui/Text/Text-Button';
+import { useDarkMode } from '../hooks/useDarkMode';
 
 export type ChatInfoProp = NativeStackScreenProps<ChatStackParamList, 'ChatInfo'>;
 

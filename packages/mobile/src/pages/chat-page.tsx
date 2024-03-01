@@ -45,11 +45,11 @@ import {
 import { ImageSource } from '../provider/image/RNImageProvider';
 import { getNewId } from '@youfoundation/js-lib/helpers';
 import { Swipeable, TouchableOpacity } from 'react-native-gesture-handler';
-import { useDarkMode } from 'feed-app-common';
 import { Colors } from '../app/Colors';
 import ReplyMessageBar from '../components/ui/Chat/Reply-Message-bar';
 import ChatMessageBox from '../components/ui/Chat/Chat-Message-box';
 import { OdinImage } from '../components/ui/OdinImage/OdinImage';
+import { useDarkMode } from '../hooks/useDarkMode';
 
 export type ChatProp = NativeStackScreenProps<ChatStackParamList, 'ChatScreen'>;
 
