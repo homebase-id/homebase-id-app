@@ -1,34 +1,34 @@
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
 import { useConversation } from '../../../hooks/chat/useConversation';
-import { ContactConfig, ContactFile } from '@youfoundation/js-lib/network';
+import { ContactConfig, ContactFile, DotYouProfile } from '@youfoundation/js-lib/network';
 import { CheckCircle, ChevronRight, CircleOutlined } from '../Icons/icons';
 import { Colors } from '../../../app/Colors';
 import { OdinImage } from '../OdinImage/OdinImage';
 import { useDarkMode } from '../../../hooks/useDarkMode';
+import useContact from '../../../hooks/contact/useContact';
 export const ContactTile = ({
-  item: dsrContact,
+  item: profile,
   onOpen,
   onPress,
   isSelected,
   selectMode,
 }: {
-  item: DriveSearchResult<ContactFile>;
+  item: DotYouProfile;
   onOpen?: (conversationId: string) => void;
   onPress?: () => void;
   isSelected?: boolean;
   selectMode?: boolean;
 }) => {
-  const contact = dsrContact.fileMetadata.appData.content as ContactFile;
-  const odinId = contact.odinId;
+  const { data: contactData } = useContact(profile.odinId).fetch;
+  const contact: ContactFile | undefined = contactData?.fileMetadata.appData.content;
   const { isDarkMode } = useDarkMode();
 
   const { mutateAsync: createNew } = useConversation().create;
   const onClick = async () => {
-    if (!odinId) return;
+    if (!contact) return;
     try {
       const results = await createNew({
-        recipients: [odinId],
+        recipients: [profile.odinId],
         title: contact.name?.displayName,
       });
       if (onOpen) onOpen(results.newConversationId);
@@ -47,17 +47,19 @@ export const ContactTile = ({
           },
         ]}
       >
-        <OdinImage
-          targetDrive={ContactConfig.ContactTargetDrive}
-          fit="cover"
-          alt={contact.name?.displayName}
-          fileId={dsrContact.fileId}
-          enableZoom={false}
-          avoidPayload={true}
-          imageSize={{ width: 48, height: 48 }}
-          fileKey={'prfl_pic'}
-          style={styles.tinyLogo}
-        />
+        {contact && contactData && (
+          <OdinImage
+            targetDrive={ContactConfig.ContactTargetDrive}
+            fit="cover"
+            alt={contact.name?.displayName}
+            fileId={contactData?.fileId}
+            enableZoom={false}
+            avoidPayload={true}
+            imageSize={{ width: 48, height: 48 }}
+            fileKey={'prfl_pic'}
+            style={styles.tinyLogo}
+          />
+        )}
         <View style={[styles.content]}>
           <Text
             style={[
@@ -67,7 +69,9 @@ export const ContactTile = ({
               },
             ]}
           >
-            {contact.name?.displayName ?? contact.name?.givenName ?? contact.name?.additionalName}
+            {contact?.name?.displayName ??
+              contact?.name?.givenName ??
+              contact?.name?.additionalName}
           </Text>
           <Text
             style={[
@@ -77,7 +81,7 @@ export const ContactTile = ({
               },
             ]}
           >
-            {contact.odinId}
+            {contact?.odinId}
           </Text>
         </View>
         {selectMode && (

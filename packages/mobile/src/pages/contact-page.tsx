@@ -3,7 +3,7 @@ import { FlatList } from 'react-native-gesture-handler';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { ChatStackParamList } from '../app/App';
 
-import { useAllConnections, useAllContacts } from 'feed-app-common';
+import { useAllConnections } from 'feed-app-common';
 
 import { ContactTile, Tile } from '../components/ui/Contact/Contact-Tile';
 import { Users } from '../components/ui/Icons/icons';
@@ -29,15 +29,13 @@ export const ContactPage = ({
   navigation: NavigationProp<ChatStackParamList, 'NewChat'>;
 }) => {
   const connections = useAllConnections(true).data;
-  console.log('connections', connections?.map((connection) => connection.odinId));
 
-  const contacts = useAllContacts(true).data;
-  if (!contacts) return null;
+  if (!connections) return null;
   return (
     <>
       <FlatList
-        data={contacts}
-        keyExtractor={(item) => item.fileId}
+        data={connections}
+        keyExtractor={(item) => item.odinId}
         ListHeaderComponent={ListHeaderComponent}
         renderItem={({ item }) => (
           <ContactTile

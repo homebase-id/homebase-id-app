@@ -1,10 +1,11 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import React, { useState } from 'react';
+
 import { ProfileStackParamList } from '../../app/App';
 import { FlatList, RefreshControl, View } from 'react-native';
 import { useConnections } from '../../hooks/connections/useConnections';
 import NoItems from '../../components/list/noItems';
 import IdentityItem from '../../components/list/identityItem';
+import { useState } from 'react';
 
 type ConnectionsProps = NativeStackScreenProps<ProfileStackParamList, 'Connections'>;
 

@@ -1,10 +1,8 @@
-import { useAllContacts } from 'feed-app-common';
+import { useAllConnections } from 'feed-app-common';
 import { ActivityIndicator, FlatList, Platform, Text } from 'react-native';
 import { ContactTile } from '../components/ui/Contact/Contact-Tile';
 
 import { useCallback, useState } from 'react';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
-import { ContactFile } from '@youfoundation/js-lib/network';
 import { Header, HeaderBackButtonProps } from '@react-navigation/elements';
 import { BackButton } from '../components/ui/convo-app-bar';
 import { TouchableOpacity } from 'react-native-gesture-handler';
@@ -12,12 +10,13 @@ import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { ChatStackParamList, RootStackParamList } from '../app/App';
 import { useConversation } from '../hooks/chat/useConversation';
 import Dialog from 'react-native-dialog';
+import { DotYouProfile } from '@youfoundation/js-lib/network';
 
 export const NewGroupPage = () => {
-  const contacts = useAllContacts(true).data;
+  const contacts = useAllConnections(true).data;
   const [dialogVisible, setDialogVisible] = useState(false);
 
-  const [selectedContacts, setSetselectedContacts] = useState<DriveSearchResult<ContactFile>[]>([]);
+  const [selectedContacts, setSetselectedContacts] = useState<DotYouProfile[]>([]);
   const navigation = useNavigation<NavigationProp<ChatStackParamList, 'NewChat'>>();
   const { mutateAsync: createNew } = useConversation().create;
 
@@ -25,9 +24,7 @@ export const NewGroupPage = () => {
 
   const createGroupCallback = useCallback(async () => {
     const { newConversationId } = await createNew({
-      recipients: selectedContacts.map(
-        (contact) => contact.fileMetadata.appData.content.odinId as string
-      ),
+      recipients: selectedContacts.map((contact) => contact.odinId as string),
       title: groupTitle,
     });
 
@@ -67,7 +64,7 @@ export const NewGroupPage = () => {
       />
       <FlatList
         data={contacts}
-        keyExtractor={(item) => item.fileId}
+        keyExtractor={(item) => item.odinId}
         renderItem={({ item }) => (
           <ContactTile
             item={item}
@@ -102,7 +99,7 @@ function CreateGroup(props: {
   onPress: () => void;
 }) {
   const [loading, setloading] = useState(false);
-  const navigation = useNavigation<NavigationProp<RootStackParamList, 'NewChat'>>();
+  const navigation = useNavigation<NavigationProp<ChatStackParamList, 'NewChat'>>();
   if (loading) {
     return (
       <ActivityIndicator
