@@ -19,6 +19,8 @@ import { ChatMessage } from '../../../provider/chat/ChatProvider';
 import { Users } from '../Icons/icons';
 import { useDarkMode } from '../../../hooks/useDarkMode';
 import { useExternalOdinId } from '../../../hooks/connections/useExternalOdinId';
+import { ellipsisAtMaxChar } from 'feed-app-common';
+import { ChatSentTimeIndicator } from './Chat-Sent-Time-Indicator';
 
 type ConversationTileProps = {
   onPress?: () => void;
@@ -81,6 +83,17 @@ const ConversationTile = (props: ConversationTileProps) => {
   const isGroup = 'recipients' in props.conversation && props.conversation.recipients !== undefined;
 
   const lastMessage = flatMessages?.[0];
+
+  // const lastReadTime = props.conversation.lastReadTime;
+  // const unreadCount =
+  //   flatMessages && lastReadTime
+  //     ? flatMessages.filter(
+  //         (msg) => msg.fileMetadata.senderOdinId && msg.fileMetadata.created >= lastReadTime
+  //       ).length
+  //     : 0;
+
+  const lastMessageContent = lastMessage?.fileMetadata.appData.content;
+
   return (
     <TouchableOpacity onPress={props.onPress} onLongPress={props.onLongPress}>
       <View
@@ -93,7 +106,12 @@ const ConversationTile = (props: ConversationTileProps) => {
       >
         {!isGroup ? <Avatar odinId={props.odinId} /> : <GroupAvatar />}
 
-        <View style={styles.content}>
+        <View
+          style={{
+            ...styles.content,
+            flex: 1,
+          }}
+        >
           <Text
             style={[
               styles.title,
@@ -108,7 +126,7 @@ const ConversationTile = (props: ConversationTileProps) => {
             {props.isSelf ? <Text style={styles.you}>(you)</Text> : null}
           </Text>
 
-          {lastMessage ? (
+          {lastMessage && lastMessageContent ? (
             <Text
               numberOfLines={1}
               style={[
@@ -118,10 +136,13 @@ const ConversationTile = (props: ConversationTileProps) => {
                 },
               ]}
             >
-              {lastMessage.fileMetadata.appData.content.message || '📸 Media'}
+              {lastMessageContent.message
+                ? ellipsisAtMaxChar(lastMessageContent.message, 30)
+                : '📸 Media'}
             </Text>
           ) : null}
         </View>
+        <View>{lastMessage && <ChatSentTimeIndicator msg={lastMessage} keepDetail={false} />}</View>
       </View>
     </TouchableOpacity>
   );
