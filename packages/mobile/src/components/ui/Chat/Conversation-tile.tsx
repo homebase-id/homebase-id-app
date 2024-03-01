@@ -21,6 +21,11 @@ import { useDarkMode } from '../../../hooks/useDarkMode';
 import { useExternalOdinId } from '../../../hooks/connections/useExternalOdinId';
 import { ellipsisAtMaxChar } from 'feed-app-common';
 import { ChatSentTimeIndicator } from './Chat-Sent-Time-Indicator';
+import useContact from '../../../hooks/contact/useContact';
+import { OdinImage } from '../OdinImage/OdinImage';
+import { CONTACT_PROFILE_IMAGE_KEY, ContactConfig } from '@youfoundation/js-lib/network';
+import { useProfile } from '../../../hooks/profile/useProfile';
+import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
 
 type ConversationTileProps = {
   onPress?: () => void;
@@ -31,13 +36,41 @@ type ConversationTileProps = {
   isSelf?: boolean;
 };
 
-export const Avatar = (props: { odinId: string | null; style?: StyleProp<ImageStyle> }) => {
+export const Avatar = (props: { odinId: string; style?: ImageStyle }) => {
+  const contact = useContact(props.odinId).fetch.data;
   return (
-    <Image
-      source={{
-        uri: `https://${props.odinId}/pub/image`,
+    <OdinImage
+      fileId={contact?.fileId}
+      fileKey={CONTACT_PROFILE_IMAGE_KEY}
+      targetDrive={ContactConfig.ContactTargetDrive}
+      imageSize={{ width: 48, height: 48 }}
+      avoidPayload={true}
+      enableZoom={false}
+      fit="cover"
+      odinId={props.odinId}
+      style={{
+        ...styles.tinyLogo,
+        ...props.style,
       }}
-      style={[styles.tinyLogo, props.style]}
+    />
+  );
+};
+
+export const OwnerAvatar = (props: { style?: ImageStyle }) => {
+  const profile = useProfile().data;
+  return (
+    <OdinImage
+      fit="cover"
+      targetDrive={GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId)}
+      fileId={profile?.profileImageFileId}
+      fileKey={profile?.profileImageFileKey}
+      avoidPayload={true}
+      enableZoom={false}
+      imageSize={{ width: 48, height: 48 }}
+      style={{
+        ...styles.tinyLogo,
+        ...props.style,
+      }}
     />
   );
 };
@@ -104,7 +137,15 @@ const ConversationTile = (props: ConversationTileProps) => {
           },
         ]}
       >
-        {!isGroup ? <Avatar odinId={props.odinId} /> : <GroupAvatar />}
+        {!isGroup ? (
+          props.isSelf ? (
+            <OwnerAvatar />
+          ) : (
+            <Avatar odinId={props.odinId} />
+          )
+        ) : (
+          <GroupAvatar />
+        )}
 
         <View
           style={{

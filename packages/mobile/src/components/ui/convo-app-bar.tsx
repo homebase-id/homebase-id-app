@@ -1,25 +1,8 @@
-import { Avatar } from './Chat/Conversation-tile';
 import { ComposeChat } from './Icons/icons';
 import { Platform, StyleProp, TouchableOpacity, ViewStyle } from 'react-native';
 import { HeaderBackButton, HeaderBackButtonProps } from '@react-navigation/elements';
 import { Colors } from '../../app/Colors';
-import { useDotYouClientContext } from 'feed-app-common';
 import { useDarkMode } from '../../hooks/useDarkMode';
-
-//TODO: Refactor
-export const ProfileAvatar = () => {
-  const user = useDotYouClientContext().getIdentity();
-  return (
-    <Avatar
-      odinId={user}
-      style={{
-        width: 36,
-        height: 36,
-        // marginLeft: 16,
-      }}
-    />
-  );
-};
 
 export const HeaderActions = (props: {
   onPress: () => void;

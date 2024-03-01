@@ -32,7 +32,7 @@ const ReplyMessageBar = ({ clearReply, message }: ReplyMessageBarProps) => {
         <Text
           numberOfLines={1}
           style={{
-            color: isDarkMode ? 'white' : 'black',
+            color: isDarkMode ? Colors.white : Colors.black,
           }}
         >
           {message.text.length === 0 ? '📷 Media' : message.text}

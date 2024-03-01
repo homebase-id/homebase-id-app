@@ -1,5 +1,5 @@
 import { Pressable, StyleSheet, View } from 'react-native';
-import { Avatar, GroupAvatar } from './Conversation-tile';
+import { Avatar, GroupAvatar, OwnerAvatar } from './Conversation-tile';
 import { Header, HeaderBackButton } from '@react-navigation/elements';
 import { useProfile } from '../../../hooks/profile/useProfile';
 
@@ -25,7 +25,8 @@ export const ChatAppBar = ({
         flexDirection: 'row',
         display: 'flex',
         alignItems: 'center',
-      }}>
+      }}
+    >
       <HeaderBackButton
         style={{ left: 0 }}
         canGoBack={true}
@@ -35,7 +36,11 @@ export const ChatAppBar = ({
         // tintColor={isDarkMode ? Colors.white : Colors.black}
       />
       {!group ? (
-        <Avatar odinId={odinId} style={styles.avatar} />
+        isSelf ? (
+          <OwnerAvatar style={styles.avatar} />
+        ) : (
+          <Avatar odinId={odinId} style={styles.avatar} />
+        )
       ) : (
         <GroupAvatar style={styles.avatar} />
       )}
@@ -56,7 +61,8 @@ export const ChatAppBar = ({
             zIndex: 10,
             // backgroundColor: 'black',
           },
-        ]}>
+        ]}
+      >
         <Header
           title={!isSelf ? title : `${user?.firstName} ${user?.surName} (you)`}
           headerTitleAlign="left"

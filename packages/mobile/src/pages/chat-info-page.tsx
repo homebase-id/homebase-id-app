@@ -2,8 +2,12 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Linking, StyleSheet, Text, View } from 'react-native';
 import { ChatStackParamList } from '../app/App';
 import { useConversation } from '../hooks/chat/useConversation';
-import { Avatar, GroupAvatar } from '../components/ui/Chat/Conversation-tile';
-import { GroupConversation, SingleConversation } from '../provider/chat/ConversationProvider';
+import { Avatar, GroupAvatar, OwnerAvatar } from '../components/ui/Chat/Conversation-tile';
+import {
+  ConversationWithYourselfId,
+  GroupConversation,
+  SingleConversation,
+} from '../provider/chat/ConversationProvider';
 import { Home } from '../components/ui/Icons/icons';
 
 import { useCallback } from 'react';
@@ -23,6 +27,8 @@ export function ChatInfoPage(prop: ChatInfoProp) {
   const { data: conversation } = useConversation({ conversationId }).single;
   const { isDarkMode } = useDarkMode();
   const identity = useAuth().getIdentity();
+
+  const isSelf = conversationId === ConversationWithYourselfId;
 
   const onPress = useCallback(async () => {
     const recipient = (conversation?.fileMetadata.appData.content as SingleConversation).recipient;
@@ -78,10 +84,14 @@ export function ChatInfoPage(prop: ChatInfoProp) {
       </View>
       <View style={styles.content}>
         {!group ? (
-          <Avatar
-            odinId={(conversationContent as SingleConversation).recipient}
-            style={styles.avatar}
-          />
+          isSelf ? (
+            <OwnerAvatar style={styles.avatar} />
+          ) : (
+            <Avatar
+              odinId={(conversationContent as SingleConversation).recipient}
+              style={styles.avatar}
+            />
+          )
         ) : (
           <GroupAvatar style={styles.avatar} iconSize={'2xl'} />
         )}
