@@ -198,7 +198,8 @@ export const getThumbBytes = async (
     .then(async (res) => {
       if (res.info().status !== 200) throw new Error(`Failed to fetch thumb ${res.info().status}`);
 
-      const imageBlob = new OdinBlob(res.path(), {
+      // Android filePaths need to start with file://
+      const imageBlob = new OdinBlob(`file://${res.path()}`, {
         type: res.info().headers.decryptedcontenttype,
       });
 
@@ -216,17 +217,7 @@ export const getThumbBytes = async (
       } else if (res.info().headers.payloadencrypted === 'True') {
         throw new Error("Can't decrypt; missing keyheader");
       } else {
-        // The downloaded file will be removed after this promise is resolved, so we need a copy
-        const newPath = `file://${RNFS.CachesDirectoryPath}/${fileId}@full.${
-          imageBlob.type.split('/')[1]
-        }`;
-        if (!(await RNFS.exists(newPath))) {
-          await RNFS.copyFile(res.path(), newPath);
-        }
-
-        return new OdinBlob(newPath, {
-          type: imageBlob.type,
-        });
+        return imageBlob;
       }
     })
     .catch((err) => {
@@ -285,7 +276,8 @@ export const getPayloadBytes = async (
         throw new Error(`Failed to fetch payload ${res.info().status}`);
       }
 
-      const imageBlob = new OdinBlob(res.path(), {
+      // Android filePaths need to start with file://
+      const imageBlob = new OdinBlob(`file://${res.path()}`, {
         type: res.info().headers.decryptedcontenttype,
       });
 
@@ -303,17 +295,7 @@ export const getPayloadBytes = async (
       } else if (res.info().headers.payloadencrypted === 'True') {
         throw new Error("Can't decrypt; missing keyheader");
       } else {
-        // The downloaded file will be removed after this promise is resolved, so we need a copy
-        const newPath = `file://${RNFS.CachesDirectoryPath}/${fileId}@full.${
-          imageBlob.type.split('/')[1]
-        }`;
-        if (!(await RNFS.exists(newPath))) {
-          await RNFS.copyFile(res.path(), newPath);
-        }
-
-        return new OdinBlob(newPath, {
-          type: imageBlob.type,
-        });
+        return imageBlob;
       }
     })
     .catch((err) => {
