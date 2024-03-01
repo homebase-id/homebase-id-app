@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import {
-  Image,
   ImageStyle,
   StyleProp,
   StyleSheet,
@@ -109,9 +108,9 @@ const ConversationTile = (props: ConversationTileProps) => {
     [data]
   );
   const darkMode = useDarkMode();
-  const { data: connectionDetails } = useExternalOdinId({
-    odinId: props.odinId,
-  }).fetch;
+  const { data: connection } = useContact().fetch;
+
+  const connectionDetails = connection?.fileMetadata.appData.content;
 
   const isGroup = 'recipients' in props.conversation && props.conversation.recipients !== undefined;
 
@@ -163,7 +162,8 @@ const ConversationTile = (props: ConversationTileProps) => {
           >
             {isGroup || props.isSelf
               ? props.conversation.title
-              : connectionDetails?.name ?? props.odinId}
+              : (connectionDetails?.name?.displayName || connectionDetails?.name?.givenName) ??
+                props.odinId}
             {props.isSelf ? <Text style={styles.you}>(you)</Text> : null}
           </Text>
 
