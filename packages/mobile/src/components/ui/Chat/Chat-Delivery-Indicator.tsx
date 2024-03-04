@@ -4,8 +4,13 @@ import { useDotYouClientContext } from 'feed-app-common';
 import { View } from 'react-native';
 import { Clock, SubtleCheck } from '../Icons/icons';
 import { Colors } from '../../../app/Colors';
+import { ChatMessageIMessage } from '../../../pages/chat-page';
 
-export const ChatDeliveryIndicator = ({ msg }: { msg: DriveSearchResult<ChatMessage> }) => {
+export const ChatDeliveryIndicator = ({
+  msg,
+}: {
+  msg: ChatMessageIMessage | DriveSearchResult<ChatMessage>;
+}) => {
   const identity = useDotYouClientContext().getIdentity();
   const content = msg.fileMetadata.appData.content;
   const authorOdinId = msg.fileMetadata.senderOdinId;
@@ -41,7 +46,7 @@ export const InnerDeliveryIndicator = ({ state }: { state?: ChatDeliveryStatus }
         {isSent ? (
           <SubtleCheck size={'sm'} color={isRead ? Colors.blue[600] : undefined} />
         ) : (
-          <Clock />
+          <Clock size={'sm'} />
         )}
       </View>
     </View>

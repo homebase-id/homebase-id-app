@@ -51,6 +51,8 @@ import ChatMessageBox from '../components/ui/Chat/Chat-Message-box';
 import { OdinImage } from '../components/ui/OdinImage/OdinImage';
 import { useDarkMode } from '../hooks/useDarkMode';
 import useContact from '../hooks/contact/useContact';
+import { useMarkMessagesAsRead } from '../hooks/chat/useMarkMessagesAsRead';
+import { ChatDeliveryIndicator } from '../components/ui/Chat/Chat-Delivery-Indicator';
 
 export type ChatProp = NativeStackScreenProps<ChatStackParamList, 'ChatScreen'>;
 
@@ -251,6 +253,8 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
     resetState,
   ]);
 
+  useMarkMessagesAsRead({ conversation: conversationContent, messages });
+
   const doSend = useCallback(
     (message: IMessage[]) => {
       console.log('Sending message', message);
@@ -331,6 +335,10 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
           return (
             <Bubble
               {...props}
+              renderTicks={(message) => {
+                const msg = message as ChatMessageIMessage;
+                return <ChatDeliveryIndicator msg={msg} />;
+              }}
               renderTime={(props) => {
                 return (
                   <Time
@@ -340,14 +348,20 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
                         ? {
                             left: {
                               color: isDarkMode ? Colors.white : Colors.black,
+                              fontSize: 12,
                             },
                             right: {
                               color: isDarkMode ? Colors.white : Colors.black,
+                              fontSize: 12,
                             },
                           }
                         : {
                             right: {
+                              fontSize: 12,
                               color: !isDarkMode ? Colors.slate[600] : undefined,
+                            },
+                            left: {
+                              fontSize: 12,
                             },
                           }
                     }

@@ -123,7 +123,6 @@ const ConversationTile = (props: ConversationTileProps) => {
           (msg) => msg.fileMetadata.senderOdinId && msg.fileMetadata.created >= lastReadTime
         ).length
       : 0;
-  console.log('unreadCount', unreadCount);
 
   const lastMessageContent = lastMessage?.fileMetadata.appData.content;
 
