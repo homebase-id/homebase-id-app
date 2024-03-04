@@ -129,7 +129,6 @@ const RootStack = () => {
 const StackAuthenticated = createNativeStackNavigator<RootStackParamList>();
 const AuthenticatedStack = () => {
   useValidTokenCheck();
-  useLiveChatProcessor();
 
   return (
     <DotYouClientProvider>
@@ -150,6 +149,7 @@ const AuthenticatedStack = () => {
 
 const StackTab = createNativeStackNavigator<TabStackParamList>();
 const TabStack = () => {
+  const isLive = useLiveChatProcessor();
   return (
     <StackTab.Navigator screenOptions={{ headerShown: false }}>
       <StackTab.Screen name="Feed" component={FeedPage} />
