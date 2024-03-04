@@ -149,7 +149,7 @@ const AuthenticatedStack = () => {
 
 const StackTab = createNativeStackNavigator<TabStackParamList>();
 const TabStack = () => {
-  const isLive = useLiveChatProcessor();
+  useLiveChatProcessor();
   return (
     <StackTab.Navigator screenOptions={{ headerShown: false }}>
       <StackTab.Screen name="Feed" component={FeedPage} />

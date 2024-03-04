@@ -345,11 +345,26 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
                               color: isDarkMode ? Colors.white : Colors.black,
                             },
                           }
-                        : undefined
+                        : {
+                            right: {
+                              color: !isDarkMode ? Colors.slate[600] : undefined,
+                            },
+                          }
                     }
                   />
                 );
               }}
+              tickStyle={{
+                color: isDarkMode ? Colors.white : Colors.black,
+              }}
+              textStyle={
+                showBackground
+                  ? {
+                      left: { color: isDarkMode ? Colors.white : Colors.black },
+                      right: { color: isDarkMode ? Colors.white : Colors.black },
+                    }
+                  : {}
+              }
               wrapperStyle={
                 !showBackground
                   ? {
@@ -360,7 +375,18 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
                         backgroundColor: 'transparent',
                       },
                     }
-                  : undefined
+                  : {
+                      left: {
+                        backgroundColor: isDarkMode
+                          ? `${Colors.gray[300]}4D`
+                          : `${Colors.gray[500]}1A`,
+                      },
+                      right: {
+                        backgroundColor: isDarkMode
+                          ? `${Colors.indigo[500]}33`
+                          : `${Colors.indigo[500]}1A`,
+                      },
+                    }
               }
             />
           );
@@ -410,7 +436,7 @@ const RenderReplyMessageView = (props: BubbleProps<ChatMessageIMessage>) => {
           styles.replyMessageContainer,
           {
             borderLeftColor: props.position === 'left' ? Colors.blue[500] : Colors.purple[500],
-            backgroundColor: Colors.blue[100],
+            backgroundColor: `${Colors.indigo[500]}1A`,
           },
         ]}
       >
@@ -428,7 +454,7 @@ const RenderReplyMessageView = (props: BubbleProps<ChatMessageIMessage>) => {
           <Text
             style={{
               fontSize: 14,
-              marginTop: 6,
+              marginTop: 4,
             }}
           >
             {replyMessage?.fileMetadata.appData.content.message}
@@ -467,7 +493,7 @@ const styles = StyleSheet.create({
   },
   replyMessageContainer: {
     padding: 8,
-    paddingBottom: 0,
+    paddingBottom: 8,
     display: 'flex',
     flexDirection: 'row',
     borderLeftWidth: 6,

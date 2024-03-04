@@ -3,6 +3,7 @@ import { ChatMessage } from '../../../provider/chat/ChatProvider';
 import { Text } from 'react-native';
 import { formatToTimeAgoWithRelativeDetail } from 'feed-app-common';
 import { Colors } from '../../../app/Colors';
+import { useDarkMode } from '../../../hooks/useDarkMode';
 
 export const ChatSentTimeIndicator = ({
   msg,
@@ -11,12 +12,13 @@ export const ChatSentTimeIndicator = ({
   msg: DriveSearchResult<ChatMessage>;
   keepDetail?: boolean;
 }) => {
+  const { isDarkMode } = useDarkMode();
   if (!msg.fileMetadata.created) return null;
 
   const date = new Date(msg.fileMetadata.created);
   if (!date) return <Text>Unknown</Text>;
   return (
-    <Text style={{ fontSize: 12, color: Colors.slate[300] }}>
+    <Text style={{ fontSize: 12, color: isDarkMode ? Colors.slate[300] : Colors.slate[500] }}>
       {formatToTimeAgoWithRelativeDetail(date, keepDetail)}
     </Text>
   );
