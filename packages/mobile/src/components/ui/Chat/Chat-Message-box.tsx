@@ -1,8 +1,5 @@
 import { View, StyleSheet, Animated } from 'react-native';
-import {
-  GestureHandlerRootView,
-  Swipeable,
-} from 'react-native-gesture-handler';
+import { GestureHandlerRootView, Swipeable } from 'react-native-gesture-handler';
 import { Message, MessageProps } from 'react-native-gifted-chat';
 import { isSameDay, isSameUser } from 'react-native-gifted-chat/lib/utils';
 import { Reply } from '../Icons/icons';
@@ -13,20 +10,14 @@ type ChatMessageBoxProps = {
   updateRowRef: (ref: any) => void;
 } & MessageProps<ChatMessageIMessage>;
 
-const ChatMessageBox = ({
-  setReplyOnSwipeOpen,
-  updateRowRef,
-  ...props
-}: ChatMessageBoxProps) => {
+const ChatMessageBox = ({ setReplyOnSwipeOpen, updateRowRef, ...props }: ChatMessageBoxProps) => {
   const isNextMyMessage =
     props.currentMessage &&
     props.nextMessage &&
     isSameUser(props.currentMessage, props.nextMessage) &&
     isSameDay(props.currentMessage, props.nextMessage);
 
-  const renderRightAction = (
-    progressAnimatedValue: Animated.AnimatedInterpolation<number>,
-  ) => {
+  const renderRightAction = (progressAnimatedValue: Animated.AnimatedInterpolation<number>) => {
     const size = progressAnimatedValue.interpolate({
       inputRange: [0, 1, 100],
       outputRange: [0, 1, 1],
@@ -41,11 +32,10 @@ const ChatMessageBox = ({
         style={[
           styles.container,
           { transform: [{ scale: size }, { translateX: trans }] },
-          isNextMyMessage
-            ? styles.defaultBottomOffset
-            : styles.bottomOffsetNext,
+          isNextMyMessage ? styles.defaultBottomOffset : styles.bottomOffsetNext,
           props.position === 'right' && styles.leftOffsetValue,
-        ]}>
+        ]}
+      >
         <View style={styles.replyImageWrapper}>
           <Reply />
         </View>
@@ -66,7 +56,8 @@ const ChatMessageBox = ({
         friction={2}
         rightThreshold={40}
         renderRightActions={renderRightAction}
-        onSwipeableOpen={onSwipeOpenAction}>
+        onSwipeableOpen={onSwipeOpenAction}
+      >
         <Message {...props} />
       </Swipeable>
     </GestureHandlerRootView>

@@ -51,6 +51,8 @@ import ChatMessageBox from '../components/ui/Chat/Chat-Message-box';
 import { OdinImage } from '../components/ui/OdinImage/OdinImage';
 import { useDarkMode } from '../hooks/useDarkMode';
 import useContact from '../hooks/contact/useContact';
+import { useMarkMessagesAsRead } from '../hooks/chat/useMarkMessagesAsRead';
+import { ChatDeliveryIndicator } from '../components/ui/Chat/Chat-Delivery-Indicator';
 
 export type ChatProp = NativeStackScreenProps<ChatStackParamList, 'ChatScreen'>;
 
@@ -251,6 +253,8 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
     resetState,
   ]);
 
+  useMarkMessagesAsRead({ conversation: conversationContent, messages });
+
   const doSend = useCallback(
     (message: IMessage[]) => {
       console.log('Sending message', message);
@@ -331,6 +335,10 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
           return (
             <Bubble
               {...props}
+              renderTicks={(message) => {
+                const msg = message as ChatMessageIMessage;
+                return <ChatDeliveryIndicator msg={msg} />;
+              }}
               renderTime={(props) => {
                 return (
                   <Time
@@ -340,16 +348,37 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
                         ? {
                             left: {
                               color: isDarkMode ? Colors.white : Colors.black,
+                              fontSize: 12,
                             },
                             right: {
                               color: isDarkMode ? Colors.white : Colors.black,
+                              fontSize: 12,
                             },
                           }
-                        : undefined
+                        : {
+                            right: {
+                              fontSize: 12,
+                              color: !isDarkMode ? Colors.slate[600] : undefined,
+                            },
+                            left: {
+                              fontSize: 12,
+                            },
+                          }
                     }
                   />
                 );
               }}
+              tickStyle={{
+                color: isDarkMode ? Colors.white : Colors.black,
+              }}
+              textStyle={
+                showBackground
+                  ? {
+                      left: { color: isDarkMode ? Colors.white : Colors.black },
+                      right: { color: isDarkMode ? Colors.white : Colors.black },
+                    }
+                  : {}
+              }
               wrapperStyle={
                 !showBackground
                   ? {
@@ -360,7 +389,18 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
                         backgroundColor: 'transparent',
                       },
                     }
-                  : undefined
+                  : {
+                      left: {
+                        backgroundColor: isDarkMode
+                          ? `${Colors.gray[300]}4D`
+                          : `${Colors.gray[500]}1A`,
+                      },
+                      right: {
+                        backgroundColor: isDarkMode
+                          ? `${Colors.indigo[500]}33`
+                          : `${Colors.indigo[500]}1A`,
+                      },
+                    }
               }
             />
           );
@@ -410,7 +450,7 @@ const RenderReplyMessageView = (props: BubbleProps<ChatMessageIMessage>) => {
           styles.replyMessageContainer,
           {
             borderLeftColor: props.position === 'left' ? Colors.blue[500] : Colors.purple[500],
-            backgroundColor: Colors.blue[100],
+            backgroundColor: `${Colors.indigo[500]}1A`,
           },
         ]}
       >
@@ -428,7 +468,7 @@ const RenderReplyMessageView = (props: BubbleProps<ChatMessageIMessage>) => {
           <Text
             style={{
               fontSize: 14,
-              marginTop: 6,
+              marginTop: 4,
             }}
           >
             {replyMessage?.fileMetadata.appData.content.message}
@@ -467,7 +507,7 @@ const styles = StyleSheet.create({
   },
   replyMessageContainer: {
     padding: 8,
-    paddingBottom: 0,
+    paddingBottom: 8,
     display: 'flex',
     flexDirection: 'row',
     borderLeftWidth: 6,

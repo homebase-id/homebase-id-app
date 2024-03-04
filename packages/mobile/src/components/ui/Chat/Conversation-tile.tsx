@@ -17,7 +17,6 @@ import { useChatMessages } from '../../../hooks/chat/useChatMessages';
 import { ChatMessage } from '../../../provider/chat/ChatProvider';
 import { Users } from '../Icons/icons';
 import { useDarkMode } from '../../../hooks/useDarkMode';
-import { useExternalOdinId } from '../../../hooks/connections/useExternalOdinId';
 import { ellipsisAtMaxChar } from 'feed-app-common';
 import { ChatSentTimeIndicator } from './Chat-Sent-Time-Indicator';
 import useContact from '../../../hooks/contact/useContact';
@@ -25,6 +24,7 @@ import { OdinImage } from '../OdinImage/OdinImage';
 import { CONTACT_PROFILE_IMAGE_KEY, ContactConfig } from '@youfoundation/js-lib/network';
 import { useProfile } from '../../../hooks/profile/useProfile';
 import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
+import { ChatDeliveryIndicator } from './Chat-Delivery-Indicator';
 
 type ConversationTileProps = {
   onPress?: () => void;
@@ -116,13 +116,13 @@ const ConversationTile = (props: ConversationTileProps) => {
 
   const lastMessage = flatMessages?.[0];
 
-  // const lastReadTime = props.conversation.lastReadTime;
-  // const unreadCount =
-  //   flatMessages && lastReadTime
-  //     ? flatMessages.filter(
-  //         (msg) => msg.fileMetadata.senderOdinId && msg.fileMetadata.created >= lastReadTime
-  //       ).length
-  //     : 0;
+  const lastReadTime = props.conversation.lastReadTime;
+  const unreadCount =
+    flatMessages && lastReadTime
+      ? flatMessages.filter(
+          (msg) => msg.fileMetadata.senderOdinId && msg.fileMetadata.created >= lastReadTime
+        ).length
+      : 0;
 
   const lastMessageContent = lastMessage?.fileMetadata.appData.content;
 
@@ -168,22 +168,52 @@ const ConversationTile = (props: ConversationTileProps) => {
           </Text>
 
           {lastMessage && lastMessageContent ? (
-            <Text
-              numberOfLines={1}
-              style={[
-                styles.description,
-                {
-                  color: darkMode.isDarkMode ? Colors.white : Colors.slate[900],
-                },
-              ]}
+            <View
+              style={{
+                flexDirection: 'row',
+                alignContent: 'flex-start',
+              }}
             >
-              {lastMessageContent.message
-                ? ellipsisAtMaxChar(lastMessageContent.message, 30)
-                : '📸 Media'}
-            </Text>
+              <ChatDeliveryIndicator msg={lastMessage} />
+              <Text
+                numberOfLines={1}
+                style={[
+                  styles.description,
+                  {
+                    color: darkMode.isDarkMode ? Colors.white : Colors.slate[900],
+                  },
+                ]}
+              >
+                {lastMessageContent.message
+                  ? ellipsisAtMaxChar(lastMessageContent.message, 30)
+                  : '📸 Media'}
+              </Text>
+            </View>
           ) : null}
         </View>
-        <View>{lastMessage && <ChatSentTimeIndicator msg={lastMessage} keepDetail={false} />}</View>
+        <View>
+          {lastMessage && <ChatSentTimeIndicator msg={lastMessage} keepDetail={false} />}
+          {unreadCount > 0 ? (
+            <View
+              style={{
+                backgroundColor: darkMode.isDarkMode ? Colors.blue[500] : Colors.blue[100],
+                borderRadius: 8,
+                padding: 4,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <Text
+                style={{
+                  color: darkMode.isDarkMode ? Colors.white : Colors.blue[900],
+                  fontSize: 12,
+                }}
+              >
+                {unreadCount}
+              </Text>
+            </View>
+          ) : null}
+        </View>
       </View>
     </TouchableOpacity>
   );
