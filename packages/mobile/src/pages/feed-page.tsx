@@ -1,11 +1,11 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 
 import { TabStackParamList } from '../app/App';
 import { SafeAreaView } from '../components/ui/SafeAreaView/SafeAreaView';
 import WebView from 'react-native-webview';
 import { uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
-import { TouchableOpacity, View } from 'react-native';
+import { RefreshControl, TouchableOpacity, View } from 'react-native';
 import { useAuth } from '../hooks/auth/useAuth';
 import { Text } from '../components/ui/Text/Text';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -15,6 +15,7 @@ import { GetTargetDriveFromProfileId, BuiltInProfiles } from '@youfoundation/js-
 import { OdinImage } from '../components/ui/OdinImage/OdinImage';
 import { Bars, ChatIcon } from '../components/ui/Icons/icons';
 import { useDarkMode } from '../hooks/useDarkMode';
+import { ScrollView } from 'react-native-gesture-handler';
 
 type FeedProps = NativeStackScreenProps<TabStackParamList, 'Feed'>;
 
@@ -58,6 +59,20 @@ const FeedPage = (_props: FeedProps) => {
 
   const insets = useSafeAreaInsets();
   const [hideHeader, setHideHeader] = useState<boolean>();
+  const [refreshing, setRefreshing] = useState(false);
+  const [refresherEnabled, setEnableRefresher] = useState(true);
+  const webviewRef = useRef<WebView>(undefined);
+
+  //Code to get scroll position
+  const handleScroll = (event: any) => {
+    const yOffset = Number(event.nativeEvent.contentOffset.y);
+    if (yOffset === 0) {
+      setEnableRefresher(true);
+    } else if (refresherEnabled) {
+      setEnableRefresher(false);
+    }
+  };
+
   const headerHeight = 40;
 
   const { data: profile } = useProfile();
@@ -133,24 +148,39 @@ const FeedPage = (_props: FeedProps) => {
         </View>
       )}
       {identity && uri ? (
-        <WebView
-          ref={(ref) => (webviewRef = ref)}
-          source={{ uri: uri }}
-          injectedJavaScriptBeforeContentLoaded={INJECTED_JAVASCRIPT}
-          pullToRefreshEnabled={true}
-          containerStyle={{
-            paddingTop: hideHeader ? 0 : insets.top + headerHeight,
-          }}
-          style={{ backgroundColor: Colors.slate[50] }}
-          originWhitelist={originWhitelist} // Keeps the WebView from navigating away from the feed-app; Any links that don't match will be opened by the system.. Eg: open in the browser
-          onMessage={(event) => console.warn(event)}
-          onScroll={(event) => {
-            const scrollOffset = event.nativeEvent.contentOffset.y;
-            if (scrollOffset > 20) setHideHeader(true);
-            else setHideHeader(false);
-          }}
-          forceDarkOn={isDarkMode}
-        />
+        <ScrollView
+          contentContainerStyle={{ flex: 1 }}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              enabled={refresherEnabled}
+              onRefresh={() => {
+                webviewRef.current.reload();
+              }}
+            />
+          }
+        >
+          <WebView
+            ref={webviewRef}
+            source={{ uri: uri }}
+            injectedJavaScriptBeforeContentLoaded={INJECTED_JAVASCRIPT}
+            pullToRefreshEnabled={true}
+            containerStyle={{
+              paddingTop: hideHeader ? 0 : insets.top + headerHeight,
+            }}
+            style={{ backgroundColor: Colors.slate[50] }}
+            originWhitelist={originWhitelist} // Keeps the WebView from navigating away from the feed-app; Any links that don't match will be opened by the system.. Eg: open in the browser
+            onMessage={(event) => console.warn(event)}
+            onScroll={(event) => {
+              const scrollOffset = event.nativeEvent.contentOffset.y;
+              if (scrollOffset > 20) setHideHeader(true);
+              else setHideHeader(false);
+              handleScroll(event);
+            }}
+            onLoadEnd={() => setRefreshing(false)}
+            forceDarkOn={isDarkMode}
+          />
+        </ScrollView>
       ) : null}
     </SafeAreaView>
   );
