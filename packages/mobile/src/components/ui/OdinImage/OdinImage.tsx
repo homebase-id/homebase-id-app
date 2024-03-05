@@ -119,7 +119,6 @@ export const OdinImage = memo(
         {!imageData?.url && !hasCachedImage ? (
           <View
             style={{
-              position: 'absolute',
               top: 0,
               left: 0,
               right: 0,
@@ -174,7 +173,7 @@ const ZoomableImage = ({
 }) => {
   if (!enableZoom) {
     return contentType === 'image/svg+xml' ? (
-      <SvgUri width={imageSize?.width} height={imageSize?.height} uri={uri} />
+      <SvgUri width={imageSize?.width} height={imageSize?.height} uri={uri} style={style} />
     ) : (
       <Image
         source={{ uri }}

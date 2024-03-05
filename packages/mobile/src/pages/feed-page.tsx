@@ -117,6 +117,8 @@ const FeedPage = (_props: FeedProps) => {
               fileId={profile?.profileImageFileId}
               fileKey={profile?.profileImageFileKey}
               imageSize={{ width: 30, height: 30 }}
+              avoidPayload={true}
+              alt={profile?.firstName}
               style={{ borderRadius: 30 / 2 }}
             />
             <View>
