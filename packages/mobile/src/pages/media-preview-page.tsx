@@ -11,6 +11,7 @@ export const PreviewMedia = (prop: MediaProp) => {
   const fileId = prop.route.params.fileId;
   const fileKey = prop.route.params.payloadKey;
   const type = prop.route.params.type;
+  const previewThumbnail = prop.route.params.previewThumbnail;
   const isVideo = type?.startsWith('video') || false;
 
   return !isVideo ? (
@@ -18,6 +19,7 @@ export const PreviewMedia = (prop: MediaProp) => {
       fileId={fileId}
       fileKey={fileKey}
       enableZoom={true}
+      previewThumbnail={previewThumbnail}
       fit="cover"
       imageSize={{
         width: '100%',
@@ -31,6 +33,7 @@ export const PreviewMedia = (prop: MediaProp) => {
         fileId={fileId}
         fileKey={fileKey}
         targetDrive={ChatDrive}
+        previewThumbnail={previewThumbnail}
         fullscreen={true}
         imageSize={{
           width: '100%',

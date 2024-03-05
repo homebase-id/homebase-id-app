@@ -20,7 +20,7 @@ const ImageMessage = (props: MessageImageProps<IMessage>) => {
       <FlatList
         data={payloads}
         keyExtractor={(item) => item.key}
-        numColumns={2}
+        numColumns={payloads.length < 5 ? 2 : 3}
         renderItem={({ item }) => {
           if (item.contentType.startsWith('video')) {
             return (
@@ -31,6 +31,10 @@ const ImageMessage = (props: MessageImageProps<IMessage>) => {
                     fileId: currentMessage.fileId,
                     payloadKey: item.key,
                     type: item.contentType,
+                    previewThumbnail:
+                      payloads.length === 1
+                        ? currentMessage.fileMetadata.appData.previewThumbnail
+                        : undefined,
                   });
                 }}
               >
@@ -38,6 +42,11 @@ const ImageMessage = (props: MessageImageProps<IMessage>) => {
                   fileId={currentMessage.fileId}
                   fileKey={item.key}
                   targetDrive={ChatDrive}
+                  previewThumbnail={
+                    payloads.length === 1
+                      ? currentMessage.fileMetadata.appData.previewThumbnail
+                      : undefined
+                  }
                   fit="cover"
                   imageSize={{
                     width: 200,
@@ -55,6 +64,10 @@ const ImageMessage = (props: MessageImageProps<IMessage>) => {
                   fileId: currentMessage.fileId,
                   payloadKey: item.key,
                   type: item.contentType,
+                  previewThumbnail:
+                    payloads.length === 1
+                      ? currentMessage.fileMetadata.appData.previewThumbnail
+                      : undefined,
                 });
               }}
             >
@@ -68,12 +81,19 @@ const ImageMessage = (props: MessageImageProps<IMessage>) => {
                   width: 200,
                   height: 200,
                 }}
+                previewThumbnail={
+                  payloads.length === 1
+                    ? currentMessage.fileMetadata.appData.previewThumbnail
+                    : undefined
+                }
                 avoidPayload={true}
                 style={{
-                  borderRadius: 10,
+                  borderRadius: payloads.length === 1 ? 10 : 0,
                   flex: 1,
-
-                  resizeMode: 'cover',
+                  alignItems: 'center',
+                  margin: 2,
+                  width: payloads.length > 1 ? 150 : 200,
+                  height: payloads.length > 1 ? 150 : 200,
                 }}
                 // onClick={() => {
                 //   navigation.navigate('PreviewMedia', {

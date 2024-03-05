@@ -33,6 +33,7 @@ import { NewGroupPage } from '../pages/new-group-page';
 
 import { PreviewMedia } from '../pages/media-preview-page';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { EmbeddedThumb } from '@youfoundation/js-lib/core';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -61,7 +62,12 @@ export type ChatStackParamList = {
   ChatScreen: { convoId: string };
   NewChat: undefined;
   NewGroup: undefined;
-  PreviewMedia: { fileId: string; payloadKey: string; type?: string };
+  PreviewMedia: {
+    fileId: string;
+    payloadKey: string;
+    type?: string;
+    previewThumbnail?: EmbeddedThumb;
+  };
   ChatInfo: { convoId: string };
   EditGroup: { convoId: string };
 };
