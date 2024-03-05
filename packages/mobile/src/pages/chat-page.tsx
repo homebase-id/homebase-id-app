@@ -322,7 +322,9 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
         isKeyboardInternallyHandled={true}
         keyboardShouldPersistTaps="never"
         renderMessageImage={(prop) => <ImageMessage {...prop} />}
-        renderCustomView={(prop) => <RenderReplyMessageView {...prop} />}
+        renderCustomView={(prop: BubbleProps<ChatMessageIMessage>) => (
+          <RenderReplyMessageView {...prop} />
+        )}
         renderBubble={(props) => {
           const message = props.currentMessage as ChatMessageIMessage;
           const content = message?.fileMetadata.appData.content;
@@ -415,6 +417,14 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
           return (
             <MessageText
               {...props}
+              linkStyle={{
+                left: {
+                  color: Colors.indigo[500],
+                },
+                right: {
+                  color: Colors.indigo[500],
+                },
+              }}
               customTextStyle={
                 isEmojiOnly
                   ? {
