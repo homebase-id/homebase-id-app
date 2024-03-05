@@ -126,6 +126,7 @@ export const OdinImage = memo(
               ...imageSize,
               justifyContent: 'center',
               alignItems: 'center',
+              ...style,
             }}
           >
             <ActivityIndicator style={{}} size="large" />
