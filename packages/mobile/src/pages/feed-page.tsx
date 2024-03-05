@@ -35,6 +35,7 @@ const FeedPage = (_props: FeedProps) => {
         const APP_AUTH_TOKEN_KEY = 'BX0900_feed';
         const IDENTITY_KEY = 'identity';
         const APP_CLIENT_TYPE_KEY = 'client_type';
+        const PREFERS_DARK_MODE = 'prefersDark'
 
         const APP_SHARED_SECRET = '${base64SharedSecret}';
         const APP_AUTH_TOKEN = '${authToken}';
@@ -45,12 +46,13 @@ const FeedPage = (_props: FeedProps) => {
         window.localStorage.setItem(APP_AUTH_TOKEN_KEY, APP_AUTH_TOKEN);
         window.localStorage.setItem(IDENTITY_KEY, IDENTITY);
         window.localStorage.setItem(APP_CLIENT_TYPE_KEY, APP_CLIENT_TYPE);
+        window.localStorage.setItem(PREFERS_DARK_MODE, '${isDarkMode ? '1' : '0'}');
       })();`;
 
-  // // Debug for webview
+  // Debug for webview
   // console = new Object();
-  // console.log = function(log) {
-  //   // window.webViewBridge.send("console", log);
+  // console.log = function (log) {
+  //   window.webViewBridge.send('console', log);
   // };
   // console.debug = console.log;
   // console.info = console.log;
@@ -178,7 +180,6 @@ const FeedPage = (_props: FeedProps) => {
               handleScroll(event);
             }}
             onLoadEnd={() => setRefreshing(false)}
-            forceDarkOn={isDarkMode}
           />
         </ScrollView>
       ) : null}
