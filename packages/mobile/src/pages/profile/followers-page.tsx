@@ -1,5 +1,5 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { ProfileStackParamList } from '../../app/App';
 import { FlatList, RefreshControl, View } from 'react-native';
 import { useFollowerInfinite } from '../../hooks/followers/useFollowers';
@@ -8,23 +8,25 @@ import IdentityItem from '../../components/list/identityItem';
 
 type FollowersProps = NativeStackScreenProps<ProfileStackParamList, 'Followers'>;
 
-const FollowersPage = (_props: FollowersProps) => {
+export const FollowersPage = (_props: FollowersProps) => {
   const {
     data: identities,
     hasNextPage: hasMoreIdentities,
     fetchNextPage,
     refetch: refetchIdentities,
   } = useFollowerInfinite({}).fetch;
-  const flatIdentities =
-    (identities?.pages.flatMap((page) => page?.results).filter(Boolean) as string[]) ?? [];
+  const flatIdentities = useMemo(
+    () => (identities?.pages.flatMap((page) => page?.results).filter(Boolean) as string[]) ?? [],
+    [identities?.pages]
+  );
 
   const [refreshing, setRefreshing] = useState(false);
-  const doRefresh = async () => {
+  const doRefresh = useCallback(async () => {
     setRefreshing(true);
 
     await refetchIdentities();
     setRefreshing(false);
-  };
+  }, [refetchIdentities]);
 
   return (
     <View style={{ position: 'relative', minHeight: '100%' }}>
@@ -50,5 +52,3 @@ const FollowersPage = (_props: FollowersProps) => {
     </View>
   );
 };
-
-export default FollowersPage;

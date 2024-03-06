@@ -9,32 +9,31 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
-import { Text } from '../components/ui/Text/Text';
+import { Text } from '../../components/ui/Text/Text';
 import { getVersion, getBuildNumber } from 'react-native-device-info';
-import { version } from '../../package.json';
+import { version } from '../../../package.json';
 
-import { ProfileStackParamList } from '../app/App';
-import { SafeAreaView } from '../components/ui/SafeAreaView/SafeAreaView';
-import { Container } from '../components/ui/Container/Container';
+import { ProfileStackParamList } from '../../app/App';
+import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
+import { Container } from '../../components/ui/Container/Container';
 import {
   AddressBook,
   Download,
   People,
   Profile,
   RecycleBin,
-  Times,
-} from '../components/ui/Icons/icons';
+} from '../../components/ui/Icons/icons';
 import codePush from 'react-native-code-push';
-import { useAuth } from '../hooks/auth/useAuth';
-import { Colors } from '../app/Colors';
-import { OdinImage } from '../components/ui/OdinImage/OdinImage';
+import { useAuth } from '../../hooks/auth/useAuth';
+import { Colors } from '../../app/Colors';
+import { OdinImage } from '../../components/ui/OdinImage/OdinImage';
 import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
-import { useProfile } from '../hooks/profile/useProfile';
+import { useProfile } from '../../hooks/profile/useProfile';
 import InAppBrowser from 'react-native-inappbrowser-reborn';
 
 type SettingsProps = NativeStackScreenProps<ProfileStackParamList, 'Overview'>;
 
-const SettingsPage = (_props: SettingsProps) => {
+export const ProfilePage = (_props: SettingsProps) => {
   const { logout, getIdentity } = useAuth();
   const [logoutPending, setLogoutPending] = useState(false);
 
@@ -49,12 +48,7 @@ const SettingsPage = (_props: SettingsProps) => {
   return (
     <SafeAreaView>
       <Container>
-        <View style={{ display: 'flex', flexDirection: 'column' }}>
-          <View style={{ flexDirection: 'row-reverse' }}>
-            <TouchableOpacity onPress={() => _props.navigation.goBack()} style={{ padding: 6 }}>
-              <Times size={'lg'} />
-            </TouchableOpacity>
-          </View>
+        <View style={{ display: 'flex', flexDirection: 'column', paddingVertical: 12 }}>
           <View
             style={{
               display: 'flex',
@@ -109,25 +103,6 @@ const SettingsPage = (_props: SettingsProps) => {
           </TouchableOpacity>
 
           <TouchableOpacity
-            onPress={() => navigate('Connections')}
-            style={{
-              display: 'flex',
-              flexDirection: 'row',
-              alignItems: 'center',
-              paddingVertical: 12,
-              width: '100%',
-            }}
-          >
-            <AddressBook size={'lg'} />
-            <Text
-              style={{
-                marginLeft: 16,
-              }}
-            >
-              My connections
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
             onPress={() => navigate('Following')}
             style={{
               display: 'flex',
@@ -144,6 +119,26 @@ const SettingsPage = (_props: SettingsProps) => {
               }}
             >
               Who I&apos;m folowing
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => navigate('Connections')}
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+              paddingVertical: 12,
+              width: '100%',
+            }}
+          >
+            <AddressBook size={'lg'} />
+            <Text
+              style={{
+                marginLeft: 16,
+              }}
+            >
+              My connections
             </Text>
           </TouchableOpacity>
 
@@ -306,5 +301,3 @@ export const CheckForUpdates = ({
     </TouchableOpacity>
   );
 };
-
-export default SettingsPage;

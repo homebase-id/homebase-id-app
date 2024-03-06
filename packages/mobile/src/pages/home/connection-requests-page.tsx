@@ -1,24 +1,17 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useMemo, useState, useCallback } from 'react';
-import { ProfileStackParamList } from '../../app/App';
+
 import { FlatList, RefreshControl, View } from 'react-native';
-import { useFollowingInfinite } from '../../hooks/following/useFollowing';
 import NoItems from '../../components/list/noItems';
 import IdentityItem from '../../components/list/identityItem';
+import { useCallback, useMemo, useState } from 'react';
+import { HomeStackParamList } from '../../app/App';
+import { usePendingConnections } from '../../hooks/connections/usePendingConnections';
 
-type FollowingProps = NativeStackScreenProps<ProfileStackParamList, 'Following'>;
+type ConnectionRequestProps = NativeStackScreenProps<HomeStackParamList, 'ConnectionRequests'>;
+export const ConnectionRequestsPage = (_props: ConnectionRequestProps) => {
+  const { data: identities, refetch: refetchIdentities } = usePendingConnections().fetch;
 
-export const FollowingPage = (_props: FollowingProps) => {
-  const {
-    data: identities,
-    hasNextPage: hasMoreIdentities,
-    fetchNextPage,
-    refetch: refetchIdentities,
-  } = useFollowingInfinite({}).fetch;
-  const flatIdentities = useMemo(
-    () => (identities?.pages.flatMap((page) => page?.results).filter(Boolean) as string[]) ?? [],
-    [identities?.pages]
-  );
+  const flatIdentities = useMemo(() => identities && identities.results, [identities]);
 
   const [refreshing, setRefreshing] = useState(false);
   const doRefresh = useCallback(async () => {
@@ -36,18 +29,17 @@ export const FollowingPage = (_props: FollowingProps) => {
           data={flatIdentities}
           renderItem={(item) => (
             <View
-              key={item.item}
+              key={item.item.senderOdinId}
               style={{
                 padding: 1,
               }}
             >
-              <IdentityItem odinId={item.item} key={item.item} />
+              <IdentityItem odinId={item.item.senderOdinId} />
             </View>
           )}
-          onEndReached={() => hasMoreIdentities && fetchNextPage()}
         />
       ) : (
-        <NoItems>You&apos;re not following anyone :-(</NoItems>
+        <NoItems>You don&apos;t have any connection requests :-(</NoItems>
       )}
     </View>
   );

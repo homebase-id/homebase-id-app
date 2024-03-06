@@ -10,29 +10,37 @@ import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persi
 import { QueryClient } from '@tanstack/react-query';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import ProfilePage from '../pages/profile-page';
 import { NativeStackScreenProps, createNativeStackNavigator } from '@react-navigation/native-stack';
-import LoginPage from '../pages/login-page';
-import FeedPage from '../pages/feed-page';
 import CodePush from 'react-native-code-push';
 import { useAuth, useValidTokenCheck } from '../hooks/auth/useAuth';
-import FollowersPage from '../pages/profile/followers-page';
-import ConnectionsPage from '../pages/profile/connections-page';
-import FollowingPage from '../pages/profile/following-page';
 import { DotYouClientProvider } from '../components/Auth/DotYouClientProvider';
-import ConversationPage from '../pages/conversation-page';
 import { BackButton, HeaderActions } from '../components/ui/convo-app-bar';
 import { useLiveChatProcessor } from '../hooks/chat/useLiveChatProcessor';
-import ChatPage from '../pages/chat-page';
-import EditGroupPage from '../pages/edit-group-page';
-import { HeaderBackButton, HeaderBackButtonProps } from '@react-navigation/elements';
+import { HeaderBackButtonProps } from '@react-navigation/elements';
 import { Platform, useColorScheme } from 'react-native';
-import { ChatInfoPage } from '../pages/chat-info-page';
-import { ContactPage } from '../pages/contact-page';
-import { NewGroupPage } from '../pages/new-group-page';
 
-import { PreviewMedia } from '../pages/media-preview-page';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { useCallback } from 'react';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Bars, ChatIcon, Feed, House } from '../components/ui/Icons/icons';
+import { Colors } from './Colors';
+
+// Pages
+import { ChatInfoPage } from '../pages/chat-info-page';
+import { ConnectionsPage } from '../pages/profile/connections-page';
+import { ContactPage } from '../pages/contact-page';
+import { FeedPage } from '../pages/feed/feed-page';
+import { FollowersPage } from '../pages/profile/followers-page';
+import { FollowingPage } from '../pages/profile/following-page';
+import { HomePage } from '../pages/home/home-page';
+import { LoginPage } from '../pages/login/login-page';
+import { NewGroupPage } from '../pages/new-group-page';
+import { PreviewMedia } from '../pages/media-preview-page';
+import { ProfilePage } from '../pages/profile/profile-page';
+import ChatPage from '../pages/chat-page';
+import ConversationPage from '../pages/conversation-page';
+import EditGroupPage from '../pages/edit-group-page';
+import { ConnectionRequestsPage } from '../pages/home/connection-requests-page';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -40,13 +48,15 @@ export type AuthStackParamList = {
 };
 
 export type TabStackParamList = {
+  Home: undefined;
   Feed: undefined;
   Profile: undefined;
   Chat: undefined;
 };
 
-export type RootStackParamList = {
-  Home: undefined;
+export type HomeStackParamList = {
+  Overview: undefined;
+  ConnectionRequests: undefined;
 };
 
 export type ProfileStackParamList = {
@@ -115,47 +125,106 @@ const RootStack = () => {
     <NavigationContainer theme={scheme === 'dark' ? DarkTheme : DefaultTheme}>
       <StackRoot.Navigator screenOptions={{ headerShown: false }}>
         {isAuthenticated ? (
-          <StackRoot.Screen name="Authenticated" component={AuthenticatedStack} />
+          <StackRoot.Screen name="Authenticated" component={AuthenticatedRoot} />
         ) : (
-          <>
-            <StackRoot.Screen name="Login" component={LoginPage} options={{ headerShown: false }} />
-          </>
+          <StackRoot.Screen name="Login" component={LoginPage} options={{ headerShown: false }} />
         )}
       </StackRoot.Navigator>
     </NavigationContainer>
   );
 };
 
-const StackAuthenticated = createNativeStackNavigator<RootStackParamList>();
-const AuthenticatedStack = () => {
+const AuthenticatedRoot = () => {
   useValidTokenCheck();
 
   return (
     <DotYouClientProvider>
-      <StackAuthenticated.Navigator
-        screenOptions={{
-          headerShadowVisible: false,
-        }}
-      >
-        <StackAuthenticated.Screen
-          name="Home"
-          component={TabStack}
-          options={{ headerShown: false }}
-        />
-      </StackAuthenticated.Navigator>
+      <TabStack />
     </DotYouClientProvider>
   );
 };
 
-const StackTab = createNativeStackNavigator<TabStackParamList>();
+type TabIconProps = {
+  focused: boolean;
+  color: string;
+  size: number;
+};
+
+const TabBottom = createBottomTabNavigator<TabStackParamList>();
 const TabStack = () => {
   useLiveChatProcessor();
+
+  const houseIcon = useCallback((props: TabIconProps) => <House {...props} size={'md'} />, []);
+  const feedIcon = useCallback((props: TabIconProps) => <Feed {...props} size={'md'} />, []);
+  const chatIcon = useCallback((props: TabIconProps) => <ChatIcon {...props} size={'md'} />, []);
+  const menuIcon = useCallback((props: TabIconProps) => <Bars {...props} size={'md'} />, []);
+
   return (
-    <StackTab.Navigator screenOptions={{ headerShown: false }}>
-      <StackTab.Screen name="Feed" component={FeedPage} />
-      <StackTab.Screen name="Profile" component={ProfileStack} />
-      <StackTab.Screen name="Chat" component={ChatStack} />
-    </StackTab.Navigator>
+    <TabBottom.Navigator
+      screenOptions={{
+        headerShown: false,
+        tabBarInactiveTintColor: Colors.black,
+        tabBarActiveTintColor: Colors.black,
+        tabBarActiveBackgroundColor: Colors.indigo[200],
+        tabBarShowLabel: false,
+        tabBarStyle: {
+          backgroundColor: Colors.indigo[100],
+        },
+      }}
+      initialRouteName="Chat"
+    >
+      <TabBottom.Screen
+        name="Home"
+        component={HomeStack}
+        options={{
+          tabBarIcon: houseIcon,
+        }}
+      />
+      <TabBottom.Screen
+        name="Feed"
+        component={FeedPage}
+        options={{
+          tabBarIcon: feedIcon,
+        }}
+      />
+      <TabBottom.Screen
+        name="Chat"
+        component={ChatStack}
+        options={{
+          tabBarIcon: chatIcon,
+        }}
+      />
+      <TabBottom.Screen
+        name="Profile"
+        component={ProfileStack}
+        options={{
+          tabBarIcon: menuIcon,
+        }}
+      />
+    </TabBottom.Navigator>
+  );
+};
+
+const StackHome = createNativeStackNavigator<HomeStackParamList>();
+const HomeStack = () => {
+  return (
+    <StackHome.Navigator>
+      <StackHome.Screen
+        name="Overview"
+        component={HomePage}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <StackHome.Screen
+        name="ConnectionRequests"
+        component={ConnectionRequestsPage}
+        options={{
+          headerTitle: 'Connection requests',
+          headerBackTitle: 'Home',
+        }}
+      />
+    </StackHome.Navigator>
   );
 };
 
@@ -178,8 +247,15 @@ const ProfileStack = () => {
 };
 
 const StackChat = createNativeStackNavigator<ChatStackParamList>();
-const ChatStack = ({ navigation: nav }: NativeStackScreenProps<TabStackParamList, 'Chat'>) => {
+const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) => {
   const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
+
+  const headerRight = useCallback(() => {
+    return HeaderActions({
+      onPress: () => navigation.navigate('NewChat'),
+    });
+  }, [navigation]);
+
   return (
     <StackChat.Navigator>
       <StackChat.Screen
@@ -192,18 +268,7 @@ const ChatStack = ({ navigation: nav }: NativeStackScreenProps<TabStackParamList
           // },
           headerShown: true,
           headerTitleAlign: 'left',
-          headerLeft: (prop) => (
-            <HeaderBackButton
-              {...prop}
-              canGoBack
-              labelVisible={false}
-              onPress={() => nav.goBack()}
-            />
-          ),
-          headerRight: () =>
-            HeaderActions({
-              onPress: () => navigation.navigate('NewChat'),
-            }),
+          headerRight: headerRight,
         }}
       />
       <StackChat.Screen
@@ -237,7 +302,7 @@ const ChatStack = ({ navigation: nav }: NativeStackScreenProps<TabStackParamList
               Platform.OS === 'ios'
                 ? (props: HeaderBackButtonProps) => {
                     return BackButton({
-                      onPress: () => nav.goBack(),
+                      onPress: () => navigation.navigate('Conversation'),
                       prop: props,
                     });
                   }
@@ -252,7 +317,7 @@ const ChatStack = ({ navigation: nav }: NativeStackScreenProps<TabStackParamList
             headerShown: false,
             headerLeft: (props: HeaderBackButtonProps) => {
               return BackButton({
-                onPress: () => nav.goBack(),
+                onPress: () => navigation.navigate('Conversation'),
                 prop: props,
                 label: '',
               });
@@ -282,10 +347,6 @@ const ChatStack = ({ navigation: nav }: NativeStackScreenProps<TabStackParamList
       />
     </StackChat.Navigator>
   );
-};
-
-export type SettingsStackParamList = {
-  Profile: undefined;
 };
 
 export default App;

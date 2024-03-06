@@ -5,30 +5,33 @@ import { FlatList, RefreshControl, View } from 'react-native';
 import { useConnections } from '../../hooks/connections/useConnections';
 import NoItems from '../../components/list/noItems';
 import IdentityItem from '../../components/list/identityItem';
-import { useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 type ConnectionsProps = NativeStackScreenProps<ProfileStackParamList, 'Connections'>;
 
-const ConnectionsPage = (_props: ConnectionsProps) => {
+export const ConnectionsPage = (_props: ConnectionsProps) => {
   const {
     data: identities,
     hasNextPage: hasMoreIdentities,
     fetchNextPage,
     refetch: refetchIdentities,
   } = useConnections({}).fetch;
-  const flatIdentities =
-    identities?.pages
-      .flatMap((page) => page?.results)
-      .map((profile) => profile?.odinId)
-      .filter(Boolean) ?? [];
+  const flatIdentities = useMemo(
+    () =>
+      identities?.pages
+        .flatMap((page) => page?.results)
+        .map((profile) => profile?.odinId)
+        .filter(Boolean) ?? [],
+    [identities?.pages]
+  );
 
   const [refreshing, setRefreshing] = useState(false);
-  const doRefresh = async () => {
+  const doRefresh = useCallback(async () => {
     setRefreshing(true);
 
     await refetchIdentities();
     setRefreshing(false);
-  };
+  }, [refetchIdentities]);
 
   return (
     <View style={{ position: 'relative', minHeight: '100%' }}>
@@ -54,5 +57,3 @@ const ConnectionsPage = (_props: ConnectionsProps) => {
     </View>
   );
 };
-
-export default ConnectionsPage;
