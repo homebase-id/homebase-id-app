@@ -360,7 +360,7 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
                         : {
                             right: {
                               fontSize: 12,
-                              color: !isDarkMode ? Colors.slate[600] : undefined,
+                              color: !isDarkMode ? Colors.slate[600] : Colors.slate[200],
                             },
                             left: {
                               fontSize: 12,
