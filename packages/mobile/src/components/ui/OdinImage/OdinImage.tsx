@@ -174,9 +174,12 @@ const ZoomableImage = ({
 }) => {
   if (!enableZoom) {
     return contentType === 'image/svg+xml' ? (
-      <View style={{ ...style, overflow: 'hidden' }}>
-        <SvgUri width={imageSize?.width} height={imageSize?.height} uri={uri} />
-      </View>
+      <SvgUri
+        width={imageSize?.width}
+        height={imageSize?.height}
+        uri={uri}
+        style={{ ...style, overflow: 'hidden' }}
+      />
     ) : (
       <Image
         source={{ uri }}
