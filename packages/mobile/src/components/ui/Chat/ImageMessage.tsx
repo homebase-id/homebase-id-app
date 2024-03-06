@@ -1,7 +1,7 @@
 import { ChatMessageIMessage } from '../../../pages/chat-page';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { IMessage, MessageImageProps } from 'react-native-gifted-chat';
+import { MessageImageProps } from 'react-native-gifted-chat';
 import { ChatDrive } from '../../../provider/chat/ConversationProvider';
 import { PayloadDescriptor } from '@youfoundation/js-lib/dist';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
@@ -10,7 +10,7 @@ import { FlatList } from 'react-native-gesture-handler';
 import { VideoWithLoader } from '../Media/VideoWithLoader';
 import { OdinImage } from '../OdinImage/OdinImage';
 
-const ImageMessage = (props: MessageImageProps<IMessage>) => {
+const ImageMessage = (props: MessageImageProps<ChatMessageIMessage>) => {
   const currentMessage = props.currentMessage as ChatMessageIMessage;
   const payloads: PayloadDescriptor[] = currentMessage.fileMetadata.payloads;
   const navigation = useNavigation<NavigationProp<ChatStackParamList>>();

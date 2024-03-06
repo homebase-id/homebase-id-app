@@ -4,6 +4,7 @@ import { PhotoWithLoader } from '../components/ui/Media/PhotoWithLoader';
 import { VideoWithLoader } from '../components/ui/Media/VideoWithLoader';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChatStackParamList } from '../app/App';
+import { Dimensions } from 'react-native';
 
 export type MediaProp = NativeStackScreenProps<ChatStackParamList, 'PreviewMedia'>;
 
@@ -13,17 +14,17 @@ export const PreviewMedia = (prop: MediaProp) => {
   const type = prop.route.params.type;
   const previewThumbnail = prop.route.params.previewThumbnail;
   const isVideo = type?.startsWith('video') || false;
-
+  const { height, width } = Dimensions.get('window');
   return !isVideo ? (
     <PhotoWithLoader
       fileId={fileId}
       fileKey={fileKey}
       enableZoom={true}
       previewThumbnail={previewThumbnail}
-      fit="cover"
+      fit="contain"
       imageSize={{
-        width: '100%',
-        height: '100%',
+        width: width,
+        height: height,
       }}
       targetDrive={ChatDrive}
     />
@@ -36,8 +37,8 @@ export const PreviewMedia = (prop: MediaProp) => {
         previewThumbnail={previewThumbnail}
         fullscreen={true}
         imageSize={{
-          width: '100%',
-          height: '100%',
+          width: width,
+          height: height,
         }}
         preview={false}
       />

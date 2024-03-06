@@ -8,6 +8,7 @@ import {
   IMessage,
   InputToolbar,
   InputToolbarProps,
+  MessageImageProps,
   MessageProps,
   MessageText,
   Send,
@@ -321,7 +322,9 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
         alwaysShowSend
         isKeyboardInternallyHandled={true}
         keyboardShouldPersistTaps="never"
-        renderMessageImage={(prop) => <ImageMessage {...prop} />}
+        renderMessageImage={(prop: MessageImageProps<ChatMessageIMessage>) => (
+          <ImageMessage {...prop} />
+        )}
         renderCustomView={(prop: BubbleProps<ChatMessageIMessage>) => (
           <RenderReplyMessageView {...prop} />
         )}
