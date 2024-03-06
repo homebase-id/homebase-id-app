@@ -9,23 +9,23 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { Text } from '../components/ui/Text/Text';
-import { AuthStackParamList } from '../app/App';
-import { useYouAuthAuthorization } from '../hooks/auth/useAuth';
-import { Container } from '../components/ui/Container/Container';
-import { SafeAreaView } from '../components/ui/SafeAreaView/SafeAreaView';
-import { Colors } from '../app/Colors';
+import { Text } from '../../components/ui/Text/Text';
+import { AuthStackParamList } from '../../app/App';
+import { useYouAuthAuthorization } from '../../hooks/auth/useAuth';
+import { Container } from '../../components/ui/Container/Container';
+import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
+import { Colors } from '../../app/Colors';
 import { stringifyToQueryParams } from '@youfoundation/js-lib/helpers';
-import { doCheckIdentity } from '../hooks/checkIdentity/useCheckIdentity';
-import { CheckForUpdates, VersionInfo } from './profile-page';
+import { doCheckIdentity } from '../../hooks/checkIdentity/useCheckIdentity';
+import { CheckForUpdates, VersionInfo } from '../profile/profile-page';
 import { InAppBrowser } from 'react-native-inappbrowser-reborn';
 
-import logo from './homebase-feed.png';
-import { Input } from '../components/ui/Form/Input';
+import logo from '../../assets/homebase.png';
+import { Input } from '../../components/ui/Form/Input';
 
 type LoginProps = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 
-const LoginPage = (_props: LoginProps) => {
+export const LoginPage = (_props: LoginProps) => {
   return (
     <SafeAreaView>
       <Container style={{ flex: 1, flexDirection: 'column' }}>
@@ -40,7 +40,7 @@ const LoginPage = (_props: LoginProps) => {
           }}
         >
           <Image source={logo} style={{ width: 40, height: 40 }} />
-          <Text style={{ fontSize: 25 }}>Homebase Chat</Text>
+          <Text style={{ fontSize: 25 }}>Homebase</Text>
         </View>
         <View
           style={{
@@ -241,5 +241,3 @@ const LoginComponent = () => {
     </>
   );
 };
-
-export default LoginPage;

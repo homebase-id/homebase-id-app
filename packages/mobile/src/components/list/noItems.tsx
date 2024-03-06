@@ -1,6 +1,10 @@
 import { View, Text } from 'react-native';
+import { useDarkMode } from '../../hooks/useDarkMode';
+import { Colors } from '../../app/Colors';
 
 const NoItems = ({ children }: { children: string }) => {
+  const isDarkMode = useDarkMode();
+
   return (
     <View
       style={{
@@ -12,8 +16,11 @@ const NoItems = ({ children }: { children: string }) => {
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
-      }}>
-      <Text style={{ fontSize: 16 }}>{children}</Text>
+      }}
+    >
+      <Text style={{ fontSize: 16, color: isDarkMode ? Colors.white : Colors.black }}>
+        {children}
+      </Text>
     </View>
   );
 };

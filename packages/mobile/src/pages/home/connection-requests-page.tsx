@@ -1,32 +1,20 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
-import { ProfileStackParamList } from '../../app/App';
-import { FlatList, RefreshControl, View, TouchableOpacity, Linking } from 'react-native';
-import { useConnections } from '../../hooks/connections/useConnections';
+import { FlatList, Linking, RefreshControl, View } from 'react-native';
 import NoItems from '../../components/list/noItems';
 import IdentityItem from '../../components/list/identityItem';
 import { useCallback, useMemo, useState } from 'react';
+import { HomeStackParamList } from '../../app/App';
+import { usePendingConnections } from '../../hooks/connections/usePendingConnections';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 import { useDotYouClientContext } from 'feed-app-common';
 
-type ConnectionsProps = NativeStackScreenProps<ProfileStackParamList, 'Connections'>;
-
-export const ConnectionsPage = (_props: ConnectionsProps) => {
+type ConnectionRequestProps = NativeStackScreenProps<HomeStackParamList, 'ConnectionRequests'>;
+export const ConnectionRequestsPage = (_props: ConnectionRequestProps) => {
   const identity = useDotYouClientContext().getIdentity();
+  const { data: identities, refetch: refetchIdentities } = usePendingConnections().fetch;
 
-  const {
-    data: identities,
-    hasNextPage: hasMoreIdentities,
-    fetchNextPage,
-    refetch: refetchIdentities,
-  } = useConnections({}).fetch;
-  const flatIdentities = useMemo(
-    () =>
-      identities?.pages
-        .flatMap((page) => page?.results)
-        .map((profile) => profile?.odinId)
-        .filter(Boolean) ?? [],
-    [identities?.pages]
-  );
+  const flatIdentities = useMemo(() => identities && identities.results, [identities]);
 
   const [refreshing, setRefreshing] = useState(false);
   const doRefresh = useCallback(async () => {
@@ -44,7 +32,7 @@ export const ConnectionsPage = (_props: ConnectionsProps) => {
           data={flatIdentities}
           renderItem={(item) => (
             <TouchableOpacity
-              key={item.item}
+              key={item.item.senderOdinId}
               style={{
                 padding: 1,
               }}
@@ -52,13 +40,12 @@ export const ConnectionsPage = (_props: ConnectionsProps) => {
                 Linking.openURL(`https://${identity}/owner/connections/${item.item.senderOdinId}`)
               }
             >
-              <IdentityItem odinId={item.item} key={item.item} />
+              <IdentityItem odinId={item.item.senderOdinId} />
             </TouchableOpacity>
           )}
-          onEndReached={() => hasMoreIdentities && fetchNextPage()}
         />
       ) : (
-        <NoItems>You don&apos;t have any connections :-(</NoItems>
+        <NoItems>You don&apos;t have any connection requests :-(</NoItems>
       )}
     </View>
   );
