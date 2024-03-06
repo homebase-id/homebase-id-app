@@ -185,7 +185,7 @@ const AppStackScreen = () => {
         name="PreviewMedia"
         component={PreviewMedia}
         options={{
-          // headerShown: false,
+          headerShown: true,
           gestureEnabled: true,
           title: '',
           headerBackTitleVisible: false,
