@@ -5,7 +5,7 @@ import { MessageImageProps } from 'react-native-gifted-chat';
 import { ChatDrive } from '../../../provider/chat/ConversationProvider';
 import { PayloadDescriptor } from '@youfoundation/js-lib/dist';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { ChatStackParamList } from '../../../app/App';
+import { AppStackParamList } from '../../../app/App';
 import { FlatList } from 'react-native-gesture-handler';
 import { VideoWithLoader } from '../Media/VideoWithLoader';
 import { OdinImage } from '../OdinImage/OdinImage';
@@ -13,7 +13,7 @@ import { OdinImage } from '../OdinImage/OdinImage';
 const ImageMessage = (props: MessageImageProps<ChatMessageIMessage>) => {
   const currentMessage = props.currentMessage as ChatMessageIMessage;
   const payloads: PayloadDescriptor[] = currentMessage.fileMetadata.payloads;
-  const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
+  const navigation = useNavigation<NavigationProp<AppStackParamList>>();
 
   return (
     <View style={[styles.view]}>
@@ -31,10 +31,6 @@ const ImageMessage = (props: MessageImageProps<ChatMessageIMessage>) => {
                     fileId: currentMessage.fileId,
                     payloadKey: item.key,
                     type: item.contentType,
-                    previewThumbnail:
-                      payloads.length === 1
-                        ? currentMessage.fileMetadata.appData.previewThumbnail
-                        : undefined,
                   });
                 }}
               >
@@ -64,10 +60,6 @@ const ImageMessage = (props: MessageImageProps<ChatMessageIMessage>) => {
                   fileId: currentMessage.fileId,
                   payloadKey: item.key,
                   type: item.contentType,
-                  previewThumbnail:
-                    payloads.length === 1
-                      ? currentMessage.fileMetadata.appData.previewThumbnail
-                      : undefined,
                 });
               }}
             >
@@ -81,11 +73,6 @@ const ImageMessage = (props: MessageImageProps<ChatMessageIMessage>) => {
                   width: 200,
                   height: 200,
                 }}
-                previewThumbnail={
-                  payloads.length === 1
-                    ? currentMessage.fileMetadata.appData.previewThumbnail
-                    : undefined
-                }
                 avoidPayload={true}
                 style={{
                   borderRadius: payloads.length === 1 ? 10 : 0,

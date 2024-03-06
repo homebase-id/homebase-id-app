@@ -16,7 +16,7 @@ import {
 } from 'react-native-gifted-chat';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ChatStackParamList } from '../app/App';
+import { AppStackParamList } from '../app/App';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   ImageBackground,
@@ -55,7 +55,7 @@ import useContact from '../hooks/contact/useContact';
 import { useMarkMessagesAsRead } from '../hooks/chat/useMarkMessagesAsRead';
 import { ChatDeliveryIndicator } from '../components/ui/Chat/Chat-Delivery-Indicator';
 
-export type ChatProp = NativeStackScreenProps<ChatStackParamList, 'ChatScreen'>;
+export type ChatProp = NativeStackScreenProps<AppStackParamList, 'ChatScreen'>;
 
 export interface ChatMessageIMessage extends IMessage, DriveSearchResult<ChatMessage> {}
 

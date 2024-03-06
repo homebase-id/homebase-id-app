@@ -1,6 +1,6 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Linking, StyleSheet, Text, View } from 'react-native';
-import { ChatStackParamList } from '../app/App';
+import { AppStackParamList } from '../app/App';
 import { useConversation } from '../hooks/chat/useConversation';
 import { Avatar, GroupAvatar, OwnerAvatar } from '../components/ui/Chat/Conversation-tile';
 import {
@@ -21,7 +21,7 @@ import TextButton from '../components/ui/Text/Text-Button';
 import { useDarkMode } from '../hooks/useDarkMode';
 import { useProfile } from '../hooks/profile/useProfile';
 
-export type ChatInfoProp = NativeStackScreenProps<ChatStackParamList, 'ChatInfo'>;
+export type ChatInfoProp = NativeStackScreenProps<AppStackParamList, 'ChatInfo'>;
 
 export function ChatInfoPage(prop: ChatInfoProp) {
   const { convoId: conversationId } = prop.route.params;

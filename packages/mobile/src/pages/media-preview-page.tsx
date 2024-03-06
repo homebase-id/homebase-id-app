@@ -3,10 +3,10 @@ import { ChatDrive } from '../provider/chat/ConversationProvider';
 import { PhotoWithLoader } from '../components/ui/Media/PhotoWithLoader';
 import { VideoWithLoader } from '../components/ui/Media/VideoWithLoader';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ChatStackParamList } from '../app/App';
+import { AppStackParamList } from '../app/App';
 import { Dimensions } from 'react-native';
 
-export type MediaProp = NativeStackScreenProps<ChatStackParamList, 'PreviewMedia'>;
+export type MediaProp = NativeStackScreenProps<AppStackParamList, 'PreviewMedia'>;
 
 export const PreviewMedia = (prop: MediaProp) => {
   const fileId = prop.route.params.fileId;
