@@ -11,10 +11,12 @@ import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-
 import { useProfile } from '../../hooks/profile/useProfile';
 import { HomeStackParamList } from '../../app/App';
 import { AddressBook } from '../../components/ui/Icons/icons';
+import { useDarkMode } from '../../hooks/useDarkMode';
 
 type HomeProps = NativeStackScreenProps<HomeStackParamList, 'Overview'>;
 
 export const HomePage = (_props: HomeProps) => {
+  const isDarkMode = useDarkMode();
   const { getIdentity } = useAuth();
 
   const { data: profile } = useProfile();
@@ -30,7 +32,7 @@ export const HomePage = (_props: HomeProps) => {
               flexDirection: 'column',
               alignItems: 'center',
               borderBottomWidth: 1,
-              borderBottomColor: Colors.slate[200],
+              borderBottomColor: isDarkMode ? Colors.slate[700] : Colors.slate[200],
               width: '100%',
               height: 200,
             }}

@@ -30,10 +30,12 @@ import { OdinImage } from '../../components/ui/OdinImage/OdinImage';
 import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
 import { useProfile } from '../../hooks/profile/useProfile';
 import InAppBrowser from 'react-native-inappbrowser-reborn';
+import { useDarkMode } from '../../hooks/useDarkMode';
 
 type SettingsProps = NativeStackScreenProps<ProfileStackParamList, 'Overview'>;
 
 export const ProfilePage = (_props: SettingsProps) => {
+  const isDarkMode = useDarkMode();
   const { logout, getIdentity } = useAuth();
   const [logoutPending, setLogoutPending] = useState(false);
 
@@ -55,7 +57,7 @@ export const ProfilePage = (_props: SettingsProps) => {
               flexDirection: 'column',
               alignItems: 'center',
               borderBottomWidth: 1,
-              borderBottomColor: Colors.slate[200],
+              borderBottomColor: isDarkMode ? Colors.slate[700] : Colors.slate[200],
               width: '100%',
               height: 200,
             }}

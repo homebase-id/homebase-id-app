@@ -41,6 +41,7 @@ import ChatPage from '../pages/chat-page';
 import ConversationPage from '../pages/conversation-page';
 import EditGroupPage from '../pages/edit-group-page';
 import { ConnectionRequestsPage } from '../pages/home/connection-requests-page';
+import { useDarkMode } from '../hooks/useDarkMode';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -152,6 +153,7 @@ type TabIconProps = {
 
 const TabBottom = createBottomTabNavigator<TabStackParamList>();
 const TabStack = () => {
+  const isDarkMode = useDarkMode();
   useLiveChatProcessor();
 
   const houseIcon = useCallback((props: TabIconProps) => <House {...props} size={'md'} />, []);
@@ -163,12 +165,12 @@ const TabStack = () => {
     <TabBottom.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarInactiveTintColor: Colors.black,
-        tabBarActiveTintColor: Colors.black,
-        tabBarActiveBackgroundColor: Colors.indigo[200],
+        tabBarInactiveTintColor: isDarkMode ? Colors.white : Colors.black,
+        tabBarActiveTintColor: isDarkMode ? Colors.white : Colors.black,
+        tabBarActiveBackgroundColor: isDarkMode ? Colors.indigo[700] : Colors.indigo[200],
         tabBarShowLabel: false,
         tabBarStyle: {
-          backgroundColor: Colors.indigo[100],
+          backgroundColor: isDarkMode ? Colors.indigo[900] : Colors.indigo[100],
         },
       }}
       initialRouteName="Chat"

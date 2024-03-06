@@ -66,21 +66,19 @@ export const FeedPage = (_props: FeedProps) => {
             <RefreshControl
               refreshing={refreshing}
               enabled={refresherEnabled}
-              onRefresh={() => {
-                webviewRef.current?.reload();
-              }}
+              onRefresh={() => webviewRef.current?.reload()}
             />
           }
         >
           <WebView
             ref={webviewRef}
-            source={{ uri: uri }}
+            source={{ uri }}
             injectedJavaScriptBeforeContentLoaded={INJECTED_JAVASCRIPT}
             pullToRefreshEnabled={true}
             containerStyle={{
               paddingTop: 0,
             }}
-            style={{ backgroundColor: Colors.slate[50] }}
+            style={{ backgroundColor: isDarkMode ? Colors.slate[900] : Colors.slate[50] }}
             originWhitelist={originWhitelist} // Keeps the WebView from navigating away from the feed-app; Any links that don't match will be opened by the system.. Eg: open in the browser
             onMessage={(event) => console.warn(event)}
             onScroll={handleScroll}
