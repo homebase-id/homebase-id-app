@@ -1,14 +1,17 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useMemo, useState, useCallback } from 'react';
 import { ProfileStackParamList } from '../../app/App';
-import { FlatList, RefreshControl, View } from 'react-native';
+import { FlatList, Linking, RefreshControl, TouchableOpacity, View } from 'react-native';
 import { useFollowingInfinite } from '../../hooks/following/useFollowing';
 import NoItems from '../../components/list/noItems';
 import IdentityItem from '../../components/list/identityItem';
+import { useDotYouClientContext } from 'feed-app-common';
 
 type FollowingProps = NativeStackScreenProps<ProfileStackParamList, 'Following'>;
 
 export const FollowingPage = (_props: FollowingProps) => {
+  const identity = useDotYouClientContext().getIdentity();
+
   const {
     data: identities,
     hasNextPage: hasMoreIdentities,
@@ -35,14 +38,17 @@ export const FollowingPage = (_props: FollowingProps) => {
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={doRefresh} />}
           data={flatIdentities}
           renderItem={(item) => (
-            <View
+            <TouchableOpacity
               key={item.item}
               style={{
                 padding: 1,
               }}
+              onPress={() =>
+                Linking.openURL(`https://${identity}/owner/connections/${item.item.senderOdinId}`)
+              }
             >
               <IdentityItem odinId={item.item} key={item.item} />
-            </View>
+            </TouchableOpacity>
           )}
           onEndReached={() => hasMoreIdentities && fetchNextPage()}
         />
