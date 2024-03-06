@@ -83,7 +83,7 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
     contact?.fileMetadata.appData.content.name?.surname ||
     conversationContent?.fileMetadata.appData.content.title;
 
-  if (conversationContent == null) {
+  if (conversationContent == null && route.params.convoId === ConversationWithYourselfId) {
     conversationContent = ConversationWithYourself;
   }
 
