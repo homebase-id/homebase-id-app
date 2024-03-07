@@ -42,10 +42,11 @@ import ConversationPage from '../pages/conversation-page';
 import EditGroupPage from '../pages/edit-group-page';
 import { ConnectionRequestsPage } from '../pages/home/connection-requests-page';
 import { useDarkMode } from '../hooks/useDarkMode';
-import { EmbeddedThumb } from '@youfoundation/js-lib/core';
+import { DriveSearchResult, EmbeddedThumb } from '@youfoundation/js-lib/core';
 import { OdinImage } from '../components/ui/OdinImage/OdinImage';
 import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
 import { useProfile } from '../hooks/profile/useProfile';
+import { ChatMessage } from '../provider/chat/ChatProvider';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -157,8 +158,10 @@ export type AppStackParamList = {
   ChatInfo: { convoId: string };
   EditGroup: { convoId: string };
   PreviewMedia: {
+    msg: DriveSearchResult<ChatMessage>;
     fileId: string;
     payloadKey: string;
+    currIndex: number;
     type?: string;
     previewThumbnail?: EmbeddedThumb;
   };
