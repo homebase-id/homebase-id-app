@@ -16,9 +16,11 @@ const ConversationPage = () => {
   const { data: conversations } = useConversations().all;
   const navigation = useNavigation<NavigationProp<AppStackParamList>>();
   const flatConversations =
-    (conversations?.pages
-      ?.flatMap((page) => page.searchResults)
-      ?.filter(Boolean) as DriveSearchResult<Conversation>[]) || [];
+    (
+      conversations?.pages
+        ?.flatMap((page) => page.searchResults)
+        ?.filter(Boolean) as DriveSearchResult<Conversation>[]
+    )?.filter((convo) => convo.fileMetadata.appData.archivalStatus === 0) || [];
 
   return (
     <FlatList
