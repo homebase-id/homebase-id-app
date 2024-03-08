@@ -326,19 +326,6 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
       onPress: () => navigation.navigate('NewChat'),
     });
   }, [navigation]);
-  const { data: profile } = useProfile();
-  const profileAvatar = () => {
-    return (
-      <OdinImage
-        fit="cover"
-        targetDrive={GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId)}
-        fileId={profile?.profileImageFileId}
-        fileKey={profile?.profileImageFileKey}
-        imageSize={{ width: 30, height: 30 }}
-        style={{ borderRadius: 30 / 2 }}
-      />
-    );
-  };
 
   return (
     <StackChat.Navigator>
@@ -349,7 +336,7 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
           title: 'Chats',
           headerShown: true,
           headerTitleAlign: 'left',
-          headerLeft: profileAvatar,
+          headerLeft: ProfileAvatar,
           headerRight: headerRight,
         }}
       />
@@ -389,6 +376,20 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
         />
       </StackChat.Group>
     </StackChat.Navigator>
+  );
+};
+
+const ProfileAvatar = () => {
+  const { data: profile } = useProfile();
+  return (
+    <OdinImage
+      fit="cover"
+      targetDrive={GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId)}
+      fileId={profile?.profileImageFileId}
+      fileKey={profile?.profileImageFileKey}
+      imageSize={{ width: 30, height: 30 }}
+      style={{ borderRadius: 30 / 2 }}
+    />
   );
 };
 
