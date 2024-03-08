@@ -119,10 +119,6 @@ export const OdinImage = memo(
         {!imageData?.url && !hasCachedImage ? (
           <View
             style={{
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
               ...imageSize,
               justifyContent: 'center',
               alignItems: 'center',
