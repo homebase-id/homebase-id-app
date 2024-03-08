@@ -178,7 +178,7 @@ const ZoomableImage = ({
         width={imageSize?.width}
         height={imageSize?.height}
         uri={uri}
-        style={{ ...style, overflow: 'hidden' }}
+        style={{ overflow: 'hidden', ...style }}
       />
     ) : (
       <Image
