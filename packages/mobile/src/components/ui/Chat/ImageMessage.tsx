@@ -1,5 +1,5 @@
 import { ChatMessageIMessage } from '../../../pages/chat-page';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { MessageImageProps } from 'react-native-gifted-chat';
 import { ChatDrive } from '../../../provider/chat/ConversationProvider';
@@ -27,10 +27,23 @@ const MediaGallery = ({ msg: currentMessage }: { msg: DriveSearchResult<ChatMess
       {payloads.slice(0, maxVisible).map((item, index) => {
         if (item.contentType.startsWith('video')) {
           return (
-            // HACK: OnPress doesn't work inside OdinImage (and IDK why), Wrapping Pressable outside for now
-            <Pressable
+            <VideoWithLoader
               key={index}
-              onPress={() => {
+              fileId={currentMessage.fileId}
+              fileKey={item.key}
+              targetDrive={ChatDrive}
+              previewThumbnail={
+                payloads.length === 1
+                  ? currentMessage.fileMetadata.appData.previewThumbnail
+                  : undefined
+              }
+              fit="cover"
+              imageSize={{
+                width: 200,
+                height: 200,
+              }}
+              preview={true}
+              onClick={() => {
                 navigation.navigate('PreviewMedia', {
                   fileId: currentMessage.fileId,
                   payloadKey: item.key,
@@ -39,30 +52,37 @@ const MediaGallery = ({ msg: currentMessage }: { msg: DriveSearchResult<ChatMess
                   currIndex: index,
                 });
               }}
-            >
-              <VideoWithLoader
-                fileId={currentMessage.fileId}
-                fileKey={item.key}
-                targetDrive={ChatDrive}
-                previewThumbnail={
-                  payloads.length === 1
-                    ? currentMessage.fileMetadata.appData.previewThumbnail
-                    : undefined
-                }
-                fit="cover"
-                imageSize={{
-                  width: 200,
-                  height: 200,
-                }}
-                preview={true}
-              />
-            </Pressable>
+            />
           );
         }
         return (
-          <Pressable
-            key={index}
-            onPress={() => {
+          <OdinImage
+            fileId={currentMessage.fileId}
+            fileKey={item.key}
+            key={item.key}
+            targetDrive={ChatDrive}
+            fit="cover"
+            imageSize={{
+              width: !isGallery ? 200 : 150,
+              height: !isGallery ? 200 : 150,
+            }}
+            avoidPayload={true}
+            style={
+              !isGallery
+                ? {
+                    borderRadius: 10,
+                  }
+                : {
+                    borderTopLeftRadius: index === 0 ? 10 : 0,
+                    borderBottomLeftRadius: index === 2 ? 10 : 0,
+                    borderTopRightRadius: index === 1 ? 10 : 0,
+                    borderBottomRightRadius: index === 3 ? 10 : 0,
+                    margin: 1,
+                    aspectRatio: payloads.length === 3 && index === 2 ? 1 : undefined,
+                    width: payloads.length === 3 && index === 2 ? '100%' : 150,
+                  }
+            }
+            onClick={() => {
               navigation.navigate('PreviewMedia', {
                 fileId: currentMessage.fileId,
                 payloadKey: item.key,
@@ -71,42 +91,7 @@ const MediaGallery = ({ msg: currentMessage }: { msg: DriveSearchResult<ChatMess
                 currIndex: index,
               });
             }}
-          >
-            <OdinImage
-              fileId={currentMessage.fileId}
-              fileKey={item.key}
-              key={item.key}
-              targetDrive={ChatDrive}
-              fit="cover"
-              imageSize={{
-                width: !isGallery ? 200 : 150,
-                height: !isGallery ? 200 : 150,
-              }}
-              avoidPayload={true}
-              style={
-                !isGallery
-                  ? {
-                      borderRadius: 10,
-                    }
-                  : {
-                      borderTopLeftRadius: index === 0 ? 10 : 0,
-                      borderBottomLeftRadius: index === 2 ? 10 : 0,
-                      borderTopRightRadius: index === 1 ? 10 : 0,
-                      borderBottomRightRadius: index === 3 ? 10 : 0,
-                      margin: 1,
-                      aspectRatio: payloads.length === 3 && index === 2 ? 1 : undefined,
-                      width: payloads.length === 3 && index === 2 ? '100%' : 150,
-                    }
-              }
-              // onClick={() => {
-              //   navigation.navigate('PreviewMedia', {
-              //     fileId: currentMessage.fileId,
-              //     payloadKey: item.key,
-              //     type: item.contentType,
-              //   });
-              // }}
-            />
-          </Pressable>
+          />
         );
       })}
       {countExcludedFromView > 0 && (

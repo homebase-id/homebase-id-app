@@ -170,22 +170,26 @@ const ZoomableImage = ({
 }) => {
   if (!enableZoom) {
     return contentType === 'image/svg+xml' ? (
-      <SvgUri
-        width={imageSize?.width}
-        height={imageSize?.height}
-        uri={uri}
-        style={{ overflow: 'hidden', ...style }}
-      />
+      <TouchableWithoutFeedback onPress={onClick}>
+        <SvgUri
+          width={imageSize?.width}
+          height={imageSize?.height}
+          uri={uri}
+          style={{ overflow: 'hidden', ...style }}
+        />
+      </TouchableWithoutFeedback>
     ) : (
-      <Image
-        source={{ uri }}
-        alt={alt}
-        style={{
-          resizeMode: fit,
-          ...imageSize,
-          ...style,
-        }}
-      />
+      <TouchableWithoutFeedback onPress={onClick}>
+        <Image
+          source={{ uri }}
+          alt={alt}
+          style={{
+            resizeMode: fit,
+            ...imageSize,
+            ...style,
+          }}
+        />
+      </TouchableWithoutFeedback>
     );
   }
 
