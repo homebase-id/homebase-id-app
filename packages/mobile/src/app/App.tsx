@@ -48,6 +48,7 @@ import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-
 import { useProfile } from '../hooks/profile/useProfile';
 import { ChatMessage } from '../provider/chat/ChatProvider';
 import { useRefreshOnFocus } from '../hooks/chat/useRefetchOnFocus';
+import Toast from 'react-native-toast-message';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -111,6 +112,7 @@ let App = () => {
     >
       <GestureHandlerRootView style={{ flex: 1 }}>
         <RootStack />
+        <Toast />
       </GestureHandlerRootView>
     </PersistQueryClientProvider>
   );
