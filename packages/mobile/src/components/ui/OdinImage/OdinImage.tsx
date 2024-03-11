@@ -119,14 +119,10 @@ export const OdinImage = memo(
         {!imageData?.url && !hasCachedImage ? (
           <View
             style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
               ...imageSize,
               justifyContent: 'center',
               alignItems: 'center',
+              ...style,
             }}
           >
             <ActivityIndicator style={{}} size="large" />
@@ -174,17 +170,26 @@ const ZoomableImage = ({
 }) => {
   if (!enableZoom) {
     return contentType === 'image/svg+xml' ? (
-      <SvgUri width={imageSize?.width} height={imageSize?.height} uri={uri} />
+      <TouchableWithoutFeedback onPress={onClick}>
+        <SvgUri
+          width={imageSize?.width}
+          height={imageSize?.height}
+          uri={uri}
+          style={{ overflow: 'hidden', ...style }}
+        />
+      </TouchableWithoutFeedback>
     ) : (
-      <Image
-        source={{ uri }}
-        alt={alt}
-        style={{
-          resizeMode: fit,
-          ...imageSize,
-          ...style,
-        }}
-      />
+      <TouchableWithoutFeedback onPress={onClick}>
+        <Image
+          source={{ uri }}
+          alt={alt}
+          style={{
+            resizeMode: fit,
+            ...imageSize,
+            ...style,
+          }}
+        />
+      </TouchableWithoutFeedback>
     );
   }
 

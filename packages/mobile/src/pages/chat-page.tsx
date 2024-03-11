@@ -8,6 +8,7 @@ import {
   IMessage,
   InputToolbar,
   InputToolbarProps,
+  MessageImageProps,
   MessageProps,
   MessageText,
   Send,
@@ -15,7 +16,7 @@ import {
 } from 'react-native-gifted-chat';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ChatStackParamList } from '../app/App';
+import { AppStackParamList } from '../app/App';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   ImageBackground,
@@ -54,7 +55,7 @@ import useContact from '../hooks/contact/useContact';
 import { useMarkMessagesAsRead } from '../hooks/chat/useMarkMessagesAsRead';
 import { ChatDeliveryIndicator } from '../components/ui/Chat/Chat-Delivery-Indicator';
 
-export type ChatProp = NativeStackScreenProps<ChatStackParamList, 'ChatScreen'>;
+export type ChatProp = NativeStackScreenProps<AppStackParamList, 'ChatScreen'>;
 
 export interface ChatMessageIMessage extends IMessage, DriveSearchResult<ChatMessage> {}
 
@@ -321,8 +322,12 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
         alwaysShowSend
         isKeyboardInternallyHandled={true}
         keyboardShouldPersistTaps="never"
-        renderMessageImage={(prop) => <ImageMessage {...prop} />}
-        renderCustomView={(prop) => <RenderReplyMessageView {...prop} />}
+        renderMessageImage={(prop: MessageImageProps<ChatMessageIMessage>) => (
+          <ImageMessage {...prop} />
+        )}
+        renderCustomView={(prop: BubbleProps<ChatMessageIMessage>) => (
+          <RenderReplyMessageView {...prop} />
+        )}
         renderBubble={(props) => {
           const message = props.currentMessage as ChatMessageIMessage;
           const content = message?.fileMetadata.appData.content;
@@ -358,7 +363,7 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
                         : {
                             right: {
                               fontSize: 12,
-                              color: !isDarkMode ? Colors.slate[600] : undefined,
+                              color: !isDarkMode ? Colors.slate[600] : Colors.slate[200],
                             },
                             left: {
                               fontSize: 12,
@@ -415,6 +420,14 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
           return (
             <MessageText
               {...props}
+              linkStyle={{
+                left: {
+                  color: Colors.indigo[500],
+                },
+                right: {
+                  color: Colors.indigo[500],
+                },
+              }}
               customTextStyle={
                 isEmojiOnly
                   ? {

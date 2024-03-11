@@ -1,6 +1,6 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Linking, StyleSheet, Text, View } from 'react-native';
-import { ChatStackParamList } from '../app/App';
+import { AppStackParamList } from '../app/App';
 import { useConversation } from '../hooks/chat/useConversation';
 import { Avatar, GroupAvatar, OwnerAvatar } from '../components/ui/Chat/Conversation-tile';
 import {
@@ -19,19 +19,23 @@ import { useAuth } from '../hooks/auth/useAuth';
 import { Header, HeaderBackButton } from '@react-navigation/elements';
 import TextButton from '../components/ui/Text/Text-Button';
 import { useDarkMode } from '../hooks/useDarkMode';
+import { useProfile } from '../hooks/profile/useProfile';
 
-export type ChatInfoProp = NativeStackScreenProps<ChatStackParamList, 'ChatInfo'>;
+export type ChatInfoProp = NativeStackScreenProps<AppStackParamList, 'ChatInfo'>;
 
 export function ChatInfoPage(prop: ChatInfoProp) {
   const { convoId: conversationId } = prop.route.params;
   const { data: conversation } = useConversation({ conversationId }).single;
   const { isDarkMode } = useDarkMode();
   const identity = useAuth().getIdentity();
+  const profile = useProfile().data;
 
   const isSelf = conversationId === ConversationWithYourselfId;
 
   const onPress = useCallback(async () => {
-    const recipient = (conversation?.fileMetadata.appData.content as SingleConversation).recipient;
+    const recipient = isSelf
+      ? identity
+      : (conversation?.fileMetadata.appData.content as SingleConversation).recipient;
     const url = `https://${recipient}/`;
     if (await InAppBrowser.isAvailable()) {
       await InAppBrowser.open(url, {
@@ -40,7 +44,7 @@ export function ChatInfoPage(prop: ChatInfoProp) {
         animated: true,
       });
     } else Linking.openURL(url);
-  }, [conversation?.fileMetadata.appData.content]);
+  }, [conversation?.fileMetadata.appData.content, isSelf, identity]);
 
   const group =
     (conversation && 'recipients' in conversation.fileMetadata.appData.content) || false;
@@ -103,7 +107,7 @@ export function ChatInfoPage(prop: ChatInfoProp) {
             },
           ]}
         >
-          {conversationContent.title}
+          {isSelf ? `${profile?.firstName} ${profile?.surName}` : conversationContent.title}
         </Text>
         {!group && (
           <View
@@ -123,7 +127,7 @@ export function ChatInfoPage(prop: ChatInfoProp) {
                   },
                 ]}
               >
-                {(conversationContent as SingleConversation).recipient}
+                {isSelf ? identity : (conversationContent as SingleConversation).recipient}
               </Text>
             </TouchableOpacity>
           </View>
