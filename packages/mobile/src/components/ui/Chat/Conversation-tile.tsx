@@ -191,13 +191,17 @@ const ConversationTile = (props: ConversationTileProps) => {
             </View>
           ) : null}
         </View>
-        <View>
+        <View
+          style={{
+            justifyContent: 'space-between',
+          }}
+        >
           {lastMessage && <ChatSentTimeIndicator msg={lastMessage} keepDetail={false} />}
           {unreadCount > 0 ? (
             <View
               style={{
-                backgroundColor: darkMode.isDarkMode ? Colors.blue[500] : Colors.blue[100],
-                borderRadius: 8,
+                backgroundColor: darkMode.isDarkMode ? Colors.indigo[500] : Colors.indigo[100],
+                borderRadius: 15,
                 padding: 4,
                 justifyContent: 'center',
                 alignItems: 'center',
@@ -205,7 +209,7 @@ const ConversationTile = (props: ConversationTileProps) => {
             >
               <Text
                 style={{
-                  color: darkMode.isDarkMode ? Colors.white : Colors.blue[900],
+                  color: darkMode.isDarkMode ? Colors.white : Colors.black,
                   fontSize: 12,
                 }}
               >
