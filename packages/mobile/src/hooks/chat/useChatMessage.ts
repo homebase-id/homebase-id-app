@@ -1,6 +1,5 @@
 import { InfiniteData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-
 import {
   DriveSearchResult,
   NewDriveSearchResult,
@@ -10,12 +9,16 @@ import {
 import { getNewId } from '@youfoundation/js-lib/helpers';
 
 import { useDotYouClientContext } from 'feed-app-common';
-import { ChatDeliveryStatus, ChatMessage, getChatMessage, updateChatMessage, uploadChatMessage } from '../../provider/chat/ChatProvider';
+import {
+  ChatDeliveryStatus,
+  ChatMessage,
+  getChatMessage,
+  updateChatMessage,
+  uploadChatMessage,
+} from '../../provider/chat/ChatProvider';
 import { ImageSource } from '../../provider/image/RNImageProvider';
 
-
-export const useChatMessage = (props?: { messageId: string | undefined },) => {
-
+export const useChatMessage = (props?: { messageId: string | undefined }) => {
   const queryClient = useQueryClient();
   const dotYouClient = useDotYouClientContext();
 
@@ -58,22 +61,22 @@ export const useChatMessage = (props?: { messageId: string | undefined },) => {
       },
     };
 
-    const uploadResult = await uploadChatMessage(dotYouClient, newChat, recipients, files).catch((err) => console.error(err));
+    const uploadResult = await uploadChatMessage(dotYouClient, newChat, recipients, files);
     if (!uploadResult) throw new Error('Failed to send the chat message');
 
     newChat.fileId = uploadResult.file.fileId;
     newChat.fileMetadata.versionTag = uploadResult.newVersionTag;
+    newChat.fileMetadata.appData.previewThumbnail = uploadResult.previewThumbnail;
 
     const deliveredToInboxes = recipients.map(
       (recipient) =>
         uploadResult.recipientStatus[recipient].toLowerCase() === TransferStatus.DeliveredToInbox
     );
 
-    if (deliveredToInboxes.every((delivered) => delivered)) {
+    if (recipients.length && deliveredToInboxes.every((delivered) => delivered)) {
       newChat.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Delivered;
       await updateChatMessage(dotYouClient, newChat, recipients, uploadResult.keyHeader);
     }
-
     return newChat;
   };
 
