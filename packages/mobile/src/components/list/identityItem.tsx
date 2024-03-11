@@ -6,7 +6,7 @@ import { Colors } from '../../app/Colors';
 import { useDarkMode } from '../../hooks/useDarkMode';
 
 export const IdentityItem = ({ odinId }: { odinId: string }) => {
-  const isDarkMode = useDarkMode();
+  const { isDarkMode } = useDarkMode();
   const { data: contactFile } = useContact(odinId).fetch;
   const contactContent = contactFile?.fileMetadata.appData.content;
 
