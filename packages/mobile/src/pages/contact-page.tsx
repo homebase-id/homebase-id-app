@@ -7,6 +7,7 @@ import { useAllConnections } from 'feed-app-common';
 
 import { ContactTile, Tile } from '../components/ui/Contact/Contact-Tile';
 import { Users } from '../components/ui/Icons/icons';
+import { memo } from 'react';
 
 const ListHeaderComponent = () => {
   const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
@@ -23,16 +24,12 @@ const ListHeaderComponent = () => {
   );
 };
 
-export const ContactPage = ({
-  navigation,
-}: {
-  navigation: NavigationProp<ChatStackParamList, 'NewChat'>;
-}) => {
-  const connections = useAllConnections(true).data;
-  const nav = useNavigation<NavigationProp<AppStackParamList>>();
-  if (!connections) return null;
-  return (
-    <>
+export const ContactPage = memo(
+  ({ navigation }: { navigation: NavigationProp<ChatStackParamList, 'NewChat'> }) => {
+    const connections = useAllConnections(true).data;
+    const nav = useNavigation<NavigationProp<AppStackParamList>>();
+    if (!connections) return null;
+    return (
       <FlatList
         data={connections}
         keyExtractor={(item) => item.odinId}
@@ -49,6 +46,6 @@ export const ContactPage = ({
           />
         )}
       />
-    </>
-  );
-};
+    );
+  }
+);

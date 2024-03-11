@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import {
   ImageStyle,
   StyleProp,
@@ -78,7 +78,7 @@ export const GroupAvatar = (props: {
   style?: StyleProp<ViewStyle>;
   iconSize?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl' | number;
 }) => {
-  const darkMode = useDarkMode();
+  const { isDarkMode } = useDarkMode();
   return (
     <View
       style={[
@@ -86,7 +86,7 @@ export const GroupAvatar = (props: {
         {
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: darkMode.isDarkMode ? Colors.slate[800] : Colors.purple[200],
+          backgroundColor: isDarkMode ? Colors.slate[800] : Colors.purple[200],
         },
         props.style,
       ]}
@@ -96,35 +96,36 @@ export const GroupAvatar = (props: {
   );
 };
 
-const ConversationTile = (props: ConversationTileProps) => {
-  const { data, isFetched: fetchedMessages } = useChatMessages({
+const ConversationTile = memo((props: ConversationTileProps) => {
+  const { data: chatMessages } = useChatMessages({
     conversationId: props.conversationId,
   }).all;
   const flatMessages = useMemo(
     () =>
-      data?.pages
+      chatMessages?.pages
         .flatMap((page) => page.searchResults)
         ?.filter(Boolean) as DriveSearchResult<ChatMessage>[],
-    [data]
+    [chatMessages]
   );
-  const darkMode = useDarkMode();
+  const { isDarkMode } = useDarkMode();
   const { data: connection } = useContact().fetch;
 
   const connectionDetails = connection?.fileMetadata.appData.content;
-
   const isGroup = 'recipients' in props.conversation && props.conversation.recipients !== undefined;
 
-  const lastMessage = flatMessages?.[0];
+  const lastMessage = useMemo(() => flatMessages?.[0], [flatMessages]);
+  const lastMessageContent = lastMessage?.fileMetadata.appData.content;
 
   const lastReadTime = props.conversation.lastReadTime;
-  const unreadCount =
-    flatMessages && lastReadTime
-      ? flatMessages.filter(
-          (msg) => msg.fileMetadata.senderOdinId && msg.fileMetadata.created >= lastReadTime
-        ).length
-      : 0;
-
-  const lastMessageContent = lastMessage?.fileMetadata.appData.content;
+  const unreadCount = useMemo(
+    () =>
+      flatMessages && lastReadTime
+        ? flatMessages.filter(
+            (msg) => msg.fileMetadata.senderOdinId && msg.fileMetadata.created >= lastReadTime
+          ).length
+        : 0,
+    [flatMessages, lastReadTime]
+  );
 
   return (
     <TouchableOpacity onPress={props.onPress} onLongPress={props.onLongPress}>
@@ -132,7 +133,7 @@ const ConversationTile = (props: ConversationTileProps) => {
         style={[
           styles.tile,
           {
-            backgroundColor: darkMode.isDarkMode ? Colors.slate[900] : Colors.white,
+            backgroundColor: isDarkMode ? Colors.slate[900] : Colors.white,
           },
         ]}
       >
@@ -156,7 +157,7 @@ const ConversationTile = (props: ConversationTileProps) => {
             style={[
               styles.title,
               {
-                color: darkMode.isDarkMode ? Colors.white : Colors.slate[900],
+                color: isDarkMode ? Colors.white : Colors.slate[900],
               },
             ]}
           >
@@ -180,7 +181,7 @@ const ConversationTile = (props: ConversationTileProps) => {
                 style={[
                   styles.description,
                   {
-                    color: darkMode.isDarkMode ? Colors.white : Colors.slate[900],
+                    color: isDarkMode ? Colors.white : Colors.slate[900],
                   },
                 ]}
               >
@@ -196,7 +197,7 @@ const ConversationTile = (props: ConversationTileProps) => {
           {unreadCount > 0 ? (
             <View
               style={{
-                backgroundColor: darkMode.isDarkMode ? Colors.blue[500] : Colors.blue[100],
+                backgroundColor: isDarkMode ? Colors.blue[500] : Colors.blue[100],
                 borderRadius: 8,
                 padding: 4,
                 justifyContent: 'center',
@@ -205,7 +206,7 @@ const ConversationTile = (props: ConversationTileProps) => {
             >
               <Text
                 style={{
-                  color: darkMode.isDarkMode ? Colors.white : Colors.blue[900],
+                  color: isDarkMode ? Colors.white : Colors.blue[900],
                   fontSize: 12,
                 }}
               >
@@ -217,7 +218,7 @@ const ConversationTile = (props: ConversationTileProps) => {
       </View>
     </TouchableOpacity>
   );
-};
+});
 
 const styles = StyleSheet.create({
   tile: {

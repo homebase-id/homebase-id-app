@@ -3,7 +3,7 @@ import { useDarkMode } from '../../hooks/useDarkMode';
 import { Colors } from '../../app/Colors';
 
 const NoItems = ({ children }: { children: string }) => {
-  const isDarkMode = useDarkMode();
+  const { isDarkMode } = useDarkMode();
 
   return (
     <View

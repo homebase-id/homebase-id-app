@@ -35,7 +35,7 @@ import { useDarkMode } from '../../hooks/useDarkMode';
 type SettingsProps = NativeStackScreenProps<ProfileStackParamList, 'Overview'>;
 
 export const ProfilePage = (_props: SettingsProps) => {
-  const isDarkMode = useDarkMode();
+  const { isDarkMode } = useDarkMode();
   const { logout, getIdentity } = useAuth();
   const [logoutPending, setLogoutPending] = useState(false);
 
