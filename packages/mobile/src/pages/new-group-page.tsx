@@ -2,22 +2,23 @@ import { useAllConnections } from 'feed-app-common';
 import { ActivityIndicator, FlatList, Platform, Text } from 'react-native';
 import { ContactTile } from '../components/ui/Contact/Contact-Tile';
 
-import { useCallback, useState } from 'react';
+import { memo, useCallback, useState } from 'react';
 import { Header, HeaderBackButtonProps } from '@react-navigation/elements';
 import { BackButton } from '../components/ui/convo-app-bar';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { ChatStackParamList } from '../app/App';
+import { AppStackParamList, ChatStackParamList } from '../app/App';
 import { useConversation } from '../hooks/chat/useConversation';
 import Dialog from 'react-native-dialog';
 import { DotYouProfile } from '@youfoundation/js-lib/network';
 
-export const NewGroupPage = () => {
+export const NewGroupPage = memo(() => {
   const contacts = useAllConnections(true).data;
   const [dialogVisible, setDialogVisible] = useState(false);
 
   const [selectedContacts, setSetselectedContacts] = useState<DotYouProfile[]>([]);
   const navigation = useNavigation<NavigationProp<ChatStackParamList, 'NewChat'>>();
+  const appStackNavigation = useNavigation<NavigationProp<AppStackParamList, 'TabStack'>>();
   const { mutateAsync: createNew } = useConversation().create;
 
   let groupTitle: string | undefined;
@@ -32,11 +33,37 @@ export const NewGroupPage = () => {
       setDialogVisible(false);
       navigation.goBack();
       navigation.goBack();
-      navigation.navigate('ChatScreen', {
+
+      appStackNavigation.navigate('ChatScreen', {
         convoId: newConversationId,
       });
     }
-  }, [createNew, navigation, selectedContacts, groupTitle]);
+  }, [createNew, navigation, appStackNavigation, selectedContacts, groupTitle]);
+
+  const headerLeft = useCallback(
+    (props: HeaderBackButtonProps) => {
+      return BackButton({
+        onPress: () => navigation.goBack(),
+        prop: props,
+        label: '',
+        style: { marginLeft: 10 },
+      });
+    },
+    [navigation]
+  );
+
+  const headerRight = useCallback(
+    () =>
+      CreateGroup({
+        disabled: selectedContacts.length < 2,
+        onPress: async () => {
+          if (selectedContacts.length === 0) return;
+          setDialogVisible(true);
+        },
+      }),
+    [selectedContacts.length]
+  );
+
   if (!contacts) return null;
 
   return (
@@ -44,23 +71,8 @@ export const NewGroupPage = () => {
       <Header
         title="New Group"
         headerStatusBarHeight={Platform.OS === 'ios' ? 10 : 0}
-        headerLeft={(props: HeaderBackButtonProps) => {
-          return BackButton({
-            onPress: () => navigation.goBack(),
-            prop: props,
-            label: '',
-            style: { marginLeft: 10 },
-          });
-        }}
-        headerRight={() =>
-          CreateGroup({
-            disabled: selectedContacts.length < 2,
-            onPress: async () => {
-              if (selectedContacts.length === 0) return;
-              setDialogVisible(true);
-            },
-          })
-        }
+        headerLeft={headerLeft}
+        headerRight={headerRight}
       />
       <FlatList
         data={contacts}
@@ -87,11 +99,11 @@ export const NewGroupPage = () => {
             setDialogVisible(false);
           }}
         />
-        <Dialog.Button label="Create" onPress={async () => await createGroupCallback()} />
+        <Dialog.Button label="Create" onPress={createGroupCallback} />
       </Dialog.Container>
     </>
   );
-};
+});
 
 function CreateGroup(props: {
   disabled: boolean;

@@ -42,6 +42,7 @@ const ReplyMessageBar = ({ clearReply, message }: ReplyMessageBarProps) => {
         <OdinImage
           fileId={message.fileId}
           targetDrive={ChatDrive}
+          previewThumbnail={message.fileMetadata.appData.previewThumbnail}
           fileKey={message.fileMetadata.payloads[0].key}
           fit="cover"
           imageSize={{

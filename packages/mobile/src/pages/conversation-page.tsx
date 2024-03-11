@@ -11,16 +11,19 @@ import {
 } from '../provider/chat/ConversationProvider';
 import { useAuth } from '../hooks/auth/useAuth';
 import { useProfile } from '../hooks/profile/useProfile';
+import { memo, useMemo } from 'react';
 
-const ConversationPage = () => {
-  const { data: conversations } = useConversations().all;
+const ConversationPage = memo(() => {
   const navigation = useNavigation<NavigationProp<AppStackParamList>>();
-  const flatConversations =
-    (
-      conversations?.pages
+
+  const { data: conversations } = useConversations().all;
+  const flatConversations = useMemo(
+    () =>
+      (conversations?.pages
         ?.flatMap((page) => page.searchResults)
-        ?.filter(Boolean) as DriveSearchResult<Conversation>[]
-    )?.filter((convo) => convo.fileMetadata.appData.archivalStatus === 0) || [];
+        ?.filter(Boolean) as DriveSearchResult<Conversation>[]) || [],
+    [conversations]
+  );
 
   return (
     <FlatList
@@ -43,7 +46,7 @@ const ConversationPage = () => {
       )}
     />
   );
-};
+});
 
 const ConversationTileWithYourself = () => {
   const user = useProfile().data;

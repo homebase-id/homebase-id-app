@@ -16,12 +16,13 @@ import { useDarkMode } from '../../hooks/useDarkMode';
 type HomeProps = NativeStackScreenProps<HomeStackParamList, 'Overview'>;
 
 export const HomePage = (_props: HomeProps) => {
-  const isDarkMode = useDarkMode();
+  const { isDarkMode } = useDarkMode();
   const { getIdentity } = useAuth();
 
   const { data: profile } = useProfile();
 
   const navigate = (target: keyof HomeStackParamList) => _props.navigation.navigate(target);
+
   return (
     <SafeAreaView>
       <Container>
