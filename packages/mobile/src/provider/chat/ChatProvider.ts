@@ -33,12 +33,13 @@ import {
   SingleConversation,
 } from './ConversationProvider';
 import { getNewId, jsonStringify64 } from '@youfoundation/js-lib/helpers';
-import { appId } from '../../hooks/auth/useAuth';
 import { OdinBlob } from '../../../polyfills/OdinBlob';
 import { ImageSource } from '../image/RNImageProvider';
 import { createThumbnails } from '../image/RNThumbnailProvider';
 import { grabThumbnail, processVideo } from '../image/RNVideoProviderSegmenter';
 import { VideoContentType } from '@youfoundation/js-lib/media';
+
+const CHAT_APP_ID = '2d781401-3804-4b57-b4aa-d8e4e2ef39f4';
 
 export const ChatMessageFileType = 7878;
 export const ChatDeletedArchivalStaus = 2;
@@ -92,7 +93,7 @@ export const getChatMessages = async (
   dotYouClient: DotYouClient,
   conversationId: string,
   cursorState: string | undefined,
-  pageSize: number,
+  pageSize: number
 ) => {
   const params: FileQueryParams = {
     targetDrive: ChatDrive,
@@ -110,28 +111,21 @@ export const getChatMessages = async (
     ...response,
     searchResults: await Promise.all(
       response.searchResults.map(
-        async result =>
-          await dsrToMessage(dotYouClient, result, ChatDrive, true),
-      ),
+        async (result) => await dsrToMessage(dotYouClient, result, ChatDrive, true)
+      )
     ),
   };
 };
 
-export const deleteAllChatMessages = async (
-  dotYouClient: DotYouClient,
-  conversationId: string,
-) => {
+export const deleteAllChatMessages = async (dotYouClient: DotYouClient, conversationId: string) => {
   return await deleteFilesByGroupId(dotYouClient, ChatDrive, [conversationId]);
 };
 
-export const getChatMessage = async (
-  dotYouClient: DotYouClient,
-  chatMessageId: string,
-) => {
+export const getChatMessage = async (dotYouClient: DotYouClient, chatMessageId: string) => {
   const fileHeader = await getFileHeaderByUniqueId<ChatMessage>(
     dotYouClient,
     ChatDrive,
-    chatMessageId,
+    chatMessageId
   );
   if (!fileHeader) return null;
 
@@ -142,16 +136,11 @@ export const getChatMessage = async (
 export const getChatMessageByGlobalTransitId = async (
   dotYouClient: DotYouClient,
   conversationId: string,
-  messageGlobalTransitId: string,
+  messageGlobalTransitId: string
 ) => {
-  const allChatMessages = await getChatMessages(
-    dotYouClient,
-    conversationId,
-    undefined,
-    2000,
-  );
+  const allChatMessages = await getChatMessages(dotYouClient, conversationId, undefined, 2000);
   return allChatMessages?.searchResults?.find(
-    chat => chat?.fileMetadata.globalTransitId === messageGlobalTransitId,
+    (chat) => chat?.fileMetadata.globalTransitId === messageGlobalTransitId
   );
 };
 
@@ -159,14 +148,14 @@ export const dsrToMessage = async (
   dotYouClient: DotYouClient,
   dsr: DriveSearchResult,
   targetDrive: TargetDrive,
-  includeMetadataHeader: boolean,
+  includeMetadataHeader: boolean
 ): Promise<DriveSearchResult<ChatMessage> | null> => {
   try {
     const attrContent = await getContentFromHeaderOrPayload<ChatMessage>(
       dotYouClient,
       targetDrive,
       dsr,
-      includeMetadataHeader,
+      includeMetadataHeader
     );
     if (!attrContent) return null;
 
@@ -183,11 +172,7 @@ export const dsrToMessage = async (
 
     return chatMessage;
   } catch (ex) {
-    console.error(
-      '[DotYouCore-js] failed to get the chatMessage payload of a dsr',
-      dsr,
-      ex,
-    );
+    console.error('[DotYouCore-js] failed to get the chatMessage payload of a dsr', dsr, ex);
     return null;
   }
 };
@@ -197,7 +182,7 @@ export const uploadChatMessage = async (
   message: NewDriveSearchResult<ChatMessage>,
   recipients: string[],
   files: ImageSource[] | undefined,
-  onVersionConflict?: () => void,
+  onVersionConflict?: () => void
 ) => {
   const messageContent = message.fileMetadata.appData.content;
   const distribute = recipients?.length > 0;
@@ -209,18 +194,18 @@ export const uploadChatMessage = async (
     },
     transitOptions: distribute
       ? {
-        recipients: [...recipients],
-        schedule: ScheduleOptions.SendNowAwaitResponse,
-        sendContents: SendContents.All,
-        useGlobalTransitId: true,
-        useAppNotification: true,
-        appNotificationOptions: {
-          appId: appId,
-          typeId: message.fileMetadata.appData.groupId as string,
-          tagId: getNewId(),
-          silent: false,
-        },
-      }
+          recipients: [...recipients],
+          schedule: ScheduleOptions.SendNowAwaitResponse,
+          sendContents: SendContents.All,
+          useGlobalTransitId: true,
+          useAppNotification: true,
+          appNotificationOptions: {
+            appId: CHAT_APP_ID,
+            typeId: message.fileMetadata.appData.groupId as string,
+            tagId: getNewId(),
+            silent: false,
+          },
+        }
       : undefined,
   };
 
@@ -245,16 +230,12 @@ export const uploadChatMessage = async (
   const thumbnails: ThumbnailFile[] = [];
   const previewThumbnails: EmbeddedThumb[] = [];
 
-
   for (let i = 0; files && i < files?.length; i++) {
     const payloadKey = `${CHAT_MESSAGE_PAYLOAD_KEY}${i}`;
     const newMediaFile = files[i];
 
     if (newMediaFile.type?.startsWith('video/')) {
-      const { video: processedMedia, metadata } = await processVideo(
-        newMediaFile,
-        true
-      );
+      const { video: processedMedia, metadata } = await processVideo(newMediaFile, true);
 
       // Custom blob to avoid reading and writing the file to disk again
       const payloadBlob = new OdinBlob((processedMedia.filepath || processedMedia.uri) as string, {
@@ -264,20 +245,18 @@ export const uploadChatMessage = async (
       const thumbnail = await grabThumbnail(newMediaFile);
       const thumbSource: ImageSource | null = thumbnail
         ? {
-          uri: thumbnail.uri,
-          width: 1920,
-          height: 1080,
-          type: thumbnail.type,
-        }
+            uri: thumbnail.uri,
+            width: 1920,
+            height: 1080,
+            type: thumbnail.type,
+          }
         : null;
-      const { tinyThumb, additionalThumbnails } = thumbSource && thumbnail
-        ? await createThumbnails(
-          thumbSource,
-          payloadKey,
-          thumbnail.type as ImageContentType,
-          [{ quality: 100, width: 250, height: 250 }]
-        )
-        : { tinyThumb: undefined, additionalThumbnails: undefined };
+      const { tinyThumb, additionalThumbnails } =
+        thumbSource && thumbnail
+          ? await createThumbnails(thumbSource, payloadKey, thumbnail.type as ImageContentType, [
+              { quality: 100, width: 250, height: 250 },
+            ])
+          : { tinyThumb: undefined, additionalThumbnails: undefined };
       if (additionalThumbnails) {
         thumbnails.push(...additionalThumbnails);
       }
@@ -289,7 +268,6 @@ export const uploadChatMessage = async (
 
       if (tinyThumb) previewThumbnails.push(tinyThumb);
     } else {
-
       const blob = new OdinBlob(newMediaFile.filepath || newMediaFile.uri, {
         type: newMediaFile?.type,
       }) as any as Blob;
@@ -301,9 +279,8 @@ export const uploadChatMessage = async (
         [
           { quality: 75, width: 250, height: 250 },
           { quality: 75, width: 1600, height: 1600 },
-        ],
+        ]
       );
-
 
       thumbnails.push(...additionalThumbnails);
       payloads.push({
@@ -317,7 +294,6 @@ export const uploadChatMessage = async (
 
   uploadMetadata.appData.previewThumbnail = previewThumbnails[0];
 
-
   return await uploadFile(
     dotYouClient,
     uploadInstructions,
@@ -325,7 +301,7 @@ export const uploadChatMessage = async (
     payloads,
     thumbnails,
     undefined,
-    onVersionConflict,
+    onVersionConflict
   );
 };
 
@@ -333,7 +309,7 @@ export const updateChatMessage = async (
   dotYouClient: DotYouClient,
   message: DriveSearchResult<ChatMessage> | NewDriveSearchResult<ChatMessage>,
   recipients: string[],
-  keyHeader?: KeyHeader,
+  keyHeader?: KeyHeader
 ) => {
   const messageContent = message.fileMetadata.appData.content;
   const distribute = recipients?.length > 0;
@@ -345,11 +321,11 @@ export const updateChatMessage = async (
     },
     transitOptions: distribute
       ? {
-        recipients: [...recipients],
-        schedule: ScheduleOptions.SendNowAwaitResponse,
-        sendContents: SendContents.All,
-        useGlobalTransitId: true,
-      }
+          recipients: [...recipients],
+          schedule: ScheduleOptions.SendNowAwaitResponse,
+          sendContents: SendContents.All,
+          useGlobalTransitId: true,
+        }
       : undefined,
   };
 
@@ -360,14 +336,11 @@ export const updateChatMessage = async (
     appData: {
       uniqueId: message.fileMetadata.appData.uniqueId,
       groupId: message.fileMetadata.appData.groupId,
-      archivalStatus: (
-        message.fileMetadata.appData as AppFileMetaData<ChatMessage>
-      ).archivalStatus,
+      archivalStatus: (message.fileMetadata.appData as AppFileMetaData<ChatMessage>).archivalStatus,
       fileType: ChatMessageFileType,
       content: payloadJson,
     },
-    senderOdinId: (message.fileMetadata as FileMetadata<ChatMessage>)
-      .senderOdinId,
+    senderOdinId: (message.fileMetadata as FileMetadata<ChatMessage>).senderOdinId,
     isEncrypted: true,
     accessControlList: message.serverMetadata?.accessControlList || {
       requiredSecurityGroup: SecurityGroupType.Connected,
@@ -376,11 +349,9 @@ export const updateChatMessage = async (
 
   return await uploadHeader(
     dotYouClient,
-    keyHeader ||
-    (message as DriveSearchResult<ChatMessage>)
-      .sharedSecretEncryptedKeyHeader,
+    keyHeader || (message as DriveSearchResult<ChatMessage>).sharedSecretEncryptedKeyHeader,
     uploadInstructions,
-    uploadMetadata,
+    uploadMetadata
   );
 };
 
@@ -388,7 +359,7 @@ export const softDeleteChatMessage = async (
   dotYouClient: DotYouClient,
   message: DriveSearchResult<ChatMessage>,
   recipients: string[],
-  deleteForEveryone?: boolean,
+  deleteForEveryone?: boolean
 ) => {
   message.fileMetadata.appData.archivalStatus = ChatDeletedArchivalStaus;
   let runningVersionTag = message.fileMetadata.versionTag;
@@ -401,7 +372,7 @@ export const softDeleteChatMessage = async (
       ChatDrive,
       message.fileId,
       payload.key,
-      runningVersionTag,
+      runningVersionTag
     );
 
     if (!deleteResult) throw new Error('Failed to delete payload');
@@ -410,11 +381,7 @@ export const softDeleteChatMessage = async (
 
   message.fileMetadata.versionTag = runningVersionTag;
   message.fileMetadata.appData.content.message = '';
-  return await updateChatMessage(
-    dotYouClient,
-    message,
-    deleteForEveryone ? recipients : [],
-  );
+  return await updateChatMessage(dotYouClient, message, deleteForEveryone ? recipients : []);
 };
 
 export const MARK_CHAT_READ_COMMAND = 150;
@@ -426,7 +393,7 @@ export interface MarkAsReadRequest {
 export const requestMarkAsRead = async (
   dotYouClient: DotYouClient,
   conversation: DriveSearchResult<Conversation>,
-  chatGlobalTransitIds: string[],
+  chatGlobalTransitIds: string[]
 ) => {
   const request: MarkAsReadRequest = {
     conversationId: conversation.fileMetadata.appData.uniqueId as string,
@@ -437,7 +404,9 @@ export const requestMarkAsRead = async (
   const recipients = (conversationContent as GroupConversation).recipients || [
     (conversationContent as SingleConversation).recipient,
   ];
-  if (!recipients?.filter(Boolean)?.length) { throw new Error('No recipients found in the conversation'); }
+  if (!recipients?.filter(Boolean)?.length) {
+    throw new Error('No recipients found in the conversation');
+  }
 
   return await sendCommand(
     dotYouClient,
@@ -447,7 +416,7 @@ export const requestMarkAsRead = async (
       jsonMessage: jsonStringify64(request),
       recipients: recipients,
     },
-    ChatDrive,
+    ChatDrive
   );
 };
 
