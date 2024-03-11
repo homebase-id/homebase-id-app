@@ -269,7 +269,7 @@ export const uploadChatMessage = async (
       if (tinyThumb) previewThumbnails.push(tinyThumb);
     } else {
       const blob = new OdinBlob(newMediaFile.filepath || newMediaFile.uri, {
-        type: newMediaFile?.type,
+        type: newMediaFile?.type || undefined,
       }) as any as Blob;
 
       const { additionalThumbnails, tinyThumb } = await createThumbnails(
@@ -294,7 +294,7 @@ export const uploadChatMessage = async (
 
   uploadMetadata.appData.previewThumbnail = previewThumbnails[0];
 
-  return await uploadFile(
+  const uploadResult = await uploadFile(
     dotYouClient,
     uploadInstructions,
     uploadMetadata,
@@ -303,6 +303,13 @@ export const uploadChatMessage = async (
     undefined,
     onVersionConflict
   );
+
+  if (!uploadResult) return null;
+
+  return {
+    ...uploadResult,
+    previewThumbnail: uploadMetadata.appData.previewThumbnail,
+  };
 };
 
 export const updateChatMessage = async (
@@ -337,6 +344,7 @@ export const updateChatMessage = async (
       uniqueId: message.fileMetadata.appData.uniqueId,
       groupId: message.fileMetadata.appData.groupId,
       archivalStatus: (message.fileMetadata.appData as AppFileMetaData<ChatMessage>).archivalStatus,
+      previewThumbnail: message.fileMetadata.appData.previewThumbnail,
       fileType: ChatMessageFileType,
       content: payloadJson,
     },
