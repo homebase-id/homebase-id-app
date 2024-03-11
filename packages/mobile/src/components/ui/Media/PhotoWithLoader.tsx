@@ -36,6 +36,7 @@ export const PhotoWithLoader = memo(
         imageSize={imageSize}
         enableZoom={enableZoom}
         style={style}
+        avoidPayload={false}
         onClick={onClick}
       />
     );

@@ -2,7 +2,7 @@ import { FlatList } from 'react-native';
 import ConversationTile from '../components/ui/Chat/Conversation-tile';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { ChatStackParamList } from '../app/App';
+import { AppStackParamList } from '../app/App';
 import { useConversations } from '../hooks/chat/useConversations';
 import {
   Conversation,
@@ -12,13 +12,9 @@ import {
 import { useAuth } from '../hooks/auth/useAuth';
 import { useProfile } from '../hooks/profile/useProfile';
 
-const ConversationPage = ({
-  navigation,
-}: {
-  navigation: NavigationProp<ChatStackParamList, 'Conversation'>;
-}) => {
+const ConversationPage = () => {
   const { data: conversations } = useConversations().all;
-
+  const navigation = useNavigation<NavigationProp<AppStackParamList>>();
   const flatConversations =
     (conversations?.pages
       ?.flatMap((page) => page.searchResults)
@@ -50,7 +46,7 @@ const ConversationPage = ({
 const ConversationTileWithYourself = () => {
   const user = useProfile().data;
   const odinId = useAuth().getIdentity();
-  const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
+  const navigation = useNavigation<NavigationProp<AppStackParamList>>();
   return (
     <ConversationTile
       odinId={odinId || ''}

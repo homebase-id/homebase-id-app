@@ -55,6 +55,7 @@ export const ContactTile = ({
             fileId={contactData?.fileId}
             enableZoom={false}
             avoidPayload={true}
+            previewThumbnail={contactData.fileMetadata.appData.previewThumbnail}
             imageSize={{ width: 48, height: 48 }}
             fileKey={'prfl_pic'}
             style={styles.tinyLogo}

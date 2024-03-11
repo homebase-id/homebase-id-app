@@ -42,6 +42,11 @@ import ConversationPage from '../pages/conversation-page';
 import EditGroupPage from '../pages/edit-group-page';
 import { ConnectionRequestsPage } from '../pages/home/connection-requests-page';
 import { useDarkMode } from '../hooks/useDarkMode';
+import { DriveSearchResult, EmbeddedThumb } from '@youfoundation/js-lib/core';
+import { OdinImage } from '../components/ui/OdinImage/OdinImage';
+import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
+import { useProfile } from '../hooks/profile/useProfile';
+import { ChatMessage } from '../provider/chat/ChatProvider';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -69,12 +74,8 @@ export type ProfileStackParamList = {
 
 export type ChatStackParamList = {
   Conversation: undefined;
-  ChatScreen: { convoId: string };
   NewChat: undefined;
   NewGroup: undefined;
-  PreviewMedia: { fileId: string; payloadKey: string; type?: string };
-  ChatInfo: { convoId: string };
-  EditGroup: { convoId: string };
 };
 
 const queryClient = new QueryClient({
@@ -140,7 +141,7 @@ const AuthenticatedRoot = () => {
 
   return (
     <DotYouClientProvider>
-      <TabStack />
+      <AppStackScreen />
     </DotYouClientProvider>
   );
 };
@@ -149,6 +150,74 @@ type TabIconProps = {
   focused: boolean;
   color: string;
   size: number;
+};
+
+export type AppStackParamList = {
+  TabStack: undefined;
+  ChatScreen: { convoId: string };
+  ChatInfo: { convoId: string };
+  EditGroup: { convoId: string };
+  PreviewMedia: {
+    msg: DriveSearchResult<ChatMessage>;
+    fileId: string;
+    payloadKey: string;
+    currIndex: number;
+    type?: string;
+    previewThumbnail?: EmbeddedThumb;
+  };
+};
+
+const AppStack = createNativeStackNavigator<AppStackParamList>();
+const AppStackScreen = () => {
+  return (
+    <AppStack.Navigator
+      screenOptions={{
+        headerShown: false,
+      }}
+    >
+      <AppStack.Screen name="TabStack" component={TabStack} />
+      <AppStack.Screen
+        name="ChatScreen"
+        component={ChatPage}
+        options={{
+          headerShown: false,
+          gestureEnabled: true,
+        }}
+      />
+      <AppStack.Screen
+        name="PreviewMedia"
+        component={PreviewMedia}
+        options={{
+          headerShown: true,
+          gestureEnabled: true,
+          title: '',
+          headerBackTitleVisible: false,
+
+          headerTransparent: true,
+        }}
+      />
+      <AppStack.Screen
+        name="ChatInfo"
+        component={ChatInfoPage}
+        options={{
+          gestureEnabled: true,
+          headerTitle: 'Chat Info',
+          headerBackTitleVisible: false,
+          headerShown: false,
+        }}
+      />
+      <AppStack.Screen
+        name="EditGroup"
+        component={EditGroupPage}
+        options={{
+          gestureEnabled: true,
+          headerTitle: 'Edit Group',
+          headerBackTitleVisible: false,
+          headerShown: false,
+        }}
+      />
+    </AppStack.Navigator>
+  );
 };
 
 const TabBottom = createBottomTabNavigator<TabStackParamList>();
@@ -265,34 +334,13 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
         component={ConversationPage}
         options={{
           title: 'Chats',
-          // headerStyle: {
-          //   height: Platform.OS === 'ios' ? 112 : 60,
-          // },
           headerShown: true,
           headerTitleAlign: 'left',
+          headerLeft: ProfileAvatar,
           headerRight: headerRight,
         }}
       />
-      <StackChat.Screen
-        name="ChatScreen"
-        component={ChatPage}
-        options={{
-          headerShown: false,
-          gestureEnabled: true,
-        }}
-      />
-      <StackChat.Screen
-        name="PreviewMedia"
-        component={PreviewMedia}
-        options={{
-          // headerShown: false,
-          gestureEnabled: true,
-          title: '',
-          headerBackTitleVisible: false,
 
-          headerTransparent: true,
-        }}
-      />
       <StackChat.Group screenOptions={{ presentation: 'modal' }}>
         {/* TODO: Swiping effect like signal  */}
         <StackChat.Screen
@@ -327,27 +375,21 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
           }}
         />
       </StackChat.Group>
-      <StackChat.Screen
-        name="ChatInfo"
-        component={ChatInfoPage}
-        options={{
-          gestureEnabled: true,
-          headerTitle: 'Chat Info',
-          headerBackTitleVisible: false,
-          headerShown: false,
-        }}
-      />
-      <StackChat.Screen
-        name="EditGroup"
-        component={EditGroupPage}
-        options={{
-          gestureEnabled: true,
-          headerTitle: 'Edit Group',
-          headerBackTitleVisible: false,
-          headerShown: false,
-        }}
-      />
     </StackChat.Navigator>
+  );
+};
+
+const ProfileAvatar = () => {
+  const { data: profile } = useProfile();
+  return (
+    <OdinImage
+      fit="cover"
+      targetDrive={GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId)}
+      fileId={profile?.profileImageFileId}
+      fileKey={profile?.profileImageFileKey}
+      imageSize={{ width: 30, height: 30 }}
+      style={{ borderRadius: 30 / 2 }}
+    />
   );
 };
 

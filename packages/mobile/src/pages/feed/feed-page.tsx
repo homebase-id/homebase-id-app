@@ -30,6 +30,7 @@ export const FeedPage = (_props: FeedProps) => {
         const APP_AUTH_TOKEN_KEY = 'BX0900_feed';
         const IDENTITY_KEY = 'identity';
         const APP_CLIENT_TYPE_KEY = 'client_type';
+        const PREFERS_DARK_MODE = 'prefersDark'
 
         const APP_SHARED_SECRET = '${base64SharedSecret}';
         const APP_AUTH_TOKEN = '${authToken}';
@@ -40,8 +41,9 @@ export const FeedPage = (_props: FeedProps) => {
         window.localStorage.setItem(APP_AUTH_TOKEN_KEY, APP_AUTH_TOKEN);
         window.localStorage.setItem(IDENTITY_KEY, IDENTITY);
         window.localStorage.setItem(APP_CLIENT_TYPE_KEY, APP_CLIENT_TYPE);
+        window.localStorage.setItem(PREFERS_DARK_MODE, '${isDarkMode ? '1' : '0'}');
       })();`;
-  }, [authToken, base64SharedSecret, identity]);
+  }, [authToken, base64SharedSecret, identity, isDarkMode]);
 
   const [refreshing, setRefreshing] = useState(false);
   const [refresherEnabled, setEnableRefresher] = useState(true);
