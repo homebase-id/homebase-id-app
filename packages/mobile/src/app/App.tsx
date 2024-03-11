@@ -47,6 +47,7 @@ import { OdinImage } from '../components/ui/OdinImage/OdinImage';
 import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
 import { useProfile } from '../hooks/profile/useProfile';
 import { ChatMessage } from '../provider/chat/ChatProvider';
+import { useRefreshOnFocus } from '../hooks/chat/useRefetchOnFocus';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -137,8 +138,6 @@ const RootStack = () => {
 };
 
 const AuthenticatedRoot = () => {
-  useValidTokenCheck();
-
   return (
     <DotYouClientProvider>
       <AppStackScreen />
@@ -169,6 +168,10 @@ export type AppStackParamList = {
 
 const AppStack = createNativeStackNavigator<AppStackParamList>();
 const AppStackScreen = () => {
+  useValidTokenCheck();
+  useRefreshOnFocus();
+  useLiveChatProcessor();
+
   return (
     <AppStack.Navigator
       screenOptions={{
@@ -222,8 +225,7 @@ const AppStackScreen = () => {
 
 const TabBottom = createBottomTabNavigator<TabStackParamList>();
 const TabStack = () => {
-  const isDarkMode = useDarkMode();
-  useLiveChatProcessor();
+  const { isDarkMode } = useDarkMode();
 
   const houseIcon = useCallback((props: TabIconProps) => <House {...props} size={'md'} />, []);
   const feedIcon = useCallback((props: TabIconProps) => <Feed {...props} size={'md'} />, []);

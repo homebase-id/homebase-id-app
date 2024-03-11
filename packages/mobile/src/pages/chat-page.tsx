@@ -11,11 +11,12 @@ import {
   MessageImageProps,
   MessageProps,
   MessageText,
+  MessageTextProps,
   Send,
   Time,
 } from 'react-native-gifted-chat';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, memo } from 'react';
 import { AppStackParamList } from '../app/App';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -44,7 +45,7 @@ import {
   SingleConversation,
 } from '../provider/chat/ConversationProvider';
 import { ImageSource } from '../provider/image/RNImageProvider';
-import { getNewId } from '@youfoundation/js-lib/helpers';
+import { getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { Swipeable, TouchableOpacity } from 'react-native-gesture-handler';
 import { Colors } from '../app/Colors';
 import ReplyMessageBar from '../components/ui/Chat/Reply-Message-bar';
@@ -60,6 +61,9 @@ export type ChatProp = NativeStackScreenProps<AppStackParamList, 'ChatScreen'>;
 export interface ChatMessageIMessage extends IMessage, DriveSearchResult<ChatMessage> {}
 
 const ChatPage = ({ route, navigation }: ChatProp) => {
+  const { isDarkMode } = useDarkMode();
+  const insets = useSafeAreaInsets();
+
   const [replyMessage, setReplyMessage] = useState<ChatMessageIMessage | null>(null);
   const swipeableRowRef = useRef<Swipeable | null>(null);
   const clearReplyMessage = () => setReplyMessage(null);
@@ -78,68 +82,81 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
   const contact = useContact(
     (conversationContent?.fileMetadata.appData.content as SingleConversation | undefined)?.recipient
   ).fetch.data;
-  const title =
-    contact?.fileMetadata.appData.content.name?.displayName ||
-    contact?.fileMetadata.appData.content.name?.surname ||
-    conversationContent?.fileMetadata.appData.content.title;
 
-  if (conversationContent == null && route.params.convoId === ConversationWithYourselfId) {
+  const title = useMemo(
+    () =>
+      contact?.fileMetadata.appData.content.name?.displayName ||
+      contact?.fileMetadata.appData.content.name?.surname ||
+      conversationContent?.fileMetadata.appData.content.title,
+    [contact, conversationContent]
+  );
+
+  if (
+    conversationContent == null &&
+    stringGuidsEqual(route.params.convoId, ConversationWithYourselfId)
+  ) {
     conversationContent = ConversationWithYourself;
   }
 
-  const renderCustomInputToolbar = (props: InputToolbarProps<IMessage>) => {
-    return (
-      <>
-        <InputToolbar
-          {...props}
-          renderAccessory={(props) =>
-            replyMessage ? (
-              <ReplyMessageBar message={replyMessage} clearReply={clearReplyMessage} {...props} />
-            ) : null
-          }
-          renderComposer={(props) => (
-            <Composer
-              {...props}
-              textInputStyle={{
-                color: isDarkMode ? 'white' : 'black',
-              }}
-            />
-          )}
-          renderSend={(props) => (
-            <Send
-              {...props}
-              disabled={!props.text && assets?.length === 0}
-              text={props.text || ' '}
-              containerStyle={styles.send}
-            >
-              <SendChat size={'md'} color={!props.text && assets?.length === 0 ? 'grey' : 'blue'} />
-            </Send>
-          )}
-          renderActions={() => (
-            <Actions
-              icon={PickImage}
-              onPressActionButton={async () => {
-                const medias = await launchImageLibrary({
-                  mediaType: 'mixed',
-                  selectionLimit: 10,
-                });
-                if (medias.didCancel) return;
-                setAssets(medias.assets ?? []);
-              }}
-            />
-          )}
-          containerStyle={[
-            styles.inputContainer,
-            {
-              backgroundColor: isDarkMode ? Colors.slate[900] : Colors.slate[100],
-              borderTopWidth: 0,
-              borderRadius: 10,
-            },
-          ]}
-        />
-      </>
-    );
-  };
+  const renderCustomInputToolbar = useCallback(
+    (props: InputToolbarProps<IMessage>) => {
+      return (
+        <>
+          <InputToolbar
+            {...props}
+            renderAccessory={(props) =>
+              replyMessage ? (
+                <ReplyMessageBar message={replyMessage} clearReply={clearReplyMessage} {...props} />
+              ) : null
+            }
+            renderComposer={(props) => (
+              <Composer
+                {...props}
+                textInputStyle={{
+                  color: isDarkMode ? 'white' : 'black',
+                }}
+              />
+            )}
+            renderSend={(props) => (
+              <Send
+                {...props}
+                disabled={!props.text && assets?.length === 0}
+                text={props.text || ' '}
+                containerStyle={styles.send}
+              >
+                <SendChat
+                  size={'md'}
+                  color={!props.text && assets?.length === 0 ? 'grey' : 'blue'}
+                />
+              </Send>
+            )}
+            renderActions={() => (
+              <Actions
+                icon={PickImage}
+                onPressActionButton={async () => {
+                  const medias = await launchImageLibrary({
+                    mediaType: 'mixed',
+                    selectionLimit: 10,
+                  });
+                  if (medias.didCancel) return;
+                  setAssets(medias.assets ?? []);
+                }}
+              />
+            )}
+            containerStyle={[
+              styles.inputContainer,
+              {
+                backgroundColor: isDarkMode ? Colors.slate[900] : Colors.slate[100],
+                borderTopWidth: 0,
+                borderRadius: 10,
+              },
+            ]}
+          />
+        </>
+      );
+    },
+    [assets?.length, isDarkMode, replyMessage]
+  );
 
   const updateRowRef = useCallback(
     (ref: any) => {
@@ -154,8 +171,15 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
     [replyMessage]
   );
 
-  const renderMessageBox = (props: MessageProps<ChatMessageIMessage>) => (
-    <ChatMessageBox {...props} setReplyOnSwipeOpen={setReplyMessage} updateRowRef={updateRowRef} />
+  const renderMessageBox = useCallback(
+    (props: MessageProps<ChatMessageIMessage>) => (
+      <ChatMessageBox
+        {...props}
+        setReplyOnSwipeOpen={setReplyMessage}
+        updateRowRef={updateRowRef}
+      />
+    ),
+    [updateRowRef]
   );
 
   const renderMediaItems = () => {
@@ -167,7 +191,7 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
         }}
       >
         {assets.map((value, index) => {
-          const isVideo = value.type?.startsWith('video') ?? false;
+          // const isVideo = value.type?.startsWith('video') ?? false;
           return (
             <View
               key={index}
@@ -254,7 +278,7 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
     resetState,
   ]);
 
-  useMarkMessagesAsRead({ conversation: conversationContent, messages });
+  useMarkMessagesAsRead({ conversation: conversationContent || undefined, messages });
 
   const doSend = useCallback(
     (message: IMessage[]) => {
@@ -289,8 +313,120 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
     [conversationContent, route.params.convoId, sendMessage, assets, replyMessage]
   );
 
-  const { isDarkMode } = useDarkMode();
-  const insets = useSafeAreaInsets();
+  const renderBubble = useCallback(
+    (props: Readonly<BubbleProps<IMessage>>) => {
+      const message = props.currentMessage as ChatMessageIMessage;
+      const content = message?.fileMetadata.appData.content;
+      const isEmojiOnly =
+        (content?.message?.match(/^\p{Extended_Pictographic}/u) &&
+          !content.message?.match(/[0-9a-zA-Z]/)) ??
+        false;
+      const isReply = !!content?.replyId;
+      const showBackground = !isEmojiOnly || isReply;
+      return (
+        <Bubble
+          {...props}
+          renderTicks={(message) => {
+            const msg = message as ChatMessageIMessage;
+            return <ChatDeliveryIndicator msg={msg} />;
+          }}
+          renderTime={(props) => {
+            return (
+              <Time
+                {...props}
+                timeTextStyle={
+                  !showBackground
+                    ? {
+                        left: {
+                          color: isDarkMode ? Colors.white : Colors.black,
+                          fontSize: 12,
+                        },
+                        right: {
+                          color: isDarkMode ? Colors.white : Colors.black,
+                          fontSize: 12,
+                        },
+                      }
+                    : {
+                        right: {
+                          fontSize: 12,
+                          color: !isDarkMode ? Colors.slate[600] : Colors.slate[200],
+                        },
+                        left: {
+                          fontSize: 12,
+                        },
+                      }
+                }
+              />
+            );
+          }}
+          tickStyle={{
+            color: isDarkMode ? Colors.white : Colors.black,
+          }}
+          textStyle={
+            showBackground
+              ? {
+                  left: { color: isDarkMode ? Colors.white : Colors.black },
+                  right: { color: isDarkMode ? Colors.white : Colors.black },
+                }
+              : {}
+          }
+          wrapperStyle={
+            !showBackground
+              ? {
+                  left: {
+                    backgroundColor: 'transparent',
+                  },
+                  right: {
+                    backgroundColor: 'transparent',
+                  },
+                }
+              : {
+                  left: {
+                    backgroundColor: isDarkMode ? `${Colors.gray[300]}4D` : `${Colors.gray[500]}1A`,
+                  },
+                  right: {
+                    backgroundColor: isDarkMode
+                      ? `${Colors.indigo[500]}33`
+                      : `${Colors.indigo[500]}1A`,
+                  },
+                }
+          }
+        />
+      );
+    },
+    [isDarkMode]
+  );
+
+  const renderMessageText = useCallback((props: MessageTextProps<IMessage>) => {
+    const message = props.currentMessage as ChatMessageIMessage;
+    const content = message?.fileMetadata.appData.content;
+    const isEmojiOnly =
+      (content?.message?.match(/^\p{Extended_Pictographic}/u) &&
+        !content.message?.match(/[0-9a-zA-Z]/)) ??
+      false;
+    return (
+      <MessageText
+        {...props}
+        linkStyle={{
+          left: {
+            color: Colors.indigo[500],
+          },
+          right: {
+            color: Colors.indigo[500],
+          },
+        }}
+        customTextStyle={
+          isEmojiOnly
+            ? {
+                fontSize: 48,
+                lineHeight: 60,
+              }
+            : undefined
+        }
+      />
+    );
+  }, []);
+
   if (!conversationContent) return null;
   if (sendMessageError) console.error(sendMessageError);
 
@@ -328,117 +464,8 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
         renderCustomView={(prop: BubbleProps<ChatMessageIMessage>) => (
           <RenderReplyMessageView {...prop} />
         )}
-        renderBubble={(props) => {
-          const message = props.currentMessage as ChatMessageIMessage;
-          const content = message?.fileMetadata.appData.content;
-          const isEmojiOnly =
-            (content?.message?.match(/^\p{Extended_Pictographic}/u) &&
-              !content.message?.match(/[0-9a-zA-Z]/)) ??
-            false;
-          const isReply = !!content?.replyId;
-          const showBackground = !isEmojiOnly || isReply;
-          return (
-            <Bubble
-              {...props}
-              renderTicks={(message) => {
-                const msg = message as ChatMessageIMessage;
-                return <ChatDeliveryIndicator msg={msg} />;
-              }}
-              renderTime={(props) => {
-                return (
-                  <Time
-                    {...props}
-                    timeTextStyle={
-                      !showBackground
-                        ? {
-                            left: {
-                              color: isDarkMode ? Colors.white : Colors.black,
-                              fontSize: 12,
-                            },
-                            right: {
-                              color: isDarkMode ? Colors.white : Colors.black,
-                              fontSize: 12,
-                            },
-                          }
-                        : {
-                            right: {
-                              fontSize: 12,
-                              color: !isDarkMode ? Colors.slate[600] : Colors.slate[200],
-                            },
-                            left: {
-                              fontSize: 12,
-                            },
-                          }
-                    }
-                  />
-                );
-              }}
-              tickStyle={{
-                color: isDarkMode ? Colors.white : Colors.black,
-              }}
-              textStyle={
-                showBackground
-                  ? {
-                      left: { color: isDarkMode ? Colors.white : Colors.black },
-                      right: { color: isDarkMode ? Colors.white : Colors.black },
-                    }
-                  : {}
-              }
-              wrapperStyle={
-                !showBackground
-                  ? {
-                      left: {
-                        backgroundColor: 'transparent',
-                      },
-                      right: {
-                        backgroundColor: 'transparent',
-                      },
-                    }
-                  : {
-                      left: {
-                        backgroundColor: isDarkMode
-                          ? `${Colors.gray[300]}4D`
-                          : `${Colors.gray[500]}1A`,
-                      },
-                      right: {
-                        backgroundColor: isDarkMode
-                          ? `${Colors.indigo[500]}33`
-                          : `${Colors.indigo[500]}1A`,
-                      },
-                    }
-              }
-            />
-          );
-        }}
-        renderMessageText={(props) => {
-          const message = props.currentMessage as ChatMessageIMessage;
-          const content = message?.fileMetadata.appData.content;
-          const isEmojiOnly =
-            (content?.message?.match(/^\p{Extended_Pictographic}/u) &&
-              !content.message?.match(/[0-9a-zA-Z]/)) ??
-            false;
-          return (
-            <MessageText
-              {...props}
-              linkStyle={{
-                left: {
-                  color: Colors.indigo[500],
-                },
-                right: {
-                  color: Colors.indigo[500],
-                },
-              }}
-              customTextStyle={
-                isEmojiOnly
-                  ? {
-                      fontSize: 48,
-                      lineHeight: 60,
-                    }
-                  : undefined
-              }
-            />
-          );
-        }}
+        renderBubble={renderBubble}
+        renderMessageText={renderMessageText}
         renderMessage={renderMessageBox}
         renderFooter={renderMediaItems}
         renderAccessory={() => null}
@@ -451,7 +478,7 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
   );
 };
 
-const RenderReplyMessageView = (props: BubbleProps<ChatMessageIMessage>) => {
+const RenderReplyMessageView = memo((props: BubbleProps<ChatMessageIMessage>) => {
   const replyMessage = useChatMessage({
     messageId: props.currentMessage?.fileMetadata.appData.content.replyId,
   }).get.data;
@@ -492,6 +519,7 @@ const RenderReplyMessageView = (props: BubbleProps<ChatMessageIMessage>) => {
             fileId={replyMessage.fileId}
             targetDrive={ChatDrive}
             fileKey={replyMessage.fileMetadata.payloads[0].key}
+            previewThumbnail={replyMessage.fileMetadata.appData.previewThumbnail}
             imageSize={{
               width: 60,
               height: 60,
@@ -501,7 +529,9 @@ const RenderReplyMessageView = (props: BubbleProps<ChatMessageIMessage>) => {
       </View>
     )
   );
-};
+});
+
+const PickImage = () => <Images />;
 
 const styles = StyleSheet.create({
   inputContainer: {
@@ -538,9 +568,5 @@ const styles = StyleSheet.create({
     transform: [{ rotate: '30deg' }],
   },
 });
-
-const PickImage = () => {
-  return <Images />;
-};
 
 export default ChatPage;

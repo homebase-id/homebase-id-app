@@ -1,5 +1,6 @@
 import { ChatMessageIMessage } from '../../../pages/chat-page';
 import { StyleSheet, Text, View } from 'react-native';
+import { memo } from 'react';
 
 import { MessageImageProps } from 'react-native-gifted-chat';
 import { ChatDrive } from '../../../provider/chat/ConversationProvider';
@@ -10,10 +11,10 @@ import { OdinImage } from '../OdinImage/OdinImage';
 import { ChatMessage } from '../../../provider/chat/ChatProvider';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 
-const ImageMessage = (props: MessageImageProps<ChatMessageIMessage>) => {
-  const currentMessage = props.currentMessage as ChatMessageIMessage;
-  return <MediaGallery msg={currentMessage} />;
-};
+const ImageMessage = memo((props: MessageImageProps<ChatMessageIMessage>) => {
+  if (!props.currentMessage) return null;
+  return <MediaGallery msg={props.currentMessage} />;
+});
 
 const MediaGallery = ({ msg: currentMessage }: { msg: DriveSearchResult<ChatMessage> }) => {
   const payloads = currentMessage.fileMetadata.payloads;
@@ -55,6 +56,7 @@ const MediaGallery = ({ msg: currentMessage }: { msg: DriveSearchResult<ChatMess
             />
           );
         }
+
         return (
           <OdinImage
             fileId={currentMessage.fileId}
@@ -62,6 +64,7 @@ const MediaGallery = ({ msg: currentMessage }: { msg: DriveSearchResult<ChatMess
             key={item.key}
             targetDrive={ChatDrive}
             fit="cover"
+            previewThumbnail={currentMessage.fileMetadata.appData.previewThumbnail}
             imageSize={{
               width: !isGallery ? 200 : 150,
               height: !isGallery ? 200 : 150,

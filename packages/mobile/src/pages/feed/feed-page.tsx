@@ -1,5 +1,5 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useMemo, useRef, useState } from 'react';
+import { memo, useMemo, useRef, useState } from 'react';
 
 import { TabStackParamList } from '../../app/App';
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
@@ -13,7 +13,7 @@ import { ScrollView } from 'react-native-gesture-handler';
 
 type FeedProps = NativeStackScreenProps<TabStackParamList, 'Feed'>;
 
-export const FeedPage = (_props: FeedProps) => {
+export const FeedPage = memo((_props: FeedProps) => {
   const { isDarkMode } = useDarkMode();
   const { authToken, getIdentity, getSharedSecret } = useAuth();
   const identity = getIdentity();
@@ -91,4 +91,4 @@ export const FeedPage = (_props: FeedProps) => {
       ) : null}
     </SafeAreaView>
   );
-};
+});
