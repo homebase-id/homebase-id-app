@@ -392,7 +392,7 @@ const ProfileAvatar = () => {
       fileId={profile?.profileImageFileId}
       fileKey={profile?.profileImageFileKey}
       imageSize={{ width: 30, height: 30 }}
-      style={{ borderRadius: 30 / 2 }}
+      style={{ borderRadius: 30 / 2, marginRight: Platform.OS === 'android' ? 10 : 0 }}
     />
   );
 };
