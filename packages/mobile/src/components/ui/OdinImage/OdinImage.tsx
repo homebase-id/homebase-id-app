@@ -171,12 +171,19 @@ const ZoomableImage = ({
   if (!enableZoom) {
     return contentType === 'image/svg+xml' ? (
       <TouchableWithoutFeedback onPress={onClick}>
-        <SvgUri
-          width={imageSize?.width}
-          height={imageSize?.height}
-          uri={uri}
-          style={{ overflow: 'hidden', ...style }}
-        />
+        <View
+          style={{
+            ...imageSize,
+            ...style,
+          }}
+        >
+          <SvgUri
+            width={imageSize?.width}
+            height={imageSize?.height}
+            uri={uri}
+            style={{ overflow: 'hidden', ...style }}
+          />
+        </View>
       </TouchableWithoutFeedback>
     ) : (
       <TouchableWithoutFeedback onPress={onClick}>
