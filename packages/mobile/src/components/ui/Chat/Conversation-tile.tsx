@@ -47,6 +47,9 @@ export const Avatar = (props: { odinId: string; style?: ImageStyle }) => {
       enableZoom={false}
       fit="cover"
       odinId={props.odinId}
+      svgPlaceHolderStyle={{
+        marginRight: 16,
+      }}
       style={{
         ...styles.tinyLogo,
         ...props.style,

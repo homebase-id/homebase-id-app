@@ -1,5 +1,12 @@
-import { View, StyleSheet, Animated } from 'react-native';
-import { GestureHandlerRootView, Swipeable } from 'react-native-gesture-handler';
+import {
+  View,
+  StyleSheet,
+  Animated,
+  LayoutChangeEvent,
+  Pressable,
+  GestureResponderEvent,
+} from 'react-native';
+import { Swipeable } from 'react-native-gesture-handler';
 import { Message, MessageProps } from 'react-native-gifted-chat';
 import { isSameDay, isSameUser } from 'react-native-gifted-chat/lib/utils';
 import { Reply } from '../Icons/icons';
@@ -8,9 +15,17 @@ import { ChatMessageIMessage } from '../../../pages/chat-page';
 type ChatMessageBoxProps = {
   setReplyOnSwipeOpen: (message: ChatMessageIMessage) => void;
   updateRowRef: (ref: any) => void;
+  onMessageLayout: (e: LayoutChangeEvent) => void;
+  onLongPress: (e: GestureResponderEvent, message: ChatMessageIMessage) => void;
 } & MessageProps<ChatMessageIMessage>;
 
-const ChatMessageBox = ({ setReplyOnSwipeOpen, updateRowRef, ...props }: ChatMessageBoxProps) => {
+const ChatMessageBox = ({
+  setReplyOnSwipeOpen,
+  updateRowRef,
+  onMessageLayout,
+  onLongPress,
+  ...props
+}: ChatMessageBoxProps) => {
   const isNextMyMessage =
     props.currentMessage &&
     props.nextMessage &&
@@ -50,7 +65,11 @@ const ChatMessageBox = ({ setReplyOnSwipeOpen, updateRowRef, ...props }: ChatMes
   };
 
   return (
-    <GestureHandlerRootView>
+    <Pressable
+      onLongPress={(e) => {
+        return onLongPress(e, props.currentMessage as ChatMessageIMessage);
+      }}
+    >
       <Swipeable
         ref={updateRowRef}
         friction={2}
@@ -58,9 +77,9 @@ const ChatMessageBox = ({ setReplyOnSwipeOpen, updateRowRef, ...props }: ChatMes
         renderRightActions={renderRightAction}
         onSwipeableOpen={onSwipeOpenAction}
       >
-        <Message {...props} />
+        <Message {...props} onMessageLayout={onMessageLayout} />
       </Swipeable>
-    </GestureHandlerRootView>
+    </Pressable>
   );
 };
 

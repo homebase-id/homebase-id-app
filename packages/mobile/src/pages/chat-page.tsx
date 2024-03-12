@@ -20,8 +20,10 @@ import { useCallback, useEffect, useMemo, useRef, useState, memo } from 'react';
 import { AppStackParamList } from '../app/App';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  GestureResponderEvent,
   ImageBackground,
   Keyboard,
+  LayoutChangeEvent,
   Platform,
   StatusBar,
   StyleSheet,
@@ -55,6 +57,9 @@ import { useDarkMode } from '../hooks/useDarkMode';
 import useContact from '../hooks/contact/useContact';
 import { useMarkMessagesAsRead } from '../hooks/chat/useMarkMessagesAsRead';
 import { ChatDeliveryIndicator } from '../components/ui/Chat/Chat-Delivery-Indicator';
+import Toast from 'react-native-toast-message';
+import PortalView from '../components/ui/Chat/Chat-Reaction';
+import { Host } from 'react-native-portalize';
 
 export type ChatProp = NativeStackScreenProps<AppStackParamList, 'ChatScreen'>;
 
@@ -171,15 +176,44 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
     [replyMessage]
   );
 
+  const [layoutHeight, setLayoutHeight] = useState(0);
+
+  const onLayout = (e: LayoutChangeEvent) => {
+    const { height } = e.nativeEvent.layout;
+    setLayoutHeight(height);
+  };
+
+  const [messageCordinates, setMessageCordinates] = useState({ x: 0, y: 0 });
+  const [selectedMessage, setSelectedMessage] = useState<ChatMessageIMessage>();
+
+  const onLongPress = useCallback(
+    (e: GestureResponderEvent, message: ChatMessageIMessage) => {
+      const { pageY, locationY } = e.nativeEvent;
+      const y = pageY - locationY;
+
+      setMessageCordinates({
+        x: 0,
+        y,
+      });
+
+      setSelectedMessage({ layoutHeight, ...message });
+    },
+    [layoutHeight]
+  );
+
   const renderMessageBox = useCallback(
-    (props: MessageProps<ChatMessageIMessage>) => (
-      <ChatMessageBox
-        {...props}
-        setReplyOnSwipeOpen={setReplyMessage}
-        updateRowRef={updateRowRef}
-      />
-    ),
-    [updateRowRef]
+    (props: MessageProps<ChatMessageIMessage>) => {
+      return (
+        <ChatMessageBox
+          {...props}
+          setReplyOnSwipeOpen={setReplyMessage}
+          updateRowRef={updateRowRef}
+          onMessageLayout={onLayout}
+          onLongPress={onLongPress}
+        />
+      );
+    },
+    [onLongPress, updateRowRef]
   );
 
   const renderMediaItems = () => {
@@ -428,53 +462,71 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
   }, []);
 
   if (!conversationContent) return null;
-  if (sendMessageError) console.error(sendMessageError);
+  if (sendMessageError) {
+    Toast.show({
+      type: 'error',
+      text1: 'Error sending message',
+      text2: sendMessageError.message,
+      position: 'bottom',
+    });
+    console.error(sendMessageError);
+  }
 
   return (
-    <View
-      style={{
-        paddingBottom: replyMessage && !Keyboard.isVisible() ? insets.bottom : 0,
-        flex: 1,
-      }}
-    >
-      <ChatAppBar
-        title={title || ''}
-        group={'recipients' in conversationContent.fileMetadata.appData.content}
-        odinId={
-          route.params.convoId === ConversationWithYourselfId
-            ? identity || ''
-            : (conversationContent?.fileMetadata.appData.content as SingleConversation).recipient
-        }
-        goBack={navigation.goBack}
-        onPress={() => navigation.navigate('ChatInfo', { convoId: route.params.convoId })}
-        isSelf={route.params.convoId === ConversationWithYourselfId}
-      />
-      <GiftedChat<ChatMessageIMessage>
-        messages={messages}
-        onSend={doSend}
-        renderAvatar={null}
-        infiniteScroll
-        scrollToBottom
-        alwaysShowSend
-        isKeyboardInternallyHandled={true}
-        keyboardShouldPersistTaps="never"
-        renderMessageImage={(prop: MessageImageProps<ChatMessageIMessage>) => (
-          <ImageMessage {...prop} />
-        )}
-        renderCustomView={(prop: BubbleProps<ChatMessageIMessage>) => (
-          <RenderReplyMessageView {...prop} />
-        )}
-        renderBubble={renderBubble}
-        renderMessageText={renderMessageText}
-        renderMessage={renderMessageBox}
-        renderFooter={renderMediaItems}
-        renderAccessory={() => null}
-        renderInputToolbar={renderCustomInputToolbar}
-        user={{
-          _id: '',
+    <Host>
+      <View
+        style={{
+          paddingBottom: replyMessage && !Keyboard.isVisible() ? insets.bottom : 0,
+          flex: 1,
         }}
-      />
-    </View>
+      >
+        <ChatAppBar
+          title={title || ''}
+          group={'recipients' in conversationContent.fileMetadata.appData.content}
+          odinId={
+            route.params.convoId === ConversationWithYourselfId
+              ? identity || ''
+              : (conversationContent?.fileMetadata.appData.content as SingleConversation).recipient
+          }
+          goBack={navigation.goBack}
+          onPress={() => navigation.navigate('ChatInfo', { convoId: route.params.convoId })}
+          isSelf={route.params.convoId === ConversationWithYourselfId}
+        />
+        <GiftedChat<ChatMessageIMessage>
+          messages={messages}
+          onSend={doSend}
+          renderAvatar={null}
+          infiniteScroll
+          scrollToBottom
+          onLongPress={(c, message: ChatMessageIMessage) => {
+            //
+          }}
+          alwaysShowSend
+          isKeyboardInternallyHandled={true}
+          keyboardShouldPersistTaps="never"
+          renderMessageImage={(prop: MessageImageProps<ChatMessageIMessage>) => (
+            <ImageMessage {...prop} />
+          )}
+          renderCustomView={(prop: BubbleProps<ChatMessageIMessage>) => (
+            <RenderReplyMessageView {...prop} />
+          )}
+          renderBubble={renderBubble}
+          renderMessageText={renderMessageText}
+          renderMessage={renderMessageBox}
+          renderFooter={renderMediaItems}
+          renderAccessory={() => null}
+          renderInputToolbar={renderCustomInputToolbar}
+          user={{
+            _id: '',
+          }}
+        />
+        <PortalView
+          messageCordinates={messageCordinates}
+          selectedMessage={selectedMessage}
+          setSelectedMessage={setSelectedMessage}
+        />
+      </View>
+    </Host>
   );
 };
 
