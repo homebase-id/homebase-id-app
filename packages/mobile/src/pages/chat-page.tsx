@@ -60,6 +60,7 @@ import { ChatDeliveryIndicator } from '../components/ui/Chat/Chat-Delivery-Indic
 import Toast from 'react-native-toast-message';
 import PortalView from '../components/ui/Chat/Chat-Reaction';
 import { Host } from 'react-native-portalize';
+import { useChatReaction } from '../hooks/chat/useChatReaction';
 
 export type ChatProp = NativeStackScreenProps<AppStackParamList, 'ChatScreen'>;
 
@@ -184,7 +185,7 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
   };
 
   const [messageCordinates, setMessageCordinates] = useState({ x: 0, y: 0 });
-  const [selectedMessage, setSelectedMessage] = useState<ChatMessageIMessage>();
+  const [selectedMessage, setSelectedMessage] = useState<ChatMessageIMessage | null>();
 
   const onLongPress = useCallback(
     (e: GestureResponderEvent, message: ChatMessageIMessage) => {
@@ -347,90 +348,6 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
     [conversationContent, route.params.convoId, sendMessage, assets, replyMessage]
   );
 
-  const renderBubble = useCallback(
-    (props: Readonly<BubbleProps<IMessage>>) => {
-      const message = props.currentMessage as ChatMessageIMessage;
-      const content = message?.fileMetadata.appData.content;
-      const isEmojiOnly =
-        (content?.message?.match(/^\p{Extended_Pictographic}/u) &&
-          !content.message?.match(/[0-9a-zA-Z]/)) ??
-        false;
-      const isReply = !!content?.replyId;
-      const showBackground = !isEmojiOnly || isReply;
-      return (
-        <Bubble
-          {...props}
-          renderTicks={(message) => {
-            const msg = message as ChatMessageIMessage;
-            return <ChatDeliveryIndicator msg={msg} />;
-          }}
-          renderTime={(props) => {
-            return (
-              <Time
-                {...props}
-                timeTextStyle={
-                  !showBackground
-                    ? {
-                        left: {
-                          color: isDarkMode ? Colors.white : Colors.black,
-                          fontSize: 12,
-                        },
-                        right: {
-                          color: isDarkMode ? Colors.white : Colors.black,
-                          fontSize: 12,
-                        },
-                      }
-                    : {
-                        right: {
-                          fontSize: 12,
-                          color: !isDarkMode ? Colors.slate[600] : Colors.slate[200],
-                        },
-                        left: {
-                          fontSize: 12,
-                        },
-                      }
-                }
-              />
-            );
-          }}
-          tickStyle={{
-            color: isDarkMode ? Colors.white : Colors.black,
-          }}
-          textStyle={
-            showBackground
-              ? {
-                  left: { color: isDarkMode ? Colors.white : Colors.black },
-                  right: { color: isDarkMode ? Colors.white : Colors.black },
-                }
-              : {}
-          }
-          wrapperStyle={
-            !showBackground
-              ? {
-                  left: {
-                    backgroundColor: 'transparent',
-                  },
-                  right: {
-                    backgroundColor: 'transparent',
-                  },
-                }
-              : {
-                  left: {
-                    backgroundColor: isDarkMode ? `${Colors.gray[300]}4D` : `${Colors.gray[500]}1A`,
-                  },
-                  right: {
-                    backgroundColor: isDarkMode
-                      ? `${Colors.indigo[500]}33`
-                      : `${Colors.indigo[500]}1A`,
-                  },
-                }
-          }
-        />
-      );
-    },
-    [isDarkMode]
-  );
-
   const renderMessageText = useCallback((props: MessageTextProps<IMessage>) => {
     const message = props.currentMessage as ChatMessageIMessage;
     const content = message?.fileMetadata.appData.content;
@@ -498,7 +415,7 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
           renderAvatar={null}
           infiniteScroll
           scrollToBottom
-          onLongPress={(c, message: ChatMessageIMessage) => {
+          onLongPress={(_, message: ChatMessageIMessage) => {
             //
           }}
           alwaysShowSend
@@ -510,7 +427,7 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
           renderCustomView={(prop: BubbleProps<ChatMessageIMessage>) => (
             <RenderReplyMessageView {...prop} />
           )}
-          renderBubble={renderBubble}
+          renderBubble={(prop) => <RenderBubble {...prop} />}
           renderMessageText={renderMessageText}
           renderMessage={renderMessageBox}
           renderFooter={renderMediaItems}
@@ -529,6 +446,134 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
     </Host>
   );
 };
+
+const RenderBubble = memo((props: Readonly<BubbleProps<IMessage>>) => {
+  const message = props.currentMessage as ChatMessageIMessage;
+  const content = message?.fileMetadata.appData.content;
+  const { isDarkMode } = useDarkMode();
+  const isEmojiOnly =
+    (content?.message?.match(/^\p{Extended_Pictographic}/u) &&
+      !content.message?.match(/[0-9a-zA-Z]/)) ??
+    false;
+  const isReply = !!content?.replyId;
+  const showBackground = !isEmojiOnly || isReply;
+  const { data: reactions } = useChatReaction({
+    conversationId: message?.fileMetadata.appData.groupId,
+    messageId: message?.fileMetadata.appData.uniqueId,
+  }).get;
+
+  const hasReactions = reactions?.length > 0 || false;
+  const flatReactions = reactions?.flatMap((val) => val.fileMetadata.appData.content.message);
+
+  return (
+    <>
+      <Bubble
+        {...props}
+        renderTicks={(message) => {
+          const msg = message as ChatMessageIMessage;
+          return <ChatDeliveryIndicator msg={msg} />;
+        }}
+        renderTime={(timeProp) => {
+          return (
+            <View
+              style={{
+                flexDirection: props.position === 'left' ? 'row' : 'row-reverse',
+                justifyContent: 'space-between',
+                alignItems: 'flex-end',
+              }}
+            >
+              <Time
+                {...timeProp}
+                timeTextStyle={
+                  !showBackground
+                    ? {
+                        left: {
+                          color: isDarkMode ? Colors.white : Colors.black,
+                          fontSize: 12,
+                        },
+                        right: {
+                          color: isDarkMode ? Colors.white : Colors.black,
+                          fontSize: 12,
+                        },
+                      }
+                    : {
+                        right: {
+                          fontSize: 12,
+                          color: !isDarkMode ? Colors.slate[600] : Colors.slate[200],
+                        },
+                        left: {
+                          fontSize: 12,
+                        },
+                      }
+                }
+              />
+              {hasReactions && flatReactions && (
+                <View
+                  style={{
+                    bottom: -6,
+
+                    display: 'flex',
+                    flexDirection: 'row',
+                  }}
+                >
+                  {flatReactions.map((reaction, index) => {
+                    return (
+                      <Text
+                        key={index}
+                        style={{
+                          fontSize: 18,
+                          marginRight: 4,
+                          marginBottom:
+                            props.nextMessage && props.nextMessage.user?._id === message.user?._id
+                              ? 8
+                              : 0,
+                        }}
+                      >
+                        {reaction}
+                      </Text>
+                    );
+                  })}
+                </View>
+              )}
+            </View>
+          );
+        }}
+        tickStyle={{
+          color: isDarkMode ? Colors.white : Colors.black,
+        }}
+        textStyle={
+          showBackground
+            ? {
+                left: { color: isDarkMode ? Colors.white : Colors.black },
+                right: { color: isDarkMode ? Colors.white : Colors.black },
+              }
+            : {}
+        }
+        wrapperStyle={
+          !showBackground
+            ? {
+                left: {
+                  backgroundColor: 'transparent',
+                },
+                right: {
+                  backgroundColor: 'transparent',
+                },
+              }
+            : {
+                left: {
+                  backgroundColor: isDarkMode ? `${Colors.gray[300]}4D` : `${Colors.gray[500]}1A`,
+                },
+                right: {
+                  backgroundColor: isDarkMode
+                    ? `${Colors.indigo[500]}33`
+                    : `${Colors.indigo[500]}1A`,
+                },
+              }
+        }
+      />
+    </>
+  );
+});
 
 const RenderReplyMessageView = memo((props: BubbleProps<ChatMessageIMessage>) => {
   const replyMessage = useChatMessage({

@@ -1,5 +1,5 @@
 import { StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { Portal } from 'react-native-portalize';
 
 import Animated, {
@@ -10,14 +10,19 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { ChatMessageIMessage } from '../../../pages/chat-page';
+import { useChatReaction } from '../../../hooks/chat/useChatReaction';
+import Toast from 'react-native-toast-message';
+import { useConversation } from '../../../hooks/chat/useConversation';
+import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { ChatMessage } from '../../../provider/chat/ChatProvider';
 
 const PortalView = ({
   selectedMessage,
   messageCordinates,
   setSelectedMessage,
 }: {
-  selectedMessage: (ChatMessageIMessage & number) | null;
-  setSelectedMessage: (message: ChatMessageIMessage | null) => void;
+  selectedMessage: (ChatMessageIMessage & number) | undefined;
+  setSelectedMessage: (message: ChatMessageIMessage | undefined) => void;
   messageCordinates: { x: number; y: number };
 }) => {
   const scale = useSharedValue(0);
@@ -73,25 +78,70 @@ const PortalView = ({
     };
   });
 
+  const {
+    mutate: addReaction,
+    error: reactionError,
+    status,
+  } = useChatReaction({
+    conversationId: selectedMessage?.fileMetadata.appData.groupId,
+    messageId: selectedMessage?.fileMetadata.appData.uniqueId,
+  }).add;
+
+  const conversation = useConversation({
+    conversationId: selectedMessage?.fileMetadata.appData.groupId,
+  }).single.data;
+
+  const sendReaction = useCallback(
+    (reaction: string, index: number) => {
+      console.log('selectedMessage', selectedMessage);
+      if (!selectedMessage && !conversation) {
+        return;
+      } else if (index === 6) {
+        //TODO: Show Emoji Picker
+        return;
+      } else {
+        addReaction({
+          conversation: conversation,
+          message: selectedMessage as DriveSearchResult<ChatMessage>,
+          reaction,
+        });
+      }
+      setSelectedMessage(undefined);
+    },
+    [addReaction, conversation, selectedMessage, setSelectedMessage]
+  );
+
   if (!selectedMessage) {
     return null;
   }
+  if (reactionError) {
+    console.error('Failed to add reaction', reactionError);
+    Toast.show({
+      type: 'error',
+      text1: 'Failed to add reaction',
+      text2: reactionError.message,
+      position: 'bottom',
+    });
+  }
+  console.log('status', status);
+
+  const initialReactions: string[] = ['❤️', '👍', '😀', '😂', '😍', '😡', '➕'];
 
   return (
     <Portal>
       <TouchableOpacity
         activeOpacity={0.9}
-        onPress={() => setSelectedMessage(null)}
+        onPress={() => setSelectedMessage(undefined)}
         style={styles.container}
       >
         <Animated.View style={[styles.reaction, reactionStyle]}>
-          <Animated.Text style={textStyle}>❤️</Animated.Text>
-          <Animated.Text style={textStyle}>👍</Animated.Text>
-          <Animated.Text style={textStyle}>😀</Animated.Text>
-          <Animated.Text style={textStyle}>😂</Animated.Text>
-          <Animated.Text style={textStyle}>😍</Animated.Text>
-          <Animated.Text style={textStyle}>😡</Animated.Text>
-          <Animated.Text style={textStyle}>➕</Animated.Text>
+          {initialReactions.map((reaction, index) => (
+            <TouchableOpacity key={index} onPress={() => sendReaction(reaction, index)}>
+              <Animated.Text style={textStyle}>{reaction}</Animated.Text>
+            </TouchableOpacity>
+          ))}
+
+          {/* TODO: Show Emoji Picker */}
         </Animated.View>
       </TouchableOpacity>
     </Portal>
