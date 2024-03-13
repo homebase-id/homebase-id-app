@@ -1,5 +1,5 @@
 import { StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Portal } from 'react-native-portalize';
 
 import Animated, {
@@ -15,19 +15,23 @@ import Toast from 'react-native-toast-message';
 import { useConversation } from '../../../hooks/chat/useConversation';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import { ChatMessage } from '../../../provider/chat/ChatProvider';
+import { useBottomSheetModal } from '@gorhom/bottom-sheet';
 
 const PortalView = ({
   selectedMessage,
   messageCordinates,
   setSelectedMessage,
+  openEmojiPicker,
 }: {
   selectedMessage: (ChatMessageIMessage & number) | undefined;
   setSelectedMessage: (message: ChatMessageIMessage | undefined) => void;
   messageCordinates: { x: number; y: number };
+  openEmojiPicker: () => void;
 }) => {
   const scale = useSharedValue(0);
   const { height } = useWindowDimensions();
-
+  const { dismiss } = useBottomSheetModal();
+  const [emojiModalOpen, setEmojiModalOpen] = useState<boolean>(false);
   useEffect(() => {
     if (selectedMessage) {
       scale.value = withSpring(1);
@@ -78,11 +82,7 @@ const PortalView = ({
     };
   });
 
-  const {
-    mutate: addReaction,
-    error: reactionError,
-    status,
-  } = useChatReaction({
+  const { mutate: addReaction, error: reactionError } = useChatReaction({
     conversationId: selectedMessage?.fileMetadata.appData.groupId,
     messageId: selectedMessage?.fileMetadata.appData.uniqueId,
   }).add;
@@ -93,13 +93,14 @@ const PortalView = ({
 
   const sendReaction = useCallback(
     (reaction: string, index: number) => {
-      console.log('selectedMessage', selectedMessage);
-      if (!selectedMessage && !conversation) {
+      if (!selectedMessage) {
         return;
       } else if (index === 6) {
-        //TODO: Show Emoji Picker
+        openEmojiPicker();
+        setEmojiModalOpen(true);
         return;
       } else {
+        if (!conversation) return;
         addReaction({
           conversation: conversation,
           message: selectedMessage as DriveSearchResult<ChatMessage>,
@@ -108,12 +109,10 @@ const PortalView = ({
       }
       setSelectedMessage(undefined);
     },
-    [addReaction, conversation, selectedMessage, setSelectedMessage]
+    [addReaction, conversation, openEmojiPicker, selectedMessage, setSelectedMessage]
   );
 
-  if (!selectedMessage) {
-    return null;
-  }
+  //TODO: Add Error Handling ErrorNotification
   if (reactionError) {
     console.error('Failed to add reaction', reactionError);
     Toast.show({
@@ -123,7 +122,10 @@ const PortalView = ({
       position: 'bottom',
     });
   }
-  console.log('status', status);
+
+  if (!selectedMessage) {
+    return null;
+  }
 
   const initialReactions: string[] = ['❤️', '👍', '😀', '😂', '😍', '😡', '➕'];
 
@@ -131,18 +133,22 @@ const PortalView = ({
     <Portal>
       <TouchableOpacity
         activeOpacity={0.9}
-        onPress={() => setSelectedMessage(undefined)}
+        onPress={() => {
+          dismiss();
+          setSelectedMessage(undefined);
+          setEmojiModalOpen(false);
+        }}
         style={styles.container}
       >
-        <Animated.View style={[styles.reaction, reactionStyle]}>
-          {initialReactions.map((reaction, index) => (
-            <TouchableOpacity key={index} onPress={() => sendReaction(reaction, index)}>
-              <Animated.Text style={textStyle}>{reaction}</Animated.Text>
-            </TouchableOpacity>
-          ))}
-
-          {/* TODO: Show Emoji Picker */}
-        </Animated.View>
+        {!emojiModalOpen && (
+          <Animated.View style={[styles.reaction, reactionStyle]}>
+            {initialReactions.map((reaction, index) => (
+              <TouchableOpacity key={index} onPress={() => sendReaction(reaction, index)}>
+                <Animated.Text style={textStyle}>{reaction}</Animated.Text>
+              </TouchableOpacity>
+            ))}
+          </Animated.View>
+        )}
       </TouchableOpacity>
     </Portal>
   );

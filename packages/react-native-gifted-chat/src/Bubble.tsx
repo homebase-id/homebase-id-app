@@ -267,7 +267,6 @@ export default class Bubble<
 
   onLongPress = (e: GestureResponderEvent) => {
     const { currentMessage } = this.props;
-    console.log(this.props.onLongPress);
     if (this.props.onLongPress) {
       this.props.onLongPress(e, this.context, this.props.currentMessage);
     } else if (currentMessage && currentMessage.text) {

@@ -16,7 +16,7 @@ import {
   Time,
 } from 'react-native-gifted-chat';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
-import { useCallback, useEffect, useMemo, useRef, useState, memo } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, memo, useLayoutEffect } from 'react';
 import { AppStackParamList } from '../app/App';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -61,6 +61,8 @@ import Toast from 'react-native-toast-message';
 import PortalView from '../components/ui/Chat/Chat-Reaction';
 import { Host } from 'react-native-portalize';
 import { useChatReaction } from '../hooks/chat/useChatReaction';
+import { BottomSheetModal, BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import { EmojiPickerModal } from '../components/ui/Emoji-Picker/Emoji-Picker-Modal';
 
 export type ChatProp = NativeStackScreenProps<AppStackParamList, 'ChatScreen'>;
 
@@ -213,7 +215,7 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
         />
       );
     },
-    [onLongPress, updateRowRef]
+    [updateRowRef]
   );
 
   const renderMediaItems = () => {
@@ -377,6 +379,13 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
     );
   }, []);
 
+  // ref
+  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+
+  const openEmojiModal = useCallback(() => {
+    bottomSheetModalRef.current?.present();
+  }, []);
+
   if (!conversationContent) return null;
   if (sendMessageError) {
     Toast.show({
@@ -389,58 +398,66 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
   }
 
   return (
-    <Host>
-      <View
-        style={{
-          paddingBottom: replyMessage && !Keyboard.isVisible() ? insets.bottom : 0,
-          flex: 1,
-        }}
-      >
-        <ChatAppBar
-          title={title || ''}
-          group={'recipients' in conversationContent.fileMetadata.appData.content}
-          odinId={
-            route.params.convoId === ConversationWithYourselfId
-              ? identity || ''
-              : (conversationContent?.fileMetadata.appData.content as SingleConversation).recipient
-          }
-          goBack={navigation.goBack}
-          onPress={() => navigation.navigate('ChatInfo', { convoId: route.params.convoId })}
-          isSelf={route.params.convoId === ConversationWithYourselfId}
-        />
-        <GiftedChat<ChatMessageIMessage>
-          messages={messages}
-          onSend={doSend}
-          renderAvatar={null}
-          infiniteScroll
-          scrollToBottom
-          onLongPress={(e, _, m) => onLongPress(e, m)}
-          alwaysShowSend
-          isKeyboardInternallyHandled={true}
-          keyboardShouldPersistTaps="never"
-          renderMessageImage={(prop: MessageImageProps<ChatMessageIMessage>) => (
-            <ImageMessage {...prop} />
-          )}
-          renderCustomView={(prop: BubbleProps<ChatMessageIMessage>) => (
-            <RenderReplyMessageView {...prop} />
-          )}
-          renderBubble={(prop) => <RenderBubble {...prop} />}
-          renderMessageText={renderMessageText}
-          renderMessage={renderMessageBox}
-          renderFooter={renderMediaItems}
-          renderAccessory={() => null}
-          renderInputToolbar={renderCustomInputToolbar}
-          user={{
-            _id: '',
+    <BottomSheetModalProvider>
+      <Host>
+        <View
+          style={{
+            paddingBottom: replyMessage && !Keyboard.isVisible() ? insets.bottom : 0,
+            flex: 1,
           }}
-        />
-        <PortalView
-          messageCordinates={messageCordinates}
-          selectedMessage={selectedMessage}
-          setSelectedMessage={setSelectedMessage}
-        />
-      </View>
-    </Host>
+        >
+          <ChatAppBar
+            title={title || ''}
+            group={'recipients' in conversationContent.fileMetadata.appData.content}
+            odinId={
+              route.params.convoId === ConversationWithYourselfId
+                ? identity || ''
+                : (conversationContent?.fileMetadata.appData.content as SingleConversation)
+                    .recipient
+            }
+            goBack={navigation.goBack}
+            onPress={() => navigation.navigate('ChatInfo', { convoId: route.params.convoId })}
+            isSelf={route.params.convoId === ConversationWithYourselfId}
+          />
+          <GiftedChat<ChatMessageIMessage>
+            messages={messages}
+            onSend={doSend}
+            renderAvatar={null}
+            infiniteScroll
+            scrollToBottom
+            onLongPress={(e, _, m: ChatMessageIMessage) => onLongPress(e, m)}
+            alwaysShowSend
+            isKeyboardInternallyHandled={true}
+            keyboardShouldPersistTaps="never"
+            renderMessageImage={(prop: MessageImageProps<ChatMessageIMessage>) => (
+              <ImageMessage {...prop} />
+            )}
+            renderCustomView={(prop: BubbleProps<ChatMessageIMessage>) => (
+              <RenderReplyMessageView {...prop} />
+            )}
+            renderBubble={(prop) => <RenderBubble {...prop} />}
+            renderMessageText={renderMessageText}
+            renderMessage={renderMessageBox}
+            renderFooter={renderMediaItems}
+            renderAccessory={() => null}
+            renderInputToolbar={renderCustomInputToolbar}
+            user={{
+              _id: '',
+            }}
+          />
+          <PortalView
+            messageCordinates={messageCordinates}
+            selectedMessage={selectedMessage}
+            setSelectedMessage={setSelectedMessage}
+            openEmojiPicker={openEmojiModal}
+          />
+        </View>
+      </Host>
+      <EmojiPickerModal
+        ref={bottomSheetModalRef}
+        selectedMessage={selectedMessage as ChatMessageIMessage}
+      />
+    </BottomSheetModalProvider>
   );
 };
 
