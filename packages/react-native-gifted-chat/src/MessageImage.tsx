@@ -53,6 +53,7 @@ export function MessageImage<TMessage extends IMessage = IMessage>({
 
   return (
     <View style={[styles.container, containerStyle]}>
+      {/* @ts-ignore: https://github.com/cbbfcd/react-native-lightbox/issues/11 */}
       <Lightbox
         activeProps={{
           style: styles.imageActive,

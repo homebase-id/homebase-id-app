@@ -20,10 +20,6 @@
   ],
   "author": "Farid Safi",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/FaridSafi/react-native-gifted-chat/issues"
-  },
-  "homepage": "https://github.com/FaridSafi/react-native-gifted-chat#readme",
   "scripts": {
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "lint:fix": "./node_modules/.bin/eslint ./src/*.{ts,tsx} --fix",
@@ -80,10 +76,5 @@
   "peerDependencies": {
     "react": "*",
     "react-native": "*"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "yarn lint:fix && yarn prettier && yarn tsc"
-    }
   }
 }

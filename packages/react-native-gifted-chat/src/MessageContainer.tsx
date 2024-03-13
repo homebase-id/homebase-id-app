@@ -7,7 +7,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Text,
-  ListViewProps,
+  FlatListProps,
   ListRenderItemInfo,
   NativeSyntheticEvent,
   NativeScrollEvent,
@@ -70,7 +70,7 @@ export interface MessageContainerProps<TMessage extends IMessage> {
   messages?: TMessage[]
   isTyping?: boolean
   user?: User
-  listViewProps: Partial<ListViewProps>
+  listViewProps: Partial<FlatListProps<unknown>>
   inverted?: boolean
   loadEarlier?: boolean
   alignTop?: boolean
