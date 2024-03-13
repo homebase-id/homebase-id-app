@@ -65,6 +65,7 @@ const ChatMessageBox = ({
   };
 
   return (
+    //TODO(@2002bishwajeet): Need double tab instead of longPress
     <Pressable
       onLongPress={(e) => {
         return onLongPress(e, props.currentMessage as ChatMessageIMessage);
