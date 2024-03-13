@@ -210,7 +210,6 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
           setReplyOnSwipeOpen={setReplyMessage}
           updateRowRef={updateRowRef}
           onMessageLayout={onLayout}
-          onLongPress={onLongPress}
         />
       );
     },
@@ -415,9 +414,7 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
           renderAvatar={null}
           infiniteScroll
           scrollToBottom
-          onLongPress={(_, message: ChatMessageIMessage) => {
-            //
-          }}
+          onLongPress={(e, _, m) => onLongPress(e, m)}
           alwaysShowSend
           isKeyboardInternallyHandled={true}
           keyboardShouldPersistTaps="never"
@@ -464,7 +461,6 @@ const RenderBubble = memo((props: Readonly<BubbleProps<IMessage>>) => {
 
   const hasReactions = reactions?.length > 0 || false;
   const flatReactions = reactions?.flatMap((val) => val.fileMetadata.appData.content.message);
-
   return (
     <>
       <Bubble

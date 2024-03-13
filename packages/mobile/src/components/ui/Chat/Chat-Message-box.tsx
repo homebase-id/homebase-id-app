@@ -1,11 +1,4 @@
-import {
-  View,
-  StyleSheet,
-  Animated,
-  LayoutChangeEvent,
-  Pressable,
-  GestureResponderEvent,
-} from 'react-native';
+import { View, StyleSheet, Animated, LayoutChangeEvent } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 import { Message, MessageProps } from 'react-native-gifted-chat';
 import { isSameDay, isSameUser } from 'react-native-gifted-chat/lib/utils';
@@ -16,14 +9,12 @@ type ChatMessageBoxProps = {
   setReplyOnSwipeOpen: (message: ChatMessageIMessage) => void;
   updateRowRef: (ref: any) => void;
   onMessageLayout: (e: LayoutChangeEvent) => void;
-  onLongPress: (e: GestureResponderEvent, message: ChatMessageIMessage) => void;
 } & MessageProps<ChatMessageIMessage>;
 
 const ChatMessageBox = ({
   setReplyOnSwipeOpen,
   updateRowRef,
   onMessageLayout,
-  onLongPress,
   ...props
 }: ChatMessageBoxProps) => {
   const isNextMyMessage =
@@ -65,22 +56,15 @@ const ChatMessageBox = ({
   };
 
   return (
-    //TODO(@2002bishwajeet): Need double tab instead of longPress
-    <Pressable
-      onLongPress={(e) => {
-        return onLongPress(e, props.currentMessage as ChatMessageIMessage);
-      }}
+    <Swipeable
+      ref={updateRowRef}
+      friction={2}
+      rightThreshold={40}
+      renderRightActions={renderRightAction}
+      onSwipeableOpen={onSwipeOpenAction}
     >
-      <Swipeable
-        ref={updateRowRef}
-        friction={2}
-        rightThreshold={40}
-        renderRightActions={renderRightAction}
-        onSwipeableOpen={onSwipeOpenAction}
-      >
-        <Message {...props} onMessageLayout={onMessageLayout} />
-      </Swipeable>
-    </Pressable>
+      <Message {...props} onMessageLayout={onMessageLayout} />
+    </Swipeable>
   );
 };
 
