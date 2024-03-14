@@ -25,6 +25,7 @@ import {
   Keyboard,
   LayoutChangeEvent,
   Platform,
+  Pressable,
   StatusBar,
   StyleSheet,
   Text,
@@ -63,6 +64,7 @@ import { Host } from 'react-native-portalize';
 import { useChatReaction } from '../hooks/chat/useChatReaction';
 import { BottomSheetModal, BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { EmojiPickerModal } from '../components/ui/Emoji-Picker/Emoji-Picker-Modal';
+import { ReactionsModal } from '../components/ui/Modal/ReactionsModal';
 
 export type ChatProp = NativeStackScreenProps<AppStackParamList, 'ChatScreen'>;
 
@@ -381,9 +383,17 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
 
   // ref
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+  const reactionModalRef = useRef<BottomSheetModal>(null);
 
   const openEmojiModal = useCallback(() => {
     bottomSheetModalRef.current?.present();
+  }, []);
+
+  const [selectedReactionMessage, setSelectedReactionMessage] = useState<ChatMessageIMessage>();
+
+  const openReactionModal = useCallback((message: ChatMessageIMessage) => {
+    setSelectedReactionMessage(message);
+    reactionModalRef.current?.present();
   }, []);
 
   if (!conversationContent) return null;
@@ -435,7 +445,7 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
             renderCustomView={(prop: BubbleProps<ChatMessageIMessage>) => (
               <RenderReplyMessageView {...prop} />
             )}
-            renderBubble={(prop) => <RenderBubble {...prop} />}
+            renderBubble={(prop) => <RenderBubble {...prop} onReactionClick={openReactionModal} />}
             renderMessageText={renderMessageText}
             renderMessage={renderMessageBox}
             renderFooter={renderMediaItems}
@@ -457,152 +467,171 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
         ref={bottomSheetModalRef}
         selectedMessage={selectedMessage as ChatMessageIMessage}
       />
+      <ReactionsModal
+        ref={reactionModalRef}
+        message={selectedReactionMessage}
+        onClose={() => {
+          setSelectedReactionMessage(undefined);
+          reactionModalRef.current?.dismiss();
+        }}
+      />
     </BottomSheetModalProvider>
   );
 };
 
-const RenderBubble = memo((props: Readonly<BubbleProps<IMessage>>) => {
-  const message = props.currentMessage as ChatMessageIMessage;
-  const content = message?.fileMetadata.appData.content;
-  const { isDarkMode } = useDarkMode();
-  const isEmojiOnly =
-    (content?.message?.match(/^\p{Extended_Pictographic}/u) &&
-      !content.message?.match(/[0-9a-zA-Z]/)) ??
-    false;
-  const isReply = !!content?.replyId;
-  const showBackground = !isEmojiOnly || isReply;
-  const { data: reactions } = useChatReaction({
-    conversationId: message?.fileMetadata.appData.groupId,
-    messageId: message?.fileMetadata.appData.uniqueId,
-  }).get;
+const RenderBubble = memo(
+  (
+    props: {
+      onReactionClick: (message: ChatMessageIMessage) => void;
+    } & Readonly<BubbleProps<IMessage>>
+  ) => {
+    const message = props.currentMessage as ChatMessageIMessage;
+    const content = message?.fileMetadata.appData.content;
+    const { isDarkMode } = useDarkMode();
+    const isEmojiOnly =
+      (content?.message?.match(/^\p{Extended_Pictographic}/u) &&
+        !content.message?.match(/[0-9a-zA-Z]/)) ??
+      false;
+    const isReply = !!content?.replyId;
+    const showBackground = !isEmojiOnly || isReply;
+    const { data: reactions } = useChatReaction({
+      conversationId: message?.fileMetadata.appData.groupId,
+      messageId: message?.fileMetadata.appData.uniqueId,
+    }).get;
 
-  const hasReactions = reactions?.length > 0 || false;
-  const flatReactions = reactions?.flatMap((val) => val.fileMetadata.appData.content.message);
-  return (
-    <>
-      <Bubble
-        {...props}
-        renderTicks={(message) => {
-          const msg = message as ChatMessageIMessage;
-          return <ChatDeliveryIndicator msg={msg} />;
-        }}
-        renderReactions={
-          !hasReactions
-            ? undefined
-            : () => {
-                const maxVisible = 2;
-                const countExcludedFromView = reactions?.length - maxVisible;
+    const hasReactions = (reactions && reactions?.length > 0) || false;
+    const flatReactions = reactions?.flatMap((val) => val.fileMetadata.appData.content.message);
+    return (
+      <>
+        <Bubble
+          {...props}
+          renderTicks={(message) => {
+            const msg = message as ChatMessageIMessage;
+            return <ChatDeliveryIndicator msg={msg} />;
+          }}
+          renderReactions={
+            !hasReactions
+              ? undefined
+              : //TODO: Add LeftRight StyleProp
+                () => {
+                  const maxVisible = 2;
+                  const countExcludedFromView = reactions?.length
+                    ? reactions?.length - maxVisible
+                    : 0;
 
-                return (
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      justifyContent: 'flex-end',
-                      padding: 4,
-                      borderRadius: 15,
-                      backgroundColor:
-                        reactions?.length && reactions?.length < 2
-                          ? undefined
-                          : isDarkMode
-                          ? Colors.gray[800]
-                          : Colors.gray[200],
-                    }}
-                  >
-                    {flatReactions?.slice(0, maxVisible).map((reaction, index) => {
-                      return (
-                        <Text
-                          key={index}
-                          style={{
-                            fontSize: 18,
-                            marginRight: 2,
-                          }}
-                        >
-                          {reaction}
-                        </Text>
-                      );
-                    })}
-                    {countExcludedFromView > 0 && (
-                      <Text
+                  return (
+                    <Pressable onPress={() => props.onReactionClick(message)}>
+                      <View
                         style={{
-                          color: isDarkMode ? Colors.white : Colors.black,
-                          fontSize: 16,
-                          fontWeight: '500',
-                          marginRight: 2,
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          justifyContent: 'flex-start',
+                          padding: 4,
+                          borderRadius: 15,
+                          backgroundColor:
+                            reactions?.length && reactions?.length < 2
+                              ? undefined
+                              : isDarkMode
+                              ? Colors.gray[800]
+                              : Colors.gray[200],
                         }}
                       >
-                        +{countExcludedFromView}
-                      </Text>
-                    )}
-                  </View>
-                );
-              }
-        }
-        renderTime={(timeProp) => {
-          return (
-            <Time
-              {...timeProp}
-              timeTextStyle={
-                !showBackground
-                  ? {
-                      left: {
-                        color: isDarkMode ? Colors.white : Colors.black,
-                        fontSize: 12,
-                      },
-                      right: {
-                        color: isDarkMode ? Colors.white : Colors.black,
-                        fontSize: 12,
-                      },
-                    }
-                  : {
-                      right: {
-                        fontSize: 12,
-                        color: !isDarkMode ? Colors.slate[600] : Colors.slate[200],
-                      },
-                      left: {
-                        fontSize: 12,
-                      },
-                    }
-              }
-            />
-          );
-        }}
-        tickStyle={{
-          color: isDarkMode ? Colors.white : Colors.black,
-        }}
-        textStyle={
-          showBackground
-            ? {
-                left: { color: isDarkMode ? Colors.white : Colors.black },
-                right: { color: isDarkMode ? Colors.white : Colors.black },
-              }
-            : {}
-        }
-        wrapperStyle={
-          !showBackground
-            ? {
-                left: {
-                  backgroundColor: 'transparent',
-                },
-                right: {
-                  backgroundColor: 'transparent',
-                },
-              }
-            : {
-                left: {
-                  backgroundColor: isDarkMode ? `${Colors.gray[300]}4D` : `${Colors.gray[500]}1A`,
-                },
-                right: {
-                  backgroundColor: isDarkMode
-                    ? `${Colors.indigo[500]}33`
-                    : `${Colors.indigo[500]}1A`,
-                },
-              }
-        }
-      />
-    </>
-  );
-});
+                        {flatReactions?.slice(0, maxVisible).map((reaction, index) => {
+                          return (
+                            <Text
+                              key={index}
+                              style={{
+                                fontSize: 18,
+                                marginRight: 2,
+                              }}
+                            >
+                              {reaction}
+                            </Text>
+                          );
+                        })}
+                        {countExcludedFromView > 0 && (
+                          <Text
+                            style={{
+                              color: isDarkMode ? Colors.white : Colors.black,
+                              fontSize: 16,
+                              fontWeight: '500',
+                              marginRight: 2,
+                            }}
+                          >
+                            +{countExcludedFromView}
+                          </Text>
+                        )}
+                      </View>
+                    </Pressable>
+                  );
+                }
+          }
+          renderTime={(timeProp) => {
+            return (
+              <Time
+                {...timeProp}
+                timeTextStyle={
+                  !showBackground
+                    ? {
+                        left: {
+                          color: isDarkMode ? Colors.white : Colors.black,
+                          fontSize: 12,
+                        },
+                        right: {
+                          color: isDarkMode ? Colors.white : Colors.black,
+                          fontSize: 12,
+                        },
+                      }
+                    : {
+                        right: {
+                          fontSize: 12,
+                          color: !isDarkMode ? Colors.slate[600] : Colors.slate[200],
+                        },
+                        left: {
+                          fontSize: 12,
+                        },
+                      }
+                }
+              />
+            );
+          }}
+          tickStyle={{
+            color: isDarkMode ? Colors.white : Colors.black,
+          }}
+          textStyle={
+            showBackground
+              ? {
+                  left: { color: isDarkMode ? Colors.white : Colors.black },
+                  right: { color: isDarkMode ? Colors.white : Colors.black },
+                }
+              : {}
+          }
+          wrapperStyle={
+            !showBackground
+              ? {
+                  left: {
+                    backgroundColor: 'transparent',
+                  },
+                  right: {
+                    backgroundColor: 'transparent',
+                  },
+                }
+              : {
+                  left: {
+                    backgroundColor: isDarkMode ? `${Colors.gray[300]}4D` : `${Colors.gray[500]}1A`,
+                  },
+                  right: {
+                    backgroundColor: isDarkMode
+                      ? `${Colors.indigo[500]}33`
+                      : `${Colors.indigo[500]}1A`,
+                  },
+                }
+          }
+        />
+      </>
+    );
+  }
+);
 
 const RenderReplyMessageView = memo((props: BubbleProps<ChatMessageIMessage>) => {
   const replyMessage = useChatMessage({

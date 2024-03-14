@@ -57,19 +57,7 @@ export const EmojiPickerModal = forwardRef(
                 (ref as React.RefObject<BottomSheetModal>).current?.dismiss();
                 return;
               }
-            }} // callback when user selects emoji - returns emoji obj
-            // backgroundColor={'#000'} // optional custom bg color
-            // enabledCategories={[ // optional list of enabled category keys
-            //   'recent',
-            //   'emotion',
-            //   'emojis',
-            //   'activities',
-            //   'flags',
-            //   'food',
-            //   'places',
-            //   'nature'
-            // ]}
-            // defaultCategory={'food'} // optional default category key
+            }}
           />
         </View>
       </BottomSheetModal>
