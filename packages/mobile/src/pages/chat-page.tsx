@@ -637,6 +637,7 @@ const RenderReplyMessageView = memo((props: BubbleProps<ChatMessageIMessage>) =>
   const replyMessage = useChatMessage({
     messageId: props.currentMessage?.fileMetadata.appData.content.replyId,
   }).get.data;
+  const { isDarkMode } = useDarkMode();
   return (
     props.currentMessage &&
     props.currentMessage.fileMetadata.appData.content.replyId && (
@@ -654,6 +655,7 @@ const RenderReplyMessageView = memo((props: BubbleProps<ChatMessageIMessage>) =>
             style={{
               fontWeight: '600',
               fontSize: 15,
+              color: isDarkMode ? Colors.slate[300] : Colors.slate[900],
             }}
           >
             {props.currentMessage?.fileMetadata.senderOdinId?.length > 0
@@ -664,6 +666,7 @@ const RenderReplyMessageView = memo((props: BubbleProps<ChatMessageIMessage>) =>
             style={{
               fontSize: 14,
               marginTop: 4,
+              color: isDarkMode ? Colors.slate[300] : Colors.slate[900],
             }}
           >
             {replyMessage?.fileMetadata.appData.content.message}
