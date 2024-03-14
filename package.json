@@ -10,7 +10,8 @@
     "scripts": {
         "postinstall": "patch-package",
         "start": "npm run start:mobile",
-        "start:mobile": "npm run start --w packages/mobile"
+        "start:mobile": "npm run start --w packages/mobile",
+        "build:libs": "npm run build --w packages/react-native-gifted-chat"
     },
     "dependencies": {
         "axios": "1.6.7",

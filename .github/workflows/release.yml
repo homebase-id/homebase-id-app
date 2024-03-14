@@ -27,6 +27,9 @@ jobs:
       - name: Install npm dependencies
         run: npm ci
 
+      - name: Build libs
+        run: npm run build:libs
+
       - name: Setup Ruby (bundle)
         uses: ruby/setup-ruby@v1
         with:
