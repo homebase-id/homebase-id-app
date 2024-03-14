@@ -1,13 +1,13 @@
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
 import { View } from 'react-native';
 import { useDarkMode } from '../../../hooks/useDarkMode';
-import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { emojis } from 'rn-emoji-picker/dist/data';
 import EmojiPicker from 'rn-emoji-picker';
 import React, { forwardRef } from 'react';
 import { ChatMessageIMessage } from '../../../pages/chat-page';
 import { useChatReaction } from '../../../hooks/chat/useChatReaction';
 import { useConversation } from '../../../hooks/chat/useConversation';
+import { Colors } from '../../../app/Colors';
 
 export const EmojiPickerModal = forwardRef(
   (

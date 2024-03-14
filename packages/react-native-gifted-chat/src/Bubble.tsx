@@ -55,6 +55,11 @@ const styles = {
       flexDirection: 'row',
       justifyContent: 'flex-start',
     },
+    reactions: {
+      flexDirection: 'row',
+      justifyContent: 'flex-end',
+      marginVertical: 4,
+    },
   }),
   right: StyleSheet.create({
     container: {
@@ -77,6 +82,11 @@ const styles = {
     bottom: {
       flexDirection: 'row',
       justifyContent: 'flex-end',
+    },
+    reactions: {
+      flexDirection: 'row',
+      justifyContent: 'flex-start',
+      marginVertical: 4,
     },
   }),
   content: StyleSheet.create({
@@ -172,6 +182,7 @@ export interface BubbleProps<TMessage extends IMessage> {
   renderTicks?(currentMessage: TMessage): React.ReactNode;
   renderUsername?(user?: TMessage['user']): React.ReactNode;
   renderQuickReplySend?(): React.ReactNode;
+  renderReactions?(): React.ReactNode;
   renderQuickReplies?(
     quickReplies: QuickRepliesProps<TMessage>,
   ): React.ReactNode;
@@ -191,6 +202,7 @@ export default class Bubble<
     renderMessageAudio: null,
     renderMessageText: null,
     renderCustomView: null,
+    renderReactions: null,
     renderUsername: null,
     renderTicks: null,
     renderTime: null,
@@ -223,6 +235,7 @@ export default class Bubble<
     renderMessageAudio: PropTypes.func,
     renderMessageText: PropTypes.func,
     renderCustomView: PropTypes.func,
+    renderReactions: PropTypes.func,
     isCustomViewBottom: PropTypes.bool,
     renderUsernameOnMessage: PropTypes.bool,
     renderUsername: PropTypes.func,
@@ -515,6 +528,24 @@ export default class Bubble<
       </View>
     );
   }
+  renderReactions() {
+    if (this.props.renderReactions) {
+      const child = this.props.renderReactions();
+      const { position, bottomContainerStyle } = this.props;
+
+      return (
+        <View
+          style={[
+            styles[position].reactions,
+            bottomContainerStyle && bottomContainerStyle[position],
+          ]}
+        >
+          {child}
+        </View>
+      );
+    }
+    return null;
+  }
 
   render() {
     const {
@@ -559,6 +590,8 @@ export default class Bubble<
             </View>
           </TouchableWithoutFeedback>
         </View>
+
+        {this.renderReactions()}
         {this.renderQuickReplies()}
       </View>
     );

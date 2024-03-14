@@ -16,7 +16,7 @@ import {
   Time,
 } from 'react-native-gifted-chat';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
-import { useCallback, useEffect, useMemo, useRef, useState, memo, useLayoutEffect } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, memo } from 'react';
 import { AppStackParamList } from '../app/App';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -486,69 +486,85 @@ const RenderBubble = memo((props: Readonly<BubbleProps<IMessage>>) => {
           const msg = message as ChatMessageIMessage;
           return <ChatDeliveryIndicator msg={msg} />;
         }}
-        renderTime={(timeProp) => {
-          return (
-            <View
-              style={{
-                flexDirection: props.position === 'left' ? 'row' : 'row-reverse',
-                justifyContent: 'space-between',
-                alignItems: 'flex-end',
-              }}
-            >
-              <Time
-                {...timeProp}
-                timeTextStyle={
-                  !showBackground
-                    ? {
-                        left: {
-                          color: isDarkMode ? Colors.white : Colors.black,
-                          fontSize: 12,
-                        },
-                        right: {
-                          color: isDarkMode ? Colors.white : Colors.black,
-                          fontSize: 12,
-                        },
-                      }
-                    : {
-                        right: {
-                          fontSize: 12,
-                          color: !isDarkMode ? Colors.slate[600] : Colors.slate[200],
-                        },
-                        left: {
-                          fontSize: 12,
-                        },
-                      }
-                }
-              />
-              {hasReactions && flatReactions && (
-                <View
-                  style={{
-                    bottom: -6,
+        renderReactions={
+          !hasReactions
+            ? undefined
+            : () => {
+                const maxVisible = 2;
+                const countExcludedFromView = reactions?.length - maxVisible;
 
-                    display: 'flex',
-                    flexDirection: 'row',
-                  }}
-                >
-                  {flatReactions.map((reaction, index) => {
-                    return (
+                return (
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'flex-end',
+                      padding: 4,
+                      borderRadius: 15,
+                      backgroundColor:
+                        reactions?.length && reactions?.length < 2
+                          ? undefined
+                          : isDarkMode
+                          ? Colors.gray[800]
+                          : Colors.gray[200],
+                    }}
+                  >
+                    {flatReactions?.slice(0, maxVisible).map((reaction, index) => {
+                      return (
+                        <Text
+                          key={index}
+                          style={{
+                            fontSize: 18,
+                            marginRight: 2,
+                          }}
+                        >
+                          {reaction}
+                        </Text>
+                      );
+                    })}
+                    {countExcludedFromView > 0 && (
                       <Text
-                        key={index}
                         style={{
-                          fontSize: 18,
-                          marginRight: 4,
-                          marginBottom:
-                            props.nextMessage && props.nextMessage.user?._id === message.user?._id
-                              ? 8
-                              : 0,
+                          color: isDarkMode ? Colors.white : Colors.black,
+                          fontSize: 16,
+                          fontWeight: '500',
+                          marginRight: 2,
                         }}
                       >
-                        {reaction}
+                        +{countExcludedFromView}
                       </Text>
-                    );
-                  })}
-                </View>
-              )}
-            </View>
+                    )}
+                  </View>
+                );
+              }
+        }
+        renderTime={(timeProp) => {
+          return (
+            <Time
+              {...timeProp}
+              timeTextStyle={
+                !showBackground
+                  ? {
+                      left: {
+                        color: isDarkMode ? Colors.white : Colors.black,
+                        fontSize: 12,
+                      },
+                      right: {
+                        color: isDarkMode ? Colors.white : Colors.black,
+                        fontSize: 12,
+                      },
+                    }
+                  : {
+                      right: {
+                        fontSize: 12,
+                        color: !isDarkMode ? Colors.slate[600] : Colors.slate[200],
+                      },
+                      left: {
+                        fontSize: 12,
+                      },
+                    }
+              }
+            />
           );
         }}
         tickStyle={{
