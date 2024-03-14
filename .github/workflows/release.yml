@@ -107,6 +107,9 @@ jobs:
       - name: Install npm dependencies
         run: npm ci
 
+      - name: Build libs
+        run: npm run build:libs
+
       - name: Decode Homebase Keystore to file
         id: decode_keystore_file
         env:
