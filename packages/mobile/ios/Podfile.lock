@@ -481,6 +481,8 @@ PODS:
     - ZIPFoundation (= 0.9.11)
   - RNCAsyncStorage (1.22.3):
     - React-Core
+  - RNCClipboard (1.13.2):
+    - React-Core
   - RNDeviceInfo (10.12.0):
     - React-Core
   - RNFS (2.20.0):
@@ -560,6 +562,7 @@ DEPENDENCIES:
   - ReactCommon/turbomodule/core (from `../../../node_modules/react-native/ReactCommon`)
   - ReactNativeFileAccess (from `../../../node_modules/react-native-file-access`)
   - "RNCAsyncStorage (from `../../../node_modules/@react-native-async-storage/async-storage`)"
+  - "RNCClipboard (from `../../../node_modules/@react-native-clipboard/clipboard`)"
   - RNDeviceInfo (from `../../../node_modules/react-native-device-info`)
   - RNFS (from `../node_modules/react-native-fs`)
   - RNGestureHandler (from `../../../node_modules/react-native-gesture-handler`)
@@ -691,6 +694,8 @@ EXTERNAL SOURCES:
     :path: "../../../node_modules/react-native-file-access"
   RNCAsyncStorage:
     :path: "../../../node_modules/@react-native-async-storage/async-storage"
+  RNCClipboard:
+    :path: "../../../node_modules/@react-native-clipboard/clipboard"
   RNDeviceInfo:
     :path: "../../../node_modules/react-native-device-info"
   RNFS:
@@ -770,6 +775,7 @@ SPEC CHECKSUMS:
   ReactCommon: 4b2bdcb50a3543e1c2b2849ad44533686610826d
   ReactNativeFileAccess: 4530e3be4d5069454c6c6389096d8cb78c897f2c
   RNCAsyncStorage: 10591b9e0a91eaffee14e69b3721009759235125
+  RNCClipboard: 60fed4b71560d7bfe40e9d35dea9762b024da86d
   RNDeviceInfo: db5c64a060e66e5db3102d041ebe3ef307a85120
   RNFS: 4ac0f0ea233904cb798630b3c077808c06931688
   RNGestureHandler: 7909c50383a18f0cb10ce1db7262b9a6da504c03
