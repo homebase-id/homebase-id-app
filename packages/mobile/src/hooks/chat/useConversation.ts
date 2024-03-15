@@ -133,7 +133,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     isTitleUpdated?: boolean;
   }) => {
     return await updateConversation(dotYouClient, conversation).then(async () => {
-      if (isTitleUpdated) {
+      if (isTitleUpdated && 'recipients' in conversation.fileMetadata.appData.content) {
         await updateGroupConversationCommand(
           dotYouClient,
           conversation.fileMetadata.appData.content as GroupConversation,
