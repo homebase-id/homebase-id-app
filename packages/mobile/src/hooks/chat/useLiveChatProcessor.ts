@@ -13,7 +13,7 @@ import { processInbox } from '@youfoundation/js-lib/peer';
 import { useNotificationSubscriber } from '../useNotificationSubscriber';
 import { useCallback, useEffect, useRef } from 'react';
 
-import { hasDebugFlag, tryJsonParse } from '@youfoundation/js-lib/helpers';
+import { hasDebugFlag, stringGuidsEqual, tryJsonParse } from '@youfoundation/js-lib/helpers';
 import { getSingleConversation, useConversation } from './useConversation';
 import { processCommand } from '../../provider/chat/ChatCommandProvider';
 import { useDotYouClientContext } from 'feed-app-common';
@@ -99,8 +99,8 @@ const useChatWebsocket = (isEnabled: boolean) => {
       if (
         (notification.notificationType === 'fileAdded' ||
           notification.notificationType === 'fileModified') &&
-        notification.targetDrive?.alias === ChatDrive.alias &&
-        notification.targetDrive?.type === ChatDrive.type
+        stringGuidsEqual(notification.targetDrive?.alias, ChatDrive.alias) &&
+        stringGuidsEqual(notification.targetDrive?.type, ChatDrive.type)
       ) {
         if (notification.header.fileMetadata.appData.fileType === ChatMessageFileType) {
           const conversationId = notification.header.fileMetadata.appData.groupId;
