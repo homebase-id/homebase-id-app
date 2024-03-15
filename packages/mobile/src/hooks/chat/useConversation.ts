@@ -127,13 +127,13 @@ export const useConversation = (props?: { conversationId?: string | undefined })
 
   const updateExistingConversation = async ({
     conversation,
-    sendCommand = false,
+    isTitleUpdated = false,
   }: {
     conversation: DriveSearchResult<Conversation>;
-    sendCommand?: boolean;
+    isTitleUpdated?: boolean;
   }) => {
     return await updateConversation(dotYouClient, conversation).then(async () => {
-      if (sendCommand) {
+      if (isTitleUpdated) {
         await updateGroupConversationCommand(
           dotYouClient,
           conversation.fileMetadata.appData.content as GroupConversation,
