@@ -461,7 +461,7 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
                 ? null
                 : (props: AvatarProps<IMessage>) => {
                     const prop = props as AvatarProps<ChatMessageIMessage>;
-                    const odinId = prop.currentMessage?.user._id;
+                    const odinId = prop.currentMessage?.fileMetadata.senderOdinId;
 
                     if (!odinId) {
                       return (
