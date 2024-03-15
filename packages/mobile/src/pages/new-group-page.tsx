@@ -23,7 +23,7 @@ export const NewGroupPage = memo(() => {
   const appStackNavigation = useNavigation<NavigationProp<AppStackParamList, 'TabStack'>>();
   const { mutateAsync: createNew } = useConversation().create;
 
-  let groupTitle: string | undefined;
+  const [groupTitle, setgroupTitle] = useState<string>();
 
   const createGroupCallback = useCallback(async () => {
     const { newConversationId } = await createNew({
@@ -94,8 +94,7 @@ export const NewGroupPage = memo(() => {
         <Dialog.Title>New Group Name</Dialog.Title>
         <Dialog.Input
           onChangeText={(value) => {
-            groupTitle = value;
-            console.log(groupTitle);
+            setgroupTitle(value);
           }}
         />
         <Dialog.Button

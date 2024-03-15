@@ -26,6 +26,7 @@ import {
   JOIN_GROUP_CONVERSATION_COMMAND,
   UPDATE_GROUP_CONVERSATION_COMMAND,
 } from '../../provider/chat/ConversationProvider';
+import { ChatReactionFileType } from '../../provider/chat/ChatReactionProvider';
 
 const MINUTE_IN_MS = 60000;
 
@@ -122,6 +123,9 @@ const useChatWebsocket = (isEnabled: boolean) => {
           else if (conversation.fileMetadata.appData.archivalStatus === 2) {
             restoreChat({ conversation });
           }
+        } else if (notification.header.fileMetadata.appData.fileType === ChatReactionFileType) {
+          const messageId = notification.header.fileMetadata.appData.groupId;
+          queryClient.invalidateQueries({ queryKey: ['chat-reaction', messageId] });
         } else if (
           [
             JOIN_CONVERSATION_COMMAND,
