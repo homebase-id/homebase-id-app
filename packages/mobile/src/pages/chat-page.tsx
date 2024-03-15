@@ -1,6 +1,8 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import {
   Actions,
+  Avatar,
+  AvatarProps,
   Bubble,
   BubbleProps,
   Composer,
@@ -65,6 +67,7 @@ import { useChatReaction } from '../hooks/chat/useChatReaction';
 import { BottomSheetModal, BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { EmojiPickerModal } from '../components/ui/Emoji-Picker/Emoji-Picker-Modal';
 import { ReactionsModal } from '../components/ui/Modal/ReactionsModal';
+import { Avatar as AppAvatar, OwnerAvatar } from '../components/ui/Chat/Conversation-tile';
 
 export type ChatProp = NativeStackScreenProps<AppStackParamList, 'ChatScreen'>;
 
@@ -189,7 +192,7 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
   };
 
   const [messageCordinates, setMessageCordinates] = useState({ x: 0, y: 0 });
-  const [selectedMessage, setSelectedMessage] = useState<ChatMessageIMessage | null>();
+  const [selectedMessage, setSelectedMessage] = useState<ChatMessageIMessage | undefined>();
 
   const onLongPress = useCallback(
     (e: GestureResponderEvent, message: ChatMessageIMessage) => {
@@ -407,6 +410,8 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
     console.error(sendMessageError);
   }
 
+  const isGroup = 'recipients' in conversationContent.fileMetadata.appData.content;
+
   return (
     <BottomSheetModalProvider>
       <Host>
@@ -432,7 +437,6 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
           <GiftedChat<ChatMessageIMessage>
             messages={messages}
             onSend={doSend}
-            renderAvatar={null}
             infiniteScroll
             scrollToBottom
             onLongPress={(e, _, m: ChatMessageIMessage) => onLongPress(e, m)}
@@ -450,6 +454,54 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
             renderMessage={renderMessageBox}
             renderFooter={renderMediaItems}
             renderAccessory={() => null}
+            showUserAvatar={false}
+            renderUsernameOnMessage={isGroup}
+            renderAvatar={
+              !isGroup
+                ? null
+                : (props: AvatarProps<IMessage>) => {
+                    const prop = props as AvatarProps<ChatMessageIMessage>;
+                    const odinId = prop.currentMessage?.user._id;
+
+                    if (!odinId) {
+                      return (
+                        <Avatar
+                          renderAvatar={(
+                            _: Omit<AvatarProps<ChatMessageIMessage>, 'renderAvatar'>
+                          ) => {
+                            return (
+                              <OwnerAvatar
+                                style={{
+                                  width: 30,
+                                  height: 30,
+                                  marginRight: 0,
+                                }}
+                              />
+                            );
+                          }}
+                        />
+                      );
+                    }
+                    return (
+                      <Avatar
+                        renderAvatar={(
+                          _: Omit<AvatarProps<ChatMessageIMessage>, 'renderAvatar'>
+                        ) => {
+                          return (
+                            <AppAvatar
+                              odinId={odinId}
+                              style={{
+                                width: 30,
+                                height: 30,
+                                marginRight: 0,
+                              }}
+                            />
+                          );
+                        }}
+                      />
+                    );
+                  }
+            }
             renderInputToolbar={renderCustomInputToolbar}
             user={{
               _id: '',
