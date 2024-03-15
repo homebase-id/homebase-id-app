@@ -157,6 +157,7 @@ const ConversationTile = memo((props: ConversationTileProps) => {
           }}
         >
           <Text
+            numberOfLines={1}
             style={[
               styles.title,
               {
