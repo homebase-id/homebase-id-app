@@ -68,6 +68,7 @@ import { BottomSheetModal, BottomSheetModalProvider } from '@gorhom/bottom-sheet
 import { EmojiPickerModal } from '../components/ui/Emoji-Picker/Emoji-Picker-Modal';
 import { ReactionsModal } from '../components/ui/Modal/ReactionsModal';
 import { Avatar as AppAvatar, OwnerAvatar } from '../components/ui/Chat/Conversation-tile';
+import { ChatConnectedState } from '../components/ui/Chat/Chat-Connected-state';
 
 export type ChatProp = NativeStackScreenProps<AppStackParamList, 'ChatScreen'>;
 
@@ -434,6 +435,7 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
             onPress={() => navigation.navigate('ChatInfo', { convoId: route.params.convoId })}
             isSelf={route.params.convoId === ConversationWithYourselfId}
           />
+          <ChatConnectedState {...conversationContent} />
           <GiftedChat<ChatMessageIMessage>
             messages={messages}
             onSend={doSend}
