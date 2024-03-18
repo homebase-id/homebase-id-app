@@ -24,6 +24,7 @@ export interface OdinImageProps {
   enableZoom?: boolean;
   fileKey?: string;
   style?: ImageStyle;
+  svgPlaceHolderStyle?: ImageStyle;
   onClick?: () => void;
 }
 
@@ -41,6 +42,7 @@ export const OdinImage = memo(
     avoidPayload,
     enableZoom,
     style,
+    svgPlaceHolderStyle,
     onClick,
   }: OdinImageProps) => {
     const loadSize = {
@@ -140,6 +142,7 @@ export const OdinImage = memo(
             alt={alt || title}
             onClick={onClick}
             style={style}
+            svgPlaceHolderStyle={svgPlaceHolderStyle}
           />
         ) : null}
       </View>
@@ -155,7 +158,7 @@ const ZoomableImage = ({
   fit,
   enableZoom,
   onClick,
-
+  svgPlaceHolderStyle,
   contentType,
 }: {
   uri: string;
@@ -164,6 +167,7 @@ const ZoomableImage = ({
   style?: ImageStyle;
   fit?: 'cover' | 'contain';
   enableZoom?: boolean;
+  svgPlaceHolderStyle?: ImageStyle;
   onClick?: () => void;
 
   contentType?: ImageContentType;
@@ -171,12 +175,19 @@ const ZoomableImage = ({
   if (!enableZoom) {
     return contentType === 'image/svg+xml' ? (
       <TouchableWithoutFeedback onPress={onClick}>
-        <SvgUri
-          width={imageSize?.width}
-          height={imageSize?.height}
-          uri={uri}
-          style={{ overflow: 'hidden', ...style }}
-        />
+        <View
+          style={{
+            ...imageSize,
+            ...svgPlaceHolderStyle,
+          }}
+        >
+          <SvgUri
+            width={imageSize?.width}
+            height={imageSize?.height}
+            uri={uri}
+            style={{ overflow: 'hidden', ...style }}
+          />
+        </View>
       </TouchableWithoutFeedback>
     ) : (
       <TouchableWithoutFeedback onPress={onClick}>

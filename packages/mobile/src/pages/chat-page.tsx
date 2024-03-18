@@ -1,6 +1,8 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import {
   Actions,
+  Avatar,
+  AvatarProps,
   Bubble,
   BubbleProps,
   Composer,
@@ -20,9 +22,12 @@ import { useCallback, useEffect, useMemo, useRef, useState, memo } from 'react';
 import { AppStackParamList } from '../app/App';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  GestureResponderEvent,
   ImageBackground,
   Keyboard,
+  LayoutChangeEvent,
   Platform,
+  Pressable,
   StatusBar,
   StyleSheet,
   Text,
@@ -55,6 +60,15 @@ import { useDarkMode } from '../hooks/useDarkMode';
 import useContact from '../hooks/contact/useContact';
 import { useMarkMessagesAsRead } from '../hooks/chat/useMarkMessagesAsRead';
 import { ChatDeliveryIndicator } from '../components/ui/Chat/Chat-Delivery-Indicator';
+import Toast from 'react-native-toast-message';
+import PortalView from '../components/ui/Chat/Chat-Reaction';
+import { Host } from 'react-native-portalize';
+import { useChatReaction } from '../hooks/chat/useChatReaction';
+import { BottomSheetModal, BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import { EmojiPickerModal } from '../components/ui/Emoji-Picker/Emoji-Picker-Modal';
+import { ReactionsModal } from '../components/ui/Modal/ReactionsModal';
+import { Avatar as AppAvatar, OwnerAvatar } from '../components/ui/Chat/Conversation-tile';
+import { ChatConnectedState } from '../components/ui/Chat/Chat-Connected-state';
 
 export type ChatProp = NativeStackScreenProps<AppStackParamList, 'ChatScreen'>;
 
@@ -171,14 +185,42 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
     [replyMessage]
   );
 
+  const [layoutHeight, setLayoutHeight] = useState(0);
+
+  const onLayout = (e: LayoutChangeEvent) => {
+    const { height } = e.nativeEvent.layout;
+    setLayoutHeight(height);
+  };
+
+  const [messageCordinates, setMessageCordinates] = useState({ x: 0, y: 0 });
+  const [selectedMessage, setSelectedMessage] = useState<ChatMessageIMessage | undefined>();
+
+  const onLongPress = useCallback(
+    (e: GestureResponderEvent, message: ChatMessageIMessage) => {
+      const { pageY, locationY } = e.nativeEvent;
+      const y = pageY - locationY;
+
+      setMessageCordinates({
+        x: 0,
+        y,
+      });
+
+      setSelectedMessage({ layoutHeight, ...message });
+    },
+    [layoutHeight]
+  );
+
   const renderMessageBox = useCallback(
-    (props: MessageProps<ChatMessageIMessage>) => (
-      <ChatMessageBox
-        {...props}
-        setReplyOnSwipeOpen={setReplyMessage}
-        updateRowRef={updateRowRef}
-      />
-    ),
+    (props: MessageProps<ChatMessageIMessage>) => {
+      return (
+        <ChatMessageBox
+          {...props}
+          setReplyOnSwipeOpen={setReplyMessage}
+          updateRowRef={updateRowRef}
+          onMessageLayout={onLayout}
+        />
+      );
+    },
     [updateRowRef]
   );
 
@@ -313,27 +355,275 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
     [conversationContent, route.params.convoId, sendMessage, assets, replyMessage]
   );
 
-  const renderBubble = useCallback(
-    (props: Readonly<BubbleProps<IMessage>>) => {
-      const message = props.currentMessage as ChatMessageIMessage;
-      const content = message?.fileMetadata.appData.content;
-      const isEmojiOnly =
-        (content?.message?.match(/^\p{Extended_Pictographic}/u) &&
-          !content.message?.match(/[0-9a-zA-Z]/)) ??
-        false;
-      const isReply = !!content?.replyId;
-      const showBackground = !isEmojiOnly || isReply;
-      return (
+  const renderMessageText = useCallback((props: MessageTextProps<IMessage>) => {
+    const message = props.currentMessage as ChatMessageIMessage;
+    const content = message?.fileMetadata.appData.content;
+    const isEmojiOnly =
+      (content?.message?.match(/^\p{Extended_Pictographic}/u) &&
+        !content.message?.match(/[0-9a-zA-Z]/)) ??
+      false;
+    return (
+      <MessageText
+        {...props}
+        linkStyle={{
+          left: {
+            color: Colors.indigo[500],
+          },
+          right: {
+            color: Colors.indigo[500],
+          },
+        }}
+        customTextStyle={
+          isEmojiOnly
+            ? {
+                fontSize: 48,
+                lineHeight: 60,
+              }
+            : undefined
+        }
+      />
+    );
+  }, []);
+
+  // ref
+  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+  const reactionModalRef = useRef<BottomSheetModal>(null);
+
+  const openEmojiModal = useCallback(() => {
+    bottomSheetModalRef.current?.present();
+  }, []);
+
+  const [selectedReactionMessage, setSelectedReactionMessage] = useState<ChatMessageIMessage>();
+
+  const openReactionModal = useCallback((message: ChatMessageIMessage) => {
+    setSelectedReactionMessage(message);
+    reactionModalRef.current?.present();
+  }, []);
+
+  if (!conversationContent) return null;
+  if (sendMessageError) {
+    Toast.show({
+      type: 'error',
+      text1: 'Error sending message',
+      text2: sendMessageError.message,
+      position: 'bottom',
+    });
+    console.error(sendMessageError);
+  }
+
+  const isGroup = 'recipients' in conversationContent.fileMetadata.appData.content;
+
+  return (
+    <BottomSheetModalProvider>
+      <Host>
+        <View
+          style={{
+            paddingBottom: replyMessage && !Keyboard.isVisible() ? insets.bottom : 0,
+            flex: 1,
+          }}
+        >
+          <ChatAppBar
+            title={title || ''}
+            group={'recipients' in conversationContent.fileMetadata.appData.content}
+            odinId={
+              route.params.convoId === ConversationWithYourselfId
+                ? identity || ''
+                : (conversationContent?.fileMetadata.appData.content as SingleConversation)
+                    .recipient
+            }
+            goBack={navigation.goBack}
+            onPress={() => navigation.navigate('ChatInfo', { convoId: route.params.convoId })}
+            isSelf={route.params.convoId === ConversationWithYourselfId}
+          />
+          <ChatConnectedState {...conversationContent} />
+          <GiftedChat<ChatMessageIMessage>
+            messages={messages}
+            onSend={doSend}
+            infiniteScroll
+            scrollToBottom
+            onLongPress={(e, _, m: ChatMessageIMessage) => onLongPress(e, m)}
+            alwaysShowSend
+            isKeyboardInternallyHandled={true}
+            keyboardShouldPersistTaps="never"
+            renderMessageImage={(prop: MessageImageProps<ChatMessageIMessage>) => (
+              <ImageMessage {...prop} />
+            )}
+            renderCustomView={(prop: BubbleProps<ChatMessageIMessage>) => (
+              <RenderReplyMessageView {...prop} />
+            )}
+            renderBubble={(prop) => <RenderBubble {...prop} onReactionClick={openReactionModal} />}
+            renderMessageText={renderMessageText}
+            renderMessage={renderMessageBox}
+            renderFooter={renderMediaItems}
+            renderAccessory={() => null}
+            showUserAvatar={false}
+            renderUsernameOnMessage={isGroup}
+            renderAvatar={
+              !isGroup
+                ? null
+                : (props: AvatarProps<IMessage>) => {
+                    const prop = props as AvatarProps<ChatMessageIMessage>;
+                    const odinId = prop.currentMessage?.fileMetadata.senderOdinId;
+
+                    if (!odinId) {
+                      return (
+                        <Avatar
+                          renderAvatar={(
+                            _: Omit<AvatarProps<ChatMessageIMessage>, 'renderAvatar'>
+                          ) => {
+                            return (
+                              <OwnerAvatar
+                                style={{
+                                  width: 30,
+                                  height: 30,
+                                  marginRight: 0,
+                                }}
+                              />
+                            );
+                          }}
+                        />
+                      );
+                    }
+                    return (
+                      <Avatar
+                        renderAvatar={(
+                          _: Omit<AvatarProps<ChatMessageIMessage>, 'renderAvatar'>
+                        ) => {
+                          return (
+                            <AppAvatar
+                              odinId={odinId}
+                              style={{
+                                width: 30,
+                                height: 30,
+                                marginRight: 0,
+                              }}
+                            />
+                          );
+                        }}
+                      />
+                    );
+                  }
+            }
+            renderInputToolbar={renderCustomInputToolbar}
+            user={{
+              _id: '',
+            }}
+          />
+          <PortalView
+            messageCordinates={messageCordinates}
+            selectedMessage={selectedMessage}
+            setSelectedMessage={setSelectedMessage}
+            openEmojiPicker={openEmojiModal}
+          />
+        </View>
+      </Host>
+      <EmojiPickerModal
+        ref={bottomSheetModalRef}
+        selectedMessage={selectedMessage as ChatMessageIMessage}
+      />
+      <ReactionsModal
+        ref={reactionModalRef}
+        message={selectedReactionMessage}
+        onClose={() => {
+          setSelectedReactionMessage(undefined);
+          reactionModalRef.current?.dismiss();
+        }}
+      />
+    </BottomSheetModalProvider>
+  );
+};
+
+const RenderBubble = memo(
+  (
+    props: {
+      onReactionClick: (message: ChatMessageIMessage) => void;
+    } & Readonly<BubbleProps<IMessage>>
+  ) => {
+    const message = props.currentMessage as ChatMessageIMessage;
+    const content = message?.fileMetadata.appData.content;
+    const { isDarkMode } = useDarkMode();
+    const isEmojiOnly =
+      (content?.message?.match(/^\p{Extended_Pictographic}/u) &&
+        !content.message?.match(/[0-9a-zA-Z]/)) ??
+      false;
+    const isReply = !!content?.replyId;
+    const showBackground = !isEmojiOnly || isReply;
+    const { data: reactions } = useChatReaction({
+      conversationId: message?.fileMetadata.appData.groupId,
+      messageId: message?.fileMetadata.appData.uniqueId,
+    }).get;
+
+    const hasReactions = (reactions && reactions?.length > 0) || false;
+    const flatReactions = reactions?.flatMap((val) => val.fileMetadata.appData.content.message);
+    return (
+      <>
         <Bubble
           {...props}
           renderTicks={(message) => {
             const msg = message as ChatMessageIMessage;
             return <ChatDeliveryIndicator msg={msg} />;
           }}
-          renderTime={(props) => {
+          renderReactions={
+            !hasReactions
+              ? undefined
+              : //TODO: Add LeftRight StyleProp
+                () => {
+                  const maxVisible = 2;
+                  const countExcludedFromView = reactions?.length
+                    ? reactions?.length - maxVisible
+                    : 0;
+
+                  return (
+                    <Pressable onPress={() => props.onReactionClick(message)}>
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          justifyContent: 'flex-start',
+                          padding: 4,
+                          borderRadius: 15,
+                          backgroundColor:
+                            reactions?.length && reactions?.length < 2
+                              ? undefined
+                              : isDarkMode
+                              ? Colors.gray[800]
+                              : Colors.gray[200],
+                        }}
+                      >
+                        {flatReactions?.slice(0, maxVisible).map((reaction, index) => {
+                          return (
+                            <Text
+                              key={index}
+                              style={{
+                                fontSize: 18,
+                                marginRight: 2,
+                              }}
+                            >
+                              {reaction}
+                            </Text>
+                          );
+                        })}
+                        {countExcludedFromView > 0 && (
+                          <Text
+                            style={{
+                              color: isDarkMode ? Colors.white : Colors.black,
+                              fontSize: 16,
+                              fontWeight: '500',
+                              marginRight: 2,
+                            }}
+                          >
+                            +{countExcludedFromView}
+                          </Text>
+                        )}
+                      </View>
+                    </Pressable>
+                  );
+                }
+          }
+          renderTime={(timeProp) => {
             return (
               <Time
-                {...props}
+                {...timeProp}
                 timeTextStyle={
                   !showBackground
                     ? {
@@ -392,96 +682,16 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
                 }
           }
         />
-      );
-    },
-    [isDarkMode]
-  );
-
-  const renderMessageText = useCallback((props: MessageTextProps<IMessage>) => {
-    const message = props.currentMessage as ChatMessageIMessage;
-    const content = message?.fileMetadata.appData.content;
-    const isEmojiOnly =
-      (content?.message?.match(/^\p{Extended_Pictographic}/u) &&
-        !content.message?.match(/[0-9a-zA-Z]/)) ??
-      false;
-    return (
-      <MessageText
-        {...props}
-        linkStyle={{
-          left: {
-            color: Colors.indigo[500],
-          },
-          right: {
-            color: Colors.indigo[500],
-          },
-        }}
-        customTextStyle={
-          isEmojiOnly
-            ? {
-                fontSize: 48,
-                lineHeight: 60,
-              }
-            : undefined
-        }
-      />
+      </>
     );
-  }, []);
-
-  if (!conversationContent) return null;
-  if (sendMessageError) console.error(sendMessageError);
-
-  return (
-    <View
-      style={{
-        paddingBottom: replyMessage && !Keyboard.isVisible() ? insets.bottom : 0,
-        flex: 1,
-      }}
-    >
-      <ChatAppBar
-        title={title || ''}
-        group={'recipients' in conversationContent.fileMetadata.appData.content}
-        odinId={
-          route.params.convoId === ConversationWithYourselfId
-            ? identity || ''
-            : (conversationContent?.fileMetadata.appData.content as SingleConversation).recipient
-        }
-        goBack={navigation.goBack}
-        onPress={() => navigation.navigate('ChatInfo', { convoId: route.params.convoId })}
-        isSelf={route.params.convoId === ConversationWithYourselfId}
-      />
-      <GiftedChat<ChatMessageIMessage>
-        messages={messages}
-        onSend={doSend}
-        renderAvatar={null}
-        infiniteScroll
-        scrollToBottom
-        alwaysShowSend
-        isKeyboardInternallyHandled={true}
-        keyboardShouldPersistTaps="never"
-        renderMessageImage={(prop: MessageImageProps<ChatMessageIMessage>) => (
-          <ImageMessage {...prop} />
-        )}
-        renderCustomView={(prop: BubbleProps<ChatMessageIMessage>) => (
-          <RenderReplyMessageView {...prop} />
-        )}
-        renderBubble={renderBubble}
-        renderMessageText={renderMessageText}
-        renderMessage={renderMessageBox}
-        renderFooter={renderMediaItems}
-        renderAccessory={() => null}
-        renderInputToolbar={renderCustomInputToolbar}
-        user={{
-          _id: '',
-        }}
-      />
-    </View>
-  );
-};
+  }
+);
 
 const RenderReplyMessageView = memo((props: BubbleProps<ChatMessageIMessage>) => {
   const replyMessage = useChatMessage({
     messageId: props.currentMessage?.fileMetadata.appData.content.replyId,
   }).get.data;
+  const { isDarkMode } = useDarkMode();
   return (
     props.currentMessage &&
     props.currentMessage.fileMetadata.appData.content.replyId && (
@@ -499,6 +709,7 @@ const RenderReplyMessageView = memo((props: BubbleProps<ChatMessageIMessage>) =>
             style={{
               fontWeight: '600',
               fontSize: 15,
+              color: isDarkMode ? Colors.slate[300] : Colors.slate[900],
             }}
           >
             {props.currentMessage?.fileMetadata.senderOdinId?.length > 0
@@ -509,6 +720,7 @@ const RenderReplyMessageView = memo((props: BubbleProps<ChatMessageIMessage>) =>
             style={{
               fontSize: 14,
               marginTop: 4,
+              color: isDarkMode ? Colors.slate[300] : Colors.slate[900],
             }}
           >
             {replyMessage?.fileMetadata.appData.content.message}

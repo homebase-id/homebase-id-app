@@ -336,6 +336,9 @@ PODS:
     - glog
   - react-native-blob-util (0.19.8):
     - React-Core
+  - react-native-blur (4.4.0):
+    - RCT-Folly (= 2021.07.22.00)
+    - React-Core
   - react-native-compressor (1.8.24):
     - RCT-Folly (= 2021.07.22.00)
     - React-Core
@@ -478,6 +481,8 @@ PODS:
     - ZIPFoundation (= 0.9.11)
   - RNCAsyncStorage (1.22.3):
     - React-Core
+  - RNCClipboard (1.13.2):
+    - React-Core
   - RNDeviceInfo (10.12.0):
     - React-Core
   - RNFS (2.20.0):
@@ -528,6 +533,7 @@ DEPENDENCIES:
   - React-jsinspector (from `../../../node_modules/react-native/ReactCommon/jsinspector`)
   - React-logger (from `../../../node_modules/react-native/ReactCommon/logger`)
   - react-native-blob-util (from `../../../node_modules/react-native-blob-util`)
+  - "react-native-blur (from `../../../node_modules/@react-native-community/blur`)"
   - react-native-compressor (from `../../../node_modules/react-native-compressor`)
   - react-native-image-picker (from `../../../node_modules/react-native-image-picker`)
   - "react-native-image-resizer (from `../../../node_modules/@bam.tech/react-native-image-resizer`)"
@@ -556,6 +562,7 @@ DEPENDENCIES:
   - ReactCommon/turbomodule/core (from `../../../node_modules/react-native/ReactCommon`)
   - ReactNativeFileAccess (from `../../../node_modules/react-native-file-access`)
   - "RNCAsyncStorage (from `../../../node_modules/@react-native-async-storage/async-storage`)"
+  - "RNCClipboard (from `../../../node_modules/@react-native-clipboard/clipboard`)"
   - RNDeviceInfo (from `../../../node_modules/react-native-device-info`)
   - RNFS (from `../node_modules/react-native-fs`)
   - RNGestureHandler (from `../../../node_modules/react-native-gesture-handler`)
@@ -629,6 +636,8 @@ EXTERNAL SOURCES:
     :path: "../../../node_modules/react-native/ReactCommon/logger"
   react-native-blob-util:
     :path: "../../../node_modules/react-native-blob-util"
+  react-native-blur:
+    :path: "../../../node_modules/@react-native-community/blur"
   react-native-compressor:
     :path: "../../../node_modules/react-native-compressor"
   react-native-image-picker:
@@ -685,6 +694,8 @@ EXTERNAL SOURCES:
     :path: "../../../node_modules/react-native-file-access"
   RNCAsyncStorage:
     :path: "../../../node_modules/@react-native-async-storage/async-storage"
+  RNCClipboard:
+    :path: "../../../node_modules/@react-native-clipboard/clipboard"
   RNDeviceInfo:
     :path: "../../../node_modules/react-native-device-info"
   RNFS:
@@ -735,6 +746,7 @@ SPEC CHECKSUMS:
   React-jsinspector: aaed4cf551c4a1c98092436518c2d267b13a673f
   React-logger: da1ebe05ae06eb6db4b162202faeafac4b435e77
   react-native-blob-util: 26f1fb0c91f2b437380d4f3875769a7c3e06080e
+  react-native-blur: 69ecfe61d81b32ee7baae10f5d17aeb4e2594b10
   react-native-compressor: d84e28c430c8022cc44a45ec9ec26071269992c3
   react-native-image-picker: 5e076db26cd81660cfb6db5bcf517cfa12054d45
   react-native-image-resizer: 681f7607418b97c084ba2d0999b153b103040d8a
@@ -763,6 +775,7 @@ SPEC CHECKSUMS:
   ReactCommon: 4b2bdcb50a3543e1c2b2849ad44533686610826d
   ReactNativeFileAccess: 4530e3be4d5069454c6c6389096d8cb78c897f2c
   RNCAsyncStorage: 10591b9e0a91eaffee14e69b3721009759235125
+  RNCClipboard: 60fed4b71560d7bfe40e9d35dea9762b024da86d
   RNDeviceInfo: db5c64a060e66e5db3102d041ebe3ef307a85120
   RNFS: 4ac0f0ea233904cb798630b3c077808c06931688
   RNGestureHandler: 7909c50383a18f0cb10ce1db7262b9a6da504c03
@@ -777,4 +790,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 269f822781cfcb727ea8d80e5ab29950ac3ff700
 
-COCOAPODS: 1.12.1
+COCOAPODS: 1.12.0

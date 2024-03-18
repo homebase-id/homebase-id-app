@@ -1,5 +1,5 @@
-import { View, StyleSheet, Animated } from 'react-native';
-import { GestureHandlerRootView, Swipeable } from 'react-native-gesture-handler';
+import { View, StyleSheet, Animated, LayoutChangeEvent } from 'react-native';
+import { Swipeable } from 'react-native-gesture-handler';
 import { Message, MessageProps } from 'react-native-gifted-chat';
 import { isSameDay, isSameUser } from 'react-native-gifted-chat/lib/utils';
 import { Reply } from '../Icons/icons';
@@ -8,9 +8,15 @@ import { ChatMessageIMessage } from '../../../pages/chat-page';
 type ChatMessageBoxProps = {
   setReplyOnSwipeOpen: (message: ChatMessageIMessage) => void;
   updateRowRef: (ref: any) => void;
+  onMessageLayout: (e: LayoutChangeEvent) => void;
 } & MessageProps<ChatMessageIMessage>;
 
-const ChatMessageBox = ({ setReplyOnSwipeOpen, updateRowRef, ...props }: ChatMessageBoxProps) => {
+const ChatMessageBox = ({
+  setReplyOnSwipeOpen,
+  updateRowRef,
+  onMessageLayout,
+  ...props
+}: ChatMessageBoxProps) => {
   const isNextMyMessage =
     props.currentMessage &&
     props.nextMessage &&
@@ -50,17 +56,15 @@ const ChatMessageBox = ({ setReplyOnSwipeOpen, updateRowRef, ...props }: ChatMes
   };
 
   return (
-    <GestureHandlerRootView>
-      <Swipeable
-        ref={updateRowRef}
-        friction={2}
-        rightThreshold={40}
-        renderRightActions={renderRightAction}
-        onSwipeableOpen={onSwipeOpenAction}
-      >
-        <Message {...props} />
-      </Swipeable>
-    </GestureHandlerRootView>
+    <Swipeable
+      ref={updateRowRef}
+      friction={2}
+      rightThreshold={40}
+      renderRightActions={renderRightAction}
+      onSwipeableOpen={onSwipeOpenAction}
+    >
+      <Message {...props} onMessageLayout={onMessageLayout} />
+    </Swipeable>
   );
 };
 

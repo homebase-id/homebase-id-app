@@ -56,7 +56,6 @@ const MediaGallery = ({ msg: currentMessage }: { msg: DriveSearchResult<ChatMess
             />
           );
         }
-
         return (
           <OdinImage
             fileId={currentMessage.fileId}

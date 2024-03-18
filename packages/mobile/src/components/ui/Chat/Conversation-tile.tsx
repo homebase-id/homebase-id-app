@@ -47,6 +47,9 @@ export const Avatar = (props: { odinId: string; style?: ImageStyle }) => {
       enableZoom={false}
       fit="cover"
       odinId={props.odinId}
+      svgPlaceHolderStyle={{
+        marginRight: 16,
+      }}
       style={{
         ...styles.tinyLogo,
         ...props.style,
@@ -154,6 +157,7 @@ const ConversationTile = memo((props: ConversationTileProps) => {
           }}
         >
           <Text
+            numberOfLines={1}
             style={[
               styles.title,
               {
@@ -192,7 +196,11 @@ const ConversationTile = memo((props: ConversationTileProps) => {
             </View>
           ) : null}
         </View>
-        <View>
+        <View
+          style={{
+            justifyContent: 'space-between',
+          }}
+        >
           {lastMessage && <ChatSentTimeIndicator msg={lastMessage} keepDetail={false} />}
           {unreadCount > 0 ? (
             <View

@@ -59,6 +59,9 @@ export const ContactTile = ({
             imageSize={{ width: 48, height: 48 }}
             fileKey={'prfl_pic'}
             style={styles.tinyLogo}
+            svgPlaceHolderStyle={{
+              marginRight: 16,
+            }}
           />
         )}
         <View style={[styles.content]}>

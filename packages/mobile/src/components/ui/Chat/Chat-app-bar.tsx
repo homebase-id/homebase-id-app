@@ -2,6 +2,8 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { Avatar, GroupAvatar, OwnerAvatar } from './Conversation-tile';
 import { Header, HeaderBackButton } from '@react-navigation/elements';
 import { useProfile } from '../../../hooks/profile/useProfile';
+import { Colors } from '../../../app/Colors';
+import { useDarkMode } from '../../../hooks/useDarkMode';
 
 export const ChatAppBar = ({
   odinId,
@@ -19,6 +21,7 @@ export const ChatAppBar = ({
   onPress: () => void;
 }) => {
   const user = useProfile().data;
+  const { isDarkMode } = useDarkMode();
   const headerLeft = () => (
     <View
       style={{
@@ -33,7 +36,7 @@ export const ChatAppBar = ({
         onPress={goBack}
         label={''}
         labelVisible={false}
-        // tintColor={isDarkMode ? Colors.white : Colors.black}
+        tintColor={isDarkMode ? Colors.white : Colors.black}
       />
       {!group ? (
         isSelf ? (
@@ -48,27 +51,11 @@ export const ChatAppBar = ({
   );
   return (
     <Pressable onPress={onPress}>
-      <View
-        style={[
-          styles.header,
-          {
-            // marginTop: insets.top,
-            top: 0,
-            left: 0,
-            right: 0,
-            paddingVertical: 3,
-            width: '100%',
-            zIndex: 10,
-            // backgroundColor: 'black',
-          },
-        ]}
-      >
-        <Header
-          title={!isSelf ? title : `${user?.firstName} ${user?.surName} (you)`}
-          headerTitleAlign="left"
-          headerLeft={headerLeft}
-        />
-      </View>
+      <Header
+        title={!isSelf ? title : `${user?.firstName} ${user?.surName} (you)`}
+        headerTitleAlign="left"
+        headerLeft={headerLeft}
+      />
     </Pressable>
   );
 };
@@ -77,7 +64,8 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
-    // flex: 1,
+    paddingVertical: 3,
+    zIndex: 10,
   },
   titleStyle: {
     fontSize: 18,

@@ -48,6 +48,8 @@ import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-
 import { useProfile } from '../hooks/profile/useProfile';
 import { ChatMessage } from '../provider/chat/ChatProvider';
 import { useRefreshOnFocus } from '../hooks/chat/useRefetchOnFocus';
+import Toast from 'react-native-toast-message';
+import { ErrorToaster } from '../components/ui/Alert/ErrorToaster';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -111,6 +113,7 @@ let App = () => {
     >
       <GestureHandlerRootView style={{ flex: 1 }}>
         <RootStack />
+        <Toast />
       </GestureHandlerRootView>
     </PersistQueryClientProvider>
   );
@@ -133,6 +136,7 @@ const RootStack = () => {
           <StackRoot.Screen name="Login" component={LoginPage} options={{ headerShown: false }} />
         )}
       </StackRoot.Navigator>
+      <ErrorToaster />
     </NavigationContainer>
   );
 };
@@ -390,7 +394,7 @@ const ProfileAvatar = () => {
       fileId={profile?.profileImageFileId}
       fileKey={profile?.profileImageFileKey}
       imageSize={{ width: 30, height: 30 }}
-      style={{ borderRadius: 30 / 2 }}
+      style={{ borderRadius: 30 / 2, marginRight: Platform.OS === 'android' ? 10 : 0 }}
     />
   );
 };

@@ -1,5 +1,5 @@
 import { useAllConnections } from 'feed-app-common';
-import { ActivityIndicator, FlatList, Platform, Text } from 'react-native';
+import { FlatList, Platform, Text } from 'react-native';
 import { ContactTile } from '../components/ui/Contact/Contact-Tile';
 
 import { memo, useCallback, useState } from 'react';
@@ -11,6 +11,8 @@ import { AppStackParamList, ChatStackParamList } from '../app/App';
 import { useConversation } from '../hooks/chat/useConversation';
 import Dialog from 'react-native-dialog';
 import { DotYouProfile } from '@youfoundation/js-lib/network';
+import { useDarkMode } from '../hooks/useDarkMode';
+import { Colors } from '../app/Colors';
 
 export const NewGroupPage = memo(() => {
   const contacts = useAllConnections(true).data;
@@ -21,19 +23,17 @@ export const NewGroupPage = memo(() => {
   const appStackNavigation = useNavigation<NavigationProp<AppStackParamList, 'TabStack'>>();
   const { mutateAsync: createNew } = useConversation().create;
 
-  let groupTitle: string | undefined;
+  const [groupTitle, setgroupTitle] = useState<string>();
 
   const createGroupCallback = useCallback(async () => {
     const { newConversationId } = await createNew({
       recipients: selectedContacts.map((contact) => contact.odinId as string),
       title: groupTitle,
     });
-
     if (newConversationId) {
       setDialogVisible(false);
       navigation.goBack();
       navigation.goBack();
-
       appStackNavigation.navigate('ChatScreen', {
         convoId: newConversationId,
       });
@@ -92,7 +92,11 @@ export const NewGroupPage = memo(() => {
       />
       <Dialog.Container visible={dialogVisible} onBackdropPress={() => setDialogVisible(false)}>
         <Dialog.Title>New Group Name</Dialog.Title>
-        <Dialog.Input onChangeText={(value) => (groupTitle = value)} />
+        <Dialog.Input
+          onChangeText={(value) => {
+            setgroupTitle(value);
+          }}
+        />
         <Dialog.Button
           label="Cancel"
           onPress={() => {
@@ -105,52 +109,21 @@ export const NewGroupPage = memo(() => {
   );
 });
 
-function CreateGroup(props: {
-  disabled: boolean;
-  // onPress: () => Promise<{ newConversationId: string } | undefined>;
-  onPress: () => void;
-}) {
-  const [loading, setloading] = useState(false);
-  const navigation = useNavigation<NavigationProp<ChatStackParamList, 'NewChat'>>();
-  if (loading) {
-    return (
-      <ActivityIndicator
+function CreateGroup(props: { disabled: boolean; onPress: () => void }) {
+  const { isDarkMode } = useDarkMode();
+
+  return (
+    <TouchableOpacity disabled={props.disabled} onPress={props.onPress}>
+      <Text
         style={{
+          fontSize: 16,
+          fontWeight: '500',
           marginRight: 10,
+          color: props.disabled ? 'grey' : isDarkMode ? Colors.white : Colors.black,
         }}
-        size="small"
-        color="black"
-      />
-    );
-  } else {
-    return (
-      <TouchableOpacity
-        disabled={props.disabled}
-        onPress={props.onPress}
-        // onPress={async () => {
-        //   setloading(true);
-        //   const newConversationId = await props.onPress();
-        //   setloading(false);
-        //   if (newConversationId) {
-        //     navigation.goBack();
-        //     navigation.goBack();
-        //     navigation.navigate('ChatScreen', {
-        //       convoId: newConversationId.newConversationId,
-        //     });
-        //   }
-        // }}
       >
-        <Text
-          style={{
-            fontSize: 16,
-            fontWeight: '500',
-            marginRight: 10,
-            color: props.disabled ? 'grey' : 'black',
-          }}
-        >
-          Create
-        </Text>
-      </TouchableOpacity>
-    );
-  }
+        Create
+      </Text>
+    </TouchableOpacity>
+  );
 }

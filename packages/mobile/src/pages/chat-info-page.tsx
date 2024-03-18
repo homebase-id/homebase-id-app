@@ -158,13 +158,22 @@ export function ChatInfoPage(prop: ChatInfoProp) {
                     marginTop: 8,
                   }}
                 >
-                  <Avatar
-                    odinId={recipient}
-                    style={{
-                      width: 50,
-                      height: 50,
-                    }}
-                  />
+                  {index === (conversationContent as GroupConversation).recipients.length ? (
+                    <OwnerAvatar
+                      style={{
+                        width: 50,
+                        height: 50,
+                      }}
+                    />
+                  ) : (
+                    <Avatar
+                      odinId={recipient}
+                      style={{
+                        width: 50,
+                        height: 50,
+                      }}
+                    />
+                  )}
                   <Text
                     style={[
                       {

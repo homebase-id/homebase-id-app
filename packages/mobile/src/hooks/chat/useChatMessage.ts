@@ -6,7 +6,7 @@ import {
   SecurityGroupType,
   TransferStatus,
 } from '@youfoundation/js-lib/core';
-import { getNewId } from '@youfoundation/js-lib/helpers';
+import { getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 
 import { useDotYouClientContext } from 'feed-app-common';
 import {
@@ -17,6 +17,7 @@ import {
   uploadChatMessage,
 } from '../../provider/chat/ChatProvider';
 import { ImageSource } from '../../provider/image/RNImageProvider';
+import { Conversation, GroupConversation, SingleConversation } from '../../provider/chat/ConversationProvider';
 
 export const useChatMessage = (props?: { messageId: string | undefined }) => {
   const queryClient = useQueryClient();
@@ -80,6 +81,22 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
     return newChat;
   };
 
+  const updateMessage = async ({
+    updatedChatMessage,
+    conversation,
+  }: {
+    updatedChatMessage: DriveSearchResult<ChatMessage>;
+    conversation: DriveSearchResult<Conversation>;
+  }) => {
+    const conversationContent = conversation.fileMetadata.appData.content;
+
+    const recipients =
+      (conversationContent as GroupConversation).recipients ||
+      [(conversationContent as SingleConversation).recipient].filter(Boolean);
+
+    await updateChatMessage(dotYouClient, updatedChatMessage, recipients);
+  };
+
   return {
     get: useQuery({
       queryKey: ['chat-message', props?.messageId],
@@ -137,6 +154,63 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
       },
       onSettled: async (_data, _error, variables) => {
         queryClient.invalidateQueries({ queryKey: ['chat', variables.conversationId] });
+      },
+    }),
+    update: useMutation({
+      mutationFn: updateMessage,
+      onMutate: async ({ conversation, updatedChatMessage }) => {
+        // Update chat messages
+        const extistingMessages = queryClient.getQueryData<
+          InfiniteData<{
+            searchResults: (DriveSearchResult<ChatMessage> | null)[];
+            cursorState: string;
+            queryTime: number;
+            includeMetadataHeader: boolean;
+          }>
+        >(['chat-messages', conversation.fileMetadata.appData.uniqueId]);
+
+        if (extistingMessages) {
+          const newData = {
+            ...extistingMessages,
+            pages: extistingMessages?.pages?.map((page) => ({
+              ...page,
+              searchResults: page.searchResults.map((msg) =>
+                stringGuidsEqual(msg?.fileId, updatedChatMessage.fileId) ? updatedChatMessage : msg
+              ),
+            })),
+          };
+          queryClient.setQueryData(
+            ['chat-messages', conversation.fileMetadata.appData.uniqueId],
+            newData
+          );
+        }
+
+        // Update chat message
+        const existingMessage = queryClient.getQueryData<DriveSearchResult<ChatMessage>>([
+          'chat-message',
+          updatedChatMessage.fileMetadata.appData.uniqueId,
+        ]);
+
+        if (existingMessage) {
+          queryClient.setQueryData(
+            ['chat-message', updatedChatMessage.fileMetadata.appData.uniqueId],
+            updatedChatMessage
+          );
+        }
+
+        return { extistingMessages, existingMessage };
+      },
+      // eslint-disable-next-line handle-callback-err
+      onError: (err, messageParams, context) => {
+        queryClient.setQueryData(
+          ['chat-messages', messageParams.conversation.fileMetadata.appData.uniqueId],
+          context?.extistingMessages
+        );
+
+        queryClient.setQueryData(
+          ['chat-message', messageParams.updatedChatMessage.fileMetadata.appData.uniqueId],
+          context?.existingMessage
+        );
       },
     }),
   };
