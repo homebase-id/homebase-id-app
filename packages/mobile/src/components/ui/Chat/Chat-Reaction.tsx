@@ -16,6 +16,8 @@ import { useConversation } from '../../../hooks/chat/useConversation';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import { ChatMessage } from '../../../provider/chat/ChatProvider';
 import { useBottomSheetModal } from '@gorhom/bottom-sheet';
+import { Colors } from '../../../app/Colors';
+import { useDarkMode } from '../../../hooks/useDarkMode';
 
 const PortalView = ({
   selectedMessage,
@@ -40,7 +42,6 @@ const PortalView = ({
     }
   }, [scale, selectedMessage]);
 
-  //TODO:(@2002Bishwajeet) @stef-coenen - Need help here
   // Double Tap
   // Layout Height
   // Is this Clean?????????
@@ -122,13 +123,13 @@ const PortalView = ({
       position: 'bottom',
     });
   }
+  const { isDarkMode } = useDarkMode();
 
   if (!selectedMessage) {
     return null;
   }
 
   const initialReactions: string[] = ['❤️', '👍', '😀', '😂', '😍', '😡', '➕'];
-
   return (
     <Portal>
       <TouchableOpacity
@@ -141,7 +142,15 @@ const PortalView = ({
         style={styles.container}
       >
         {!emojiModalOpen && (
-          <Animated.View style={[styles.reaction, reactionStyle]}>
+          <Animated.View
+            style={[
+              styles.reaction,
+              reactionStyle,
+              {
+                backgroundColor: isDarkMode ? Colors.slate[800] : Colors.slate[100],
+              },
+            ]}
+          >
             {initialReactions.map((reaction, index) => (
               <TouchableOpacity key={index} onPress={() => sendReaction(reaction, index)}>
                 <Animated.Text style={textStyle}>{reaction}</Animated.Text>
@@ -165,7 +174,6 @@ const styles = StyleSheet.create({
   },
   reaction: {
     position: 'absolute',
-    backgroundColor: 'white',
     padding: 16,
     borderRadius: 50,
     flexDirection: 'row',

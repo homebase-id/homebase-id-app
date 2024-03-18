@@ -582,12 +582,7 @@ const RenderBubble = memo(
                           justifyContent: 'flex-start',
                           padding: 4,
                           borderRadius: 15,
-                          backgroundColor:
-                            reactions?.length && reactions?.length < 2
-                              ? undefined
-                              : isDarkMode
-                              ? Colors.gray[800]
-                              : Colors.gray[200],
+                          backgroundColor: isDarkMode ? Colors.gray[800] : Colors.gray[200],
                         }}
                       >
                         {flatReactions?.slice(0, maxVisible).map((reaction, index) => {
