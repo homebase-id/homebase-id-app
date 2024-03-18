@@ -58,6 +58,7 @@ const saveNotification = async (notification) => {
 };
 
 // Register notification background handler
+//
 // https://rnfirebase.io/messaging/usage#background--quit-state-messages
 //
 // SEB:TODO headless https://rnfirebase.io/messaging/usage#background-application-state
