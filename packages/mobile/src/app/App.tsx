@@ -48,6 +48,7 @@ import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-
 import { useProfile } from '../hooks/profile/useProfile';
 import { ChatMessage } from '../provider/chat/ChatProvider';
 import { useRefreshOnFocus } from '../hooks/chat/useRefetchOnFocus';
+import NotificationProvider from '../components/Notification/NotificationProvider';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -126,6 +127,7 @@ const RootStack = () => {
 
   return (
     <NavigationContainer theme={scheme === 'dark' ? DarkTheme : DefaultTheme}>
+      <NotificationProvider />
       <StackRoot.Navigator screenOptions={{ headerShown: false }}>
         {isAuthenticated ? (
           <StackRoot.Screen name="Authenticated" component={AuthenticatedRoot} />
