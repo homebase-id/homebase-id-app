@@ -59,8 +59,8 @@ const styles = {
       flexDirection: 'row',
       justifyContent: 'flex-end',
       marginVertical: 4,
-      bottom: 0,
-      right: 0,
+      bottom: -22,
+      right: 7,
       position: 'absolute',
     },
   }),
@@ -90,8 +90,8 @@ const styles = {
       flexDirection: 'row',
       justifyContent: 'flex-start',
       marginVertical: 4,
-      bottom: 0,
-      left: 0,
+      bottom: -22,
+      left: 7,
       position: 'absolute',
     },
   }),
@@ -560,14 +560,13 @@ export default class Bubble<
       wrapperStyle,
       bottomContainerStyle,
     } = this.props;
-    const reactions = this.renderReactions();
+    const renderedReactions = this.renderReactions();
     return (
       <View
         style={[
           styles[position].container,
           containerStyle && containerStyle[position],
-          //TODO: @stef-coenen , you could see this and line 563
-          reactions && { marginBottom: 20 },
+          renderedReactions && { paddingBottom: 20 },
         ]}
       >
         <View
@@ -590,15 +589,16 @@ export default class Bubble<
                 style={[
                   styles[position].bottom,
                   bottomContainerStyle && bottomContainerStyle[position],
+                  renderedReactions && { paddingBottom: 8 },
                 ]}
               >
                 {this.renderUsername()}
                 {this.renderTime()}
                 {this.renderTicks()}
               </View>
+              {renderedReactions}
             </View>
           </TouchableWithoutFeedback>
-          {reactions}
         </View>
 
         {this.renderQuickReplies()}

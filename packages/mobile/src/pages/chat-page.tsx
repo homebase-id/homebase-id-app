@@ -559,10 +559,7 @@ const RenderBubble = memo(
       <>
         <Bubble
           {...props}
-          renderTicks={(message) => {
-            const msg = message as ChatMessageIMessage;
-            return <ChatDeliveryIndicator msg={msg} />;
-          }}
+          renderTicks={(message: ChatMessageIMessage) => <ChatDeliveryIndicator msg={message} />}
           renderReactions={
             !hasReactions
               ? undefined
@@ -582,7 +579,7 @@ const RenderBubble = memo(
                           justifyContent: 'flex-start',
                           padding: 4,
                           borderRadius: 15,
-                          backgroundColor: isDarkMode ? Colors.gray[800] : Colors.gray[200],
+                          backgroundColor: isDarkMode ? Colors.gray[800] : Colors.gray[100],
                         }}
                       >
                         {flatReactions?.slice(0, maxVisible).map((reaction, index) => {
