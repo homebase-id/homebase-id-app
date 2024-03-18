@@ -277,7 +277,7 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
           createdAt: value.fileMetadata.created,
           text: value.fileMetadata.appData.content.message,
           user: {
-            _id: value.fileMetadata.senderOdinId || '',
+            _id: value.fileMetadata.senderOdinId || identity || '',
             name: value.fileMetadata.senderOdinId || identity || '',
           },
           sent: value.fileMetadata.appData.content.deliveryStatus === 20,
@@ -506,7 +506,7 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
             }
             renderInputToolbar={renderCustomInputToolbar}
             user={{
-              _id: '',
+              _id: identity || '',
             }}
           />
           <PortalView

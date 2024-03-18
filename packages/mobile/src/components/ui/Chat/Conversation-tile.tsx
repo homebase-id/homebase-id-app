@@ -69,6 +69,9 @@ export const OwnerAvatar = (props: { style?: ImageStyle }) => {
       avoidPayload={true}
       enableZoom={false}
       imageSize={{ width: 48, height: 48 }}
+      svgPlaceHolderStyle={{
+        marginRight: 16,
+      }}
       style={{
         ...styles.tinyLogo,
         ...props.style,
@@ -111,7 +114,7 @@ const ConversationTile = memo((props: ConversationTileProps) => {
     [chatMessages]
   );
   const { isDarkMode } = useDarkMode();
-  const { data: connection } = useContact().fetch;
+  const { data: connection } = useContact(props.odinId).fetch;
 
   const connectionDetails = connection?.fileMetadata.appData.content;
   const isGroup = 'recipients' in props.conversation && props.conversation.recipients !== undefined;
