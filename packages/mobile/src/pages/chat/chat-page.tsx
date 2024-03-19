@@ -677,6 +677,7 @@ const RenderBubble = memo(
               : {
                   left: {
                     backgroundColor: isDarkMode ? `${Colors.gray[300]}4D` : `${Colors.gray[500]}1A`,
+                    minWidth: hasReactions ? 90 : undefined,
                   },
                   right: {
                     backgroundColor: isDarkMode
