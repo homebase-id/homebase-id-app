@@ -17,7 +17,7 @@ import { ChatMessage } from '../../../provider/chat/ChatProvider';
 import { useBottomSheetModal } from '@gorhom/bottom-sheet';
 import { Colors } from '../../../app/Colors';
 import { useDarkMode } from '../../../hooks/useDarkMode';
-import { useErrors } from '../../../hooks/errors/useErrors';
+import { ErrorNotification } from '../Alert/ErrorNotification';
 
 const PortalView = ({
   selectedMessage,
@@ -142,13 +142,6 @@ const PortalView = ({
     ]
   );
 
-  const error = useErrors().add;
-  if (reactionError) {
-    error(reactionError);
-  }
-  if (removeReactionError) {
-    error(removeReactionError);
-  }
   const { isDarkMode } = useDarkMode();
 
   if (!selectedMessage) {
@@ -158,6 +151,7 @@ const PortalView = ({
   const initialReactions: string[] = ['❤️', '👍', '😀', '😂', '😍', '😡', '➕'];
   return (
     <Portal>
+      <ErrorNotification error={reactionError || removeReactionError} />
       <TouchableOpacity
         activeOpacity={0.9}
         onPress={() => {
