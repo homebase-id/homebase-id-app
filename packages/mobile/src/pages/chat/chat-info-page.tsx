@@ -20,6 +20,7 @@ import { Header, HeaderBackButton } from '@react-navigation/elements';
 import TextButton from '../../components/ui/Text/Text-Button';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { useProfile } from '../../hooks/profile/useProfile';
+import { ConnectionName } from '../../components/ui/Name';
 
 export type ChatInfoProp = NativeStackScreenProps<AppStackParamList, 'ChatInfo'>;
 
@@ -107,7 +108,13 @@ export function ChatInfoPage(prop: ChatInfoProp) {
             },
           ]}
         >
-          {isSelf ? `${profile?.firstName} ${profile?.surName}` : conversationContent.title}
+          {isSelf ? (
+            `${profile?.firstName} ${profile?.surName}`
+          ) : group ? (
+            conversationContent.title
+          ) : (
+            <ConnectionName odinId={(conversationContent as SingleConversation).recipient} />
+          )}
         </Text>
         {!group && (
           <View
