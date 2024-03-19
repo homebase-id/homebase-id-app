@@ -19,7 +19,7 @@ import {
 } from 'react-native-gifted-chat';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import { useCallback, useEffect, useMemo, useRef, useState, memo } from 'react';
-import { AppStackParamList } from '../app/App';
+import { AppStackParamList } from '../../app/App';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   GestureResponderEvent,
@@ -33,42 +33,42 @@ import {
   Text,
   View,
 } from 'react-native';
-import { ChatAppBar } from '../components/ui/Chat/Chat-app-bar';
-import { Close, Images, SendChat } from '../components/ui/Icons/icons';
-import ImageMessage from '../components/ui/Chat/ImageMessage';
+import { ChatAppBar } from '../../components/ui/Chat/Chat-app-bar';
+import { Close, Images, SendChat } from '../../components/ui/Icons/icons';
+import ImageMessage from '../../components/ui/Chat/ImageMessage';
 import { Asset, launchImageLibrary } from 'react-native-image-picker';
-import { ChatMessage } from '../provider/chat/ChatProvider';
-import { useAuth } from '../hooks/auth/useAuth';
-import { useChatMessages } from '../hooks/chat/useChatMessages';
-import { useChatMessage } from '../hooks/chat/useChatMessage';
-import { useConversation } from '../hooks/chat/useConversation';
+import { ChatMessage } from '../../provider/chat/ChatProvider';
+import { useAuth } from '../../hooks/auth/useAuth';
+import { useChatMessages } from '../../hooks/chat/useChatMessages';
+import { useChatMessage } from '../../hooks/chat/useChatMessage';
+import { useConversation } from '../../hooks/chat/useConversation';
 import {
   ChatDrive,
   ConversationWithYourself,
   ConversationWithYourselfId,
   GroupConversation,
   SingleConversation,
-} from '../provider/chat/ConversationProvider';
-import { ImageSource } from '../provider/image/RNImageProvider';
+} from '../../provider/chat/ConversationProvider';
+import { ImageSource } from '../../provider/image/RNImageProvider';
 import { getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { Swipeable, TouchableOpacity } from 'react-native-gesture-handler';
-import { Colors } from '../app/Colors';
-import ReplyMessageBar from '../components/ui/Chat/Reply-Message-bar';
-import ChatMessageBox from '../components/ui/Chat/Chat-Message-box';
-import { OdinImage } from '../components/ui/OdinImage/OdinImage';
-import { useDarkMode } from '../hooks/useDarkMode';
-import useContact from '../hooks/contact/useContact';
-import { useMarkMessagesAsRead } from '../hooks/chat/useMarkMessagesAsRead';
-import { ChatDeliveryIndicator } from '../components/ui/Chat/Chat-Delivery-Indicator';
+import { Colors } from '../../app/Colors';
+import ReplyMessageBar from '../../components/ui/Chat/Reply-Message-bar';
+import ChatMessageBox from '../../components/ui/Chat/Chat-Message-box';
+import { OdinImage } from '../../components/ui/OdinImage/OdinImage';
+import { useDarkMode } from '../../hooks/useDarkMode';
+import useContact from '../../hooks/contact/useContact';
+import { useMarkMessagesAsRead } from '../../hooks/chat/useMarkMessagesAsRead';
+import { ChatDeliveryIndicator } from '../../components/ui/Chat/Chat-Delivery-Indicator';
 import Toast from 'react-native-toast-message';
-import PortalView from '../components/ui/Chat/Chat-Reaction';
+import PortalView from '../../components/ui/Chat/Chat-Reaction';
 import { Host } from 'react-native-portalize';
-import { useChatReaction } from '../hooks/chat/useChatReaction';
+import { useChatReaction } from '../../hooks/chat/useChatReaction';
 import { BottomSheetModal, BottomSheetModalProvider } from '@gorhom/bottom-sheet';
-import { EmojiPickerModal } from '../components/ui/Emoji-Picker/Emoji-Picker-Modal';
-import { ReactionsModal } from '../components/ui/Modal/ReactionsModal';
-import { Avatar as AppAvatar, OwnerAvatar } from '../components/ui/Chat/Conversation-tile';
-import { ChatConnectedState } from '../components/ui/Chat/Chat-Connected-state';
+import { EmojiPickerModal } from '../../components/ui/Emoji-Picker/Emoji-Picker-Modal';
+import { ReactionsModal } from '../../components/ui/Modal/ReactionsModal';
+import { Avatar as AppAvatar, OwnerAvatar } from '../../components/ui/Chat/Conversation-tile';
+import { ChatConnectedState } from '../../components/ui/Chat/Chat-Connected-state';
 
 export type ChatProp = NativeStackScreenProps<AppStackParamList, 'ChatScreen'>;
 

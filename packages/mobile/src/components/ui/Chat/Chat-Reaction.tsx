@@ -9,7 +9,7 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import { ChatMessageIMessage } from '../../../pages/chat-page';
+import { ChatMessageIMessage } from '../../../pages/chat/chat-page';
 import { useChatReaction } from '../../../hooks/chat/useChatReaction';
 import Toast from 'react-native-toast-message';
 import { useConversation } from '../../../hooks/chat/useConversation';

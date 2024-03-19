@@ -4,7 +4,7 @@ import { useDotYouClientContext } from 'feed-app-common';
 import { View } from 'react-native';
 import { Clock, SubtleCheck } from '../Icons/icons';
 import { Colors } from '../../../app/Colors';
-import { ChatMessageIMessage } from '../../../pages/chat-page';
+import { ChatMessageIMessage } from '../../../pages/chat/chat-page';
 
 export const ChatDeliveryIndicator = ({
   msg,
