@@ -58,7 +58,7 @@ export const useConversations = () => {
       getNextPageParam: (lastPage) =>
         lastPage.searchResults?.length >= PAGE_SIZE ? lastPage.cursorState : undefined,
       refetchOnMount: false,
-      gcTime: 1000 * 60 * 60
+      staleTime: 1000 * 60 * 5,
     }),
   };
 };
