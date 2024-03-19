@@ -30,6 +30,9 @@ export const ReactionsModal = forwardRef(
         backgroundStyle={{
           backgroundColor: isDarkMode ? Colors.gray[900] : Colors.white,
         }}
+        handleIndicatorStyle={{
+          backgroundColor: isDarkMode ? Colors.gray[100] : Colors.gray[500],
+        }}
       >
         <View
           style={{
