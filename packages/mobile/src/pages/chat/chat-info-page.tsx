@@ -1,25 +1,26 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Linking, StyleSheet, Text, View } from 'react-native';
-import { AppStackParamList } from '../app/App';
-import { useConversation } from '../hooks/chat/useConversation';
-import { Avatar, GroupAvatar, OwnerAvatar } from '../components/ui/Chat/Conversation-tile';
+import { AppStackParamList } from '../../app/App';
+import { useConversation } from '../../hooks/chat/useConversation';
+import { Avatar, GroupAvatar, OwnerAvatar } from '../../components/ui/Chat/Conversation-tile';
 import {
   ConversationWithYourselfId,
   GroupConversation,
   SingleConversation,
-} from '../provider/chat/ConversationProvider';
-import { Home } from '../components/ui/Icons/icons';
+} from '../../provider/chat/ConversationProvider';
+import { Home } from '../../components/ui/Icons/icons';
 
 import { useCallback } from 'react';
 import InAppBrowser from 'react-native-inappbrowser-reborn';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 
-import { Colors } from '../app/Colors';
-import { useAuth } from '../hooks/auth/useAuth';
+import { Colors } from '../../app/Colors';
+import { useAuth } from '../../hooks/auth/useAuth';
 import { Header, HeaderBackButton } from '@react-navigation/elements';
-import TextButton from '../components/ui/Text/Text-Button';
-import { useDarkMode } from '../hooks/useDarkMode';
-import { useProfile } from '../hooks/profile/useProfile';
+import TextButton from '../../components/ui/Text/Text-Button';
+import { useDarkMode } from '../../hooks/useDarkMode';
+import { useProfile } from '../../hooks/profile/useProfile';
+import { ConnectionName } from '../../components/ui/Name';
 
 export type ChatInfoProp = NativeStackScreenProps<AppStackParamList, 'ChatInfo'>;
 
@@ -107,7 +108,13 @@ export function ChatInfoPage(prop: ChatInfoProp) {
             },
           ]}
         >
-          {isSelf ? `${profile?.firstName} ${profile?.surName}` : conversationContent.title}
+          {isSelf ? (
+            `${profile?.firstName} ${profile?.surName}`
+          ) : group ? (
+            conversationContent.title
+          ) : (
+            <ConnectionName odinId={(conversationContent as SingleConversation).recipient} />
+          )}
         </Text>
         {!group && (
           <View

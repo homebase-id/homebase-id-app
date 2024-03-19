@@ -59,6 +59,9 @@ const styles = {
       flexDirection: 'row',
       justifyContent: 'flex-end',
       marginVertical: 4,
+      bottom: -22,
+      right: 7,
+      position: 'absolute',
     },
   }),
   right: StyleSheet.create({
@@ -87,6 +90,9 @@ const styles = {
       flexDirection: 'row',
       justifyContent: 'flex-start',
       marginVertical: 4,
+      bottom: -22,
+      left: 7,
+      position: 'absolute',
     },
   }),
   content: StyleSheet.create({
@@ -554,11 +560,13 @@ export default class Bubble<
       wrapperStyle,
       bottomContainerStyle,
     } = this.props;
+    const renderedReactions = this.renderReactions();
     return (
       <View
         style={[
           styles[position].container,
           containerStyle && containerStyle[position],
+          renderedReactions && { paddingBottom: 20 },
         ]}
       >
         <View
@@ -581,17 +589,18 @@ export default class Bubble<
                 style={[
                   styles[position].bottom,
                   bottomContainerStyle && bottomContainerStyle[position],
+                  renderedReactions && { paddingBottom: 8 },
                 ]}
               >
                 {this.renderUsername()}
                 {this.renderTime()}
                 {this.renderTicks()}
               </View>
+              {renderedReactions}
             </View>
           </TouchableWithoutFeedback>
         </View>
 
-        {this.renderReactions()}
         {this.renderQuickReplies()}
       </View>
     );

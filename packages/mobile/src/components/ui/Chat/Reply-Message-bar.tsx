@@ -1,6 +1,6 @@
 import { Text, StyleSheet, View, TouchableOpacity } from 'react-native';
 import { Close, Reply } from '../Icons/icons';
-import { ChatMessageIMessage } from '../../../pages/chat-page';
+import { ChatMessageIMessage } from '../../../pages/chat/chat-page';
 import { ChatDrive } from '../../../provider/chat/ConversationProvider';
 import { Colors } from '../../../app/Colors';
 import { OdinImage } from '../OdinImage/OdinImage';

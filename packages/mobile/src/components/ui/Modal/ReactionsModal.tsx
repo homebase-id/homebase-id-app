@@ -4,7 +4,7 @@ import { Text, View } from 'react-native';
 import { Colors } from '../../../app/Colors';
 import { useDarkMode } from '../../../hooks/useDarkMode';
 
-import { ChatMessageIMessage } from '../../../pages/chat-page';
+import { ChatMessageIMessage } from '../../../pages/chat/chat-page';
 import { useChatReaction } from '../../../hooks/chat/useChatReaction';
 import { DriveSearchResult } from '@youfoundation/js-lib/dist';
 import { ChatReaction } from '../../../provider/chat/ChatReactionProvider';
@@ -29,6 +29,9 @@ export const ReactionsModal = forwardRef(
         onDismiss={onClose}
         backgroundStyle={{
           backgroundColor: isDarkMode ? Colors.gray[900] : Colors.white,
+        }}
+        handleIndicatorStyle={{
+          backgroundColor: isDarkMode ? Colors.gray[100] : Colors.gray[500],
         }}
       >
         <View

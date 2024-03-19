@@ -1,4 +1,4 @@
-import { ChatMessageIMessage } from '../../../pages/chat-page';
+import { ChatMessageIMessage } from '../../../pages/chat/chat-page';
 import { StyleSheet, Text, View } from 'react-native';
 import { memo } from 'react';
 

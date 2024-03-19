@@ -4,7 +4,7 @@ import { useDarkMode } from '../../../hooks/useDarkMode';
 import { emojis } from 'rn-emoji-picker/dist/data';
 import EmojiPicker from 'rn-emoji-picker';
 import React, { forwardRef } from 'react';
-import { ChatMessageIMessage } from '../../../pages/chat-page';
+import { ChatMessageIMessage } from '../../../pages/chat/chat-page';
 import { useChatReaction } from '../../../hooks/chat/useChatReaction';
 import { useConversation } from '../../../hooks/chat/useConversation';
 import { Colors } from '../../../app/Colors';
@@ -33,6 +33,9 @@ export const EmojiPickerModal = forwardRef(
         snapPoints={['50%', '90%']}
         backgroundStyle={{
           backgroundColor: isDarkMode ? Colors.gray[900] : Colors.white,
+        }}
+        handleIndicatorStyle={{
+          backgroundColor: isDarkMode ? Colors.gray[100] : Colors.gray[500],
         }}
       >
         <View

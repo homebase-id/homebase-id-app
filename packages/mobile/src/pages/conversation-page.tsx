@@ -1,11 +1,10 @@
 import { FlatList } from 'react-native';
 import ConversationTile from '../components/ui/Chat/Conversation-tile';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { AppStackParamList } from '../app/App';
-import { useConversations } from '../hooks/chat/useConversations';
+import { ConversationWithRecentMessage, useConversations } from '../hooks/chat/useConversations';
 import {
-  Conversation,
   ConversationWithYourselfId,
   SingleConversation,
 } from '../provider/chat/ConversationProvider';
@@ -17,11 +16,9 @@ const ConversationPage = memo(() => {
   const navigation = useNavigation<NavigationProp<AppStackParamList>>();
 
   const { data: conversations } = useConversations().all;
+
   const flatConversations = useMemo(
-    () =>
-      (conversations?.pages
-        ?.flatMap((page) => page.searchResults)
-        ?.filter(Boolean) as DriveSearchResult<Conversation>[]) || [],
+    () => conversations?.pages?.flatMap((page) => page.searchResults),
     [conversations]
   );
 

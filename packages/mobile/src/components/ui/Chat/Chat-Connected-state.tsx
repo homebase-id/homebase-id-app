@@ -12,6 +12,9 @@ export const ChatConnectedState = (conversation: DriveSearchResult<Conversation>
   if (!conversation) return null;
   const recipients = (conversation.fileMetadata.appData.content as GroupConversation).recipients;
   if (!recipients || recipients.length <= 1) return null;
+  const recipientConnectedState = recipients.map((recipient) => {
+    return <RecipientConnectedState recipient={recipient} key={recipient} />;
+  });
   return (
     <View
       style={{
@@ -19,9 +22,7 @@ export const ChatConnectedState = (conversation: DriveSearchResult<Conversation>
         ...styles.header,
       }}
     >
-      {recipients.map((recipient) => {
-        return <RecipientConnectedState recipient={recipient} key={recipient} />;
-      })}
+      {recipientConnectedState}
     </View>
   );
 };

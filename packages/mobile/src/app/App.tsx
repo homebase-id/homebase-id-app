@@ -26,7 +26,7 @@ import { Bars, ChatIcon, Feed, House } from '../components/ui/Icons/icons';
 import { Colors } from './Colors';
 
 // Pages
-import { ChatInfoPage } from '../pages/chat-info-page';
+import { ChatInfoPage } from '../pages/chat/chat-info-page';
 import { ConnectionsPage } from '../pages/profile/connections-page';
 import { ContactPage } from '../pages/contact-page';
 import { FeedPage } from '../pages/feed/feed-page';
@@ -37,9 +37,9 @@ import { LoginPage } from '../pages/login/login-page';
 import { NewGroupPage } from '../pages/new-group-page';
 import { PreviewMedia } from '../pages/media-preview-page';
 import { ProfilePage } from '../pages/profile/profile-page';
-import ChatPage from '../pages/chat-page';
+import ChatPage from '../pages/chat/chat-page';
 import ConversationPage from '../pages/conversation-page';
-import EditGroupPage from '../pages/edit-group-page';
+import EditGroupPage from '../pages/chat/edit-group-page';
 import { ConnectionRequestsPage } from '../pages/home/connection-requests-page';
 import { useDarkMode } from '../hooks/useDarkMode';
 import { DriveSearchResult, EmbeddedThumb } from '@youfoundation/js-lib/core';
@@ -50,6 +50,8 @@ import { ChatMessage } from '../provider/chat/ChatProvider';
 import { useRefreshOnFocus } from '../hooks/chat/useRefetchOnFocus';
 import Toast from 'react-native-toast-message';
 import { ErrorToaster } from '../components/ui/Alert/ErrorToaster';
+import { MessageInfoPage } from '../pages/chat/message-info-page';
+import { Conversation } from '../provider/chat/ConversationProvider';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -159,6 +161,10 @@ export type AppStackParamList = {
   TabStack: undefined;
   ChatScreen: { convoId: string };
   ChatInfo: { convoId: string };
+  MessageInfo: {
+    message: DriveSearchResult<ChatMessage>;
+    conversation: DriveSearchResult<Conversation>;
+  };
   EditGroup: { convoId: string };
   PreviewMedia: {
     msg: DriveSearchResult<ChatMessage>;
@@ -211,6 +217,16 @@ const AppStackScreen = () => {
           headerTitle: 'Chat Info',
           headerBackTitleVisible: false,
           headerShown: false,
+        }}
+      />
+      <AppStack.Screen
+        name="MessageInfo"
+        component={MessageInfoPage}
+        options={{
+          gestureEnabled: true,
+          headerTitle: 'Message Info',
+          headerBackTitleVisible: false,
+          headerShown: true,
         }}
       />
       <AppStack.Screen
