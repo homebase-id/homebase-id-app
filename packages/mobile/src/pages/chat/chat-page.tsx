@@ -44,6 +44,7 @@ import { useChatMessage } from '../../hooks/chat/useChatMessage';
 import { useConversation } from '../../hooks/chat/useConversation';
 import {
   ChatDrive,
+  Conversation,
   ConversationWithYourself,
   ConversationWithYourselfId,
   GroupConversation,
@@ -210,6 +211,16 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
     [layoutHeight]
   );
 
+  const onLeftSwipe = useCallback(
+    (message: ChatMessageIMessage) => {
+      navigation.navigate('MessageInfo', {
+        message,
+        conversation: conversationContent as DriveSearchResult<Conversation>,
+      });
+    },
+    [conversationContent, navigation]
+  );
+
   const renderMessageBox = useCallback(
     (props: MessageProps<ChatMessageIMessage>) => {
       return (
@@ -218,10 +229,11 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
           setReplyOnSwipeOpen={setReplyMessage}
           updateRowRef={updateRowRef}
           onMessageLayout={onLayout}
+          onLeftSwipeOpen={onLeftSwipe}
         />
       );
     },
-    [updateRowRef]
+    [onLeftSwipe, updateRowRef]
   );
 
   const renderMediaItems = () => {

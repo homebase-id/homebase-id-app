@@ -50,6 +50,8 @@ import { ChatMessage } from '../provider/chat/ChatProvider';
 import { useRefreshOnFocus } from '../hooks/chat/useRefetchOnFocus';
 import Toast from 'react-native-toast-message';
 import { ErrorToaster } from '../components/ui/Alert/ErrorToaster';
+import { MessageInfoPage } from '../pages/chat/message-info-page';
+import { Conversation } from '../provider/chat/ConversationProvider';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -159,6 +161,10 @@ export type AppStackParamList = {
   TabStack: undefined;
   ChatScreen: { convoId: string };
   ChatInfo: { convoId: string };
+  MessageInfo: {
+    message: DriveSearchResult<ChatMessage>;
+    conversation: DriveSearchResult<Conversation>;
+  };
   EditGroup: { convoId: string };
   PreviewMedia: {
     msg: DriveSearchResult<ChatMessage>;
@@ -211,6 +217,16 @@ const AppStackScreen = () => {
           headerTitle: 'Chat Info',
           headerBackTitleVisible: false,
           headerShown: false,
+        }}
+      />
+      <AppStack.Screen
+        name="MessageInfo"
+        component={MessageInfoPage}
+        options={{
+          gestureEnabled: true,
+          headerTitle: 'Message Info',
+          headerBackTitleVisible: false,
+          headerShown: true,
         }}
       />
       <AppStack.Screen

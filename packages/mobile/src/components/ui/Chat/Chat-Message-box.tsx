@@ -2,11 +2,12 @@ import { View, StyleSheet, Animated, LayoutChangeEvent } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 import { Message, MessageProps } from 'react-native-gifted-chat';
 import { isSameDay, isSameUser } from 'react-native-gifted-chat/lib/utils';
-import { Reply } from '../Icons/icons';
+import { Info, Reply } from '../Icons/icons';
 import { ChatMessageIMessage } from '../../../pages/chat/chat-page';
 
 type ChatMessageBoxProps = {
   setReplyOnSwipeOpen: (message: ChatMessageIMessage) => void;
+  onLeftSwipeOpen: (message: ChatMessageIMessage) => void;
   updateRowRef: (ref: any) => void;
   onMessageLayout: (e: LayoutChangeEvent) => void;
 } & MessageProps<ChatMessageIMessage>;
@@ -48,10 +49,38 @@ const ChatMessageBox = ({
       </Animated.View>
     );
   };
+  const renderLeftAction = (progressAnimatedValue: Animated.AnimatedInterpolation<number>) => {
+    const size = progressAnimatedValue.interpolate({
+      inputRange: [0, 1, 100],
+      outputRange: [0, 1, 1],
+    });
+    const trans = progressAnimatedValue.interpolate({
+      inputRange: [0, 1, 2],
+      outputRange: [0, -12, -20],
+    });
 
-  const onSwipeOpenAction = () => {
-    if (props.currentMessage) {
+    return (
+      <Animated.View
+        style={[
+          styles.container,
+          { transform: [{ scale: size }, { translateX: trans }] },
+          isNextMyMessage ? styles.defaultBottomOffset : styles.bottomOffsetNext,
+          props.position === 'right' && styles.leftOffsetValue,
+        ]}
+      >
+        <View style={styles.replyImageWrapper}>
+          <Info />
+        </View>
+      </Animated.View>
+    );
+  };
+
+  const onSwipeOpenAction = (direction: 'left' | 'right', swipeable: Swipeable) => {
+    if (props.currentMessage && direction === 'right') {
       setReplyOnSwipeOpen({ ...props.currentMessage });
+    } else {
+      props.currentMessage && props.onLeftSwipeOpen({ ...props.currentMessage });
+      swipeable.close();
     }
   };
 
@@ -60,7 +89,9 @@ const ChatMessageBox = ({
       ref={updateRowRef}
       friction={2}
       rightThreshold={40}
+      leftThreshold={40}
       renderRightActions={renderRightAction}
+      renderLeftActions={renderLeftAction}
       onSwipeableOpen={onSwipeOpenAction}
     >
       <Message {...props} onMessageLayout={onMessageLayout} />
