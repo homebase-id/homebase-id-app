@@ -1,5 +1,5 @@
 import { StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Portal } from 'react-native-portalize';
 
 import Animated, {
@@ -11,13 +11,13 @@ import Animated, {
 } from 'react-native-reanimated';
 import { ChatMessageIMessage } from '../../../pages/chat/chat-page';
 import { useChatReaction } from '../../../hooks/chat/useChatReaction';
-import Toast from 'react-native-toast-message';
 import { useConversation } from '../../../hooks/chat/useConversation';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import { ChatMessage } from '../../../provider/chat/ChatProvider';
 import { useBottomSheetModal } from '@gorhom/bottom-sheet';
 import { Colors } from '../../../app/Colors';
 import { useDarkMode } from '../../../hooks/useDarkMode';
+import { useErrors } from '../../../hooks/errors/useErrors';
 
 const PortalView = ({
   selectedMessage,
@@ -83,10 +83,20 @@ const PortalView = ({
     };
   });
 
-  const { mutate: addReaction, error: reactionError } = useChatReaction({
+  const { add, get, remove } = useChatReaction({
     conversationId: selectedMessage?.fileMetadata.appData.groupId,
     messageId: selectedMessage?.fileMetadata.appData.uniqueId,
-  }).add;
+  });
+
+  const { data: reactions } = get;
+
+  const filteredReactions = useMemo(
+    () => reactions?.filter((reaction) => reaction.fileMetadata.senderOdinId === '') || [],
+    [reactions]
+  );
+
+  const { mutate: addReaction, error: reactionError } = add;
+  const { mutate: removeReaction, error: removeReactionError } = remove;
 
   const conversation = useConversation({
     conversationId: selectedMessage?.fileMetadata.appData.groupId,
@@ -102,6 +112,17 @@ const PortalView = ({
         return;
       } else {
         if (!conversation) return;
+        const reactionStrings = filteredReactions.map(
+          (reac) => reac.fileMetadata.appData.content.message
+        );
+        const matchedReaction = reactionStrings.indexOf(reaction);
+        if (matchedReaction !== -1) {
+          removeReaction({
+            conversation,
+            reaction: filteredReactions[matchedReaction],
+            message: selectedMessage,
+          });
+        }
         addReaction({
           conversation: conversation,
           message: selectedMessage as DriveSearchResult<ChatMessage>,
@@ -110,18 +131,23 @@ const PortalView = ({
       }
       setSelectedMessage(undefined);
     },
-    [addReaction, conversation, openEmojiPicker, selectedMessage, setSelectedMessage]
+    [
+      addReaction,
+      conversation,
+      filteredReactions,
+      openEmojiPicker,
+      removeReaction,
+      selectedMessage,
+      setSelectedMessage,
+    ]
   );
 
-  //TODO: Add Error Handling ErrorNotification
+  const error = useErrors().add;
   if (reactionError) {
-    console.error('Failed to add reaction', reactionError);
-    Toast.show({
-      type: 'error',
-      text1: 'Failed to add reaction',
-      text2: reactionError.message,
-      position: 'bottom',
-    });
+    error(reactionError);
+  }
+  if (removeReactionError) {
+    error(removeReactionError);
   }
   const { isDarkMode } = useDarkMode();
 
