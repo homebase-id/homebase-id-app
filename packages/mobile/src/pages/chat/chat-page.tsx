@@ -70,6 +70,7 @@ import { EmojiPickerModal } from '../../components/ui/Emoji-Picker/Emoji-Picker-
 import { ReactionsModal } from '../../components/ui/Modal/ReactionsModal';
 import { Avatar as AppAvatar, OwnerAvatar } from '../../components/ui/Chat/Conversation-tile';
 import { ChatConnectedState } from '../../components/ui/Chat/Chat-Connected-state';
+import { ConnectionName } from '../../components/ui/Name';
 
 export type ChatProp = NativeStackScreenProps<AppStackParamList, 'ChatScreen'>;
 
@@ -697,6 +698,7 @@ const RenderReplyMessageView = memo((props: BubbleProps<ChatMessageIMessage>) =>
     messageId: props.currentMessage?.fileMetadata.appData.content.replyId,
   }).get.data;
   const { isDarkMode } = useDarkMode();
+  if (!replyMessage) return null;
   return (
     props.currentMessage &&
     props.currentMessage.fileMetadata.appData.content.replyId && (
@@ -717,9 +719,11 @@ const RenderReplyMessageView = memo((props: BubbleProps<ChatMessageIMessage>) =>
               color: isDarkMode ? Colors.slate[300] : Colors.slate[900],
             }}
           >
-            {props.currentMessage?.fileMetadata.senderOdinId?.length > 0
-              ? props.currentMessage.fileMetadata.senderOdinId
-              : 'You'}
+            {replyMessage?.fileMetadata.senderOdinId?.length > 0 ? (
+              <ConnectionName odinId={replyMessage?.fileMetadata.senderOdinId} />
+            ) : (
+              'You'
+            )}
           </Text>
           <Text
             style={{
