@@ -49,6 +49,7 @@ const ConversationTileWithYourself = () => {
   const user = useProfile().data;
   const odinId = useAuth().getIdentity();
   const navigation = useNavigation<NavigationProp<AppStackParamList>>();
+  if (!user) return null;
   return (
     <ConversationTile
       odinId={odinId || ''}
