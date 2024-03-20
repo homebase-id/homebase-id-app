@@ -48,7 +48,8 @@ import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-
 import { useProfile } from '../hooks/profile/useProfile';
 import { ChatMessage } from '../provider/chat/ChatProvider';
 import { useRefreshOnFocus } from '../hooks/chat/useRefetchOnFocus';
-import NotificationProvider from '../components/Notification/NotificationProvider';
+import { NotificationProvider } from '../components/notification/NotificationProvider';
+import { useNotification } from '../hooks/notification/useNotification';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -126,16 +127,17 @@ const RootStack = () => {
   const scheme = useColorScheme();
 
   return (
-    <NavigationContainer theme={scheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <NotificationProvider />
-      <StackRoot.Navigator screenOptions={{ headerShown: false }}>
-        {isAuthenticated ? (
-          <StackRoot.Screen name="Authenticated" component={AuthenticatedRoot} />
-        ) : (
-          <StackRoot.Screen name="Login" component={LoginPage} options={{ headerShown: false }} />
-        )}
-      </StackRoot.Navigator>
-    </NavigationContainer>
+    <NotificationProvider>
+      <NavigationContainer theme={scheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <StackRoot.Navigator screenOptions={{ headerShown: false }}>
+          {isAuthenticated ? (
+            <StackRoot.Screen name="Authenticated" component={AuthenticatedRoot} />
+          ) : (
+            <StackRoot.Screen name="Login" component={LoginPage} options={{ headerShown: false }} />
+          )}
+        </StackRoot.Navigator>
+      </NavigationContainer>
+    </NotificationProvider>
   );
 };
 
@@ -173,6 +175,7 @@ const AppStackScreen = () => {
   useValidTokenCheck();
   useRefreshOnFocus();
   useLiveChatProcessor();
+  useNotification();
 
   return (
     <AppStack.Navigator

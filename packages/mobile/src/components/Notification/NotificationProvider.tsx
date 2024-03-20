@@ -1,11 +1,22 @@
-import { useEffect, useState } from 'react';
+import { ReactNode, createContext, useEffect, useState } from 'react';
 import { Alert, AppState, AppStateStatus } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import messaging from '@react-native-firebase/messaging';
 import notifee from '@notifee/react-native';
 import { debounce } from 'lodash';
 
-const NotificationProvider = () => {
+export interface NotificationContextType {
+  deviceToken: string;
+}
+
+export const NotificationContext = createContext<NotificationContextType>({ deviceToken: '' });
+
+interface Props {
+  children: ReactNode;
+}
+
+export const NotificationProvider: React.FC<Props> = ({ children }) => {
+  const [deviceToken, setDeviceToken] = useState('');
   const [notificationPermissionGranted, setNotificationPermissionGranted] = useState(false);
   const [appState, setAppState] = useState(AppState.currentState);
 
@@ -47,6 +58,7 @@ const NotificationProvider = () => {
         .getToken()
         .then((token) => {
           console.log('FCM Token:', token);
+          setDeviceToken(token);
         })
         .catch((error) => {
           console.error('Error fetching FCM Token:', error);
@@ -157,8 +169,7 @@ const NotificationProvider = () => {
 
   //
 
-  // This component doesn't render anything
-  return null;
+  return (
+    <NotificationContext.Provider value={{ deviceToken }}>{children}</NotificationContext.Provider>
+  );
 };
-
-export default NotificationProvider;
