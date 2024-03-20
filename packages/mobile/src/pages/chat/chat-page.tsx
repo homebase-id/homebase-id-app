@@ -732,7 +732,7 @@ const RenderReplyMessageView = memo((props: BubbleProps<ChatMessageIMessage>) =>
               color: isDarkMode ? Colors.slate[300] : Colors.slate[900],
             }}
           >
-            {replyMessage?.fileMetadata.appData.content.message}
+            {replyMessage?.fileMetadata.appData.content.message || 'Media 📸'}
           </Text>
         </View>
         {replyMessage && replyMessage.fileMetadata.payloads?.length > 0 && (
