@@ -40,7 +40,6 @@ export const EmojiPickerModal = forwardRef(
       >
         <View
           style={{
-            paddingHorizontal: 10,
             flex: 1,
           }}
         >
