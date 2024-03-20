@@ -34,7 +34,7 @@ import {
   View,
 } from 'react-native';
 import { ChatAppBar } from '../../components/ui/Chat/Chat-app-bar';
-import { Close, Images, SendChat } from '../../components/ui/Icons/icons';
+import { Close, Images, Microphone, SendChat } from '../../components/ui/Icons/icons';
 import ImageMessage from '../../components/ui/Chat/ImageMessage';
 import { Asset, launchImageLibrary } from 'react-native-image-picker';
 import { ChatMessage } from '../../provider/chat/ChatProvider';
@@ -134,17 +134,33 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
               />
             )}
             renderSend={(props) => (
-              <Send
-                {...props}
-                disabled={!props.text && assets?.length === 0}
-                text={props.text || ' '}
-                containerStyle={styles.send}
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'flex-end',
+                  justifyContent: 'center',
+                }}
               >
-                <SendChat
-                  size={'md'}
-                  color={!props.text && assets?.length === 0 ? 'grey' : 'blue'}
+                <Actions
+                  icon={AudioRecorder}
+                  containerStyle={props.containerStyle}
+                  onPressActionButton={() => {
+                    // TODO: Start Recording
+                  }}
                 />
-              </Send>
+                <View style={{ width: 6 }} />
+                <Send
+                  {...props}
+                  disabled={!props.text && assets?.length === 0}
+                  text={props.text || ' '}
+                  containerStyle={styles.send}
+                >
+                  <SendChat
+                    size={'md'}
+                    color={!props.text && assets?.length === 0 ? 'grey' : 'blue'}
+                  />
+                </Send>
+              </View>
             )}
             renderActions={() => (
               <Actions
@@ -753,6 +769,7 @@ const RenderReplyMessageView = memo((props: BubbleProps<ChatMessageIMessage>) =>
 });
 
 const PickImage = () => <Images />;
+const AudioRecorder = () => <Microphone />;
 
 const styles = StyleSheet.create({
   inputContainer: {
