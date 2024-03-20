@@ -87,7 +87,8 @@ const ChatMessageBox = ({
   return (
     <Swipeable
       ref={updateRowRef}
-      friction={2}
+      friction={3}
+      overshootFriction={8}
       rightThreshold={40}
       leftThreshold={40}
       renderRightActions={renderRightAction}
