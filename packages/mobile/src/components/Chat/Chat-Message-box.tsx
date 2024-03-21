@@ -70,26 +70,15 @@ const ChatMessageBox = ({ setReplyOnSwipeOpen, ...props }: ChatMessageBoxProps) 
     );
   };
 
-  const onSwipeOpenStartDrag = useCallback(
-    (direction: 'left' | 'right') => {
-      if (props.currentMessage && direction === 'right') {
-        setReplyOnSwipeOpen({ ...props.currentMessage });
-      }
-    },
-    [props.currentMessage, setReplyOnSwipeOpen]
-  );
-
-  const onSwipeOpenAction = useCallback(
-    (direction: 'left' | 'right', swipeable: Swipeable) => {
-      if (props.currentMessage && direction === 'right') {
-        swipeable && swipeable.close();
-      } else {
-        props.currentMessage && props.onLeftSwipeOpen({ ...props.currentMessage });
-        swipeable && swipeable.close();
-      }
-    },
-    [props]
-  );
+  const onSwipeOpenAction = (direction: 'left' | 'right', swipeable: Swipeable) => {
+    if (props.currentMessage && direction === 'right') {
+      setReplyOnSwipeOpen({ ...props.currentMessage });
+      swipeable.close();
+    } else {
+      props.currentMessage && props.onLeftSwipeOpen({ ...props.currentMessage });
+      swipeable.close();
+    }
+  };
 
   return (
     <Swipeable
@@ -100,7 +89,6 @@ const ChatMessageBox = ({ setReplyOnSwipeOpen, ...props }: ChatMessageBoxProps) 
       renderRightActions={renderRightAction}
       renderLeftActions={renderLeftAction}
       onSwipeableOpen={onSwipeOpenAction}
-      onSwipeableOpenStartDrag={onSwipeOpenStartDrag}
     >
       <Message {...props} />
     </Swipeable>
