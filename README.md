@@ -13,3 +13,8 @@ adb reverse tcp:443 tcp:443
 ```
 
 Now you can login with `frodo.dotyou.cloud`.
+
+# metro debug level
+
+export METRO_LOG_LEVEL=debug
+npm start
