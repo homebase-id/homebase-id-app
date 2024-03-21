@@ -15,6 +15,8 @@ export interface OdinImageProps {
   odinId?: string;
   targetDrive: TargetDrive;
   fileId: string | undefined;
+  fileKey?: string;
+  lastModified?: number;
   fit?: 'cover' | 'contain';
   imageSize?: { width: number; height: number };
   alt?: string;
@@ -22,7 +24,6 @@ export interface OdinImageProps {
   previewThumbnail?: EmbeddedThumb;
   avoidPayload?: boolean;
   enableZoom?: boolean;
-  fileKey?: string;
   style?: ImageStyle;
   onClick?: () => void;
 }
@@ -33,6 +34,7 @@ export const OdinImage = memo(
     targetDrive,
     fileId,
     fileKey,
+    lastModified,
     fit,
     imageSize,
     alt,
@@ -64,12 +66,12 @@ export const OdinImage = memo(
     );
     const skipTiny = !!previewThumbnail || !!cachedImage;
 
-    const { data: tinyThumb } = useTinyThumb(
+    const { data: tinyThumb } = useTinyThumb({
       odinId,
-      !skipTiny ? fileId : undefined,
-      fileKey,
-      targetDrive
-    );
+      imageFileId: !skipTiny ? fileId : undefined,
+      imageFileKey: fileKey,
+      imageDrive: targetDrive,
+    });
     const previewUrl = cachedImage?.url || embeddedThumbUrl || tinyThumb?.url;
 
     const naturalSize: ImageSize | undefined = tinyThumb
@@ -81,14 +83,15 @@ export const OdinImage = memo(
 
     const {
       fetch: { data: imageData },
-    } = useImage(
+    } = useImage({
       odinId,
-      enableZoom || loadSize !== undefined ? fileId : undefined,
-      fileKey,
-      targetDrive,
-      avoidPayload ? { pixelHeight: 200, pixelWidth: 200 } : loadSize,
-      naturalSize
-    );
+      imageFileId: enableZoom || loadSize !== undefined ? fileId : undefined,
+      imageFileKey: fileKey,
+      imageDrive: targetDrive,
+      size: avoidPayload ? { pixelHeight: 200, pixelWidth: 200 } : loadSize,
+      naturalSize,
+      lastModified,
+    });
 
     const hasCachedImage = !!cachedImage?.url;
 

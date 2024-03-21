@@ -55,6 +55,7 @@ export const Avatar = (props: {
         ...styles.tinyLogo,
         ...props.style,
       }}
+      lastModified={contact?.fileMetadata.updated}
     />
   );
 };
