@@ -1,10 +1,10 @@
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
-import { ChatDeliveryStatus, ChatMessage } from '../../../provider/chat/ChatProvider';
+import { ChatDeliveryStatus, ChatMessage } from '../../provider/chat/ChatProvider';
 import { useDotYouClientContext } from 'feed-app-common';
 import { View } from 'react-native';
-import { Clock, SubtleCheck } from '../Icons/icons';
-import { Colors } from '../../../app/Colors';
-import { ChatMessageIMessage } from '../../../pages/chat/chat-page';
+import { Clock, SubtleCheck } from '../ui/Icons/icons';
+import { Colors } from '../../app/Colors';
+import { ChatMessageIMessage } from './ChatDetail';
 
 export const ChatDeliveryIndicator = ({
   msg,

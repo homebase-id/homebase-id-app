@@ -2,7 +2,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Linking, StyleSheet, Text, View } from 'react-native';
 import { AppStackParamList } from '../../app/App';
 import { useConversation } from '../../hooks/chat/useConversation';
-import { Avatar, GroupAvatar, OwnerAvatar } from '../../components/ui/Chat/Conversation-tile';
+import { Avatar, GroupAvatar, OwnerAvatar } from '../../components/Chat/Conversation-tile';
 import {
   ConversationWithYourselfId,
   GroupConversation,

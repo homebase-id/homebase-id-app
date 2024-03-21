@@ -1,9 +1,9 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Avatar, GroupAvatar, OwnerAvatar } from './Conversation-tile';
 import { Header, HeaderBackButton } from '@react-navigation/elements';
-import { useProfile } from '../../../hooks/profile/useProfile';
-import { Colors } from '../../../app/Colors';
-import { useDarkMode } from '../../../hooks/useDarkMode';
+import { useProfile } from '../../hooks/profile/useProfile';
+import { Colors } from '../../app/Colors';
+import { useDarkMode } from '../../hooks/useDarkMode';
 
 export const ChatAppBar = ({
   odinId,

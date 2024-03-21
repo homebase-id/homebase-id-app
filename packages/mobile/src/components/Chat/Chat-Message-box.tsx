@@ -1,21 +1,20 @@
 import { View, StyleSheet, Animated, LayoutChangeEvent } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 import { Message, MessageProps, isSameUser, isSameDay } from 'react-native-gifted-chat';
-
-import { Info, Reply } from '../Icons/icons';
-import { ChatMessageIMessage } from '../../../pages/chat/chat-page';
+import { ChatMessageIMessage } from './ChatDetail';
+import { Info, Reply } from '../ui/Icons/icons';
 import { useCallback } from 'react';
 
 type ChatMessageBoxProps = {
   setReplyOnSwipeOpen: (message: ChatMessageIMessage) => void;
   onLeftSwipeOpen: (message: ChatMessageIMessage) => void;
-  updateRowRef: (ref: any) => void;
+
   onMessageLayout: (e: LayoutChangeEvent) => void;
 } & MessageProps<ChatMessageIMessage>;
 
 const ChatMessageBox = ({
   setReplyOnSwipeOpen,
-  updateRowRef,
+
   onMessageLayout,
   ...props
 }: ChatMessageBoxProps) => {
@@ -99,7 +98,6 @@ const ChatMessageBox = ({
 
   return (
     <Swipeable
-      ref={updateRowRef}
       friction={3}
       overshootFriction={8}
       rightThreshold={40}

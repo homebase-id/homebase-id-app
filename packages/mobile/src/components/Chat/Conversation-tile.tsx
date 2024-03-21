@@ -11,18 +11,18 @@ import {
 
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 
-import { Colors } from '../../../app/Colors';
-import { Conversation } from '../../../provider/chat/ConversationProvider';
-import { useChatMessages } from '../../../hooks/chat/useChatMessages';
-import { ChatMessage } from '../../../provider/chat/ChatProvider';
-import { Users } from '../Icons/icons';
-import { useDarkMode } from '../../../hooks/useDarkMode';
+import { Colors } from '../../app/Colors';
+import { Conversation } from '../../provider/chat/ConversationProvider';
+import { useChatMessages } from '../../hooks/chat/useChatMessages';
+import { ChatMessage } from '../../provider/chat/ChatProvider';
+import { Users } from '../ui/Icons/icons';
+import { useDarkMode } from '../../hooks/useDarkMode';
 import { ellipsisAtMaxChar } from 'feed-app-common';
 import { ChatSentTimeIndicator } from './Chat-Sent-Time-Indicator';
-import useContact from '../../../hooks/contact/useContact';
-import { OdinImage } from '../OdinImage/OdinImage';
+import useContact from '../../hooks/contact/useContact';
+import { OdinImage } from '../ui/OdinImage/OdinImage';
 import { CONTACT_PROFILE_IMAGE_KEY, ContactConfig } from '@youfoundation/js-lib/network';
-import { useProfile } from '../../../hooks/profile/useProfile';
+import { useProfile } from '../../hooks/profile/useProfile';
 import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
 import { ChatDeliveryIndicator } from './Chat-Delivery-Indicator';
 

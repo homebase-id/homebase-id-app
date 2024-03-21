@@ -1,49 +1,18 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import {
-  Actions,
-  Avatar,
-  AvatarProps,
-  Bubble,
-  BubbleProps,
-  Composer,
-  GiftedChat,
-  IMessage,
-  InputToolbar,
-  InputToolbarProps,
-  MessageImageProps,
-  MessageProps,
-  MessageText,
-  MessageTextProps,
-  Send,
-  Time,
-} from 'react-native-gifted-chat';
+import { IMessage } from 'react-native-gifted-chat';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
-import { useCallback, useEffect, useMemo, useRef, useState, memo } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AppStackParamList } from '../../app/App';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import {
-  GestureResponderEvent,
-  ImageBackground,
-  Keyboard,
-  LayoutChangeEvent,
-  Platform,
-  Pressable,
-  StatusBar,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-import { ChatAppBar } from '../../components/ui/Chat/Chat-app-bar';
-import { Close, Images, SendChat } from '../../components/ui/Icons/icons';
-import ImageMessage from '../../components/ui/Chat/ImageMessage';
-import { Asset, launchImageLibrary } from 'react-native-image-picker';
+import { Keyboard, View } from 'react-native';
+import { ChatAppBar } from '../../components/Chat/Chat-app-bar';
+import { Asset } from 'react-native-image-picker';
 import { ChatMessage } from '../../provider/chat/ChatProvider';
 import { useAuth } from '../../hooks/auth/useAuth';
 import { useChatMessages } from '../../hooks/chat/useChatMessages';
 import { useChatMessage } from '../../hooks/chat/useChatMessage';
 import { useConversation } from '../../hooks/chat/useConversation';
 import {
-  ChatDrive,
   Conversation,
   ConversationWithYourself,
   ConversationWithYourselfId,
@@ -52,37 +21,23 @@ import {
 } from '../../provider/chat/ConversationProvider';
 import { ImageSource } from '../../provider/image/RNImageProvider';
 import { getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import { Swipeable, TouchableOpacity } from 'react-native-gesture-handler';
-import { Colors } from '../../app/Colors';
-import ReplyMessageBar from '../../components/ui/Chat/Reply-Message-bar';
-import ChatMessageBox from '../../components/ui/Chat/Chat-Message-box';
-import { OdinImage } from '../../components/ui/OdinImage/OdinImage';
-import { useDarkMode } from '../../hooks/useDarkMode';
 import useContact from '../../hooks/contact/useContact';
 import { useMarkMessagesAsRead } from '../../hooks/chat/useMarkMessagesAsRead';
-import { ChatDeliveryIndicator } from '../../components/ui/Chat/Chat-Delivery-Indicator';
-import PortalView, { HighlightedChatMessage } from '../../components/ui/Chat/Chat-Reaction';
+import PortalView, { HighlightedChatMessage } from '../../components/Chat/Chat-Reaction';
 import { Host } from 'react-native-portalize';
-import { useChatReaction } from '../../hooks/chat/useChatReaction';
 import { BottomSheetModal, BottomSheetModalProvider } from '@gorhom/bottom-sheet';
-import { EmojiPickerModal } from '../../components/ui/Emoji-Picker/Emoji-Picker-Modal';
-import { ReactionsModal } from '../../components/ui/Modal/ReactionsModal';
-import { Avatar as AppAvatar, OwnerAvatar } from '../../components/ui/Chat/Conversation-tile';
-import { ChatConnectedState } from '../../components/ui/Chat/Chat-Connected-state';
-import { ConnectionName } from '../../components/ui/Name';
+import { EmojiPickerModal } from '../../components/Chat/Reactions/Emoji-Picker/Emoji-Picker-Modal';
+import { ReactionsModal } from '../../components/Chat/Reactions/Modal/ReactionsModal';
+import { ChatConnectedState } from '../../components/Chat/Chat-Connected-state';
 import { ErrorNotification } from '../../components/ui/Alert/ErrorNotification';
+import { ChatDetail, ChatMessageIMessage } from '../../components/Chat/ChatDetail';
 
 export type ChatProp = NativeStackScreenProps<AppStackParamList, 'ChatScreen'>;
 
-export interface ChatMessageIMessage extends IMessage, DriveSearchResult<ChatMessage> {}
-
 const ChatPage = ({ route, navigation }: ChatProp) => {
-  const { isDarkMode } = useDarkMode();
   const insets = useSafeAreaInsets();
 
   const [replyMessage, setReplyMessage] = useState<ChatMessageIMessage | null>(null);
-  const swipeableRowRef = useRef<Swipeable | null>(null);
-  const clearReplyMessage = () => setReplyMessage(null);
   const identity = useAuth().getIdentity();
 
   const [assets, setAssets] = useState<Asset[]>([]);
@@ -148,87 +103,24 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
   const isGroup =
     conversationContent && 'recipients' in conversationContent.fileMetadata.appData.content;
 
-  const imagesIcon = useCallback(() => <Images />, []);
-  const renderCustomInputToolbar = useCallback(
-    (props: InputToolbarProps<IMessage>) => {
-      return (
-        <>
-          <InputToolbar
-            {...props}
-            renderComposer={(props) => (
-              <Composer
-                {...props}
-                textInputStyle={{
-                  color: isDarkMode ? 'white' : 'black',
-                }}
-              />
-            )}
-            renderSend={(props) => (
-              <Send
-                {...props}
-                disabled={!props.text && assets?.length === 0}
-                text={props.text || ' '}
-                containerStyle={styles.send}
-              >
-                <SendChat
-                  size={'md'}
-                  color={!props.text && assets?.length === 0 ? 'grey' : 'blue'}
-                />
-              </Send>
-            )}
-            renderActions={() => (
-              <Actions
-                icon={imagesIcon}
-                onPressActionButton={async () => {
-                  const medias = await launchImageLibrary({
-                    mediaType: 'mixed',
-                    selectionLimit: 10,
-                  });
-                  if (medias.didCancel) return;
-                  setAssets(medias.assets ?? []);
-                }}
-              />
-            )}
-            containerStyle={[
-              styles.inputContainer,
-              {
-                backgroundColor: isDarkMode ? Colors.slate[900] : Colors.white,
-                borderTopWidth: 0,
-                borderRadius: 10,
-              },
-            ]}
-          />
-        </>
-      );
-    },
-    [assets?.length, isDarkMode, imagesIcon]
-  );
-
-  const [layoutHeight, setLayoutHeight] = useState(0);
-  const onLayout = (e: LayoutChangeEvent) => {
-    const { height } = e.nativeEvent.layout;
-    setLayoutHeight(height);
-  };
-
   const [messageCordinates, setMessageCordinates] = useState({ x: 0, y: 0 });
   const [selectedMessage, setSelectedMessage] = useState<HighlightedChatMessage | undefined>();
 
-  const onLongPress = useCallback(
-    (e: GestureResponderEvent, message: ChatMessageIMessage) => {
-      const { pageY, locationY } = e.nativeEvent;
-      const y = pageY - locationY;
-
-      setMessageCordinates({
-        x: 0,
-        y,
-      });
-
-      setSelectedMessage({ layoutHeight, ...message });
+  const doSelectMessage = useCallback(
+    ({
+      coords,
+      message,
+    }: {
+      coords: { x: number; y: number };
+      message: HighlightedChatMessage;
+    }) => {
+      setMessageCordinates(coords);
+      setSelectedMessage(message);
     },
-    [layoutHeight]
+    []
   );
 
-  const onLeftSwipe = useCallback(
+  const doOpenMessageInfo = useCallback(
     (message: ChatMessageIMessage) => {
       navigation.navigate('MessageInfo', {
         message,
@@ -237,81 +129,6 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
     },
     [conversationContent, navigation]
   );
-
-  const updateRowRef = useCallback(
-    (ref: any) => {
-      if (
-        ref &&
-        replyMessage &&
-        ref.props.children.props.currentMessage?._id === replyMessage._id
-      ) {
-        swipeableRowRef.current = ref;
-      }
-    },
-    [replyMessage]
-  );
-  const renderMessageBox = useCallback(
-    (props: MessageProps<ChatMessageIMessage>) => {
-      return (
-        <ChatMessageBox
-          {...props}
-          setReplyOnSwipeOpen={setReplyMessage}
-          updateRowRef={updateRowRef}
-          onMessageLayout={onLayout}
-          onLeftSwipeOpen={onLeftSwipe}
-        />
-      );
-    },
-    [onLeftSwipe, updateRowRef]
-  );
-
-  const renderChatFooter = useCallback(() => {
-    return (
-      <View
-        style={{
-          backgroundColor: Colors.white,
-        }}
-      >
-        {replyMessage ? (
-          <ReplyMessageBar message={replyMessage} clearReply={clearReplyMessage} />
-        ) : null}
-
-        <View
-          style={{
-            flexDirection: 'row',
-            gap: 2,
-          }}
-        >
-          {assets.map((value, index) => {
-            // const isVideo = value.type?.startsWith('video') ?? false;
-            return (
-              <View
-                key={index}
-                style={{
-                  borderRadius: 15,
-                }}
-              >
-                <ImageBackground
-                  key={index}
-                  source={{ uri: value.uri || value.originalPath }}
-                  style={{
-                    width: 65,
-                    height: 65,
-                    alignItems: 'flex-end',
-                    padding: 4,
-                  }}
-                >
-                  <TouchableOpacity onPress={() => setAssets(assets.filter((_, i) => i !== index))}>
-                    <Close size={'sm'} color="white" />
-                  </TouchableOpacity>
-                </ImageBackground>
-              </View>
-            );
-          })}
-        </View>
-      </View>
-    );
-  }, [assets, replyMessage]);
 
   const {
     mutate: sendMessage,
@@ -326,19 +143,8 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
         conversation: conversationContent,
       });
     }
-    if (replyMessage && swipeableRowRef.current) {
-      swipeableRowRef.current.close();
-      swipeableRowRef.current = null;
-    }
     if (sendMessageState === 'pending') resetState();
-  }, [
-    replyMessage,
-    conversationContent,
-    inviteRecipient,
-    messages.length,
-    sendMessageState,
-    resetState,
-  ]);
+  }, [conversationContent, inviteRecipient, messages.length, sendMessageState, resetState]);
 
   useMarkMessagesAsRead({ conversation: conversationContent || undefined, messages });
 
@@ -415,78 +221,17 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
             isSelf={route.params.convoId === ConversationWithYourselfId}
           />
           <ChatConnectedState {...conversationContent} />
-          <GiftedChat<ChatMessageIMessage>
+          <ChatDetail
+            isGroup={!!isGroup}
             messages={messages}
-            onSend={doSend}
-            infiniteScroll
-            scrollToBottom
-            onLongPress={(e, _, m: ChatMessageIMessage) => onLongPress(e, m)}
-            alwaysShowSend
-            isKeyboardInternallyHandled={true}
-            keyboardShouldPersistTaps="never"
-            renderMessageImage={(prop: MessageImageProps<ChatMessageIMessage>) => (
-              <ImageMessage {...prop} />
-            )}
-            renderCustomView={(prop: BubbleProps<ChatMessageIMessage>) => (
-              <RenderReplyMessageView {...prop} />
-            )}
-            renderBubble={(prop) => <RenderBubble {...prop} onReactionClick={openReactionModal} />}
-            renderMessageText={(prop) => <RenderMessageText {...prop} />}
-            renderMessage={renderMessageBox}
-            // renderChatFooter instead of renderFooter as the renderFooter renders within the scrollView
-            renderChatFooter={renderChatFooter}
-            showUserAvatar={false}
-            renderUsernameOnMessage={isGroup}
-            renderAvatar={
-              !isGroup
-                ? null
-                : (props: AvatarProps<IMessage>) => {
-                    const prop = props as AvatarProps<ChatMessageIMessage>;
-                    const odinId = prop.currentMessage?.fileMetadata.senderOdinId;
-
-                    if (!odinId) {
-                      return (
-                        <Avatar
-                          renderAvatar={(
-                            _: Omit<AvatarProps<ChatMessageIMessage>, 'renderAvatar'>
-                          ) => {
-                            return (
-                              <OwnerAvatar
-                                style={{
-                                  width: 30,
-                                  height: 30,
-                                  marginRight: 0,
-                                }}
-                              />
-                            );
-                          }}
-                        />
-                      );
-                    }
-                    return (
-                      <Avatar
-                        renderAvatar={(
-                          _: Omit<AvatarProps<ChatMessageIMessage>, 'renderAvatar'>
-                        ) => {
-                          return (
-                            <AppAvatar
-                              odinId={odinId}
-                              style={{
-                                width: 30,
-                                height: 30,
-                                marginRight: 0,
-                              }}
-                            />
-                          );
-                        }}
-                      />
-                    );
-                  }
-            }
-            renderInputToolbar={renderCustomInputToolbar}
-            user={{
-              _id: identity || '',
-            }}
+            doSend={doSend}
+            doSelectMessage={doSelectMessage}
+            doOpenMessageInfo={doOpenMessageInfo}
+            doOpenReactionModal={openReactionModal}
+            replyMessage={replyMessage}
+            setReplyMessage={setReplyMessage}
+            assets={assets}
+            setAssets={setAssets}
           />
           <PortalView
             messageCordinates={messageCordinates}
@@ -511,277 +256,5 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
     </BottomSheetModalProvider>
   );
 };
-
-const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
-  const message = props.currentMessage as ChatMessageIMessage;
-  const content = message?.fileMetadata.appData.content;
-  const isEmojiOnly =
-    (content?.message?.match(/^\p{Extended_Pictographic}/u) &&
-      !content.message?.match(/[0-9a-zA-Z]/)) ??
-    false;
-  return (
-    <MessageText
-      {...props}
-      linkStyle={{
-        left: {
-          color: Colors.indigo[500],
-        },
-        right: {
-          color: Colors.indigo[500],
-        },
-      }}
-      customTextStyle={
-        isEmojiOnly
-          ? {
-              fontSize: 48,
-              lineHeight: 60,
-            }
-          : undefined
-      }
-    />
-  );
-});
-
-const RenderBubble = memo(
-  (
-    props: {
-      onReactionClick: (message: ChatMessageIMessage) => void;
-    } & Readonly<BubbleProps<IMessage>>
-  ) => {
-    const message = props.currentMessage as ChatMessageIMessage;
-    const content = message?.fileMetadata.appData.content;
-    const { isDarkMode } = useDarkMode();
-    const isEmojiOnly =
-      (content?.message?.match(/^\p{Extended_Pictographic}/u) &&
-        !content.message?.match(/[0-9a-zA-Z]/)) ??
-      false;
-    const isReply = !!content?.replyId;
-    const showBackground = !isEmojiOnly || isReply;
-    const { data: reactions } = useChatReaction({
-      conversationId: message?.fileMetadata.appData.groupId,
-      messageId: message?.fileMetadata.appData.uniqueId,
-    }).get;
-
-    const hasReactions = (reactions && reactions?.length > 0) || false;
-    const flatReactions = reactions?.flatMap((val) => val.fileMetadata.appData.content.message);
-    return (
-      <>
-        <Bubble
-          {...props}
-          renderTicks={(message: ChatMessageIMessage) => <ChatDeliveryIndicator msg={message} />}
-          renderReactions={
-            !hasReactions
-              ? undefined
-              : //TODO: Add LeftRight StyleProp
-                () => {
-                  const maxVisible = 2;
-                  const countExcludedFromView = reactions?.length
-                    ? reactions?.length - maxVisible
-                    : 0;
-
-                  return (
-                    <Pressable onPress={() => props.onReactionClick(message)}>
-                      <View
-                        style={{
-                          flexDirection: 'row',
-                          alignItems: 'center',
-                          justifyContent: 'flex-start',
-                          padding: 4,
-                          borderRadius: 15,
-                          backgroundColor: isDarkMode ? Colors.gray[800] : Colors.gray[100],
-                        }}
-                      >
-                        {flatReactions?.slice(0, maxVisible).map((reaction, index) => {
-                          return (
-                            <Text
-                              key={index}
-                              style={{
-                                fontSize: 18,
-                                marginRight: 2,
-                              }}
-                            >
-                              {reaction}
-                            </Text>
-                          );
-                        })}
-                        {countExcludedFromView > 0 && (
-                          <Text
-                            style={{
-                              color: isDarkMode ? Colors.white : Colors.black,
-                              fontSize: 16,
-                              fontWeight: '500',
-                              marginRight: 2,
-                            }}
-                          >
-                            +{countExcludedFromView}
-                          </Text>
-                        )}
-                      </View>
-                    </Pressable>
-                  );
-                }
-          }
-          renderTime={(timeProp) => {
-            return (
-              <Time
-                {...timeProp}
-                timeTextStyle={
-                  !showBackground
-                    ? {
-                        left: {
-                          color: isDarkMode ? Colors.white : Colors.black,
-                          fontSize: 12,
-                        },
-                        right: {
-                          color: isDarkMode ? Colors.white : Colors.black,
-                          fontSize: 12,
-                        },
-                      }
-                    : {
-                        right: {
-                          fontSize: 12,
-                          color: !isDarkMode ? Colors.slate[600] : Colors.slate[200],
-                        },
-                        left: {
-                          fontSize: 12,
-                        },
-                      }
-                }
-              />
-            );
-          }}
-          tickStyle={{
-            color: isDarkMode ? Colors.white : Colors.black,
-          }}
-          textStyle={
-            showBackground
-              ? {
-                  left: { color: isDarkMode ? Colors.white : Colors.black },
-                  right: { color: isDarkMode ? Colors.white : Colors.black },
-                }
-              : {}
-          }
-          wrapperStyle={
-            !showBackground
-              ? {
-                  left: {
-                    backgroundColor: 'transparent',
-                  },
-                  right: {
-                    backgroundColor: 'transparent',
-                  },
-                }
-              : {
-                  left: {
-                    backgroundColor: isDarkMode ? `${Colors.gray[300]}4D` : `${Colors.gray[500]}1A`,
-                    minWidth: hasReactions ? 90 : undefined,
-                  },
-                  right: {
-                    backgroundColor: isDarkMode
-                      ? `${Colors.indigo[500]}33`
-                      : `${Colors.indigo[500]}1A`,
-                  },
-                }
-          }
-        />
-      </>
-    );
-  }
-);
-
-const RenderReplyMessageView = memo((props: BubbleProps<ChatMessageIMessage>) => {
-  const replyMessage = useChatMessage({
-    messageId: props.currentMessage?.fileMetadata.appData.content.replyId,
-  }).get.data;
-  const { isDarkMode } = useDarkMode();
-  if (!replyMessage) return null;
-  return (
-    props.currentMessage &&
-    props.currentMessage.fileMetadata.appData.content.replyId && (
-      <View
-        style={[
-          styles.replyMessageContainer,
-          {
-            borderLeftColor: props.position === 'left' ? Colors.blue[500] : Colors.purple[500],
-            backgroundColor: `${Colors.indigo[500]}1A`,
-          },
-        ]}
-      >
-        <View style={styles.replyText}>
-          <Text
-            style={{
-              fontWeight: '600',
-              fontSize: 15,
-              color: isDarkMode ? Colors.slate[300] : Colors.slate[900],
-            }}
-          >
-            {replyMessage?.fileMetadata.senderOdinId?.length > 0 ? (
-              <ConnectionName odinId={replyMessage?.fileMetadata.senderOdinId} />
-            ) : (
-              'You'
-            )}
-          </Text>
-          <Text
-            style={{
-              fontSize: 14,
-              marginTop: 4,
-              color: isDarkMode ? Colors.slate[300] : Colors.slate[900],
-            }}
-          >
-            {replyMessage?.fileMetadata.appData.content.message || 'Media 📸'}
-          </Text>
-        </View>
-        {replyMessage && replyMessage.fileMetadata.payloads?.length > 0 && (
-          <OdinImage
-            fileId={replyMessage.fileId}
-            targetDrive={ChatDrive}
-            fileKey={replyMessage.fileMetadata.payloads[0].key}
-            previewThumbnail={replyMessage.fileMetadata.appData.previewThumbnail}
-            imageSize={{
-              width: 60,
-              height: 60,
-            }}
-          />
-        )}
-      </View>
-    )
-  );
-});
-
-const styles = StyleSheet.create({
-  inputContainer: {
-    position: 'relative',
-    flexDirection: 'column-reverse',
-  },
-  container: {
-    flex: 1,
-    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
-  },
-
-  replyText: {
-    justifyContent: 'center',
-    marginLeft: 6,
-    marginRight: 12,
-  },
-  replyMessageContainer: {
-    padding: 8,
-    paddingBottom: 8,
-    display: 'flex',
-    flexDirection: 'row',
-    borderLeftWidth: 6,
-    borderLeftColor: 'lightgrey',
-    borderRadius: 6,
-    marginLeft: 6,
-    marginTop: 6,
-    marginRight: 6,
-  },
-
-  send: {
-    borderWidth: 0,
-    justifyContent: 'center',
-    marginRight: 8,
-    transform: [{ rotate: '30deg' }],
-  },
-});
 
 export default ChatPage;

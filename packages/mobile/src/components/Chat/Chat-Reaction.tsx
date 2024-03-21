@@ -9,15 +9,15 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import { ChatMessageIMessage } from '../../../pages/chat/chat-page';
-import { useChatReaction } from '../../../hooks/chat/useChatReaction';
-import { useConversation } from '../../../hooks/chat/useConversation';
+import { useChatReaction } from '../../hooks/chat/useChatReaction';
+import { useConversation } from '../../hooks/chat/useConversation';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
-import { ChatMessage } from '../../../provider/chat/ChatProvider';
+import { ChatMessage } from '../../provider/chat/ChatProvider';
 import { useBottomSheetModal } from '@gorhom/bottom-sheet';
-import { Colors } from '../../../app/Colors';
-import { useDarkMode } from '../../../hooks/useDarkMode';
-import { ErrorNotification } from '../Alert/ErrorNotification';
+import { Colors } from '../../app/Colors';
+import { useDarkMode } from '../../hooks/useDarkMode';
+import { ErrorNotification } from '../ui/Alert/ErrorNotification';
+import { ChatMessageIMessage } from './ChatDetail';
 
 export interface HighlightedChatMessage extends ChatMessageIMessage {
   layoutHeight: number;

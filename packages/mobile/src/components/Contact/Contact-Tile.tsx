@@ -1,11 +1,11 @@
 import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
-import { useConversation } from '../../../hooks/chat/useConversation';
+import { useConversation } from '../../hooks/chat/useConversation';
 import { ContactConfig, ContactFile, DotYouProfile } from '@youfoundation/js-lib/network';
-import { CheckCircle, ChevronRight, CircleOutlined } from '../Icons/icons';
-import { Colors } from '../../../app/Colors';
-import { OdinImage } from '../OdinImage/OdinImage';
-import { useDarkMode } from '../../../hooks/useDarkMode';
-import useContact from '../../../hooks/contact/useContact';
+import { CheckCircle, ChevronRight, CircleOutlined } from '../ui/Icons/icons';
+import { Colors } from '../../app/Colors';
+import { OdinImage } from '../ui/OdinImage/OdinImage';
+import { useDarkMode } from '../../hooks/useDarkMode';
+import useContact from '../../hooks/contact/useContact';
 export const ContactTile = ({
   item: profile,
   onOpen,

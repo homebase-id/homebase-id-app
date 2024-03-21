@@ -1,5 +1,5 @@
 import { FlatList } from 'react-native';
-import ConversationTile from '../components/ui/Chat/Conversation-tile';
+import ConversationTile from '../components/Chat/Conversation-tile';
 
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { AppStackParamList } from '../app/App';
