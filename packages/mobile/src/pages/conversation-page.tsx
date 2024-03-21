@@ -3,7 +3,7 @@ import ConversationTile from '../components/ui/Chat/Conversation-tile';
 
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { AppStackParamList } from '../app/App';
-import { ConversationWithRecentMessage, useConversations } from '../hooks/chat/useConversations';
+import { useConversations } from '../hooks/chat/useConversations';
 import {
   ConversationWithYourselfId,
   SingleConversation,

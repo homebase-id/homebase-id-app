@@ -1,7 +1,7 @@
 import { View, StyleSheet, Animated, LayoutChangeEvent } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
-import { Message, MessageProps } from 'react-native-gifted-chat';
-import { isSameDay, isSameUser } from 'react-native-gifted-chat/lib/utils';
+import { Message, MessageProps, isSameUser, isSameDay } from 'react-native-gifted-chat';
+
 import { Info, Reply } from '../Icons/icons';
 import { ChatMessageIMessage } from '../../../pages/chat/chat-page';
 

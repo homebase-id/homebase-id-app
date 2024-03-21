@@ -62,7 +62,7 @@ import useContact from '../../hooks/contact/useContact';
 import { useMarkMessagesAsRead } from '../../hooks/chat/useMarkMessagesAsRead';
 import { ChatDeliveryIndicator } from '../../components/ui/Chat/Chat-Delivery-Indicator';
 import Toast from 'react-native-toast-message';
-import PortalView from '../../components/ui/Chat/Chat-Reaction';
+import PortalView, { HighlightedChatMessage } from '../../components/ui/Chat/Chat-Reaction';
 import { Host } from 'react-native-portalize';
 import { useChatReaction } from '../../hooks/chat/useChatReaction';
 import { BottomSheetModal, BottomSheetModalProvider } from '@gorhom/bottom-sheet';
@@ -195,7 +195,7 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
   };
 
   const [messageCordinates, setMessageCordinates] = useState({ x: 0, y: 0 });
-  const [selectedMessage, setSelectedMessage] = useState<ChatMessageIMessage | undefined>();
+  const [selectedMessage, setSelectedMessage] = useState<HighlightedChatMessage | undefined>();
 
   const onLongPress = useCallback(
     (e: GestureResponderEvent, message: ChatMessageIMessage) => {

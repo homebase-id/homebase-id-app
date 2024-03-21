@@ -24,7 +24,6 @@ export interface OdinImageProps {
   enableZoom?: boolean;
   fileKey?: string;
   style?: ImageStyle;
-  svgPlaceHolderStyle?: ImageStyle;
   onClick?: () => void;
 }
 
@@ -42,7 +41,6 @@ export const OdinImage = memo(
     avoidPayload,
     enableZoom,
     style,
-    svgPlaceHolderStyle,
     onClick,
   }: OdinImageProps) => {
     const loadSize = {
@@ -101,7 +99,8 @@ export const OdinImage = memo(
         }}
       >
         {/* Blurry image */}
-        {!enableZoom && previewUrl ? (
+        {/* TODO: Check to add support for direct full loading for svg */}
+        {!enableZoom && previewUrl && cachedImage?.type !== 'image/svg+xml' ? (
           <Image
             source={{ uri: previewUrl }}
             style={{
@@ -142,7 +141,6 @@ export const OdinImage = memo(
             alt={alt || title}
             onClick={onClick}
             style={style}
-            svgPlaceHolderStyle={svgPlaceHolderStyle}
           />
         ) : null}
       </View>
@@ -158,7 +156,7 @@ const ZoomableImage = ({
   fit,
   enableZoom,
   onClick,
-  svgPlaceHolderStyle,
+
   contentType,
 }: {
   uri: string;
@@ -167,7 +165,7 @@ const ZoomableImage = ({
   style?: ImageStyle;
   fit?: 'cover' | 'contain';
   enableZoom?: boolean;
-  svgPlaceHolderStyle?: ImageStyle;
+
   onClick?: () => void;
 
   contentType?: ImageContentType;
@@ -178,7 +176,6 @@ const ZoomableImage = ({
         <View
           style={{
             ...imageSize,
-            ...svgPlaceHolderStyle,
           }}
         >
           <SvgUri

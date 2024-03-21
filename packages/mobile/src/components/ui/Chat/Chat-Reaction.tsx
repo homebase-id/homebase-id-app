@@ -19,14 +19,18 @@ import { Colors } from '../../../app/Colors';
 import { useDarkMode } from '../../../hooks/useDarkMode';
 import { ErrorNotification } from '../Alert/ErrorNotification';
 
+export interface HighlightedChatMessage extends ChatMessageIMessage {
+  layoutHeight: number;
+}
+
 const PortalView = ({
   selectedMessage,
   messageCordinates,
   setSelectedMessage,
   openEmojiPicker,
 }: {
-  selectedMessage: (ChatMessageIMessage & number) | undefined;
-  setSelectedMessage: (message: ChatMessageIMessage | undefined) => void;
+  selectedMessage: HighlightedChatMessage | undefined;
+  setSelectedMessage: (message: HighlightedChatMessage | undefined) => void;
   messageCordinates: { x: number; y: number };
   openEmojiPicker: () => void;
 }) => {
@@ -49,14 +53,14 @@ const PortalView = ({
     let y = messageCordinates.y || 0;
     let shouldAnimate = false;
     const isLessDisatanceFromTop = y < 100;
-    const isLessDisatanceFromBottom = height - y < selectedMessage?.layoutHeight;
+    const isLessDisatanceFromBottom = height - y < (selectedMessage?.layoutHeight || 0);
     if (isLessDisatanceFromBottom) {
-      y = y - selectedMessage?.layoutHeight;
+      y = y - (selectedMessage?.layoutHeight || 0);
       shouldAnimate = true;
     }
 
     if (isLessDisatanceFromTop) {
-      y = y + selectedMessage?.layoutHeight;
+      y = y + (selectedMessage?.layoutHeight || 0);
       shouldAnimate = true;
     }
     y = isNaN(y) ? 0 : y;

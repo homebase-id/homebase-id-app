@@ -40,9 +40,9 @@ export const ChatAppBar = ({
       />
       {!group ? (
         isSelf ? (
-          <OwnerAvatar style={styles.avatar} />
+          <OwnerAvatar style={styles.avatar} imageSize={{ width: 36, height: 36 }} />
         ) : (
-          <Avatar odinId={odinId} style={styles.avatar} />
+          <Avatar odinId={odinId} style={styles.avatar} imageSize={{ width: 36, height: 36 }} />
         )
       ) : (
         <GroupAvatar style={styles.avatar} />
@@ -75,5 +75,6 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     marginRight: 0,
+    borderRadius: 18,
   },
 });

@@ -48,21 +48,20 @@ export const ContactTile = ({
         ]}
       >
         {contact && contactData && (
-          <OdinImage
-            targetDrive={ContactConfig.ContactTargetDrive}
-            fit="cover"
-            alt={contact.name?.displayName}
-            fileId={contactData?.fileId}
-            enableZoom={false}
-            avoidPayload={true}
-            previewThumbnail={contactData.fileMetadata.appData.previewThumbnail}
-            imageSize={{ width: 48, height: 48 }}
-            fileKey={'prfl_pic'}
-            style={styles.tinyLogo}
-            svgPlaceHolderStyle={{
-              marginRight: 16,
-            }}
-          />
+          <View style={{ marginRight: 16 }}>
+            <OdinImage
+              targetDrive={ContactConfig.ContactTargetDrive}
+              fit="cover"
+              alt={contact.name?.displayName}
+              fileId={contactData?.fileId}
+              enableZoom={false}
+              avoidPayload={true}
+              previewThumbnail={contactData.fileMetadata.appData.previewThumbnail}
+              imageSize={{ width: 48, height: 48 }}
+              fileKey={'prfl_pic'}
+              style={styles.tinyLogo}
+            />
+          </View>
         )}
         <View style={[styles.content]}>
           <Text
