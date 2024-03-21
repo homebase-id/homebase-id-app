@@ -120,11 +120,6 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
         <>
           <InputToolbar
             {...props}
-            renderAccessory={(props) =>
-              replyMessage ? (
-                <ReplyMessageBar message={replyMessage} clearReply={clearReplyMessage} {...props} />
-              ) : null
-            }
             renderComposer={(props) => (
               <Composer
                 {...props}
@@ -162,7 +157,7 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
             containerStyle={[
               styles.inputContainer,
               {
-                backgroundColor: isDarkMode ? Colors.slate[900] : Colors.slate[100],
+                backgroundColor: isDarkMode ? Colors.slate[900] : Colors.white,
                 borderTopWidth: 0,
                 borderRadius: 10,
               },
@@ -171,7 +166,7 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
         </>
       );
     },
-    [assets?.length, isDarkMode, replyMessage]
+    [assets?.length, isDarkMode]
   );
 
   const updateRowRef = useCallback(
@@ -237,42 +232,50 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
     [onLeftSwipe, updateRowRef]
   );
 
-  const renderMediaItems = () => {
+  const renderChatFooter = () => {
     return (
       <View
-        key={'ftr_key'}
         style={{
-          flexDirection: 'row',
+          backgroundColor: Colors.white,
         }}
       >
-        {assets.map((value, index) => {
-          // const isVideo = value.type?.startsWith('video') ?? false;
-          return (
-            <View
-              key={index}
-              style={{
-                borderRadius: 15,
-              }}
-            >
-              <ImageBackground
+        {replyMessage ? (
+          <ReplyMessageBar message={replyMessage} clearReply={clearReplyMessage} />
+        ) : null}
+
+        <View
+          style={{
+            flexDirection: 'row',
+            gap: 2,
+          }}
+        >
+          {assets.map((value, index) => {
+            // const isVideo = value.type?.startsWith('video') ?? false;
+            return (
+              <View
                 key={index}
-                source={{ uri: value.uri || value.originalPath }}
                 style={{
-                  width: 70,
-                  height: 60,
-                  alignItems: 'flex-end',
-                  paddingRight: 2,
-                  paddingTop: 2,
-                  marginRight: 4,
+                  borderRadius: 15,
                 }}
               >
-                <TouchableOpacity onPress={() => setAssets(assets.filter((_, i) => i !== index))}>
-                  <Close size={'sm'} color="white" />
-                </TouchableOpacity>
-              </ImageBackground>
-            </View>
-          );
-        })}
+                <ImageBackground
+                  key={index}
+                  source={{ uri: value.uri || value.originalPath }}
+                  style={{
+                    width: 65,
+                    height: 65,
+                    alignItems: 'flex-end',
+                    padding: 4,
+                  }}
+                >
+                  <TouchableOpacity onPress={() => setAssets(assets.filter((_, i) => i !== index))}>
+                    <Close size={'sm'} color="white" />
+                  </TouchableOpacity>
+                </ImageBackground>
+              </View>
+            );
+          })}
+        </View>
       </View>
     );
   };
@@ -467,8 +470,8 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
             renderBubble={(prop) => <RenderBubble {...prop} onReactionClick={openReactionModal} />}
             renderMessageText={renderMessageText}
             renderMessage={renderMessageBox}
-            renderFooter={renderMediaItems}
-            renderAccessory={() => null}
+            // renderChatFooter instead of renderFooter as the renderFooter renders within the scrollView
+            renderChatFooter={renderChatFooter}
             showUserAvatar={false}
             renderUsernameOnMessage={isGroup}
             renderAvatar={

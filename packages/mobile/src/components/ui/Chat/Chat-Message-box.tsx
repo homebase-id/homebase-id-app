@@ -4,6 +4,7 @@ import { Message, MessageProps, isSameUser, isSameDay } from 'react-native-gifte
 
 import { Info, Reply } from '../Icons/icons';
 import { ChatMessageIMessage } from '../../../pages/chat/chat-page';
+import { useCallback } from 'react';
 
 type ChatMessageBoxProps = {
   setReplyOnSwipeOpen: (message: ChatMessageIMessage) => void;
@@ -75,14 +76,26 @@ const ChatMessageBox = ({
     );
   };
 
-  const onSwipeOpenAction = (direction: 'left' | 'right', swipeable: Swipeable) => {
-    if (props.currentMessage && direction === 'right') {
-      setReplyOnSwipeOpen({ ...props.currentMessage });
-    } else {
-      props.currentMessage && props.onLeftSwipeOpen({ ...props.currentMessage });
-      swipeable.close();
-    }
-  };
+  const onSwipeOpenStartDrag = useCallback(
+    (direction: 'left' | 'right') => {
+      if (props.currentMessage && direction === 'right') {
+        setReplyOnSwipeOpen({ ...props.currentMessage });
+      }
+    },
+    [props.currentMessage, setReplyOnSwipeOpen]
+  );
+
+  const onSwipeOpenAction = useCallback(
+    (direction: 'left' | 'right', swipeable: Swipeable) => {
+      if (props.currentMessage && direction === 'right') {
+        swipeable && swipeable.close();
+      } else {
+        props.currentMessage && props.onLeftSwipeOpen({ ...props.currentMessage });
+        swipeable && swipeable.close();
+      }
+    },
+    [props]
+  );
 
   return (
     <Swipeable
@@ -94,6 +107,7 @@ const ChatMessageBox = ({
       renderRightActions={renderRightAction}
       renderLeftActions={renderLeftAction}
       onSwipeableOpen={onSwipeOpenAction}
+      onSwipeableOpenStartDrag={onSwipeOpenStartDrag}
     >
       <Message {...props} onMessageLayout={onMessageLayout} />
     </Swipeable>
