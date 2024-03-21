@@ -9,15 +9,10 @@ type ChatMessageBoxProps = {
   setReplyOnSwipeOpen: (message: ChatMessageIMessage) => void;
   onLeftSwipeOpen: (message: ChatMessageIMessage) => void;
 
-  onMessageLayout: (e: LayoutChangeEvent) => void;
+  onMessageLayout?: (e: LayoutChangeEvent) => void;
 } & MessageProps<ChatMessageIMessage>;
 
-const ChatMessageBox = ({
-  setReplyOnSwipeOpen,
-
-  onMessageLayout,
-  ...props
-}: ChatMessageBoxProps) => {
+const ChatMessageBox = ({ setReplyOnSwipeOpen, ...props }: ChatMessageBoxProps) => {
   const isNextMyMessage =
     props.currentMessage &&
     props.nextMessage &&
@@ -107,7 +102,7 @@ const ChatMessageBox = ({
       onSwipeableOpen={onSwipeOpenAction}
       onSwipeableOpenStartDrag={onSwipeOpenStartDrag}
     >
-      <Message {...props} onMessageLayout={onMessageLayout} />
+      <Message {...props} />
     </Swipeable>
   );
 };

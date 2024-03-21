@@ -16,11 +16,10 @@ import {
   Send,
   Time,
 } from 'react-native-gifted-chat';
-import { useCallback, useState, memo } from 'react';
+import { useCallback, memo } from 'react';
 import {
   GestureResponderEvent,
   ImageBackground,
-  LayoutChangeEvent,
   Platform,
   Pressable,
   StatusBar,
@@ -50,194 +49,211 @@ import { ChatMessage } from '../../provider/chat/ChatProvider';
 
 export interface ChatMessageIMessage extends IMessage, DriveSearchResult<ChatMessage> {}
 
-export const ChatDetail = ({
-  isGroup,
+export const ChatDetail = memo(
+  ({
+    isGroup,
 
-  messages,
-  doSend,
-  doSelectMessage,
-  doOpenMessageInfo,
-  doOpenReactionModal,
+    messages,
+    doSend,
+    doSelectMessage,
+    doOpenMessageInfo,
+    doOpenReactionModal,
 
-  replyMessage,
-  setReplyMessage,
+    replyMessage,
+    setReplyMessage,
 
-  assets,
-  setAssets,
-}: {
-  isGroup: boolean;
-
-  messages: ChatMessageIMessage[];
-  doSend: (message: IMessage[]) => void;
-  doSelectMessage: ({
-    coords,
-    message,
+    assets,
+    setAssets,
   }: {
-    coords: { x: number; y: number };
-    message: HighlightedChatMessage;
-  }) => void;
-  doOpenMessageInfo: (message: ChatMessageIMessage) => void;
-  doOpenReactionModal: (message: ChatMessageIMessage) => void;
+    isGroup: boolean;
 
-  replyMessage: ChatMessageIMessage | null;
-  setReplyMessage: (message: ChatMessageIMessage | null) => void;
+    messages: ChatMessageIMessage[];
+    doSend: (message: IMessage[]) => void;
+    doSelectMessage: ({
+      coords,
+      message,
+    }: {
+      coords: { x: number; y: number };
+      message: HighlightedChatMessage;
+    }) => void;
+    doOpenMessageInfo: (message: ChatMessageIMessage) => void;
+    doOpenReactionModal: (message: ChatMessageIMessage) => void;
 
-  assets: Asset[];
-  setAssets: (assets: Asset[]) => void;
-}) => {
-  const { isDarkMode } = useDarkMode();
+    replyMessage: ChatMessageIMessage | null;
+    setReplyMessage: (message: ChatMessageIMessage | null) => void;
 
-  const identity = useAuth().getIdentity();
+    assets: Asset[];
+    setAssets: (assets: Asset[]) => void;
+  }) => {
+    const { isDarkMode } = useDarkMode();
+    const identity = useAuth().getIdentity();
 
-  const [layoutHeight, setLayoutHeight] = useState(0);
-  const onLayout = (e: LayoutChangeEvent) => {
-    const { height } = e.nativeEvent.layout;
-    setLayoutHeight(height);
-  };
+    // @2002Bishwajeet, something doesn't add up here.. The layoutHeight is overwritten per message, as the state is a single number but each message calls the onMessageLayout.. I don't think this can work like that
+    // const [layoutHeight, setLayoutHeight] = useState(0);
+    // const onLayout = (e: LayoutChangeEvent) => {
+    //   const { height } = e.nativeEvent.layout;
+    //   setLayoutHeight(height);
+    // };
 
-  const onLongPress = useCallback(
-    (e: GestureResponderEvent, message: ChatMessageIMessage) => {
-      const { pageY, locationY } = e.nativeEvent;
-      const y = pageY - locationY;
+    const onLongPress = useCallback(
+      (e: GestureResponderEvent, message: ChatMessageIMessage) => {
+        const { pageY, locationY } = e.nativeEvent;
+        const y = pageY - locationY;
 
-      doSelectMessage({ coords: { x: 0, y }, message: { layoutHeight, ...message } });
-    },
-    [layoutHeight, doSelectMessage]
-  );
+        doSelectMessage({ coords: { x: 0, y }, message: { layoutHeight: 0, ...message } });
+      },
+      [doSelectMessage]
+    );
 
-  const onLeftSwipe = useCallback(
-    (message: ChatMessageIMessage) => doOpenMessageInfo(message),
-    [doOpenMessageInfo]
-  );
+    const onLeftSwipe = useCallback(
+      (message: ChatMessageIMessage) => doOpenMessageInfo(message),
+      [doOpenMessageInfo]
+    );
 
-  const renderMessageBox = useCallback(
-    (props: MessageProps<ChatMessageIMessage>) => {
+    const renderMessageBox = (props: MessageProps<ChatMessageIMessage>) => {
       return (
         <ChatMessageBox
           {...props}
+          // onMessageLayout={onLayout}
           setReplyOnSwipeOpen={setReplyMessage}
-          onMessageLayout={onLayout}
           onLeftSwipeOpen={onLeftSwipe}
         />
       );
-    },
-    [onLeftSwipe, setReplyMessage]
-  );
+    };
 
-  const renderChatFooter = useCallback(() => {
-    return (
-      <View
-        style={{
-          backgroundColor: Colors.white,
-        }}
-      >
-        {replyMessage ? (
-          <ReplyMessageBar message={replyMessage} clearReply={() => setReplyMessage(null)} />
-        ) : null}
-
+    const renderChatFooter = useCallback(() => {
+      return (
         <View
           style={{
-            flexDirection: 'row',
-            gap: 2,
+            backgroundColor: Colors.white,
           }}
         >
-          {assets.map((value, index) => {
-            // const isVideo = value.type?.startsWith('video') ?? false;
-            return (
-              <View
-                key={index}
-                style={{
-                  borderRadius: 15,
-                }}
-              >
-                <ImageBackground
+          {replyMessage ? (
+            <ReplyMessageBar message={replyMessage} clearReply={() => setReplyMessage(null)} />
+          ) : null}
+
+          <View
+            style={{
+              flexDirection: 'row',
+              gap: 2,
+            }}
+          >
+            {assets.map((value, index) => {
+              // const isVideo = value.type?.startsWith('video') ?? false;
+              return (
+                <View
                   key={index}
-                  source={{ uri: value.uri || value.originalPath }}
                   style={{
-                    width: 65,
-                    height: 65,
-                    alignItems: 'flex-end',
-                    padding: 4,
+                    borderRadius: 15,
                   }}
                 >
-                  <TouchableOpacity onPress={() => setAssets(assets.filter((_, i) => i !== index))}>
-                    <Close size={'sm'} color="white" />
-                  </TouchableOpacity>
-                </ImageBackground>
-              </View>
-            );
-          })}
+                  <ImageBackground
+                    key={index}
+                    source={{ uri: value.uri || value.originalPath }}
+                    style={{
+                      width: 65,
+                      height: 65,
+                      alignItems: 'flex-end',
+                      padding: 4,
+                    }}
+                  >
+                    <TouchableOpacity
+                      onPress={() => setAssets(assets.filter((_, i) => i !== index))}
+                    >
+                      <Close size={'sm'} color="white" />
+                    </TouchableOpacity>
+                  </ImageBackground>
+                </View>
+              );
+            })}
+          </View>
         </View>
-      </View>
-    );
-  }, [assets, replyMessage, setAssets, setReplyMessage]);
-
-  const imagesIcon = useCallback(() => <Images />, []);
-  const renderCustomInputToolbar = useCallback(
-    (props: InputToolbarProps<IMessage>) => {
-      return (
-        <>
-          <InputToolbar
-            {...props}
-            renderComposer={(props) => (
-              <Composer
-                {...props}
-                textInputStyle={{
-                  color: isDarkMode ? 'white' : 'black',
-                }}
-              />
-            )}
-            renderSend={(props) => (
-              <Send
-                {...props}
-                disabled={!props.text && assets?.length === 0}
-                text={props.text || ' '}
-                containerStyle={styles.send}
-              >
-                <SendChat
-                  size={'md'}
-                  color={!props.text && assets?.length === 0 ? 'grey' : 'blue'}
-                />
-              </Send>
-            )}
-            renderActions={() => (
-              <Actions
-                icon={imagesIcon}
-                onPressActionButton={async () => {
-                  const medias = await launchImageLibrary({
-                    mediaType: 'mixed',
-                    selectionLimit: 10,
-                  });
-                  if (medias.didCancel) return;
-                  setAssets(medias.assets ?? []);
-                }}
-              />
-            )}
-            containerStyle={[
-              styles.inputContainer,
-              {
-                backgroundColor: isDarkMode ? Colors.slate[900] : Colors.white,
-                borderTopWidth: 0,
-                borderRadius: 10,
-              },
-            ]}
-          />
-        </>
       );
-    },
-    [isDarkMode, assets?.length, imagesIcon, setAssets]
-  );
+    }, [assets, replyMessage, setAssets, setReplyMessage]);
 
-  const renderAvatar = useCallback((props: AvatarProps<IMessage>) => {
-    const prop = props as AvatarProps<ChatMessageIMessage>;
-    const odinId = prop.currentMessage?.fileMetadata.senderOdinId;
+    const imagesIcon = useCallback(() => <Images />, []);
+    const renderCustomInputToolbar = useCallback(
+      (props: InputToolbarProps<IMessage>) => {
+        return (
+          <>
+            <InputToolbar
+              {...props}
+              renderComposer={(props) => (
+                <Composer
+                  {...props}
+                  textInputStyle={{
+                    color: isDarkMode ? 'white' : 'black',
+                  }}
+                />
+              )}
+              renderSend={(props) => (
+                <Send
+                  {...props}
+                  disabled={!props.text && assets?.length === 0}
+                  text={props.text || ' '}
+                  containerStyle={styles.send}
+                >
+                  <SendChat
+                    size={'md'}
+                    color={!props.text && assets?.length === 0 ? 'grey' : 'blue'}
+                  />
+                </Send>
+              )}
+              renderActions={() => (
+                <Actions
+                  icon={imagesIcon}
+                  onPressActionButton={async () => {
+                    const medias = await launchImageLibrary({
+                      mediaType: 'mixed',
+                      selectionLimit: 10,
+                    });
+                    if (medias.didCancel) return;
+                    setAssets(medias.assets ?? []);
+                  }}
+                />
+              )}
+              containerStyle={[
+                styles.inputContainer,
+                {
+                  backgroundColor: isDarkMode ? Colors.slate[900] : Colors.white,
+                  borderTopWidth: 0,
+                  borderRadius: 10,
+                },
+              ]}
+            />
+          </>
+        );
+      },
+      [isDarkMode, assets?.length, imagesIcon, setAssets]
+    );
 
-    if (!odinId) {
+    const renderAvatar = useCallback((props: AvatarProps<IMessage>) => {
+      const prop = props as AvatarProps<ChatMessageIMessage>;
+      const odinId = prop.currentMessage?.fileMetadata.senderOdinId;
+
+      if (!odinId) {
+        return (
+          <Avatar
+            renderAvatar={(_: Omit<AvatarProps<ChatMessageIMessage>, 'renderAvatar'>) => {
+              return (
+                <OwnerAvatar
+                  style={{
+                    width: 30,
+                    height: 30,
+                    marginRight: 0,
+                  }}
+                />
+              );
+            }}
+          />
+        );
+      }
       return (
         <Avatar
           renderAvatar={(_: Omit<AvatarProps<ChatMessageIMessage>, 'renderAvatar'>) => {
             return (
-              <OwnerAvatar
+              <AppAvatar
+                odinId={odinId}
                 style={{
                   width: 30,
                   height: 30,
@@ -248,56 +264,40 @@ export const ChatDetail = ({
           }}
         />
       );
-    }
+    }, []);
+
     return (
-      <Avatar
-        renderAvatar={(_: Omit<AvatarProps<ChatMessageIMessage>, 'renderAvatar'>) => {
-          return (
-            <AppAvatar
-              odinId={odinId}
-              style={{
-                width: 30,
-                height: 30,
-                marginRight: 0,
-              }}
-            />
-          );
+      <GiftedChat<ChatMessageIMessage>
+        messages={messages}
+        onSend={doSend}
+        infiniteScroll
+        scrollToBottom
+        onLongPress={(e, _, m: HighlightedChatMessage) => onLongPress(e, m)}
+        alwaysShowSend
+        isKeyboardInternallyHandled={true}
+        keyboardShouldPersistTaps="never"
+        renderMessageImage={(prop: MessageImageProps<ChatMessageIMessage>) => (
+          <ImageMessage {...prop} />
+        )}
+        renderCustomView={(prop: BubbleProps<ChatMessageIMessage>) => (
+          <RenderReplyMessageView {...prop} />
+        )}
+        renderBubble={(prop) => <RenderBubble {...prop} onReactionClick={doOpenReactionModal} />}
+        renderMessageText={(prop) => <RenderMessageText {...prop} />}
+        renderMessage={renderMessageBox}
+        // renderChatFooter instead of renderFooter as the renderFooter renders within the scrollView
+        renderChatFooter={renderChatFooter}
+        showUserAvatar={false}
+        renderUsernameOnMessage={isGroup}
+        renderAvatar={isGroup ? renderAvatar : null}
+        renderInputToolbar={renderCustomInputToolbar}
+        user={{
+          _id: identity || '',
         }}
       />
     );
-  }, []);
-
-  return (
-    <GiftedChat<ChatMessageIMessage>
-      messages={messages}
-      onSend={doSend}
-      infiniteScroll
-      scrollToBottom
-      onLongPress={(e, _, m: ChatMessageIMessage) => onLongPress(e, m)}
-      alwaysShowSend
-      isKeyboardInternallyHandled={true}
-      keyboardShouldPersistTaps="never"
-      renderMessageImage={(prop: MessageImageProps<ChatMessageIMessage>) => (
-        <ImageMessage {...prop} />
-      )}
-      renderCustomView={(prop: BubbleProps<ChatMessageIMessage>) => (
-        <RenderReplyMessageView {...prop} />
-      )}
-      renderBubble={(prop) => <RenderBubble {...prop} onReactionClick={doOpenReactionModal} />}
-      renderMessageText={(prop) => <RenderMessageText {...prop} />}
-      renderMessage={renderMessageBox}
-      // renderChatFooter instead of renderFooter as the renderFooter renders within the scrollView
-      renderChatFooter={renderChatFooter}
-      showUserAvatar={false}
-      renderUsernameOnMessage={isGroup}
-      renderAvatar={isGroup ? renderAvatar : null}
-      renderInputToolbar={renderCustomInputToolbar}
-      user={{
-        _id: identity || '',
-      }}
-    />
-  );
-};
+  }
+);
 
 const styles = StyleSheet.create({
   inputContainer: {
@@ -387,6 +387,7 @@ const RenderBubble = memo(
 
     const hasReactions = (reactions && reactions?.length > 0) || false;
     const flatReactions = reactions?.flatMap((val) => val.fileMetadata.appData.content.message);
+
     return (
       <>
         <Bubble

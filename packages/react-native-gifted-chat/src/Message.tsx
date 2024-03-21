@@ -1,14 +1,14 @@
-import PropTypes from 'prop-types'
-import React from 'react'
-import { View, StyleSheet, ViewStyle, LayoutChangeEvent } from 'react-native'
+import PropTypes from 'prop-types';
+import React from 'react';
+import { View, StyleSheet, ViewStyle, LayoutChangeEvent } from 'react-native';
 
-import { Avatar, AvatarProps } from './Avatar'
-import Bubble from './Bubble'
-import { SystemMessage, SystemMessageProps } from './SystemMessage'
-import { Day, DayProps } from './Day'
+import { Avatar, AvatarProps } from './Avatar';
+import Bubble from './Bubble';
+import { SystemMessage, SystemMessageProps } from './SystemMessage';
+import { Day, DayProps } from './Day';
 
-import { StylePropType, isSameUser } from './utils'
-import { IMessage, User, LeftRightStyle } from './Models'
+import { StylePropType, isSameUser } from './utils';
+import { IMessage, User, LeftRightStyle } from './Models';
 
 const styles = {
   left: StyleSheet.create({
@@ -29,27 +29,27 @@ const styles = {
       marginRight: 8,
     },
   }),
-}
+};
 
 export interface MessageProps<TMessage extends IMessage> {
-  key: any
-  showUserAvatar?: boolean
-  position: 'left' | 'right'
-  currentMessage?: TMessage
-  nextMessage?: TMessage
-  previousMessage?: TMessage
-  user: User
-  inverted?: boolean
-  containerStyle?: LeftRightStyle<ViewStyle>
-  renderBubble?(props: Bubble['props']): React.ReactNode
-  renderDay?(props: DayProps<TMessage>): React.ReactNode
-  renderSystemMessage?(props: SystemMessageProps<TMessage>): React.ReactNode
-  renderAvatar?(props: AvatarProps<TMessage>): React.ReactNode
+  key: any;
+  showUserAvatar?: boolean;
+  position: 'left' | 'right';
+  currentMessage?: TMessage;
+  nextMessage?: TMessage;
+  previousMessage?: TMessage;
+  user: User;
+  inverted?: boolean;
+  containerStyle?: LeftRightStyle<ViewStyle>;
+  renderBubble?(props: Bubble['props']): React.ReactNode;
+  renderDay?(props: DayProps<TMessage>): React.ReactNode;
+  renderSystemMessage?(props: SystemMessageProps<TMessage>): React.ReactNode;
+  renderAvatar?(props: AvatarProps<TMessage>): React.ReactNode;
   shouldUpdateMessage?(
     props: MessageProps<IMessage>,
     nextProps: MessageProps<IMessage>,
-  ): boolean
-  onMessageLayout?(event: LayoutChangeEvent): void
+  ): boolean;
+  onMessageLayout?(event: LayoutChangeEvent): void;
 }
 
 export default class Message<
@@ -70,7 +70,7 @@ export default class Message<
     inverted: true,
     shouldUpdateMessage: undefined,
     onMessageLayout: undefined,
-  }
+  };
 
   static propTypes = {
     renderAvatar: PropTypes.func,
@@ -90,19 +90,19 @@ export default class Message<
     }),
     shouldUpdateMessage: PropTypes.func,
     onMessageLayout: PropTypes.func,
-  }
+  };
 
   shouldComponentUpdate(nextProps: MessageProps<TMessage>) {
-    const next = nextProps.currentMessage!
-    const current = this.props.currentMessage!
-    const { previousMessage, nextMessage } = this.props
-    const nextPropsMessage = nextProps.nextMessage
-    const nextPropsPreviousMessage = nextProps.previousMessage
+    const next = nextProps.currentMessage!;
+    const current = this.props.currentMessage!;
+    const { previousMessage, nextMessage } = this.props;
+    const nextPropsMessage = nextProps.nextMessage;
+    const nextPropsPreviousMessage = nextProps.previousMessage;
 
     const shouldUpdate =
       (this.props.shouldUpdateMessage &&
         this.props.shouldUpdateMessage(this.props, nextProps)) ||
-      false
+      false;
 
     return (
       next.sent !== current.sent ||
@@ -116,40 +116,40 @@ export default class Message<
       previousMessage !== nextPropsPreviousMessage ||
       nextMessage !== nextPropsMessage ||
       shouldUpdate
-    )
+    );
   }
 
   renderDay() {
     if (this.props.currentMessage && this.props.currentMessage.createdAt) {
-      const { containerStyle, onMessageLayout, ...props } = this.props
+      const { containerStyle, ...props } = this.props;
       if (this.props.renderDay) {
-        return this.props.renderDay(props)
+        return this.props.renderDay(props);
       }
-      return <Day {...props} />
+      return <Day {...props} />;
     }
-    return null
+    return null;
   }
 
   renderBubble() {
-    const { containerStyle, onMessageLayout, ...props } = this.props
+    const { containerStyle, ...props } = this.props;
     if (this.props.renderBubble) {
-      return this.props.renderBubble(props)
+      return this.props.renderBubble(props);
     }
     // @ts-ignore
-    return <Bubble {...props} />
+    return <Bubble {...props} />;
   }
 
   renderSystemMessage() {
-    const { containerStyle, onMessageLayout, ...props } = this.props
+    const { containerStyle, ...props } = this.props;
 
     if (this.props.renderSystemMessage) {
-      return this.props.renderSystemMessage(props)
+      return this.props.renderSystemMessage(props);
     }
-    return <SystemMessage {...props} />
+    return <SystemMessage {...props} />;
   }
 
   renderAvatar() {
-    const { user, currentMessage, showUserAvatar } = this.props
+    const { user, currentMessage, showUserAvatar } = this.props;
 
     if (
       user &&
@@ -159,7 +159,7 @@ export default class Message<
       user._id === currentMessage.user._id &&
       !showUserAvatar
     ) {
-      return null
+      return null;
     }
 
     if (
@@ -167,11 +167,11 @@ export default class Message<
       currentMessage.user &&
       currentMessage.user.avatar === null
     ) {
-      return null
+      return null;
     }
 
-    const { containerStyle, onMessageLayout, ...props } = this.props
-    return <Avatar {...props} />
+    const { containerStyle, ...props } = this.props;
+    return <Avatar {...props} />;
   }
 
   render() {
@@ -181,9 +181,9 @@ export default class Message<
       nextMessage,
       position,
       containerStyle,
-    } = this.props
+    } = this.props;
     if (currentMessage) {
-      const sameUser = isSameUser(currentMessage, nextMessage!)
+      const sameUser = isSameUser(currentMessage, nextMessage!);
       return (
         <View onLayout={onMessageLayout}>
           {this.renderDay()}
@@ -204,8 +204,8 @@ export default class Message<
             </View>
           )}
         </View>
-      )
+      );
     }
-    return null
+    return null;
   }
 }
