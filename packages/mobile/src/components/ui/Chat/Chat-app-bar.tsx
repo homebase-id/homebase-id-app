@@ -31,10 +31,9 @@ export const ChatAppBar = ({
       }}
     >
       <HeaderBackButton
-        style={{ left: 0 }}
+        style={{ left: 0, marginRight: -10 }}
         canGoBack={true}
         onPress={goBack}
-        label={''}
         labelVisible={false}
         tintColor={isDarkMode ? Colors.white : Colors.black}
       />

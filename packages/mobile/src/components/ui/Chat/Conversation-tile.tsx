@@ -257,7 +257,6 @@ const styles = StyleSheet.create({
   tinyLogo: {
     objectFit: 'cover',
     marginLeft: 0,
-    marginRight: 16,
     width: 48,
     height: 48,
     borderRadius: 24,
