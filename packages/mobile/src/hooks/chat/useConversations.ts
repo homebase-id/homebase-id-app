@@ -38,6 +38,7 @@ export const useConversations = () => {
         }
       )
     );
+
     convoWithMessage.sort((a, b) => {
       if (!a.lastMessage) return -1;
       if (!b.lastMessage) return 1;
