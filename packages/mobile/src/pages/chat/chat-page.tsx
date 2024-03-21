@@ -61,7 +61,6 @@ import { useDarkMode } from '../../hooks/useDarkMode';
 import useContact from '../../hooks/contact/useContact';
 import { useMarkMessagesAsRead } from '../../hooks/chat/useMarkMessagesAsRead';
 import { ChatDeliveryIndicator } from '../../components/ui/Chat/Chat-Delivery-Indicator';
-import Toast from 'react-native-toast-message';
 import PortalView, { HighlightedChatMessage } from '../../components/ui/Chat/Chat-Reaction';
 import { Host } from 'react-native-portalize';
 import { useChatReaction } from '../../hooks/chat/useChatReaction';
@@ -71,6 +70,7 @@ import { ReactionsModal } from '../../components/ui/Modal/ReactionsModal';
 import { Avatar as AppAvatar, OwnerAvatar } from '../../components/ui/Chat/Conversation-tile';
 import { ChatConnectedState } from '../../components/ui/Chat/Chat-Connected-state';
 import { ConnectionName } from '../../components/ui/Name';
+import { ErrorNotification } from '../../components/ui/Alert/ErrorNotification';
 
 export type ChatProp = NativeStackScreenProps<AppStackParamList, 'ChatScreen'>;
 
@@ -84,20 +84,52 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
   const swipeableRowRef = useRef<Swipeable | null>(null);
   const clearReplyMessage = () => setReplyMessage(null);
   const identity = useAuth().getIdentity();
+
+  const [assets, setAssets] = useState<Asset[]>([]);
+
+  // Messages
   const { data: chatMessages } = useChatMessages({
     conversationId: route.params.convoId,
   }).all;
-  const [assets, setAssets] = useState<Asset[]>([]);
 
+  const messages: ChatMessageIMessage[] = useMemo(
+    () =>
+      (
+        chatMessages?.pages
+          .flatMap((page) => page.searchResults)
+          ?.filter(Boolean) as DriveSearchResult<ChatMessage>[]
+      )?.map<ChatMessageIMessage>((value) => {
+        // Mapping done here, because the chat component expects a different format
+        return {
+          _id: value.fileMetadata.appData.uniqueId ?? value.fileId ?? getNewId(),
+          createdAt: value.fileMetadata.created,
+          text: value.fileMetadata.appData.content.message,
+          user: {
+            _id: value.fileMetadata.senderOdinId || identity || '',
+            name: value.fileMetadata.senderOdinId || identity || '',
+          },
+          sent: value.fileMetadata.appData.content.deliveryStatus === 20,
+          received: value.fileMetadata.appData.content.deliveryStatus === 40,
+          pending: value.fileMetadata.appData.content.deliveryStatus === 15,
+          image:
+            value.fileMetadata.payloads?.length > 0
+              ? value.fileMetadata.payloads.length.toString()
+              : undefined,
+          ...value,
+        };
+      }) || [],
+    [chatMessages, identity]
+  );
+
+  // Conversation & Contact
   let { data: conversationContent } = useConversation({
     conversationId: route.params.convoId,
   }).single;
-
-  const { mutateAsync: inviteRecipient } = useConversation().inviteRecipient;
-
   const contact = useContact(
     (conversationContent?.fileMetadata.appData.content as SingleConversation | undefined)?.recipient
   ).fetch.data;
+
+  const { mutateAsync: inviteRecipient } = useConversation().inviteRecipient;
 
   const title = useMemo(
     () =>
@@ -113,7 +145,10 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
   ) {
     conversationContent = ConversationWithYourself;
   }
+  const isGroup =
+    conversationContent && 'recipients' in conversationContent.fileMetadata.appData.content;
 
+  const imagesIcon = useCallback(() => <Images />, []);
   const renderCustomInputToolbar = useCallback(
     (props: InputToolbarProps<IMessage>) => {
       return (
@@ -143,7 +178,7 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
             )}
             renderActions={() => (
               <Actions
-                icon={PickImage}
+                icon={imagesIcon}
                 onPressActionButton={async () => {
                   const medias = await launchImageLibrary({
                     mediaType: 'mixed',
@@ -166,24 +201,10 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
         </>
       );
     },
-    [assets?.length, isDarkMode]
-  );
-
-  const updateRowRef = useCallback(
-    (ref: any) => {
-      if (
-        ref &&
-        replyMessage &&
-        ref.props.children.props.currentMessage?._id === replyMessage._id
-      ) {
-        swipeableRowRef.current = ref;
-      }
-    },
-    [replyMessage]
+    [assets?.length, isDarkMode, imagesIcon]
   );
 
   const [layoutHeight, setLayoutHeight] = useState(0);
-
   const onLayout = (e: LayoutChangeEvent) => {
     const { height } = e.nativeEvent.layout;
     setLayoutHeight(height);
@@ -217,6 +238,18 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
     [conversationContent, navigation]
   );
 
+  const updateRowRef = useCallback(
+    (ref: any) => {
+      if (
+        ref &&
+        replyMessage &&
+        ref.props.children.props.currentMessage?._id === replyMessage._id
+      ) {
+        swipeableRowRef.current = ref;
+      }
+    },
+    [replyMessage]
+  );
   const renderMessageBox = useCallback(
     (props: MessageProps<ChatMessageIMessage>) => {
       return (
@@ -232,7 +265,7 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
     [onLeftSwipe, updateRowRef]
   );
 
-  const renderChatFooter = () => {
+  const renderChatFooter = useCallback(() => {
     return (
       <View
         style={{
@@ -278,36 +311,7 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
         </View>
       </View>
     );
-  };
-
-  const messages: ChatMessageIMessage[] = useMemo(
-    () =>
-      (
-        chatMessages?.pages
-          .flatMap((page) => page.searchResults)
-          ?.filter(Boolean) as DriveSearchResult<ChatMessage>[]
-      )?.map<ChatMessageIMessage>((value) => {
-        // Mapping done here, because the chat component expects a different format
-        return {
-          _id: value.fileMetadata.appData.uniqueId ?? value.fileId ?? getNewId(),
-          createdAt: value.fileMetadata.created,
-          text: value.fileMetadata.appData.content.message,
-          user: {
-            _id: value.fileMetadata.senderOdinId || identity || '',
-            name: value.fileMetadata.senderOdinId || identity || '',
-          },
-          sent: value.fileMetadata.appData.content.deliveryStatus === 20,
-          received: value.fileMetadata.appData.content.deliveryStatus === 40,
-          pending: value.fileMetadata.appData.content.deliveryStatus === 15,
-          image:
-            value.fileMetadata.payloads?.length > 0
-              ? value.fileMetadata.payloads.length.toString()
-              : undefined,
-          ...value,
-        };
-      }) || [],
-    [chatMessages, identity]
-  );
+  }, [assets, replyMessage]);
 
   const {
     mutate: sendMessage,
@@ -340,7 +344,6 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
 
   const doSend = useCallback(
     (message: IMessage[]) => {
-      console.log('Sending message', message);
       sendMessage({
         conversationId: route.params.convoId,
         message: message[0].text,
@@ -371,36 +374,6 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
     [conversationContent, route.params.convoId, sendMessage, assets, replyMessage]
   );
 
-  const renderMessageText = useCallback((props: MessageTextProps<IMessage>) => {
-    const message = props.currentMessage as ChatMessageIMessage;
-    const content = message?.fileMetadata.appData.content;
-    const isEmojiOnly =
-      (content?.message?.match(/^\p{Extended_Pictographic}/u) &&
-        !content.message?.match(/[0-9a-zA-Z]/)) ??
-      false;
-    return (
-      <MessageText
-        {...props}
-        linkStyle={{
-          left: {
-            color: Colors.indigo[500],
-          },
-          right: {
-            color: Colors.indigo[500],
-          },
-        }}
-        customTextStyle={
-          isEmojiOnly
-            ? {
-                fontSize: 48,
-                lineHeight: 60,
-              }
-            : undefined
-        }
-      />
-    );
-  }, []);
-
   // ref
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const reactionModalRef = useRef<BottomSheetModal>(null);
@@ -417,21 +390,11 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
   }, []);
 
   if (!conversationContent) return null;
-  if (sendMessageError) {
-    Toast.show({
-      type: 'error',
-      text1: 'Error sending message',
-      text2: sendMessageError.message,
-      position: 'bottom',
-    });
-    console.error(sendMessageError);
-  }
-
-  const isGroup = 'recipients' in conversationContent.fileMetadata.appData.content;
 
   return (
     <BottomSheetModalProvider>
       <Host>
+        <ErrorNotification error={sendMessageError} />
         <View
           style={{
             paddingBottom: replyMessage && !Keyboard.isVisible() ? insets.bottom : 0,
@@ -468,7 +431,7 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
               <RenderReplyMessageView {...prop} />
             )}
             renderBubble={(prop) => <RenderBubble {...prop} onReactionClick={openReactionModal} />}
-            renderMessageText={renderMessageText}
+            renderMessageText={(prop) => <RenderMessageText {...prop} />}
             renderMessage={renderMessageBox}
             // renderChatFooter instead of renderFooter as the renderFooter renders within the scrollView
             renderChatFooter={renderChatFooter}
@@ -548,6 +511,36 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
     </BottomSheetModalProvider>
   );
 };
+
+const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
+  const message = props.currentMessage as ChatMessageIMessage;
+  const content = message?.fileMetadata.appData.content;
+  const isEmojiOnly =
+    (content?.message?.match(/^\p{Extended_Pictographic}/u) &&
+      !content.message?.match(/[0-9a-zA-Z]/)) ??
+    false;
+  return (
+    <MessageText
+      {...props}
+      linkStyle={{
+        left: {
+          color: Colors.indigo[500],
+        },
+        right: {
+          color: Colors.indigo[500],
+        },
+      }}
+      customTextStyle={
+        isEmojiOnly
+          ? {
+              fontSize: 48,
+              lineHeight: 60,
+            }
+          : undefined
+      }
+    />
+  );
+});
 
 const RenderBubble = memo(
   (
@@ -754,8 +747,6 @@ const RenderReplyMessageView = memo((props: BubbleProps<ChatMessageIMessage>) =>
     )
   );
 });
-
-const PickImage = () => <Images />;
 
 const styles = StyleSheet.create({
   inputContainer: {
