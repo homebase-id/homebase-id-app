@@ -117,7 +117,7 @@ export const ChatDetail = memo(
       return (
         <View
           style={{
-            backgroundColor: Colors.white,
+            backgroundColor: isDarkMode ? Colors.black : Colors.white,
           }}
         >
           {replyMessage ? (
