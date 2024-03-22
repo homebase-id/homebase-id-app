@@ -11,6 +11,8 @@ import { ChatMessage } from '../../provider/chat/ChatProvider';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import { ChatMessageIMessage } from './ChatDetail';
 
+import { AudioMessage } from './AudioMessage';
+
 const ImageMessage = memo((props: MessageImageProps<ChatMessageIMessage>) => {
   if (!props.currentMessage) return null;
   return <MediaGallery msg={props.currentMessage} />;
@@ -55,6 +57,9 @@ const MediaGallery = ({ msg: currentMessage }: { msg: DriveSearchResult<ChatMess
               }}
             />
           );
+        }
+        if (item.contentType.startsWith('audio/')) {
+          return <AudioMessage key={item.key} fileId={currentMessage.fileId} payload={item} />;
         }
         return (
           <OdinImage

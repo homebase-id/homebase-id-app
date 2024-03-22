@@ -1,5 +1,4 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { IMessage } from 'react-native-gifted-chat';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AppStackParamList } from '../../app/App';
@@ -41,7 +40,6 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
   const identity = useAuth().getIdentity();
 
   const [assets, setAssets] = useState<Asset[]>([]);
-
   // Messages
   const { data: chatMessages } = useChatMessages({
     conversationId: route.params.convoId,
@@ -149,7 +147,7 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
   useMarkMessagesAsRead({ conversation: conversationContent || undefined, messages });
 
   const doSend = useCallback(
-    (message: IMessage[]) => {
+    (message: ChatMessageIMessage[]) => {
       sendMessage({
         conversationId: route.params.convoId,
         message: message[0].text,
