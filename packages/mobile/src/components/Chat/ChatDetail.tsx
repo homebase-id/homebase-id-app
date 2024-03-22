@@ -40,7 +40,6 @@ import ChatMessageBox from '../../components/Chat/Chat-Message-box';
 import { OdinImage } from '../../components/ui/OdinImage/OdinImage';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { ChatDeliveryIndicator } from '../../components/Chat/Chat-Delivery-Indicator';
-import { HighlightedChatMessage } from '../../components/Chat/Chat-Reaction';
 import { useChatReaction } from '../../hooks/chat/useChatReaction';
 import { Avatar as AppAvatar, OwnerAvatar } from '../../components/Chat/Conversation-tile';
 import { ConnectionName } from '../../components/ui/Name';
@@ -74,7 +73,7 @@ export const ChatDetail = memo(
       message,
     }: {
       coords: { x: number; y: number };
-      message: HighlightedChatMessage;
+      message: ChatMessageIMessage;
     }) => void;
     doOpenMessageInfo: (message: ChatMessageIMessage) => void;
     doOpenReactionModal: (message: ChatMessageIMessage) => void;
@@ -88,19 +87,12 @@ export const ChatDetail = memo(
     const { isDarkMode } = useDarkMode();
     const identity = useAuth().getIdentity();
 
-    // @2002Bishwajeet, something doesn't add up here.. The layoutHeight is overwritten per message, as the state is a single number but each message calls the onMessageLayout.. I don't think this can work like that
-    // const [layoutHeight, setLayoutHeight] = useState(0);
-    // const onLayout = (e: LayoutChangeEvent) => {
-    //   const { height } = e.nativeEvent.layout;
-    //   setLayoutHeight(height);
-    // };
-
     const onLongPress = useCallback(
       (e: GestureResponderEvent, message: ChatMessageIMessage) => {
         const { pageY, locationY } = e.nativeEvent;
         const y = pageY - locationY;
 
-        doSelectMessage({ coords: { x: 0, y }, message: { layoutHeight: 0, ...message } });
+        doSelectMessage({ coords: { x: 0, y }, message });
       },
       [doSelectMessage]
     );

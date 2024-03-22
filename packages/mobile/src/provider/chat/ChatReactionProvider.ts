@@ -16,7 +16,7 @@ import {
   uploadFile,
 } from '@youfoundation/js-lib/core';
 import { ChatDrive } from './ConversationProvider';
-import { getNewId, jsonStringify64 } from '@youfoundation/js-lib/helpers';
+import { assertIfDefined, getNewId, jsonStringify64 } from '@youfoundation/js-lib/helpers';
 import { appId } from '../../hooks/auth/useAuth';
 
 export const ChatReactionFileType = 7979;
@@ -32,6 +32,10 @@ export const getReactions = async (
   conversationId: string,
   messageId: string
 ) => {
+  assertIfDefined('dotYouClient', dotYouClient);
+  assertIfDefined('conversationId', conversationId);
+  assertIfDefined('messageId', messageId);
+
   const params: FileQueryParams = {
     targetDrive: ChatDrive,
     groupId: [messageId],
@@ -72,18 +76,18 @@ export const uploadReaction = async (
     },
     transitOptions: distribute
       ? {
-        recipients: [...recipients],
-        schedule: ScheduleOptions.SendNowAwaitResponse,
-        sendContents: SendContents.All,
-        useGlobalTransitId: true,
-        useAppNotification: true,
-        appNotificationOptions: {
-          appId: appId,
-          typeId: conversationId,
-          tagId: getNewId(),
-          silent: false,
-        },
-      }
+          recipients: [...recipients],
+          schedule: ScheduleOptions.SendNowAwaitResponse,
+          sendContents: SendContents.All,
+          useGlobalTransitId: true,
+          useAppNotification: true,
+          appNotificationOptions: {
+            appId: appId,
+            typeId: conversationId,
+            tagId: getNewId(),
+            silent: false,
+          },
+        }
       : undefined,
   };
 

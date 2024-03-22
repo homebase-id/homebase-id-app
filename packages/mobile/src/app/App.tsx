@@ -112,6 +112,12 @@ const INCLUDED_QUERY_KEYS = [
   'conversations',
   'chat-reaction',
   'connectionDetails',
+
+  // Small data (blobs to local file Uri)
+  'image',
+
+  // Big data (base64 uri's)
+  // 'tinyThumb',
 ];
 const persistOptions: Omit<PersistQueryClientOptions, 'queryClient'> = {
   buster: '202403',
