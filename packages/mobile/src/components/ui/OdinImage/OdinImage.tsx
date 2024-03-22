@@ -15,6 +15,8 @@ export interface OdinImageProps {
   odinId?: string;
   targetDrive: TargetDrive;
   fileId: string | undefined;
+  fileKey?: string;
+  lastModified?: number;
   fit?: 'cover' | 'contain';
   imageSize?: { width: number; height: number };
   alt?: string;
@@ -22,9 +24,7 @@ export interface OdinImageProps {
   previewThumbnail?: EmbeddedThumb;
   avoidPayload?: boolean;
   enableZoom?: boolean;
-  fileKey?: string;
   style?: ImageStyle;
-  svgPlaceHolderStyle?: ImageStyle;
   onClick?: () => void;
 }
 
@@ -34,6 +34,7 @@ export const OdinImage = memo(
     targetDrive,
     fileId,
     fileKey,
+    lastModified,
     fit,
     imageSize,
     alt,
@@ -42,7 +43,6 @@ export const OdinImage = memo(
     avoidPayload,
     enableZoom,
     style,
-    svgPlaceHolderStyle,
     onClick,
   }: OdinImageProps) => {
     const loadSize = {
@@ -66,12 +66,12 @@ export const OdinImage = memo(
     );
     const skipTiny = !!previewThumbnail || !!cachedImage;
 
-    const { data: tinyThumb } = useTinyThumb(
+    const { data: tinyThumb } = useTinyThumb({
       odinId,
-      !skipTiny ? fileId : undefined,
-      fileKey,
-      targetDrive
-    );
+      imageFileId: !skipTiny ? fileId : undefined,
+      imageFileKey: fileKey,
+      imageDrive: targetDrive,
+    });
     const previewUrl = cachedImage?.url || embeddedThumbUrl || tinyThumb?.url;
 
     const naturalSize: ImageSize | undefined = tinyThumb
@@ -83,14 +83,15 @@ export const OdinImage = memo(
 
     const {
       fetch: { data: imageData },
-    } = useImage(
+    } = useImage({
       odinId,
-      enableZoom || loadSize !== undefined ? fileId : undefined,
-      fileKey,
-      targetDrive,
-      avoidPayload ? { pixelHeight: 200, pixelWidth: 200 } : loadSize,
-      naturalSize
-    );
+      imageFileId: enableZoom || loadSize !== undefined ? fileId : undefined,
+      imageFileKey: fileKey,
+      imageDrive: targetDrive,
+      size: avoidPayload ? { pixelHeight: 200, pixelWidth: 200 } : loadSize,
+      naturalSize,
+      lastModified,
+    });
 
     const hasCachedImage = !!cachedImage?.url;
 
@@ -101,7 +102,8 @@ export const OdinImage = memo(
         }}
       >
         {/* Blurry image */}
-        {!enableZoom && previewUrl ? (
+        {/* TODO: Check to add support for direct full loading for svg */}
+        {!enableZoom && previewUrl && cachedImage?.type !== 'image/svg+xml' ? (
           <Image
             source={{ uri: previewUrl }}
             style={{
@@ -142,7 +144,6 @@ export const OdinImage = memo(
             alt={alt || title}
             onClick={onClick}
             style={style}
-            svgPlaceHolderStyle={svgPlaceHolderStyle}
           />
         ) : null}
       </View>
@@ -158,7 +159,7 @@ const ZoomableImage = ({
   fit,
   enableZoom,
   onClick,
-  svgPlaceHolderStyle,
+
   contentType,
 }: {
   uri: string;
@@ -167,7 +168,7 @@ const ZoomableImage = ({
   style?: ImageStyle;
   fit?: 'cover' | 'contain';
   enableZoom?: boolean;
-  svgPlaceHolderStyle?: ImageStyle;
+
   onClick?: () => void;
 
   contentType?: ImageContentType;
@@ -178,7 +179,6 @@ const ZoomableImage = ({
         <View
           style={{
             ...imageSize,
-            ...svgPlaceHolderStyle,
           }}
         >
           <SvgUri

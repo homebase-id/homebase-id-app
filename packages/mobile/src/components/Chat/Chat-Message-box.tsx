@@ -1,23 +1,18 @@
 import { View, StyleSheet, Animated, LayoutChangeEvent } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
-import { Message, MessageProps } from 'react-native-gifted-chat';
-import { isSameDay, isSameUser } from 'react-native-gifted-chat/lib/utils';
-import { Info, Reply } from '../Icons/icons';
-import { ChatMessageIMessage } from '../../../pages/chat/chat-page';
+import { Message, MessageProps, isSameUser, isSameDay } from 'react-native-gifted-chat';
+import { ChatMessageIMessage } from './ChatDetail';
+import { Info, Reply } from '../ui/Icons/icons';
+import { useCallback } from 'react';
 
 type ChatMessageBoxProps = {
   setReplyOnSwipeOpen: (message: ChatMessageIMessage) => void;
   onLeftSwipeOpen: (message: ChatMessageIMessage) => void;
-  updateRowRef: (ref: any) => void;
-  onMessageLayout: (e: LayoutChangeEvent) => void;
+
+  onMessageLayout?: (e: LayoutChangeEvent) => void;
 } & MessageProps<ChatMessageIMessage>;
 
-const ChatMessageBox = ({
-  setReplyOnSwipeOpen,
-  updateRowRef,
-  onMessageLayout,
-  ...props
-}: ChatMessageBoxProps) => {
+const ChatMessageBox = ({ setReplyOnSwipeOpen, ...props }: ChatMessageBoxProps) => {
   const isNextMyMessage =
     props.currentMessage &&
     props.nextMessage &&
@@ -78,6 +73,7 @@ const ChatMessageBox = ({
   const onSwipeOpenAction = (direction: 'left' | 'right', swipeable: Swipeable) => {
     if (props.currentMessage && direction === 'right') {
       setReplyOnSwipeOpen({ ...props.currentMessage });
+      swipeable.close();
     } else {
       props.currentMessage && props.onLeftSwipeOpen({ ...props.currentMessage });
       swipeable.close();
@@ -86,7 +82,6 @@ const ChatMessageBox = ({
 
   return (
     <Swipeable
-      ref={updateRowRef}
       friction={3}
       overshootFriction={8}
       rightThreshold={40}
@@ -95,7 +90,7 @@ const ChatMessageBox = ({
       renderLeftActions={renderLeftAction}
       onSwipeableOpen={onSwipeOpenAction}
     >
-      <Message {...props} onMessageLayout={onMessageLayout} />
+      <Message {...props} />
     </Swipeable>
   );
 };

@@ -6,8 +6,8 @@ import { useChatReaction } from '../../hooks/chat/useChatReaction';
 
 import { GroupConversation, SingleConversation } from '../../provider/chat/ConversationProvider';
 import { AuthorName, ConnectionName } from '../../components/ui/Name';
-import { Avatar, OwnerAvatar } from '../../components/ui/Chat/Conversation-tile';
-import { InnerDeliveryIndicator } from '../../components/ui/Chat/Chat-Delivery-Indicator';
+import { Avatar, OwnerAvatar } from '../../components/Chat/Conversation-tile';
+import { InnerDeliveryIndicator } from '../../components/Chat/Chat-Delivery-Indicator';
 import { useDotYouClientContext } from 'feed-app-common';
 
 export type MessageInfoProp = NativeStackScreenProps<AppStackParamList, 'MessageInfo'>;

@@ -4,12 +4,17 @@ import { TargetDrive } from '@youfoundation/js-lib/core';
 import { getDecryptedThumbnailMeta } from '@youfoundation/js-lib/media';
 import { useDotYouClientContext } from 'feed-app-common';
 
-const useTinyThumb = (
-  odinId?: string,
-  imageFileId?: string,
-  imageFileKey?: string,
-  imageDrive?: TargetDrive
-) => {
+const useTinyThumb = ({
+  odinId,
+  imageFileId,
+  imageFileKey,
+  imageDrive,
+}: {
+  odinId?: string;
+  imageFileId?: string;
+  imageFileKey?: string;
+  imageDrive?: TargetDrive;
+}) => {
   const dotYouClient = useDotYouClientContext();
   const fetchImageData = async (
     odinId: string,
@@ -32,7 +37,7 @@ const useTinyThumb = (
   };
 
   return useQuery({
-    queryKey: ['tinyThumb', odinId, imageFileId, imageDrive?.alias],
+    queryKey: ['tinyThumb', odinId, imageFileId, imageDrive?.alias || ''],
     queryFn: () =>
       fetchImageData(odinId as string, imageFileId, imageFileKey as string, imageDrive),
     refetchOnMount: true,

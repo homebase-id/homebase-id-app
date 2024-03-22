@@ -1,9 +1,9 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Avatar, GroupAvatar, OwnerAvatar } from './Conversation-tile';
 import { Header, HeaderBackButton } from '@react-navigation/elements';
-import { useProfile } from '../../../hooks/profile/useProfile';
-import { Colors } from '../../../app/Colors';
-import { useDarkMode } from '../../../hooks/useDarkMode';
+import { useProfile } from '../../hooks/profile/useProfile';
+import { Colors } from '../../app/Colors';
+import { useDarkMode } from '../../hooks/useDarkMode';
 
 export const ChatAppBar = ({
   odinId,
@@ -31,18 +31,17 @@ export const ChatAppBar = ({
       }}
     >
       <HeaderBackButton
-        style={{ left: 0 }}
+        style={{ left: 0, marginRight: -10 }}
         canGoBack={true}
         onPress={goBack}
-        label={''}
         labelVisible={false}
         tintColor={isDarkMode ? Colors.white : Colors.black}
       />
       {!group ? (
         isSelf ? (
-          <OwnerAvatar style={styles.avatar} />
+          <OwnerAvatar style={styles.avatar} imageSize={{ width: 36, height: 36 }} />
         ) : (
-          <Avatar odinId={odinId} style={styles.avatar} />
+          <Avatar odinId={odinId} style={styles.avatar} imageSize={{ width: 36, height: 36 }} />
         )
       ) : (
         <GroupAvatar style={styles.avatar} />
@@ -75,5 +74,6 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     marginRight: 0,
+    borderRadius: 18,
   },
 });

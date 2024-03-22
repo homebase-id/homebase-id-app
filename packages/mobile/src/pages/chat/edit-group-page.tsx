@@ -3,7 +3,7 @@ import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import { AppStackParamList } from '../../app/App';
 import { useConversation } from '../../hooks/chat/useConversation';
 import { useCallback, useEffect, useState } from 'react';
-import { GroupAvatar } from '../../components/ui/Chat/Conversation-tile';
+import { GroupAvatar } from '../../components/Chat/Conversation-tile';
 import { Input } from '../../components/ui/Form/Input';
 import TextButton from '../../components/ui/Text/Text-Button';
 import { Header, HeaderBackButton } from '@react-navigation/elements';
