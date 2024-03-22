@@ -1,9 +1,9 @@
 import { FlatList } from 'react-native';
-import ConversationTile from '../components/ui/Chat/Conversation-tile';
+import ConversationTile from '../components/Chat/Conversation-tile';
 
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { AppStackParamList } from '../app/App';
-import { ConversationWithRecentMessage, useConversations } from '../hooks/chat/useConversations';
+import { useConversations } from '../hooks/chat/useConversations';
 import {
   ConversationWithYourselfId,
   SingleConversation,
@@ -49,6 +49,7 @@ const ConversationTileWithYourself = () => {
   const user = useProfile().data;
   const odinId = useAuth().getIdentity();
   const navigation = useNavigation<NavigationProp<AppStackParamList>>();
+  if (!user) return null;
   return (
     <ConversationTile
       odinId={odinId || ''}

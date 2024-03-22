@@ -11,18 +11,18 @@ import {
 
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 
-import { Colors } from '../../../app/Colors';
-import { Conversation } from '../../../provider/chat/ConversationProvider';
-import { useChatMessages } from '../../../hooks/chat/useChatMessages';
-import { ChatMessage } from '../../../provider/chat/ChatProvider';
-import { Users } from '../Icons/icons';
-import { useDarkMode } from '../../../hooks/useDarkMode';
+import { Colors } from '../../app/Colors';
+import { Conversation } from '../../provider/chat/ConversationProvider';
+import { useChatMessages } from '../../hooks/chat/useChatMessages';
+import { ChatMessage } from '../../provider/chat/ChatProvider';
+import { Users } from '../ui/Icons/icons';
+import { useDarkMode } from '../../hooks/useDarkMode';
 import { ellipsisAtMaxChar } from 'feed-app-common';
 import { ChatSentTimeIndicator } from './Chat-Sent-Time-Indicator';
-import useContact from '../../../hooks/contact/useContact';
-import { OdinImage } from '../OdinImage/OdinImage';
+import useContact from '../../hooks/contact/useContact';
+import { OdinImage } from '../ui/OdinImage/OdinImage';
 import { CONTACT_PROFILE_IMAGE_KEY, ContactConfig } from '@youfoundation/js-lib/network';
-import { useProfile } from '../../../hooks/profile/useProfile';
+import { useProfile } from '../../hooks/profile/useProfile';
 import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
 import { ChatDeliveryIndicator } from './Chat-Delivery-Indicator';
 
@@ -35,30 +35,35 @@ type ConversationTileProps = {
   isSelf?: boolean;
 };
 
-export const Avatar = (props: { odinId: string; style?: ImageStyle }) => {
+export const Avatar = (props: {
+  odinId: string;
+  style?: ImageStyle;
+  imageSize?: { width: number; height: number };
+}) => {
   const contact = useContact(props.odinId).fetch.data;
   return (
     <OdinImage
       fileId={contact?.fileId}
       fileKey={CONTACT_PROFILE_IMAGE_KEY}
       targetDrive={ContactConfig.ContactTargetDrive}
-      imageSize={{ width: 48, height: 48 }}
+      imageSize={props.imageSize || { width: 48, height: 48 }}
       avoidPayload={true}
       enableZoom={false}
       fit="cover"
       odinId={props.odinId}
-      svgPlaceHolderStyle={{
-        marginRight: 16,
-      }}
       style={{
         ...styles.tinyLogo,
         ...props.style,
       }}
+      lastModified={contact?.fileMetadata.updated}
     />
   );
 };
 
-export const OwnerAvatar = (props: { style?: ImageStyle }) => {
+export const OwnerAvatar = (props: {
+  style?: ImageStyle;
+  imageSize?: { width: number; height: number };
+}) => {
   const profile = useProfile().data;
   return (
     <OdinImage
@@ -68,10 +73,7 @@ export const OwnerAvatar = (props: { style?: ImageStyle }) => {
       fileKey={profile?.profileImageFileKey}
       avoidPayload={true}
       enableZoom={false}
-      imageSize={{ width: 48, height: 48 }}
-      svgPlaceHolderStyle={{
-        marginRight: 16,
-      }}
+      imageSize={props.imageSize || { width: 48, height: 48 }}
       style={{
         ...styles.tinyLogo,
         ...props.style,
@@ -143,15 +145,17 @@ const ConversationTile = memo((props: ConversationTileProps) => {
           },
         ]}
       >
-        {!isGroup ? (
-          props.isSelf ? (
-            <OwnerAvatar />
+        <View style={{ marginRight: 16 }}>
+          {!isGroup ? (
+            props.isSelf ? (
+              <OwnerAvatar />
+            ) : (
+              <Avatar odinId={props.odinId} />
+            )
           ) : (
-            <Avatar odinId={props.odinId} />
-          )
-        ) : (
-          <GroupAvatar />
-        )}
+            <GroupAvatar />
+          )}
+        </View>
 
         <View
           style={{
@@ -205,27 +209,27 @@ const ConversationTile = memo((props: ConversationTileProps) => {
           }}
         >
           {lastMessage && <ChatSentTimeIndicator msg={lastMessage} keepDetail={false} />}
-          {unreadCount > 0 ? (
-            <View
+        </View>
+        {unreadCount > 0 ? (
+          <View
+            style={{
+              backgroundColor: isDarkMode ? Colors.blue[500] : Colors.blue[100],
+              borderRadius: 8,
+              padding: 4,
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <Text
               style={{
-                backgroundColor: isDarkMode ? Colors.blue[500] : Colors.blue[100],
-                borderRadius: 8,
-                padding: 4,
-                justifyContent: 'center',
-                alignItems: 'center',
+                color: isDarkMode ? Colors.white : Colors.blue[900],
+                fontSize: 12,
               }}
             >
-              <Text
-                style={{
-                  color: isDarkMode ? Colors.white : Colors.blue[900],
-                  fontSize: 12,
-                }}
-              >
-                {unreadCount}
-              </Text>
-            </View>
-          ) : null}
-        </View>
+              {unreadCount}
+            </Text>
+          </View>
+        ) : null}
       </View>
     </TouchableOpacity>
   );
@@ -254,10 +258,10 @@ const styles = StyleSheet.create({
   tinyLogo: {
     objectFit: 'cover',
     marginLeft: 0,
-    marginRight: 16,
     width: 48,
     height: 48,
     borderRadius: 24,
+    overflow: 'hidden',
   },
   description: {
     fontSize: 16,

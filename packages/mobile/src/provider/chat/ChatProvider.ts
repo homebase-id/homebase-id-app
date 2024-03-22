@@ -32,7 +32,7 @@ import {
   GroupConversation,
   SingleConversation,
 } from './ConversationProvider';
-import { getNewId, jsonStringify64 } from '@youfoundation/js-lib/helpers';
+import { assertIfDefined, getNewId, jsonStringify64 } from '@youfoundation/js-lib/helpers';
 import { OdinBlob } from '../../../polyfills/OdinBlob';
 import { ImageSource } from '../image/RNImageProvider';
 import { createThumbnails } from '../image/RNThumbnailProvider';
@@ -95,6 +95,9 @@ export const getChatMessages = async (
   cursorState: string | undefined,
   pageSize: number
 ) => {
+  assertIfDefined('dotYouClient', dotYouClient);
+  assertIfDefined('conversationId', conversationId);
+
   const params: FileQueryParams = {
     targetDrive: ChatDrive,
     groupId: [conversationId],

@@ -17,7 +17,11 @@ import {
   uploadChatMessage,
 } from '../../provider/chat/ChatProvider';
 import { ImageSource } from '../../provider/image/RNImageProvider';
-import { Conversation, GroupConversation, SingleConversation } from '../../provider/chat/ConversationProvider';
+import {
+  Conversation,
+  GroupConversation,
+  SingleConversation,
+} from '../../provider/chat/ConversationProvider';
 
 export const useChatMessage = (props?: { messageId: string | undefined }) => {
   const queryClient = useQueryClient();
@@ -108,7 +112,6 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
     send: useMutation({
       mutationFn: sendMessage,
       onMutate: async ({ conversationId, recipients, replyId, files, message }) => {
-        // TODO: Optimistic update of the chat messages append the new message to the list
         const existingData = queryClient.getQueryData<
           InfiniteData<{
             searchResults: (DriveSearchResult<ChatMessage> | null)[];

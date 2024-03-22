@@ -1,5 +1,5 @@
-import * as React from 'react'
-import PropTypes from 'prop-types'
+import * as React from 'react';
+import PropTypes from 'prop-types';
 import {
   StyleSheet,
   Text,
@@ -9,13 +9,13 @@ import {
   ViewStyle,
   TextStyle,
   TouchableOpacityProps,
-} from 'react-native'
-import { useCallbackOne, useMemoOne } from 'use-memo-one'
+} from 'react-native';
+import { useCallbackOne, useMemoOne } from 'use-memo-one';
 
-import Color from './Color'
-import { IMessage } from './Models'
-import { StylePropType } from './utils'
-import { TEST_ID } from './Constant'
+import Color from './Color';
+import { IMessage } from './Models';
+import { StylePropType } from './utils';
+import { TEST_ID } from './Constant';
 
 const styles = StyleSheet.create({
   container: {
@@ -31,21 +31,21 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     marginRight: 10,
   },
-})
+});
 
 export interface SendProps<TMessage extends IMessage> {
-  text?: string
-  label?: string
-  containerStyle?: StyleProp<ViewStyle>
-  textStyle?: StyleProp<TextStyle>
-  children?: React.ReactNode
-  alwaysShowSend?: boolean
-  disabled?: boolean
-  sendButtonProps?: Partial<TouchableOpacityProps>
+  text?: string;
+  label?: string;
+  containerStyle?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
+  children?: React.ReactNode;
+  alwaysShowSend?: boolean;
+  disabled?: boolean;
+  sendButtonProps?: Partial<TouchableOpacityProps>;
   onSend?(
     messages: Partial<TMessage> | Partial<TMessage>[],
     shouldResetInputToolbar: boolean,
-  ): void
+  ): void;
 }
 
 export const Send = <TMessage extends IMessage = IMessage>({
@@ -61,17 +61,17 @@ export const Send = <TMessage extends IMessage = IMessage>({
 }: SendProps<TMessage>) => {
   const handleOnPress = useCallbackOne(() => {
     if (text && onSend) {
-      onSend({ text: text.trim() } as Partial<TMessage>, true)
+      onSend({ text: text.trim() } as Partial<TMessage>, true);
     }
-  }, [text, onSend])
+  }, [text, onSend]);
 
   const showSend = useMemoOne(
     () => alwaysShowSend || (text && text.trim().length > 0),
     [alwaysShowSend, text],
-  )
+  );
 
   if (!showSend) {
-    return null
+    return null;
   }
 
   return (
@@ -89,8 +89,8 @@ export const Send = <TMessage extends IMessage = IMessage>({
         {children || <Text style={[styles.text, textStyle]}>{label}</Text>}
       </View>
     </TouchableOpacity>
-  )
-}
+  );
+};
 
 Send.propTypes = {
   text: PropTypes.string,
@@ -102,4 +102,4 @@ Send.propTypes = {
   alwaysShowSend: PropTypes.bool,
   disabled: PropTypes.bool,
   sendButtonProps: PropTypes.object,
-}
+};

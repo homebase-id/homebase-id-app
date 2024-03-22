@@ -1,15 +1,15 @@
-import { ChatMessageIMessage } from '../../../pages/chat/chat-page';
 import { StyleSheet, Text, View } from 'react-native';
 import { memo } from 'react';
 
 import { MessageImageProps } from 'react-native-gifted-chat';
-import { ChatDrive } from '../../../provider/chat/ConversationProvider';
+import { ChatDrive } from '../../provider/chat/ConversationProvider';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { AppStackParamList } from '../../../app/App';
-import { VideoWithLoader } from '../Media/VideoWithLoader';
-import { OdinImage } from '../OdinImage/OdinImage';
-import { ChatMessage } from '../../../provider/chat/ChatProvider';
+import { AppStackParamList } from '../../app/App';
+import { VideoWithLoader } from '../ui/Media/VideoWithLoader';
+import { OdinImage } from '../ui/OdinImage/OdinImage';
+import { ChatMessage } from '../../provider/chat/ChatProvider';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { ChatMessageIMessage } from './ChatDetail';
 
 const ImageMessage = memo((props: MessageImageProps<ChatMessageIMessage>) => {
   if (!props.currentMessage) return null;

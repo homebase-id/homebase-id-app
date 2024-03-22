@@ -1,11 +1,11 @@
 import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
-import { useConversation } from '../../../hooks/chat/useConversation';
+import { useConversation } from '../../hooks/chat/useConversation';
 import { ContactConfig, ContactFile, DotYouProfile } from '@youfoundation/js-lib/network';
-import { CheckCircle, ChevronRight, CircleOutlined } from '../Icons/icons';
-import { Colors } from '../../../app/Colors';
-import { OdinImage } from '../OdinImage/OdinImage';
-import { useDarkMode } from '../../../hooks/useDarkMode';
-import useContact from '../../../hooks/contact/useContact';
+import { CheckCircle, ChevronRight, CircleOutlined } from '../ui/Icons/icons';
+import { Colors } from '../../app/Colors';
+import { OdinImage } from '../ui/OdinImage/OdinImage';
+import { useDarkMode } from '../../hooks/useDarkMode';
+import useContact from '../../hooks/contact/useContact';
 export const ContactTile = ({
   item: profile,
   onOpen,
@@ -48,21 +48,20 @@ export const ContactTile = ({
         ]}
       >
         {contact && contactData && (
-          <OdinImage
-            targetDrive={ContactConfig.ContactTargetDrive}
-            fit="cover"
-            alt={contact.name?.displayName}
-            fileId={contactData?.fileId}
-            enableZoom={false}
-            avoidPayload={true}
-            previewThumbnail={contactData.fileMetadata.appData.previewThumbnail}
-            imageSize={{ width: 48, height: 48 }}
-            fileKey={'prfl_pic'}
-            style={styles.tinyLogo}
-            svgPlaceHolderStyle={{
-              marginRight: 16,
-            }}
-          />
+          <View style={{ marginRight: 16 }}>
+            <OdinImage
+              targetDrive={ContactConfig.ContactTargetDrive}
+              fit="cover"
+              alt={contact.name?.displayName}
+              fileId={contactData?.fileId}
+              enableZoom={false}
+              avoidPayload={true}
+              previewThumbnail={contactData.fileMetadata.appData.previewThumbnail}
+              imageSize={{ width: 48, height: 48 }}
+              fileKey={'prfl_pic'}
+              style={styles.tinyLogo}
+            />
+          </View>
         )}
         <View style={[styles.content]}>
           <Text
@@ -183,7 +182,7 @@ const styles = StyleSheet.create({
   tinyLogo: {
     objectFit: 'cover',
     marginLeft: 0,
-    marginRight: 16,
+    marginRight: 0,
     width: 48,
     height: 48,
     borderRadius: 24,

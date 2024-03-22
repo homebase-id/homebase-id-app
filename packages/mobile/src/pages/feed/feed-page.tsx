@@ -24,6 +24,10 @@ export const FeedPage = memo((_props: FeedProps) => {
   const uri = useMemo(() => `https://${identity}/apps/feed`, [identity]);
   const originWhitelist = useMemo(() => [`https://${identity}`], [identity]);
 
+  // const meta = document.createElement('meta'); meta.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no'); meta.setAttribute('name', 'viewport'); document.getElementsByTagName('head')[0].appendChild(meta);
+  // @2002Bishwajeet: this ☝️ ain't right.. It breaks the injected_javascript fully (I assume as the JS is set to load before the content);
+  //  To be honest Not sure if we want it, and if we do, it should be part of the feed-app itself, enabling it based on the "client_type" key in the localStorage
+
   const INJECTED_JAVASCRIPT = useMemo(() => {
     return `(function() {
         const APP_SHARED_SECRET_KEY = 'APPS_feed';
