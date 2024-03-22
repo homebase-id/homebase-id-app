@@ -183,6 +183,24 @@ export const Microphone = (props: IconProps) => {
   );
 };
 
+export const Stop = (props: IconProps) => {
+  const { isDarkMode } = useDarkMode();
+  return (
+    <Center>
+      <Svg
+        {...getSize(props.size || 'md')}
+        color={props.color || (isDarkMode ? 'white' : 'black')}
+        viewBox="0 0 384 512"
+      >
+        <Path
+          fill="currentColor"
+          d="M0 128C0 92.7 28.7 64 64 64H320c35.3 0 64 28.7 64 64V384c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V128z"
+        />
+      </Svg>
+    </Center>
+  );
+};
+
 export const Globe = (props: IconProps) => {
   const { isDarkMode } = useDarkMode();
   return (
