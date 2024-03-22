@@ -1,6 +1,6 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { IMessage } from 'react-native-gifted-chat';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AppStackParamList } from '../../app/App';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -52,7 +52,7 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
       (
         chatMessages?.pages
           .flatMap((page) => page.searchResults)
-          ?.filter(Boolean) as DriveSearchResult<ChatMessage>[]
+          ?.filter(Boolean) as HomebaseFile<ChatMessage>[]
       )?.map<ChatMessageIMessage>((value) => {
         // Mapping done here, because the chat component expects a different format
         return {
@@ -124,7 +124,7 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
     (message: ChatMessageIMessage) => {
       navigation.navigate('MessageInfo', {
         message,
-        conversation: conversationContent as DriveSearchResult<Conversation>,
+        conversation: conversationContent as HomebaseFile<Conversation>,
       });
     },
     [conversationContent, navigation]
