@@ -27,7 +27,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import { Close, Images, SendChat } from '../../components/ui/Icons/icons';
+import { Close, Images, Microphone, SendChat } from '../../components/ui/Icons/icons';
 import ImageMessage from '../../components/Chat/ImageMessage';
 import { Asset, launchImageLibrary } from 'react-native-image-picker';
 import { useAuth } from '../../hooks/auth/useAuth';
@@ -87,13 +87,6 @@ export const ChatDetail = memo(
   }) => {
     const { isDarkMode } = useDarkMode();
     const identity = useAuth().getIdentity();
-
-    // @2002Bishwajeet, something doesn't add up here.. The layoutHeight is overwritten per message, as the state is a single number but each message calls the onMessageLayout.. I don't think this can work like that
-    // const [layoutHeight, setLayoutHeight] = useState(0);
-    // const onLayout = (e: LayoutChangeEvent) => {
-    //   const { height } = e.nativeEvent.layout;
-    //   setLayoutHeight(height);
-    // };
 
     const onLongPress = useCallback(
       (e: GestureResponderEvent, message: ChatMessageIMessage) => {
@@ -169,9 +162,10 @@ export const ChatDetail = memo(
           </View>
         </View>
       );
-    }, [assets, replyMessage, setAssets, setReplyMessage]);
+    }, [assets, isDarkMode, replyMessage, setAssets, setReplyMessage]);
 
     const imagesIcon = useCallback(() => <Images />, []);
+    const microphoneIcon = useCallback(() => <Microphone />, []);
     const renderCustomInputToolbar = useCallback(
       (props: InputToolbarProps<IMessage>) => {
         return (
@@ -187,17 +181,32 @@ export const ChatDetail = memo(
                 />
               )}
               renderSend={(props) => (
-                <Send
-                  {...props}
-                  disabled={!props.text && assets?.length === 0}
-                  text={props.text || ' '}
-                  containerStyle={styles.send}
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'flex-end',
+                  }}
                 >
-                  <SendChat
-                    size={'md'}
-                    color={!props.text && assets?.length === 0 ? 'grey' : 'blue'}
+                  <Actions
+                    icon={microphoneIcon}
+                    containerStyle={props.containerStyle}
+                    onPressActionButton={() => {
+                      console.log('Microphone pressed');
+                    }}
                   />
-                </Send>
+                  <View style={{ width: 6 }} />
+                  <Send
+                    {...props}
+                    disabled={!props.text && assets?.length === 0}
+                    text={props.text || ' '}
+                    containerStyle={styles.send}
+                  >
+                    <SendChat
+                      size={'md'}
+                      color={!props.text && assets?.length === 0 ? 'grey' : 'blue'}
+                    />
+                  </Send>
+                </View>
               )}
               renderActions={() => (
                 <Actions
@@ -224,7 +233,7 @@ export const ChatDetail = memo(
           </>
         );
       },
-      [isDarkMode, assets?.length, imagesIcon, setAssets]
+      [isDarkMode, microphoneIcon, assets?.length, imagesIcon, setAssets]
     );
 
     const renderAvatar = useCallback((props: AvatarProps<IMessage>) => {
