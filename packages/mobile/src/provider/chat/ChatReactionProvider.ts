@@ -1,9 +1,9 @@
 import {
   DotYouClient,
-  DriveSearchResult,
+  HomebaseFile,
   FileQueryParams,
   GetBatchQueryResultOptions,
-  NewDriveSearchResult,
+  NewHomebaseFile,
   ScheduleOptions,
   SecurityGroupType,
   SendContents,
@@ -56,14 +56,14 @@ export const getReactions = async (
           async (result) => await dsrToReaction(dotYouClient, result, ChatDrive, true)
         )
       )
-    ).filter(Boolean) as DriveSearchResult<ChatReaction>[],
+    ).filter(Boolean) as HomebaseFile<ChatReaction>[],
   };
 };
 
 export const uploadReaction = async (
   dotYouClient: DotYouClient,
   conversationId: string,
-  reaction: NewDriveSearchResult<ChatReaction>,
+  reaction: NewHomebaseFile<ChatReaction>,
   recipients: string[]
 ) => {
   const reactionContent = reaction.fileMetadata.appData.content;
@@ -119,7 +119,7 @@ export const uploadReaction = async (
 
 export const deleteReaction = async (
   dotYouClient: DotYouClient,
-  chatReaction: DriveSearchResult<ChatReaction>,
+  chatReaction: HomebaseFile<ChatReaction>,
   recipients: string[]
 ) => {
   return await deleteFile(dotYouClient, ChatDrive, chatReaction.fileId, recipients);
@@ -127,10 +127,10 @@ export const deleteReaction = async (
 
 export const dsrToReaction = async (
   dotYouClient: DotYouClient,
-  dsr: DriveSearchResult,
+  dsr: HomebaseFile,
   targetDrive: TargetDrive,
   includeMetadataHeader: boolean
-): Promise<DriveSearchResult<ChatReaction> | null> => {
+): Promise<HomebaseFile<ChatReaction> | null> => {
   try {
     const attrContent = await getContentFromHeaderOrPayload<ChatReaction>(
       dotYouClient,
@@ -140,7 +140,7 @@ export const dsrToReaction = async (
     );
     if (!attrContent) return null;
 
-    const chatReaction: DriveSearchResult<ChatReaction> = {
+    const chatReaction: HomebaseFile<ChatReaction> = {
       ...dsr,
       fileMetadata: {
         ...dsr.fileMetadata,

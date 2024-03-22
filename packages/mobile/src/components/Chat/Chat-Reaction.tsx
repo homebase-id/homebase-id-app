@@ -11,7 +11,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useChatReaction } from '../../hooks/chat/useChatReaction';
 import { useConversation } from '../../hooks/chat/useConversation';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ChatMessage } from '../../provider/chat/ChatProvider';
 import { useBottomSheetModal } from '@gorhom/bottom-sheet';
 import { Colors } from '../../app/Colors';
@@ -125,7 +125,7 @@ const PortalView = ({
         }
         addReaction({
           conversation: conversation,
-          message: selectedMessage as DriveSearchResult<ChatMessage>,
+          message: selectedMessage as HomebaseFile<ChatMessage>,
           reaction,
         });
       }

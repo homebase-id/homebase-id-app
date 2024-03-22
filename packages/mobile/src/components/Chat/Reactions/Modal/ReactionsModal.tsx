@@ -6,7 +6,7 @@ import { useDarkMode } from '../../../../hooks/useDarkMode';
 
 import { ChatMessageIMessage } from '../../ChatDetail';
 import { useChatReaction } from '../../../../hooks/chat/useChatReaction';
-import { DriveSearchResult } from '@youfoundation/js-lib/dist';
+import { HomebaseFile } from '@youfoundation/js-lib/dist';
 import { ChatReaction } from '../../../../provider/chat/ChatReactionProvider';
 import useContact from '../../../../hooks/contact/useContact';
 import { Avatar, OwnerAvatar } from '../../Conversation-tile';
@@ -59,7 +59,7 @@ export const ReactionsModal = forwardRef(
   }
 );
 
-const ReactionTile = (prop: DriveSearchResult<ChatReaction>) => {
+const ReactionTile = (prop: HomebaseFile<ChatReaction>) => {
   const reaction = prop.fileMetadata.appData.content.message;
   const senderOdinId = prop.fileMetadata.senderOdinId;
   const contact = useContact(senderOdinId).fetch.data;

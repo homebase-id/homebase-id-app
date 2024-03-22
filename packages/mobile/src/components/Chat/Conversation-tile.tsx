@@ -9,7 +9,7 @@ import {
   ViewStyle,
 } from 'react-native';
 
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 
 import { Colors } from '../../app/Colors';
 import { Conversation } from '../../provider/chat/ConversationProvider';
@@ -112,7 +112,7 @@ const ConversationTile = memo((props: ConversationTileProps) => {
     () =>
       chatMessages?.pages
         .flatMap((page) => page.searchResults)
-        ?.filter(Boolean) as DriveSearchResult<ChatMessage>[],
+        ?.filter(Boolean) as HomebaseFile<ChatMessage>[],
     [chatMessages]
   );
   const { isDarkMode } = useDarkMode();

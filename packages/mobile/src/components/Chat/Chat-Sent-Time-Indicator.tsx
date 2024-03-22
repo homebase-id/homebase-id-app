@@ -1,4 +1,4 @@
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ChatMessage } from '../../provider/chat/ChatProvider';
 import { memo } from 'react';
 import { Text } from 'react-native';
@@ -7,7 +7,7 @@ import { Colors } from '../../app/Colors';
 import { useDarkMode } from '../../hooks/useDarkMode';
 
 export const ChatSentTimeIndicator = memo(
-  ({ msg, keepDetail }: { msg: DriveSearchResult<ChatMessage>; keepDetail?: boolean }) => {
+  ({ msg, keepDetail }: { msg: HomebaseFile<ChatMessage>; keepDetail?: boolean }) => {
     const { isDarkMode } = useDarkMode();
     if (!msg.fileMetadata.created) return null;
 

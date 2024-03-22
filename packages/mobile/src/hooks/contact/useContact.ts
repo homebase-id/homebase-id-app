@@ -1,13 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { ContactFile, getContactByOdinId } from '@youfoundation/js-lib/network';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { useDotYouClientContext } from 'feed-app-common';
 
 const useContact = (odinId?: string) => {
   const dotYouClient = useDotYouClientContext();
 
-  const fetchSingle = async (_odinId: string): Promise<DriveSearchResult<ContactFile> | null> => {
+  const fetchSingle = async (_odinId: string): Promise<HomebaseFile<ContactFile> | null> => {
     // Direct fetch with odinId:
     return (await getContactByOdinId(dotYouClient, _odinId)) || null;
   };

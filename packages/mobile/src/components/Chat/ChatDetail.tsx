@@ -43,10 +43,10 @@ import { ChatDeliveryIndicator } from '../../components/Chat/Chat-Delivery-Indic
 import { useChatReaction } from '../../hooks/chat/useChatReaction';
 import { Avatar as AppAvatar, OwnerAvatar } from '../../components/Chat/Conversation-tile';
 import { ConnectionName } from '../../components/ui/Name';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ChatMessage } from '../../provider/chat/ChatProvider';
 
-export interface ChatMessageIMessage extends IMessage, DriveSearchResult<ChatMessage> {}
+export interface ChatMessageIMessage extends IMessage, HomebaseFile<ChatMessage> {}
 
 export const ChatDetail = memo(
   ({
