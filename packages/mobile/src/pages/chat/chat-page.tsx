@@ -3,7 +3,7 @@ import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AppStackParamList } from '../../app/App';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Keyboard, View } from 'react-native';
+import { Keyboard, Platform, View } from 'react-native';
 import { ChatAppBar } from '../../components/Chat/Chat-app-bar';
 import { Asset } from 'react-native-image-picker';
 import { ChatMessage } from '../../provider/chat/ChatProvider';
@@ -201,7 +201,8 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
         <ErrorNotification error={sendMessageError} />
         <View
           style={{
-            paddingBottom: insets.bottom,
+            paddingBottom:
+              Platform.OS === 'ios' && (replyMessage || Keyboard.isVisible()) ? 0 : insets.bottom,
             flex: 1,
           }}
         >
