@@ -68,6 +68,7 @@
     "stream": "^0.0.2",
     "text-encoding-polyfill": "^0.6.7",
     "tslib": "^2.5.0",
+    "uuid": "^9.0.1",
     "webcrypto-core": "^1.7.7"
   },
   "devDependencies": {

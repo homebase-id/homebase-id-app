@@ -48,8 +48,8 @@ import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-
 import { useProfile } from '../hooks/profile/useProfile';
 import { ChatMessage } from '../provider/chat/ChatProvider';
 import { useRefreshOnFocus } from '../hooks/chat/useRefetchOnFocus';
-import { NotificationProvider } from '../components/notification/NotificationProvider';
-import { useNotification } from '../hooks/notification/useNotification';
+import { PushNotificationProvider } from '../components/push-notification/PushNotificationProvider';
+import { usePushNotification } from '../hooks/push-notification/usePushNotification';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -112,7 +112,9 @@ let App = () => {
       }
     >
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <RootStack />
+        <PushNotificationProvider>
+          <RootStack />
+        </PushNotificationProvider>
       </GestureHandlerRootView>
     </PersistQueryClientProvider>
   );
@@ -127,17 +129,15 @@ const RootStack = () => {
   const scheme = useColorScheme();
 
   return (
-    <NotificationProvider>
-      <NavigationContainer theme={scheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <StackRoot.Navigator screenOptions={{ headerShown: false }}>
-          {isAuthenticated ? (
-            <StackRoot.Screen name="Authenticated" component={AuthenticatedRoot} />
-          ) : (
-            <StackRoot.Screen name="Login" component={LoginPage} options={{ headerShown: false }} />
-          )}
-        </StackRoot.Navigator>
-      </NavigationContainer>
-    </NotificationProvider>
+    <NavigationContainer theme={scheme === 'dark' ? DarkTheme : DefaultTheme}>
+      <StackRoot.Navigator screenOptions={{ headerShown: false }}>
+        {isAuthenticated ? (
+          <StackRoot.Screen name="Authenticated" component={AuthenticatedRoot} />
+        ) : (
+          <StackRoot.Screen name="Login" component={LoginPage} options={{ headerShown: false }} />
+        )}
+      </StackRoot.Navigator>
+    </NavigationContainer>
   );
 };
 
@@ -175,7 +175,7 @@ const AppStackScreen = () => {
   useValidTokenCheck();
   useRefreshOnFocus();
   useLiveChatProcessor();
-  useNotification();
+  usePushNotification();
 
   return (
     <AppStack.Navigator
