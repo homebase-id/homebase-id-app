@@ -1,4 +1,4 @@
-import { HomebaseFile } from '@youfoundation/js-lib/dist';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { Conversation, GroupConversation } from '../../provider/chat/ConversationProvider';
 import { useDotYouClientContext, useIsConnected } from 'feed-app-common';
 import { Linking, StyleSheet, TouchableOpacity, View } from 'react-native';
