@@ -1,4 +1,3 @@
-import { remove } from 'lodash-es';
 import { Platform } from 'react-native';
 import AudioRecorderPlayer, { AudioEncoderAndroidType, AudioSet, AudioSourceAndroidType, AVEncoderAudioQualityIOSType, AVEncodingOption, AVModeIOSOption } from 'react-native-audio-recorder-player';
 import RNFS from 'react-native-fs';
@@ -14,7 +13,7 @@ const audioSet: AudioSet = {
 };
 
 export const useAudio = () => {
-    const dirs = RNFS.DocumentDirectoryPath;
+    const dirs = RNFS.TemporaryDirectoryPath;
     const path = Platform.select({
         ios: `file://${dirs}/audio.m4a`,
         android: `${dirs}/audio.mp3`,
