@@ -1,6 +1,6 @@
 import { PayloadDescriptor } from '@youfoundation/js-lib/core';
 import { useAudio } from '../../hooks/audio/useAudio';
-import { Pressable, View } from 'react-native';
+import { Pressable } from 'react-native';
 import { useState } from 'react';
 import { Play, Stop } from '../ui/Icons/icons';
 import useImage from '../ui/OdinImage/hooks/useImage';
@@ -29,6 +29,7 @@ export const AudioMessage = (props: AudioMessageProps) => {
         justifyContent: 'center',
         alignItems: 'center',
         display: 'flex',
+        flexDirection: 'row',
       }}
       onPress={async () => {
         if (playing) {

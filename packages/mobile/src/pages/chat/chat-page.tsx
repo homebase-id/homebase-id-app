@@ -135,22 +135,13 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
     error: sendMessageError,
   } = useChatMessage().send;
 
-  useEffect(() => {
-    if (messages.length === 0 && conversationContent) {
-      inviteRecipient({
-        conversation: conversationContent,
-      });
-    }
-    if (sendMessageState === 'pending') resetState();
-  }, [conversationContent, inviteRecipient, messages.length, sendMessageState, resetState]);
-
   useMarkMessagesAsRead({ conversation: conversationContent || undefined, messages });
 
   const doSend = useCallback(
     (message: ChatMessageIMessage[]) => {
       sendMessage({
         conversationId: route.params.convoId,
-        message: message[0].text,
+        message: message[0]?.text,
         replyId: replyMessage?.fileMetadata.appData.uniqueId,
         files: assets.map<ImageSource>((value) => {
           return {
@@ -177,6 +168,27 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
     },
     [conversationContent, route.params.convoId, sendMessage, assets, replyMessage]
   );
+
+  useEffect(() => {
+    if (messages.length === 0 && conversationContent) {
+      inviteRecipient({
+        conversation: conversationContent,
+      });
+    }
+    // Send Audio after Recording
+    if (assets.length === 1 && assets[0].type?.startsWith('audio/')) {
+      doSend([]);
+    }
+    if (sendMessageState === 'pending') resetState();
+  }, [
+    conversationContent,
+    inviteRecipient,
+    messages.length,
+    sendMessageState,
+    resetState,
+    assets,
+    doSend,
+  ]);
 
   // ref
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);

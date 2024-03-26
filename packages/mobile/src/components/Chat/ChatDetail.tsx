@@ -16,7 +16,7 @@ import {
   Send,
   Time,
 } from 'react-native-gifted-chat';
-import { useCallback, memo, useState } from 'react';
+import { useCallback, memo, useState, useEffect } from 'react';
 import {
   GestureResponderEvent,
   ImageBackground,
@@ -24,10 +24,9 @@ import {
   Pressable,
   StatusBar,
   StyleSheet,
-  Text,
   View,
 } from 'react-native';
-import { Close, Images, Microphone, SendChat, Stop } from '../../components/ui/Icons/icons';
+import { Close, Images, Microphone, SendChat, Stop, XIcon } from '../../components/ui/Icons/icons';
 import ImageMessage from '../../components/Chat/ImageMessage';
 import { Asset, launchImageLibrary } from 'react-native-image-picker';
 import { useAuth } from '../../hooks/auth/useAuth';
@@ -47,13 +46,13 @@ import { ConnectionName } from '../../components/ui/Name';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ChatMessage } from '../../provider/chat/ChatProvider';
 import { useAudio } from '../../hooks/audio/useAudio';
+import { Text } from '../ui/Text/Text';
 
 export interface ChatMessageIMessage extends IMessage, HomebaseFile<ChatMessage> {}
 
 export const ChatDetail = memo(
   ({
     isGroup,
-
     messages,
     doSend,
     doSelectMessage,
@@ -61,7 +60,6 @@ export const ChatDetail = memo(
     doOpenReactionModal,
     replyMessage,
     setReplyMessage,
-
     assets,
     setAssets,
   }: {
@@ -73,7 +71,7 @@ export const ChatDetail = memo(
       message,
     }: {
       coords: { x: number; y: number };
-      message: HighlightedChatMessage;
+      message: ChatMessageIMessage;
     }) => void;
     doOpenMessageInfo: (message: ChatMessageIMessage) => void;
     doOpenReactionModal: (message: ChatMessageIMessage) => void;
@@ -163,11 +161,40 @@ export const ChatDetail = memo(
       );
     }, [assets, isDarkMode, replyMessage, setAssets, setReplyMessage]);
 
-    const { startRecording, stopRecording } = useAudio();
+    const { startRecording, stopRecording, recordListenter, removeRecordListenter } = useAudio();
     const [isRecording, setIsRecording] = useState(false);
     const imagesIcon = useCallback(() => <Images />, []);
     const microphoneIcon = useCallback(() => <Microphone />, []);
+    const crossIcon = useCallback(() => <XIcon />, []);
     const stopIcon = useCallback(() => <Stop />, []);
+    const [duration, setDuration] = useState<string>();
+
+    //https://stackoverflow.com/a/21294619/15538463
+    function millisToMinutesAndSeconds(millis: number) {
+      const minutes = Math.floor(millis / 60000);
+      const seconds = Number(((millis % 60000) / 1000).toFixed(0));
+      return seconds === 60
+        ? minutes + 1 + ':00'
+        : minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
+    }
+
+    useEffect(() => {
+      if (isRecording) {
+        recordListenter((e) => {
+          console.log('Recording . . . ', e.currentPosition);
+          setDuration(millisToMinutesAndSeconds(e.currentPosition));
+        });
+      } else {
+        removeRecordListenter();
+      }
+    }, [isRecording, recordListenter, removeRecordListenter]);
+
+    const cancelRecording = useCallback(async () => {
+      await stopRecording();
+      setIsRecording(false);
+      setDuration('0:00');
+    }, [stopRecording]);
+
     const onStopRecording = useCallback(async () => {
       const audioPath = await stopRecording();
       setAssets([
@@ -184,44 +211,85 @@ export const ChatDetail = memo(
         },
       ] as Asset[]);
       setIsRecording(false);
+      setDuration('0:00');
     }, [setAssets, stopRecording]);
     const renderCustomInputToolbar = useCallback(
       (props: InputToolbarProps<IMessage>) => {
         return (
-          <>
-            <InputToolbar
-              {...props}
-              renderComposer={(props) => (
+          <InputToolbar
+            {...props}
+            renderComposer={(props) => {
+              if (isRecording) {
+                return (
+                  <View
+                    style={{
+                      flex: 1,
+                      alignContent: 'center',
+                      alignItems: 'center',
+                      marginLeft: 10,
+                      marginTop: Platform.select({
+                        ios: 6,
+                        android: 0,
+                        web: 6,
+                      }),
+                      marginBottom: Platform.select({
+                        ios: 5,
+                        android: 3,
+                        web: 4,
+                      }),
+                      flexDirection: 'row',
+                      height: props.composerHeight,
+                    }}
+                  >
+                    <Microphone color={Colors.red[600]} />
+                    <Text style={{ marginLeft: 8, fontSize: 16 }}>{duration}</Text>
+                  </View>
+                );
+              }
+              return (
                 <Composer
                   {...props}
                   textInputStyle={{
                     color: isDarkMode ? 'white' : 'black',
                   }}
                 />
-              )}
-              renderSend={(props) => (
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'flex-end',
+              );
+            }}
+            renderSend={(props) => (
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'flex-end',
+                }}
+              >
+                <Actions
+                  icon={!isRecording ? microphoneIcon : stopIcon}
+                  containerStyle={props.containerStyle}
+                  onPressActionButton={async () => {
+                    if (isRecording) {
+                      await onStopRecording();
+                      return;
+                    } else {
+                      setIsRecording(true);
+                      await startRecording();
+                      console.log('Microphone started');
+                    }
                   }}
-                >
+                />
+
+                <View style={{ width: 6 }} />
+                {isRecording ? (
                   <Actions
-                    icon={!isRecording ? microphoneIcon : stopIcon}
+                    icon={crossIcon}
                     containerStyle={props.containerStyle}
                     onPressActionButton={async () => {
                       if (isRecording) {
-                        await onStopRecording();
+                        await cancelRecording();
                         return;
-                      } else {
-                        setIsRecording(true);
-                        await startRecording();
-                        console.log('Microphone started');
                       }
                     }}
                   />
-
-                  <View style={{ width: 6 }} />
+                ) : (
                   <Send
                     {...props}
                     disabled={!props.text && assets?.length === 0}
@@ -233,41 +301,48 @@ export const ChatDetail = memo(
                       color={!props.text && assets?.length === 0 ? 'grey' : 'blue'}
                     />
                   </Send>
-                </View>
-              )}
-              renderActions={() => (
-                <Actions
-                  icon={imagesIcon}
-                  onPressActionButton={async () => {
-                    const medias = await launchImageLibrary({
-                      mediaType: 'mixed',
-                      selectionLimit: 10,
-                    });
-                    if (medias.didCancel) return;
-                    setAssets(medias.assets ?? []);
-                  }}
-                />
-              )}
-              containerStyle={[
-                styles.inputContainer,
-                {
-                  backgroundColor: isDarkMode ? Colors.slate[900] : Colors.white,
-                  borderTopWidth: 0,
-                  borderRadius: 10,
-                },
-              ]}
-            />
-          </>
+                )}
+              </View>
+            )}
+            renderActions={
+              isRecording
+                ? () => null
+                : () => (
+                    <Actions
+                      icon={imagesIcon}
+                      onPressActionButton={async () => {
+                        const medias = await launchImageLibrary({
+                          mediaType: 'mixed',
+                          selectionLimit: 10,
+                        });
+                        if (medias.didCancel) return;
+                        setAssets(medias.assets ?? []);
+                      }}
+                    />
+                  )
+            }
+            containerStyle={[
+              styles.inputContainer,
+              {
+                backgroundColor: isDarkMode ? Colors.slate[900] : Colors.white,
+                borderTopWidth: 0,
+                borderRadius: 10,
+              },
+            ]}
+          />
         );
       },
       [
-        isDarkMode,
         isRecording,
+        isDarkMode,
+        duration,
         microphoneIcon,
         stopIcon,
+        crossIcon,
         assets?.length,
         onStopRecording,
         startRecording,
+        cancelRecording,
         imagesIcon,
         setAssets,
       ]

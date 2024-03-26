@@ -1,3 +1,4 @@
+import { remove } from 'lodash-es';
 import { Platform } from 'react-native';
 import AudioRecorderPlayer, { AudioEncoderAndroidType, AudioSet, AudioSourceAndroidType, AVEncoderAudioQualityIOSType, AVEncodingOption, AVModeIOSOption } from 'react-native-audio-recorder-player';
 import RNFS from 'react-native-fs';
@@ -59,8 +60,12 @@ export const useAudio = () => {
 
     return {
         startRecording,
+        recordListenter: audioRecorder.addRecordBackListener,
+        removeRecordListenter: audioRecorder.removeRecordBackListener,
         stopRecording,
         playRecording,
+        playListenter: audioRecorder.addPlayBackListener,
+        removePlayListenter: audioRecorder.removePlayBackListener,
         stopPlaying,
         pausePlaying,
     };
