@@ -26,7 +26,15 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import { Close, Images, Microphone, SendChat, Stop, XIcon } from '../../components/ui/Icons/icons';
+import {
+  Close,
+  Images,
+  Microphone,
+  SendChat,
+  Stop,
+  Times,
+  XIcon,
+} from '../../components/ui/Icons/icons';
 import ImageMessage from '../../components/Chat/ImageMessage';
 import { Asset, launchImageLibrary } from 'react-native-image-picker';
 import { useAuth } from '../../hooks/auth/useAuth';
@@ -166,7 +174,7 @@ export const ChatDetail = memo(
     const [isRecording, setIsRecording] = useState(false);
     const imagesIcon = useCallback(() => <Images />, []);
     const microphoneIcon = useCallback(() => <Microphone />, []);
-    const crossIcon = useCallback(() => <XIcon />, []);
+    const crossIcon = useCallback(() => <Times />, []);
     const stopIcon = useCallback(() => <Stop />, []);
     const [duration, setDuration] = useState<string>();
 
