@@ -1,4 +1,3 @@
-import { AppState } from 'react-native';
 import messaging, { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
 import notifee, { EventType, EventDetail } from '@notifee/react-native';
 
@@ -14,6 +13,50 @@ export interface OdinNotification {
   type: string;
   data: string;
 }
+
+//
+
+export const initializeNotificationSupport = async () => {
+  messaging().onMessage(onMessageReceived);
+  messaging().setBackgroundMessageHandler(onMessageReceived);
+
+  // https://notifee.app/react-native/docs/events#background-events
+  notifee.onBackgroundEvent(async ({ type, detail }) => {
+    console.debug('onBackgroundEvent event:', type, detail);
+    await handleNotificationEvent(type, detail, false);
+  });
+};
+
+//
+
+const onMessageReceived = async (message: FirebaseMessagingTypes.RemoteMessage) => {
+  console.debug('FCM Message:', message);
+
+  const notification = message.data as unknown as OdinNotification;
+  storeNotification(notification);
+
+  console.debug('notification:', notification);
+
+  // SEB:TODO branch on notification.version and notification.type
+
+  const odinChatNotificationData = JSON.parse(notification.data) as OdinChatNotificationData;
+
+  // SEB:TODO Is it normal to display a notification when the app is in the foreground, or
+  // should it only do it when AppState.currentState !== 'active' ?
+  await notifee.displayNotification({
+    id: notification?.id,
+    title: 'Odin message',
+    body: `Message received from ${odinChatNotificationData?.sender || 'unknown'}`,
+    android: {
+      channelId: 'default',
+      // smallIcon: 'name-of-a-small-icon', // optional, defaults to 'ic_launcher'.
+      // pressAction is needed if you want the notification to open the app when pressed
+      pressAction: {
+        id: 'default',
+      },
+    },
+  });
+};
 
 //
 
@@ -60,53 +103,13 @@ export const handleNotification = async (notification: OdinNotification): Promis
 
   // Make sure notification widget is removed when we're done with it
   // (notifee doesn't always do this automatically):
-  await notifee.cancelNotification(notification.id);
+  // await notifee.cancelNotification(notification.id);
 
   // Cleanup notification from memory when you're done with it:
   deleteNotification(notification);
 };
 
 //
-
-const onMessageReceived = async (message: FirebaseMessagingTypes.RemoteMessage) => {
-  console.debug('FCM Message:', message);
-
-  const notification = message.data as unknown as OdinNotification;
-  storeNotification(notification);
-
-  console.debug('notification:', notification);
-
-  // SEB:TODO branch on notification.version and notification.type
-
-  const odinChatNotificationData = JSON.parse(notification.data) as OdinChatNotificationData;
-
-  // SEB:TODO Is it normal to display a notification when the app is in the foreground, or
-  // should it only do it when AppState.currentState !== 'active' ?
-  await notifee.displayNotification({
-    id: notification?.id,
-    title: 'Odin message',
-    body: `Message received from ${odinChatNotificationData?.sender || 'unknown'}`,
-    android: {
-      channelId: 'default',
-      // smallIcon: 'name-of-a-small-icon', // optional, defaults to 'ic_launcher'.
-      // pressAction is needed if you want the notification to open the app when pressed
-      pressAction: {
-        id: 'default',
-      },
-    },
-  });
-};
-
-export const initializeNotificationSupport = async () => {
-  messaging().onMessage(onMessageReceived);
-  messaging().setBackgroundMessageHandler(onMessageReceived);
-
-  // https://notifee.app/react-native/docs/events#background-events
-  notifee.onBackgroundEvent(async ({ type, detail }) => {
-    console.debug('onBackgroundEvent event:', type, detail);
-    await handleNotificationEvent(type, detail, false);
-  });
-};
 
 //
 // Notification "storage"

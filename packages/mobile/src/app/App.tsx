@@ -49,7 +49,7 @@ import { useProfile } from '../hooks/profile/useProfile';
 import { ChatMessage } from '../provider/chat/ChatProvider';
 import { useRefreshOnFocus } from '../hooks/chat/useRefetchOnFocus';
 import { PushNotificationProvider } from '../components/push-notification/PushNotificationProvider';
-import { usePushNotification } from '../hooks/push-notification/usePushNotification';
+import { useAuthenticatedPushNotification } from '../hooks/push-notification/useAuthenticatedPushNotification';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -175,7 +175,7 @@ const AppStackScreen = () => {
   useValidTokenCheck();
   useRefreshOnFocus();
   useLiveChatProcessor();
-  usePushNotification();
+  useAuthenticatedPushNotification();
 
   return (
     <AppStack.Navigator

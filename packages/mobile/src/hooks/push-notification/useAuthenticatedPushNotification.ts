@@ -1,20 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useMutation } from '@tanstack/react-query';
 import messaging from '@react-native-firebase/messaging';
 import notifee from '@notifee/react-native';
 import { useDotYouClientContext } from 'feed-app-common';
-import { AppState, AppStateStatus } from 'react-native';
-import {
-  getNotifcations,
-  handleNotification,
-  handleNotificationEvent,
-} from '../../provider/push-notification/PushNotificationLib';
+import { handleNotificationEvent } from '../../provider/push-notification/PushNotificationLib';
 import { usePushNotificationPermission } from '../../provider/push-notification/PushNotificationContext';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 //
 
-export const usePushNotification = () => {
+export const useAuthenticatedPushNotification = () => {
   const dotYouClient = useDotYouClientContext();
 
   const [deviceToken, setDeviceToken] = useState('');
