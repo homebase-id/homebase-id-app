@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import { Avatar, GroupAvatar, OwnerAvatar } from './Conversation-tile';
 import { Header, HeaderBackButton } from '@react-navigation/elements';
 import { useProfile } from '../../hooks/profile/useProfile';
@@ -31,7 +31,7 @@ export const ChatAppBar = ({
       }}
     >
       <HeaderBackButton
-        style={{ left: 0, marginRight: -10 }}
+        style={{ left: 0, marginRight: Platform.OS === 'ios' ? -10 : 0 }}
         canGoBack={true}
         onPress={goBack}
         labelVisible={false}

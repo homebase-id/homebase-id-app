@@ -201,7 +201,7 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
         <ErrorNotification error={sendMessageError} />
         <View
           style={{
-            paddingBottom: replyMessage && !Keyboard.isVisible() ? insets.bottom : 0,
+            paddingBottom: insets.bottom,
             flex: 1,
           }}
         >
