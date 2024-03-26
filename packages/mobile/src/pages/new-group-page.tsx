@@ -1,6 +1,6 @@
 import { useAllConnections } from 'feed-app-common';
 import { FlatList, Platform, Text } from 'react-native';
-import { ContactTile } from '../components/ui/Contact/Contact-Tile';
+import { ContactTile } from '../components/Contact/Contact-Tile';
 
 import { memo, useCallback, useState } from 'react';
 import { Header, HeaderBackButtonProps } from '@react-navigation/elements';

@@ -5,7 +5,7 @@ import { AppStackParamList, ChatStackParamList } from '../app/App';
 
 import { useAllConnections } from 'feed-app-common';
 
-import { ContactTile, Tile } from '../components/ui/Contact/Contact-Tile';
+import { ContactTile, Tile } from '../components/Contact/Contact-Tile';
 import { Users } from '../components/ui/Icons/icons';
 import { memo } from 'react';
 

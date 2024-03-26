@@ -1,9 +1,9 @@
 import {
   DotYouClient,
-  DriveSearchResult,
+  HomebaseFile,
   FileQueryParams,
   GetBatchQueryResultOptions,
-  NewDriveSearchResult,
+  NewHomebaseFile,
   ScheduleOptions,
   SecurityGroupType,
   SendContents,
@@ -16,7 +16,7 @@ import {
   uploadFile,
 } from '@youfoundation/js-lib/core';
 import { ChatDrive } from './ConversationProvider';
-import { getNewId, jsonStringify64 } from '@youfoundation/js-lib/helpers';
+import { assertIfDefined, getNewId, jsonStringify64 } from '@youfoundation/js-lib/helpers';
 import { appId } from '../../hooks/auth/useAuth';
 
 export const ChatReactionFileType = 7979;
@@ -32,6 +32,10 @@ export const getReactions = async (
   conversationId: string,
   messageId: string
 ) => {
+  assertIfDefined('dotYouClient', dotYouClient);
+  assertIfDefined('conversationId', conversationId);
+  assertIfDefined('messageId', messageId);
+
   const params: FileQueryParams = {
     targetDrive: ChatDrive,
     groupId: [messageId],
@@ -52,14 +56,14 @@ export const getReactions = async (
           async (result) => await dsrToReaction(dotYouClient, result, ChatDrive, true)
         )
       )
-    ).filter(Boolean) as DriveSearchResult<ChatReaction>[],
+    ).filter(Boolean) as HomebaseFile<ChatReaction>[],
   };
 };
 
 export const uploadReaction = async (
   dotYouClient: DotYouClient,
   conversationId: string,
-  reaction: NewDriveSearchResult<ChatReaction>,
+  reaction: NewHomebaseFile<ChatReaction>,
   recipients: string[]
 ) => {
   const reactionContent = reaction.fileMetadata.appData.content;
@@ -72,18 +76,18 @@ export const uploadReaction = async (
     },
     transitOptions: distribute
       ? {
-        recipients: [...recipients],
-        schedule: ScheduleOptions.SendNowAwaitResponse,
-        sendContents: SendContents.All,
-        useGlobalTransitId: true,
-        useAppNotification: true,
-        appNotificationOptions: {
-          appId: appId,
-          typeId: conversationId,
-          tagId: getNewId(),
-          silent: false,
-        },
-      }
+          recipients: [...recipients],
+          schedule: ScheduleOptions.SendNowAwaitResponse,
+          sendContents: SendContents.All,
+          useGlobalTransitId: true,
+          useAppNotification: true,
+          appNotificationOptions: {
+            appId: appId,
+            typeId: conversationId,
+            tagId: getNewId(),
+            silent: false,
+          },
+        }
       : undefined,
   };
 
@@ -115,7 +119,7 @@ export const uploadReaction = async (
 
 export const deleteReaction = async (
   dotYouClient: DotYouClient,
-  chatReaction: DriveSearchResult<ChatReaction>,
+  chatReaction: HomebaseFile<ChatReaction>,
   recipients: string[]
 ) => {
   return await deleteFile(dotYouClient, ChatDrive, chatReaction.fileId, recipients);
@@ -123,10 +127,10 @@ export const deleteReaction = async (
 
 export const dsrToReaction = async (
   dotYouClient: DotYouClient,
-  dsr: DriveSearchResult,
+  dsr: HomebaseFile,
   targetDrive: TargetDrive,
   includeMetadataHeader: boolean
-): Promise<DriveSearchResult<ChatReaction> | null> => {
+): Promise<HomebaseFile<ChatReaction> | null> => {
   try {
     const attrContent = await getContentFromHeaderOrPayload<ChatReaction>(
       dotYouClient,
@@ -136,7 +140,7 @@ export const dsrToReaction = async (
     );
     if (!attrContent) return null;
 
-    const chatReaction: DriveSearchResult<ChatReaction> = {
+    const chatReaction: HomebaseFile<ChatReaction> = {
       ...dsr,
       fileMetadata: {
         ...dsr.fileMetadata,

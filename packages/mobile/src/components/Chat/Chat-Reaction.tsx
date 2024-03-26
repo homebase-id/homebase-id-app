@@ -9,15 +9,15 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import { ChatMessageIMessage } from '../../../pages/chat/chat-page';
-import { useChatReaction } from '../../../hooks/chat/useChatReaction';
-import { useConversation } from '../../../hooks/chat/useConversation';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
-import { ChatMessage } from '../../../provider/chat/ChatProvider';
+import { useChatReaction } from '../../hooks/chat/useChatReaction';
+import { useConversation } from '../../hooks/chat/useConversation';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { ChatMessage } from '../../provider/chat/ChatProvider';
 import { useBottomSheetModal } from '@gorhom/bottom-sheet';
-import { Colors } from '../../../app/Colors';
-import { useDarkMode } from '../../../hooks/useDarkMode';
-import { ErrorNotification } from '../Alert/ErrorNotification';
+import { Colors } from '../../app/Colors';
+import { useDarkMode } from '../../hooks/useDarkMode';
+import { ErrorNotification } from '../ui/Alert/ErrorNotification';
+import { ChatMessageIMessage } from './ChatDetail';
 
 const PortalView = ({
   selectedMessage,
@@ -25,7 +25,7 @@ const PortalView = ({
   setSelectedMessage,
   openEmojiPicker,
 }: {
-  selectedMessage: (ChatMessageIMessage & number) | undefined;
+  selectedMessage: ChatMessageIMessage | undefined;
   setSelectedMessage: (message: ChatMessageIMessage | undefined) => void;
   messageCordinates: { x: number; y: number };
   openEmojiPicker: () => void;
@@ -49,14 +49,14 @@ const PortalView = ({
     let y = messageCordinates.y || 0;
     let shouldAnimate = false;
     const isLessDisatanceFromTop = y < 100;
-    const isLessDisatanceFromBottom = height - y < selectedMessage?.layoutHeight;
+    const isLessDisatanceFromBottom = height - y < 0;
     if (isLessDisatanceFromBottom) {
-      y = y - selectedMessage?.layoutHeight;
+      y = y - 0;
       shouldAnimate = true;
     }
 
     if (isLessDisatanceFromTop) {
-      y = y + selectedMessage?.layoutHeight;
+      y = y + 0;
       shouldAnimate = true;
     }
     y = isNaN(y) ? 0 : y;
@@ -125,7 +125,7 @@ const PortalView = ({
         }
         addReaction({
           conversation: conversation,
-          message: selectedMessage as DriveSearchResult<ChatMessage>,
+          message: selectedMessage as HomebaseFile<ChatMessage>,
           reaction,
         });
       }

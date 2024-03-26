@@ -1,9 +1,9 @@
 import {
   DotYouClient,
-  DriveSearchResult,
+  HomebaseFile,
   FileQueryParams,
   GetBatchQueryResultOptions,
-  NewDriveSearchResult,
+  NewHomebaseFile,
   SecurityGroupType,
   TargetDrive,
   UploadFileMetadata,
@@ -18,13 +18,12 @@ import {
 import { jsonStringify64 } from '@youfoundation/js-lib/helpers';
 import { ImageSource } from '../image/RNImageProvider';
 
-
 export const ConversationFileType = 8888;
 export const GroupConversationFileType = 8890;
 export const ConversationWithYourselfId = 'e4ef2382-ab3c-405d-a8b5-ad3e09e980dd';
 export const CONVERSATION_PAYLOAD_KEY = 'convo_pk';
 
-export const ConversationWithYourself: DriveSearchResult<SingleConversation> = {
+export const ConversationWithYourself: HomebaseFile<SingleConversation> = {
   fileState: 'active',
   fileId: '',
   fileSystemType: 'Standard',
@@ -44,7 +43,7 @@ export const ConversationWithYourself: DriveSearchResult<SingleConversation> = {
   },
   serverMetadata: undefined,
   priority: 0,
-} as any as DriveSearchResult<SingleConversation>;
+} as any as HomebaseFile<SingleConversation>;
 
 export const ChatDrive: TargetDrive = {
   alias: '9ff813aff2d61e2f9b9db189e72d1a11',
@@ -109,10 +108,10 @@ export const getConversation = async (dotYouClient: DotYouClient, conversationId
 
 export const dsrToConversation = async (
   dotYouClient: DotYouClient,
-  dsr: DriveSearchResult,
+  dsr: HomebaseFile,
   targetDrive: TargetDrive,
   includeMetadataHeader: boolean
-): Promise<DriveSearchResult<Conversation> | null> => {
+): Promise<HomebaseFile<Conversation> | null> => {
   try {
     const attrContent = await getContentFromHeaderOrPayload<Conversation>(
       dotYouClient,
@@ -122,7 +121,7 @@ export const dsrToConversation = async (
     );
     if (!attrContent) return null;
 
-    const conversation: DriveSearchResult<Conversation> = {
+    const conversation: HomebaseFile<Conversation> = {
       ...dsr,
       fileMetadata: {
         ...dsr.fileMetadata,
@@ -142,7 +141,7 @@ export const dsrToConversation = async (
 
 export const uploadConversation = async (
   dotYouClient: DotYouClient,
-  conversation: NewDriveSearchResult<Conversation>,
+  conversation: NewHomebaseFile<Conversation>,
   file?: ImageSource | undefined,
   onVersionConflict?: () => void
 ) => {
@@ -170,8 +169,6 @@ export const uploadConversation = async (
     },
   };
 
-
-
   return await uploadFile(
     dotYouClient,
     uploadInstructions,
@@ -185,7 +182,7 @@ export const uploadConversation = async (
 
 export const updateConversation = async (
   dotYouClient: DotYouClient,
-  conversation: DriveSearchResult<Conversation>
+  conversation: HomebaseFile<Conversation>
 ) => {
   const uploadInstructions: UploadInstructionSet = {
     storageOptions: {
@@ -246,20 +243,25 @@ export const updateGroupConversationCommand = async (
 ) => {
   const recipients = conversation.recipients;
 
-  if (!recipients || recipients.length === 0) { throw new Error('No recipients found for conversation'); }
+  if (!recipients || recipients.length === 0) {
+    throw new Error('No recipients found for conversation');
+  }
 
   const request: UpdateGroupConversationRequest = {
     title: conversation.title,
     conversationId,
   };
 
-  return await sendCommand(dotYouClient, {
-    code: UPDATE_GROUP_CONVERSATION_COMMAND,
-    globalTransitIdList: [],
-    jsonMessage: jsonStringify64(request),
-    recipients,
-  }, ChatDrive);
-
+  return await sendCommand(
+    dotYouClient,
+    {
+      code: UPDATE_GROUP_CONVERSATION_COMMAND,
+      globalTransitIdList: [],
+      jsonMessage: jsonStringify64(request),
+      recipients,
+    },
+    ChatDrive
+  );
 };
 
 export const requestConversationCommand = async (
@@ -271,7 +273,9 @@ export const requestConversationCommand = async (
     (conversation as SingleConversation).recipient,
   ];
 
-  if (!recipients || recipients.length === 0) { throw new Error('No recipients found for conversation'); }
+  if (!recipients || recipients.length === 0) {
+    throw new Error('No recipients found for conversation');
+  }
 
   const request: JoinConversationRequest | JoinGroupConversationRequest = {
     conversationId: conversationId,

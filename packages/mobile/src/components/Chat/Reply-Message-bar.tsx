@@ -1,10 +1,10 @@
 import { Text, StyleSheet, View, TouchableOpacity } from 'react-native';
-import { Close, Reply } from '../Icons/icons';
-import { ChatMessageIMessage } from '../../../pages/chat/chat-page';
-import { ChatDrive } from '../../../provider/chat/ConversationProvider';
-import { Colors } from '../../../app/Colors';
-import { OdinImage } from '../OdinImage/OdinImage';
-import { useDarkMode } from '../../../hooks/useDarkMode';
+import { Close, Reply } from '../ui/Icons/icons';
+import { ChatDrive } from '../../provider/chat/ConversationProvider';
+import { Colors } from '../../app/Colors';
+import { OdinImage } from '../ui/OdinImage/OdinImage';
+import { useDarkMode } from '../../hooks/useDarkMode';
+import { ChatMessageIMessage } from './ChatDetail';
 
 type ReplyMessageBarProps = {
   clearReply: () => void;

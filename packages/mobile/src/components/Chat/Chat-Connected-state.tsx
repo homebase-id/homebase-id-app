@@ -1,13 +1,13 @@
-import { DriveSearchResult } from '@youfoundation/js-lib/dist';
-import { Conversation, GroupConversation } from '../../../provider/chat/ConversationProvider';
+import { HomebaseFile } from '@youfoundation/js-lib/dist';
+import { Conversation, GroupConversation } from '../../provider/chat/ConversationProvider';
 import { useDotYouClientContext, useIsConnected } from 'feed-app-common';
 import { Linking, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { Text } from '../Text/Text';
-import { useDarkMode } from '../../../hooks/useDarkMode';
-import { Colors } from '../../../app/Colors';
+import { Text } from '../ui/Text/Text';
+import { useDarkMode } from '../../hooks/useDarkMode';
+import { Colors } from '../../app/Colors';
 import { ReactNode } from 'react';
 
-export const ChatConnectedState = (conversation: DriveSearchResult<Conversation> | undefined) => {
+export const ChatConnectedState = (conversation: HomebaseFile<Conversation> | undefined) => {
   const { isDarkMode } = useDarkMode();
   if (!conversation) return null;
   const recipients = (conversation.fileMetadata.appData.content as GroupConversation).recipients;

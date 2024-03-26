@@ -1,15 +1,15 @@
 import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { forwardRef } from 'react';
 import { Text, View } from 'react-native';
-import { Colors } from '../../../app/Colors';
-import { useDarkMode } from '../../../hooks/useDarkMode';
+import { Colors } from '../../../../app/Colors';
+import { useDarkMode } from '../../../../hooks/useDarkMode';
 
-import { ChatMessageIMessage } from '../../../pages/chat/chat-page';
-import { useChatReaction } from '../../../hooks/chat/useChatReaction';
-import { DriveSearchResult } from '@youfoundation/js-lib/dist';
-import { ChatReaction } from '../../../provider/chat/ChatReactionProvider';
-import useContact from '../../../hooks/contact/useContact';
-import { Avatar, OwnerAvatar } from '../Chat/Conversation-tile';
+import { ChatMessageIMessage } from '../../ChatDetail';
+import { useChatReaction } from '../../../../hooks/chat/useChatReaction';
+import { HomebaseFile } from '@youfoundation/js-lib/dist';
+import { ChatReaction } from '../../../../provider/chat/ChatReactionProvider';
+import useContact from '../../../../hooks/contact/useContact';
+import { Avatar, OwnerAvatar } from '../../Conversation-tile';
 
 export const ReactionsModal = forwardRef(
   (
@@ -59,7 +59,7 @@ export const ReactionsModal = forwardRef(
   }
 );
 
-const ReactionTile = (prop: DriveSearchResult<ChatReaction>) => {
+const ReactionTile = (prop: HomebaseFile<ChatReaction>) => {
   const reaction = prop.fileMetadata.appData.content.message;
   const senderOdinId = prop.fileMetadata.senderOdinId;
   const contact = useContact(senderOdinId).fetch.data;
