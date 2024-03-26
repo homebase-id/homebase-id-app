@@ -25,7 +25,6 @@ import { Platform, useColorScheme } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useCallback } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Bars, ChatIcon, Feed, House } from '../components/ui/Icons/icons';
 import { Colors } from './Colors';
 
 // Pages
@@ -55,6 +54,12 @@ import Toast from 'react-native-toast-message';
 import { ErrorToaster } from '../components/ui/Alert/ErrorToaster';
 import { MessageInfoPage } from '../pages/chat/message-info-page';
 import { Conversation } from '../provider/chat/ConversationProvider';
+import {
+  TabFeedIcon,
+  TabHouseIcon,
+  TabChatIcon,
+  TabMenuIcon,
+} from '../components/Nav/TabStackIcons';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -188,12 +193,6 @@ const AuthenticatedRoot = () => {
   );
 };
 
-type TabIconProps = {
-  focused: boolean;
-  color: string;
-  size: number;
-};
-
 export type AppStackParamList = {
   TabStack: undefined;
   ChatScreen: { convoId: string };
@@ -284,11 +283,6 @@ const TabBottom = createBottomTabNavigator<TabStackParamList>();
 const TabStack = () => {
   const { isDarkMode } = useDarkMode();
 
-  const houseIcon = useCallback((props: TabIconProps) => <House {...props} size={'md'} />, []);
-  const feedIcon = useCallback((props: TabIconProps) => <Feed {...props} size={'md'} />, []);
-  const chatIcon = useCallback((props: TabIconProps) => <ChatIcon {...props} size={'md'} />, []);
-  const menuIcon = useCallback((props: TabIconProps) => <Bars {...props} size={'md'} />, []);
-
   return (
     <TabBottom.Navigator
       screenOptions={{
@@ -307,28 +301,28 @@ const TabStack = () => {
         name="Home"
         component={HomeStack}
         options={{
-          tabBarIcon: houseIcon,
+          tabBarIcon: TabHouseIcon,
         }}
       />
       <TabBottom.Screen
         name="Feed"
         component={FeedPage}
         options={{
-          tabBarIcon: feedIcon,
+          tabBarIcon: TabFeedIcon,
         }}
       />
       <TabBottom.Screen
         name="Chat"
         component={ChatStack}
         options={{
-          tabBarIcon: chatIcon,
+          tabBarIcon: TabChatIcon,
         }}
       />
       <TabBottom.Screen
         name="Profile"
         component={ProfileStack}
         options={{
-          tabBarIcon: menuIcon,
+          tabBarIcon: TabMenuIcon,
         }}
       />
     </TabBottom.Navigator>
