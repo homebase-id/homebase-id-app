@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import {
   BuiltInAttributes,
   BuiltInProfiles,
-  getAttributeVersions,
+  getProfileAttributes,
 } from '@youfoundation/js-lib/profile';
 import { useDotYouClientContext } from 'feed-app-common';
 
@@ -11,7 +11,7 @@ const useProfile = () => {
   const dotYouClient = useDotYouClientContext();
 
   const fetchProfile = async () => {
-    const attributes = await getAttributeVersions(
+    const attributes = await getProfileAttributes(
       dotYouClient,
       BuiltInProfiles.StandardProfileId,
       undefined,

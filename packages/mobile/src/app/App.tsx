@@ -20,7 +20,7 @@ import { DotYouClientProvider } from '../components/Auth/DotYouClientProvider';
 import { BackButton, HeaderActions } from '../components/ui/convo-app-bar';
 import { useLiveChatProcessor } from '../hooks/chat/useLiveChatProcessor';
 import { HeaderBackButtonProps } from '@react-navigation/elements';
-import { Platform, useColorScheme } from 'react-native';
+import { Platform, View, useColorScheme } from 'react-native';
 
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useCallback } from 'react';
@@ -55,6 +55,7 @@ import Toast from 'react-native-toast-message';
 import { ErrorToaster } from '../components/ui/Alert/ErrorToaster';
 import { MessageInfoPage } from '../pages/chat/message-info-page';
 import { Conversation } from '../provider/chat/ConversationProvider';
+import { useUnreadPushNotificationsCount } from '../hooks/notifications/usePushNotifications';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -280,13 +281,27 @@ const AppStackScreen = () => {
   );
 };
 
+export const CHAT_APP_ID = '2d781401-3804-4b57-b4aa-d8e4e2ef39f4';
+export const MAIL_APP_ID = '6e8ecfff-7c15-40e4-94f4-d6e83bfb5857';
+export const FEED_APP_ID = '5f887d80-0132-4294-ba40-bda79155551d';
+export const PHOTO_APP_ID = '32f0bdbf-017f-4fc0-8004-2d4631182d1e';
+export const OWNER_APP_ID = 'ac126e09-54cb-4878-a690-856be692da16';
+
+const TabFeedIcon = (props: TabIconProps) => {
+  const unread = !!useUnreadPushNotificationsCount({appId: FEED_APP_ID});
+  return <View style={{position:'relative'}}><Feed {...props} size={'md'} />{unread ? <View style={{backgroundColor: Colors.red[500], width: 10, height:10, position: 'absolute',bottom:0, right:0, borderRadius: 5}}/> : null}</View>;
+};
+
+const TabChatIcon = (props: TabIconProps) => {
+  const unread = !!useUnreadPushNotificationsCount({appId: CHAT_APP_ID});
+  return <View style={{position:'relative'}}><ChatIcon {...props} size={'md'} />{unread ? <View style={{backgroundColor: Colors.red[500], width: 10, height:10, position: 'absolute',bottom:0, right:0, borderRadius: 5}}/> : null}</View>;
+};
+
 const TabBottom = createBottomTabNavigator<TabStackParamList>();
 const TabStack = () => {
   const { isDarkMode } = useDarkMode();
 
   const houseIcon = useCallback((props: TabIconProps) => <House {...props} size={'md'} />, []);
-  const feedIcon = useCallback((props: TabIconProps) => <Feed {...props} size={'md'} />, []);
-  const chatIcon = useCallback((props: TabIconProps) => <ChatIcon {...props} size={'md'} />, []);
   const menuIcon = useCallback((props: TabIconProps) => <Bars {...props} size={'md'} />, []);
 
   return (
@@ -314,14 +329,14 @@ const TabStack = () => {
         name="Feed"
         component={FeedPage}
         options={{
-          tabBarIcon: feedIcon,
+          tabBarIcon: TabFeedIcon,
         }}
       />
       <TabBottom.Screen
         name="Chat"
         component={ChatStack}
         options={{
-          tabBarIcon: chatIcon,
+          tabBarIcon: TabChatIcon,
         }}
       />
       <TabBottom.Screen
