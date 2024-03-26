@@ -106,7 +106,7 @@ export const handleNotification = async (notification: OdinNotification): Promis
   // await notifee.cancelNotification(notification.id);
 
   // Cleanup notification from memory when you're done with it:
-  deleteNotification(notification);
+  // deleteNotification(notification);
 };
 
 //

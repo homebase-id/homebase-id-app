@@ -91,6 +91,7 @@ export const useAuthenticatedPushNotification = () => {
   }, []);
 
   // SEB:TODO not sure we want to handle missed notifications at all?
+  // Be aware that enabling this can interleave the notifications so that the same notification is handled multiple times.
   //
   // Initial mount and App state change
   // useEffect(() => {
