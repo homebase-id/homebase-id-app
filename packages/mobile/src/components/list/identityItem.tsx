@@ -25,6 +25,7 @@ export const IdentityItem = ({ odinId }: { odinId: string }) => {
           fileKey={CONTACT_PROFILE_IMAGE_KEY}
           targetDrive={ContactConfig.ContactTargetDrive}
           imageSize={{ width: 50, height: 50 }}
+          style={{ borderRadius: 25, overflow: 'hidden' }}
         />
       ) : (
         <View

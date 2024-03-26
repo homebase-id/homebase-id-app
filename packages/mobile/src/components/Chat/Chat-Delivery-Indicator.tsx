@@ -1,4 +1,4 @@
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ChatDeliveryStatus, ChatMessage } from '../../provider/chat/ChatProvider';
 import { useDotYouClientContext } from 'feed-app-common';
 import { View } from 'react-native';
@@ -9,7 +9,7 @@ import { ChatMessageIMessage } from './ChatDetail';
 export const ChatDeliveryIndicator = ({
   msg,
 }: {
-  msg: ChatMessageIMessage | DriveSearchResult<ChatMessage>;
+  msg: ChatMessageIMessage | HomebaseFile<ChatMessage>;
 }) => {
   const identity = useDotYouClientContext().getIdentity();
   const content = msg.fileMetadata.appData.content;

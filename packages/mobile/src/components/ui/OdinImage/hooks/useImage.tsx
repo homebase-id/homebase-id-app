@@ -80,7 +80,7 @@ const useImage = (props?: {
     imageDrive?: TargetDrive,
     size?: ImageSize,
     naturalSize?: ImageSize
-  ): Promise<ImageData | undefined> => {
+  ): Promise<ImageData | null> => {
     if (
       imageFileId === undefined ||
       imageFileId === '' ||
@@ -88,7 +88,7 @@ const useImage = (props?: {
       !imageFileKey ||
       !authToken
     ) {
-      return;
+      return null;
     }
 
     const cachedEntry = checkIfWeHaveLargerCachedImage(
@@ -114,7 +114,7 @@ const useImage = (props?: {
       lastModified
     );
 
-    if (!imageBlob) return undefined;
+    if (!imageBlob) return null;
 
     return {
       url: imageBlob.uri,

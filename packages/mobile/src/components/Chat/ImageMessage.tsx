@@ -8,9 +8,8 @@ import { AppStackParamList } from '../../app/App';
 import { VideoWithLoader } from '../ui/Media/VideoWithLoader';
 import { OdinImage } from '../ui/OdinImage/OdinImage';
 import { ChatMessage } from '../../provider/chat/ChatProvider';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ChatMessageIMessage } from './ChatDetail';
-
 import { AudioMessage } from './AudioMessage';
 
 const ImageMessage = memo((props: MessageImageProps<ChatMessageIMessage>) => {
@@ -18,7 +17,7 @@ const ImageMessage = memo((props: MessageImageProps<ChatMessageIMessage>) => {
   return <MediaGallery msg={props.currentMessage} />;
 });
 
-const MediaGallery = ({ msg: currentMessage }: { msg: DriveSearchResult<ChatMessage> }) => {
+const MediaGallery = ({ msg: currentMessage }: { msg: HomebaseFile<ChatMessage> }) => {
   const payloads = currentMessage.fileMetadata.payloads;
   const maxVisible = 4;
   const countExcludedFromView = payloads.length - maxVisible;

@@ -23,7 +23,7 @@ const useTinyThumb = ({
     imageDrive?: TargetDrive
   ) => {
     if (imageFileId === undefined || imageFileId === '' || !imageDrive || !imageFileKey) {
-      return;
+      return null;
     }
     return (
       (await getDecryptedThumbnailMeta(

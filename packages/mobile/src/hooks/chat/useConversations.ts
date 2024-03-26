@@ -1,13 +1,13 @@
 import { Conversation, getConversations } from '../../provider/chat/ConversationProvider';
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { useDotYouClientContext } from 'feed-app-common';
 import { ChatMessage, getChatMessages } from '../../provider/chat/ChatProvider';
 
 const PAGE_SIZE = 500;
 
-export type ConversationWithRecentMessage = DriveSearchResult<Conversation> & {
-  lastMessage: DriveSearchResult<ChatMessage> | null;
+export type ConversationWithRecentMessage = HomebaseFile<Conversation> & {
+  lastMessage: HomebaseFile<ChatMessage> | null;
 };
 export const useConversations = () => {
   const dotYouClient = useDotYouClientContext();
@@ -23,7 +23,7 @@ export const useConversations = () => {
     }
 
     const convoWithMessage = await Promise.all(
-      (fetchedConversations.searchResults.filter(Boolean) as DriveSearchResult<Conversation>[]).map(
+      (fetchedConversations.searchResults.filter(Boolean) as HomebaseFile<Conversation>[]).map(
         async (convo) => {
           const conversationId = convo.fileMetadata.appData.uniqueId;
           const messagesA = await queryClient.fetchInfiniteQuery({

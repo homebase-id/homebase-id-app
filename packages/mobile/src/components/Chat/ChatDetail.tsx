@@ -44,13 +44,11 @@ import { HighlightedChatMessage } from '../../components/Chat/Chat-Reaction';
 import { useChatReaction } from '../../hooks/chat/useChatReaction';
 import { Avatar as AppAvatar, OwnerAvatar } from '../../components/Chat/Conversation-tile';
 import { ConnectionName } from '../../components/ui/Name';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ChatMessage } from '../../provider/chat/ChatProvider';
 import { useAudio } from '../../hooks/audio/useAudio';
-import { OdinBlob } from '../../../polyfills/OdinBlob';
-import { GiftedChatContext } from 'react-native-gifted-chat/src/GiftedChatContext';
 
-export interface ChatMessageIMessage extends IMessage, DriveSearchResult<ChatMessage> {}
+export interface ChatMessageIMessage extends IMessage, HomebaseFile<ChatMessage> {}
 
 export const ChatDetail = memo(
   ({
@@ -94,7 +92,7 @@ export const ChatDetail = memo(
         const { pageY, locationY } = e.nativeEvent;
         const y = pageY - locationY;
 
-        doSelectMessage({ coords: { x: 0, y }, message: { layoutHeight: 0, ...message } });
+        doSelectMessage({ coords: { x: 0, y }, message });
       },
       [doSelectMessage]
     );

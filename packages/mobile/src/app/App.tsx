@@ -45,7 +45,7 @@ import ConversationPage from '../pages/conversation-page';
 import EditGroupPage from '../pages/chat/edit-group-page';
 import { ConnectionRequestsPage } from '../pages/home/connection-requests-page';
 import { useDarkMode } from '../hooks/useDarkMode';
-import { DriveSearchResult, EmbeddedThumb } from '@youfoundation/js-lib/core';
+import { HomebaseFile, EmbeddedThumb } from '@youfoundation/js-lib/core';
 import { OdinImage } from '../components/ui/OdinImage/OdinImage';
 import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
 import { useProfile } from '../hooks/profile/useProfile';
@@ -112,6 +112,12 @@ const INCLUDED_QUERY_KEYS = [
   'conversations',
   'chat-reaction',
   'connectionDetails',
+
+  // Small data (blobs to local file Uri)
+  'image',
+
+  // Big data (base64 uri's)
+  // 'tinyThumb',
 ];
 const persistOptions: Omit<PersistQueryClientOptions, 'queryClient'> = {
   buster: '202403',
@@ -193,12 +199,12 @@ export type AppStackParamList = {
   ChatScreen: { convoId: string };
   ChatInfo: { convoId: string };
   MessageInfo: {
-    message: DriveSearchResult<ChatMessage>;
-    conversation: DriveSearchResult<Conversation>;
+    message: HomebaseFile<ChatMessage>;
+    conversation: HomebaseFile<Conversation>;
   };
   EditGroup: { convoId: string };
   PreviewMedia: {
-    msg: DriveSearchResult<ChatMessage>;
+    msg: HomebaseFile<ChatMessage>;
     fileId: string;
     payloadKey: string;
     currIndex: number;
