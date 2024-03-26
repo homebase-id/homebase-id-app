@@ -23,10 +23,6 @@ export const useAudio = () => {
     const startRecording = async () => {
         try {
             await audioRecorder.startRecorder(path, audioSet);
-            audioRecorder.addRecordBackListener(e => {
-                console.log('Recording . . . ', e.currentPosition);
-                return;
-            });
         } catch (error) {
             console.log('error Starting  Recording', error);
         }
@@ -40,10 +36,6 @@ export const useAudio = () => {
     const playRecording = async (path: string) => {
         try {
             await audioRecorder.startPlayer(path);
-            audioRecorder.addPlayBackListener(e => {
-                console.log('Playing . . . ', e.currentPosition);
-                return;
-            });
         } catch (error) {
             console.log('error Starting  Playing', error);
         }

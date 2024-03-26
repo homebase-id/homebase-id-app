@@ -47,6 +47,7 @@ import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ChatMessage } from '../../provider/chat/ChatProvider';
 import { useAudio } from '../../hooks/audio/useAudio';
 import { Text } from '../ui/Text/Text';
+import { millisToMinutesAndSeconds } from '../../utils/utils';
 
 export interface ChatMessageIMessage extends IMessage, HomebaseFile<ChatMessage> {}
 
@@ -168,15 +169,6 @@ export const ChatDetail = memo(
     const crossIcon = useCallback(() => <XIcon />, []);
     const stopIcon = useCallback(() => <Stop />, []);
     const [duration, setDuration] = useState<string>();
-
-    //https://stackoverflow.com/a/21294619/15538463
-    function millisToMinutesAndSeconds(millis: number) {
-      const minutes = Math.floor(millis / 60000);
-      const seconds = Number(((millis % 60000) / 1000).toFixed(0));
-      return seconds === 60
-        ? minutes + 1 + ':00'
-        : minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
-    }
 
     useEffect(() => {
       if (isRecording) {
