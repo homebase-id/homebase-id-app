@@ -27,7 +27,7 @@ export const OdinAudio = memo((props: OdinAudioProps) => {
   return (
     <View
       style={{
-        flex: 1,
+        width: 150,
       }}
     >
       {isLoading ? (
@@ -51,7 +51,6 @@ export const OdinAudio = memo((props: OdinAudioProps) => {
               if (playing) {
                 await stopPlaying();
               } else {
-                console.log('audioData?.url', audioData?.url);
                 await playRecording(audioData?.url as string);
               }
             }}
@@ -70,7 +69,13 @@ export const OdinAudio = memo((props: OdinAudioProps) => {
         </View>
       )}
 
-      <Text>{millisToMinutesAndSeconds(duration || 0)}</Text>
+      <Text
+        style={{
+          marginLeft: 12,
+        }}
+      >
+        {millisToMinutesAndSeconds(duration || 0)}
+      </Text>
     </View>
   );
 });
