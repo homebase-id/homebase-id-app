@@ -16,7 +16,7 @@ import { logout as logoutYouauth } from '@youfoundation/js-lib/auth';
 import { useEncrtypedStorage } from './useEncryptedStorage';
 import { Platform } from 'react-native';
 import { DrivePermissionType } from '@youfoundation/js-lib/core';
-import { AppPermissionType, ContactConfig } from '@youfoundation/js-lib/network';
+import { ALL_CONNECTIONS_CIRCLE_ID, AppPermissionType, ContactConfig } from '@youfoundation/js-lib/network';
 import { BlogConfig, HomePageConfig } from '@youfoundation/js-lib/public';
 import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
 import { useQueryClient } from '@tanstack/react-query';
@@ -209,6 +209,7 @@ export const useYouAuthAuthorization = () => {
       undefined,
       drives,
       circleDrives,
+      [ALL_CONNECTIONS_CIRCLE_ID],
       uint8ArrayToBase64(stringToUint8Array(JSON.stringify(publicKeyJwk))),
       corsHost,
       `${Platform.OS === 'ios' ? 'iOS' : Platform.OS === 'android' ? 'Android' : Platform.OS} | ${Platform.Version
