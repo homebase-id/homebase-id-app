@@ -16,7 +16,7 @@ import {
   Send,
   Time,
 } from 'react-native-gifted-chat';
-import { useCallback, memo, useState, useEffect } from 'react';
+import { useCallback, memo } from 'react';
 import {
   GestureResponderEvent,
   ImageBackground,
@@ -26,15 +26,7 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import {
-  Close,
-  Images,
-  Microphone,
-  SendChat,
-  Stop,
-  Times,
-  XIcon,
-} from '../../components/ui/Icons/icons';
+import { Close, Images, Microphone, SendChat, Stop, Times } from '../../components/ui/Icons/icons';
 import MediaMessage from './MediaMessage';
 import { Asset, launchImageLibrary } from 'react-native-image-picker';
 import { useAuth } from '../../hooks/auth/useAuth';
@@ -53,7 +45,7 @@ import { Avatar as AppAvatar, OwnerAvatar } from '../../components/Chat/Conversa
 import { ConnectionName } from '../../components/ui/Name';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ChatMessage } from '../../provider/chat/ChatProvider';
-import { useAudio } from '../../hooks/audio/useAudio';
+import { useRecorder } from '../../hooks/audio/useRecorder';
 import { Text } from '../ui/Text/Text';
 import { millisToMinutesAndSeconds } from '../../utils/utils';
 
@@ -170,29 +162,14 @@ export const ChatDetail = memo(
       );
     }, [assets, isDarkMode, replyMessage, setAssets, setReplyMessage]);
 
-    const { startRecording, stopRecording, recordListenter, removeRecordListenter } = useAudio();
-    const [isRecording, setIsRecording] = useState(false);
+    const { startRecording, stopRecording, currDuration: duration, isRecording } = useRecorder();
     const imagesIcon = useCallback(() => <Images />, []);
     const microphoneIcon = useCallback(() => <Microphone />, []);
     const crossIcon = useCallback(() => <Times />, []);
     const stopIcon = useCallback(() => <Stop />, []);
-    const [duration, setDuration] = useState<string>();
-
-    useEffect(() => {
-      if (isRecording) {
-        recordListenter((e) => {
-          console.log('Recording . . . ', e.currentPosition);
-          setDuration(millisToMinutesAndSeconds(e.currentPosition));
-        });
-      } else {
-        removeRecordListenter();
-      }
-    }, [isRecording, recordListenter, removeRecordListenter]);
 
     const cancelRecording = useCallback(async () => {
       await stopRecording();
-      setIsRecording(false);
-      setDuration('0:00');
     }, [stopRecording]);
 
     const onStopRecording = useCallback(async () => {
@@ -210,8 +187,6 @@ export const ChatDetail = memo(
           id: 'audio',
         },
       ] as Asset[]);
-      setIsRecording(false);
-      setDuration('0:00');
     }, [setAssets, stopRecording]);
     const renderCustomInputToolbar = useCallback(
       (props: InputToolbarProps<IMessage>) => {
@@ -242,7 +217,10 @@ export const ChatDetail = memo(
                     }}
                   >
                     <Microphone color={Colors.red[600]} />
-                    <Text style={{ marginLeft: 8, fontSize: 16 }}>{duration}</Text>
+
+                    <Text style={{ marginLeft: 8, fontSize: 16 }}>
+                      {millisToMinutesAndSeconds(duration)}
+                    </Text>
                   </View>
                 );
               }
@@ -270,8 +248,8 @@ export const ChatDetail = memo(
                       await onStopRecording();
                       return;
                     } else {
-                      setIsRecording(true);
                       await startRecording();
+                      //TODO: REmove
                       console.log('Microphone started');
                     }
                   }}
@@ -411,14 +389,6 @@ export const ChatDetail = memo(
         showUserAvatar={false}
         renderUsernameOnMessage={isGroup}
         renderAvatar={isGroup ? renderAvatar : null}
-        // renderInputToolbar={(props) => (
-        //   <CustomInputToolbar
-        //     {...props}
-        //     setAssets={setAssets}
-        //     startRecording={startRecording}
-        //     stopRecording={stopRecording}
-        //   />
-        // )}
         renderInputToolbar={renderCustomInputToolbar}
         user={{
           _id: identity || '',
@@ -427,102 +397,6 @@ export const ChatDetail = memo(
     );
   }
 );
-
-// interface CustomInputToolbarProps extends InputToolbarProps<IMessage> {
-//   setAssets: (assets: Asset[]) => void;
-//   startRecording: () => void;
-//   stopRecording: () => void;
-// }
-
-// const CustomInputToolbar = memo((props: CustomInputToolbarProps) => {
-//   const { isDarkMode } = useDarkMode();
-//   const [isRecording, setIsRecording] = useState(false);
-//   const startRecording = props.startRecording;
-//   const stopRecording = props.stopRecording;
-//   const setAssets = props.setAssets;
-//   const imagesIcon = useCallback(() => <Images />, []);
-//   const microphoneIcon = useCallback(() => <Microphone />, []);
-//   const stopIcon = useCallback(() => <Stop />, []);
-//   return (
-//     <>
-//       <InputToolbar
-//         {...props}
-//         renderComposer={(props) => (
-//           <Composer
-//             {...props}
-//             textInputStyle={{
-//               color: isDarkMode ? 'white' : 'black',
-//             }}
-//           />
-//         )}
-//         renderSend={(props) => (
-//           <View
-//             style={{
-//               flexDirection: 'row',
-//               alignItems: 'flex-end',
-//             }}
-//           >
-//             {!isRecording ? (
-//               <Actions
-//                 icon={microphoneIcon}
-//                 containerStyle={props.containerStyle}
-//                 onPressActionButton={() => {
-//                   startRecording();
-//                   setIsRecording(true);
-//                   console.log('Microphone pressed');
-//                 }}
-//               />
-//             ) : (
-//               <Actions
-//                 icon={stopIcon}
-//                 containerStyle={props.containerStyle}
-//                 onPressActionButton={() => {
-//                   if (isRecording) {
-//                     stopRecording;
-//                     setIsRecording(false);
-//                     return;
-//                   }
-//                   console.log('Microphone stopped');
-//                 }}
-//               />
-//             )}
-//             <View style={{ width: 6 }} />
-//             <Send
-//               {...props}
-//               // disabled={!props.text && assets?.length === 0}
-//               disabled={props.disabled}
-//               text={props.text || ' '}
-//               containerStyle={styles.send}
-//             >
-//               <SendChat size={'md'} color={props.disabled ? 'grey' : 'blue'} />
-//             </Send>
-//           </View>
-//         )}
-//         renderActions={() => (
-//           <Actions
-//             icon={imagesIcon}
-//             onPressActionButton={async () => {
-//               const medias = await launchImageLibrary({
-//                 mediaType: 'mixed',
-//                 selectionLimit: 10,
-//               });
-//               if (medias.didCancel) return;
-//               setAssets(medias.assets ?? []);
-//             }}
-//           />
-//         )}
-//         containerStyle={[
-//           styles.inputContainer,
-//           {
-//             backgroundColor: isDarkMode ? Colors.slate[900] : Colors.white,
-//             borderTopWidth: 0,
-//             borderRadius: 10,
-//           },
-//         ]}
-//       />
-//     </>
-//   );
-// });
 
 const styles = StyleSheet.create({
   inputContainer: {

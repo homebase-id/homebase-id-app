@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Platform } from 'react-native';
 import AudioRecorderPlayer, { AudioEncoderAndroidType, AudioSet, AudioSourceAndroidType, AVEncoderAudioQualityIOSType, AVEncodingOption, AVModeIOSOption } from 'react-native-audio-recorder-player';
 import RNFS from 'react-native-fs';
@@ -12,7 +13,7 @@ const audioSet: AudioSet = {
     AVFormatIDKeyIOS: AVEncodingOption.aac,
 };
 
-export const useAudio = () => {
+export const useRecorder = () => {
     const dirs = RNFS.TemporaryDirectoryPath;
     const path = Platform.select({
         ios: `file://${dirs}/audio.m4a`,
@@ -22,26 +23,32 @@ export const useAudio = () => {
     const startRecording = async () => {
         try {
             await audioRecorder.startRecorder(path, audioSet);
+            setIsRecording(true);
         } catch (error) {
-            console.log('error Starting  Recording', error);
+            console.error('error Starting  Recording', error);
         }
     };
 
     const stopRecording = async () => {
         const result = await audioRecorder.stopRecorder();
+        setIsRecording(false);
+        setCurrDuration(0);
         return result;
     };
 
     const playRecording = async (path: string) => {
         try {
             await audioRecorder.startPlayer(path);
+            setplaying(true);
         } catch (error) {
-            console.log('error Starting  Playing', error);
+            console.error('error Starting  Playing', error);
         }
 
     };
     const stopPlaying = async () => {
         const result = await audioRecorder.stopPlayer();
+        setplaying(false);
+        setCurrDuration(0);
         return result;
     };
     const pausePlaying = async () => {
@@ -49,14 +56,41 @@ export const useAudio = () => {
         return result;
     };
 
+    const [playing, setplaying] = useState(false);
+    const [isRecording, setIsRecording] = useState(false);
+    const [duration, setDuration] = useState<number>();
+    const [currDuration, setCurrDuration] = useState<number>();
+    useEffect(() => {
+        if (isRecording) {
+            audioRecorder.addRecordBackListener((recordType) => {
+                setCurrDuration(recordType.currentPosition);
+            });
+        }
+        if (!isRecording) {
+            audioRecorder.removeRecordBackListener();
+        }
+        if (playing) {
+            audioRecorder.addPlayBackListener((playbackType) => {
+                setCurrDuration(playbackType.currentPosition);
+                setDuration(playbackType.duration);
+            });
+        }
+        if (!playing) {
+            audioRecorder.removePlayBackListener();
+        }
+        if (currDuration === duration) {
+            setplaying(false);
+        }
+    }, [currDuration, duration, isRecording, playing]);
+
     return {
         startRecording,
-        recordListenter: audioRecorder.addRecordBackListener,
-        removeRecordListenter: audioRecorder.removeRecordBackListener,
+        isRecording,
         stopRecording,
         playRecording,
-        playListenter: audioRecorder.addPlayBackListener,
-        removePlayListenter: audioRecorder.removePlayBackListener,
+        currDuration,
+        duration,
+        playing,
         stopPlaying,
         pausePlaying,
     };

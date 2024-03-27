@@ -1,7 +1,7 @@
 import { PayloadDescriptor } from '@youfoundation/js-lib/core';
-import { useAudio } from '../../hooks/audio/useAudio';
+import { useRecorder } from '../../hooks/audio/useRecorder';
 import { ActivityIndicator, Pressable, View } from 'react-native';
-import { memo, useEffect, useState } from 'react';
+import { memo } from 'react';
 import { Play, Stop } from '../ui/Icons/icons';
 import useImage from '../ui/OdinImage/hooks/useImage';
 import { ChatDrive } from '../../provider/chat/ConversationProvider';
@@ -15,10 +15,8 @@ interface OdinAudioProps {
 }
 
 export const OdinAudio = memo((props: OdinAudioProps) => {
-  const { playRecording, stopPlaying, playListenter } = useAudio();
-  const [playing, setplaying] = useState(false);
-  const [duration, setDuration] = useState<number>();
-  const [currDuration, setCurrDuration] = useState<number>();
+  const { playRecording, stopPlaying, playing, currDuration, duration } = useRecorder();
+
   // TODO: Build useAudio hook instead of relying on useImage
   const { data: audioData, isLoading } = useImage({
     imageDrive: ChatDrive,
@@ -26,20 +24,7 @@ export const OdinAudio = memo((props: OdinAudioProps) => {
     imageFileKey: props.payload.key,
     lastModified: props.payload.lastModified,
   }).fetch;
-  useEffect(() => {
-    if (playing) {
-      playListenter((playbackType) => {
-        setCurrDuration(playbackType.currentPosition);
-        setDuration(playbackType.duration);
-      });
-    }
-    if (!playing) {
-      setCurrDuration(0);
-    }
-    if (currDuration === duration) {
-      setplaying(false);
-    }
-  }, [currDuration, duration, playListenter, playing]);
+
   return (
     <View
       style={{
@@ -66,11 +51,9 @@ export const OdinAudio = memo((props: OdinAudioProps) => {
             onPress={async () => {
               if (playing) {
                 await stopPlaying();
-                setplaying(false);
               } else {
                 console.log('audioData?.url', audioData?.url);
                 await playRecording(audioData?.url as string);
-                setplaying(true);
               }
             }}
             key={'audio'}
