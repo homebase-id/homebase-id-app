@@ -1,22 +1,27 @@
 import messaging, { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
 import notifee, { EventType, EventDetail } from '@notifee/react-native';
+import { PushNotificationOptions } from '@youfoundation/js-lib/dist';
 
-export interface OdinChatNotificationData {
-  sender: string;
-  message: string;
+// backend: src/services/Odin.Services/AppNotifications/Push/PushNotificationContent.cs
+export interface PushNotificationPayload {
+  senderId: string;
+  timestamp: string;
+  appDisplayName: string;
+  options: PushNotificationOptions;
 }
 
-export interface OdinNotification {
-  version: number;
-  id: string;
+// backend: src/core/Odin.Core/Dto/DevicePushNotificationRequest.cs
+export interface PushNotificationMessage {
   correlationId: string;
-  type: string;
-  data: string;
+  id: string;
+  data: PushNotificationPayload;
+  timestamp: string;
+  version: number;
 }
 
 //
 
-export const initializeNotificationSupport = async () => {
+export const initializePushNotificationSupport = async () => {
   messaging().onMessage(onMessageReceived);
   messaging().setBackgroundMessageHandler(onMessageReceived);
 
@@ -32,21 +37,22 @@ export const initializeNotificationSupport = async () => {
 const onMessageReceived = async (message: FirebaseMessagingTypes.RemoteMessage) => {
   console.debug('FCM Message:', message);
 
-  const notification = message.data as unknown as OdinNotification;
+  const notification = message.data as unknown as PushNotificationMessage;
+  const data = notification.data as unknown as string;
+  notification.data = JSON.parse(data);
+
+  console.debug('ODIN notification:', notification);
+
   storeNotification(notification);
 
-  console.debug('notification:', notification);
-
   // SEB:TODO branch on notification.version and notification.type
-
-  const odinChatNotificationData = JSON.parse(notification.data) as OdinChatNotificationData;
 
   // SEB:TODO Is it normal to display a notification when the app is in the foreground, or
   // should it only do it when AppState.currentState !== 'active' ?
   await notifee.displayNotification({
     id: notification?.id,
     title: 'Odin message',
-    body: `Message received from ${odinChatNotificationData?.sender || 'unknown'}`,
+    body: `Message received from ${notification?.data?.senderId || 'unknown'}`,
     android: {
       channelId: 'default',
       // smallIcon: 'name-of-a-small-icon', // optional, defaults to 'ic_launcher'.
