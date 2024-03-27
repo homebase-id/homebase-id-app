@@ -166,7 +166,6 @@ export const ChatDetail = memo(
     const imagesIcon = useCallback(() => <Images />, []);
     const microphoneIcon = useCallback(() => <Microphone />, []);
     const crossIcon = useCallback(() => <Times />, []);
-    const stopIcon = useCallback(() => <Stop />, []);
 
     const cancelRecording = useCallback(async () => {
       await stopRecording();
@@ -241,45 +240,34 @@ export const ChatDetail = memo(
                 }}
               >
                 <Actions
-                  icon={!isRecording ? microphoneIcon : stopIcon}
+                  icon={!isRecording ? microphoneIcon : crossIcon}
                   containerStyle={props.containerStyle}
                   onPressActionButton={async () => {
                     if (isRecording) {
-                      await onStopRecording();
+                      await cancelRecording();
                       return;
                     } else {
                       await startRecording();
-                      //TODO: REmove
-                      console.log('Microphone started');
                     }
                   }}
                 />
 
                 <View style={{ width: 6 }} />
-                {isRecording ? (
-                  <Actions
-                    icon={crossIcon}
-                    containerStyle={props.containerStyle}
-                    onPressActionButton={async () => {
-                      if (isRecording) {
-                        await cancelRecording();
-                        return;
-                      }
-                    }}
+
+                <Send
+                  {...props}
+                  disabled={isRecording ? false : !props.text && assets?.length === 0}
+                  onSend={isRecording ? async (_) => await onStopRecording() : undefined}
+                  text={props.text || ' '}
+                  containerStyle={styles.send}
+                >
+                  <SendChat
+                    size={'md'}
+                    color={
+                      isRecording ? 'blue' : !props.text && assets?.length === 0 ? 'grey' : 'blue'
+                    }
                   />
-                ) : (
-                  <Send
-                    {...props}
-                    disabled={!props.text && assets?.length === 0}
-                    text={props.text || ' '}
-                    containerStyle={styles.send}
-                  >
-                    <SendChat
-                      size={'md'}
-                      color={!props.text && assets?.length === 0 ? 'grey' : 'blue'}
-                    />
-                  </Send>
-                )}
+                </Send>
               </View>
             )}
             renderActions={
@@ -315,12 +303,11 @@ export const ChatDetail = memo(
         isDarkMode,
         duration,
         microphoneIcon,
-        stopIcon,
         crossIcon,
         assets?.length,
         onStopRecording,
-        startRecording,
         cancelRecording,
+        startRecording,
         imagesIcon,
         setAssets,
       ]
