@@ -29,7 +29,6 @@ export const AudioMessage = memo((props: AudioMessageProps) => {
   useEffect(() => {
     if (playing) {
       playListenter((playbackType) => {
-        console.log('playbackType', playbackType.currentPosition, playbackType.duration);
         setCurrDuration(playbackType.currentPosition);
         setDuration(playbackType.duration);
       });
