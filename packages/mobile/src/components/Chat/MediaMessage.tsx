@@ -10,7 +10,7 @@ import { OdinImage } from '../ui/OdinImage/OdinImage';
 import { ChatMessage } from '../../provider/chat/ChatProvider';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ChatMessageIMessage } from './ChatDetail';
-import { OdinAudio } from './OdinAudio';
+import { OdinAudio } from '../ui/OdinAudio/OdinAudio';
 
 const MediaMessage = memo((props: MessageImageProps<ChatMessageIMessage>) => {
   if (!props.currentMessage) return null;

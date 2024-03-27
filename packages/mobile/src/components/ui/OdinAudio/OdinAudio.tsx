@@ -1,13 +1,13 @@
 import { PayloadDescriptor } from '@youfoundation/js-lib/core';
-import { useRecorder } from '../../hooks/audio/useRecorder';
+import { useRecorder } from '../../../hooks/audio/useRecorder';
 import { ActivityIndicator, Pressable, View } from 'react-native';
 import { memo } from 'react';
-import { Play, Stop } from '../ui/Icons/icons';
-import useImage from '../ui/OdinImage/hooks/useImage';
-import { ChatDrive } from '../../provider/chat/ConversationProvider';
+import { Play, Stop } from '../Icons/icons';
+import { ChatDrive } from '../../../provider/chat/ConversationProvider';
 import Slider from '@react-native-community/slider';
-import { Text } from '../ui/Text/Text';
-import { millisToMinutesAndSeconds } from '../../utils/utils';
+import { Text } from '../Text/Text';
+import { millisToMinutesAndSeconds } from '../../../utils/utils';
+import { useAudio } from './hooks/useAudio';
 
 interface OdinAudioProps {
   fileId: string;
@@ -17,11 +17,10 @@ interface OdinAudioProps {
 export const OdinAudio = memo((props: OdinAudioProps) => {
   const { playRecording, stopPlaying, playing, currDuration, duration } = useRecorder();
 
-  // TODO: Build useAudio hook instead of relying on useImage
-  const { data: audioData, isLoading } = useImage({
-    imageDrive: ChatDrive,
-    imageFileId: props.fileId,
-    imageFileKey: props.payload.key,
+  const { data: audioData, isLoading } = useAudio({
+    drive: ChatDrive,
+    fileId: props.fileId,
+    payloadKey: props.payload.key,
     lastModified: props.payload.lastModified,
   }).fetch;
 

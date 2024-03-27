@@ -78,7 +78,7 @@ export const useRecorder = () => {
         if (!playing) {
             audioRecorder.removePlayBackListener();
         }
-        if (currDuration === duration) {
+        if (currDuration === duration && playing) {
             setplaying(false);
         }
     }, [currDuration, duration, isRecording, playing]);
