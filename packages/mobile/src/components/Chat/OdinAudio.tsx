@@ -9,12 +9,12 @@ import Slider from '@react-native-community/slider';
 import { Text } from '../ui/Text/Text';
 import { millisToMinutesAndSeconds } from '../../utils/utils';
 
-interface AudioMessageProps {
+interface OdinAudioProps {
   fileId: string;
   payload: PayloadDescriptor;
 }
 
-export const AudioMessage = memo((props: AudioMessageProps) => {
+export const OdinAudio = memo((props: OdinAudioProps) => {
   const { playRecording, stopPlaying, playListenter } = useAudio();
   const [playing, setplaying] = useState(false);
   const [duration, setDuration] = useState<number>();

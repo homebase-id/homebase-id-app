@@ -35,7 +35,7 @@ import {
   Times,
   XIcon,
 } from '../../components/ui/Icons/icons';
-import ImageMessage from '../../components/Chat/ImageMessage';
+import MediaMessage from './MediaMessage';
 import { Asset, launchImageLibrary } from 'react-native-image-picker';
 import { useAuth } from '../../hooks/auth/useAuth';
 import { useChatMessage } from '../../hooks/chat/useChatMessage';
@@ -398,7 +398,7 @@ export const ChatDetail = memo(
         isKeyboardInternallyHandled={true}
         keyboardShouldPersistTaps="never"
         renderMessageImage={(prop: MessageImageProps<ChatMessageIMessage>) => (
-          <ImageMessage {...prop} />
+          <MediaMessage {...prop} />
         )}
         renderCustomView={(prop: BubbleProps<ChatMessageIMessage>) => (
           <RenderReplyMessageView {...prop} />
