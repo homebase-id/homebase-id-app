@@ -2,7 +2,7 @@ import { FlatList } from 'react-native';
 import ConversationTile from '../components/Chat/Conversation-tile';
 
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { AppStackParamList } from '../app/App';
+import { AppStackParamList, CHAT_APP_ID } from '../app/App';
 import { useConversations } from '../hooks/chat/useConversations';
 import {
   ConversationWithYourselfId,
@@ -11,11 +11,14 @@ import {
 import { useAuth } from '../hooks/auth/useAuth';
 import { useProfile } from '../hooks/profile/useProfile';
 import { memo, useMemo } from 'react';
+import { useRemoveNotifications } from '../hooks/notifications/usePushNotifications';
 
 const ConversationPage = memo(() => {
   const navigation = useNavigation<NavigationProp<AppStackParamList>>();
 
   const { data: conversations } = useConversations().all;
+
+  useRemoveNotifications({ appId: CHAT_APP_ID });
 
   const flatConversations = useMemo(
     () => conversations?.pages?.flatMap((page) => page.searchResults),

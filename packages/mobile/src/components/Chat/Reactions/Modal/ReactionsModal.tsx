@@ -6,7 +6,7 @@ import { useDarkMode } from '../../../../hooks/useDarkMode';
 
 import { ChatMessageIMessage } from '../../ChatDetail';
 import { useChatReaction } from '../../../../hooks/chat/useChatReaction';
-import { HomebaseFile } from '@youfoundation/js-lib/dist';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ChatReaction } from '../../../../provider/chat/ChatReactionProvider';
 import useContact from '../../../../hooks/contact/useContact';
 import { Avatar, OwnerAvatar } from '../../Conversation-tile';

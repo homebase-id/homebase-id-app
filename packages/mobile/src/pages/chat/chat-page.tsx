@@ -23,7 +23,7 @@ import { ImageSource } from '../../provider/image/RNImageProvider';
 import { getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import useContact from '../../hooks/contact/useContact';
 import { useMarkMessagesAsRead } from '../../hooks/chat/useMarkMessagesAsRead';
-import PortalView, { HighlightedChatMessage } from '../../components/Chat/Chat-Reaction';
+import PortalView from '../../components/Chat/Chat-Reaction';
 import { Host } from 'react-native-portalize';
 import { BottomSheetModal, BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { EmojiPickerModal } from '../../components/Chat/Reactions/Emoji-Picker/Emoji-Picker-Modal';
@@ -104,7 +104,7 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
     conversationContent && 'recipients' in conversationContent.fileMetadata.appData.content;
 
   const [messageCordinates, setMessageCordinates] = useState({ x: 0, y: 0 });
-  const [selectedMessage, setSelectedMessage] = useState<HighlightedChatMessage | undefined>();
+  const [selectedMessage, setSelectedMessage] = useState<ChatMessageIMessage | undefined>();
 
   const doSelectMessage = useCallback(
     ({
@@ -112,7 +112,7 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
       message,
     }: {
       coords: { x: number; y: number };
-      message: HighlightedChatMessage;
+      message: ChatMessageIMessage;
     }) => {
       setMessageCordinates(coords);
       setSelectedMessage(message);

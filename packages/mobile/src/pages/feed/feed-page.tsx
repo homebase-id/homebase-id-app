@@ -1,7 +1,7 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { memo, useMemo, useRef, useState } from 'react';
 
-import { TabStackParamList } from '../../app/App';
+import { FEED_APP_ID, TabStackParamList } from '../../app/App';
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 import WebView from 'react-native-webview';
 import { uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
@@ -10,6 +10,7 @@ import { useAuth } from '../../hooks/auth/useAuth';
 import { Colors } from '../../app/Colors';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { ScrollView } from 'react-native-gesture-handler';
+import { useRemoveNotifications } from '../../hooks/notifications/usePushNotifications';
 
 type FeedProps = NativeStackScreenProps<TabStackParamList, 'Feed'>;
 
@@ -17,6 +18,8 @@ export const FeedPage = memo((_props: FeedProps) => {
   const { isDarkMode } = useDarkMode();
   const { authToken, getIdentity, getSharedSecret } = useAuth();
   const identity = getIdentity();
+
+  useRemoveNotifications({ appId: FEED_APP_ID });
 
   const sharedSecret = getSharedSecret();
   const base64SharedSecret = sharedSecret ? uint8ArrayToBase64(sharedSecret) : '';
