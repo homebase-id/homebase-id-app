@@ -4,8 +4,13 @@ import { useMutation } from '@tanstack/react-query';
 import messaging from '@react-native-firebase/messaging';
 import notifee from '@notifee/react-native';
 import { useDotYouClientContext } from 'feed-app-common';
-import { handleNotificationEvent } from '../../provider/push-notification/PushNotificationLib';
+import {
+  PushNotificationMessage,
+  Subscribe,
+  handleNotificationEvent,
+} from '../../provider/push-notification/PushNotificationLib';
 import { usePushNotificationPermission } from '../../provider/push-notification/PushNotificationContext';
+import { Alert } from 'react-native';
 
 //
 
@@ -88,6 +93,13 @@ export const useAuthenticatedPushNotification = () => {
       console.debug('Foreground event:', type, detail);
       await handleNotificationEvent(type, detail, true);
     });
+  }, []);
+
+  useEffect(() => {
+    const onPushNotification = (message: PushNotificationMessage) => {
+      Alert.alert(message.id);
+    };
+    return Subscribe(onPushNotification);
   }, []);
 
   // SEB:TODO not sure we want to handle missed notifications at all?

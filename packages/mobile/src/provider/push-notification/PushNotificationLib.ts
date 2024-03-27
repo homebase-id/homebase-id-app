@@ -3,7 +3,7 @@ import notifee, { EventType, EventDetail } from '@notifee/react-native';
 import { PushNotificationOptions } from '@youfoundation/js-lib/dist';
 
 // backend: src/services/Odin.Services/AppNotifications/Push/PushNotificationContent.cs
-export interface PushNotificationPayload {
+interface PushNotificationPayload {
   senderId: string;
   timestamp: string;
   appDisplayName: string;
@@ -104,8 +104,12 @@ export const handleNotificationEvent = async (
 
 //
 
-export const handleNotification = async (notification: OdinNotification): Promise<void> => {
+export const handleNotification = async (notification: PushNotificationMessage): Promise<void> => {
   console.debug('TODO do stuff with the notification here:', notification.id);
+
+  for (const subscriber of notificationSubscribers) {
+    subscriber.onNotificationReceived(notification);
+  }
 
   // Make sure notification widget is removed when we're done with it
   // (notifee doesn't always do this automatically):
@@ -121,21 +125,21 @@ export const handleNotification = async (notification: OdinNotification): Promis
 // Notification "storage"
 //
 
-const notifications: Array<OdinNotification> = [];
+const notifications: Array<PushNotificationMessage> = [];
 
-export const getNotifcationById = (id: string): OdinNotification | null => {
-  return notifications.find((x: OdinNotification) => x.id === id) || null;
+export const getNotifcationById = (id: string): PushNotificationMessage | null => {
+  return notifications.find((x) => x.id === id) || null;
 };
 
 //
 
-export const getNotifcations = (): Array<OdinNotification> => {
+export const getNotifcations = (): Array<PushNotificationMessage> => {
   return notifications;
 };
 
 //
 
-export const storeNotification = (notification: OdinNotification): void => {
+export const storeNotification = (notification: PushNotificationMessage): void => {
   const existingNotification = getNotifcationById(notification.id);
   if (!existingNotification) {
     notifications.push(notification);
@@ -144,9 +148,40 @@ export const storeNotification = (notification: OdinNotification): void => {
 
 //
 
-export const deleteNotification = (notification: OdinNotification): void => {
-  const idx = notifications.findIndex((x: OdinNotification) => x.id === notification.id);
+export const deleteNotification = (notification: PushNotificationMessage): void => {
+  const idx = notifications.findIndex((x) => x.id === notification.id);
   if (idx !== -1) {
     notifications.splice(idx, 1);
+  }
+};
+
+//
+// Notification subscribers
+//
+
+const notificationSubscribers: {
+  onNotificationReceived: (notification: PushNotificationMessage) => void;
+}[] = [];
+
+export const Subscribe = (
+  onNotificationReceived: (notification: PushNotificationMessage) => void
+) => {
+  const index = notificationSubscribers.findIndex(
+    (subscriber) => subscriber.onNotificationReceived === onNotificationReceived
+  );
+  if (index === -1) {
+    notificationSubscribers.push({ onNotificationReceived });
+  }
+  return () => Unsubscribe(onNotificationReceived);
+};
+
+export const Unsubscribe = (
+  onNotificationReceived: (notification: PushNotificationMessage) => void
+) => {
+  const index = notificationSubscribers.findIndex(
+    (subscriber) => subscriber.onNotificationReceived === onNotificationReceived
+  );
+  if (index !== -1) {
+    notificationSubscribers.splice(index, 1);
   }
 };
