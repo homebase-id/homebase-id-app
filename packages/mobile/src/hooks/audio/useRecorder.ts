@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Platform } from 'react-native';
-import AudioRecorderPlayer, { AudioEncoderAndroidType, AudioSet, AudioSourceAndroidType, AVEncoderAudioQualityIOSType, AVEncodingOption, AVModeIOSOption } from 'react-native-audio-recorder-player';
+import AudioRecorderPlayer, { AudioEncoderAndroidType, AudioSet, AudioSourceAndroidType, AVEncoderAudioQualityIOSType, AVEncodingOption, AVModeIOSOption, OutputFormatAndroidType } from 'react-native-audio-recorder-player';
 import RNFS from 'react-native-fs';
 
 const audioRecorder = new AudioRecorderPlayer();
 const audioSet: AudioSet = {
     AudioEncoderAndroid: AudioEncoderAndroidType.AAC,
     AudioSourceAndroid: AudioSourceAndroidType.MIC,
+    OutputFormatAndroid: OutputFormatAndroidType.AAC_ADTS,
     AVModeIOS: AVModeIOSOption.measurement,
     AVEncoderAudioQualityKeyIOS: AVEncoderAudioQualityIOSType.high,
     AVNumberOfChannelsKeyIOS: 2,

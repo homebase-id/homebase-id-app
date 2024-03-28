@@ -33,49 +33,51 @@ export const OdinAudio = memo((props: OdinAudioProps) => {
       {isLoading ? (
         <ActivityIndicator />
       ) : (
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-          }}
-        >
-          <Pressable
+        <>
+          <View
             style={{
-              width: 50,
-              height: 50,
-              justifyContent: 'center',
+              flexDirection: 'row',
               alignItems: 'center',
-              display: 'flex',
             }}
-            onPress={async () => {
-              if (playing) {
-                await stopPlaying();
-              } else {
-                await playRecording(audioData?.url as string);
-              }
-            }}
-            key={'audio'}
           >
-            {playing ? <Stop /> : <Play />}
-          </Pressable>
-          <Slider
-            minimumValue={0}
-            value={currDuration}
-            maximumValue={duration}
-            style={{
-              flex: 1,
-            }}
-          />
-        </View>
-      )}
+            <Pressable
+              style={{
+                width: 50,
+                height: 50,
+                justifyContent: 'center',
+                alignItems: 'center',
+                display: 'flex',
+              }}
+              onPress={async () => {
+                if (playing) {
+                  await stopPlaying();
+                } else {
+                  await playRecording(audioData?.url as string);
+                }
+              }}
+              key={'audio'}
+            >
+              {playing ? <Stop /> : <Play />}
+            </Pressable>
 
-      <Text
-        style={{
-          marginLeft: 12,
-        }}
-      >
-        {millisToMinutesAndSeconds(duration || 0)}
-      </Text>
+            <Slider
+              minimumValue={0}
+              value={currDuration}
+              maximumValue={duration}
+              style={{
+                flex: 1,
+              }}
+            />
+          </View>
+          <Text
+            style={{
+              marginLeft: 12,
+            }}
+          >
+            {millisToMinutesAndSeconds(duration || 0)}
+          </Text>
+        </>
+      )}
     </View>
   );
 });
