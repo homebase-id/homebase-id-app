@@ -12,7 +12,7 @@ const RNAudioTranscoder = NativeModules.RNAudioTranscoder;
  *            errors in native code will propagate
  * @returns {Promise.<boolean>}
  */
-async function transcode(input, output, log = false): Promise<boolean> {
+async function transcode(input: string, output: string, log = false): Promise<boolean> {
 	if (log) {
 		try {
 			await RNAudioTranscoder.transcode({ input, output });
@@ -27,4 +27,4 @@ async function transcode(input, output, log = false): Promise<boolean> {
 	return true;
 }
 
-module.exports = { transcode };
+export { transcode };

@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Platform } from 'react-native';
 import AudioRecorderPlayer, { AudioEncoderAndroidType, AudioSet, AudioSourceAndroidType, AVEncoderAudioQualityIOSType, AVEncodingOption, AVModeIOSOption, OutputFormatAndroidType } from 'react-native-audio-recorder-player';
 import RNFS from 'react-native-fs';
+import { transcode } from '../../../polyfills/transcoder';
 
-const audioRecorder = new AudioRecorderPlayer();
 const audioSet: AudioSet = {
     AudioEncoderAndroid: AudioEncoderAndroidType.AAC,
     AudioSourceAndroid: AudioSourceAndroidType.MIC,
@@ -15,6 +15,7 @@ const audioSet: AudioSet = {
 };
 
 export const useRecorder = () => {
+    const audioRecorder = useMemo(() => new AudioRecorderPlayer(), []);
     const dirs = RNFS.TemporaryDirectoryPath;
     const path = Platform.select({
         ios: `file://${dirs}/audio.m4a`,
@@ -32,6 +33,19 @@ export const useRecorder = () => {
 
     const stopRecording = async () => {
         const result = await audioRecorder.stopRecorder();
+        if (Platform.OS === 'ios') {
+            const transcodePath = Platform.select({
+                ios: `file://${dirs}/audio.mp3`,
+                android: `${dirs}/audio.mp3`,
+            });
+            try {
+                await transcode(result, transcodePath as string, true);
+            } catch (error) {
+                console.error('error Transcoding', error);
+            }
+            // return transcodePath;
+
+        }
         setIsRecording(false);
         setCurrDuration(0);
         return result;
@@ -67,22 +81,25 @@ export const useRecorder = () => {
                 setCurrDuration(recordType.currentPosition);
             });
         }
-        if (!isRecording) {
-            audioRecorder.removeRecordBackListener();
-        }
         if (playing) {
             audioRecorder.addPlayBackListener((playbackType) => {
-                setCurrDuration(playbackType.currentPosition);
                 setDuration(playbackType.duration);
+                setCurrDuration(playbackType.currentPosition);
+
             });
         }
-        if (!playing) {
-            audioRecorder.removePlayBackListener();
-        }
-        if (currDuration === duration && playing) {
+        if (currDuration === duration && currDuration !== 0) {
             setplaying(false);
+            setCurrDuration(0);
         }
-    }, [currDuration, duration, isRecording, playing]);
+
+
+        return () => {
+            audioRecorder.removePlayBackListener();
+            audioRecorder.removeRecordBackListener();
+        };
+
+    }, [audioRecorder, currDuration, duration, isRecording, playing]);
 
     return {
         startRecording,
