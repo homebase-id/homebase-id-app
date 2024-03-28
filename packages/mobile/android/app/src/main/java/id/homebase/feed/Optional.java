@@ -1,4 +1,4 @@
-package com.rnaudiotranscoder;
+package id.homebase.feed;
 
 /**
  * React native doesn't seem to play nicely with the JDK 8 Optional class.

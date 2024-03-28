@@ -1,4 +1,4 @@
-package com.rnaudiotranscoder;
+package id.homebase.feed;
 
 import android.content.Context;
 import android.net.Uri;

@@ -30,16 +30,24 @@ export const OdinAudio = memo((props: OdinAudioProps) => {
         width: 150,
       }}
     >
-      {isLoading ? (
-        <ActivityIndicator />
-      ) : (
-        <>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-            }}
-          >
+      <>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+          }}
+        >
+          {isLoading ? (
+            <ActivityIndicator
+              style={{
+                width: 50,
+                height: 50,
+                justifyContent: 'center',
+                alignItems: 'center',
+                display: 'flex',
+              }}
+            />
+          ) : (
             <Pressable
               style={{
                 width: 50,
@@ -59,25 +67,25 @@ export const OdinAudio = memo((props: OdinAudioProps) => {
             >
               {playing ? <Stop /> : <Play />}
             </Pressable>
+          )}
 
-            <Slider
-              minimumValue={0}
-              value={currDuration}
-              maximumValue={duration}
-              style={{
-                flex: 1,
-              }}
-            />
-          </View>
-          <Text
+          <Slider
+            minimumValue={0}
+            value={currDuration}
+            maximumValue={duration}
             style={{
-              marginLeft: 12,
+              flex: 1,
             }}
-          >
-            {millisToMinutesAndSeconds(duration || 0)}
-          </Text>
-        </>
-      )}
+          />
+        </View>
+        <Text
+          style={{
+            marginLeft: 12,
+          }}
+        >
+          {millisToMinutesAndSeconds(duration || 0)}
+        </Text>
+      </>
     </View>
   );
 });
