@@ -13,6 +13,7 @@ const RNAudioTranscoder = NativeModules.RNAudioTranscoder;
  * @returns {Promise<void>}
  */
 export const transcodeAudio = async (input: string, output: string, log = false): Promise<void> => {
+  console.log('[AudioTranscoder]', 'Transcoding audio', input, 'to', output, '...');
   if (log) {
     try {
       await RNAudioTranscoder.transcode({ input, output });

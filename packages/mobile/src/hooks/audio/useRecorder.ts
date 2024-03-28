@@ -11,6 +11,7 @@ import AudioRecorderPlayer, {
 } from 'react-native-audio-recorder-player';
 import RNFS from 'react-native-fs';
 import { transcodeAudio } from '../../provider/audio/AudioTranscoder';
+import { getNewId } from '@youfoundation/js-lib/helpers';
 
 const audioSet: AudioSet = {
   AudioEncoderAndroid: AudioEncoderAndroidType.AAC,
@@ -24,10 +25,10 @@ const audioSet: AudioSet = {
 
 export const useRecorder = () => {
   const audioRecorder = useMemo(() => new AudioRecorderPlayer(), []);
-  const dirs = RNFS.TemporaryDirectoryPath;
+  const dirs = RNFS.CachesDirectoryPath;
   const path = Platform.select({
-    ios: `file://${dirs}audio.m4a`,
-    android: `${dirs}audio.mp3`,
+    ios: `file://${dirs}/audio-${getNewId()}.m4a`,
+    android: `${dirs}/audio-${getNewId()}.mp3`,
   });
 
   const startRecording = async () => {
@@ -41,19 +42,19 @@ export const useRecorder = () => {
 
   const stopRecording = async () => {
     const result = await audioRecorder.stopRecorder();
-    if (Platform.OS === 'ios') {
-      const transcodePath = Platform.select({
-        ios: `file://${dirs}audio.mp3`,
-        android: `${dirs}audio.mp3`,
-      });
+    // if (Platform.OS === 'ios') {
+    //   const transcodePath = Platform.select({
+    //     ios: `file://${dirs}/audio-${getNewId()}.mp3`,
+    //     android: `${dirs}/audio-${getNewId()}.mp3`,
+    //   });
 
-      // try {
-      await transcodeAudio(result, transcodePath as string, true);
-      // } catch (error) {
-      //   console.error('[useRecorder] error transcoding', error);
-      // }
-      // return transcodePath;
-    }
+    //   // try {
+    //   await transcodeAudio(result, transcodePath as string, true);
+    //   // } catch (error) {
+    //   //   console.error('[useRecorder] error transcoding', error);
+    //   // }
+    //   // return transcodePath;
+    // }
     setIsRecording(false);
     setCurrDuration(0);
     return result;

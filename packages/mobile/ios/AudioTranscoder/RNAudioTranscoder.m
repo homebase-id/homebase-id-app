@@ -23,27 +23,21 @@ RCT_EXPORT_METHOD(
     rejecter: (RCTPromiseRejectBlock) reject
 ) {
     NSString *inputPath = obj[@"input"];
+    // Remove "file://" prefix from input file path if present
+    if ([inputPath hasPrefix:@"file://"]) {
+      inputPath = [inputPath substringFromIndex:@"file://".length];
+    }
     NSURL *inputURL = [[NSURL alloc] initFileURLWithPath:inputPath];
+
     NSString *outputPath = obj[@"output"];
+    // Remove "file://" prefix from input file path if present
+    if ([outputPath hasPrefix:@"file://"]) {
+      outputPath = [outputPath substringFromIndex:@"file://".length];
+    }
     NSURL *outputURL = [[NSURL alloc] initFileURLWithPath:outputPath];
 
-    NSError *rgError = nil;
-    NSRegularExpression *replacer = [NSRegularExpression regularExpressionWithPattern:@"\\.m4a$"
-                                                                              options:NSRegularExpressionCaseInsensitive
-                                                                                error:&rgError];
-
-    NSString *tempPath = [replacer stringByReplacingMatchesInString:outputPath
-                                                            options:0
-                                                              range:NSMakeRange(0, outputPath.length)
-                                                       withTemplate:@".m4a"];
-
-    if (rgError != nil) {
-        NSLog(@"Failed to create temp path for output");
-        reject(@"Failed to create temp path for output", rgError.localizedDescription, rgError);
-        return;
-    }
-
-    NSURL *tempUrl = [[NSURL alloc] initFileURLWithPath:tempPath];
+    NSLog(@"inputPath: %@", inputPath);
+    NSLog(@"outputPath: %@", outputPath);
 
     AVMutableComposition *input = [[AVMutableComposition alloc] init];
     AVURLAsset *track = [AVURLAsset assetWithURL:inputURL];
@@ -55,26 +49,22 @@ RCT_EXPORT_METHOD(
 
     if (!success) {
         NSLog(@"Setup failed");
-      NSLog(@"Error occurred: %@", error);
-          // Or if you want more details about the error
-          NSLog(@"Error domain: %@", error.domain);
-          NSLog(@"Error code: %ld", (long)error.code);
-        NSLog(@"Error description: %@", error.localizedDescription);
-      
         reject(@"Setup failed", error.localizedDescription, error);
         return;
     }
 
-    AVAssetExportSession *outputSession = [[AVAssetExportSession alloc] initWithAsset:input presetName:AVAssetExportPresetPassthrough];
-    outputSession.metadata = input.metadata;
-    outputSession.outputURL = tempUrl;
-    outputSession.outputFileType = AVFileTypeAppleM4A;
+    AVAssetExportSession *outputSession = [[AVAssetExportSession alloc] initWithAsset:input presetName:AVAssetExportPresetLowQuality];
+    // AVAssetExportSession *outputSession = [[AVAssetExportSession alloc] initWithAsset:input presetName:AVAssetExportPresetPassthrough];
+    // outputSession.metadata = input.metadata;
+    outputSession.outputURL = outputURL;
+    outputSession.outputFileType = AVFileTypeMPEGLayer3;
+    // outputSession.outputFileType = AVFileTypeAppleM4A;
 
     [outputSession exportAsynchronouslyWithCompletionHandler:^{
 
         if (outputSession.status == AVAssetExportSessionStatusCompleted)
         {
-
+            NSLog(@"Export Success");
             resolve(@"Successfully encoded audio");
         }
         else if (outputSession.status == AVAssetExportSessionStatusCancelled)
