@@ -5,3 +5,4 @@ declare global {
 }
 
 declare module '*.png';
+declare module 'react-native-audio-transcoder';

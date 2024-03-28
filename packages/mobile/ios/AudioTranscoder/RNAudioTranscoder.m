@@ -1,3 +1,12 @@
+//
+//  RNAudioTranscoder.m
+//  HomebaseFeed
+//
+//  Created by Stef Coenen on 28/03/2024.
+//
+
+#import <Foundation/Foundation.h>
+
 #import "RNAudioTranscoder.h"
 #import <React/RCTBridgeModule.h>
 #import <React/RCTUtils.h>
@@ -29,6 +38,7 @@ RCT_EXPORT_METHOD(
                                                        withTemplate:@".m4a"];
 
     if (rgError != nil) {
+        NSLog(@"Failed to create temp path for output");
         reject(@"Failed to create temp path for output", rgError.localizedDescription, rgError);
         return;
     }
@@ -44,6 +54,13 @@ RCT_EXPORT_METHOD(
     BOOL success = [input insertTimeRange:CMTimeRangeMake(start, track.duration) ofAsset:track atTime:start error:&error];
 
     if (!success) {
+        NSLog(@"Setup failed");
+      NSLog(@"Error occurred: %@", error);
+          // Or if you want more details about the error
+          NSLog(@"Error domain: %@", error.domain);
+          NSLog(@"Error code: %ld", (long)error.code);
+        NSLog(@"Error description: %@", error.localizedDescription);
+      
         reject(@"Setup failed", error.localizedDescription, error);
         return;
     }
@@ -62,10 +79,12 @@ RCT_EXPORT_METHOD(
         }
         else if (outputSession.status == AVAssetExportSessionStatusCancelled)
         {
+            NSLog(@"Export Cancelled");
             reject(@"Export Cancelled", @"Exporting audio file was cancelled", nil);
         }
         else
         {
+            NSLog(@"Export Failed");
             reject(@"Export Failed", outputSession.error.localizedDescription, outputSession.error);
         }
 
