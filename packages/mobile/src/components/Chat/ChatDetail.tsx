@@ -26,7 +26,7 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import { Close, Images, Microphone, SendChat, Stop, Times } from '../../components/ui/Icons/icons';
+import { Close, Images, Microphone, SendChat, Times } from '../../components/ui/Icons/icons';
 import MediaMessage from './MediaMessage';
 import { Asset, launchImageLibrary } from 'react-native-image-picker';
 import { useAuth } from '../../hooks/auth/useAuth';
@@ -39,7 +39,6 @@ import ChatMessageBox from '../../components/Chat/Chat-Message-box';
 import { OdinImage } from '../../components/ui/OdinImage/OdinImage';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { ChatDeliveryIndicator } from '../../components/Chat/Chat-Delivery-Indicator';
-import { HighlightedChatMessage } from '../../components/Chat/Chat-Reaction';
 import { useChatReaction } from '../../hooks/chat/useChatReaction';
 import { Avatar as AppAvatar, OwnerAvatar } from '../../components/Chat/Conversation-tile';
 import { ConnectionName } from '../../components/ui/Name';
@@ -358,7 +357,7 @@ export const ChatDetail = memo(
         onSend={doSend}
         infiniteScroll
         scrollToBottom
-        onLongPress={(e, _, m: HighlightedChatMessage) => onLongPress(e, m)}
+        onLongPress={(e, _, m: ChatMessageIMessage) => onLongPress(e, m)}
         alwaysShowSend
         isKeyboardInternallyHandled={true}
         keyboardShouldPersistTaps="never"

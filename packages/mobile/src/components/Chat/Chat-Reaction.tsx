@@ -19,18 +19,14 @@ import { useDarkMode } from '../../hooks/useDarkMode';
 import { ErrorNotification } from '../ui/Alert/ErrorNotification';
 import { ChatMessageIMessage } from './ChatDetail';
 
-export interface HighlightedChatMessage extends ChatMessageIMessage {
-  layoutHeight: number;
-}
-
 const PortalView = ({
   selectedMessage,
   messageCordinates,
   setSelectedMessage,
   openEmojiPicker,
 }: {
-  selectedMessage: HighlightedChatMessage | undefined;
-  setSelectedMessage: (message: HighlightedChatMessage | undefined) => void;
+  selectedMessage: ChatMessageIMessage | undefined;
+  setSelectedMessage: (message: ChatMessageIMessage | undefined) => void;
   messageCordinates: { x: number; y: number };
   openEmojiPicker: () => void;
 }) => {
@@ -53,14 +49,14 @@ const PortalView = ({
     let y = messageCordinates.y || 0;
     let shouldAnimate = false;
     const isLessDisatanceFromTop = y < 100;
-    const isLessDisatanceFromBottom = height - y < (selectedMessage?.layoutHeight || 0);
+    const isLessDisatanceFromBottom = height - y < 0;
     if (isLessDisatanceFromBottom) {
-      y = y - (selectedMessage?.layoutHeight || 0);
+      y = y - 0;
       shouldAnimate = true;
     }
 
     if (isLessDisatanceFromTop) {
-      y = y + (selectedMessage?.layoutHeight || 0);
+      y = y + 0;
       shouldAnimate = true;
     }
     y = isNaN(y) ? 0 : y;
