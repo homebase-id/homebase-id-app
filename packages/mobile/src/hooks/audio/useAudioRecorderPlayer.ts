@@ -49,7 +49,7 @@ export const useAudioRecorder = () => {
       const transcodePath = `file://${dirs}/audio-${runningId}.mp3`;
       const tempPath = `file://${dirs}/audio-${runningId}.tmp`;
 
-      await transcodeAudio(result, tempPath, transcodePath, true);
+      await transcodeAudio(result, tempPath, transcodePath);
       setIsRecording(false);
       setDuration(0);
 
