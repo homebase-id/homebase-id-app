@@ -19,6 +19,8 @@ import { Text } from '../components/ui/Text/Text';
 import { ScrollView } from 'react-native-gesture-handler';
 import { ContactTile } from '../components/Contact/Contact-Tile';
 import { useAllContacts } from 'feed-app-common';
+import { Colors } from '../app/Colors';
+import { useDarkMode } from '../hooks/useDarkMode';
 
 type ConversationProp = NativeStackScreenProps<ChatStackParamList, 'Conversation'>;
 
@@ -36,11 +38,14 @@ const ConversationPage = ({ navigation: rootNavigation }: ConversationProp) => {
 
   const [query, setQuery] = useState<string | undefined>(undefined);
   const isQueryActive = !!(query && query.length >= 1);
+  const { isDarkMode } = useDarkMode();
 
   useLayoutEffect(() => {
     rootNavigation.setOptions({
       headerSearchBarOptions: {
         hideWhenScrolling: true,
+        headerIconColor: isDarkMode ? Colors.white : Colors.black,
+
         placeholder: 'Search',
         hideNavigationBar: true,
         autoCapitalize: 'none',
