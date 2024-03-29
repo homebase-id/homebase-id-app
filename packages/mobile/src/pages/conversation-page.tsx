@@ -60,7 +60,7 @@ const ConversationPage = ({ navigation: rootNavigation }: ConversationProp) => {
         },
       },
     });
-  }, [rootNavigation]);
+  }, [isDarkMode, rootNavigation]);
 
   if (isQueryActive) {
     return <SearchConversationResults query={query} conversations={flatConversations} />;
