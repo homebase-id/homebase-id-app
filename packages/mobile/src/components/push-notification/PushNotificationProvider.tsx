@@ -1,7 +1,7 @@
 import { ReactNode, useState, FunctionComponent, useEffect } from 'react';
 import notifee, { EventType } from '@notifee/react-native';
 import { Platform } from 'react-native';
-import { handleNotificationEvent } from '../../provider/push-notification/PushNotificationLib';
+import { handleNotificationMessage } from '../../provider/push-notification/PushNotificationLib';
 import { PushNotificationPermissionContext } from '../../provider/push-notification/PushNotificationContext';
 
 interface PushNotificationProviderProps {
@@ -61,7 +61,7 @@ export const PushNotificationProvider: FunctionComponent<PushNotificationProvide
         const initialNotification = await notifee.getInitialNotification();
         if (initialNotification?.notification) {
           console.debug('getInitialNotification:', initialNotification.notification.id);
-          await handleNotificationEvent(EventType.PRESS, initialNotification, true);
+          await handleNotificationMessage(EventType.PRESS, initialNotification, true);
         }
       }
     };

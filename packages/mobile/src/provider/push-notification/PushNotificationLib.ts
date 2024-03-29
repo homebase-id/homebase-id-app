@@ -25,10 +25,16 @@ export const initializePushNotificationSupport = async () => {
   messaging().onMessage(onMessageReceived);
   messaging().setBackgroundMessageHandler(onMessageReceived);
 
+  // https://notifee.app/react-native/docs/events#foreground-events
+  notifee.onForegroundEvent(async ({ type, detail }) => {
+    console.debug('onForegroundEvent event:', type, detail);
+    await handleNotificationMessage(type, detail, true);
+  });
+
   // https://notifee.app/react-native/docs/events#background-events
   notifee.onBackgroundEvent(async ({ type, detail }) => {
     console.debug('onBackgroundEvent event:', type, detail);
-    await handleNotificationEvent(type, detail, false);
+    await handleNotificationMessage(type, detail, false);
   });
 };
 
@@ -41,14 +47,11 @@ const onMessageReceived = async (message: FirebaseMessagingTypes.RemoteMessage) 
   const data = notification.data as unknown as string;
   notification.data = JSON.parse(data);
 
-  console.debug('ODIN notification:', notification);
-
+  console.debug('ODIN Notification:', notification);
   storeNotification(notification);
 
   // SEB:TODO branch on notification.version and notification.type
 
-  // SEB:TODO Is it normal to display a notification when the app is in the foreground, or
-  // should it only do it when AppState.currentState !== 'active' ?
   await notifee.displayNotification({
     id: notification?.id,
     title: 'Odin message',
@@ -66,60 +69,27 @@ const onMessageReceived = async (message: FirebaseMessagingTypes.RemoteMessage) 
 
 //
 
-export const handleNotificationEvent = async (
+export const handleNotificationMessage = async (
   type: EventType,
   detail: EventDetail,
   isForegroundEvent: boolean
 ): Promise<void> => {
   const id = detail.notification?.id;
 
+  // Sanity #1
   if (!id) {
     throw new Error('No id in notification');
   }
 
-  // We can get called with the same notification multiple times, so make sure
-  // it is deleted from memory after we're done with it.
   const notification = getNotifcationById(id);
-  if (!notification) {
-    await notifee.cancelNotification(id);
-    return;
-  }
-
-  if (type === EventType.DELIVERED) {
-    console.debug(
-      `handleNotificationEvent DELIVERED ${notification.id}, foreground: ${isForegroundEvent}`
-    );
+  if (notification) {
     if (isForegroundEvent) {
-      await handleNotification(notification);
+      for (const subscriber of notificationSubscribers) {
+        await subscriber.onNotificationReceived(type, notification);
+      }
     }
   }
-
-  if (type === EventType.PRESS) {
-    console.debug(
-      `handleNotificationEvent PRESS ${notification.id}, foreground: ${isForegroundEvent}`
-    );
-    await handleNotification(notification);
-  }
 };
-
-//
-
-export const handleNotification = async (notification: PushNotificationMessage): Promise<void> => {
-  console.debug('TODO do stuff with the notification here:', notification.id);
-
-  for (const subscriber of notificationSubscribers) {
-    subscriber.onNotificationReceived(notification);
-  }
-
-  // Make sure notification widget is removed when we're done with it
-  // (notifee doesn't always do this automatically):
-  // await notifee.cancelNotification(notification.id);
-
-  // Cleanup notification from memory when you're done with it:
-  // deleteNotification(notification);
-};
-
-//
 
 //
 // Notification "storage"
@@ -134,7 +104,7 @@ export const getNotifcationById = (id: string): PushNotificationMessage | null =
 //
 
 export const getNotifcations = (): Array<PushNotificationMessage> => {
-  return notifications;
+  return [...notifications];
 };
 
 //
@@ -160,11 +130,11 @@ export const deleteNotification = (notification: PushNotificationMessage): void 
 //
 
 const notificationSubscribers: {
-  onNotificationReceived: (notification: PushNotificationMessage) => void;
+  onNotificationReceived: (type: EventType, notification: PushNotificationMessage) => Promise<void>;
 }[] = [];
 
 export const Subscribe = (
-  onNotificationReceived: (notification: PushNotificationMessage) => void
+  onNotificationReceived: (type: EventType, notification: PushNotificationMessage) => Promise<void>
 ) => {
   const index = notificationSubscribers.findIndex(
     (subscriber) => subscriber.onNotificationReceived === onNotificationReceived
@@ -176,7 +146,7 @@ export const Subscribe = (
 };
 
 export const Unsubscribe = (
-  onNotificationReceived: (notification: PushNotificationMessage) => void
+  onNotificationReceived: (type: EventType, notification: PushNotificationMessage) => Promise<void>
 ) => {
   const index = notificationSubscribers.findIndex(
     (subscriber) => subscriber.onNotificationReceived === onNotificationReceived

@@ -2,15 +2,16 @@ import { useCallback, useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useMutation } from '@tanstack/react-query';
 import messaging from '@react-native-firebase/messaging';
-import notifee from '@notifee/react-native';
+import notifee, { EventType } from '@notifee/react-native';
 import { useDotYouClientContext } from 'feed-app-common';
 import {
   PushNotificationMessage,
   Subscribe,
-  handleNotificationEvent,
+  deleteNotification,
+  getNotifcations,
 } from '../../provider/push-notification/PushNotificationLib';
 import { usePushNotificationPermission } from '../../provider/push-notification/PushNotificationContext';
-import { Alert } from 'react-native';
+import { Alert, AppState, AppStateStatus } from 'react-native';
 
 //
 
@@ -86,50 +87,44 @@ export const useAuthenticatedPushNotification = () => {
   // Notifications
   //
 
-  // Notifee foreground Events
-  // https://notifee.app/react-native/docs/events#foreground-events
   useEffect(() => {
-    return notifee.onForegroundEvent(async ({ type, detail }) => {
-      console.debug('Foreground event:', type, detail);
-      await handleNotificationEvent(type, detail, true);
-    });
-  }, []);
-
-  useEffect(() => {
-    const onPushNotification = (message: PushNotificationMessage) => {
-      Alert.alert(message.id);
+    const onPushNotification = async (type: EventType, notification: PushNotificationMessage) => {
+      deleteNotification(notification);
+      await notifee.cancelNotification(notification.id);
+      Alert.alert(notification.id);
     };
     return Subscribe(onPushNotification);
   }, []);
 
-  // SEB:TODO not sure we want to handle missed notifications at all?
-  // Be aware that enabling this can interleave the notifications so that the same notification is handled multiple times.
   //
+
   // Initial mount and App state change
-  // useEffect(() => {
-  //   const handleMissedNotifications = async (): Promise<void> => {
-  //     if (notificationPermissionGranted) {
-  //       const notifications = getNotifcations();
-  //       while (notifications.length > 0) {
-  //         await handleNotification(notifications[0]);
-  //       }
-  //     }
-  //   };
+  useEffect(() => {
+    const handleMissedNotifications = async (): Promise<void> => {
+      if (notificationPermissionGranted) {
+        const notifications = getNotifcations();
+        for (const notification of notifications) {
+          deleteNotification(notification);
+          await notifee.cancelNotification(notification.id);
+          Alert.alert(notification.id);
+        }
+      }
+    };
 
-  //   const subscription = AppState.addEventListener(
-  //     'change',
-  //     async (nextAppState: AppStateStatus) => {
-  //       if (nextAppState === 'active') {
-  //         await handleMissedNotifications();
-  //       }
-  //     }
-  //   );
+    const subscription = AppState.addEventListener(
+      'change',
+      async (nextAppState: AppStateStatus) => {
+        if (nextAppState === 'active') {
+          await handleMissedNotifications();
+        }
+      }
+    );
 
-  //   handleMissedNotifications();
+    handleMissedNotifications();
 
-  //   // Cleanup subscription
-  //   return () => {
-  //     subscription.remove();
-  //   };
-  // }, [notificationPermissionGranted]);
+    // Cleanup subscription
+    return () => {
+      subscription.remove();
+    };
+  }, [notificationPermissionGranted]);
 };
