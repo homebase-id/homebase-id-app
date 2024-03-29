@@ -24,7 +24,7 @@ const audioSet: AudioSet = {
   AVEncoderBitRateKeyIOS: 128000,
 };
 
-export const useRecorder = () => {
+export const useAudioRecorder = () => {
   const audioRecorder = useMemo(() => new AudioRecorderPlayer(), []);
   const dirs = RNFS.CachesDirectoryPath;
   const runningId = getNewId();
@@ -33,7 +33,7 @@ export const useRecorder = () => {
     android: `${dirs}/audio-${runningId}.mp3`,
   });
 
-  const startRecording = async () => {
+  const record = async () => {
     try {
       await audioRecorder.startRecorder(path, audioSet);
       setIsRecording(true);
@@ -42,7 +42,7 @@ export const useRecorder = () => {
     }
   };
 
-  const stopRecording = async () => {
+  const stop = async () => {
     const result = await audioRecorder.stopRecorder();
     if (Platform.OS === 'ios') {
       const transcodePath = `file://${dirs}/audio-${runningId}.mp3`;
@@ -50,72 +50,87 @@ export const useRecorder = () => {
 
       await transcodeAudio(result, tempPath, transcodePath, true);
       setIsRecording(false);
-      setCurrDuration(0);
+      setDuration(0);
 
       // throw new Error('Transcoding Error');
       return transcodePath;
     }
     setIsRecording(false);
-    setCurrDuration(0);
+    setDuration(0);
     return result;
   };
 
-  const playRecording = async (path: string) => {
+  const [isRecording, setIsRecording] = useState(false);
+  const [duration, setDuration] = useState<number>();
+
+  useEffect(() => {
+    audioRecorder.addRecordBackListener((recordType) => {
+      setDuration(recordType.currentPosition);
+    });
+
+    return () => audioRecorder.removeRecordBackListener();
+  }, [audioRecorder, isRecording]);
+
+  return {
+    record,
+    stop,
+    isRecording,
+    duration,
+  };
+};
+
+export const useAudioPlayback = (audioPath: string | undefined) => {
+  const audioPlayer = useMemo(() => new AudioRecorderPlayer(), []);
+
+  const play = async () => {
+    if (!audioPath) return;
     try {
-      await audioRecorder.startPlayer(path);
+      await audioPlayer.startPlayer(audioPath);
       setplaying(true);
     } catch (error) {
       console.error('error Starting Playing', error);
     }
   };
 
-  const stopPlaying = async () => {
-    const result = await audioRecorder.stopPlayer();
+  const stop = async () => {
+    const result = await audioPlayer.stopPlayer();
     setplaying(false);
     setCurrDuration(0);
     return result;
   };
-  const pausePlaying = async () => {
-    const result = await audioRecorder.pausePlayer();
+
+  const pause = async () => {
+    const result = await audioPlayer.pausePlayer();
     return result;
   };
 
   const [playing, setplaying] = useState(false);
-  const [isRecording, setIsRecording] = useState(false);
   const [duration, setDuration] = useState<number>();
   const [currDuration, setCurrDuration] = useState<number>();
+
   useEffect(() => {
-    if (isRecording) {
-      audioRecorder.addRecordBackListener((recordType) => {
-        setCurrDuration(recordType.currentPosition);
-      });
-    }
-    if (playing) {
-      audioRecorder.addPlayBackListener((playbackType) => {
-        setDuration(playbackType.duration);
-        setCurrDuration(playbackType.currentPosition);
-      });
-    }
+    audioPlayer.addPlayBackListener((playbackType) => {
+      setDuration(playbackType.duration);
+      setCurrDuration(playbackType.currentPosition);
+    });
+
     if (currDuration === duration && currDuration !== 0) {
       setplaying(false);
       setCurrDuration(0);
     }
 
     return () => {
-      audioRecorder.removePlayBackListener();
-      audioRecorder.removeRecordBackListener();
+      audioPlayer.removePlayBackListener();
+      audioPlayer.removeRecordBackListener();
     };
-  }, [audioRecorder, currDuration, duration, isRecording, playing]);
+  }, [audioPlayer, currDuration, duration, playing]);
 
   return {
-    startRecording,
-    isRecording,
-    stopRecording,
-    playRecording,
+    play,
+    playing,
+    stop,
+    pause,
     currDuration,
     duration,
-    playing,
-    stopPlaying,
-    pausePlaying,
   };
 };
