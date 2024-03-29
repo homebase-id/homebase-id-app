@@ -49,6 +49,7 @@ const onMessageReceived = async (message: FirebaseMessagingTypes.RemoteMessage) 
 
   console.debug('ODIN Notification:', notification);
   storeNotification(notification);
+  console.debug('ODIN Notifications:', notifications.length);
 
   // SEB:NOTE notification.version helps with backwards compatibility
 
@@ -89,6 +90,8 @@ export const handleNotificationMessage = async (
       }
     }
   }
+
+  notifee.setBadgeCount(notifications.length);
 };
 
 //
