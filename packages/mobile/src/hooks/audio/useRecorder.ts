@@ -21,14 +21,16 @@ const audioSet: AudioSet = {
   AVEncoderAudioQualityKeyIOS: AVEncoderAudioQualityIOSType.high,
   AVNumberOfChannelsKeyIOS: 2,
   AVFormatIDKeyIOS: AVEncodingOption.aac,
+  AVEncoderBitRateKeyIOS: 128000,
 };
 
 export const useRecorder = () => {
   const audioRecorder = useMemo(() => new AudioRecorderPlayer(), []);
   const dirs = RNFS.CachesDirectoryPath;
+  const runningId = getNewId();
   const path = Platform.select({
-    ios: `file://${dirs}/audio-${getNewId()}.m4a`,
-    android: `${dirs}/audio-${getNewId()}.mp3`,
+    ios: `file://${dirs}/audio-${runningId}.m4a`,
+    android: `${dirs}/audio-${runningId}.mp3`,
   });
 
   const startRecording = async () => {
@@ -42,19 +44,17 @@ export const useRecorder = () => {
 
   const stopRecording = async () => {
     const result = await audioRecorder.stopRecorder();
-    // if (Platform.OS === 'ios') {
-    //   const transcodePath = Platform.select({
-    //     ios: `file://${dirs}/audio-${getNewId()}.mp3`,
-    //     android: `${dirs}/audio-${getNewId()}.mp3`,
-    //   });
+    if (Platform.OS === 'ios') {
+      const transcodePath = `file://${dirs}/audio-${runningId}.mp3`;
+      const tempPath = `file://${dirs}/audio-${runningId}.tmp`;
 
-    //   // try {
-    //   await transcodeAudio(result, transcodePath as string, true);
-    //   // } catch (error) {
-    //   //   console.error('[useRecorder] error transcoding', error);
-    //   // }
-    //   // return transcodePath;
-    // }
+      await transcodeAudio(result, tempPath, transcodePath, true);
+      setIsRecording(false);
+      setCurrDuration(0);
+
+      // throw new Error('Transcoding Error');
+      return transcodePath;
+    }
     setIsRecording(false);
     setCurrDuration(0);
     return result;

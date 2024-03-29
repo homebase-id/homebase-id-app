@@ -175,7 +175,7 @@ export const ChatDetail = memo(
       setAssets([
         {
           uri: audioPath,
-          type: Platform.OS === 'android' ? 'audio/mp3' : 'audio/m4a',
+          type: 'audio/mp3',
           fileName: 'recording',
           fileSize: 0,
           height: 0,

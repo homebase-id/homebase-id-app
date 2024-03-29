@@ -29,6 +29,7 @@ PODS:
   - hermes-engine/Pre-built (0.72.4)
   - JWT (3.0.0-beta.14):
     - Base64 (~> 1.1.2)
+  - lame (1.2.0)
   - libevent (2.1.12)
   - MMKV (1.2.13):
     - MMKVCore (~> 1.2.13)
@@ -518,6 +519,7 @@ DEPENDENCIES:
   - ffmpeg-kit-react-native (from `../../../node_modules/ffmpeg-kit-react-native`)
   - glog (from `../../../node_modules/react-native/third-party-podspecs/glog.podspec`)
   - hermes-engine (from `../../../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec`)
+  - lame
   - libevent (~> 2.1.12)
   - RCT-Folly (from `../../../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
   - RCTRequired (from `../../../node_modules/react-native/Libraries/RCTRequired`)
@@ -583,6 +585,7 @@ SPEC REPOS:
     - ffmpeg-kit-ios-https
     - fmt
     - JWT
+    - lame
     - libevent
     - MMKV
     - MMKVCore
@@ -735,6 +738,7 @@ SPEC CHECKSUMS:
   glog: 04b94705f318337d7ead9e6d17c019bd9b1f6b1b
   hermes-engine: 81191603c4eaa01f5e4ae5737a9efcf64756c7b2
   JWT: ef71dfb03e1f842081e64dc42eef0e164f35d251
+  lame: 2c502faeecfb6d5bd93867b73ec600ce34e6b3ba
   libevent: 4049cae6c81cdb3654a443be001fb9bdceff7913
   MMKV: aac95d817a100479445633f2b3ed8961b4ac5043
   MMKVCore: 9cfef4c48c6c46f66226fc2e4634d78490206a48
@@ -799,6 +803,6 @@ SPEC CHECKSUMS:
   Yoga: 3efc43e0d48686ce2e8c60f99d4e6bd349aff981
   ZIPFoundation: b1f0de4eed33e74a676f76e12559ab6b75990197
 
-PODFILE CHECKSUM: 4a6e12ff0e2ff00bb6350a6d2ed87911f5e02ba7
+PODFILE CHECKSUM: bbf7d4ae0534dffbed85224bcc5463158e12b92f
 
-COCOAPODS: 1.15.2
+COCOAPODS: 1.12.1
