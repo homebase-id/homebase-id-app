@@ -2,7 +2,7 @@ import { FlatList } from 'react-native';
 import ConversationTile from '../components/Chat/Conversation-tile';
 
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { AppStackParamList, CHAT_APP_ID } from '../app/App';
+import { AppStackParamList } from '../app/App';
 import { useConversations } from '../hooks/chat/useConversations';
 import {
   ConversationWithYourselfId,
@@ -12,6 +12,7 @@ import { useAuth } from '../hooks/auth/useAuth';
 import { useProfile } from '../hooks/profile/useProfile';
 import { memo, useMemo } from 'react';
 import { useRemoveNotifications } from '../hooks/notifications/usePushNotifications';
+import { CHAT_APP_ID } from '../components/Nav/TabStackIcons';
 
 const ConversationPage = memo(() => {
   const navigation = useNavigation<NavigationProp<AppStackParamList>>();
@@ -30,6 +31,7 @@ const ConversationPage = memo(() => {
       data={flatConversations}
       keyExtractor={(item) => item.fileId}
       ListHeaderComponent={ConversationTileWithYourself}
+      contentInsetAdjustmentBehavior="automatic"
       renderItem={({ item }) => (
         <ConversationTile
           conversation={item.fileMetadata.appData.content}

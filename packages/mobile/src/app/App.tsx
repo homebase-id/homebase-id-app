@@ -391,6 +391,11 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
           headerTitleAlign: 'left',
           headerLeft: ProfileAvatar,
           headerRight: headerRight,
+          headerSearchBarOptions: {
+            shouldShowHintSearchIcon: true,
+            hideWhenScrolling: true,
+            placeholder: 'Search',
+          },
         }}
       />
 
