@@ -90,6 +90,7 @@ export const useAuthenticatedPushNotification = () => {
   const handleNotification = useCallback(async (notification: PushNotificationMessage) => {
     deleteNotification(notification);
     await notifee.cancelNotification(notification.id);
+    // SEB:TODO do stuff with the notification...
     Alert.alert(notification.id);
   }, []);
 
