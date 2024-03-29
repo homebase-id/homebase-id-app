@@ -60,6 +60,7 @@ import {
   TabChatIcon,
   TabMenuIcon,
 } from '../components/Nav/TabStackIcons';
+import { AudioContextProvider } from '../components/AudioContext/AudioContext';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -188,7 +189,9 @@ const RootStack = () => {
 const AuthenticatedRoot = () => {
   return (
     <DotYouClientProvider>
-      <AppStackScreen />
+      <AudioContextProvider>
+        <AppStackScreen />
+      </AudioContextProvider>
     </DotYouClientProvider>
   );
 };
