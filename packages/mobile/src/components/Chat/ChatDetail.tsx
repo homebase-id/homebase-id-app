@@ -44,7 +44,7 @@ import { Avatar as AppAvatar, OwnerAvatar } from '../../components/Chat/Conversa
 import { ConnectionName } from '../../components/ui/Name';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ChatMessage } from '../../provider/chat/ChatProvider';
-import { useRecorder } from '../../hooks/audio/useRecorder';
+import { useAudioRecorder } from '../../hooks/audio/useAudioRecorderPlayer';
 import { Text } from '../ui/Text/Text';
 import { millisToMinutesAndSeconds } from '../../utils/utils';
 
@@ -161,21 +161,21 @@ export const ChatDetail = memo(
       );
     }, [assets, isDarkMode, replyMessage, setAssets, setReplyMessage]);
 
-    const { startRecording, stopRecording, currDuration: duration, isRecording } = useRecorder();
+    const { record, stop, duration, isRecording } = useAudioRecorder();
     const imagesIcon = useCallback(() => <Images />, []);
     const microphoneIcon = useCallback(() => <Microphone />, []);
     const crossIcon = useCallback(() => <Times />, []);
 
     const cancelRecording = useCallback(async () => {
-      await stopRecording();
-    }, [stopRecording]);
+      await stop();
+    }, [stop]);
 
     const onStopRecording = useCallback(async () => {
-      const audioPath = await stopRecording();
+      const audioPath = await stop();
       setAssets([
         {
           uri: audioPath,
-          type: Platform.OS === 'android' ? 'audio/mp3' : 'audio/m4a',
+          type: 'audio/mp3',
           fileName: 'recording',
           fileSize: 0,
           height: 0,
@@ -185,7 +185,8 @@ export const ChatDetail = memo(
           id: 'audio',
         },
       ] as Asset[]);
-    }, [setAssets, stopRecording]);
+    }, [setAssets, stop]);
+
     const renderCustomInputToolbar = useCallback(
       (props: InputToolbarProps<IMessage>) => {
         return (
@@ -246,7 +247,7 @@ export const ChatDetail = memo(
                       await cancelRecording();
                       return;
                     } else {
-                      await startRecording();
+                      await record();
                     }
                   }}
                 />
@@ -306,7 +307,7 @@ export const ChatDetail = memo(
         assets?.length,
         onStopRecording,
         cancelRecording,
-        startRecording,
+        record,
         imagesIcon,
         setAssets,
       ]

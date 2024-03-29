@@ -1,5 +1,5 @@
 import { PayloadDescriptor } from '@youfoundation/js-lib/core';
-import { useRecorder } from '../../../hooks/audio/useRecorder';
+import { useAudioPlayback } from '../../../hooks/audio/useAudioRecorderPlayer';
 import { ActivityIndicator, Pressable, View } from 'react-native';
 import { memo } from 'react';
 import { Play, Stop } from '../Icons/icons';
@@ -15,14 +15,14 @@ interface OdinAudioProps {
 }
 
 export const OdinAudio = memo((props: OdinAudioProps) => {
-  const { playRecording, stopPlaying, playing, currDuration, duration } = useRecorder();
-
   const { data: audioData, isLoading } = useAudio({
     drive: ChatDrive,
     fileId: props.fileId,
     payloadKey: props.payload.key,
     lastModified: props.payload.lastModified,
   }).fetch;
+
+  const { play, stop, playing, currDuration, duration } = useAudioPlayback(audioData?.url);
 
   return (
     <View
@@ -58,9 +58,9 @@ export const OdinAudio = memo((props: OdinAudioProps) => {
               }}
               onPress={async () => {
                 if (playing) {
-                  await stopPlaying();
+                  await stop();
                 } else {
-                  await playRecording(audioData?.url as string);
+                  await play();
                 }
               }}
               key={'audio'}
