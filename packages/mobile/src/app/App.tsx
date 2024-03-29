@@ -291,6 +291,7 @@ const TabStack = () => {
         tabBarActiveTintColor: isDarkMode ? Colors.white : Colors.black,
         tabBarActiveBackgroundColor: isDarkMode ? Colors.indigo[700] : Colors.indigo[200],
         tabBarShowLabel: false,
+        tabBarHideOnKeyboard: true,
         tabBarStyle: {
           backgroundColor: isDarkMode ? Colors.indigo[900] : Colors.indigo[100],
         },
@@ -395,6 +396,7 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
             shouldShowHintSearchIcon: true,
             hideWhenScrolling: true,
             placeholder: 'Search',
+            hideNavigationBar: true,
           },
         }}
       />

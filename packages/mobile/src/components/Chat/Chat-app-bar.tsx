@@ -59,13 +59,6 @@ export const ChatAppBar = ({
   );
 };
 const styles = StyleSheet.create({
-  header: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 3,
-    zIndex: 10,
-  },
   titleStyle: {
     fontSize: 18,
     fontWeight: '500',
