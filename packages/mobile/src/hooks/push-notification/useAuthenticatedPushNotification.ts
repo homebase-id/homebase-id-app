@@ -87,14 +87,20 @@ export const useAuthenticatedPushNotification = () => {
   // Notifications
   //
 
+  const handleNotification = useCallback(async (notification: PushNotificationMessage) => {
+    deleteNotification(notification);
+    await notifee.cancelNotification(notification.id);
+    Alert.alert(notification.id);
+  }, []);
+
+  //
+
   useEffect(() => {
     const onPushNotification = async (type: EventType, notification: PushNotificationMessage) => {
-      deleteNotification(notification);
-      await notifee.cancelNotification(notification.id);
-      Alert.alert(notification.id);
+      await handleNotification(notification);
     };
     return Subscribe(onPushNotification);
-  }, []);
+  }, [handleNotification]);
 
   //
 
@@ -104,9 +110,7 @@ export const useAuthenticatedPushNotification = () => {
       if (notificationPermissionGranted) {
         const notifications = getNotifcations();
         for (const notification of notifications) {
-          deleteNotification(notification);
-          await notifee.cancelNotification(notification.id);
-          Alert.alert(notification.id);
+          await handleNotification(notification);
         }
       }
     };
@@ -126,5 +130,5 @@ export const useAuthenticatedPushNotification = () => {
     return () => {
       subscription.remove();
     };
-  }, [notificationPermissionGranted]);
+  }, [handleNotification, notificationPermissionGranted]);
 };

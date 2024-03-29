@@ -50,7 +50,7 @@ const onMessageReceived = async (message: FirebaseMessagingTypes.RemoteMessage) 
   console.debug('ODIN Notification:', notification);
   storeNotification(notification);
 
-  // SEB:TODO branch on notification.version and notification.type
+  // SEB:NOTE notification.version helps with backwards compatibility
 
   await notifee.displayNotification({
     id: notification?.id,
