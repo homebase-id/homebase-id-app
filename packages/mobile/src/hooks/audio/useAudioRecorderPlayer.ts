@@ -12,6 +12,7 @@ import AudioRecorderPlayer, {
 import RNFS from 'react-native-fs';
 import { transcodeAudio } from '../../provider/audio/AudioTranscoder';
 import { getNewId } from '@youfoundation/js-lib/helpers';
+import { useAudioContext } from '../../components/AudioContext/useAudioContext';
 
 const audioSet: AudioSet = {
   AudioEncoderAndroid: AudioEncoderAndroidType.AAC,
@@ -81,28 +82,7 @@ export const useAudioRecorder = () => {
 
 export const useAudioPlayback = (audioPath: string | undefined) => {
   const audioPlayer = useMemo(() => new AudioRecorderPlayer(), []);
-
-  const play = async () => {
-    if (!audioPath) return;
-    try {
-      await audioPlayer.startPlayer(audioPath);
-      setplaying(true);
-    } catch (error) {
-      console.error('error Starting Playing', error);
-    }
-  };
-
-  const stop = async () => {
-    const result = await audioPlayer.stopPlayer();
-    setplaying(false);
-    setCurrDuration(0);
-    return result;
-  };
-
-  const pause = async () => {
-    const result = await audioPlayer.pausePlayer();
-    return result;
-  };
+  const { audioPath: globalAudioPath, setAudioPath: setGlobalAudioPath } = useAudioContext();
 
   const [playing, setplaying] = useState(false);
   const [duration, setDuration] = useState<number>();
@@ -110,6 +90,9 @@ export const useAudioPlayback = (audioPath: string | undefined) => {
 
   useEffect(() => {
     audioPlayer.addPlayBackListener((playbackType) => {
+      // Updates are not for this audio
+      if (audioPath !== globalAudioPath) return;
+
       setDuration(playbackType.duration);
       setCurrDuration(playbackType.currentPosition);
     });
@@ -119,11 +102,40 @@ export const useAudioPlayback = (audioPath: string | undefined) => {
       setCurrDuration(0);
     }
 
-    return () => {
-      audioPlayer.removePlayBackListener();
-      audioPlayer.removeRecordBackListener();
-    };
-  }, [audioPlayer, currDuration, duration, playing]);
+    return () => audioPlayer.removePlayBackListener();
+  }, [audioPlayer, currDuration, duration, playing, globalAudioPath, audioPath]);
+
+  useEffect(() => {
+    if (globalAudioPath !== audioPath) {
+      setplaying(false);
+      setCurrDuration(0);
+      setDuration(0);
+    }
+  }, [globalAudioPath, audioPath]);
+
+  const play = async () => {
+    if (!audioPath) return;
+    try {
+      await audioPlayer.startPlayer(audioPath);
+      setGlobalAudioPath(audioPath);
+      setplaying(true);
+    } catch (error) {
+      console.error('error Starting Playing', error);
+    }
+  };
+
+  const stop = async () => {
+    const result = await audioPlayer.stopPlayer();
+    setGlobalAudioPath(null);
+    setplaying(false);
+    setCurrDuration(0);
+    return result;
+  };
+
+  const pause = async () => {
+    const result = await audioPlayer.pausePlayer();
+    return result;
+  };
 
   return {
     play,
