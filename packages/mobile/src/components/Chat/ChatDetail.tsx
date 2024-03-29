@@ -257,7 +257,7 @@ export const ChatDetail = memo(
                 <Send
                   {...props}
                   disabled={isRecording ? false : !props.text && assets?.length === 0}
-                  onSend={isRecording ? async (_) => await onStopRecording() : undefined}
+                  onSend={isRecording ? async (_) => await onStopRecording() : props.onSend}
                   text={props.text || ' '}
                   containerStyle={styles.send}
                 >
@@ -399,6 +399,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginLeft: 6,
     marginRight: 12,
+    maxWidth: '80%',
   },
   replyMessageContainer: {
     padding: 8,
@@ -647,6 +648,11 @@ const RenderReplyMessageView = memo((props: BubbleProps<ChatMessageIMessage>) =>
             targetDrive={ChatDrive}
             fileKey={replyMessage.fileMetadata.payloads[0].key}
             previewThumbnail={replyMessage.fileMetadata.appData.previewThumbnail}
+            avoidPayload={true}
+            enableZoom={false}
+            style={{
+              flex: 1,
+            }}
             imageSize={{
               width: 60,
               height: 60,
