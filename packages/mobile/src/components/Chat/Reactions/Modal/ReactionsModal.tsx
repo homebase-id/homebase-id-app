@@ -80,7 +80,7 @@ const ReactionTile = (prop: HomebaseFile<ChatReaction>) => {
           style={{
             width: 30,
             height: 30,
-            marginRight: 10,
+            marginRight: 16,
           }}
         />
       ) : (

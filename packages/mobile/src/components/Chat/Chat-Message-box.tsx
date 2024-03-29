@@ -3,7 +3,6 @@ import { Swipeable } from 'react-native-gesture-handler';
 import { Message, MessageProps, isSameUser, isSameDay } from 'react-native-gifted-chat';
 import { ChatMessageIMessage } from './ChatDetail';
 import { Info, Reply } from '../ui/Icons/icons';
-import { useCallback } from 'react';
 
 type ChatMessageBoxProps = {
   setReplyOnSwipeOpen: (message: ChatMessageIMessage) => void;

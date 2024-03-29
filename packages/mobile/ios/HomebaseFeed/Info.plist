@@ -62,6 +62,8 @@
 				</array>
 			</dict>
 		</array>
+		<key>NSMicrophoneUsageDescription</key>
+		<string>Give $(PRODUCT_NAME) permission to use your microphone. This would be used to send audio messages</string>
 		<key>NSCameraUsageDescription</key>
 		<string>$(PRODUCT_NAME) would like access to your camera to take secure photos and video.</string>
 		<key>NSMicrophoneUsageDescription</key>

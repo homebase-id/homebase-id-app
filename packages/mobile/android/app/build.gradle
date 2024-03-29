@@ -147,6 +147,8 @@ dependencies {
      // For WebP support, including animated WebP
     implementation 'com.facebook.fresco:animated-webp:2.5.0'
     implementation 'com.facebook.fresco:webpsupport:2.5.0'
+    
+    implementation 'com.writingminds:FFmpegAndroid:0.3.2'
 
     debugImplementation("com.facebook.flipper:flipper-fresco-plugin:${FLIPPER_VERSION}")
     if (hermesEnabled.toBoolean()) {

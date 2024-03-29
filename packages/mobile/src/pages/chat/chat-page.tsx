@@ -1,10 +1,9 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { IMessage } from 'react-native-gifted-chat';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AppStackParamList } from '../../app/App';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Keyboard, View } from 'react-native';
+import { Keyboard, Platform, View } from 'react-native';
 import { ChatAppBar } from '../../components/Chat/Chat-app-bar';
 import { Asset } from 'react-native-image-picker';
 import { ChatMessage } from '../../provider/chat/ChatProvider';
@@ -41,7 +40,6 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
   const identity = useAuth().getIdentity();
 
   const [assets, setAssets] = useState<Asset[]>([]);
-
   // Messages
   const { data: chatMessages } = useChatMessages({
     conversationId: route.params.convoId,
@@ -137,22 +135,13 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
     error: sendMessageError,
   } = useChatMessage().send;
 
-  useEffect(() => {
-    if (messages.length === 0 && conversationContent) {
-      inviteRecipient({
-        conversation: conversationContent,
-      });
-    }
-    if (sendMessageState === 'pending') resetState();
-  }, [conversationContent, inviteRecipient, messages.length, sendMessageState, resetState]);
-
   useMarkMessagesAsRead({ conversation: conversationContent || undefined, messages });
 
   const doSend = useCallback(
-    (message: IMessage[]) => {
+    (message: ChatMessageIMessage[]) => {
       sendMessage({
         conversationId: route.params.convoId,
-        message: message[0].text,
+        message: message[0]?.text,
         replyId: replyMessage?.fileMetadata.appData.uniqueId,
         files: assets.map<ImageSource>((value) => {
           return {
@@ -180,6 +169,27 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
     [conversationContent, route.params.convoId, sendMessage, assets, replyMessage]
   );
 
+  useEffect(() => {
+    if (messages.length === 0 && conversationContent) {
+      inviteRecipient({
+        conversation: conversationContent,
+      });
+    }
+    // Send Audio after Recording
+    if (assets.length === 1 && assets[0].type?.startsWith('audio/')) {
+      doSend([]);
+    }
+    if (sendMessageState === 'pending') resetState();
+  }, [
+    conversationContent,
+    inviteRecipient,
+    messages.length,
+    sendMessageState,
+    resetState,
+    assets,
+    doSend,
+  ]);
+
   // ref
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const reactionModalRef = useRef<BottomSheetModal>(null);
@@ -203,7 +213,8 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
         <ErrorNotification error={sendMessageError} />
         <View
           style={{
-            paddingBottom: replyMessage && !Keyboard.isVisible() ? insets.bottom : 0,
+            paddingBottom:
+              Platform.OS === 'ios' && (replyMessage || Keyboard.isVisible()) ? 0 : insets.bottom,
             flex: 1,
           }}
         >

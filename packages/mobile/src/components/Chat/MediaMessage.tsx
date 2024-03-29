@@ -10,8 +10,9 @@ import { OdinImage } from '../ui/OdinImage/OdinImage';
 import { ChatMessage } from '../../provider/chat/ChatProvider';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ChatMessageIMessage } from './ChatDetail';
+import { OdinAudio } from '../ui/OdinAudio/OdinAudio';
 
-const ImageMessage = memo((props: MessageImageProps<ChatMessageIMessage>) => {
+const MediaMessage = memo((props: MessageImageProps<ChatMessageIMessage>) => {
   if (!props.currentMessage) return null;
   return <MediaGallery msg={props.currentMessage} />;
 });
@@ -55,6 +56,9 @@ const MediaGallery = ({ msg: currentMessage }: { msg: HomebaseFile<ChatMessage> 
               }}
             />
           );
+        }
+        if (item.contentType.startsWith('audio/')) {
+          return <OdinAudio key={item.key} fileId={currentMessage.fileId} payload={item} />;
         }
         return (
           <OdinImage
@@ -131,4 +135,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ImageMessage;
+export default MediaMessage;

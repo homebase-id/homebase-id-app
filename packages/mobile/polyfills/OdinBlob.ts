@@ -179,9 +179,8 @@ class Blob {
       }, 100);
     });
 
-    const destinationUri = `file://${RNFS.CachesDirectoryPath}/${this.data.blobId}.${
-      this.data.type.split('/')[1]
-    }`;
+    const extension = this.data.type === 'audio/mpeg' ? 'mp3' : this.data.type.split('/')[1];
+    const destinationUri = `file://${RNFS.CachesDirectoryPath}/${this.data.blobId}.${extension}`;
 
     const decryptStatus = await OdinBlobModule.decryptFileWithAesCbc16(
       this.uri,

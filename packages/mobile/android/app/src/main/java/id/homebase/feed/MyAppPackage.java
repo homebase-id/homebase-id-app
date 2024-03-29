@@ -21,7 +21,7 @@ public class MyAppPackage implements ReactPackage {
         List<NativeModule> modules = new ArrayList<>();
 
         modules.add(new OdinBlobModule(reactContext));
-
+     modules.add(new RNAudioTranscoder(reactContext));
         return modules;
     }
 

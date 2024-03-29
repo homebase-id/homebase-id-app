@@ -24,11 +24,10 @@ import {
   Pressable,
   StatusBar,
   StyleSheet,
-  Text,
   View,
 } from 'react-native';
-import { Close, Images, SendChat } from '../../components/ui/Icons/icons';
-import ImageMessage from '../../components/Chat/ImageMessage';
+import { Close, Images, Microphone, SendChat, Times } from '../../components/ui/Icons/icons';
+import MediaMessage from './MediaMessage';
 import { Asset, launchImageLibrary } from 'react-native-image-picker';
 import { useAuth } from '../../hooks/auth/useAuth';
 import { useChatMessage } from '../../hooks/chat/useChatMessage';
@@ -45,29 +44,28 @@ import { Avatar as AppAvatar, OwnerAvatar } from '../../components/Chat/Conversa
 import { ConnectionName } from '../../components/ui/Name';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ChatMessage } from '../../provider/chat/ChatProvider';
+import { useAudioRecorder } from '../../hooks/audio/useAudioRecorderPlayer';
+import { Text } from '../ui/Text/Text';
+import { millisToMinutesAndSeconds } from '../../utils/utils';
 
 export interface ChatMessageIMessage extends IMessage, HomebaseFile<ChatMessage> {}
 
 export const ChatDetail = memo(
   ({
     isGroup,
-
     messages,
     doSend,
     doSelectMessage,
     doOpenMessageInfo,
     doOpenReactionModal,
-
     replyMessage,
     setReplyMessage,
-
     assets,
     setAssets,
   }: {
     isGroup: boolean;
-
     messages: ChatMessageIMessage[];
-    doSend: (message: IMessage[]) => void;
+    doSend: (message: ChatMessageIMessage[]) => void;
     doSelectMessage: ({
       coords,
       message,
@@ -161,62 +159,158 @@ export const ChatDetail = memo(
           </View>
         </View>
       );
-    }, [assets, replyMessage, setAssets, setReplyMessage]);
+    }, [assets, isDarkMode, replyMessage, setAssets, setReplyMessage]);
 
+    const { record, stop, duration, isRecording } = useAudioRecorder();
     const imagesIcon = useCallback(() => <Images />, []);
+    const microphoneIcon = useCallback(() => <Microphone />, []);
+    const crossIcon = useCallback(() => <Times />, []);
+
+    const cancelRecording = useCallback(async () => {
+      await stop();
+    }, [stop]);
+
+    const onStopRecording = useCallback(async () => {
+      const audioPath = await stop();
+      setAssets([
+        {
+          uri: audioPath,
+          type: 'audio/mp3',
+          fileName: 'recording',
+          fileSize: 0,
+          height: 0,
+          width: 0,
+          originalPath: audioPath,
+          timestamp: new Date().toUTCString(),
+          id: 'audio',
+        },
+      ] as Asset[]);
+    }, [setAssets, stop]);
+
     const renderCustomInputToolbar = useCallback(
       (props: InputToolbarProps<IMessage>) => {
         return (
-          <>
-            <InputToolbar
-              {...props}
-              renderComposer={(props) => (
+          <InputToolbar
+            {...props}
+            renderComposer={(props) => {
+              if (isRecording) {
+                return (
+                  <View
+                    style={{
+                      flex: 1,
+                      alignContent: 'center',
+                      alignItems: 'center',
+                      marginLeft: 10,
+                      marginTop: Platform.select({
+                        ios: 6,
+                        android: 0,
+                        web: 6,
+                      }),
+                      marginBottom: Platform.select({
+                        ios: 5,
+                        android: 3,
+                        web: 4,
+                      }),
+                      flexDirection: 'row',
+                      height: props.composerHeight,
+                    }}
+                  >
+                    <Microphone color={Colors.red[600]} />
+
+                    <Text style={{ marginLeft: 8, fontSize: 16 }}>
+                      {millisToMinutesAndSeconds(duration)}
+                    </Text>
+                  </View>
+                );
+              }
+              return (
                 <Composer
                   {...props}
                   textInputStyle={{
                     color: isDarkMode ? 'white' : 'black',
                   }}
                 />
-              )}
-              renderSend={(props) => (
+              );
+            }}
+            renderSend={(props) => (
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'flex-end',
+                }}
+              >
+                <Actions
+                  icon={!isRecording ? microphoneIcon : crossIcon}
+                  containerStyle={props.containerStyle}
+                  onPressActionButton={async () => {
+                    if (isRecording) {
+                      await cancelRecording();
+                      return;
+                    } else {
+                      await record();
+                    }
+                  }}
+                />
+
+                <View style={{ width: 6 }} />
+
                 <Send
                   {...props}
-                  disabled={!props.text && assets?.length === 0}
+                  disabled={isRecording ? false : !props.text && assets?.length === 0}
+                  onSend={isRecording ? async (_) => await onStopRecording() : undefined}
                   text={props.text || ' '}
                   containerStyle={styles.send}
                 >
                   <SendChat
                     size={'md'}
-                    color={!props.text && assets?.length === 0 ? 'grey' : 'blue'}
+                    color={
+                      isRecording ? 'blue' : !props.text && assets?.length === 0 ? 'grey' : 'blue'
+                    }
                   />
                 </Send>
-              )}
-              renderActions={() => (
-                <Actions
-                  icon={imagesIcon}
-                  onPressActionButton={async () => {
-                    const medias = await launchImageLibrary({
-                      mediaType: 'mixed',
-                      selectionLimit: 10,
-                    });
-                    if (medias.didCancel) return;
-                    setAssets(medias.assets ?? []);
-                  }}
-                />
-              )}
-              containerStyle={[
-                styles.inputContainer,
-                {
-                  backgroundColor: isDarkMode ? Colors.slate[900] : Colors.white,
-                  borderTopWidth: 0,
-                  borderRadius: 10,
-                },
-              ]}
-            />
-          </>
+              </View>
+            )}
+            renderActions={
+              isRecording
+                ? () => null
+                : () => (
+                    <Actions
+                      icon={imagesIcon}
+                      onPressActionButton={async () => {
+                        const medias = await launchImageLibrary({
+                          mediaType: 'mixed',
+                          selectionLimit: 10,
+                        });
+                        if (medias.didCancel) return;
+                        setAssets(medias.assets ?? []);
+                      }}
+                    />
+                  )
+            }
+            containerStyle={[
+              styles.inputContainer,
+              {
+                backgroundColor: isDarkMode ? Colors.slate[900] : Colors.white,
+                borderTopWidth: 0,
+                borderRadius: 10,
+              },
+            ]}
+          />
         );
       },
-      [isDarkMode, assets?.length, imagesIcon, setAssets]
+      [
+        isRecording,
+        isDarkMode,
+        duration,
+        microphoneIcon,
+        crossIcon,
+        assets?.length,
+        onStopRecording,
+        cancelRecording,
+        record,
+        imagesIcon,
+        setAssets,
+      ]
     );
 
     const renderAvatar = useCallback((props: AvatarProps<IMessage>) => {
@@ -264,12 +358,12 @@ export const ChatDetail = memo(
         onSend={doSend}
         infiniteScroll
         scrollToBottom
-        onLongPress={(e, _, m: HighlightedChatMessage) => onLongPress(e, m)}
+        onLongPress={(e, _, m: ChatMessageIMessage) => onLongPress(e, m)}
         alwaysShowSend
         isKeyboardInternallyHandled={true}
         keyboardShouldPersistTaps="never"
         renderMessageImage={(prop: MessageImageProps<ChatMessageIMessage>) => (
-          <ImageMessage {...prop} />
+          <MediaMessage {...prop} />
         )}
         renderCustomView={(prop: BubbleProps<ChatMessageIMessage>) => (
           <RenderReplyMessageView {...prop} />
