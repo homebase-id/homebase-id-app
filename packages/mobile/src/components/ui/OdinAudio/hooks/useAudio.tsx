@@ -2,7 +2,7 @@ import { TargetDrive } from '@youfoundation/js-lib/core';
 import { useAuth } from '../../../../hooks/auth/useAuth';
 import { useDotYouClientContext } from 'feed-app-common';
 import { useQuery } from '@tanstack/react-query';
-import { getDecryptedImageData } from '../../../../provider/image/RNImageProvider';
+import { getPayloadBytes } from '../../../../provider/image/RNImageProvider';
 
 export interface OdinAudioProps {
   fileId: string;
@@ -20,7 +20,6 @@ export const useAudio = (props: OdinAudioProps) => {
   const { fileId, payloadKey, drive, lastModified } = props;
   const { authToken } = useAuth();
   const dotYouClient = useDotYouClientContext();
-  //   const queryClient = useQueryClient();
 
   const fetchAudio = async (
     fileId: string,
@@ -31,16 +30,10 @@ export const useAudio = (props: OdinAudioProps) => {
     if (fileId === undefined || fileId === '' || !drive || !payloadKey || !authToken) {
       return null;
     }
-    const audioBlob = await getDecryptedImageData(
-      dotYouClient,
-      drive,
-      fileId,
-      payloadKey,
-      authToken,
-      undefined,
-      undefined,
-      lastModified
-    );
+
+    const audioBlob = await getPayloadBytes(dotYouClient, drive, fileId, payloadKey, authToken, {
+      lastModified,
+    });
 
     if (!audioBlob) return null;
     return {
