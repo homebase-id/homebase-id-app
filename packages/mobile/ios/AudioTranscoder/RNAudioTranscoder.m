@@ -66,7 +66,6 @@ Boolean convertAACToPCMData(NSString *inputFilePath, NSString *outputFilePath) {
     }
     @catch (NSException *exception) {
         NSLog(@"Exception occurred: %@", exception);
-        //reject(@"Export Failed", @"Something went wrong", exception);
         return false;
     }
 }
@@ -94,12 +93,10 @@ RCT_EXPORT_METHOD(
       outputPath = [outputPath substringFromIndex:@"file://".length];
     }
 
-    NSLog(@"inputPath: %@", inputPath);
-    NSLog(@"tempPath: %@", tempPath);
-    NSLog(@"outputPath: %@", outputPath);
 
     if(!convertAACToPCMData(inputPath, tempPath)){
       NSLog(@"Failed to convert to PCM");
+      reject(@"Audio_Transcoder_failure", @"Failed to convert to PCM", nil);
     }
 
     @try {
@@ -125,8 +122,6 @@ RCT_EXPORT_METHOD(
         do {
           bytesRead = (int)fread(pcmBuffer, 2 * sizeof(short int), PCM_SIZE, pcmFile); // Read 8192 samples
 
-          NSLog(@"Bytes read %d", bytesRead);
-
           if (bytesRead == 0)
              bytesEncoded = lame_encode_flush(lame, mp3Buffer, PCM_SIZE); // Flush the encoder
           else
@@ -134,7 +129,6 @@ RCT_EXPORT_METHOD(
 
           bytesWritten = fwrite(mp3Buffer, 1, bytesEncoded, mp3File); // Write encoded data to MP3 file
 
-          NSLog(@"Bytes written %d", bytesWritten);
         } while (bytesRead > 0);
 
         // Clean up
@@ -147,7 +141,8 @@ RCT_EXPORT_METHOD(
     }
     @catch (NSException *exception) {
         NSLog(@"Exception occurred: %@", exception);
-        //reject(@"Export Failed", @"Something went wrong", exception);
+      
+        reject(@"Audio_Transcoder_failure", @"Exception occured", nil);
     }
 }
 
