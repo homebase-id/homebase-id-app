@@ -87,31 +87,59 @@ export const useAuthenticatedPushNotification = () => {
   // Notifications
   //
 
-  const handleNotification = useCallback(async (notification: PushNotificationMessage) => {
-    deleteNotification(notification);
-    await notifee.cancelNotification(notification.id);
-    // SEB:TODO do stuff with the notification...
-    Alert.alert(notification.id);
-  }, []);
+  // Handle foreground or pressed notification
+  const handleForegroundNotification = useCallback(
+    async (notification: PushNotificationMessage) => {
+      console.debug('Handling foreground notification', notification.id);
+      deleteNotification(notification);
+      await notifee.cancelNotification(notification.id);
+
+      // SEB:TODO do stuff with the notification...
+      Alert.alert(
+        'Foreground Notification',
+        `Message ${notification.id} received from ${notification.data.senderId || 'unknown'}`
+      );
+    },
+    []
+  );
 
   //
 
+  // Handle background notification
+  const handleBackgroundNotification = useCallback(
+    async (notification: PushNotificationMessage) => {
+      console.debug('Handling background notification', notification.id);
+      deleteNotification(notification);
+      await notifee.cancelNotification(notification.id);
+
+      // SEB:TODO do stuff with the notification...
+      Alert.alert(
+        'Background Notification',
+        `Message ${notification.id} received from ${notification.data.senderId || 'unknown'}`
+      );
+    },
+    []
+  );
+
+  //
+
+  // Subscribe to notifications
   useEffect(() => {
     const onPushNotification = async (type: EventType, notification: PushNotificationMessage) => {
-      await handleNotification(notification);
+      await handleForegroundNotification(notification);
     };
     return Subscribe(onPushNotification);
-  }, [handleNotification]);
+  }, [handleForegroundNotification]);
 
   //
 
-  // Initial mount and App state change
+  // Process missed/background notifications
   useEffect(() => {
-    const handleMissedNotifications = async (): Promise<void> => {
+    const handleBackgroundNotifications = async (): Promise<void> => {
       if (notificationPermissionGranted) {
         const notifications = getNotifcations();
         for (const notification of notifications) {
-          await handleNotification(notification);
+          await handleBackgroundNotification(notification);
         }
         notifee.setBadgeCount(0);
       }
@@ -121,16 +149,16 @@ export const useAuthenticatedPushNotification = () => {
       'change',
       async (nextAppState: AppStateStatus) => {
         if (nextAppState === 'active') {
-          await handleMissedNotifications();
+          await handleBackgroundNotifications();
         }
       }
     );
 
-    handleMissedNotifications();
+    handleBackgroundNotifications();
 
     // Cleanup subscription
     return () => {
       subscription.remove();
     };
-  }, [handleNotification, notificationPermissionGranted]);
+  }, [handleBackgroundNotification, notificationPermissionGranted]);
 };

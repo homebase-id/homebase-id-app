@@ -56,7 +56,7 @@ const onMessageReceived = async (message: FirebaseMessagingTypes.RemoteMessage) 
   await notifee.displayNotification({
     id: notification?.id,
     title: 'Odin message',
-    body: `Message received from ${notification?.data?.senderId || 'unknown'}`,
+    body: `${notification?.id} received from ${notification?.data?.senderId || 'unknown'}`,
     android: {
       channelId: 'default',
       // smallIcon: 'name-of-a-small-icon', // optional, defaults to 'ic_launcher'.
@@ -84,7 +84,7 @@ export const handleNotificationMessage = async (
 
   const notification = getNotifcationById(id);
   if (notification) {
-    if (isForegroundEvent) {
+    if (isForegroundEvent || type === EventType.PRESS) {
       for (const subscriber of notificationSubscribers) {
         await subscriber.onNotificationReceived(type, notification);
       }
