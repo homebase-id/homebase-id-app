@@ -111,7 +111,6 @@ export const useAuthenticatedPushNotification = () => {
       if (notificationPermissionGranted) {
         const notifications = getNotifcations();
         for (const notification of notifications) {
-          console.debug('XXXXXXXX:', notification);
           await handleNotification(notification);
         }
         notifee.setBadgeCount(0);
