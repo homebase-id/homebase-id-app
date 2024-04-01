@@ -8,7 +8,7 @@ on:
 
 jobs:
   build-ios:
-    runs-on: macOS-latest
+    runs-on: macOS-14
 
     steps:
       - uses: actions/checkout@v3
@@ -27,6 +27,9 @@ jobs:
       - name: Install npm dependencies
         run: npm ci
 
+      # - name: Build libs
+      #   run: npm run build:libs
+
       - name: Setup Ruby (bundle)
         uses: ruby/setup-ruby@v1
         with:
@@ -39,6 +42,11 @@ jobs:
           version: ${{ steps.package-version.outputs.version}}
           build-number: ${{github.run_number}}
           project-path: packages/mobile/ios
+
+      - name: setup-cocoapods
+        uses: maxim-lobanov/setup-cocoapods@v1
+        with:
+          version: 1.15.2
 
       - name: Install Pods
         run: pod install --repo-update
@@ -103,6 +111,9 @@ jobs:
 
       - name: Install npm dependencies
         run: npm ci
+
+      # - name: Build libs
+      #   run: npm run build:libs
 
       - name: Decode Homebase Keystore to file
         id: decode_keystore_file

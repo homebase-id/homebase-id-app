@@ -11,13 +11,12 @@ import {
 } from '../../provider/chat/ConversationProvider';
 import {
   DotYouClient,
-  DriveSearchResult,
-  NewDriveSearchResult,
+  HomebaseFile,
+  NewHomebaseFile,
   SecurityGroupType,
 } from '@youfoundation/js-lib/core';
 import { getNewId, getNewXorId } from '@youfoundation/js-lib/helpers';
 import { useConversations } from './useConversations';
-
 
 import { useDotYouClientContext } from 'feed-app-common';
 import { deleteAllChatMessages } from '../../provider/chat/ChatProvider';
@@ -40,10 +39,10 @@ export const useConversation = (props?: { conversationId?: string | undefined })
 
   const getExistingConversationsForRecipient = async (
     recipients: string[]
-  ): Promise<null | DriveSearchResult<Conversation>> => {
-    const allConversationsInCache = await queryClient.fetchQuery<
-      InfiniteData<{ searchResults: DriveSearchResult<Conversation>[] }>
-    >({ queryKey: ['conversations'] });
+  ): Promise<null | HomebaseFile<Conversation>> => {
+    const allConversationsInCache = await queryClient.fetchInfiniteQuery<{
+      searchResults: HomebaseFile<Conversation>[];
+    }>({ queryKey: ['conversations'], initialPageParam: undefined });
 
     for (const page of allConversationsInCache?.pages || []) {
       const matchedConversation = page.searchResults.find((conversation) => {
@@ -82,18 +81,18 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     const newConversationId =
       recipients.length === 1 ? await getNewXorId(identity as string, recipients[0]) : getNewId();
 
-    const newConversation: NewDriveSearchResult<Conversation> = {
+    const newConversation: NewHomebaseFile<Conversation> = {
       fileMetadata: {
         appData: {
           uniqueId: newConversationId,
           content: {
             ...(recipients.length > 1
               ? {
-                recipients: recipients,
-              }
+                  recipients: recipients,
+                }
               : {
-                recipient: recipients[0],
-              }),
+                  recipient: recipients[0],
+                }),
             title: title || recipients.join(', '),
           },
         },
@@ -116,7 +115,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
   const sendJoinCommand = async ({
     conversation,
   }: {
-    conversation: DriveSearchResult<Conversation>;
+    conversation: HomebaseFile<Conversation>;
   }): Promise<void> => {
     await requestConversationCommand(
       dotYouClient,
@@ -127,13 +126,13 @@ export const useConversation = (props?: { conversationId?: string | undefined })
 
   const updateExistingConversation = async ({
     conversation,
-    sendCommand = false,
+    isTitleUpdated = false,
   }: {
-    conversation: DriveSearchResult<Conversation>;
-    sendCommand?: boolean;
+    conversation: HomebaseFile<Conversation>;
+    isTitleUpdated?: boolean;
   }) => {
     return await updateConversation(dotYouClient, conversation).then(async () => {
-      if (sendCommand) {
+      if (isTitleUpdated && 'recipients' in conversation.fileMetadata.appData.content) {
         await updateGroupConversationCommand(
           dotYouClient,
           conversation.fileMetadata.appData.content as GroupConversation,
@@ -141,21 +140,16 @@ export const useConversation = (props?: { conversationId?: string | undefined })
         );
       }
     });
-
   };
 
-  const clearChat = async ({ conversation }: { conversation: DriveSearchResult<Conversation> }) => {
+  const clearChat = async ({ conversation }: { conversation: HomebaseFile<Conversation> }) => {
     return await deleteAllChatMessages(
       dotYouClient,
       conversation.fileMetadata.appData.uniqueId as string
     );
   };
 
-  const deleteChat = async ({
-    conversation,
-  }: {
-    conversation: DriveSearchResult<Conversation>;
-  }) => {
+  const deleteChat = async ({ conversation }: { conversation: HomebaseFile<Conversation> }) => {
     const deletedResult = await deleteAllChatMessages(
       dotYouClient,
       conversation.fileMetadata.appData.uniqueId as string
@@ -163,7 +157,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     if (!deletedResult) throw new Error('Failed to delete chat messages');
 
     // We soft delete the conversation, so we can still see newly received messages
-    const newConversation: DriveSearchResult<Conversation> = {
+    const newConversation: HomebaseFile<Conversation> = {
       ...conversation,
       fileMetadata: {
         ...conversation.fileMetadata,
@@ -174,12 +168,8 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     return await updateConversation(dotYouClient, newConversation);
   };
 
-  const restoreChat = async ({
-    conversation,
-  }: {
-    conversation: DriveSearchResult<Conversation>;
-  }) => {
-    const newConversation: DriveSearchResult<Conversation> = {
+  const restoreChat = async ({ conversation }: { conversation: HomebaseFile<Conversation> }) => {
+    const newConversation: HomebaseFile<Conversation> = {
       ...conversation,
       fileMetadata: {
         ...conversation.fileMetadata,

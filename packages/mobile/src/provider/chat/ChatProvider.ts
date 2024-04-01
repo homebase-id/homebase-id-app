@@ -1,14 +1,14 @@
 import {
   AppFileMetaData,
   DotYouClient,
-  DriveSearchResult,
+  HomebaseFile,
   EmbeddedThumb,
   FileMetadata,
   FileQueryParams,
   GetBatchQueryResultOptions,
   ImageContentType,
   KeyHeader,
-  NewDriveSearchResult,
+  NewHomebaseFile,
   PayloadFile,
   ScheduleOptions,
   SecurityGroupType,
@@ -32,7 +32,7 @@ import {
   GroupConversation,
   SingleConversation,
 } from './ConversationProvider';
-import { getNewId, jsonStringify64 } from '@youfoundation/js-lib/helpers';
+import { assertIfDefined, getNewId, jsonStringify64 } from '@youfoundation/js-lib/helpers';
 import { OdinBlob } from '../../../polyfills/OdinBlob';
 import { ImageSource } from '../image/RNImageProvider';
 import { createThumbnails } from '../image/RNThumbnailProvider';
@@ -95,6 +95,9 @@ export const getChatMessages = async (
   cursorState: string | undefined,
   pageSize: number
 ) => {
+  assertIfDefined('dotYouClient', dotYouClient);
+  assertIfDefined('conversationId', conversationId);
+
   const params: FileQueryParams = {
     targetDrive: ChatDrive,
     groupId: [conversationId],
@@ -146,10 +149,10 @@ export const getChatMessageByGlobalTransitId = async (
 
 export const dsrToMessage = async (
   dotYouClient: DotYouClient,
-  dsr: DriveSearchResult,
+  dsr: HomebaseFile,
   targetDrive: TargetDrive,
   includeMetadataHeader: boolean
-): Promise<DriveSearchResult<ChatMessage> | null> => {
+): Promise<HomebaseFile<ChatMessage> | null> => {
   try {
     const attrContent = await getContentFromHeaderOrPayload<ChatMessage>(
       dotYouClient,
@@ -159,7 +162,7 @@ export const dsrToMessage = async (
     );
     if (!attrContent) return null;
 
-    const chatMessage: DriveSearchResult<ChatMessage> = {
+    const chatMessage: HomebaseFile<ChatMessage> = {
       ...dsr,
       fileMetadata: {
         ...dsr.fileMetadata,
@@ -179,7 +182,7 @@ export const dsrToMessage = async (
 
 export const uploadChatMessage = async (
   dotYouClient: DotYouClient,
-  message: NewDriveSearchResult<ChatMessage>,
+  message: NewHomebaseFile<ChatMessage>,
   recipients: string[],
   files: ImageSource[] | undefined,
   onVersionConflict?: () => void
@@ -194,18 +197,18 @@ export const uploadChatMessage = async (
     },
     transitOptions: distribute
       ? {
-          recipients: [...recipients],
-          schedule: ScheduleOptions.SendNowAwaitResponse,
-          sendContents: SendContents.All,
-          useGlobalTransitId: true,
-          useAppNotification: true,
-          appNotificationOptions: {
-            appId: CHAT_APP_ID,
-            typeId: message.fileMetadata.appData.groupId as string,
-            tagId: getNewId(),
-            silent: false,
-          },
-        }
+        recipients: [...recipients],
+        schedule: ScheduleOptions.SendNowAwaitResponse,
+        sendContents: SendContents.All,
+        useGlobalTransitId: true,
+        useAppNotification: true,
+        appNotificationOptions: {
+          appId: CHAT_APP_ID,
+          typeId: message.fileMetadata.appData.groupId as string,
+          tagId: getNewId(),
+          silent: false,
+        },
+      }
       : undefined,
   };
 
@@ -245,17 +248,17 @@ export const uploadChatMessage = async (
       const thumbnail = await grabThumbnail(newMediaFile);
       const thumbSource: ImageSource | null = thumbnail
         ? {
-            uri: thumbnail.uri,
-            width: 1920,
-            height: 1080,
-            type: thumbnail.type,
-          }
+          uri: thumbnail.uri,
+          width: 1920,
+          height: 1080,
+          type: thumbnail.type,
+        }
         : null;
       const { tinyThumb, additionalThumbnails } =
         thumbSource && thumbnail
           ? await createThumbnails(thumbSource, payloadKey, thumbnail.type as ImageContentType, [
-              { quality: 100, width: 250, height: 250 },
-            ])
+            { quality: 100, width: 250, height: 250 },
+          ])
           : { tinyThumb: undefined, additionalThumbnails: undefined };
       if (additionalThumbnails) {
         thumbnails.push(...additionalThumbnails);
@@ -267,7 +270,18 @@ export const uploadChatMessage = async (
       });
 
       if (tinyThumb) previewThumbnails.push(tinyThumb);
-    } else {
+    }
+    else if (newMediaFile.type?.startsWith('audio/')) {
+      const payloadBlob = new OdinBlob(newMediaFile.filepath || newMediaFile.uri, {
+        type: newMediaFile.type,
+      }) as any as Blob;
+
+      payloads.push({
+        key: payloadKey,
+        payload: payloadBlob,
+      });
+    }
+    else {
       const blob = new OdinBlob(newMediaFile.filepath || newMediaFile.uri, {
         type: newMediaFile?.type || undefined,
       }) as any as Blob;
@@ -314,7 +328,7 @@ export const uploadChatMessage = async (
 
 export const updateChatMessage = async (
   dotYouClient: DotYouClient,
-  message: DriveSearchResult<ChatMessage> | NewDriveSearchResult<ChatMessage>,
+  message: HomebaseFile<ChatMessage> | NewHomebaseFile<ChatMessage>,
   recipients: string[],
   keyHeader?: KeyHeader
 ) => {
@@ -328,11 +342,11 @@ export const updateChatMessage = async (
     },
     transitOptions: distribute
       ? {
-          recipients: [...recipients],
-          schedule: ScheduleOptions.SendNowAwaitResponse,
-          sendContents: SendContents.All,
-          useGlobalTransitId: true,
-        }
+        recipients: [...recipients],
+        schedule: ScheduleOptions.SendNowAwaitResponse,
+        sendContents: SendContents.All,
+        useGlobalTransitId: true,
+      }
       : undefined,
   };
 
@@ -357,7 +371,7 @@ export const updateChatMessage = async (
 
   return await uploadHeader(
     dotYouClient,
-    keyHeader || (message as DriveSearchResult<ChatMessage>).sharedSecretEncryptedKeyHeader,
+    keyHeader || (message as HomebaseFile<ChatMessage>).sharedSecretEncryptedKeyHeader,
     uploadInstructions,
     uploadMetadata
   );
@@ -365,7 +379,7 @@ export const updateChatMessage = async (
 
 export const softDeleteChatMessage = async (
   dotYouClient: DotYouClient,
-  message: DriveSearchResult<ChatMessage>,
+  message: HomebaseFile<ChatMessage>,
   recipients: string[],
   deleteForEveryone?: boolean
 ) => {
@@ -400,7 +414,7 @@ export interface MarkAsReadRequest {
 
 export const requestMarkAsRead = async (
   dotYouClient: DotYouClient,
-  conversation: DriveSearchResult<Conversation>,
+  conversation: HomebaseFile<Conversation>,
   chatGlobalTransitIds: string[]
 ) => {
   const request: MarkAsReadRequest = {
@@ -437,7 +451,7 @@ export const requestMarkAsRead = async (
 // Probably not needed, as the file is "updated" for a soft delete, which just is sent over transit to the recipients
 // export const requestDelete = async (
 //   dotYouClient: DotYouClient,
-//   conversation: DriveSearchResult<Conversation>,
+//   conversation: HomebaseFile<Conversation>,
 //   chatGlobalTransitIds: string[]
 // ) => {
 //   const request: DeleteRequest = {

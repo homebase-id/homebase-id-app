@@ -8,6 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		00E356F31AD99517003FC87E /* HomebaseFeedTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* HomebaseFeedTests.m */; };
+		12099F9B2BB5AD1C0036F910 /* RNAudioTranscoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 12099F9A2BB5AD1C0036F910 /* RNAudioTranscoder.m */; };
+		12099F9C2BB5AD1C0036F910 /* RNAudioTranscoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 12099F9A2BB5AD1C0036F910 /* RNAudioTranscoder.m */; };
+		12099F9F2BB5BFE50036F910 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 12099F9D2BB5BBDC0036F910 /* AVFoundation.framework */; };
+		12099FA12BB5BFEC0036F910 /* AVFAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 12099FA02BB5BFEC0036F910 /* AVFAudio.framework */; };
 		12A0DF8A2B909CAA00E1A798 /* RCTOdinBlobModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 12A0DF892B909CAA00E1A798 /* RCTOdinBlobModule.m */; };
 		12A0DF8B2B909CAA00E1A798 /* RCTOdinBlobModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 12A0DF892B909CAA00E1A798 /* RCTOdinBlobModule.m */; };
 		13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
@@ -33,6 +37,10 @@
 		00E356EE1AD99517003FC87E /* HomebaseFeedTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HomebaseFeedTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		00E356F11AD99517003FC87E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		00E356F21AD99517003FC87E /* HomebaseFeedTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HomebaseFeedTests.m; sourceTree = "<group>"; };
+		12099F992BB5AD030036F910 /* RNAudioTranscoder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = RNAudioTranscoder.h; path = AudioTranscoder/RNAudioTranscoder.h; sourceTree = "<group>"; };
+		12099F9A2BB5AD1C0036F910 /* RNAudioTranscoder.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = RNAudioTranscoder.m; path = AudioTranscoder/RNAudioTranscoder.m; sourceTree = "<group>"; };
+		12099F9D2BB5BBDC0036F910 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		12099FA02BB5BFEC0036F910 /* AVFAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFAudio.framework; path = System/Library/Frameworks/AVFAudio.framework; sourceTree = SDKROOT; };
 		12A0DF882B909C8E00E1A798 /* RCTOdinBlobModule.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = RCTOdinBlobModule.h; path = OdinBlob/RCTOdinBlobModule.h; sourceTree = "<group>"; };
 		12A0DF892B909CAA00E1A798 /* RCTOdinBlobModule.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = RCTOdinBlobModule.m; path = OdinBlob/RCTOdinBlobModule.m; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* HomebaseFeed.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HomebaseFeed.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -67,6 +75,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				7D9D3781A7EAE35D69C5F44C /* Pods_HomebaseFeed.framework in Frameworks */,
+				12099FA12BB5BFEC0036F910 /* AVFAudio.framework in Frameworks */,
+				12099F9F2BB5BFE50036F910 /* AVFoundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -107,6 +117,8 @@
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				12099FA02BB5BFEC0036F910 /* AVFAudio.framework */,
+				12099F9D2BB5BBDC0036F910 /* AVFoundation.framework */,
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
 				4AA1622DF51695664505A26E /* Pods_HomebaseFeed.framework */,
 				E08B53A62F52A5786DCC93B9 /* Pods_HomebaseFeed_HomebaseFeedTests.framework */,
@@ -119,6 +131,8 @@
 			children = (
 				12A0DF882B909C8E00E1A798 /* RCTOdinBlobModule.h */,
 				12A0DF892B909CAA00E1A798 /* RCTOdinBlobModule.m */,
+				12099F992BB5AD030036F910 /* RNAudioTranscoder.h */,
+				12099F9A2BB5AD1C0036F910 /* RNAudioTranscoder.m */,
 			);
 			name = Libraries;
 			sourceTree = "<group>";
@@ -430,6 +444,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				12099F9C2BB5AD1C0036F910 /* RNAudioTranscoder.m in Sources */,
 				12A0DF8B2B909CAA00E1A798 /* RCTOdinBlobModule.m in Sources */,
 				00E356F31AD99517003FC87E /* HomebaseFeedTests.m in Sources */,
 			);
@@ -440,6 +455,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */,
+				12099F9B2BB5AD1C0036F910 /* RNAudioTranscoder.m in Sources */,
 				12A0DF8A2B909CAA00E1A798 /* RCTOdinBlobModule.m in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
 			);

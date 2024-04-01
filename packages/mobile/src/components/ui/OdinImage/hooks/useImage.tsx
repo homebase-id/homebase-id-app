@@ -13,14 +13,17 @@ interface ImageData {
   type?: ImageContentType;
 }
 
-const useImage = (
-  odinId?: string,
-  imageFileId?: string | undefined,
-  imageFileKey?: string | undefined,
-  imageDrive?: TargetDrive,
-  size?: ImageSize,
-  naturalSize?: ImageSize
-) => {
+const useImage = (props?: {
+  odinId?: string;
+  imageFileId?: string | undefined;
+  imageFileKey?: string | undefined;
+  imageDrive?: TargetDrive;
+  size?: ImageSize;
+  naturalSize?: ImageSize;
+  lastModified?: number;
+}) => {
+  const { odinId, imageFileId, imageFileKey, imageDrive, size, naturalSize, lastModified } =
+    props || {};
   const { authToken } = useAuth();
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
@@ -38,7 +41,7 @@ const useImage = (
         queryKey: ['image', odinId || '', imageDrive?.alias, imageFileId, imageFileKey],
         exact: false,
       })
-      .filter((query) => query.state.status !== 'error');
+      .filter((query) => query.state.status !== 'error' && !query.isStale);
 
     const cachedEntriesWithSize = cachedEntries.map((entry) => {
       const sizeParts = (entry.queryKey[5] as string)?.split('x');
@@ -77,7 +80,7 @@ const useImage = (
     imageDrive?: TargetDrive,
     size?: ImageSize,
     naturalSize?: ImageSize
-  ): Promise<ImageData | undefined> => {
+  ): Promise<ImageData | null> => {
     if (
       imageFileId === undefined ||
       imageFileId === '' ||
@@ -85,7 +88,7 @@ const useImage = (
       !imageFileKey ||
       !authToken
     ) {
-      return;
+      return null;
     }
 
     const cachedEntry = checkIfWeHaveLargerCachedImage(
@@ -106,10 +109,12 @@ const useImage = (
       imageFileId,
       imageFileKey,
       authToken,
-      size
+      size,
+      undefined,
+      lastModified
     );
 
-    if (!imageBlob) return undefined;
+    if (!imageBlob) return null;
 
     return {
       url: imageBlob.uri,
@@ -130,6 +135,7 @@ const useImage = (
         size
           ? `${Math.round(size.pixelHeight / 25) * 25}x${Math.round(size?.pixelWidth / 25) * 25}`
           : undefined,
+        lastModified,
       ],
       queryFn: () =>
         fetchImageData(odinId, imageFileId, imageFileKey, imageDrive, size, naturalSize),

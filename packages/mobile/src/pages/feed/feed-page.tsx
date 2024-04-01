@@ -1,7 +1,7 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { memo, useMemo, useRef, useState } from 'react';
 
-import { TabStackParamList } from '../../app/App';
+import { FEED_APP_ID, TabStackParamList } from '../../app/App';
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 import WebView from 'react-native-webview';
 import { uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
@@ -10,6 +10,7 @@ import { useAuth } from '../../hooks/auth/useAuth';
 import { Colors } from '../../app/Colors';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { ScrollView } from 'react-native-gesture-handler';
+import { useRemoveNotifications } from '../../hooks/notifications/usePushNotifications';
 
 type FeedProps = NativeStackScreenProps<TabStackParamList, 'Feed'>;
 
@@ -18,11 +19,17 @@ export const FeedPage = memo((_props: FeedProps) => {
   const { authToken, getIdentity, getSharedSecret } = useAuth();
   const identity = getIdentity();
 
+  useRemoveNotifications({ appId: FEED_APP_ID });
+
   const sharedSecret = getSharedSecret();
   const base64SharedSecret = sharedSecret ? uint8ArrayToBase64(sharedSecret) : '';
 
   const uri = useMemo(() => `https://${identity}/apps/feed`, [identity]);
   const originWhitelist = useMemo(() => [`https://${identity}`], [identity]);
+
+  // const meta = document.createElement('meta'); meta.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no'); meta.setAttribute('name', 'viewport'); document.getElementsByTagName('head')[0].appendChild(meta);
+  // @2002Bishwajeet: this ☝️ ain't right.. It breaks the injected_javascript fully (I assume as the JS is set to load before the content);
+  //  To be honest Not sure if we want it, and if we do, it should be part of the feed-app itself, enabling it based on the "client_type" key in the localStorage
 
   const INJECTED_JAVASCRIPT = useMemo(() => {
     return `(function() {

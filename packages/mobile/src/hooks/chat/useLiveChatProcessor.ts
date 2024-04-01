@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  DriveSearchResult,
+  HomebaseFile,
   Notify,
   ReceivedCommand,
   TypedConnectionNotification,
@@ -13,7 +13,7 @@ import { processInbox } from '@youfoundation/js-lib/peer';
 import { useNotificationSubscriber } from '../useNotificationSubscriber';
 import { useCallback, useEffect, useRef } from 'react';
 
-import { hasDebugFlag, tryJsonParse } from '@youfoundation/js-lib/helpers';
+import { hasDebugFlag, stringGuidsEqual, tryJsonParse } from '@youfoundation/js-lib/helpers';
 import { getSingleConversation, useConversation } from './useConversation';
 import { processCommand } from '../../provider/chat/ChatCommandProvider';
 import { useDotYouClientContext } from 'feed-app-common';
@@ -26,6 +26,7 @@ import {
   JOIN_GROUP_CONVERSATION_COMMAND,
   UPDATE_GROUP_CONVERSATION_COMMAND,
 } from '../../provider/chat/ConversationProvider';
+import { ChatReactionFileType } from '../../provider/chat/ChatReactionProvider';
 
 const MINUTE_IN_MS = 60000;
 
@@ -99,8 +100,8 @@ const useChatWebsocket = (isEnabled: boolean) => {
       if (
         (notification.notificationType === 'fileAdded' ||
           notification.notificationType === 'fileModified') &&
-        notification.targetDrive?.alias === ChatDrive.alias &&
-        notification.targetDrive?.type === ChatDrive.type
+        stringGuidsEqual(notification.targetDrive?.alias, ChatDrive.alias) &&
+        stringGuidsEqual(notification.targetDrive?.type, ChatDrive.type)
       ) {
         if (notification.header.fileMetadata.appData.fileType === ChatMessageFileType) {
           const conversationId = notification.header.fileMetadata.appData.groupId;
@@ -108,12 +109,10 @@ const useChatWebsocket = (isEnabled: boolean) => {
           queryClient.invalidateQueries({ queryKey: ['chat', conversationId] });
 
           // Check if the message is orphaned from a conversation
-          const conversation = await queryClient.fetchQuery<DriveSearchResult<Conversation> | null>(
-            {
-              queryKey: ['conversation', conversationId],
-              queryFn: () => getSingleConversation(dotYouClient, conversationId),
-            }
-          );
+          const conversation = await queryClient.fetchQuery<HomebaseFile<Conversation> | null>({
+            queryKey: ['conversation', conversationId],
+            queryFn: () => getSingleConversation(dotYouClient, conversationId),
+          });
 
           if (!conversation) {
             console.error('Orphaned message received', notification.header.fileId, conversation);
@@ -122,6 +121,9 @@ const useChatWebsocket = (isEnabled: boolean) => {
           else if (conversation.fileMetadata.appData.archivalStatus === 2) {
             restoreChat({ conversation });
           }
+        } else if (notification.header.fileMetadata.appData.fileType === ChatReactionFileType) {
+          const messageId = notification.header.fileMetadata.appData.groupId;
+          queryClient.invalidateQueries({ queryKey: ['chat-reaction', messageId] });
         } else if (
           [
             JOIN_CONVERSATION_COMMAND,

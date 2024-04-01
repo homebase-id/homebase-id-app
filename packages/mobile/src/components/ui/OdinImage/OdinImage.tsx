@@ -15,6 +15,8 @@ export interface OdinImageProps {
   odinId?: string;
   targetDrive: TargetDrive;
   fileId: string | undefined;
+  fileKey?: string;
+  lastModified?: number;
   fit?: 'cover' | 'contain';
   imageSize?: { width: number; height: number };
   alt?: string;
@@ -22,7 +24,6 @@ export interface OdinImageProps {
   previewThumbnail?: EmbeddedThumb;
   avoidPayload?: boolean;
   enableZoom?: boolean;
-  fileKey?: string;
   style?: ImageStyle;
   onClick?: () => void;
 }
@@ -33,6 +34,7 @@ export const OdinImage = memo(
     targetDrive,
     fileId,
     fileKey,
+    lastModified,
     fit,
     imageSize,
     alt,
@@ -64,12 +66,12 @@ export const OdinImage = memo(
     );
     const skipTiny = !!previewThumbnail || !!cachedImage;
 
-    const { data: tinyThumb } = useTinyThumb(
+    const { data: tinyThumb } = useTinyThumb({
       odinId,
-      !skipTiny ? fileId : undefined,
-      fileKey,
-      targetDrive
-    );
+      imageFileId: !skipTiny ? fileId : undefined,
+      imageFileKey: fileKey,
+      imageDrive: targetDrive,
+    });
     const previewUrl = cachedImage?.url || embeddedThumbUrl || tinyThumb?.url;
 
     const naturalSize: ImageSize | undefined = tinyThumb
@@ -81,14 +83,15 @@ export const OdinImage = memo(
 
     const {
       fetch: { data: imageData },
-    } = useImage(
+    } = useImage({
       odinId,
-      enableZoom || loadSize !== undefined ? fileId : undefined,
-      fileKey,
-      targetDrive,
-      avoidPayload ? { pixelHeight: 200, pixelWidth: 200 } : loadSize,
-      naturalSize
-    );
+      imageFileId: enableZoom || loadSize !== undefined ? fileId : undefined,
+      imageFileKey: fileKey,
+      imageDrive: targetDrive,
+      size: avoidPayload ? { pixelHeight: 200, pixelWidth: 200 } : loadSize,
+      naturalSize,
+      lastModified,
+    });
 
     const hasCachedImage = !!cachedImage?.url;
 
@@ -99,7 +102,8 @@ export const OdinImage = memo(
         }}
       >
         {/* Blurry image */}
-        {!enableZoom && previewUrl ? (
+        {/* TODO: Check to add support for direct full loading for svg */}
+        {!enableZoom && previewUrl && cachedImage?.type !== 'image/svg+xml' ? (
           <Image
             source={{ uri: previewUrl }}
             style={{
@@ -164,6 +168,7 @@ const ZoomableImage = ({
   style?: ImageStyle;
   fit?: 'cover' | 'contain';
   enableZoom?: boolean;
+
   onClick?: () => void;
 
   contentType?: ImageContentType;
@@ -171,12 +176,18 @@ const ZoomableImage = ({
   if (!enableZoom) {
     return contentType === 'image/svg+xml' ? (
       <TouchableWithoutFeedback onPress={onClick}>
-        <SvgUri
-          width={imageSize?.width}
-          height={imageSize?.height}
-          uri={uri}
-          style={{ overflow: 'hidden', ...style }}
-        />
+        <View
+          style={{
+            ...imageSize,
+          }}
+        >
+          <SvgUri
+            width={imageSize?.width}
+            height={imageSize?.height}
+            uri={uri}
+            style={{ overflow: 'hidden', ...style }}
+          />
+        </View>
       </TouchableWithoutFeedback>
     ) : (
       <TouchableWithoutFeedback onPress={onClick}>

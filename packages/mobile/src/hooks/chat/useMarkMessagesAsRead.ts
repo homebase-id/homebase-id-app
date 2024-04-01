@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 
 import { useChatMessages } from './useChatMessages';
 import { useEffect, useState } from 'react';
@@ -11,8 +11,8 @@ export const useMarkMessagesAsRead = ({
   conversation,
   messages,
 }: {
-  conversation: DriveSearchResult<Conversation> | undefined;
-  messages: DriveSearchResult<ChatMessage>[] | undefined;
+  conversation: HomebaseFile<Conversation> | undefined;
+  messages: HomebaseFile<ChatMessage>[] | undefined;
 }) => {
   const { mutateAsync: markAsRead } = useChatMessages({
     conversationId: conversation?.fileMetadata.appData.uniqueId,
@@ -30,7 +30,7 @@ export const useMarkMessagesAsRead = ({
       const unreadMessages = messages.filter(
         (msg) =>
           msg?.fileMetadata.created >
-          (conversation.fileMetadata.appData.content.lastReadTime || 0) &&
+            (conversation.fileMetadata.appData.content.lastReadTime || 0) &&
           msg.fileMetadata.senderOdinId
       );
 

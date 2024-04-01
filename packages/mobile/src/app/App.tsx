@@ -8,7 +8,10 @@ import {
 
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
 import { QueryClient } from '@tanstack/react-query';
-import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
+import {
+  PersistQueryClientProvider,
+  PersistQueryClientOptions,
+} from '@tanstack/react-query-persist-client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NativeStackScreenProps, createNativeStackNavigator } from '@react-navigation/native-stack';
 import CodePush from 'react-native-code-push';
@@ -22,11 +25,10 @@ import { Platform, useColorScheme } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useCallback } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Bars, ChatIcon, Feed, House } from '../components/ui/Icons/icons';
 import { Colors } from './Colors';
 
 // Pages
-import { ChatInfoPage } from '../pages/chat-info-page';
+import { ChatInfoPage } from '../pages/chat/chat-info-page';
 import { ConnectionsPage } from '../pages/profile/connections-page';
 import { ContactPage } from '../pages/contact-page';
 import { FeedPage } from '../pages/feed/feed-page';
@@ -37,12 +39,12 @@ import { LoginPage } from '../pages/login/login-page';
 import { NewGroupPage } from '../pages/new-group-page';
 import { PreviewMedia } from '../pages/media-preview-page';
 import { ProfilePage } from '../pages/profile/profile-page';
-import ChatPage from '../pages/chat-page';
+import ChatPage from '../pages/chat/chat-page';
 import ConversationPage from '../pages/conversation-page';
-import EditGroupPage from '../pages/edit-group-page';
+import EditGroupPage from '../pages/chat/edit-group-page';
 import { ConnectionRequestsPage } from '../pages/home/connection-requests-page';
 import { useDarkMode } from '../hooks/useDarkMode';
-import { DriveSearchResult, EmbeddedThumb } from '@youfoundation/js-lib/core';
+import { HomebaseFile, EmbeddedThumb } from '@youfoundation/js-lib/core';
 import { OdinImage } from '../components/ui/OdinImage/OdinImage';
 import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
 import { useProfile } from '../hooks/profile/useProfile';
@@ -50,6 +52,17 @@ import { ChatMessage } from '../provider/chat/ChatProvider';
 import { useRefreshOnFocus } from '../hooks/chat/useRefetchOnFocus';
 import { PushNotificationProvider } from '../components/push-notification/PushNotificationProvider';
 import { useAuthenticatedPushNotification } from '../hooks/push-notification/useAuthenticatedPushNotification';
+import Toast from 'react-native-toast-message';
+import { ErrorToaster } from '../components/ui/Alert/ErrorToaster';
+import { MessageInfoPage } from '../pages/chat/message-info-page';
+import { Conversation } from '../provider/chat/ConversationProvider';
+import {
+  TabFeedIcon,
+  TabHouseIcon,
+  TabChatIcon,
+  TabMenuIcon,
+} from '../components/Nav/TabStackIcons';
+import { AudioContextProvider } from '../components/AudioContext/AudioContext';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -89,7 +102,7 @@ const queryClient = new QueryClient({
     },
     queries: {
       retry: 2,
-      gcTime: 1000 * 10,
+      gcTime: Infinity,
     },
   },
 });
@@ -99,14 +112,48 @@ const asyncPersist = createAsyncStoragePersister({
   throttleTime: 1000,
 });
 
+// Explicit includes to avoid persisting media items, or large data in general
+const INCLUDED_QUERY_KEYS = [
+  'chat-message',
+  'chat-messages',
+  'conversation',
+  'conversations',
+  'chat-reaction',
+  'connectionDetails',
+
+  // Small data (blobs to local file Uri)
+  'image',
+
+  // Big data (base64 uri's)
+  // 'tinyThumb',
+];
+const persistOptions: Omit<PersistQueryClientOptions, 'queryClient'> = {
+  buster: '202403',
+  maxAge: Infinity,
+  persister: asyncPersist,
+  dehydrateOptions: {
+    shouldDehydrateQuery: (query) => {
+      if (
+        query.state.status === 'pending' ||
+        query.state.status === 'error' ||
+        (query.state.data &&
+          typeof query.state.data === 'object' &&
+          !Array.isArray(query.state.data) &&
+          Object.keys(query.state.data).length === 0)
+      ) {
+        return false;
+      }
+      const { queryKey } = query;
+      return INCLUDED_QUERY_KEYS.some((key) => queryKey.includes(key));
+    },
+  },
+};
+
 let App = () => {
   return (
     <PersistQueryClientProvider
       client={queryClient}
-      persistOptions={{
-        maxAge: Infinity,
-        persister: asyncPersist,
-      }}
+      persistOptions={persistOptions}
       onSuccess={() =>
         queryClient.resumePausedMutations().then(() => queryClient.invalidateQueries())
       }
@@ -114,6 +161,7 @@ let App = () => {
       <GestureHandlerRootView style={{ flex: 1 }}>
         <PushNotificationProvider>
           <RootStack />
+          <Toast />
         </PushNotificationProvider>
       </GestureHandlerRootView>
     </PersistQueryClientProvider>
@@ -137,6 +185,7 @@ const RootStack = () => {
           <StackRoot.Screen name="Login" component={LoginPage} options={{ headerShown: false }} />
         )}
       </StackRoot.Navigator>
+      <ErrorToaster />
     </NavigationContainer>
   );
 };
@@ -144,24 +193,24 @@ const RootStack = () => {
 const AuthenticatedRoot = () => {
   return (
     <DotYouClientProvider>
-      <AppStackScreen />
+      <AudioContextProvider>
+        <AppStackScreen />
+      </AudioContextProvider>
     </DotYouClientProvider>
   );
-};
-
-type TabIconProps = {
-  focused: boolean;
-  color: string;
-  size: number;
 };
 
 export type AppStackParamList = {
   TabStack: undefined;
   ChatScreen: { convoId: string };
   ChatInfo: { convoId: string };
+  MessageInfo: {
+    message: HomebaseFile<ChatMessage>;
+    conversation: HomebaseFile<Conversation>;
+  };
   EditGroup: { convoId: string };
   PreviewMedia: {
-    msg: DriveSearchResult<ChatMessage>;
+    msg: HomebaseFile<ChatMessage>;
     fileId: string;
     payloadKey: string;
     currIndex: number;
@@ -215,6 +264,16 @@ const AppStackScreen = () => {
         }}
       />
       <AppStack.Screen
+        name="MessageInfo"
+        component={MessageInfoPage}
+        options={{
+          gestureEnabled: true,
+          headerTitle: 'Message Info',
+          headerBackTitleVisible: false,
+          headerShown: true,
+        }}
+      />
+      <AppStack.Screen
         name="EditGroup"
         component={EditGroupPage}
         options={{
@@ -232,11 +291,6 @@ const TabBottom = createBottomTabNavigator<TabStackParamList>();
 const TabStack = () => {
   const { isDarkMode } = useDarkMode();
 
-  const houseIcon = useCallback((props: TabIconProps) => <House {...props} size={'md'} />, []);
-  const feedIcon = useCallback((props: TabIconProps) => <Feed {...props} size={'md'} />, []);
-  const chatIcon = useCallback((props: TabIconProps) => <ChatIcon {...props} size={'md'} />, []);
-  const menuIcon = useCallback((props: TabIconProps) => <Bars {...props} size={'md'} />, []);
-
   return (
     <TabBottom.Navigator
       screenOptions={{
@@ -245,6 +299,7 @@ const TabStack = () => {
         tabBarActiveTintColor: isDarkMode ? Colors.white : Colors.black,
         tabBarActiveBackgroundColor: isDarkMode ? Colors.indigo[700] : Colors.indigo[200],
         tabBarShowLabel: false,
+        tabBarHideOnKeyboard: true,
         tabBarStyle: {
           backgroundColor: isDarkMode ? Colors.indigo[900] : Colors.indigo[100],
         },
@@ -255,28 +310,28 @@ const TabStack = () => {
         name="Home"
         component={HomeStack}
         options={{
-          tabBarIcon: houseIcon,
+          tabBarIcon: TabHouseIcon,
         }}
       />
       <TabBottom.Screen
         name="Feed"
         component={FeedPage}
         options={{
-          tabBarIcon: feedIcon,
+          tabBarIcon: TabFeedIcon,
         }}
       />
       <TabBottom.Screen
         name="Chat"
         component={ChatStack}
         options={{
-          tabBarIcon: chatIcon,
+          tabBarIcon: TabChatIcon,
         }}
       />
       <TabBottom.Screen
         name="Profile"
         component={ProfileStack}
         options={{
-          tabBarIcon: menuIcon,
+          tabBarIcon: TabMenuIcon,
         }}
       />
     </TabBottom.Navigator>
@@ -345,6 +400,12 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
           headerTitleAlign: 'left',
           headerLeft: ProfileAvatar,
           headerRight: headerRight,
+          headerSearchBarOptions: {
+            shouldShowHintSearchIcon: true,
+            hideWhenScrolling: true,
+            placeholder: 'Search',
+            hideNavigationBar: true,
+          },
         }}
       />
 
@@ -395,7 +456,7 @@ const ProfileAvatar = () => {
       fileId={profile?.profileImageFileId}
       fileKey={profile?.profileImageFileKey}
       imageSize={{ width: 30, height: 30 }}
-      style={{ borderRadius: 30 / 2 }}
+      style={{ borderRadius: 30 / 2, marginRight: Platform.OS === 'android' ? 10 : 0 }}
     />
   );
 };
