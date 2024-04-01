@@ -19,14 +19,18 @@ import { useDarkMode } from '../../hooks/useDarkMode';
 import { ErrorNotification } from '../ui/Alert/ErrorNotification';
 import { ChatMessageIMessage } from './ChatDetail';
 
+export interface HighlightedChatMessage extends ChatMessageIMessage {
+  layoutHeight: number;
+}
+
 const PortalView = ({
   selectedMessage,
   messageCordinates,
   setSelectedMessage,
   openEmojiPicker,
 }: {
-  selectedMessage: ChatMessageIMessage | undefined;
-  setSelectedMessage: (message: ChatMessageIMessage | undefined) => void;
+  selectedMessage: HighlightedChatMessage | undefined;
+  setSelectedMessage: (message: HighlightedChatMessage | undefined) => void;
   messageCordinates: { x: number; y: number };
   openEmojiPicker: () => void;
 }) => {
@@ -43,23 +47,23 @@ const PortalView = ({
   }, [scale, selectedMessage]);
 
   // Double Tap
-  // Layout Height
-  // Is this Clean?????????
+  //TODO: This does not get retriggered for some reasons
+  //HACK: @stef-coenen I brought back the HighlightedChat again to fix this
+  // But without that the useAnimatedHook does not retrigger and it makes no fucking sense :)
   const reactionStyle = useAnimatedStyle(() => {
-    let y = messageCordinates.y || 0;
+    let y = messageCordinates.y;
     let shouldAnimate = false;
-    const isLessDisatanceFromTop = y < 100;
-    const isLessDisatanceFromBottom = height - y < 0;
-    if (isLessDisatanceFromBottom) {
-      y = y - 0;
+    const isLessDistanceFromTop = y < 100;
+    const isLessDistanceFromBottom = height - y < (selectedMessage?.layoutHeight || 0);
+    if (isLessDistanceFromBottom) {
       shouldAnimate = true;
     }
 
-    if (isLessDisatanceFromTop) {
-      y = y + 0;
+    if (isLessDistanceFromTop) {
       shouldAnimate = true;
     }
     y = isNaN(y) ? 0 : y;
+    console.log(y, shouldAnimate, emojiModalOpen);
     return {
       transform: [
         {
@@ -67,7 +71,7 @@ const PortalView = ({
         },
       ],
     };
-  });
+  }, [messageCordinates]);
 
   const textStyle = useAnimatedStyle(() => {
     return {
