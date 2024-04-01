@@ -1,6 +1,29 @@
 import messaging, { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
-import notifee, { EventType, EventDetail } from '@notifee/react-native';
 import { PushNotificationOptions } from '@youfoundation/js-lib/dist';
+
+//
+// CAVEATS GALORE!
+//
+// This is the BARE MIMIMUM required to get a push notification to the device.
+//
+// Notifications can not be sent to iOS simulators. Use a real device.
+//
+// Messages can be sent as data messages or notification messages or both. Check the backend code.
+// They behave differently on ios and android. On iOS, only notification messages are guaranteed to be delivered.
+//
+// When the app is in the background, notification messages will always show a notification with backend
+// determined title and body. Data messages can be used with e.g. Notifiee to better control the notification UI
+// but are not guaranteed to be delivered.
+//
+// Stuff to consider from here (in no particular order):
+// - Separate onMessage and setBackgroundMessageHandler in to separate functions.
+// - Use Notifee (https://notifee.app/react-native/docs/overview) for better handling of notifications
+//   locally. Be warned that even though Notifee is from the same source as Firebase messaging lib, it's a separate
+//   package and it has its own quirks ans conflicts with firebase messaging (!) in certain areas.
+// - use messaging().getInitialNotification() to get the initial notification when the app is opened from a notification.
+//   BEWARE of Notifee here!
+// - Notifee conflicts with certain splash screen libraries. Be warned.
+//
 
 // backend: src/services/Odin.Services/AppNotifications/Push/PushNotificationContent.cs
 interface PushNotificationPayload {
@@ -22,139 +45,42 @@ export interface PushNotificationMessage {
 //
 
 export const initializePushNotificationSupport = async () => {
+  console.debug('initializePushNotificationSupport');
   messaging().onMessage(onMessageReceived);
   messaging().setBackgroundMessageHandler(onMessageReceived);
-
-  // https://notifee.app/react-native/docs/events#foreground-events
-  notifee.onForegroundEvent(async ({ type, detail }) => {
-    console.debug('onForegroundEvent event:', type, detail);
-    await handleNotificationMessage(type, detail, true);
-  });
-
-  // https://notifee.app/react-native/docs/events#background-events
-  notifee.onBackgroundEvent(async ({ type, detail }) => {
-    console.debug('onBackgroundEvent event:', type, detail);
-    await handleNotificationMessage(type, detail, false);
-  });
 };
 
 //
 
-const onMessageReceived = async (message: FirebaseMessagingTypes.RemoteMessage) => {
-  console.debug('FCM Message:', message);
+const onMessageReceived = async (message: FirebaseMessagingTypes.RemoteMessage): Promise<void> => {
+  console.log('FCM Message:', message);
 
+  // Sanity #1 (yes, this can happen...)
+  if (!message?.data?.version) {
+    return;
+  }
+
+  // Sanity #2
+  let notification: PushNotificationMessage;
+  try {
+    notification = parseNotificationMessage(message);
+  } catch (error) {
+    console.error('Failed to parse notification message:', error);
+    return;
+  }
+
+  console.log('NOTIFICATION:', notification);
+
+  await Promise.resolve();
+};
+
+//
+
+export const parseNotificationMessage = (
+  message: FirebaseMessagingTypes.RemoteMessage
+): PushNotificationMessage => {
   const notification = message.data as unknown as PushNotificationMessage;
   const data = notification.data as unknown as string;
   notification.data = JSON.parse(data);
-
-  console.debug('ODIN Notification:', notification);
-  storeNotification(notification);
-  console.debug('ODIN Notifications:', notifications.length);
-
-  // SEB:NOTE notification.version helps with backwards compatibility
-
-  await notifee.displayNotification({
-    id: notification?.id,
-    title: 'Odin message',
-    body: `${notification?.id} received from ${notification?.data?.senderId || 'unknown'}`,
-    android: {
-      channelId: 'default',
-      // smallIcon: 'name-of-a-small-icon', // optional, defaults to 'ic_launcher'.
-      // pressAction is needed if you want the notification to open the app when pressed
-      pressAction: {
-        id: 'default',
-      },
-    },
-  });
-};
-
-//
-
-export const handleNotificationMessage = async (
-  type: EventType,
-  detail: EventDetail,
-  isForegroundEvent: boolean
-): Promise<void> => {
-  const id = detail.notification?.id;
-
-  // Sanity #1
-  if (!id) {
-    throw new Error('No id in notification');
-  }
-
-  const notification = getNotifcationById(id);
-  if (notification) {
-    if (isForegroundEvent || type === EventType.PRESS) {
-      for (const subscriber of notificationSubscribers) {
-        await subscriber.onNotificationReceived(type, notification);
-      }
-    }
-  }
-
-  notifee.setBadgeCount(notifications.length);
-};
-
-//
-// Notification "storage"
-//
-
-const notifications: Array<PushNotificationMessage> = [];
-
-export const getNotifcationById = (id: string): PushNotificationMessage | null => {
-  return notifications.find((x) => x.id === id) || null;
-};
-
-//
-
-export const getNotifcations = (): Array<PushNotificationMessage> => {
-  return [...notifications];
-};
-
-//
-
-export const storeNotification = (notification: PushNotificationMessage): void => {
-  const existingNotification = getNotifcationById(notification.id);
-  if (!existingNotification) {
-    notifications.push(notification);
-  }
-};
-
-//
-
-export const deleteNotification = (notification: PushNotificationMessage): void => {
-  const idx = notifications.findIndex((x) => x.id === notification.id);
-  if (idx !== -1) {
-    notifications.splice(idx, 1);
-  }
-};
-
-//
-// Notification subscribers
-//
-
-const notificationSubscribers: {
-  onNotificationReceived: (type: EventType, notification: PushNotificationMessage) => Promise<void>;
-}[] = [];
-
-export const Subscribe = (
-  onNotificationReceived: (type: EventType, notification: PushNotificationMessage) => Promise<void>
-) => {
-  const index = notificationSubscribers.findIndex(
-    (subscriber) => subscriber.onNotificationReceived === onNotificationReceived
-  );
-  if (index === -1) {
-    notificationSubscribers.push({ onNotificationReceived });
-  }
-  return () => Unsubscribe(onNotificationReceived);
-};
-
-export const Unsubscribe = (
-  onNotificationReceived: (type: EventType, notification: PushNotificationMessage) => Promise<void>
-) => {
-  const index = notificationSubscribers.findIndex(
-    (subscriber) => subscriber.onNotificationReceived === onNotificationReceived
-  );
-  if (index !== -1) {
-    notificationSubscribers.splice(index, 1);
-  }
+  return notification;
 };

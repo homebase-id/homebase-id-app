@@ -1,8 +1,7 @@
 import { ReactNode, useState, FunctionComponent, useEffect } from 'react';
-import notifee, { EventType } from '@notifee/react-native';
-import { Platform } from 'react-native';
-import { handleNotificationMessage } from '../../provider/push-notification/PushNotificationLib';
+import messaging from '@react-native-firebase/messaging';
 import { PushNotificationPermissionContext } from '../../provider/push-notification/PushNotificationContext';
+import { PermissionsAndroid, Platform } from 'react-native';
 
 interface PushNotificationProviderProps {
   children: ReactNode;
@@ -14,61 +13,37 @@ export const PushNotificationProvider: FunctionComponent<PushNotificationProvide
   const [notificationPermissionGranted, setNotificationPermissionGranted] =
     useState<boolean>(false);
 
-  // Context value that will be provided to any descendants of this provider.
   const value = {
     notificationPermissionGranted,
     setNotificationPermissionGranted,
   };
 
   useEffect(() => {
-    // Request permission - required for iOS
     const requestUserPermission = async () => {
-      try {
-        const status = await notifee.requestPermission();
-        if (status) {
-          setNotificationPermissionGranted(true);
-          console.debug('Notification permission granted.');
-        } else {
-          setNotificationPermissionGranted(false);
-          console.debug('Notification permission denied.');
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    };
+      let status = false;
 
-    // Create channel - required for Android
-    const channelId = 'default';
-    const createChannel = async () => {
-      if (await notifee.isChannelCreated(channelId)) {
-        console.debug('Channel exists:', channelId);
+      if (Platform.OS === 'ios') {
+        const authStatus = await messaging().requestPermission();
+        status =
+          authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+          authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+      } else if (Platform.OS === 'android') {
+        const authStatus = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
+        );
+        status = authStatus === PermissionsAndroid.RESULTS.GRANTED;
+      }
+
+      if (status) {
+        setNotificationPermissionGranted(true);
+        console.debug('Notification permission granted.');
       } else {
-        const result = await notifee.createChannel({
-          id: 'default',
-          name: 'Default Channel',
-        });
-        if (result === channelId) {
-          console.debug('Channel created:', channelId);
-        } else {
-          console.error('Failed to create channel:', result);
-        }
-      }
-    };
-
-    // https://notifee.app/react-native/docs/events#app-open-events
-    const getInitialNotification = async () => {
-      if (Platform.OS === 'android') {
-        const initialNotification = await notifee.getInitialNotification();
-        if (initialNotification?.notification) {
-          console.debug('getInitialNotification:', initialNotification.notification.id);
-          await handleNotificationMessage(EventType.PRESS, initialNotification, true);
-        }
+        setNotificationPermissionGranted(false);
+        console.debug('Notification permission denied.');
       }
     };
 
     requestUserPermission();
-    createChannel();
-    getInitialNotification();
   }, []);
 
   return (

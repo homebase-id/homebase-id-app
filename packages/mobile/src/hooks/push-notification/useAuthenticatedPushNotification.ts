@@ -1,17 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
+import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useMutation } from '@tanstack/react-query';
 import messaging from '@react-native-firebase/messaging';
-import notifee, { EventType } from '@notifee/react-native';
 import { useDotYouClientContext } from 'feed-app-common';
-import {
-  PushNotificationMessage,
-  Subscribe,
-  deleteNotification,
-  getNotifcations,
-} from '../../provider/push-notification/PushNotificationLib';
 import { usePushNotificationPermission } from '../../provider/push-notification/PushNotificationContext';
-import { Alert, AppState, AppStateStatus } from 'react-native';
 
 //
 
@@ -51,7 +44,10 @@ export const useAuthenticatedPushNotification = () => {
       },
     });
 
-    await client.post('/notify/push/subscribe-firebase', { DeviceToken: deviceToken });
+    await client.post('/notify/push/subscribe-firebase', {
+      DeviceToken: deviceToken,
+      DevicePlatform: Platform.OS,
+    });
     await AsyncStorage.setItem('deviceToken', deviceToken);
   }, [dotYouClient, deviceToken]);
 
@@ -82,83 +78,4 @@ export const useAuthenticatedPushNotification = () => {
   }, [deviceToken, mutate]);
 
   //////////////////////////////////////////////////////////////////////////////////////////
-
-  //
-  // Notifications
-  //
-
-  // Handle foreground or pressed notification
-  const handleForegroundNotification = useCallback(
-    async (notification: PushNotificationMessage) => {
-      console.debug('Handling foreground notification', notification.id);
-      deleteNotification(notification);
-      await notifee.cancelNotification(notification.id);
-
-      // SEB:TODO do stuff with the notification...
-      Alert.alert(
-        'Foreground Notification',
-        `Message ${notification.id} received from ${notification.data.senderId || 'unknown'}`
-      );
-    },
-    []
-  );
-
-  //
-
-  // Handle background notification
-  const handleBackgroundNotification = useCallback(
-    async (notification: PushNotificationMessage) => {
-      console.debug('Handling background notification', notification.id);
-      deleteNotification(notification);
-      await notifee.cancelNotification(notification.id);
-
-      // SEB:TODO do stuff with the notification...
-      Alert.alert(
-        'Background Notification',
-        `Message ${notification.id} received from ${notification.data.senderId || 'unknown'}`
-      );
-    },
-    []
-  );
-
-  //
-
-  // Subscribe to notifications
-  useEffect(() => {
-    const onPushNotification = async (type: EventType, notification: PushNotificationMessage) => {
-      await handleForegroundNotification(notification);
-    };
-    return Subscribe(onPushNotification);
-  }, [handleForegroundNotification]);
-
-  //
-
-  // Process missed/background notifications
-  useEffect(() => {
-    const handleBackgroundNotifications = async (): Promise<void> => {
-      if (notificationPermissionGranted) {
-        const notifications = getNotifcations();
-        for (const notification of notifications) {
-          await handleBackgroundNotification(notification);
-        }
-        notifee.setBadgeCount(0);
-      }
-    };
-
-    const subscription = AppState.addEventListener(
-      'change',
-      async (nextAppState: AppStateStatus) => {
-        if (nextAppState === 'active') {
-          await handleBackgroundNotifications();
-        }
-      }
-    );
-
-    handleBackgroundNotifications();
-
-    // Cleanup subscription
-    return () => {
-      subscription.remove();
-    };
-  }, [handleBackgroundNotification, notificationPermissionGranted]);
 };
