@@ -32,7 +32,10 @@ const ConversationPage = ({ navigation: rootNavigation }: ConversationProp) => {
   useRemoveNotifications({ appId: CHAT_APP_ID });
 
   const flatConversations = useMemo(
-    () => conversations?.pages?.flatMap((page) => page.searchResults) || [],
+    () =>
+      conversations?.pages
+        ?.flatMap((page) => page.searchResults)
+        .filter((convo) => convo.fileMetadata.appData.archivalStatus === 0) || [],
     [conversations]
   );
 
@@ -45,7 +48,6 @@ const ConversationPage = ({ navigation: rootNavigation }: ConversationProp) => {
       headerSearchBarOptions: {
         hideWhenScrolling: true,
         headerIconColor: isDarkMode ? Colors.white : Colors.black,
-
         placeholder: 'Search',
         hideNavigationBar: true,
         autoCapitalize: 'none',
@@ -165,8 +167,10 @@ const SearchConversationResults = ({
           style={{
             fontSize: 16,
             fontWeight: '600',
-            marginLeft: 12,
-            marginTop: 4,
+            display: 'flex',
+            marginTop: 'auto',
+            marginBottom: 'auto',
+            alignSelf: 'center',
           }}
         >
           No Contacts Found
