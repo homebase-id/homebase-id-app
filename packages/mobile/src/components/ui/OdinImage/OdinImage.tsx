@@ -5,7 +5,14 @@ import {
   TargetDrive,
 } from '@youfoundation/js-lib/core';
 import { memo, useMemo } from 'react';
-import { ActivityIndicator, Image, ImageStyle, TouchableWithoutFeedback, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Image,
+  ImageStyle,
+  Platform,
+  TouchableWithoutFeedback,
+  View,
+} from 'react-native';
 import useImage from './hooks/useImage';
 import useTinyThumb from './hooks/useTinyThumb';
 import { SvgUri } from 'react-native-svg';
@@ -129,7 +136,7 @@ export const OdinImage = memo(
               ...style,
             }}
           >
-            <ActivityIndicator style={{}} size="large" />
+            <ActivityIndicator size="large" />
           </View>
         ) : null}
 
@@ -177,9 +184,12 @@ const ZoomableImage = ({
     return contentType === 'image/svg+xml' ? (
       <TouchableWithoutFeedback onPress={onClick}>
         <View
-          style={{
-            ...imageSize,
-          }}
+          style={[
+            {
+              ...imageSize,
+            },
+            Platform.OS === 'android' ? style : undefined,
+          ]}
         >
           <SvgUri
             width={imageSize?.width}
