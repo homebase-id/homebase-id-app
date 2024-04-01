@@ -67,6 +67,7 @@ export const ProfilePage = (_props: SettingsProps) => {
               targetDrive={GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId)}
               fileId={profile?.profileImageFileId}
               fileKey={profile?.profileImageFileKey}
+              avoidPayload={true}
               imageSize={{ width: 160, height: 160 }}
               style={{ borderRadius: 160 / 2 }}
             />

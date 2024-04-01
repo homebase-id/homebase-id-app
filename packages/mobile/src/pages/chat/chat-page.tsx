@@ -41,7 +41,7 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
 
   const [assets, setAssets] = useState<Asset[]>([]);
   // Messages
-  const { data: chatMessages } = useChatMessages({
+  const { data: chatMessages, error } = useChatMessages({
     conversationId: route.params.convoId,
   }).all;
 
@@ -205,6 +205,7 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
     <BottomSheetModalProvider>
       <Host>
         <ErrorNotification error={sendMessageError} />
+        <ErrorNotification error={error} />
         <View
           style={{
             paddingBottom:
