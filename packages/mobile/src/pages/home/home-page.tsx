@@ -21,8 +21,6 @@ export const HomePage = (_props: HomeProps) => {
 
   const { data: profile } = useProfile();
 
-  // const navigate = (target: keyof TabStackParamList) => _props.navigation.navigate(target);
-
   return (
     <SafeAreaView>
       <Container>

@@ -1,7 +1,7 @@
-import { Text, TouchableOpacity, View } from 'react-native';
+import { Linking, Text, TouchableOpacity, View } from 'react-native';
 
 import { usePushNotifications } from '../../hooks/notifications/usePushNotifications';
-import { useMemo, useState } from 'react';
+import { memo, useMemo, useState } from 'react';
 import { PushNotification } from '@youfoundation/js-lib/core';
 import { formatToTimeAgoWithRelativeDetail, useDotYouClientContext } from 'feed-app-common';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
@@ -9,8 +9,12 @@ import { CHAT_APP_ID, FEED_APP_ID, MAIL_APP_ID, OWNER_APP_ID } from '../../app/c
 import useContact from '../../hooks/contact/useContact';
 import { Colors } from '../../app/Colors';
 import { Times } from '../ui/Icons/icons';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { AppStackParamList, TabStackParamList } from '../../app/App';
+import { useDarkMode } from '../../hooks/useDarkMode';
 
-export const NotificationsOverview = () => {
+export const NotificationsOverview = memo(() => {
+  const { isDarkMode } = useDarkMode();
   const { data: notifications } = usePushNotifications().fetch;
 
   const groupedNotificationsPerDay = useMemo(
@@ -29,7 +33,7 @@ export const NotificationsOverview = () => {
     [notifications]
   );
 
-  return (
+  return notifications?.results?.length ? (
     <>
       <Text
         style={{
@@ -40,30 +44,30 @@ export const NotificationsOverview = () => {
       >
         Notifications
       </Text>
-      {notifications?.results?.length ? (
-        <View
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 3,
-            paddingHorizontal: 2,
-            paddingRight: 15,
-          }}
-        >
-          {Object.keys(groupedNotificationsPerDay).map((day) => (
-            <NotificationDay
-              day={new Date(day)}
-              notifications={groupedNotificationsPerDay[day]}
-              key={day}
-            />
-          ))}
-        </View>
-      ) : (
-        <Text>{'No notifications'}</Text>
-      )}
+      <View
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 3,
+          paddingHorizontal: 2,
+          paddingRight: 15,
+        }}
+      >
+        {Object.keys(groupedNotificationsPerDay).map((day) => (
+          <NotificationDay
+            day={new Date(day)}
+            notifications={groupedNotificationsPerDay[day]}
+            key={day}
+          />
+        ))}
+      </View>
     </>
+  ) : (
+    <Text style={{ color: isDarkMode ? Colors.slate[400] : Colors.slate[500] }}>
+      {'No notifications'}
+    </Text>
   );
-};
+});
 
 const NotificationDay = ({
   day,
@@ -157,6 +161,10 @@ const NotificationGroup = ({
   const groupCount = typeGroup.length - 1;
   const visibleLength = isExpanded ? 10 : 3;
 
+  const identity = useDotYouClientContext().getIdentity();
+  const chatNavigator = useNavigation<NavigationProp<AppStackParamList>>();
+  const feedNavigator = useNavigation<NavigationProp<TabStackParamList>>();
+
   return (
     <View
       style={{
@@ -189,13 +197,11 @@ const NotificationGroup = ({
               isExpanded={index === 0 || isExpanded}
               onDismiss={() => remove([notification.id])}
               onOpen={() =>
-                canExpand && !isExpanded ? setExpanded(true) : remove(typeGroup.map((n) => n.id))
+                canExpand && !isExpanded
+                  ? setExpanded(true)
+                  : navigateOnNotification(notification, identity, chatNavigator, feedNavigator)
               }
               groupCount={isExpanded ? 0 : groupCount}
-              href={
-                // (canExpand && isExpanded) || !canExpand ? getTargetLink(notification) :
-                undefined
-              }
               appName={appName}
             />
           </View>
@@ -218,7 +224,6 @@ const NotificationItem = ({
   isExpanded,
   onOpen,
   onDismiss,
-  href,
   groupCount,
   appName,
 }: {
@@ -226,10 +231,10 @@ const NotificationItem = ({
   isExpanded: boolean;
   onOpen: () => void;
   onDismiss: () => void;
-  href: string | undefined;
   groupCount: number;
   appName: string;
 }) => {
+  const { isDarkMode } = useDarkMode();
   const identity = useDotYouClientContext().getIdentity();
   const isLocalNotification = notification.senderId === identity;
 
@@ -245,25 +250,13 @@ const NotificationItem = ({
   );
 
   return (
-    // <Toast
-    //   title={title}
-    //   // Keeping the hidden ones short
-    //   body={ellipsisAtMaxChar(body, isExpanded ? 120 : 40)}
-    //   timestamp={notification.created}
-    //   onDismiss={onDismiss}
-    //   onOpen={onOpen}
-    //   href={href}
-    //   groupCount={groupCount}
-    //   isRead={!notification.unread}
-    // />
-
     <TouchableOpacity onPress={onOpen}>
       <View
         style={{
-          backgroundColor: Colors.white,
+          backgroundColor: isDarkMode ? Colors.black : Colors.white,
           borderRadius: 10,
           borderStyle: 'solid',
-          borderColor: Colors.slate[200],
+          borderColor: isDarkMode ? Colors.slate[700] : Colors.slate[200],
           borderWidth: 1,
           overflow: 'hidden',
           paddingHorizontal: 8,
@@ -271,14 +264,16 @@ const NotificationItem = ({
         }}
       >
         <View style={{ display: 'flex', flexDirection: 'row' }}>
-          <Text style={{ fontWeight: '600' }}>{title}</Text>
+          <Text style={{ fontWeight: '600', color: isDarkMode ? Colors.white : Colors.black }}>
+            {title}
+          </Text>
           {isExpanded ? (
             <TouchableOpacity onPress={onDismiss} style={{ marginLeft: 'auto' }}>
               <Times size={'sm'} />
             </TouchableOpacity>
           ) : null}
         </View>
-        <Text>{body}</Text>
+        <Text style={{ color: isDarkMode ? Colors.white : Colors.black }}>{body}</Text>
 
         {notification.created ? (
           <Text style={{ color: Colors.slate[500] }}>
@@ -337,4 +332,31 @@ const bodyFormer = (
   }
 
   return `${sender} sent you a notification via ${appName}`;
+};
+
+const navigateOnNotification = (
+  notification: PushNotification,
+  identity: string,
+  chatNavigator: NavigationProp<AppStackParamList>,
+  feedNavigator: NavigationProp<TabStackParamList>
+) => {
+  if (notification.options.appId === OWNER_APP_ID) {
+    // Based on type, we show different messages
+    if (
+      [
+        OWNER_FOLLOWER_TYPE_ID,
+        OWNER_CONNECTION_REQUEST_TYPE_ID,
+        OWNER_CONNECTION_ACCEPTED_TYPE_ID,
+      ].includes(notification.options.typeId)
+    ) {
+      Linking.openURL(`https://${identity}/owner/connections/${notification.senderId}`);
+    }
+  } else if (notification.options.appId === CHAT_APP_ID) {
+    chatNavigator.navigate('ChatScreen', { convoId: notification.options.typeId });
+  } else if (notification.options.appId === MAIL_APP_ID) {
+    // Navigate to owner console:
+    return `https://${identity}/apps/mail/${notification.options.typeId}`;
+  } else if (notification.options.appId === FEED_APP_ID) {
+    feedNavigator.navigate('Feed');
+  }
 };

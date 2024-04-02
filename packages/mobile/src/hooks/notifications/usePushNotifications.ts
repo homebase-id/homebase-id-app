@@ -62,13 +62,13 @@ export const useRemoveNotifications = (props?: { appId?: string }) => {
     remove: { mutateAsync: removeListOfNotifications },
   } = usePushNotifications(props);
 
-  // useEffect(() => {
-  //   (async () => {
-  //     const notifications = notifcationsData?.results;
-  //     if (notifications && notifications?.length > 0) {
-  //       isDebug && console.debug('Removing all notifications', props?.appId);
-  //       await removeListOfNotifications(notifications.map((n) => n.id));
-  //     }
-  //   })();
-  // }, [notifcationsData]);
+  useEffect(() => {
+    (async () => {
+      const notifications = notifcationsData?.results;
+      if (notifications && notifications?.length > 0) {
+        isDebug && console.debug('Removing all notifications', props?.appId);
+        await removeListOfNotifications(notifications.map((n) => n.id));
+      }
+    })();
+  }, [notifcationsData, props?.appId, removeListOfNotifications]);
 };
