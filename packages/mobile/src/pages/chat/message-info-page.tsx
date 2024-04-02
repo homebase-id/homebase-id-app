@@ -25,9 +25,9 @@ export const MessageInfoPage = ({ route }: MessageInfoProp) => {
   const messageContent = message.fileMetadata.appData.content;
 
   const conversationContent = conversation.fileMetadata.appData.content;
-  const recipients = (conversationContent as GroupConversation).recipients || [
-    (conversationContent as SingleConversation).recipient,
-  ];
+  const recipients =
+    (conversationContent as GroupConversation).recipients ||
+    [(conversationContent as SingleConversation).recipient].filter(Boolean);
 
   const { data: reactions } = useChatReaction({
     conversationId: message.fileMetadata.appData.groupId,
@@ -65,7 +65,7 @@ export const MessageInfoPage = ({ route }: MessageInfoProp) => {
     );
   }
   function renderRecipients() {
-    if (!recipients) return null;
+    if (!recipients.length) return null;
     return (
       <View>
         <Header title="Recipients" />

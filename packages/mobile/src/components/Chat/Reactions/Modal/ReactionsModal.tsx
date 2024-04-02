@@ -108,6 +108,7 @@ const ReactionTile = (prop: HomebaseFile<ChatReaction>) => {
           flex: 1,
           textAlign: 'right',
           fontSize: 24,
+          color: isDarkMode ? Colors.white : Colors.slate[700],
         }}
       >
         {reaction}
