@@ -25,6 +25,7 @@ import { CONTACT_PROFILE_IMAGE_KEY, ContactConfig } from '@youfoundation/js-lib/
 import { useProfile } from '../../hooks/profile/useProfile';
 import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
 import { ChatDeliveryIndicator } from './Chat-Delivery-Indicator';
+import { ChatMessageContent } from './Chat-Message-Content';
 
 type ConversationTileProps = {
   onPress?: () => void;
@@ -196,9 +197,7 @@ const ConversationTile = memo((props: ConversationTileProps) => {
                   },
                 ]}
               >
-                {lastMessageContent.message
-                  ? ellipsisAtMaxChar(lastMessageContent.message, 30)
-                  : '📸 Media'}
+                <ChatMessageContent {...lastMessage} />
               </Text>
             </View>
           ) : null}

@@ -6,6 +6,8 @@ import { OdinImage } from '../ui/OdinImage/OdinImage';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { ChatMessageIMessage } from './ChatDetail';
 
+import { ChatMessageContent } from './Chat-Message-Content';
+
 type ReplyMessageBarProps = {
   clearReply: () => void;
   message: ChatMessageIMessage;
@@ -13,6 +15,11 @@ type ReplyMessageBarProps = {
 
 const ReplyMessageBar = ({ clearReply, message }: ReplyMessageBarProps) => {
   const { isDarkMode } = useDarkMode();
+  const { payloads } = message.fileMetadata;
+  const isImageOrVideo = payloads.some(
+    (payload) => payload.contentType.includes('image') || payload.contentType.includes('video')
+  );
+
   return (
     <View style={styles.container}>
       <View style={styles.replyImageContainer}>
@@ -35,10 +42,10 @@ const ReplyMessageBar = ({ clearReply, message }: ReplyMessageBarProps) => {
             color: isDarkMode ? Colors.white : Colors.black,
           }}
         >
-          {message.text.length === 0 ? '📷 Media' : message.text}
+          <ChatMessageContent {...message} />
         </Text>
       </View>
-      {message.fileMetadata.payloads?.length > 0 && (
+      {payloads?.length > 0 && isImageOrVideo && (
         <OdinImage
           fileId={message.fileId}
           targetDrive={ChatDrive}
