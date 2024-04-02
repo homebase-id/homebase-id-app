@@ -67,6 +67,7 @@ const PortalView = ({
   const textStyle = useAnimatedStyle(() => {
     return {
       fontSize: 28,
+      color: isDarkMode ? Colors.white : Colors.slate[700],
       transform: [
         {
           scale: scale.value,
