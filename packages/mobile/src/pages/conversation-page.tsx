@@ -35,7 +35,8 @@ const ConversationPage = ({ navigation: rootNavigation }: ConversationProp) => {
     () =>
       conversations?.pages
         ?.flatMap((page) => page.searchResults)
-        .filter((convo) => convo.fileMetadata.appData.archivalStatus === 0) || [],
+        .filter((convo) => [0, undefined].includes(convo.fileMetadata.appData.archivalStatus)) ||
+      [],
     [conversations]
   );
 
