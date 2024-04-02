@@ -191,7 +191,8 @@ const ZoomableImage = ({
             {
               ...imageSize,
             },
-            // Android SVGs are not supported in Image component
+            // SVGs styling are not supported on Android
+            // And IDK why :( )
             Platform.OS === 'android' ? style : undefined,
           ]}
         >
