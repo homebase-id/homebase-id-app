@@ -554,18 +554,18 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
   // Commented out for now as it didn't break anything and it fixes the problem.
   // TODO: Will remove if this caused any performance issues and didn't break anything else
   const onInputSizeChanged = (size: { height: number }) => {
-    // const newComposerHeight = Math.max(
-    //   minComposerHeight!,
-    //   Math.min(maxComposerHeight!, size.height),
-    // );
+    const newComposerHeight = Math.max(
+      minComposerHeight!,
+      Math.min(maxComposerHeight!, size.height),
+    );
 
     const newMessagesContainerHeight = getMessagesContainerHeightWithKeyboard(
-      minComposerHeight!,
+      newComposerHeight!,
     );
 
     setState({
       ...state,
-      composerHeight: minComposerHeight!,
+      composerHeight: newComposerHeight!,
       messagesContainerHeight: newMessagesContainerHeight,
     });
   };

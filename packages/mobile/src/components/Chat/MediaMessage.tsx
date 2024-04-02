@@ -67,7 +67,6 @@ const MediaMessage = memo((props: MessageImageProps<ChatMessageIMessage>) => {
             //   width: 200,
             //   height: 200,
             // }}
-            avoidPayload={true}
             style={{
               borderRadius: 10,
               aspectRatio: aspectRatio,
