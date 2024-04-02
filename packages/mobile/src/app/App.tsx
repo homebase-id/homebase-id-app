@@ -170,10 +170,10 @@ App = CodePush(codePushOptions)(App);
 const StackRoot = createNativeStackNavigator<AuthStackParamList>();
 const RootStack = () => {
   const { isAuthenticated } = useAuth();
-  const scheme = useColorScheme();
+  const { isDarkMode } = useDarkMode();
 
   return (
-    <NavigationContainer theme={scheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <NavigationContainer theme={isDarkMode ? DarkTheme : DefaultTheme}>
       <StackRoot.Navigator screenOptions={{ headerShown: false }}>
         {isAuthenticated ? (
           <StackRoot.Screen name="Authenticated" component={AuthenticatedRoot} />
@@ -232,7 +232,6 @@ const AppStackScreen = () => {
         name="ChatScreen"
         component={ChatPage}
         options={{
-          headerShown: false,
           gestureEnabled: true,
         }}
       />
@@ -320,6 +319,7 @@ const TabStack = () => {
         component={ChatStack}
         options={{
           tabBarIcon: TabChatIcon,
+          headerShown: false,
         }}
       />
       <TabBottom.Screen
