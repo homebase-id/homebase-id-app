@@ -48,7 +48,7 @@ import { useAudioRecorder } from '../../hooks/audio/useAudioRecorderPlayer';
 import { Text } from '../ui/Text/Text';
 import { millisToMinutesAndSeconds } from '../../utils/utils';
 
-export interface ChatMessageIMessage extends IMessage, HomebaseFile<ChatMessage> {}
+export type ChatMessageIMessage = IMessage & HomebaseFile<ChatMessage>;
 
 export const ChatDetail = memo(
   ({

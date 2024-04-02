@@ -41,7 +41,7 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
 
   const [assets, setAssets] = useState<Asset[]>([]);
   // Messages
-  const { data: chatMessages } = useChatMessages({
+  const { data: chatMessages, error } = useChatMessages({
     conversationId: route.params.convoId,
   }).all;
 
@@ -105,13 +105,7 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
   const [selectedMessage, setSelectedMessage] = useState<ChatMessageIMessage | undefined>();
 
   const doSelectMessage = useCallback(
-    ({
-      coords,
-      message,
-    }: {
-      coords: { x: number; y: number };
-      message: ChatMessageIMessage;
-    }) => {
+    ({ coords, message }: { coords: { x: number; y: number }; message: ChatMessageIMessage }) => {
       setMessageCordinates(coords);
       setSelectedMessage(message);
     },
@@ -211,6 +205,7 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
     <BottomSheetModalProvider>
       <Host>
         <ErrorNotification error={sendMessageError} />
+        <ErrorNotification error={error} />
         <View
           style={{
             paddingBottom:

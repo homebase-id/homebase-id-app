@@ -5,11 +5,19 @@ import {
   TargetDrive,
 } from '@youfoundation/js-lib/core';
 import { memo, useMemo } from 'react';
-import { ActivityIndicator, Image, ImageStyle, TouchableWithoutFeedback, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Image,
+  ImageStyle,
+  Platform,
+  TouchableWithoutFeedback,
+  View,
+} from 'react-native';
 import useImage from './hooks/useImage';
 import useTinyThumb from './hooks/useTinyThumb';
 import { SvgUri } from 'react-native-svg';
 import { ImageZoom } from '@likashefqet/react-native-image-zoom';
+import { ErrorNotification } from '../Alert/ErrorNotification';
 
 export interface OdinImageProps {
   odinId?: string;
@@ -82,7 +90,7 @@ export const OdinImage = memo(
       : cachedImage?.naturalSize || previewThumbnail;
 
     const {
-      fetch: { data: imageData },
+      fetch: { data: imageData, error },
     } = useImage({
       odinId,
       imageFileId: enableZoom || loadSize !== undefined ? fileId : undefined,
@@ -94,59 +102,61 @@ export const OdinImage = memo(
     });
 
     const hasCachedImage = !!cachedImage?.url;
-
     return (
-      <View
-        style={{
-          position: 'relative',
-        }}
-      >
-        {/* Blurry image */}
-        {/* TODO: Check to add support for direct full loading for svg */}
-        {!enableZoom && previewUrl && cachedImage?.type !== 'image/svg+xml' ? (
-          <Image
-            source={{ uri: previewUrl }}
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              resizeMode: fit,
-              ...imageSize,
-              ...style,
-            }}
-            blurRadius={hasCachedImage ? 0 : 2}
-          />
-        ) : null}
+      <>
+        <ErrorNotification error={error} />
+        <View
+          style={{
+            position: 'relative',
+          }}
+        >
+          {/* Blurry image */}
+          {/* TODO: Check to add support for direct full loading for svg */}
+          {!enableZoom && previewUrl && !imageData?.url && cachedImage?.type !== 'image/svg+xml' ? (
+            <Image
+              source={{ uri: previewUrl }}
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                resizeMode: fit,
+                ...imageSize,
+                ...style,
+              }}
+              blurRadius={hasCachedImage ? 0 : 2}
+            />
+          ) : null}
 
-        {!imageData?.url && !hasCachedImage ? (
-          <View
-            style={{
-              ...imageSize,
-              justifyContent: 'center',
-              alignItems: 'center',
-              ...style,
-            }}
-          >
-            <ActivityIndicator style={{}} size="large" />
-          </View>
-        ) : null}
+          {!imageData?.url && !hasCachedImage ? (
+            <View
+              style={{
+                justifyContent: 'center',
+                alignItems: 'center',
+                ...imageSize,
+                ...style,
+              }}
+            >
+              <ActivityIndicator size="large" />
+            </View>
+          ) : null}
 
-        {/* Actual image */}
-        {imageData?.url ? (
-          <ZoomableImage
-            uri={imageData.url}
-            contentType={imageData.type}
-            fit={fit}
-            imageSize={imageSize}
-            enableZoom={enableZoom}
-            alt={alt || title}
-            onClick={onClick}
-            style={style}
-          />
-        ) : null}
-      </View>
+          {/* Actual image */}
+          {imageData?.url ? (
+            <ZoomableImage
+              uri={imageData.url}
+              contentType={imageData.type}
+              fit={fit}
+              imageSize={imageSize}
+              enableZoom={enableZoom}
+              alt={alt || title}
+              onClick={onClick}
+              style={style}
+            />
+          ) : null}
+        </View>
+      </>
     );
   }
 );
@@ -177,9 +187,14 @@ const ZoomableImage = ({
     return contentType === 'image/svg+xml' ? (
       <TouchableWithoutFeedback onPress={onClick}>
         <View
-          style={{
-            ...imageSize,
-          }}
+          style={[
+            {
+              ...imageSize,
+            },
+            // SVGs styling are not supported on Android
+            // And IDK why :( )
+            Platform.OS === 'android' ? style : undefined,
+          ]}
         >
           <SvgUri
             width={imageSize?.width}
