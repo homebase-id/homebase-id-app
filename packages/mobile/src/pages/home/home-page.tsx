@@ -1,5 +1,5 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { TouchableOpacity, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { Text } from '../../components/ui/Text/Text';
 
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
@@ -9,11 +9,11 @@ import { Colors } from '../../app/Colors';
 import { OdinImage } from '../../components/ui/OdinImage/OdinImage';
 import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
 import { useProfile } from '../../hooks/profile/useProfile';
-import { HomeStackParamList } from '../../app/App';
-import { AddressBook } from '../../components/ui/Icons/icons';
+import { TabStackParamList } from '../../app/App';
 import { useDarkMode } from '../../hooks/useDarkMode';
+import { NotificationsOverview } from '../../components/Notifications/NotificationsOverview';
 
-type HomeProps = NativeStackScreenProps<HomeStackParamList, 'Overview'>;
+type HomeProps = NativeStackScreenProps<TabStackParamList, 'Home'>;
 
 export const HomePage = (_props: HomeProps) => {
   const { isDarkMode } = useDarkMode();
@@ -21,83 +21,48 @@ export const HomePage = (_props: HomeProps) => {
 
   const { data: profile } = useProfile();
 
-  const navigate = (target: keyof HomeStackParamList) => _props.navigation.navigate(target);
+  // const navigate = (target: keyof TabStackParamList) => _props.navigation.navigate(target);
 
   return (
     <SafeAreaView>
       <Container>
-        <View style={{ display: 'flex', flexDirection: 'column', paddingVertical: 12 }}>
-          <View
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              borderBottomWidth: 1,
-              borderBottomColor: isDarkMode ? Colors.slate[700] : Colors.slate[200],
-              width: '100%',
-              height: 200,
-            }}
-          >
-            <OdinImage
-              fit="cover"
-              targetDrive={GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId)}
-              fileId={profile?.profileImageFileId}
-              fileKey={profile?.profileImageFileKey}
-              imageSize={{ width: 160, height: 160 }}
-              style={{ borderRadius: 160 / 2 }}
-            />
-            <Text
+        <ScrollView>
+          <View style={{ display: 'flex', flexDirection: 'column', paddingVertical: 12 }}>
+            <View
               style={{
-                fontSize: 18,
-                fontWeight: 'bold',
-                marginBottom: 8,
-                paddingTop: 4,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                borderBottomWidth: 1,
+                borderBottomColor: isDarkMode ? Colors.slate[700] : Colors.slate[200],
+                width: '100%',
+                height: 200,
               }}
             >
-              {profile?.firstName || profile?.surName
-                ? `${profile.firstName} ${profile.surName}`
-                : getIdentity()}
-            </Text>
+              <OdinImage
+                fit="cover"
+                targetDrive={GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId)}
+                fileId={profile?.profileImageFileId}
+                fileKey={profile?.profileImageFileKey}
+                imageSize={{ width: 160, height: 160 }}
+                style={{ borderRadius: 160 / 2 }}
+              />
+              <Text
+                style={{
+                  fontSize: 18,
+                  fontWeight: 'bold',
+                  marginBottom: 8,
+                  paddingTop: 4,
+                }}
+              >
+                {profile?.firstName || profile?.surName
+                  ? `${profile.firstName} ${profile.surName}`
+                  : getIdentity()}
+              </Text>
+            </View>
           </View>
-        </View>
-        <TouchableOpacity
-          onPress={() => navigate('ConnectionRequests')}
-          style={{
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'center',
-            paddingVertical: 12,
-            width: '100%',
-          }}
-        >
-          <AddressBook size={'lg'} />
-          <Text
-            style={{
-              marginLeft: 16,
-            }}
-          >
-            Connection requests
-          </Text>
-        </TouchableOpacity>
-        {/* <TouchableOpacity
-          onPress={() => navigate('Notifications')}
-          style={{
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'center',
-            paddingVertical: 12,
-            width: '100%',
-          }}
-        >
-          <AddressBook size={'lg'} />
-          <Text
-            style={{
-              marginLeft: 16,
-            }}
-          >
-            Notifications
-          </Text>
-        </TouchableOpacity> */}
+          <NotificationsOverview />
+        </ScrollView>
       </Container>
     </SafeAreaView>
   );

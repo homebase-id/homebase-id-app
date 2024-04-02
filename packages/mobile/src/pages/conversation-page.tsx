@@ -13,7 +13,6 @@ import { useAuth } from '../hooks/auth/useAuth';
 import { useProfile } from '../hooks/profile/useProfile';
 import { useLayoutEffect, useMemo, useState } from 'react';
 import { useRemoveNotifications } from '../hooks/notifications/usePushNotifications';
-import { CHAT_APP_ID } from '../components/Nav/TabStackIcons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Text } from '../components/ui/Text/Text';
 import { ScrollView } from 'react-native-gesture-handler';
@@ -21,6 +20,7 @@ import { ContactTile } from '../components/Contact/Contact-Tile';
 import { useAllContacts } from 'feed-app-common';
 import { Colors } from '../app/Colors';
 import { useDarkMode } from '../hooks/useDarkMode';
+import { CHAT_APP_ID } from '../app/constants';
 
 type ConversationProp = NativeStackScreenProps<ChatStackParamList, 'Conversation'>;
 

@@ -2,9 +2,7 @@ import { View } from 'react-native';
 import { useUnreadPushNotificationsCount } from '../../hooks/notifications/usePushNotifications';
 import { Bars, ChatIcon, Feed, House } from '../ui/Icons/icons';
 import { Colors } from '../../app/Colors';
-
-export const CHAT_APP_ID = '2d781401-3804-4b57-b4aa-d8e4e2ef39f4';
-export const FEED_APP_ID = '5f887d80-0132-4294-ba40-bda79155551d';
+import { CHAT_APP_ID, FEED_APP_ID } from '../../app/constants';
 
 type TabIconProps = {
   focused: boolean;
