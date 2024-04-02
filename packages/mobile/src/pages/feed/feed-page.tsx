@@ -1,7 +1,7 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { memo, useMemo, useRef, useState } from 'react';
 
-import { FEED_APP_ID, TabStackParamList } from '../../app/App';
+import { TabStackParamList } from '../../app/App';
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 import WebView from 'react-native-webview';
 import { uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
@@ -11,6 +11,7 @@ import { Colors } from '../../app/Colors';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { ScrollView } from 'react-native-gesture-handler';
 import { useRemoveNotifications } from '../../hooks/notifications/usePushNotifications';
+import { FEED_APP_ID } from '../../app/constants';
 
 type FeedProps = NativeStackScreenProps<TabStackParamList, 'Feed'>;
 

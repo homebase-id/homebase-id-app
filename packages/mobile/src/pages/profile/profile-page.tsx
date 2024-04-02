@@ -125,6 +125,25 @@ export const ProfilePage = (_props: SettingsProps) => {
           </TouchableOpacity>
 
           <TouchableOpacity
+            onPress={() => navigate('ConnectionRequests')}
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+              paddingVertical: 12,
+              width: '100%',
+            }}
+          >
+            <AddressBook size={'lg'} />
+            <Text
+              style={{
+                marginLeft: 16,
+              }}
+            >
+              Connection requests
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
             onPress={() => navigate('Connections')}
             style={{
               display: 'flex',

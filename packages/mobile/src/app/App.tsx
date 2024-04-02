@@ -82,6 +82,7 @@ export type HomeStackParamList = {
 export type ProfileStackParamList = {
   Overview: undefined;
   Followers: undefined;
+  ConnectionRequests: undefined;
   Connections: undefined;
   Following: undefined;
 };
@@ -302,7 +303,7 @@ const TabStack = () => {
     >
       <TabBottom.Screen
         name="Home"
-        component={HomeStack}
+        component={HomePage}
         options={{
           tabBarIcon: TabHouseIcon,
         }}
@@ -333,29 +334,6 @@ const TabStack = () => {
   );
 };
 
-const StackHome = createNativeStackNavigator<HomeStackParamList>();
-const HomeStack = () => {
-  return (
-    <StackHome.Navigator>
-      <StackHome.Screen
-        name="Overview"
-        component={HomePage}
-        options={{
-          headerShown: false,
-        }}
-      />
-      <StackHome.Screen
-        name="ConnectionRequests"
-        component={ConnectionRequestsPage}
-        options={{
-          headerTitle: 'Connection requests',
-          headerBackTitle: 'Home',
-        }}
-      />
-    </StackHome.Navigator>
-  );
-};
-
 const StackProfile = createNativeStackNavigator<ProfileStackParamList>();
 const ProfileStack = () => {
   return (
@@ -368,6 +346,7 @@ const ProfileStack = () => {
         }}
       />
       <StackProfile.Screen name="Followers" component={FollowersPage} />
+      <StackProfile.Screen name="ConnectionRequests" component={ConnectionRequestsPage} />
       <StackProfile.Screen name="Connections" component={ConnectionsPage} />
       <StackProfile.Screen name="Following" component={FollowingPage} />
     </StackProfile.Navigator>
