@@ -5,8 +5,6 @@ import messaging from '@react-native-firebase/messaging';
 import { useDotYouClientContext } from 'feed-app-common';
 import { usePushNotificationPermission } from '../../provider/push-notification/PushNotificationContext';
 
-//
-
 export const useAuthenticatedPushNotification = () => {
   const dotYouClient = useDotYouClientContext();
 

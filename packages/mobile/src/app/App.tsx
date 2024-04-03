@@ -20,7 +20,7 @@ import { DotYouClientProvider } from '../components/Auth/DotYouClientProvider';
 import { BackButton, HeaderActions } from '../components/ui/convo-app-bar';
 import { useLiveChatProcessor } from '../hooks/chat/useLiveChatProcessor';
 import { HeaderBackButtonProps } from '@react-navigation/elements';
-import { Platform, useColorScheme } from 'react-native';
+import { Platform } from 'react-native';
 
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useCallback } from 'react';
@@ -63,6 +63,7 @@ import {
   TabMenuIcon,
 } from '../components/Nav/TabStackIcons';
 import { AudioContextProvider } from '../components/AudioContext/AudioContext';
+import { useInitialPushNotification } from '../hooks/push-notification/useInitialPushNotification';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -226,6 +227,7 @@ const AppStackScreen = () => {
   useRefreshOnFocus();
   useLiveChatProcessor();
   useAuthenticatedPushNotification();
+  useInitialPushNotification();
 
   return (
     <AppStack.Navigator

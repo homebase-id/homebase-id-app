@@ -334,7 +334,7 @@ const bodyFormer = (
   return `${sender} sent you a notification via ${appName}`;
 };
 
-const navigateOnNotification = (
+export const navigateOnNotification = (
   notification: PushNotification,
   identity: string,
   chatNavigator: NavigationProp<AppStackParamList>,

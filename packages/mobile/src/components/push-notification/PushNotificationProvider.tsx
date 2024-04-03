@@ -1,4 +1,4 @@
-import { ReactNode, useState, FunctionComponent, useEffect } from 'react';
+import { ReactNode, useState, FunctionComponent, useEffect, useCallback } from 'react';
 import messaging from '@react-native-firebase/messaging';
 import { PushNotificationPermissionContext } from '../../provider/push-notification/PushNotificationContext';
 import { PermissionsAndroid, Platform } from 'react-native';
