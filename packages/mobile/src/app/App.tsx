@@ -20,7 +20,7 @@ import { DotYouClientProvider } from '../components/Auth/DotYouClientProvider';
 import { BackButton, HeaderActions } from '../components/ui/convo-app-bar';
 import { useLiveChatProcessor } from '../hooks/chat/useLiveChatProcessor';
 import { HeaderBackButtonProps } from '@react-navigation/elements';
-import { Platform, useColorScheme } from 'react-native';
+import { Platform } from 'react-native';
 
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useCallback } from 'react';
@@ -50,6 +50,8 @@ import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-
 import { useProfile } from '../hooks/profile/useProfile';
 import { ChatMessage } from '../provider/chat/ChatProvider';
 import { useRefreshOnFocus } from '../hooks/chat/useRefetchOnFocus';
+import { PushNotificationProvider } from '../components/push-notification/PushNotificationProvider';
+import { useAuthenticatedPushNotification } from '../hooks/push-notification/useAuthenticatedPushNotification';
 import Toast from 'react-native-toast-message';
 import { ErrorToaster } from '../components/ui/Alert/ErrorToaster';
 import { MessageInfoPage } from '../pages/chat/message-info-page';
@@ -61,6 +63,7 @@ import {
   TabMenuIcon,
 } from '../components/Nav/TabStackIcons';
 import { AudioContextProvider } from '../components/AudioContext/AudioContext';
+import { useInitialPushNotification } from '../hooks/push-notification/useInitialPushNotification';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -158,8 +161,10 @@ let App = () => {
       }
     >
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <RootStack />
-        <Toast />
+        <PushNotificationProvider>
+          <RootStack />
+          <Toast />
+        </PushNotificationProvider>
       </GestureHandlerRootView>
     </PersistQueryClientProvider>
   );
@@ -221,6 +226,8 @@ const AppStackScreen = () => {
   useValidTokenCheck();
   useRefreshOnFocus();
   useLiveChatProcessor();
+  useAuthenticatedPushNotification();
+  useInitialPushNotification();
 
   return (
     <AppStack.Navigator
