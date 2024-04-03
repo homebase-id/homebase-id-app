@@ -40,7 +40,7 @@ import { NewGroupPage } from '../pages/new-group-page';
 import { PreviewMedia } from '../pages/media-preview-page';
 import { ProfilePage } from '../pages/profile/profile-page';
 import ChatPage from '../pages/chat/chat-page';
-import ConversationPage from '../pages/conversation-page';
+import { ConversationsPage } from '../pages/conversations-page';
 import EditGroupPage from '../pages/chat/edit-group-page';
 import { ConnectionRequestsPage } from '../pages/home/connection-requests-page';
 import { useDarkMode } from '../hooks/useDarkMode';
@@ -376,7 +376,7 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
     <StackChat.Navigator>
       <StackChat.Screen
         name="Conversation"
-        component={ConversationPage}
+        component={ConversationsPage}
         options={{
           title: 'Chats',
           headerShown: true,

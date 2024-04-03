@@ -43,7 +43,12 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
 
   const [assets, setAssets] = useState<Asset[]>([]);
   // Messages
-  const { data: chatMessages, error } = useChatMessages({
+  const {
+    data: chatMessages,
+    hasNextPage: hasMoreMessages,
+    fetchNextPage: fetchMoreMessages,
+    error,
+  } = useChatMessages({
     conversationId: route.params.convoId,
   }).all;
 
@@ -204,7 +209,7 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
   }, []);
 
   const [selectedReactionMessage, setSelectedReactionMessage] = useState<ChatMessageIMessage>();
-  const [showChatReactionPopup, setshowChatReactionPopup] = useState(false);
+  const [showChatReactionPopup, setshowChatReactionPopup] = useState(true);
 
   const openReactionModal = useCallback((message: ChatMessageIMessage) => {
     setSelectedReactionMessage(message);
@@ -300,6 +305,8 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
               setReplyMessage={setReplyMessage}
               assets={assets}
               setAssets={setAssets}
+              hasMoreMessages={hasMoreMessages}
+              fetchMoreMessages={fetchMoreMessages}
             />
           </Pressable>
 

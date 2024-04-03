@@ -62,6 +62,9 @@ export const ChatDetail = memo(
     setReplyMessage,
     assets,
     setAssets,
+
+    hasMoreMessages,
+    fetchMoreMessages,
   }: {
     isGroup: boolean;
     messages: ChatMessageIMessage[];
@@ -81,6 +84,9 @@ export const ChatDetail = memo(
 
     assets: Asset[];
     setAssets: (assets: Asset[]) => void;
+
+    hasMoreMessages: boolean;
+    fetchMoreMessages: () => void;
   }) => {
     const { isDarkMode } = useDarkMode();
     const identity = useAuth().getIdentity();
@@ -358,8 +364,8 @@ export const ChatDetail = memo(
         onSend={doSend}
         infiniteScroll
         scrollToBottom
-        onLongPress={(e, _, m: ChatMessageIMessage) => onLongPress(e, m)}
         alwaysShowSend
+        onLongPress={(e, _, m: ChatMessageIMessage) => onLongPress(e, m)}
         isKeyboardInternallyHandled={true}
         keyboardShouldPersistTaps="never"
         renderMessageImage={(prop: MessageImageProps<ChatMessageIMessage>) => (
@@ -380,6 +386,8 @@ export const ChatDetail = memo(
         user={{
           _id: identity || '',
         }}
+        loadEarlier={hasMoreMessages}
+        onLoadEarlier={fetchMoreMessages}
       />
     );
   }

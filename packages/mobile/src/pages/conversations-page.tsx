@@ -24,7 +24,7 @@ import { CHAT_APP_ID } from '../app/constants';
 
 type ConversationProp = NativeStackScreenProps<ChatStackParamList, 'Conversation'>;
 
-const ConversationPage = ({ navigation: rootNavigation }: ConversationProp) => {
+export const ConversationsPage = ({ navigation: rootNavigation }: ConversationProp) => {
   const navigation = useNavigation<NavigationProp<AppStackParamList>>();
 
   const { data: conversations } = useConversations().all;
@@ -218,5 +218,3 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
 });
-
-export default ConversationPage;
