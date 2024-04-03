@@ -46,4 +46,7 @@ import App from './src/app/App';
 // import App from './src/compress-fragment/App';
 import { name as appName } from './app.json';
 
+import { initializePushNotificationSupport } from './src/provider/push-notification/PushNotificationLib';
+initializePushNotificationSupport();
+
 AppRegistry.registerComponent(appName, () => App);

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "927859081965",
+    "project_id": "prod-push-homebase-id",
+    "storage_bucket": "prod-push-homebase-id.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:927859081965:android:0c0a4eedcb5698d66a42e4",
+        "android_client_info": {
+          "package_name": "id.homebase.feed"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBC8ulOyNj_rs4Tusgrcb53dvduNaVw6MU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

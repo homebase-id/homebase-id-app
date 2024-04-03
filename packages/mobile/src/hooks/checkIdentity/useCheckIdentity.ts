@@ -17,9 +17,14 @@ export const doCheckIdentity = async (odinId?: string) => {
   const isValid = domainRegex.test(strippedIdentity || '');
   if (!isValid) return false;
 
-  return await axios
-    .get(`https://${strippedIdentity}/api/guest/v1/auth/ident`)
-    .then((res) => res.data)
-    .then((validation) => validation?.odinId.toLowerCase() === strippedIdentity)
-    .catch(() => false);
+  try {
+    const url = `https://${strippedIdentity}/api/guest/v1/auth/ident`;
+    console.debug(`Checking identity: ${url}`);
+    const response = await axios.get(url);
+    const validation = response.data;
+    return validation?.odinId.toLowerCase() === strippedIdentity;
+  } catch (error) {
+    console.debug('Error checking identity', error);
+    return false;
+  }
 };
