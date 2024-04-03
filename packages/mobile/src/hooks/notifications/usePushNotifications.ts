@@ -1,4 +1,3 @@
-
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   DeleteNotifications,
@@ -71,5 +70,5 @@ export const useRemoveNotifications = (props?: { appId?: string }) => {
         await removeListOfNotifications(notifications.map((n) => n.id));
       }
     })();
-  }, [notifcationsData]);
+  }, [notifcationsData, props?.appId, removeListOfNotifications]);
 };

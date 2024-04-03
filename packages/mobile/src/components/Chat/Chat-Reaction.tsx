@@ -42,21 +42,16 @@ const PortalView = ({
     }
   }, [scale, selectedMessage]);
 
-  // Double Tap
-  // Layout Height
-  // Is this Clean?????????
   const reactionStyle = useAnimatedStyle(() => {
-    let y = messageCordinates.y || 0;
+    let y = messageCordinates.y;
     let shouldAnimate = false;
-    const isLessDisatanceFromTop = y < 100;
-    const isLessDisatanceFromBottom = height - y < 0;
-    if (isLessDisatanceFromBottom) {
-      y = y - 0;
+    const isLessDistanceFromTop = y < 100;
+    const isLessDistanceFromBottom = height - y < 0;
+    if (isLessDistanceFromBottom) {
       shouldAnimate = true;
     }
 
-    if (isLessDisatanceFromTop) {
-      y = y + 0;
+    if (isLessDistanceFromTop) {
       shouldAnimate = true;
     }
     y = isNaN(y) ? 0 : y;
@@ -67,11 +62,12 @@ const PortalView = ({
         },
       ],
     };
-  });
+  }, [messageCordinates, selectedMessage]);
 
   const textStyle = useAnimatedStyle(() => {
     return {
       fontSize: 28,
+      color: isDarkMode ? Colors.white : Colors.slate[700],
       transform: [
         {
           scale: scale.value,
@@ -81,7 +77,7 @@ const PortalView = ({
         },
       ],
     };
-  });
+  }, [selectedMessage]);
 
   const { add, get, remove } = useChatReaction({
     conversationId: selectedMessage?.fileMetadata.appData.groupId,

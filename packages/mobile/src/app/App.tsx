@@ -84,6 +84,7 @@ export type HomeStackParamList = {
 export type ProfileStackParamList = {
   Overview: undefined;
   Followers: undefined;
+  ConnectionRequests: undefined;
   Connections: undefined;
   Following: undefined;
 };
@@ -174,10 +175,10 @@ App = CodePush(codePushOptions)(App);
 const StackRoot = createNativeStackNavigator<AuthStackParamList>();
 const RootStack = () => {
   const { isAuthenticated } = useAuth();
-  const scheme = useColorScheme();
+  const { isDarkMode } = useDarkMode();
 
   return (
-    <NavigationContainer theme={scheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <NavigationContainer theme={isDarkMode ? DarkTheme : DefaultTheme}>
       <StackRoot.Navigator screenOptions={{ headerShown: false }}>
         {isAuthenticated ? (
           <StackRoot.Screen name="Authenticated" component={AuthenticatedRoot} />
@@ -237,7 +238,6 @@ const AppStackScreen = () => {
         name="ChatScreen"
         component={ChatPage}
         options={{
-          headerShown: false,
           gestureEnabled: true,
         }}
       />
@@ -308,7 +308,7 @@ const TabStack = () => {
     >
       <TabBottom.Screen
         name="Home"
-        component={HomeStack}
+        component={HomePage}
         options={{
           tabBarIcon: TabHouseIcon,
         }}
@@ -325,6 +325,7 @@ const TabStack = () => {
         component={ChatStack}
         options={{
           tabBarIcon: TabChatIcon,
+          headerShown: false,
         }}
       />
       <TabBottom.Screen
@@ -335,29 +336,6 @@ const TabStack = () => {
         }}
       />
     </TabBottom.Navigator>
-  );
-};
-
-const StackHome = createNativeStackNavigator<HomeStackParamList>();
-const HomeStack = () => {
-  return (
-    <StackHome.Navigator>
-      <StackHome.Screen
-        name="Overview"
-        component={HomePage}
-        options={{
-          headerShown: false,
-        }}
-      />
-      <StackHome.Screen
-        name="ConnectionRequests"
-        component={ConnectionRequestsPage}
-        options={{
-          headerTitle: 'Connection requests',
-          headerBackTitle: 'Home',
-        }}
-      />
-    </StackHome.Navigator>
   );
 };
 
@@ -373,6 +351,7 @@ const ProfileStack = () => {
         }}
       />
       <StackProfile.Screen name="Followers" component={FollowersPage} />
+      <StackProfile.Screen name="ConnectionRequests" component={ConnectionRequestsPage} />
       <StackProfile.Screen name="Connections" component={ConnectionsPage} />
       <StackProfile.Screen name="Following" component={FollowingPage} />
     </StackProfile.Navigator>

@@ -13,7 +13,6 @@ import { useAuth } from '../hooks/auth/useAuth';
 import { useProfile } from '../hooks/profile/useProfile';
 import { useLayoutEffect, useMemo, useState } from 'react';
 import { useRemoveNotifications } from '../hooks/notifications/usePushNotifications';
-import { CHAT_APP_ID } from '../components/Nav/TabStackIcons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Text } from '../components/ui/Text/Text';
 import { ScrollView } from 'react-native-gesture-handler';
@@ -21,6 +20,7 @@ import { ContactTile } from '../components/Contact/Contact-Tile';
 import { useAllContacts } from 'feed-app-common';
 import { Colors } from '../app/Colors';
 import { useDarkMode } from '../hooks/useDarkMode';
+import { CHAT_APP_ID } from '../app/constants';
 
 type ConversationProp = NativeStackScreenProps<ChatStackParamList, 'Conversation'>;
 
@@ -32,7 +32,11 @@ const ConversationPage = ({ navigation: rootNavigation }: ConversationProp) => {
   useRemoveNotifications({ appId: CHAT_APP_ID });
 
   const flatConversations = useMemo(
-    () => conversations?.pages?.flatMap((page) => page.searchResults) || [],
+    () =>
+      conversations?.pages
+        ?.flatMap((page) => page.searchResults)
+        .filter((convo) => [0, undefined].includes(convo.fileMetadata.appData.archivalStatus)) ||
+      [],
     [conversations]
   );
 
@@ -45,7 +49,6 @@ const ConversationPage = ({ navigation: rootNavigation }: ConversationProp) => {
       headerSearchBarOptions: {
         hideWhenScrolling: true,
         headerIconColor: isDarkMode ? Colors.white : Colors.black,
-
         placeholder: 'Search',
         hideNavigationBar: true,
         autoCapitalize: 'none',
@@ -165,8 +168,10 @@ const SearchConversationResults = ({
           style={{
             fontSize: 16,
             fontWeight: '600',
-            marginLeft: 12,
-            marginTop: 4,
+            display: 'flex',
+            marginTop: 'auto',
+            marginBottom: 'auto',
+            alignSelf: 'center',
           }}
         >
           No Contacts Found

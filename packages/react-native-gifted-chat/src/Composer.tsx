@@ -1,5 +1,5 @@
-import PropTypes from 'prop-types'
-import React, { useRef } from 'react'
+import PropTypes from 'prop-types';
+import React, { useCallback, useRef } from 'react';
 import {
   Platform,
   StyleSheet,
@@ -7,11 +7,10 @@ import {
   TextInputProps,
   NativeSyntheticEvent,
   TextInputContentSizeChangeEventData,
-} from 'react-native'
-import { MIN_COMPOSER_HEIGHT, DEFAULT_PLACEHOLDER } from './Constant'
-import Color from './Color'
-import { StylePropType } from './utils'
-import { useCallbackOne } from 'use-memo-one'
+} from 'react-native';
+import { MIN_COMPOSER_HEIGHT, DEFAULT_PLACEHOLDER } from './Constant';
+import Color from './Color';
+import { StylePropType } from './utils';
 
 const styles = StyleSheet.create({
   textInput: {
@@ -36,21 +35,21 @@ const styles = StyleSheet.create({
       web: 4,
     }),
   },
-})
+});
 
 export interface ComposerProps {
-  composerHeight?: number
-  text?: string
-  placeholder?: string
-  placeholderTextColor?: string
-  textInputProps?: Partial<TextInputProps>
-  textInputStyle?: TextInputProps['style']
-  textInputAutoFocus?: boolean
-  keyboardAppearance?: TextInputProps['keyboardAppearance']
-  multiline?: boolean
-  disableComposer?: boolean
-  onTextChanged?(text: string): void
-  onInputSizeChanged?(layout: { width: number; height: number }): void
+  composerHeight?: number;
+  text?: string;
+  placeholder?: string;
+  placeholderTextColor?: string;
+  textInputProps?: Partial<TextInputProps>;
+  textInputStyle?: TextInputProps['style'];
+  textInputAutoFocus?: boolean;
+  keyboardAppearance?: TextInputProps['keyboardAppearance'];
+  multiline?: boolean;
+  disableComposer?: boolean;
+  onTextChanged?(text: string): void;
+  onInputSizeChanged?(layout: { width: number; height: number }): void;
 }
 
 export function Composer({
@@ -67,13 +66,13 @@ export function Composer({
   textInputProps = {},
   textInputStyle,
 }: ComposerProps): React.ReactElement {
-  const dimensionsRef = useRef<{ width: number; height: number }>()
+  const dimensionsRef = useRef<{ width: number; height: number }>();
 
-  const determineInputSizeChange = useCallbackOne(
+  const determineInputSizeChange = useCallback(
     (dimensions: { width: number; height: number }) => {
       // Support earlier versions of React Native on Android.
       if (!dimensions) {
-        return
+        return;
       }
 
       if (
@@ -83,17 +82,17 @@ export function Composer({
           (dimensionsRef.current.width !== dimensions.width ||
             dimensionsRef.current.height !== dimensions.height))
       ) {
-        dimensionsRef.current = dimensions
-        onInputSizeChanged(dimensions)
+        dimensionsRef.current = dimensions;
+        onInputSizeChanged(dimensions);
       }
     },
     [onInputSizeChanged],
-  )
+  );
 
   const handleContentSizeChange = ({
     nativeEvent: { contentSize },
   }: NativeSyntheticEvent<TextInputContentSizeChangeEventData>) =>
-    determineInputSizeChange(contentSize)
+    determineInputSizeChange(contentSize);
 
   return (
     <TextInput
@@ -127,7 +126,7 @@ export function Composer({
       keyboardAppearance={keyboardAppearance}
       {...textInputProps}
     />
-  )
+  );
 }
 
 Composer.propTypes = {
@@ -143,4 +142,4 @@ Composer.propTypes = {
   textInputStyle: StylePropType,
   textInputAutoFocus: PropTypes.bool,
   keyboardAppearance: PropTypes.string,
-}
+};
