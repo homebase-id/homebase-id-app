@@ -43,7 +43,7 @@ import { useChatReaction } from '../../hooks/chat/useChatReaction';
 import { Avatar as AppAvatar, OwnerAvatar } from '../../components/Chat/Conversation-tile';
 import { ConnectionName } from '../../components/ui/Name';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
-import { ChatMessage } from '../../provider/chat/ChatProvider';
+import { ChatDeletedArchivalStaus, ChatMessage } from '../../provider/chat/ChatProvider';
 import { useAudioRecorder } from '../../hooks/audio/useAudioRecorderPlayer';
 import { Text } from '../ui/Text/Text';
 import { millisToMinutesAndSeconds } from '../../utils/utils';
@@ -432,6 +432,8 @@ const styles = StyleSheet.create({
 
 const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
   const message = props.currentMessage as ChatMessageIMessage;
+  const deleted = message?.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus;
+
   const content = message?.fileMetadata.appData.content;
   const isEmojiOnly =
     (content?.message?.match(/^\p{Extended_Pictographic}/u) &&
@@ -453,6 +455,11 @@ const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
           ? {
               fontSize: 48,
               lineHeight: 60,
+            }
+          : deleted
+          ? {
+              textDecorationLine: 'line-through',
+              color: Colors.gray[500],
             }
           : undefined
       }
