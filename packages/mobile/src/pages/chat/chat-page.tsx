@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Alert, Keyboard, Platform, Pressable, View } from 'react-native';
 import { ChatAppBar } from '../../components/Chat/Chat-app-bar';
 import { Asset } from 'react-native-image-picker';
-import { ChatMessage } from '../../provider/chat/ChatProvider';
+import { ChatDeletedArchivalStaus, ChatMessage } from '../../provider/chat/ChatProvider';
 import { useAuth } from '../../hooks/auth/useAuth';
 import { useChatMessages } from '../../hooks/chat/useChatMessages';
 import { useChatMessage } from '../../hooks/chat/useChatMessage';
@@ -62,7 +62,10 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
         return {
           _id: value.fileMetadata.appData.uniqueId ?? value.fileId ?? getNewId(),
           createdAt: value.fileMetadata.created,
-          text: value.fileMetadata.appData.content.message,
+          text:
+            value.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus
+              ? 'This message was deleted.'
+              : value.fileMetadata.appData.content.message,
           user: {
             _id: value.fileMetadata.senderOdinId || identity || '',
             name: value.fileMetadata.senderOdinId || identity || '',

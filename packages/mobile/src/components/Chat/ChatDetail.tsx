@@ -442,19 +442,16 @@ const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
           color: Colors.indigo[500],
         },
       }}
-      currentMessage={
-        props.currentMessage
-          ? {
-              ...props.currentMessage,
-              text: deleted ? 'This message was deleted' : (props.currentMessage?.text as string),
-            }
-          : undefined
-      }
       customTextStyle={
         isEmojiOnly
           ? {
               fontSize: 48,
               lineHeight: 60,
+            }
+          : deleted
+          ? {
+              textDecorationLine: 'line-through',
+              color: Colors.gray[500],
             }
           : undefined
       }
