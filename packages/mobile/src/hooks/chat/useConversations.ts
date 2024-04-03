@@ -29,7 +29,7 @@ export const useConversations = () => {
           const messagesA = await queryClient.fetchInfiniteQuery({
             queryKey: ['chat', conversationId],
             initialPageParam: undefined,
-            queryFn: () => getChatMessages(dotYouClient, conversationId as string, undefined, 10),
+            queryFn: () => getChatMessages(dotYouClient, conversationId as string, undefined, 100),
           });
           return {
             ...convo,
