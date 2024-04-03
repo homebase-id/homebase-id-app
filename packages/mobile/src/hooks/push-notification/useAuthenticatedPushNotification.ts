@@ -47,6 +47,9 @@ export const useAuthenticatedPushNotification = () => {
     await client.post('/notify/push/subscribe-firebase', {
       DeviceToken: deviceToken,
       DevicePlatform: Platform.OS,
+      FriendlyName: `${
+        Platform.OS === 'ios' ? 'iOS' : Platform.OS === 'android' ? 'Android' : Platform.OS
+      } | ${Platform.Version}`,
     });
     await AsyncStorage.setItem('deviceToken', deviceToken);
   }, [dotYouClient, deviceToken]);
