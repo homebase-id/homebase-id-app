@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Platform } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useMutation } from '@tanstack/react-query';
 import messaging from '@react-native-firebase/messaging';
 import { useDotYouClientContext } from 'feed-app-common';
@@ -48,7 +47,6 @@ export const useAuthenticatedPushNotification = () => {
       DeviceToken: deviceToken,
       DevicePlatform: Platform.OS,
     });
-    await AsyncStorage.setItem('deviceToken', deviceToken);
   }, [dotYouClient, deviceToken]);
 
   //
@@ -67,11 +65,8 @@ export const useAuthenticatedPushNotification = () => {
   useEffect(() => {
     const uploadDeviceToken = async (): Promise<void> => {
       if (deviceToken) {
-        const storedDeviceToken = (await AsyncStorage.getItem('deviceToken')) || null;
-        if (storedDeviceToken !== deviceToken) {
-          console.log('updating device token', deviceToken);
-          mutate();
-        }
+        console.log('updating device token', deviceToken);
+        mutate();
       }
     };
     uploadDeviceToken();
