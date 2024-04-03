@@ -41,7 +41,12 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
 
   const [assets, setAssets] = useState<Asset[]>([]);
   // Messages
-  const { data: chatMessages, error } = useChatMessages({
+  const {
+    data: chatMessages,
+    hasNextPage: hasMoreMessages,
+    fetchNextPage: fetchMoreMessages,
+    error,
+  } = useChatMessages({
     conversationId: route.params.convoId,
   }).all;
 
@@ -238,6 +243,8 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
             setReplyMessage={setReplyMessage}
             assets={assets}
             setAssets={setAssets}
+            hasMoreMessages={hasMoreMessages}
+            fetchMoreMessages={fetchMoreMessages}
           />
           <PortalView
             messageCordinates={messageCordinates}
