@@ -3,7 +3,7 @@ import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AppStackParamList } from '../../app/App';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Keyboard, Platform, View } from 'react-native';
+import { Alert, Keyboard, Platform, Pressable, View } from 'react-native';
 import { ChatAppBar } from '../../components/Chat/Chat-app-bar';
 import { Asset } from 'react-native-image-picker';
 import { ChatMessage } from '../../provider/chat/ChatProvider';
@@ -22,7 +22,7 @@ import { ImageSource } from '../../provider/image/RNImageProvider';
 import { getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import useContact from '../../hooks/contact/useContact';
 import { useMarkMessagesAsRead } from '../../hooks/chat/useMarkMessagesAsRead';
-import PortalView from '../../components/Chat/Chat-Reaction';
+import ChatReaction from '../../components/Chat/Chat-Reaction';
 import { Host } from 'react-native-portalize';
 import { BottomSheetModal, BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { EmojiPickerModal } from '../../components/Chat/Reactions/Emoji-Picker/Emoji-Picker-Modal';
@@ -30,6 +30,8 @@ import { ReactionsModal } from '../../components/Chat/Reactions/Modal/ReactionsM
 import { ChatConnectedState } from '../../components/Chat/Chat-Connected-state';
 import { ErrorNotification } from '../../components/ui/Alert/ErrorNotification';
 import { ChatDetail, ChatMessageIMessage } from '../../components/Chat/ChatDetail';
+import Toast from 'react-native-toast-message';
+import Clipboard from '@react-native-clipboard/clipboard';
 
 export type ChatProp = NativeStackScreenProps<AppStackParamList, 'ChatScreen'>;
 
@@ -44,6 +46,10 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
   const { data: chatMessages, error } = useChatMessages({
     conversationId: route.params.convoId,
   }).all;
+
+  const { mutate: deleteMessage, error: deleteMessageError } = useChatMessages({
+    conversationId: route.params.convoId,
+  }).delete;
 
   const messages: ChatMessageIMessage[] = useMemo(
     () =>
@@ -185,11 +191,11 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
   ]);
 
   // ref
-  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+  const emojiPickerSheetModalRef = useRef<BottomSheetModal>(null);
   const reactionModalRef = useRef<BottomSheetModal>(null);
 
   const openEmojiModal = useCallback(() => {
-    bottomSheetModalRef.current?.present();
+    emojiPickerSheetModalRef.current?.present();
   }, []);
 
   const [selectedReactionMessage, setSelectedReactionMessage] = useState<ChatMessageIMessage>();
@@ -203,52 +209,104 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
 
   return (
     <BottomSheetModalProvider>
-      <Host>
-        <ErrorNotification error={sendMessageError} />
-        <ErrorNotification error={error} />
-        <View
-          style={{
-            paddingBottom:
-              Platform.OS === 'ios' && (replyMessage || Keyboard.isVisible()) ? 0 : insets.bottom,
-            flex: 1,
+      <ErrorNotification error={sendMessageError} />
+      <ErrorNotification error={error} />
+      <ErrorNotification error={deleteMessageError} />
+      <View
+        style={{
+          paddingBottom:
+            Platform.OS === 'ios' && (replyMessage || Keyboard.isVisible()) ? 0 : insets.bottom,
+          flex: 1,
+        }}
+      >
+        <ChatAppBar
+          title={title || ''}
+          group={'recipients' in conversationContent.fileMetadata.appData.content}
+          odinId={
+            route.params.convoId === ConversationWithYourselfId
+              ? identity || ''
+              : (conversationContent?.fileMetadata.appData.content as SingleConversation).recipient
+          }
+          goBack={navigation.goBack}
+          onPress={() => navigation.navigate('ChatInfo', { convoId: route.params.convoId })}
+          isSelf={route.params.convoId === ConversationWithYourselfId}
+          selectedMessage={selectedMessage}
+          selectedMessageActions={{
+            onCopy: () => {
+              if (selectedMessage) {
+                const message = selectedMessage.text;
+                if (message) {
+                  Clipboard.setString(message);
+                  Toast.show({
+                    text1: 'Copied to Clipboard',
+                    type: 'success',
+                    visibilityTime: 2000,
+                    position: 'bottom',
+                  });
+                }
+                setSelectedMessage(undefined);
+              }
+            },
+            onDelete: () => {
+              if (selectedMessage) {
+                console.log('Delete Message', selectedMessage.fileMetadata.appData.archivalStatus);
+                deleteMessage({
+                  conversation: conversationContent,
+                  messages: [selectedMessage],
+                  deleteForEveryone: true,
+                });
+                setSelectedMessage(undefined);
+              }
+            },
+            onReply: () => {
+              if (selectedMessage) {
+                setReplyMessage(selectedMessage);
+                setSelectedMessage(undefined);
+              }
+            },
+            onInfo: () => {
+              if (selectedMessage) {
+                doOpenMessageInfo(selectedMessage);
+                setSelectedMessage(undefined);
+              }
+            },
           }}
-        >
-          <ChatAppBar
-            title={title || ''}
-            group={'recipients' in conversationContent.fileMetadata.appData.content}
-            odinId={
-              route.params.convoId === ConversationWithYourselfId
-                ? identity || ''
-                : (conversationContent?.fileMetadata.appData.content as SingleConversation)
-                    .recipient
-            }
-            goBack={navigation.goBack}
-            onPress={() => navigation.navigate('ChatInfo', { convoId: route.params.convoId })}
-            isSelf={route.params.convoId === ConversationWithYourselfId}
-          />
-          <ChatConnectedState {...conversationContent} />
-          <ChatDetail
-            isGroup={!!isGroup}
-            messages={messages}
-            doSend={doSend}
-            doSelectMessage={doSelectMessage}
-            doOpenMessageInfo={doOpenMessageInfo}
-            doOpenReactionModal={openReactionModal}
-            replyMessage={replyMessage}
-            setReplyMessage={setReplyMessage}
-            assets={assets}
-            setAssets={setAssets}
-          />
-          <PortalView
+        />
+        <ChatConnectedState {...conversationContent} />
+        <Host>
+          <Pressable
+            onPress={() => {
+              emojiPickerSheetModalRef.current?.dismiss();
+              reactionModalRef.current?.dismiss();
+              setSelectedMessage(undefined);
+            }}
+            disabled={selectedMessage === undefined}
+            style={{ flex: 1 }}
+          >
+            <ChatDetail
+              isGroup={!!isGroup}
+              messages={messages}
+              doSend={doSend}
+              doSelectMessage={doSelectMessage}
+              doOpenMessageInfo={doOpenMessageInfo}
+              doOpenReactionModal={openReactionModal}
+              replyMessage={replyMessage}
+              setReplyMessage={setReplyMessage}
+              assets={assets}
+              setAssets={setAssets}
+            />
+          </Pressable>
+
+          <ChatReaction
             messageCordinates={messageCordinates}
             selectedMessage={selectedMessage}
             setSelectedMessage={setSelectedMessage}
             openEmojiPicker={openEmojiModal}
           />
-        </View>
-      </Host>
+        </Host>
+      </View>
       <EmojiPickerModal
-        ref={bottomSheetModalRef}
+        ref={emojiPickerSheetModalRef}
         selectedMessage={selectedMessage as ChatMessageIMessage}
       />
       <ReactionsModal

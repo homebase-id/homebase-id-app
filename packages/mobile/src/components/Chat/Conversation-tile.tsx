@@ -17,7 +17,6 @@ import { useChatMessages } from '../../hooks/chat/useChatMessages';
 import { ChatMessage } from '../../provider/chat/ChatProvider';
 import { Users } from '../ui/Icons/icons';
 import { useDarkMode } from '../../hooks/useDarkMode';
-import { ellipsisAtMaxChar } from 'feed-app-common';
 import { ChatSentTimeIndicator } from './Chat-Sent-Time-Indicator';
 import useContact from '../../hooks/contact/useContact';
 import { OdinImage } from '../ui/OdinImage/OdinImage';
