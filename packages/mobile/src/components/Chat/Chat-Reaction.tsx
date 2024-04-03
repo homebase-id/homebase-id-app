@@ -1,5 +1,5 @@
 import { StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { Portal } from 'react-native-portalize';
 
 import Animated, {
@@ -13,27 +13,26 @@ import { useChatReaction } from '../../hooks/chat/useChatReaction';
 import { useConversation } from '../../hooks/chat/useConversation';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ChatMessage } from '../../provider/chat/ChatProvider';
-import { useBottomSheetModal } from '@gorhom/bottom-sheet';
 import { Colors } from '../../app/Colors';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { ErrorNotification } from '../ui/Alert/ErrorNotification';
 import { ChatMessageIMessage } from './ChatDetail';
 
-const PortalView = ({
+const ChatReaction = ({
   selectedMessage,
   messageCordinates,
   setSelectedMessage,
   openEmojiPicker,
+  showReaction,
 }: {
   selectedMessage: ChatMessageIMessage | undefined;
   setSelectedMessage: (message: ChatMessageIMessage | undefined) => void;
   messageCordinates: { x: number; y: number };
+  showReaction: boolean;
   openEmojiPicker: () => void;
 }) => {
   const scale = useSharedValue(0);
   const { height } = useWindowDimensions();
-  const { dismiss } = useBottomSheetModal();
-  const [emojiModalOpen, setEmojiModalOpen] = useState<boolean>(false);
   useEffect(() => {
     if (selectedMessage) {
       scale.value = withSpring(1);
@@ -104,7 +103,6 @@ const PortalView = ({
         return;
       } else if (index === 6) {
         openEmojiPicker();
-        setEmojiModalOpen(true);
         return;
       } else {
         if (!conversation) return;
@@ -140,7 +138,7 @@ const PortalView = ({
 
   const { isDarkMode } = useDarkMode();
 
-  if (!selectedMessage) {
+  if (!selectedMessage || !showReaction) {
     return null;
   }
 
@@ -148,42 +146,31 @@ const PortalView = ({
   return (
     <Portal>
       <ErrorNotification error={reactionError || removeReactionError} />
-      <TouchableOpacity
-        activeOpacity={0.9}
-        onPress={() => {
-          dismiss();
-          setSelectedMessage(undefined);
-          setEmojiModalOpen(false);
-        }}
-        style={styles.container}
+      <Animated.View
+        style={[
+          styles.reaction,
+          reactionStyle,
+          {
+            backgroundColor: isDarkMode ? Colors.slate[800] : Colors.slate[100],
+          },
+        ]}
       >
-        {!emojiModalOpen && (
-          <Animated.View
-            style={[
-              styles.reaction,
-              reactionStyle,
-              {
-                backgroundColor: isDarkMode ? Colors.slate[800] : Colors.slate[100],
-              },
-            ]}
-          >
-            {initialReactions.map((reaction, index) => (
-              <TouchableOpacity key={index} onPress={() => sendReaction(reaction, index)}>
-                <Animated.Text style={textStyle}>{reaction}</Animated.Text>
-              </TouchableOpacity>
-            ))}
-          </Animated.View>
-        )}
-      </TouchableOpacity>
+        {initialReactions.map((reaction, index) => (
+          <TouchableOpacity key={index} onPress={() => sendReaction(reaction, index)}>
+            <Animated.Text style={textStyle}>{reaction}</Animated.Text>
+          </TouchableOpacity>
+        ))}
+      </Animated.View>
     </Portal>
   );
 };
 
-export default PortalView;
+export default ChatReaction;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    // backgroundColor: Colors.red[50],
   },
   messageStyle: {
     position: 'absolute',
