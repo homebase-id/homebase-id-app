@@ -25,6 +25,7 @@ import { CONTACT_PROFILE_IMAGE_KEY, ContactConfig } from '@youfoundation/js-lib/
 import { useProfile } from '../../hooks/profile/useProfile';
 import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
 import { ChatDeliveryIndicator } from './Chat-Delivery-Indicator';
+import { ChatMessageContent } from './Chat-Message-Content';
 
 type ConversationTileProps = {
   onPress?: () => void;
@@ -196,9 +197,7 @@ const ConversationTile = memo((props: ConversationTileProps) => {
                   },
                 ]}
               >
-                {lastMessageContent.message
-                  ? ellipsisAtMaxChar(lastMessageContent.message, 30)
-                  : '📸 Media'}
+                <ChatMessageContent {...lastMessage} />
               </Text>
             </View>
           ) : null}
@@ -206,30 +205,31 @@ const ConversationTile = memo((props: ConversationTileProps) => {
         <View
           style={{
             justifyContent: 'space-between',
+            display: 'flex',
           }}
         >
           {lastMessage && <ChatSentTimeIndicator msg={lastMessage} keepDetail={false} />}
-        </View>
-        {unreadCount > 0 ? (
-          <View
-            style={{
-              backgroundColor: isDarkMode ? Colors.blue[500] : Colors.blue[100],
-              borderRadius: 8,
-              padding: 4,
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}
-          >
-            <Text
+          {unreadCount > 0 ? (
+            <View
               style={{
-                color: isDarkMode ? Colors.white : Colors.blue[900],
-                fontSize: 12,
+                backgroundColor: isDarkMode ? Colors.blue[500] : Colors.blue[100],
+                borderRadius: 8,
+                padding: 4,
+                justifyContent: 'center',
+                alignItems: 'center',
               }}
             >
-              {unreadCount}
-            </Text>
-          </View>
-        ) : null}
+              <Text
+                style={{
+                  color: isDarkMode ? Colors.white : Colors.blue[900],
+                  fontSize: 12,
+                }}
+              >
+                {unreadCount}
+              </Text>
+            </View>
+          ) : null}
+        </View>
       </View>
     </TouchableOpacity>
   );
