@@ -40,12 +40,13 @@ export const Avatar = (props: {
   style?: ImageStyle;
   imageSize?: { width: number; height: number };
 }) => {
-  const contact = useContact(props.odinId).fetch.data;
+  const { data:contact } = useContact(props.odinId).fetch;
   return (
     <OdinImage
       fileId={contact?.fileId}
       fileKey={CONTACT_PROFILE_IMAGE_KEY}
       targetDrive={ContactConfig.ContactTargetDrive}
+      previewThumbnail={contact?.fileMetadata.appData.previewThumbnail}
       imageSize={props.imageSize || { width: 48, height: 48 }}
       avoidPayload={true}
       enableZoom={false}
@@ -64,13 +65,14 @@ export const OwnerAvatar = (props: {
   style?: ImageStyle;
   imageSize?: { width: number; height: number };
 }) => {
-  const profile = useProfile().data;
+  const {data: profileData} = useProfile();
   return (
     <OdinImage
       fit="cover"
       targetDrive={GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId)}
-      fileId={profile?.profileImageFileId}
-      fileKey={profile?.profileImageFileKey}
+      fileId={profileData?.profileImageFileId}
+      fileKey={profileData?.profileImageFileKey}
+      previewThumbnail={profileData?.profileImagePreviewThumbnail}
       avoidPayload={true}
       enableZoom={false}
       imageSize={props.imageSize || { width: 48, height: 48 }}

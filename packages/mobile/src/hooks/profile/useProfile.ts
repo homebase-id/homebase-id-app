@@ -29,14 +29,18 @@ const useProfile = () => {
     const photoAttr = photoDsr?.fileMetadata.appData.content;
 
     return {
+      displayName: nameAttr?.data?.displayName || dotYouClient.getIdentity(),
       firstName: nameAttr?.data?.givenName,
       surName: nameAttr?.data?.surname,
+
       profileImageFileId: photoDsr?.fileId,
       profileImageFileKey: photoAttr?.data?.profileImageKey,
+      profileImagePreviewThumbnail: photoDsr?.fileMetadata?.appData?.previewThumbnail,
+      profileImageLastModified: photoDsr?.fileMetadata.updated,
     };
   };
 
-  return useQuery({ queryKey: ['profile-data'], queryFn: fetchProfile });
+  return useQuery({ queryKey: ['profile-data'], queryFn: fetchProfile, staleTime: 1000 * 60 * 60});
 };
 
 export { useProfile };

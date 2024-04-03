@@ -122,6 +122,8 @@ const INCLUDED_QUERY_KEYS = [
   'conversations',
   'chat-reaction',
   'connectionDetails',
+  'contact',
+  'profile-data',
 
   // Small data (blobs to local file Uri)
   'image',

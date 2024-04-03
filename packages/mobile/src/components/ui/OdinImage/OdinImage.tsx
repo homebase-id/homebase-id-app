@@ -36,6 +36,8 @@ export interface OdinImageProps {
   onClick?: () => void;
 }
 
+const thumblessContentTypes = ['image/svg+xml', 'image/gif'];
+
 export const OdinImage = memo(
   ({
     odinId,
@@ -48,7 +50,6 @@ export const OdinImage = memo(
     alt,
     title,
     previewThumbnail,
-    avoidPayload,
     enableZoom,
     style,
     onClick,
@@ -61,26 +62,28 @@ export const OdinImage = memo(
         (imageSize?.width ? Math.round(imageSize?.width * (enableZoom ? 4 : 1)) : undefined) || 800,
     };
 
-    const embeddedThumbUrl = useMemo(() => {
-      if (!previewThumbnail) return;
-
-      return `data:${previewThumbnail.contentType};base64,${previewThumbnail.content}`;
-    }, [previewThumbnail]);
-
     const { getFromCache } = useImage();
     const cachedImage = useMemo(
       () => (fileId && fileKey ? getFromCache(odinId, fileId, fileKey, targetDrive) : undefined),
       [fileId, getFromCache, odinId, targetDrive, fileKey]
     );
-    const skipTiny = !!previewThumbnail || !!cachedImage;
+
+    const embeddedThumbUrl = useMemo(() => {
+      if (!previewThumbnail) return;
+      return `data:${previewThumbnail.contentType};base64,${previewThumbnail.content}`;
+    }, [previewThumbnail]);
+
+    const ignoreTiny = !!previewThumbnail || !!cachedImage;
 
     const { data: tinyThumb } = useTinyThumb({
       odinId,
-      imageFileId: !skipTiny ? fileId : undefined,
+      imageFileId: !ignoreTiny ? fileId : undefined,
       imageFileKey: fileKey,
       imageDrive: targetDrive,
     });
+
     const previewUrl = cachedImage?.url || embeddedThumbUrl || tinyThumb?.url;
+    const previewContentType = cachedImage?.type || previewThumbnail?.contentType || tinyThumb?.contentType;
 
     const naturalSize: ImageSize | undefined = tinyThumb
       ? {
@@ -96,7 +99,7 @@ export const OdinImage = memo(
       imageFileId: enableZoom || loadSize !== undefined ? fileId : undefined,
       imageFileKey: fileKey,
       imageDrive: targetDrive,
-      size: avoidPayload ? { pixelHeight: 200, pixelWidth: 200 } : loadSize,
+      size: loadSize,
       naturalSize,
       lastModified,
     });
@@ -108,13 +111,14 @@ export const OdinImage = memo(
         <View
           style={{
             position: 'relative',
+            ...imageSize,
           }}
         >
           {/* Blurry image */}
-          {/* TODO: Check to add support for direct full loading for svg */}
-          {!enableZoom && previewUrl && !imageData?.url && cachedImage?.type !== 'image/svg+xml' ? (
-            <Image
-              source={{ uri: previewUrl }}
+          {previewUrl ? (
+            <InnerImage
+              uri={previewUrl}
+              contentType={previewContentType as ImageContentType}
               style={{
                 position: 'absolute',
                 top: 0,
@@ -122,14 +126,15 @@ export const OdinImage = memo(
                 right: 0,
                 bottom: 0,
                 resizeMode: fit,
-                ...imageSize,
+                // ...imageSize,
                 ...style,
               }}
+              imageSize={imageSize}
               blurRadius={hasCachedImage ? 0 : 2}
             />
           ) : null}
 
-          {!imageData?.url && !hasCachedImage ? (
+          {!imageData?.url && !previewUrl ? (
             <View
               style={{
                 justifyContent: 'center',
@@ -161,6 +166,65 @@ export const OdinImage = memo(
   }
 );
 
+const InnerImage = ({
+  uri,
+  alt,
+  imageSize,
+  blurRadius,
+  style,
+  fit,
+  onClick,
+
+  contentType,
+}: {
+  uri: string;
+  imageSize?: { width: number; height: number };
+  blurRadius?: number;
+  alt?: string;
+  style?: ImageStyle;
+  fit?: 'cover' | 'contain';
+
+  onClick?: () => void;
+
+  contentType?: ImageContentType;
+}) => {
+  return contentType === 'image/svg+xml' ? (
+    <TouchableWithoutFeedback onPress={onClick}>
+      <View
+        style={[
+          {
+            ...imageSize,
+            ...style,
+          },
+          // SVGs styling are not supported on Android
+          // And IDK why :( )
+          Platform.OS === 'android' ? style : undefined,
+        ]}
+      >
+        <SvgUri
+          width={imageSize?.width}
+          height={imageSize?.height}
+          uri={uri}
+          style={{ overflow: 'hidden', ...style }}
+        />
+      </View>
+    </TouchableWithoutFeedback>
+  ) : (
+    <TouchableWithoutFeedback onPress={onClick}>
+      <Image
+        source={{ uri }}
+        alt={alt}
+        style={{
+          resizeMode: fit,
+          ...imageSize,
+          ...style,
+        }}
+        blurRadius={blurRadius}
+      />
+    </TouchableWithoutFeedback>
+  );
+};
+
 const ZoomableImage = ({
   uri,
   alt,
@@ -184,39 +248,7 @@ const ZoomableImage = ({
   contentType?: ImageContentType;
 }) => {
   if (!enableZoom) {
-    return contentType === 'image/svg+xml' ? (
-      <TouchableWithoutFeedback onPress={onClick}>
-        <View
-          style={[
-            {
-              ...imageSize,
-            },
-            // SVGs styling are not supported on Android
-            // And IDK why :( )
-            Platform.OS === 'android' ? style : undefined,
-          ]}
-        >
-          <SvgUri
-            width={imageSize?.width}
-            height={imageSize?.height}
-            uri={uri}
-            style={{ overflow: 'hidden', ...style }}
-          />
-        </View>
-      </TouchableWithoutFeedback>
-    ) : (
-      <TouchableWithoutFeedback onPress={onClick}>
-        <Image
-          source={{ uri }}
-          alt={alt}
-          style={{
-            resizeMode: fit,
-            ...imageSize,
-            ...style,
-          }}
-        />
-      </TouchableWithoutFeedback>
-    );
+    return <InnerImage uri={uri} alt={alt} imageSize={imageSize} style={style} fit={fit} contentType={contentType} />;
   }
 
   return (

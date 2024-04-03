@@ -68,6 +68,7 @@ const ConversationPage = ({ navigation: rootNavigation }: ConversationProp) => {
   if (isQueryActive) {
     return <SearchConversationResults query={query} conversations={flatConversations} />;
   }
+
   return (
     <FlatList
       data={flatConversations}
@@ -93,15 +94,15 @@ const ConversationPage = ({ navigation: rootNavigation }: ConversationProp) => {
 };
 
 const ConversationTileWithYourself = () => {
-  const user = useProfile().data;
+  const { data:profile } = useProfile();
   const odinId = useAuth().getIdentity();
   const navigation = useNavigation<NavigationProp<AppStackParamList>>();
-  if (!user) return null;
+
   return (
     <ConversationTile
       odinId={odinId || ''}
       conversation={{
-        title: `${user?.firstName} ${user?.surName} `,
+        title: profile ? `${profile?.firstName} ${profile?.surName} ` : '',
         recipient: '',
       }}
       conversationId={ConversationWithYourselfId}
