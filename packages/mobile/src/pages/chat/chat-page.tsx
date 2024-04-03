@@ -3,7 +3,7 @@ import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AppStackParamList } from '../../app/App';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Alert, Keyboard, Platform, Pressable, View } from 'react-native';
+import { Keyboard, Platform, Pressable, View } from 'react-native';
 import { ChatAppBar } from '../../components/Chat/Chat-app-bar';
 import { Asset } from 'react-native-image-picker';
 import { ChatDeletedArchivalStaus, ChatMessage } from '../../provider/chat/ChatProvider';
@@ -117,6 +117,7 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
     ({ coords, message }: { coords: { x: number; y: number }; message: ChatMessageIMessage }) => {
       setMessageCordinates(coords);
       setSelectedMessage(message);
+      setshowChatReactionPopup(true);
     },
     []
   );
@@ -199,9 +200,11 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
 
   const openEmojiModal = useCallback(() => {
     emojiPickerSheetModalRef.current?.present();
+    setshowChatReactionPopup(false);
   }, []);
 
   const [selectedReactionMessage, setSelectedReactionMessage] = useState<ChatMessageIMessage>();
+  const [showChatReactionPopup, setshowChatReactionPopup] = useState(false);
 
   const openReactionModal = useCallback((message: ChatMessageIMessage) => {
     setSelectedReactionMessage(message);
@@ -305,6 +308,7 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
             selectedMessage={selectedMessage}
             setSelectedMessage={setSelectedMessage}
             openEmojiPicker={openEmojiModal}
+            showReaction={showChatReactionPopup}
           />
         </Host>
       </View>

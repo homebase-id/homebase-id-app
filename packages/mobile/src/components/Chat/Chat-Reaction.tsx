@@ -23,10 +23,12 @@ const ChatReaction = ({
   messageCordinates,
   setSelectedMessage,
   openEmojiPicker,
+  showReaction,
 }: {
   selectedMessage: ChatMessageIMessage | undefined;
   setSelectedMessage: (message: ChatMessageIMessage | undefined) => void;
   messageCordinates: { x: number; y: number };
+  showReaction: boolean;
   openEmojiPicker: () => void;
 }) => {
   const scale = useSharedValue(0);
@@ -136,7 +138,7 @@ const ChatReaction = ({
 
   const { isDarkMode } = useDarkMode();
 
-  if (!selectedMessage) {
+  if (!selectedMessage || !showReaction) {
     return null;
   }
 
