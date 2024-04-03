@@ -7,7 +7,6 @@ import { useDarkMode } from '../../hooks/useDarkMode';
 import { ChatMessageIMessage } from './ChatDetail';
 import { ReactNode, useCallback } from 'react';
 import { Copy, Info, Reply, Trash } from '../ui/Icons/icons';
-import Clipboard from '@react-native-clipboard/clipboard';
 import Toast from 'react-native-toast-message';
 
 export type SelectedMessageProp = {
