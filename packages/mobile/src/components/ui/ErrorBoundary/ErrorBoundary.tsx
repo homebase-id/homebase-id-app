@@ -3,16 +3,11 @@ import { View, Text, Button, ScrollView } from 'react-native';
 import Toast from 'react-native-toast-message';
 import Clipboard from '@react-native-clipboard/clipboard';
 
-// import { ActionButton } from '../Buttons/ActionButton';
-// import { Arrow } from '../Icons/Arrow';
-// import { Refresh } from '../Icons/Refresh';
-// import { Clipboard } from '../Icons/Clipboard';
-
 type ErrorBoundaryProps = {
-  children: ReactNode; // like this
+  children: ReactNode;
 };
 type ErrorBoundaryState = {
-  hasError: boolean; // like this
+  hasError: boolean;
   showDetails: boolean;
   errorTitle?: string;
   details?: unknown;
@@ -93,47 +88,6 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
             </View>
           ) : null}
         </View>
-
-        // <div className="p-5 flex flex-col gap-2">
-        //   <h1 className="text-xl">Oops, that&apos;s an error.</h1>
-        //   <p>Something went wrong while rendering this component.</p>
-        //   <div className="mt-5 flex flex-row justify-between">
-        //     <ActionButton
-        //       onClick={() => window.location.reload()}
-        //       className="flex flex-row items-center gap-2 hover:underline"
-        //       type="secondary"
-        //     >
-        //       Retry <Refresh className="h-4 w-4" />{' '}
-        //     </ActionButton>
-
-        //     <button
-        //       onClick={() => this.setState({ ...this.state, showDetails: !this.state.showDetails })}
-        //       className="flex flex-row items-center gap-2 hover:underline"
-        //     >
-        //       {this.state.showDetails ? 'Less' : 'More'} information <Arrow className="h-4 w-4" />
-        //     </button>
-        //   </div>
-        //   {this.state.showDetails ? (
-        //     <>
-        //       <div className="overflow-auto">
-        //         <pre>
-        //           <code>{detailText}</code>
-        //         </pre>
-        //       </div>
-        //       <div className="flex flex-row-reverse">
-        //         <ActionButton
-        //           onClick={() => {
-        //             detailText && navigator.clipboard.writeText(detailText);
-        //           }}
-        //           type="secondary"
-        //           icon={Clipboard}
-        //         >
-        //           Copy
-        //         </ActionButton>
-        //       </div>
-        //     </>
-        //   ) : null}
-        // </div>
       );
     }
 
