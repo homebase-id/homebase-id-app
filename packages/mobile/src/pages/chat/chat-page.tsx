@@ -135,7 +135,11 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
   const doSend = useCallback(
     (message: ChatMessageIMessage[]) => {
       // If the chat was empty, invite the recipient
-      if (messages.length === 0 && conversation && route.params.convoId !== ConversationWithYourselfId) {
+      if (
+        messages.length === 0 &&
+        conversation &&
+        route.params.convoId !== ConversationWithYourselfId
+      ) {
         inviteRecipient({
           conversation: conversation,
         });
@@ -168,7 +172,15 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
       setAssets([]);
       setReplyMessage(null);
     },
-    [messages.length, conversation, route.params.convoId, sendMessage, replyMessage?.fileMetadata.appData.uniqueId, assets, inviteRecipient]
+    [
+      messages.length,
+      conversation,
+      route.params.convoId,
+      sendMessage,
+      replyMessage?.fileMetadata.appData.uniqueId,
+      assets,
+      inviteRecipient,
+    ]
   );
 
   useEffect(() => {
@@ -177,7 +189,16 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
       doSend([]);
     }
     if (sendMessageState === 'pending') resetState();
-  }, [conversation, inviteRecipient, messages.length, sendMessageState, resetState, assets, doSend, route.params.convoId]);
+  }, [
+    conversation,
+    inviteRecipient,
+    messages.length,
+    sendMessageState,
+    resetState,
+    assets,
+    doSend,
+    route.params.convoId,
+  ]);
 
   // ref
   const emojiPickerSheetModalRef = useRef<BottomSheetModal>(null);

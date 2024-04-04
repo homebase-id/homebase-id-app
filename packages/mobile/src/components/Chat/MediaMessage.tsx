@@ -4,7 +4,7 @@ import { memo } from 'react';
 import { MessageImageProps } from 'react-native-gifted-chat';
 import { ChatDrive } from '../../provider/chat/ConversationProvider';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { AppStackParamList } from '../../app/App';
+import { ChatStackParamList } from '../../app/App';
 import { VideoWithLoader } from '../ui/Media/VideoWithLoader';
 import { OdinImage } from '../ui/OdinImage/OdinImage';
 import { ChatMessage } from '../../provider/chat/ChatProvider';
@@ -13,7 +13,7 @@ import { ChatMessageIMessage } from './ChatDetail';
 import { OdinAudio } from '../ui/OdinAudio/OdinAudio';
 
 const MediaMessage = memo((props: MessageImageProps<ChatMessageIMessage>) => {
-  const navigation = useNavigation<NavigationProp<AppStackParamList>>();
+  const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
   if (!props.currentMessage) return null;
   const { currentMessage } = props;
   const payloads = currentMessage.fileMetadata.payloads;
@@ -96,7 +96,7 @@ const MediaGallery = ({ msg: currentMessage }: { msg: HomebaseFile<ChatMessage> 
   const payloads = currentMessage.fileMetadata.payloads;
   const maxVisible = 4;
   const countExcludedFromView = payloads.length - maxVisible;
-  const navigation = useNavigation<NavigationProp<AppStackParamList>>();
+  const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
   const isGallery = payloads.length >= 2;
 
   return (

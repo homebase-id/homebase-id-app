@@ -1,7 +1,7 @@
 import { FlatList } from 'react-native-gesture-handler';
 
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { AppStackParamList, ChatStackParamList } from '../app/App';
+import { ChatStackParamList } from '../app/App';
 
 import { useAllConnections } from 'feed-app-common';
 
@@ -27,7 +27,6 @@ const ListHeaderComponent = () => {
 export const ContactPage = memo(
   ({ navigation }: { navigation: NavigationProp<ChatStackParamList, 'NewChat'> }) => {
     const connections = useAllConnections(true).data;
-    const nav = useNavigation<NavigationProp<AppStackParamList>>();
     if (!connections) return null;
     return (
       <FlatList
@@ -39,7 +38,7 @@ export const ContactPage = memo(
             item={item}
             onOpen={(conversationId) => {
               navigation.goBack();
-              nav.navigate('ChatScreen', {
+              navigation.navigate('ChatScreen', {
                 convoId: conversationId,
               });
             }}

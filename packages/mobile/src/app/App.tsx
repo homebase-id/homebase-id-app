@@ -3,6 +3,7 @@ import {
   DefaultTheme,
   NavigationContainer,
   NavigationProp,
+  createNavigationContainerRef,
   useNavigation,
 } from '@react-navigation/native';
 
@@ -65,6 +66,7 @@ import {
 import { AudioContextProvider } from '../components/AudioContext/AudioContext';
 import { useInitialPushNotification } from '../hooks/push-notification/useInitialPushNotification';
 import { ErrorBoundary } from '../components/ui/ErrorBoundary/ErrorBoundary';
+import { RouteContextProvider, useRouteContext } from '../components/RouteContext/RouteContext';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -95,6 +97,22 @@ export type ChatStackParamList = {
   Conversation: undefined;
   NewChat: undefined;
   NewGroup: undefined;
+
+  ChatScreen: { convoId: string };
+  ChatInfo: { convoId: string };
+  MessageInfo: {
+    message: HomebaseFile<ChatMessage>;
+    conversation: HomebaseFile<Conversation>;
+  };
+  EditGroup: { convoId: string };
+  PreviewMedia: {
+    msg: HomebaseFile<ChatMessage>;
+    fileId: string;
+    payloadKey: string;
+    currIndex: number;
+    type?: string;
+    previewThumbnail?: EmbeddedThumb;
+  };
 };
 
 const queryClient = new QueryClient({
@@ -165,8 +183,10 @@ let App = () => {
     >
       <GestureHandlerRootView style={{ flex: 1 }}>
         <PushNotificationProvider>
-          <RootStack />
-          <Toast />
+          <RouteContextProvider>
+            <RootStack />
+            <Toast />
+          </RouteContextProvider>
         </PushNotificationProvider>
       </GestureHandlerRootView>
     </PersistQueryClientProvider>
@@ -176,13 +196,25 @@ let App = () => {
 const codePushOptions = { checkFrequency: CodePush.CheckFrequency.MANUAL };
 App = CodePush(codePushOptions)(App);
 
+const ref = createNavigationContainerRef();
 const StackRoot = createNativeStackNavigator<AuthStackParamList>();
 const RootStack = () => {
   const { isAuthenticated } = useAuth();
   const { isDarkMode } = useDarkMode();
+  const { setRouteName } = useRouteContext();
 
   return (
-    <NavigationContainer theme={isDarkMode ? DarkTheme : DefaultTheme}>
+    <NavigationContainer
+      ref={ref}
+      theme={isDarkMode ? DarkTheme : DefaultTheme}
+      onReady={() => {
+        setRouteName(ref.getCurrentRoute()?.name || null);
+      }}
+      onStateChange={async () => {
+        const currentRouteName = ref.getCurrentRoute()?.name || null;
+        setRouteName(currentRouteName);
+      }}
+    >
       <StackRoot.Navigator screenOptions={{ headerShown: false }}>
         {isAuthenticated ? (
           <StackRoot.Screen name="Authenticated" component={AuthenticatedRoot} />
@@ -207,100 +239,25 @@ const AuthenticatedRoot = () => {
   );
 };
 
-export type AppStackParamList = {
-  TabStack: undefined;
-  ChatScreen: { convoId: string };
-  ChatInfo: { convoId: string };
-  MessageInfo: {
-    message: HomebaseFile<ChatMessage>;
-    conversation: HomebaseFile<Conversation>;
-  };
-  EditGroup: { convoId: string };
-  PreviewMedia: {
-    msg: HomebaseFile<ChatMessage>;
-    fileId: string;
-    payloadKey: string;
-    currIndex: number;
-    type?: string;
-    previewThumbnail?: EmbeddedThumb;
-  };
-};
-
-const AppStack = createNativeStackNavigator<AppStackParamList>();
 const AppStackScreen = () => {
+  // CHECK: Re-renders a lot because of all the hooks, is it faster to move them in a separate component?
   useValidTokenCheck();
   useRefreshOnFocus();
   useLiveChatProcessor();
   useAuthenticatedPushNotification();
   useInitialPushNotification();
 
-  // CHECK: Re-renders a lot because of all the hooks, is it faster to move them in a separate component?
-  return (
-    <AppStack.Navigator
-      screenOptions={{
-        headerShown: false,
-      }}
-    >
-      <AppStack.Screen name="TabStack" component={TabStack} />
-
-      {/* All that follows need to move to the ChatAppStack, so simple navigations don't end up in a stack change */}
-      <AppStack.Screen
-        name="ChatScreen"
-        component={ChatPage}
-        options={{
-          gestureEnabled: true,
-        }}
-      />
-      <AppStack.Screen
-        name="PreviewMedia"
-        component={PreviewMedia}
-        options={{
-          headerShown: true,
-          gestureEnabled: true,
-          title: '',
-          headerBackTitleVisible: false,
-
-          headerTransparent: true,
-        }}
-      />
-      <AppStack.Screen
-        name="ChatInfo"
-        component={ChatInfoPage}
-        options={{
-          gestureEnabled: true,
-          headerTitle: 'Chat Info',
-          headerBackTitleVisible: false,
-          headerShown: false,
-        }}
-      />
-      <AppStack.Screen
-        name="MessageInfo"
-        component={MessageInfoPage}
-        options={{
-          gestureEnabled: true,
-          headerTitle: 'Message Info',
-          headerBackTitleVisible: false,
-          headerShown: true,
-        }}
-      />
-      <AppStack.Screen
-        name="EditGroup"
-        component={EditGroupPage}
-        options={{
-          gestureEnabled: true,
-          headerTitle: 'Edit Group',
-          headerBackTitleVisible: false,
-          headerShown: false,
-        }}
-      />
-    </AppStack.Navigator>
-  );
+  return <TabStack />;
 };
 
 const TabBottom = createBottomTabNavigator<TabStackParamList>();
 const TabStack = () => {
   const { isDarkMode } = useDarkMode();
 
+  const rootRoutes = ['Home', 'Feed', 'Chat', 'Profile', 'Conversation', 'NewChat', 'NewGroup'];
+  const { routeName } = useRouteContext();
+  const hide = !routeName || !rootRoutes.includes(routeName);
+  // TODO: Hide seems slow for the chat-page.. While actually it's the ChatScreen being slow in detecting it's correct size
   return (
     <TabBottom.Navigator
       screenOptions={{
@@ -336,6 +293,9 @@ const TabStack = () => {
         options={{
           tabBarIcon: TabChatIcon,
           headerShown: false,
+          tabBarStyle: hide
+            ? { display: 'none' }
+            : { backgroundColor: isDarkMode ? Colors.indigo[900] : Colors.indigo[100] },
         }}
       />
       <TabBottom.Screen
@@ -379,7 +339,11 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
   }, [navigation]);
 
   return (
-    <StackChat.Navigator>
+    <StackChat.Navigator
+      screenOptions={{
+        headerShown: false,
+      }}
+    >
       <StackChat.Screen
         name="Conversation"
         component={ConversationsPage}
@@ -432,6 +396,56 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
           }}
         />
       </StackChat.Group>
+
+      <StackChat.Screen
+        name="ChatScreen"
+        component={ChatPage}
+        options={{
+          gestureEnabled: true,
+        }}
+      />
+      <StackChat.Screen
+        name="PreviewMedia"
+        component={PreviewMedia}
+        options={{
+          headerShown: true,
+          gestureEnabled: true,
+          title: '',
+          headerBackTitleVisible: false,
+
+          headerTransparent: true,
+        }}
+      />
+      <StackChat.Screen
+        name="ChatInfo"
+        component={ChatInfoPage}
+        options={{
+          gestureEnabled: true,
+          headerTitle: 'Chat Info',
+          headerBackTitleVisible: false,
+          headerShown: false,
+        }}
+      />
+      <StackChat.Screen
+        name="MessageInfo"
+        component={MessageInfoPage}
+        options={{
+          gestureEnabled: true,
+          headerTitle: 'Message Info',
+          headerBackTitleVisible: false,
+          headerShown: true,
+        }}
+      />
+      <StackChat.Screen
+        name="EditGroup"
+        component={EditGroupPage}
+        options={{
+          gestureEnabled: true,
+          headerTitle: 'Edit Group',
+          headerBackTitleVisible: false,
+          headerShown: false,
+        }}
+      />
     </StackChat.Navigator>
   );
 };

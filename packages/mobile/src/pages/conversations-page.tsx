@@ -25,9 +25,7 @@ import { ErrorBoundary } from '../components/ui/ErrorBoundary/ErrorBoundary';
 
 type ConversationProp = NativeStackScreenProps<ChatStackParamList, 'Conversation'>;
 
-export const ConversationsPage = memo(({ navigation: rootNavigation }: ConversationProp) => {
-  const navigation = useNavigation<NavigationProp<AppStackParamList>>();
-
+export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
   const { data: conversations } = useConversations().all;
   const flatConversations = useMemo(
     () =>
@@ -42,7 +40,7 @@ export const ConversationsPage = memo(({ navigation: rootNavigation }: Conversat
   const { isDarkMode } = useDarkMode();
 
   useLayoutEffect(() => {
-    rootNavigation.setOptions({
+    navigation.setOptions({
       headerSearchBarOptions: {
         hideWhenScrolling: true,
         headerIconColor: isDarkMode ? Colors.white : Colors.black,
@@ -60,7 +58,7 @@ export const ConversationsPage = memo(({ navigation: rootNavigation }: Conversat
         },
       },
     });
-  }, [isDarkMode, rootNavigation]);
+  }, [isDarkMode, navigation]);
 
   const isQueryActive = !!(query && query.length >= 1);
   if (isQueryActive) {
@@ -106,7 +104,7 @@ const RemoveNotifications = memo(() => {
 const ConversationTileWithYourself = () => {
   const { data: profile } = useProfile();
   const odinId = useAuth().getIdentity();
-  const navigation = useNavigation<NavigationProp<AppStackParamList>>();
+  const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
 
   return (
     <ConversationTile
@@ -178,7 +176,7 @@ const SearchConversationResults = memo(
         ),
       [contactResults, conversationResults]
     );
-    const navigation = useNavigation<NavigationProp<AppStackParamList>>();
+    const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
 
     if (!isActive) return null;
 
