@@ -166,7 +166,7 @@ export const OdinImage = memo(
   }
 );
 
-const InnerImage = ({
+const InnerImage = memo(({
   uri,
   alt,
   imageSize,
@@ -223,7 +223,7 @@ const InnerImage = ({
       />
     </TouchableWithoutFeedback>
   );
-};
+});
 
 const ZoomableImage = ({
   uri,
