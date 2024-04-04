@@ -183,7 +183,7 @@ const MediaGallery = ({ msg: currentMessage }: { msg: HomebaseFile<ChatMessage> 
             position: 'absolute',
             bottom: 0,
             right: 0,
-            borderRadius: 10,
+            // borderRadius: 10,
             backgroundColor: 'rgba(0,0,0,0.5)',
             alignItems: 'center',
             justifyContent: 'center',

@@ -83,7 +83,8 @@ export const OdinImage = memo(
     });
 
     const previewUrl = cachedImage?.url || embeddedThumbUrl || tinyThumb?.url;
-    const previewContentType = cachedImage?.type || previewThumbnail?.contentType || tinyThumb?.contentType;
+    const previewContentType =
+      cachedImage?.type || previewThumbnail?.contentType || tinyThumb?.contentType;
 
     const naturalSize: ImageSize | undefined = tinyThumb
       ? {
@@ -183,7 +184,6 @@ const InnerImage = ({
   alt?: string;
   style?: ImageStyle;
   fit?: 'cover' | 'contain';
-
   onClick?: () => void;
 
   contentType?: ImageContentType;
@@ -197,7 +197,6 @@ const InnerImage = ({
             ...style,
           },
           // SVGs styling are not supported on Android
-          // And IDK why :( )
           Platform.OS === 'android' ? style : undefined,
         ]}
       >
@@ -242,13 +241,22 @@ const ZoomableImage = ({
   style?: ImageStyle;
   fit?: 'cover' | 'contain';
   enableZoom?: boolean;
-
   onClick?: () => void;
 
   contentType?: ImageContentType;
 }) => {
   if (!enableZoom) {
-    return <InnerImage uri={uri} alt={alt} imageSize={imageSize} style={style} fit={fit} contentType={contentType} />;
+    return (
+      <InnerImage
+        uri={uri}
+        alt={alt}
+        imageSize={imageSize}
+        style={style}
+        fit={fit}
+        contentType={contentType}
+        onClick={onClick}
+      />
+    );
   }
 
   return (
