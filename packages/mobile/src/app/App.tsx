@@ -64,6 +64,7 @@ import {
 } from '../components/Nav/TabStackIcons';
 import { AudioContextProvider } from '../components/AudioContext/AudioContext';
 import { useInitialPushNotification } from '../hooks/push-notification/useInitialPushNotification';
+import { ErrorBoundary } from '../components/ui/ErrorBoundary/ErrorBoundary';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -198,7 +199,9 @@ const AuthenticatedRoot = () => {
   return (
     <DotYouClientProvider>
       <AudioContextProvider>
-        <AppStackScreen />
+        <ErrorBoundary>
+          <AppStackScreen />
+        </ErrorBoundary>
       </AudioContextProvider>
     </DotYouClientProvider>
   );

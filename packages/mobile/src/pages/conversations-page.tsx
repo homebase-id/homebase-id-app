@@ -21,6 +21,7 @@ import { useAllContacts } from 'feed-app-common';
 import { Colors } from '../app/Colors';
 import { useDarkMode } from '../hooks/useDarkMode';
 import { CHAT_APP_ID } from '../app/constants';
+import { ErrorBoundary } from '../components/ui/ErrorBoundary/ErrorBoundary';
 
 type ConversationProp = NativeStackScreenProps<ChatStackParamList, 'Conversation'>;
 
@@ -66,30 +67,36 @@ export const ConversationsPage = ({ navigation: rootNavigation }: ConversationPr
   }, [isDarkMode, rootNavigation]);
 
   if (isQueryActive) {
-    return <SearchConversationResults query={query} conversations={flatConversations} />;
+    return (
+      <ErrorBoundary>
+        <SearchConversationResults query={query} conversations={flatConversations} />
+      </ErrorBoundary>
+    );
   }
 
   return (
-    <FlatList
-      data={flatConversations}
-      keyExtractor={(item) => item.fileId}
-      ListHeaderComponent={ConversationTileWithYourself}
-      contentInsetAdjustmentBehavior="automatic"
-      renderItem={({ item }) => (
-        <ConversationTile
-          conversation={item.fileMetadata.appData.content}
-          conversationId={item.fileMetadata.appData.uniqueId}
-          onPress={() => {
-            if (item.fileMetadata.appData.uniqueId) {
-              navigation.navigate('ChatScreen', {
-                convoId: item.fileMetadata.appData.uniqueId,
-              });
-            }
-          }}
-          odinId={(item.fileMetadata.appData.content as SingleConversation).recipient}
-        />
-      )}
-    />
+    <ErrorBoundary>
+      <FlatList
+        data={flatConversations}
+        keyExtractor={(item) => item.fileId}
+        ListHeaderComponent={ConversationTileWithYourself}
+        contentInsetAdjustmentBehavior="automatic"
+        renderItem={({ item }) => (
+          <ConversationTile
+            conversation={item.fileMetadata.appData.content}
+            conversationId={item.fileMetadata.appData.uniqueId}
+            onPress={() => {
+              if (item.fileMetadata.appData.uniqueId) {
+                navigation.navigate('ChatScreen', {
+                  convoId: item.fileMetadata.appData.uniqueId,
+                });
+              }
+            }}
+            odinId={(item.fileMetadata.appData.content as SingleConversation).recipient}
+          />
+        )}
+      />
+    </ErrorBoundary>
   );
 };
 
