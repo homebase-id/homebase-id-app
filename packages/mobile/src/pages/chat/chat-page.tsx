@@ -120,6 +120,9 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
 
   const doSelectMessage = useCallback(
     ({ coords, message }: { coords: { x: number; y: number }; message: ChatMessageIMessage }) => {
+      if (message && message.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus) {
+        return;
+      }
       setMessageCordinates(coords);
       setSelectedMessage(message);
       setshowChatReactionPopup(true);
