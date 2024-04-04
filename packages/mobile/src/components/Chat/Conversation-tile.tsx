@@ -4,6 +4,7 @@ import {
   StyleProp,
   StyleSheet,
   Text,
+  TextStyle,
   TouchableOpacity,
   View,
   ViewStyle,
@@ -14,7 +15,7 @@ import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { Colors } from '../../app/Colors';
 import { Conversation } from '../../provider/chat/ConversationProvider';
 import { useChatMessages } from '../../hooks/chat/useChatMessages';
-import { ChatMessage } from '../../provider/chat/ChatProvider';
+import { ChatDeletedArchivalStaus, ChatMessage } from '../../provider/chat/ChatProvider';
 import { Users } from '../ui/Icons/icons';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { ChatSentTimeIndicator } from './Chat-Sent-Time-Indicator';
@@ -194,6 +195,9 @@ const ConversationTile = memo((props: ConversationTileProps) => {
                   {
                     color: isDarkMode ? Colors.white : Colors.slate[900],
                   },
+                  lastMessage.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus
+                    ? styles.deleted
+                    : undefined,
                 ]}
               >
                 <ChatMessageContent {...lastMessage} />
@@ -241,6 +245,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     borderRadius: 5,
   },
+  deleted: {
+    textDecorationLine: 'line-through',
+    color: Colors.gray[500],
+  } as TextStyle,
   content: {
     borderRadius: 8,
     alignSelf: 'center',
