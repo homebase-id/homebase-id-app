@@ -258,7 +258,7 @@ export const ChatDetail = memo(
                   }}
                 />
 
-                <View style={{ width: 6 }} />
+                <View style={{ width: 12 }} />
 
                 <Send
                   {...props}
