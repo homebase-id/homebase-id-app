@@ -72,7 +72,7 @@ const useInboxProcessor = (connected?: boolean) => {
   });
 };
 
-const isDebug = true;
+const isDebug = __DEV__;
 
 const useChatWebsocket = (isEnabled: boolean) => {
   const identity = useDotYouClientContext().getIdentity();
@@ -126,8 +126,10 @@ const useChatWebsocket = (isEnabled: boolean) => {
             ChatDrive,
             true
           );
-          if (!updatedChatMessage) {
-            console.error('Failed to parse message', notification.header.fileId);
+          if (
+            !updatedChatMessage ||
+            Object.keys(updatedChatMessage.fileMetadata.appData.content).length === 0
+          ) {
             queryClient.invalidateQueries({ queryKey: ['chat-messages', conversationId] });
             return;
           }
