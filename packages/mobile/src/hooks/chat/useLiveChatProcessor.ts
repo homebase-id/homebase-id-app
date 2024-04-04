@@ -13,7 +13,7 @@ import { processInbox } from '@youfoundation/js-lib/peer';
 import { useNotificationSubscriber } from '../useNotificationSubscriber';
 import { useCallback, useEffect, useRef } from 'react';
 
-import { hasDebugFlag, stringGuidsEqual, tryJsonParse } from '@youfoundation/js-lib/helpers';
+import { stringGuidsEqual, tryJsonParse } from '@youfoundation/js-lib/helpers';
 import { getSingleConversation, useConversation } from './useConversation';
 import { processCommand } from '../../provider/chat/ChatCommandProvider';
 import { useDotYouClientContext } from 'feed-app-common';
@@ -72,7 +72,7 @@ const useInboxProcessor = (connected?: boolean) => {
   });
 };
 
-const isDebug = hasDebugFlag();
+const isDebug = __DEV__;
 
 const useChatWebsocket = (isEnabled: boolean) => {
   const identity = useDotYouClientContext().getIdentity();
@@ -164,10 +164,10 @@ const useChatWebsocket = (isEnabled: boolean) => {
                   ? [updatedChatMessage, ...page.searchResults]
                   : page.searchResults
                 : page.searchResults.map((msg) =>
-                    stringGuidsEqual(msg?.fileId, updatedChatMessage.fileId)
-                      ? updatedChatMessage
-                      : msg
-                  ),
+                  stringGuidsEqual(msg?.fileId, updatedChatMessage.fileId)
+                    ? updatedChatMessage
+                    : msg
+                ),
             })),
           };
           queryClient.setQueryData(['chat-messages', conversationId], newData);

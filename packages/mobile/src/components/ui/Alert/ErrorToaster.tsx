@@ -20,6 +20,8 @@ export const ErrorToaster = () => {
         onHide: () => dismissError(error),
         type: 'error',
         position: 'bottom',
+        visibilityTime: 2000,
+        swipeable: true,
         onPress: () => {
           Alert.alert(
             error.correlationId || 'Error',
