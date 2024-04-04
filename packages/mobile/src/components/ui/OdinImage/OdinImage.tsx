@@ -17,7 +17,6 @@ import useImage from './hooks/useImage';
 import useTinyThumb from './hooks/useTinyThumb';
 import { SvgUri } from 'react-native-svg';
 import { ImageZoom } from '@likashefqet/react-native-image-zoom';
-import { ErrorNotification } from '../Alert/ErrorNotification';
 
 export interface OdinImageProps {
   odinId?: string;

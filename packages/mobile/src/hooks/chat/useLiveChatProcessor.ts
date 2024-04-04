@@ -209,7 +209,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
         }
       }
     }
-  }, []);
+  }, [dotYouClient, identity, queryClient, restoreChat]);
 
   return useNotificationSubscriber(
     isEnabled ? handler : undefined,
