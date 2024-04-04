@@ -119,7 +119,7 @@ export const OdinImage = memo(
               uri={previewUrl}
               contentType={previewContentType as ImageContentType}
               style={{
-                position: 'absolute',
+                position: imageData ? 'absolute' : 'relative',
                 top: 0,
                 left: 0,
                 right: 0,
