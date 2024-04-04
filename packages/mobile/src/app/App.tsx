@@ -234,6 +234,7 @@ const AppStackScreen = () => {
   useAuthenticatedPushNotification();
   useInitialPushNotification();
 
+  // CHECK: Re-renders a lot because of all the hooks, is it faster to move them in a separate component?
   return (
     <AppStack.Navigator
       screenOptions={{
@@ -241,6 +242,8 @@ const AppStackScreen = () => {
       }}
     >
       <AppStack.Screen name="TabStack" component={TabStack} />
+
+      {/* All that follows need to move to the ChatAppStack, so simple navigations don't end up in a stack change */}
       <AppStack.Screen
         name="ChatScreen"
         component={ChatPage}

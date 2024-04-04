@@ -1,6 +1,8 @@
-import { useMutation, useQuery, useQueryClient, InfiniteData } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Conversation,
+  ConversationWithYourself,
+  ConversationWithYourselfId,
   GroupConversation,
   SingleConversation,
   getConversation,
@@ -15,7 +17,7 @@ import {
   NewHomebaseFile,
   SecurityGroupType,
 } from '@youfoundation/js-lib/core';
-import { getNewId, getNewXorId } from '@youfoundation/js-lib/helpers';
+import { getNewId, getNewXorId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useConversations } from './useConversations';
 
 import { useDotYouClientContext } from 'feed-app-common';
@@ -25,7 +27,10 @@ export const getSingleConversation = async (
   dotYouClient: DotYouClient,
   conversationId: string | undefined
 ) => {
-  return conversationId ? await getConversation(dotYouClient, conversationId) : null;
+  if (!conversationId) return null;
+  if (stringGuidsEqual(conversationId, ConversationWithYourselfId)) return ConversationWithYourself;
+
+  return await getConversation(dotYouClient, conversationId);
 };
 
 export const useConversation = (props?: { conversationId?: string | undefined }) => {
