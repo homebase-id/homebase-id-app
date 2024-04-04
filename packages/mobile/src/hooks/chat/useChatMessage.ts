@@ -155,6 +155,8 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
         console.error('Failed to send the chat message', err);
         queryClient.setQueryData(['chat-messages', messageParams.conversationId], context?.existingData);
       },
+      retry: 3,
+      throwOnError: true,
       onSettled: async (_data, _error, variables) => {
         queryClient.invalidateQueries({ queryKey: ['chat-messages', variables.conversationId] });
       },
