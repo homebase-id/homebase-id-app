@@ -23,7 +23,7 @@ export const useAuthenticatedPushNotification = () => {
       messaging()
         .getToken()
         .then((token) => {
-          console.debug('FCM Token:', token);
+          // console.debug('FCM Token:', token);
           setDeviceToken(token);
         })
         .catch((error) => {
@@ -66,7 +66,7 @@ export const useAuthenticatedPushNotification = () => {
   useEffect(() => {
     const uploadDeviceToken = async (): Promise<void> => {
       if (deviceToken) {
-        console.log('updating device token', deviceToken);
+        // console.log('updating device token', deviceToken);
         mutate();
       }
     };
