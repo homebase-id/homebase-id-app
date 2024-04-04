@@ -220,6 +220,12 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
     reactionModalRef.current?.present();
   }, []);
 
+  const dismissSelectedMessage = useCallback(() => {
+    emojiPickerSheetModalRef.current?.dismiss();
+    reactionModalRef.current?.dismiss();
+    setSelectedMessage(undefined);
+  }, []);
+
   if (!conversationContent) return null;
 
   return (
@@ -244,7 +250,7 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
                 : (conversationContent?.fileMetadata.appData.content as SingleConversation)
                     .recipient
             }
-            goBack={navigation.goBack}
+            goBack={selectedMessage ? dismissSelectedMessage : navigation.goBack}
             onPress={() => navigation.navigate('ChatInfo', { convoId: route.params.convoId })}
             isSelf={route.params.convoId === ConversationWithYourselfId}
             selectedMessage={selectedMessage}
@@ -295,11 +301,7 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
           <ChatConnectedState {...conversationContent} />
           <Host>
             <Pressable
-              onPress={() => {
-                emojiPickerSheetModalRef.current?.dismiss();
-                reactionModalRef.current?.dismiss();
-                setSelectedMessage(undefined);
-              }}
+              onPress={dismissSelectedMessage}
               disabled={selectedMessage === undefined}
               style={{ flex: 1 }}
             >
