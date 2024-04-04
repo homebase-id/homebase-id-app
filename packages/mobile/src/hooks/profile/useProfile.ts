@@ -7,7 +7,7 @@ import {
 } from '@youfoundation/js-lib/profile';
 import { useDotYouClientContext } from 'feed-app-common';
 
-const useProfile = () => {
+export const useProfile = () => {
   const dotYouClient = useDotYouClientContext();
 
   const fetchProfile = async () => {
@@ -40,7 +40,5 @@ const useProfile = () => {
     };
   };
 
-  return useQuery({ queryKey: ['profile-data'], queryFn: fetchProfile, staleTime: 1000 * 60 * 60});
+  return useQuery({ queryKey: ['profile-data'], queryFn: fetchProfile});
 };
-
-export { useProfile };

@@ -94,7 +94,7 @@ export const ConversationsPage = ({ navigation: rootNavigation }: ConversationPr
 };
 
 const ConversationTileWithYourself = () => {
-  const { data:profile } = useProfile();
+  const { data: profile } = useProfile();
   const odinId = useAuth().getIdentity();
   const navigation = useNavigation<NavigationProp<AppStackParamList>>();
 

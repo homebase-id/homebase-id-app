@@ -35,12 +35,12 @@ type ConversationTileProps = {
   isSelf?: boolean;
 };
 
-export const Avatar = (props: {
+export const Avatar = memo((props: {
   odinId: string;
   style?: ImageStyle;
   imageSize?: { width: number; height: number };
 }) => {
-  const { data:contact } = useContact(props.odinId).fetch;
+  const { data: contact } = useContact(props.odinId).fetch;
   return (
     <OdinImage
       fileId={contact?.fileId}
@@ -59,13 +59,14 @@ export const Avatar = (props: {
       lastModified={contact?.fileMetadata.updated}
     />
   );
-};
+});
 
-export const OwnerAvatar = (props: {
+export const OwnerAvatar = memo((props: {
   style?: ImageStyle;
   imageSize?: { width: number; height: number };
 }) => {
-  const {data: profileData} = useProfile();
+  const { data: profileData } = useProfile();
+
   return (
     <OdinImage
       fit="cover"
@@ -82,9 +83,9 @@ export const OwnerAvatar = (props: {
       }}
     />
   );
-};
+});
 
-export const GroupAvatar = (props: {
+export const GroupAvatar = memo((props: {
   style?: StyleProp<ViewStyle>;
   iconSize?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl' | number;
 }) => {
@@ -104,7 +105,7 @@ export const GroupAvatar = (props: {
       <Users size={props.iconSize} />
     </View>
   );
-};
+});
 
 const ConversationTile = memo((props: ConversationTileProps) => {
   const { data: chatMessages } = useChatMessages({

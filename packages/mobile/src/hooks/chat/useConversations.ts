@@ -27,7 +27,7 @@ export const useConversations = () => {
         async (convo) => {
           const conversationId = convo.fileMetadata.appData.uniqueId;
           const messagesA = await queryClient.fetchInfiniteQuery({
-            queryKey: ['chat', conversationId],
+            queryKey: ['chat-messages', conversationId],
             initialPageParam: undefined,
             queryFn: () => getChatMessages(dotYouClient, conversationId as string, undefined, 100),
           });
