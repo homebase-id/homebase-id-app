@@ -66,7 +66,7 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
       )?.map<ChatMessageIMessage>((value) => {
         // Mapping done here, because the chat component expects a different format
         return {
-          _id: value.fileMetadata.appData.uniqueId ?? value.fileId ?? getNewId(),
+          _id: value.fileId || value.fileMetadata.appData.uniqueId || getNewId(),
           createdAt: value.fileMetadata.created,
           text:
             value.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus
