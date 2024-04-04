@@ -1,6 +1,7 @@
 import { InfiniteData, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   HomebaseFile,
+  Notify,
   ReceivedCommand,
   TypedConnectionNotification,
   getCommands,
@@ -16,7 +17,12 @@ import { hasDebugFlag, stringGuidsEqual, tryJsonParse } from '@youfoundation/js-
 import { getSingleConversation, useConversation } from './useConversation';
 import { processCommand } from '../../provider/chat/ChatCommandProvider';
 import { useDotYouClientContext } from 'feed-app-common';
-import { ChatMessage, ChatMessageFileType, MARK_CHAT_READ_COMMAND, dsrToMessage } from '../../provider/chat/ChatProvider';
+import {
+  ChatMessage,
+  ChatMessageFileType,
+  MARK_CHAT_READ_COMMAND,
+  dsrToMessage,
+} from '../../provider/chat/ChatProvider';
 import { useAuth } from '../auth/useAuth';
 import {
   ChatDrive,
@@ -79,6 +85,22 @@ const useChatWebsocket = (isEnabled: boolean) => {
   const queryClient = useQueryClient();
 
   const handler = useCallback(async (notification: TypedConnectionNotification) => {
+    isDebug && console.debug('[ChatTransitProcessor] Got notification', notification);
+    if (notification.notificationType === 'transitFileReceived') {
+      isDebug &&
+        console.debug(
+          '[TransitProcessor] Replying to TransitFileReceived by sending processTransitInstructions for the targetDrive'
+        );
+
+      Notify({
+        command: 'processInbox',
+        data: JSON.stringify({
+          targetDrive: notification.externalFileIdentifier.targetDrive,
+          batchSize: 100,
+        }),
+      });
+    }
+
     isDebug && console.debug('[ChatWebsocket] Got notification', notification);
 
     if (
@@ -119,7 +141,9 @@ const useChatWebsocket = (isEnabled: boolean) => {
           ChatDrive,
           true
         );
-        if (!updatedChatMessage) return;
+        if (!updatedChatMessage) {
+          return;
+        }
 
         const extistingMessages = queryClient.getQueryData<
           InfiniteData<{
@@ -173,8 +197,9 @@ const useChatWebsocket = (isEnabled: boolean) => {
         command.id = notification.header.fileId;
 
         const processedCommand = await processCommand(dotYouClient, queryClient, command, identity);
-        if (processedCommand)
-          {await markCommandComplete(dotYouClient, ChatDrive, [processedCommand]);}
+        if (processedCommand) {
+          await markCommandComplete(dotYouClient, ChatDrive, [processedCommand]);
+        }
       }
     }
   }, []);
