@@ -15,6 +15,7 @@ export const ChatMessageContent = (message: HomebaseFile<ChatMessage> | ChatMess
     return '📸 Medias';
   } else {
     const payload = payloads[0];
+    if (!payload) return null;
     if (payload.contentType.includes('image')) {
       return '📷 Image';
     } else if (payload.contentType.includes('video')) {

@@ -32,6 +32,7 @@ import { ErrorNotification } from '../../components/ui/Alert/ErrorNotification';
 import { ChatDetail, ChatMessageIMessage } from '../../components/Chat/ChatDetail';
 import Toast from 'react-native-toast-message';
 import Clipboard from '@react-native-clipboard/clipboard';
+import { ErrorBoundary } from '../../components/ui/ErrorBoundary/ErrorBoundary';
 
 export type ChatProp = NativeStackScreenProps<AppStackParamList, 'ChatScreen'>;
 
@@ -233,94 +234,102 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
           flex: 1,
         }}
       >
-        <ChatAppBar
-          title={title || ''}
-          group={'recipients' in conversationContent.fileMetadata.appData.content}
-          odinId={
-            route.params.convoId === ConversationWithYourselfId
-              ? identity || ''
-              : (conversationContent?.fileMetadata.appData.content as SingleConversation).recipient
-          }
-          goBack={navigation.goBack}
-          onPress={() => navigation.navigate('ChatInfo', { convoId: route.params.convoId })}
-          isSelf={route.params.convoId === ConversationWithYourselfId}
-          selectedMessage={selectedMessage}
-          selectedMessageActions={{
-            onCopy: () => {
-              if (selectedMessage) {
-                const message = selectedMessage.text;
-                if (message) {
-                  Clipboard.setString(message);
-                  Toast.show({
-                    text1: 'Copied to Clipboard',
-                    type: 'success',
-                    visibilityTime: 2000,
-                    position: 'bottom',
-                  });
-                }
-                setSelectedMessage(undefined);
-              }
-            },
-            onDelete: () => {
-              if (selectedMessage) {
-                console.log('Delete Message', selectedMessage.fileMetadata.appData.archivalStatus);
-                deleteMessage({
-                  conversation: conversationContent,
-                  messages: [selectedMessage],
-                  deleteForEveryone: true,
-                });
-                setSelectedMessage(undefined);
-              }
-            },
-            onReply: () => {
-              if (selectedMessage) {
-                setReplyMessage(selectedMessage);
-                setSelectedMessage(undefined);
-              }
-            },
-            onInfo: () => {
-              if (selectedMessage) {
-                doOpenMessageInfo(selectedMessage);
-                setSelectedMessage(undefined);
-              }
-            },
-          }}
-        />
-        <ChatConnectedState {...conversationContent} />
-        <Host>
-          <Pressable
-            onPress={() => {
-              emojiPickerSheetModalRef.current?.dismiss();
-              reactionModalRef.current?.dismiss();
-              setSelectedMessage(undefined);
-            }}
-            disabled={selectedMessage === undefined}
-            style={{ flex: 1 }}
-          >
-            <ChatDetail
-              isGroup={!!isGroup}
-              messages={messages}
-              doSend={doSend}
-              doSelectMessage={doSelectMessage}
-              doOpenMessageInfo={doOpenMessageInfo}
-              doOpenReactionModal={openReactionModal}
-              replyMessage={replyMessage}
-              setReplyMessage={setReplyMessage}
-              assets={assets}
-              setAssets={setAssets}
-              hasMoreMessages={hasMoreMessages}
-              fetchMoreMessages={fetchMoreMessages}
-            />
-          </Pressable>
-
-          <ChatReaction
-            messageCordinates={messageCordinates}
+        <ErrorBoundary>
+          <ChatAppBar
+            title={title || ''}
+            group={'recipients' in conversationContent.fileMetadata.appData.content}
+            odinId={
+              route.params.convoId === ConversationWithYourselfId
+                ? identity || ''
+                : (conversationContent?.fileMetadata.appData.content as SingleConversation)
+                    .recipient
+            }
+            goBack={navigation.goBack}
+            onPress={() => navigation.navigate('ChatInfo', { convoId: route.params.convoId })}
+            isSelf={route.params.convoId === ConversationWithYourselfId}
             selectedMessage={selectedMessage}
-            setSelectedMessage={setSelectedMessage}
-            openEmojiPicker={openEmojiModal}
-            showReaction={showChatReactionPopup}
+            selectedMessageActions={{
+              onCopy: () => {
+                if (selectedMessage) {
+                  const message = selectedMessage.text;
+                  if (message) {
+                    Clipboard.setString(message);
+                    Toast.show({
+                      text1: 'Copied to Clipboard',
+                      type: 'success',
+                      visibilityTime: 2000,
+                      position: 'bottom',
+                    });
+                  }
+                  setSelectedMessage(undefined);
+                }
+              },
+              onDelete: () => {
+                if (selectedMessage && conversationContent) {
+                  console.log(
+                    'Delete Message',
+                    selectedMessage.fileMetadata.appData.archivalStatus
+                  );
+                  deleteMessage({
+                    conversation: conversationContent,
+                    messages: [selectedMessage],
+                    deleteForEveryone: true,
+                  });
+                  setSelectedMessage(undefined);
+                }
+              },
+              onReply: () => {
+                if (selectedMessage) {
+                  setReplyMessage(selectedMessage);
+                  setSelectedMessage(undefined);
+                }
+              },
+              onInfo: () => {
+                if (selectedMessage) {
+                  doOpenMessageInfo(selectedMessage);
+                  setSelectedMessage(undefined);
+                }
+              },
+            }}
           />
-        </Host>
+          <ChatConnectedState {...conversationContent} />
+          <Host>
+            <Pressable
+              onPress={() => {
+                emojiPickerSheetModalRef.current?.dismiss();
+                reactionModalRef.current?.dismiss();
+                setSelectedMessage(undefined);
+              }}
+              disabled={selectedMessage === undefined}
+              style={{ flex: 1 }}
+            >
+              <ErrorBoundary>
+                <ChatDetail
+                  isGroup={!!isGroup}
+                  messages={messages}
+                  doSend={doSend}
+                  doSelectMessage={doSelectMessage}
+                  doOpenMessageInfo={doOpenMessageInfo}
+                  doOpenReactionModal={openReactionModal}
+                  replyMessage={replyMessage}
+                  setReplyMessage={setReplyMessage}
+                  assets={assets}
+                  setAssets={setAssets}
+                  hasMoreMessages={hasMoreMessages}
+                  fetchMoreMessages={fetchMoreMessages}
+                />
+              </ErrorBoundary>
+            </Pressable>
+
+            <ChatReaction
+              messageCordinates={messageCordinates}
+              selectedMessage={selectedMessage}
+              setSelectedMessage={setSelectedMessage}
+              openEmojiPicker={openEmojiModal}
+              showReaction={showChatReactionPopup}
+            />
+          </Host>
+        </ErrorBoundary>
       </View>
       <EmojiPickerModal
         ref={emojiPickerSheetModalRef}

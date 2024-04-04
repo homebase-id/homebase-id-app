@@ -36,7 +36,7 @@ export const PushNotificationProvider: FunctionComponent<PushNotificationProvide
 
       if (status) {
         setNotificationPermissionGranted(true);
-        console.debug('Notification permission granted.');
+        // console.debug('Notification permission granted.');
       } else {
         setNotificationPermissionGranted(false);
         console.debug('Notification permission denied.');

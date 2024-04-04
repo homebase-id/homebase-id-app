@@ -45,7 +45,7 @@ export interface PushNotificationMessage {
 //
 
 export const initializePushNotificationSupport = async () => {
-  console.debug('initializePushNotificationSupport');
+  // console.debug('initializePushNotificationSupport');
   messaging().onMessage(onMessageReceived);
   messaging().setBackgroundMessageHandler(onMessageReceived);
 };

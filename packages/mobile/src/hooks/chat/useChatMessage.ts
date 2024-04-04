@@ -119,7 +119,7 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
             queryTime: number;
             includeMetadataHeader: boolean;
           }>
-        >(['chat', conversationId]);
+        >(['chat-messages', conversationId]);
 
         if (!existingData) return;
 
@@ -148,15 +148,15 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
           })),
         };
 
-        queryClient.setQueryData(['chat', conversationId], newData);
+        queryClient.setQueryData(['chat-messages', conversationId], newData);
         return { existingData };
       },
       onError: (err, messageParams, context) => {
         console.error('Failed to send the chat message', err);
-        queryClient.setQueryData(['chat', messageParams.conversationId], context?.existingData);
+        queryClient.setQueryData(['chat-messages', messageParams.conversationId], context?.existingData);
       },
       onSettled: async (_data, _error, variables) => {
-        queryClient.invalidateQueries({ queryKey: ['chat', variables.conversationId] });
+        queryClient.invalidateQueries({ queryKey: ['chat-messages', variables.conversationId] });
       },
     }),
     update: useMutation({
