@@ -85,7 +85,6 @@ const useChatWebsocket = (isEnabled: boolean) => {
   const queryClient = useQueryClient();
 
   const handler = useCallback(async (notification: TypedConnectionNotification) => {
-    isDebug && console.debug('[ChatTransitProcessor] Got notification', notification);
     if (notification.notificationType === 'transitFileReceived') {
       isDebug &&
         console.debug(
@@ -161,13 +160,21 @@ const useChatWebsocket = (isEnabled: boolean) => {
               ...page,
               searchResults: isNewFile
                 ? index === 0
-                  ? [updatedChatMessage, ...page.searchResults]
-                  : page.searchResults
+                  ? [
+                      updatedChatMessage,
+                      // There shouldn't be any duplicates, but just in case
+                      ...page.searchResults.filter(
+                        (msg) => !stringGuidsEqual(msg?.fileId, updatedChatMessage.fileId)
+                      ),
+                    ]
+                  : page.searchResults.filter(
+                      (msg) => !stringGuidsEqual(msg?.fileId, updatedChatMessage.fileId)
+                    ) // There shouldn't be any duplicates, but just in case
                 : page.searchResults.map((msg) =>
-                  stringGuidsEqual(msg?.fileId, updatedChatMessage.fileId)
-                    ? updatedChatMessage
-                    : msg
-                ),
+                    stringGuidsEqual(msg?.fileId, updatedChatMessage.fileId)
+                      ? updatedChatMessage
+                      : msg
+                  ),
             })),
           };
           queryClient.setQueryData(['chat-messages', conversationId], newData);
@@ -206,7 +213,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
 
   return useNotificationSubscriber(
     isEnabled ? handler : undefined,
-    ['transitFileReceived', 'fileAdded'],
+    ['transitFileReceived', 'fileAdded', 'fileModified'],
     [ChatDrive],
     () => {
       queryClient.invalidateQueries({ queryKey: ['processInbox'] });
