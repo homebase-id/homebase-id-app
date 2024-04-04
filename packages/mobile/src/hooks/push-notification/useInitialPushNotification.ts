@@ -13,7 +13,7 @@ export const useInitialPushNotification = () => {
   const feedNavigator = useNavigation<NavigationProp<TabStackParamList>>();
   const getInitialNotification = () => {
     (async () => {
-      const initialNotification = await messaging().getInitialNotification();
+      const initialNotification = await messaging().getInitialNotification() || await new Promise(resolve => messaging().onNotificationOpenedApp(resolve));
       if (
         initialNotification &&
         initialNotification.data?.data &&
