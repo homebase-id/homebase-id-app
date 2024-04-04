@@ -94,7 +94,7 @@ export const OdinImage = memo(
       : cachedImage?.naturalSize || previewThumbnail;
 
     const {
-      fetch: { data: imageData, error },
+      fetch: { data: imageData },
     } = useImage({
       odinId,
       imageFileId: enableZoom || loadSize !== undefined ? fileId : undefined,
@@ -108,7 +108,6 @@ export const OdinImage = memo(
     const hasCachedImage = !!cachedImage?.url;
     return (
       <>
-        <ErrorNotification error={error} />
         <View
           style={{
             position: 'relative',
