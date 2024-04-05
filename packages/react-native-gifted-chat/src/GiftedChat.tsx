@@ -423,9 +423,11 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
     const fragment = (
       <View
         style={[
-          typeof messagesContainerHeight === 'number' && {
-            height: messagesContainerHeight,
-          },
+          Platform.OS === 'android'
+            ? { height: 'auto', flexGrow: 1 }
+            : typeof messagesContainerHeight === 'number' && {
+                height: messagesContainerHeight,
+              },
           messagesContainerStyle,
         ]}
       >
@@ -448,7 +450,16 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
     );
 
     return isKeyboardInternallyHandled ? (
-      <KeyboardAvoidingView enabled>{fragment}</KeyboardAvoidingView>
+      <KeyboardAvoidingView
+        enabled
+        style={
+          Platform.OS === 'android'
+            ? { height: 'auto', flexGrow: 1 }
+            : undefined
+        }
+      >
+        {fragment}
+      </KeyboardAvoidingView>
     ) : (
       fragment
     );
@@ -528,9 +539,7 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
   const _onInputTextChanged = useCallback(
     (_text: string) => {
       isDebug && console.log('_onInputTextChanged');
-      if (typingDisabled) {
-        return;
-      }
+      if (typingDisabled) return;
 
       if (onInputTextChanged) {
         onInputTextChanged(_text);

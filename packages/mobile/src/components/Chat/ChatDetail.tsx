@@ -301,6 +301,7 @@ export const ChatDetail = memo(
                 backgroundColor: isDarkMode ? Colors.slate[900] : Colors.white,
                 borderTopWidth: 0,
                 borderRadius: 10,
+                marginTop: Platform.OS === 'android' ? 'auto' : undefined,
               },
             ]}
           />
@@ -390,6 +391,9 @@ export const ChatDetail = memo(
         }}
         loadEarlier={hasMoreMessages}
         onLoadEarlier={fetchMoreMessages}
+        listViewProps={{
+          initialNumToRender: 10,
+        }}
       />
     );
   }

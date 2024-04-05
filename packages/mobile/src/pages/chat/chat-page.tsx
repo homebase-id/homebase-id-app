@@ -235,7 +235,8 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
           paddingBottom:
             Platform.OS === 'ios' && (replyMessage || Keyboard.isVisible()) ? 0 : insets.bottom,
           flex: 1,
-          minHeight: Dimensions.get('window').height,
+          // Force the height on iOS to better support the keyboard handling
+          minHeight: Platform.OS === 'ios' ? Dimensions.get('window').height : undefined,
         }}
       >
         <ErrorBoundary>
