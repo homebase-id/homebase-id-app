@@ -1,9 +1,8 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AppStackParamList } from '../../app/App';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Keyboard, Platform, Pressable, View } from 'react-native';
+import { Dimensions, Keyboard, Platform, Pressable, View } from 'react-native';
 import { ChatAppBar } from '../../components/Chat/Chat-app-bar';
 import { Asset } from 'react-native-image-picker';
 import { ChatDeletedArchivalStaus, ChatMessage } from '../../provider/chat/ChatProvider';
@@ -32,9 +31,9 @@ import { ChatDetail, ChatMessageIMessage } from '../../components/Chat/ChatDetai
 import Toast from 'react-native-toast-message';
 import Clipboard from '@react-native-clipboard/clipboard';
 import { ErrorBoundary } from '../../components/ui/ErrorBoundary/ErrorBoundary';
+import { ChatStackParamList } from '../../app/App';
 
-export type ChatProp = NativeStackScreenProps<AppStackParamList, 'ChatScreen'>;
-
+export type ChatProp = NativeStackScreenProps<ChatStackParamList, 'ChatScreen'>;
 const ChatPage = memo(({ route, navigation }: ChatProp) => {
   const insets = useSafeAreaInsets();
 
@@ -227,6 +226,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
           paddingBottom:
             Platform.OS === 'ios' && (replyMessage || Keyboard.isVisible()) ? 0 : insets.bottom,
           flex: 1,
+          minHeight: Dimensions.get('window').height,
         }}
       >
         <ErrorBoundary>
