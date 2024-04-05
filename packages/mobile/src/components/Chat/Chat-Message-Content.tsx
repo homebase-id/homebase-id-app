@@ -7,7 +7,7 @@ export const ChatMessageContent = (message: HomebaseFile<ChatMessage> | ChatMess
   const textMessage = message.fileMetadata.appData.content.message;
   const { payloads } = message.fileMetadata;
   if (message.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus) {
-    return ' This message was deleted';
+    return 'This message was deleted';
   }
   if (textMessage && textMessage.length > 0) {
     return ellipsisAtMaxChar(textMessage, 30);
