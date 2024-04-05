@@ -3,6 +3,7 @@ import { Swipeable } from 'react-native-gesture-handler';
 import { Message, MessageProps, isSameUser, isSameDay } from 'react-native-gifted-chat';
 import { ChatMessageIMessage } from './ChatDetail';
 import { Info, Reply } from '../ui/Icons/icons';
+import { ChatDeletedArchivalStaus } from '../../provider/chat/ChatProvider';
 import { memo } from 'react';
 
 type ChatMessageBoxProps = {
@@ -79,6 +80,9 @@ const ChatMessageBox = memo(({ setReplyOnSwipeOpen, ...props }: ChatMessageBoxPr
       swipeable.close();
     }
   };
+  const enabled =
+    props.currentMessage &&
+    props.currentMessage.fileMetadata.appData.archivalStatus !== ChatDeletedArchivalStaus;
 
   return (
     <Swipeable
@@ -86,6 +90,7 @@ const ChatMessageBox = memo(({ setReplyOnSwipeOpen, ...props }: ChatMessageBoxPr
       overshootFriction={8}
       rightThreshold={40}
       leftThreshold={40}
+      enabled={enabled}
       renderRightActions={renderRightAction}
       renderLeftActions={renderLeftAction}
       onSwipeableOpen={onSwipeOpenAction}

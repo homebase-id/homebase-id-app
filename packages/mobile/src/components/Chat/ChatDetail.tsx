@@ -22,6 +22,7 @@ import {
   ImageBackground,
   Platform,
   Pressable,
+  ScrollView,
   StatusBar,
   StyleSheet,
   View,
@@ -128,11 +129,12 @@ export const ChatDetail = memo(
             <ReplyMessageBar message={replyMessage} clearReply={() => setReplyMessage(null)} />
           ) : null}
 
-          <View
-            style={{
-              flexDirection: 'row',
+          <ScrollView
+            horizontal
+            contentContainerStyle={{
               gap: 2,
             }}
+            showsHorizontalScrollIndicator={false}
           >
             {assets.map((value, index) => {
               // const isVideo = value.type?.startsWith('video') ?? false;
@@ -162,7 +164,7 @@ export const ChatDetail = memo(
                 </View>
               );
             })}
-          </View>
+          </ScrollView>
         </View>
       );
     }, [assets, isDarkMode, replyMessage, setAssets, setReplyMessage]);
@@ -258,7 +260,7 @@ export const ChatDetail = memo(
                   }}
                 />
 
-                <View style={{ width: 6 }} />
+                <View style={{ width: 12 }} />
 
                 <Send
                   {...props}

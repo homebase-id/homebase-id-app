@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import {
   ApiType,
   Unsubscribe,
@@ -6,20 +5,23 @@ import {
   Subscribe,
   TargetDrive,
   TypedConnectionNotification,
+  Notify,
 } from '@youfoundation/js-lib/core';
 import { useRef, useEffect, useState } from 'react';
-import { BlogConfig } from '@youfoundation/js-lib/public';
+import { hasDebugFlag } from '@youfoundation/js-lib/helpers';
 
-import { useAuth } from './auth/useAuth';
+const isDebug = hasDebugFlag();
+
 import { useDotYouClientContext } from 'feed-app-common';
+import { useAuth } from './auth/useAuth';
 
 // Wrapper for the notification subscriber within DotYouCore-js to add client side filtering of the notifications
 export const useNotificationSubscriber = (
   subscriber: ((notification: TypedConnectionNotification) => void) | undefined,
   types: NotificationType[],
-  drives: TargetDrive[] = [BlogConfig.FeedDrive, BlogConfig.PublicChannelDrive],
+  drives: TargetDrive[],
   onDisconnect?: () => void,
-  onReconnect?: () => void,
+  onReconnect?: () => void
 ) => {
   const [isActive, setIsActive] = useState<boolean>(false);
   const isConnected = useRef<boolean>(false);
@@ -29,20 +31,29 @@ export const useNotificationSubscriber = (
 
   const localHandler = subscriber
     ? (notification: TypedConnectionNotification) => {
-      if (
-        types?.length >= 1 &&
-        !types.includes(notification.notificationType)
-      ) {
-        return;
+        if (notification.notificationType === 'transitFileReceived') {
+          isDebug &&
+            console.debug(
+              '[NotificationSubscriber] Replying to TransitFileReceived by sending processInbox'
+            );
+
+          Notify({
+            command: 'processInbox',
+            data: JSON.stringify({
+              targetDrive: notification.externalFileIdentifier.targetDrive,
+              batchSize: 100,
+            }),
+          });
+        }
+
+        if (types?.length >= 1 && !types.includes(notification.notificationType)) return;
+        subscriber && subscriber(notification);
       }
-      subscriber && subscriber(notification);
-    }
     : undefined;
 
   useEffect(() => {
     if (
-      (dotYouClient.getType() !== ApiType.Owner &&
-        dotYouClient.getType() !== ApiType.App) ||
+      (dotYouClient.getType() !== ApiType.Owner && dotYouClient.getType() !== ApiType.App) ||
       !dotYouClient.getSharedSecret()
     ) {
       return;
@@ -65,7 +76,7 @@ export const useNotificationSubscriber = (
           },
           {
             headers: { Cookie: `BX0900=${authToken}` },
-          },
+          }
         );
         setIsActive(true);
       })();
@@ -82,7 +93,7 @@ export const useNotificationSubscriber = (
         }
       }
     };
-  }, [subscriber, authToken, dotYouClient]);
+  }, [subscriber]);
 
   return isActive;
 };
