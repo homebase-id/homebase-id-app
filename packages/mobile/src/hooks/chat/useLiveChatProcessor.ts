@@ -1,6 +1,7 @@
 import { InfiniteData, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   HomebaseFile,
+  Notify,
   ReceivedCommand,
   TypedConnectionNotification,
   getCommands,
@@ -12,11 +13,16 @@ import { processInbox } from '@youfoundation/js-lib/peer';
 import { useNotificationSubscriber } from '../useNotificationSubscriber';
 import { useCallback, useEffect, useRef } from 'react';
 
-import { hasDebugFlag, stringGuidsEqual, tryJsonParse } from '@youfoundation/js-lib/helpers';
+import { stringGuidsEqual, tryJsonParse } from '@youfoundation/js-lib/helpers';
 import { getSingleConversation, useConversation } from './useConversation';
 import { processCommand } from '../../provider/chat/ChatCommandProvider';
 import { useDotYouClientContext } from 'feed-app-common';
-import { ChatMessage, ChatMessageFileType, MARK_CHAT_READ_COMMAND, dsrToMessage } from '../../provider/chat/ChatProvider';
+import {
+  ChatMessage,
+  ChatMessageFileType,
+  MARK_CHAT_READ_COMMAND,
+  dsrToMessage,
+} from '../../provider/chat/ChatProvider';
 import { useAuth } from '../auth/useAuth';
 import {
   ChatDrive,
@@ -66,7 +72,7 @@ const useInboxProcessor = (connected?: boolean) => {
   });
 };
 
-const isDebug = hasDebugFlag();
+const isDebug = __DEV__;
 
 const useChatWebsocket = (isEnabled: boolean) => {
   const identity = useDotYouClientContext().getIdentity();
@@ -78,110 +84,133 @@ const useChatWebsocket = (isEnabled: boolean) => {
   } = useConversation();
   const queryClient = useQueryClient();
 
-  const handler = useCallback(async (notification: TypedConnectionNotification) => {
-    isDebug && console.debug('[ChatWebsocket] Got notification', notification);
+  const handler = useCallback(
+    async (notification: TypedConnectionNotification) => {
+      isDebug && console.debug('[ChatWebsocket] Got notification', notification);
 
-    if (
-      (notification.notificationType === 'fileAdded' ||
-        notification.notificationType === 'fileModified') &&
-      stringGuidsEqual(notification.targetDrive?.alias, ChatDrive.alias) &&
-      stringGuidsEqual(notification.targetDrive?.type, ChatDrive.type)
-    ) {
-      if (notification.header.fileMetadata.appData.fileType === ChatMessageFileType) {
-        const conversationId = notification.header.fileMetadata.appData.groupId;
-        const isNewFile = notification.notificationType === 'fileAdded';
-        const sender = notification.header.fileMetadata.senderOdinId;
+      if (
+        (notification.notificationType === 'fileAdded' ||
+          notification.notificationType === 'fileModified') &&
+        stringGuidsEqual(notification.targetDrive?.alias, ChatDrive.alias) &&
+        stringGuidsEqual(notification.targetDrive?.type, ChatDrive.type)
+      ) {
+        if (notification.header.fileMetadata.appData.fileType === ChatMessageFileType) {
+          const conversationId = notification.header.fileMetadata.appData.groupId;
+          const isNewFile = notification.notificationType === 'fileAdded';
+          const sender = notification.header.fileMetadata.senderOdinId;
 
-        if (!sender || sender === identity) {
-          // Ignore messages sent by the current user
-          return;
-        }
+          if (!sender || sender === identity) {
+            // Ignore messages sent by the current user
+            return;
+          }
 
-        if (isNewFile) {
-          // Check if the message is orphaned from a conversation
-          const conversation = await queryClient.fetchQuery<HomebaseFile<Conversation> | null>({
-            queryKey: ['conversation', conversationId],
-            queryFn: () => getSingleConversation(dotYouClient, conversationId),
-          });
+          if (isNewFile) {
+            // Check if the message is orphaned from a conversation
+            const conversation = await queryClient.fetchQuery<HomebaseFile<Conversation> | null>({
+              queryKey: ['conversation', conversationId],
+              queryFn: () => getSingleConversation(dotYouClient, conversationId),
+            });
 
-          if (!conversation) {
-            console.error('Orphaned message received', notification.header.fileId, conversation);
-            // Can't handle this one ATM.. How to resolve?
-          } else if (conversation.fileMetadata.appData.archivalStatus === 2) {
-            restoreChat({ conversation });
+            if (!conversation) {
+              console.error('Orphaned message received', notification.header.fileId, conversation);
+              // Can't handle this one ATM.. How to resolve?
+            } else if (conversation.fileMetadata.appData.archivalStatus === 2) {
+              restoreChat({ conversation });
+            }
+          }
+
+          // This skips the invalidation of all chat messages, as we only need to add/update this specific message
+          const updatedChatMessage = await dsrToMessage(
+            dotYouClient,
+            notification.header,
+            ChatDrive,
+            true
+          );
+          if (
+            !updatedChatMessage ||
+            Object.keys(updatedChatMessage.fileMetadata.appData.content).length === 0
+          ) {
+            queryClient.invalidateQueries({ queryKey: ['chat-messages', conversationId] });
+            return;
+          }
+
+          const extistingMessages = queryClient.getQueryData<
+            InfiniteData<{
+              searchResults: (HomebaseFile<ChatMessage> | null)[];
+              cursorState: string;
+              queryTime: number;
+              includeMetadataHeader: boolean;
+            }>
+          >(['chat-messages', conversationId]);
+
+          if (extistingMessages) {
+            const newData = {
+              ...extistingMessages,
+              pages: extistingMessages?.pages?.map((page, index) => ({
+                ...page,
+                searchResults: isNewFile
+                  ? index === 0
+                    ? [
+                        updatedChatMessage,
+                        // There shouldn't be any duplicates, but just in case
+                        ...page.searchResults.filter(
+                          (msg) => !stringGuidsEqual(msg?.fileId, updatedChatMessage.fileId)
+                        ),
+                      ]
+                    : page.searchResults.filter(
+                        (msg) => !stringGuidsEqual(msg?.fileId, updatedChatMessage.fileId)
+                      ) // There shouldn't be any duplicates, but just in case
+                  : page.searchResults.map((msg) =>
+                      stringGuidsEqual(msg?.fileId, updatedChatMessage.fileId)
+                        ? updatedChatMessage
+                        : msg
+                    ),
+              })),
+            };
+            queryClient.setQueryData(['chat-messages', conversationId], newData);
+          }
+
+          queryClient.setQueryData(
+            ['chat-message', updatedChatMessage.fileMetadata.appData.uniqueId],
+            updatedChatMessage
+          );
+        } else if (notification.header.fileMetadata.appData.fileType === ChatReactionFileType) {
+          const messageId = notification.header.fileMetadata.appData.groupId;
+          queryClient.invalidateQueries({ queryKey: ['chat-reaction', messageId] });
+        } else if (
+          [
+            JOIN_CONVERSATION_COMMAND,
+            JOIN_GROUP_CONVERSATION_COMMAND,
+            MARK_CHAT_READ_COMMAND,
+            UPDATE_GROUP_CONVERSATION_COMMAND,
+          ].includes(notification.header.fileMetadata.appData.dataType) &&
+          identity
+        ) {
+          const command: ReceivedCommand = tryJsonParse<ReceivedCommand>(
+            notification.header.fileMetadata.appData.content
+          );
+          command.sender = notification.header.fileMetadata.senderOdinId;
+          command.clientCode = notification.header.fileMetadata.appData.dataType;
+          command.id = notification.header.fileId;
+
+          const processedCommand = await processCommand(
+            dotYouClient,
+            queryClient,
+            command,
+            identity
+          );
+          if (processedCommand) {
+            await markCommandComplete(dotYouClient, ChatDrive, [processedCommand]);
           }
         }
-
-        // This skips the invalidation of all chat messages, as we only need to add/update this specific message
-        const updatedChatMessage = await dsrToMessage(
-          dotYouClient,
-          notification.header,
-          ChatDrive,
-          true
-        );
-        if (!updatedChatMessage) return;
-
-        const extistingMessages = queryClient.getQueryData<
-          InfiniteData<{
-            searchResults: (HomebaseFile<ChatMessage> | null)[];
-            cursorState: string;
-            queryTime: number;
-            includeMetadataHeader: boolean;
-          }>
-        >(['chat-messages', conversationId]);
-
-        if (extistingMessages) {
-          const newData = {
-            ...extistingMessages,
-            pages: extistingMessages?.pages?.map((page, index) => ({
-              ...page,
-              searchResults: isNewFile
-                ? index === 0
-                  ? [updatedChatMessage, ...page.searchResults]
-                  : page.searchResults
-                : page.searchResults.map((msg) =>
-                    stringGuidsEqual(msg?.fileId, updatedChatMessage.fileId)
-                      ? updatedChatMessage
-                      : msg
-                  ),
-            })),
-          };
-          queryClient.setQueryData(['chat-messages', conversationId], newData);
-        }
-
-        queryClient.setQueryData(
-          ['chat-message', updatedChatMessage.fileMetadata.appData.uniqueId],
-          updatedChatMessage
-        );
-      } else if (notification.header.fileMetadata.appData.fileType === ChatReactionFileType) {
-        const messageId = notification.header.fileMetadata.appData.groupId;
-        queryClient.invalidateQueries({ queryKey: ['chat-reaction', messageId] });
-      } else if (
-        [
-          JOIN_CONVERSATION_COMMAND,
-          JOIN_GROUP_CONVERSATION_COMMAND,
-          MARK_CHAT_READ_COMMAND,
-          UPDATE_GROUP_CONVERSATION_COMMAND,
-        ].includes(notification.header.fileMetadata.appData.dataType) &&
-        identity
-      ) {
-        const command: ReceivedCommand = tryJsonParse<ReceivedCommand>(
-          notification.header.fileMetadata.appData.content
-        );
-        command.sender = notification.header.fileMetadata.senderOdinId;
-        command.clientCode = notification.header.fileMetadata.appData.dataType;
-        command.id = notification.header.fileId;
-
-        const processedCommand = await processCommand(dotYouClient, queryClient, command, identity);
-        if (processedCommand)
-          {await markCommandComplete(dotYouClient, ChatDrive, [processedCommand]);}
       }
-    }
-  }, []);
+    },
+    [dotYouClient, identity, queryClient, restoreChat]
+  );
 
   return useNotificationSubscriber(
     isEnabled ? handler : undefined,
-    ['transitFileReceived', 'fileAdded'],
+    ['fileAdded', 'fileModified'],
     [ChatDrive],
     () => {
       queryClient.invalidateQueries({ queryKey: ['processInbox'] });

@@ -30,13 +30,21 @@ export const processCommand = async (
   command: ReceivedCommand,
   identity: string
 ) => {
-  if (command.clientCode === JOIN_CONVERSATION_COMMAND) { return await joinConversation(dotYouClient, queryClient, command); }
+  if (command.clientCode === JOIN_CONVERSATION_COMMAND) {
+    return await joinConversation(dotYouClient, queryClient, command);
+  }
 
-  if (command.clientCode === JOIN_GROUP_CONVERSATION_COMMAND && identity) { return await joinGroupConversation(dotYouClient, queryClient, command, identity); }
+  if (command.clientCode === JOIN_GROUP_CONVERSATION_COMMAND && identity) {
+    return await joinGroupConversation(dotYouClient, queryClient, command, identity);
+  }
 
-  if (command.clientCode === MARK_CHAT_READ_COMMAND) { return await markChatAsRead(dotYouClient, queryClient, command); }
+  if (command.clientCode === MARK_CHAT_READ_COMMAND) {
+    return await markChatAsRead(dotYouClient, queryClient, command);
+  }
 
-  if (command.clientCode === UPDATE_GROUP_CONVERSATION_COMMAND) { return await updateGroupConversation(dotYouClient, queryClient, command); }
+  if (command.clientCode === UPDATE_GROUP_CONVERSATION_COMMAND) {
+    return await updateGroupConversation(dotYouClient, queryClient, command);
+  }
 };
 
 const joinConversation = async (
@@ -117,13 +125,18 @@ const joinGroupConversation = async (
   return command.id;
 };
 
-const updateGroupConversation = async (dotYouClient: DotYouClient,
+const updateGroupConversation = async (
+  dotYouClient: DotYouClient,
   queryClient: QueryClient,
-  command: ReceivedCommand) => {
+  command: ReceivedCommand
+) => {
   const updateGroupConversation = tryJsonParse<UpdateGroupConversationRequest>(
     command.clientJsonMessage
   );
-  const conversation = await getSingleConversation(dotYouClient, updateGroupConversation.conversationId);
+  const conversation = await getSingleConversation(
+    dotYouClient,
+    updateGroupConversation.conversationId
+  );
   if (!conversation) return null;
   conversation.fileMetadata.appData.content.title = updateGroupConversation.title;
   await updateConversation(dotYouClient, conversation);
@@ -151,7 +164,7 @@ const markChatAsRead = async (
   if (!recipients.filter(Boolean)?.length) return null;
 
   const chatMessages = await Promise.all(
-    chatGlobalTransIds.map((msgId) =>
+    Array.from(new Set(...chatGlobalTransIds)).map((msgId) =>
       getChatMessageByGlobalTransitId(dotYouClient, conversationId, msgId)
     )
   );
@@ -172,7 +185,9 @@ const markChatAsRead = async (
           ChatDeliveryStatus.Read;
 
         // Single recipient conversation
-        if (recipients.length === 1) { chatMessage.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Read; }
+        if (recipients.length === 1) {
+          chatMessage.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Read;
+        }
 
         const keys = Object.keys(chatMessage.fileMetadata.appData.content.deliveryDetails);
         const allRead = keys.every(
@@ -180,7 +195,9 @@ const markChatAsRead = async (
             chatMessage.fileMetadata.appData.content.deliveryDetails?.[key] ===
             ChatDeliveryStatus.Read
         );
-        if (recipients.length === keys.length && allRead) { chatMessage.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Read; }
+        if (recipients.length === keys.length && allRead) {
+          chatMessage.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Read;
+        }
 
         try {
           const updateResult = await updateChatMessage(dotYouClient, chatMessage, recipients);

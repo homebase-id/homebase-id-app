@@ -17,7 +17,6 @@ import useImage from './hooks/useImage';
 import useTinyThumb from './hooks/useTinyThumb';
 import { SvgUri } from 'react-native-svg';
 import { ImageZoom } from '@likashefqet/react-native-image-zoom';
-import { ErrorNotification } from '../Alert/ErrorNotification';
 
 export interface OdinImageProps {
   odinId?: string;
@@ -83,7 +82,8 @@ export const OdinImage = memo(
     });
 
     const previewUrl = cachedImage?.url || embeddedThumbUrl || tinyThumb?.url;
-    const previewContentType = cachedImage?.type || previewThumbnail?.contentType || tinyThumb?.contentType;
+    const previewContentType =
+      cachedImage?.type || previewThumbnail?.contentType || tinyThumb?.contentType;
 
     const naturalSize: ImageSize | undefined = tinyThumb
       ? {
@@ -93,7 +93,7 @@ export const OdinImage = memo(
       : cachedImage?.naturalSize || previewThumbnail;
 
     const {
-      fetch: { data: imageData, error },
+      fetch: { data: imageData },
     } = useImage({
       odinId,
       imageFileId: enableZoom || loadSize !== undefined ? fileId : undefined,
@@ -107,7 +107,6 @@ export const OdinImage = memo(
     const hasCachedImage = !!cachedImage?.url;
     return (
       <>
-        <ErrorNotification error={error} />
         <View
           style={{
             position: 'relative',
@@ -120,7 +119,7 @@ export const OdinImage = memo(
               uri={previewUrl}
               contentType={previewContentType as ImageContentType}
               style={{
-                position: 'absolute',
+                position: imageData ? 'absolute' : 'relative',
                 top: 0,
                 left: 0,
                 right: 0,
@@ -183,7 +182,6 @@ const InnerImage = ({
   alt?: string;
   style?: ImageStyle;
   fit?: 'cover' | 'contain';
-
   onClick?: () => void;
 
   contentType?: ImageContentType;
@@ -197,7 +195,6 @@ const InnerImage = ({
             ...style,
           },
           // SVGs styling are not supported on Android
-          // And IDK why :( )
           Platform.OS === 'android' ? style : undefined,
         ]}
       >
@@ -242,13 +239,22 @@ const ZoomableImage = ({
   style?: ImageStyle;
   fit?: 'cover' | 'contain';
   enableZoom?: boolean;
-
   onClick?: () => void;
 
   contentType?: ImageContentType;
 }) => {
   if (!enableZoom) {
-    return <InnerImage uri={uri} alt={alt} imageSize={imageSize} style={style} fit={fit} contentType={contentType} />;
+    return (
+      <InnerImage
+        uri={uri}
+        alt={alt}
+        imageSize={imageSize}
+        style={style}
+        fit={fit}
+        contentType={contentType}
+        onClick={onClick}
+      />
+    );
   }
 
   return (

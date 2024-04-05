@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { memo } from 'react';
 
 import { MessageImageProps } from 'react-native-gifted-chat';
@@ -176,23 +176,33 @@ const MediaGallery = ({ msg: currentMessage }: { msg: HomebaseFile<ChatMessage> 
         );
       })}
       {countExcludedFromView > 0 && (
-        <View
+        <Pressable
           style={{
             width: 150,
             height: 150,
             position: 'absolute',
             bottom: 0,
             right: 0,
-            borderRadius: 10,
+            // borderRadius: 10,
             backgroundColor: 'rgba(0,0,0,0.5)',
             alignItems: 'center',
             justifyContent: 'center',
+          }}
+          onPress={() => {
+            const item = payloads[maxVisible - 1];
+            navigation.navigate('PreviewMedia', {
+              fileId: currentMessage.fileId,
+              payloadKey: item.key,
+              type: item.contentType,
+              msg: currentMessage,
+              currIndex: maxVisible - 1,
+            });
           }}
         >
           <Text style={{ color: 'white', fontSize: 22, fontWeight: '500' }}>
             +{countExcludedFromView}
           </Text>
-        </View>
+        </Pressable>
       )}
     </View>
   );

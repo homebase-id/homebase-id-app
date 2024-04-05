@@ -66,7 +66,7 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
       )?.map<ChatMessageIMessage>((value) => {
         // Mapping done here, because the chat component expects a different format
         return {
-          _id: value.fileMetadata.appData.uniqueId ?? value.fileId ?? getNewId(),
+          _id: value.fileId || value.fileMetadata.appData.uniqueId || getNewId(),
           createdAt: value.fileMetadata.created,
           text:
             value.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus
@@ -121,6 +121,9 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
 
   const doSelectMessage = useCallback(
     ({ coords, message }: { coords: { x: number; y: number }; message: ChatMessageIMessage }) => {
+      if (message && message.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus) {
+        return;
+      }
       setMessageCordinates(coords);
       setSelectedMessage(message);
       setshowChatReactionPopup(true);
@@ -217,6 +220,12 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
     reactionModalRef.current?.present();
   }, []);
 
+  const dismissSelectedMessage = useCallback(() => {
+    emojiPickerSheetModalRef.current?.dismiss();
+    reactionModalRef.current?.dismiss();
+    setSelectedMessage(undefined);
+  }, []);
+
   if (!conversationContent) return null;
 
   return (
@@ -241,7 +250,7 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
                 : (conversationContent?.fileMetadata.appData.content as SingleConversation)
                     .recipient
             }
-            goBack={navigation.goBack}
+            goBack={selectedMessage ? dismissSelectedMessage : navigation.goBack}
             onPress={() => navigation.navigate('ChatInfo', { convoId: route.params.convoId })}
             isSelf={route.params.convoId === ConversationWithYourselfId}
             selectedMessage={selectedMessage}
@@ -292,11 +301,7 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
           <ChatConnectedState {...conversationContent} />
           <Host>
             <Pressable
-              onPress={() => {
-                emojiPickerSheetModalRef.current?.dismiss();
-                reactionModalRef.current?.dismiss();
-                setSelectedMessage(undefined);
-              }}
+              onPress={dismissSelectedMessage}
               disabled={selectedMessage === undefined}
               style={{ flex: 1 }}
             >

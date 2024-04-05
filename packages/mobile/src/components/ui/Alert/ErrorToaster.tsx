@@ -2,7 +2,9 @@ import Clipboard from '@react-native-clipboard/clipboard';
 import { useErrors } from '../../../hooks/errors/useErrors';
 import Toast from 'react-native-toast-message';
 import { useEffect } from 'react';
+import { Alert } from 'react-native';
 
+// TODO: Create a PositiveToaster component
 export const ErrorToaster = () => {
   const {
     fetch: { data: errors },
@@ -18,9 +20,28 @@ export const ErrorToaster = () => {
         onHide: () => dismissError(error),
         type: 'error',
         position: 'bottom',
+        visibilityTime: 2000,
+        swipeable: true,
         onPress: () => {
-          //TODO: Show Error Details Modal
-          if (error.correlationId) Clipboard.setString(error.correlationId);
+          Alert.alert(
+            error.correlationId || 'Error',
+            error.message,
+            [
+              {
+                text: 'Copy',
+                onPress: () => {
+                  return Clipboard.setString(error.correlationId || error.message);
+                },
+              },
+              {
+                text: 'Ok',
+                style: 'cancel',
+              },
+            ],
+            {
+              cancelable: true,
+            }
+          );
         },
       })
     );
