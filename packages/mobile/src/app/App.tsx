@@ -24,7 +24,7 @@ import { HeaderBackButtonProps } from '@react-navigation/elements';
 import { Platform } from 'react-native';
 
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { useCallback } from 'react';
+import { memo, useCallback } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Colors } from './Colors';
 
@@ -227,7 +227,7 @@ const RootStack = () => {
   );
 };
 
-const AuthenticatedRoot = () => {
+const AuthenticatedRoot = memo(() => {
   return (
     <DotYouClientProvider>
       <AudioContextProvider>
@@ -237,9 +237,9 @@ const AuthenticatedRoot = () => {
       </AudioContextProvider>
     </DotYouClientProvider>
   );
-};
+});
 
-const AppStackScreen = () => {
+const AppStackScreen = memo(() => {
   // CHECK: Re-renders a lot because of all the hooks, is it faster to move them in a separate component?
   useValidTokenCheck();
   useRefreshOnFocus();
@@ -248,16 +248,17 @@ const AppStackScreen = () => {
   useInitialPushNotification();
 
   return <TabStack />;
-};
+});
 
 const TabBottom = createBottomTabNavigator<TabStackParamList>();
-const TabStack = () => {
+const TabStack = memo(() => {
   const { isDarkMode } = useDarkMode();
 
   const rootRoutes = ['Home', 'Feed', 'Chat', 'Profile', 'Conversation', 'NewChat', 'NewGroup'];
   const { routeName } = useRouteContext();
   const hide = !routeName || !rootRoutes.includes(routeName);
   // TODO: Hide seems slow for the chat-page.. While actually it's the ChatScreen being slow in detecting it's correct size
+
   return (
     <TabBottom.Navigator
       screenOptions={{
@@ -307,7 +308,7 @@ const TabStack = () => {
       />
     </TabBottom.Navigator>
   );
-};
+});
 
 const StackProfile = createNativeStackNavigator<ProfileStackParamList>();
 const ProfileStack = () => {
@@ -399,6 +400,7 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
 
       <StackChat.Screen
         name="ChatScreen"
+        // component={(props) => <ChatPage {...props} />} // This is faster, but not react-navigation goes crazy with warnings
         component={ChatPage}
         options={{
           gestureEnabled: true,
