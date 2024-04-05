@@ -79,7 +79,8 @@ const useImage = (props?: {
     imageFileKey: string | undefined,
     imageDrive?: TargetDrive,
     size?: ImageSize,
-    naturalSize?: ImageSize
+    naturalSize?: ImageSize,
+    lastModified?: number
   ): Promise<ImageData | null> => {
     if (
       imageFileId === undefined ||
@@ -137,8 +138,18 @@ const useImage = (props?: {
           : undefined,
         lastModified,
       ],
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
       queryFn: () =>
-        fetchImageData(odinId, imageFileId, imageFileKey, imageDrive, size, naturalSize),
+        fetchImageData(
+          odinId,
+          imageFileId,
+          imageFileKey,
+          imageDrive,
+          size,
+          naturalSize,
+          lastModified
+        ),
       staleTime: 1000 * 60 * 60 * 24 * 7, // 1 week,
       enabled: !!imageFileId && imageFileId !== '',
     }),

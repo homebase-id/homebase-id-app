@@ -2,7 +2,7 @@ import { FlatList, StyleSheet } from 'react-native';
 import ConversationTile from '../components/Chat/Conversation-tile';
 
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { AppStackParamList, ChatStackParamList } from '../app/App';
+import { ChatStackParamList } from '../app/App';
 import { ConversationWithRecentMessage, useConversations } from '../hooks/chat/useConversations';
 import {
   ConversationWithYourselfId,

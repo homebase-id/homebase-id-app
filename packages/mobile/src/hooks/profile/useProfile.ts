@@ -40,5 +40,11 @@ export const useProfile = () => {
     };
   };
 
-  return useQuery({ queryKey: ['profile-data'], queryFn: fetchProfile});
+  return useQuery({
+    queryKey: ['profile-data'],
+    queryFn: fetchProfile,
+    staleTime: 1000 * 60 * 60 * 24, // 1 day,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+  });
 };

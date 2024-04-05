@@ -190,6 +190,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
       queryKey: ['conversation', conversationId],
       queryFn: () => getSingleConversation(dotYouClient, conversationId),
       refetchOnMount: false,
+      staleTime: 1000 * 60 * 60, // 1 hour
       enabled: !!conversationId,
     }),
     create: useMutation({

@@ -46,9 +46,6 @@ import EditGroupPage from '../pages/chat/edit-group-page';
 import { ConnectionRequestsPage } from '../pages/home/connection-requests-page';
 import { useDarkMode } from '../hooks/useDarkMode';
 import { HomebaseFile, EmbeddedThumb } from '@youfoundation/js-lib/core';
-import { OdinImage } from '../components/ui/OdinImage/OdinImage';
-import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
-import { useProfile } from '../hooks/profile/useProfile';
 import { ChatMessage } from '../provider/chat/ChatProvider';
 import { useRefreshOnFocus } from '../hooks/chat/useRefetchOnFocus';
 import { PushNotificationProvider } from '../components/push-notification/PushNotificationProvider';
@@ -67,6 +64,7 @@ import { AudioContextProvider } from '../components/AudioContext/AudioContext';
 import { useInitialPushNotification } from '../hooks/push-notification/useInitialPushNotification';
 import { ErrorBoundary } from '../components/ui/ErrorBoundary/ErrorBoundary';
 import { RouteContextProvider, useRouteContext } from '../components/RouteContext/RouteContext';
+import { OwnerAvatar } from '../components/Chat/Conversation-tile';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -339,6 +337,7 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
     });
   }, [navigation]);
 
+  console.log('render chat stack');
   return (
     <StackChat.Navigator
       screenOptions={{
@@ -453,17 +452,9 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
 };
 
 const ProfileAvatar = () => {
-  const { data: profile } = useProfile();
   return (
-    <View style={{marginRight: Platform.OS === 'android' ? 16 : 0}}>
-      <OdinImage
-        fit="cover"
-        targetDrive={GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId)}
-        fileId={profile?.profileImageFileId}
-        fileKey={profile?.profileImageFileKey}
-        imageSize={{ width: 30, height: 30 }}
-        style={{ borderRadius: 30 / 2 }}
-      />
+    <View style={{ marginRight: Platform.OS === 'android' ? 16 : 0 }}>
+      <OwnerAvatar imageSize={{ width: 30, height: 30 }} style={{ borderRadius: 30 / 2 }} />
     </View>
   );
 };
