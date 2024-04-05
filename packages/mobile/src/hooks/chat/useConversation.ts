@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { InfiniteData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Conversation,
   ConversationWithYourself,
@@ -65,6 +65,25 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     }
 
     return null;
+  };
+
+  const fetchSingleConversation = async (dotYouClient: DotYouClient, conversationId: string) => {
+    const queryData = queryClient.getQueryData<InfiniteData<{
+        searchResults: HomebaseFile<Conversation>[];
+        cursorState: string;
+        queryTime: number;
+        includeMetadataHeader: boolean;
+    }>>(['conversations']);
+
+    queryData?.pages.forEach((page) => {
+      const conversation = page.searchResults.find((conversation) => {
+        return stringGuidsEqual(conversation.fileMetadata.appData.uniqueId, conversationId);
+      });
+
+      if (conversation) return conversation;
+    });
+
+    return await getSingleConversation(dotYouClient, conversationId);
   };
 
   const createConversation = async ({
@@ -188,7 +207,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
   return {
     single: useQuery({
       queryKey: ['conversation', conversationId],
-      queryFn: () => getSingleConversation(dotYouClient, conversationId),
+      queryFn: () => fetchSingleConversation(dotYouClient, conversationId),
       refetchOnMount: false,
       staleTime: 1000 * 60 * 60, // 1 hour
       enabled: !!conversationId,
