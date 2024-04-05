@@ -139,7 +139,7 @@ const useImage = (props?: {
       ],
       queryFn: () =>
         fetchImageData(odinId, imageFileId, imageFileKey, imageDrive, size, naturalSize),
-      staleTime: 1000 * 60 * 60 * 1, // 1h
+      staleTime: 1000 * 60 * 60 * 24 * 7, // 1 week,
       enabled: !!imageFileId && imageFileId !== '',
     }),
     getFromCache: (

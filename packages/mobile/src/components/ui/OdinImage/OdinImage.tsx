@@ -233,7 +233,7 @@ const InnerImage = memo(
   }
 );
 
-const ZoomableImage = ({
+const ZoomableImage = memo(({
   uri,
   alt,
   imageSize,
@@ -287,4 +287,4 @@ const ZoomableImage = ({
       </View>
     </TouchableWithoutFeedback>
   );
-};
+});
