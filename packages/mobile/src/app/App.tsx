@@ -21,7 +21,7 @@ import { DotYouClientProvider } from '../components/Auth/DotYouClientProvider';
 import { BackButton, HeaderActions } from '../components/ui/convo-app-bar';
 import { useLiveChatProcessor } from '../hooks/chat/useLiveChatProcessor';
 import { HeaderBackButtonProps } from '@react-navigation/elements';
-import { Platform } from 'react-native';
+import { Platform, View } from 'react-native';
 
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { memo, useCallback } from 'react';
@@ -455,14 +455,16 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
 const ProfileAvatar = () => {
   const { data: profile } = useProfile();
   return (
-    <OdinImage
-      fit="cover"
-      targetDrive={GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId)}
-      fileId={profile?.profileImageFileId}
-      fileKey={profile?.profileImageFileKey}
-      imageSize={{ width: 30, height: 30 }}
-      style={{ borderRadius: 30 / 2, marginRight: Platform.OS === 'android' ? 10 : 0 }}
-    />
+    <View style={{marginRight: Platform.OS === 'android' ? 16 : 0}}>
+      <OdinImage
+        fit="cover"
+        targetDrive={GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId)}
+        fileId={profile?.profileImageFileId}
+        fileKey={profile?.profileImageFileKey}
+        imageSize={{ width: 30, height: 30 }}
+        style={{ borderRadius: 30 / 2 }}
+      />
+    </View>
   );
 };
 

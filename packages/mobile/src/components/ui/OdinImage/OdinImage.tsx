@@ -57,7 +57,8 @@ export const OdinImage = memo(
     const loadSize =
       previewThumbnail?.contentType && thumblessContentTypes.includes(previewThumbnail?.contentType)
         ? undefined
-        : {
+        :
+        {
             pixelHeight:
               (imageSize?.height
                 ? Math.round(imageSize?.height * (enableZoom ? 4 : 1))
@@ -103,7 +104,7 @@ export const OdinImage = memo(
       fetch: { data: imageData },
     } = useImage({
       odinId,
-      imageFileId: enableZoom || loadSize !== undefined ? fileId : undefined,
+      imageFileId: fileId,
       imageFileKey: fileKey,
       imageDrive: targetDrive,
       size: loadSize,
@@ -121,18 +122,18 @@ export const OdinImage = memo(
           }}
         >
           {/* Blurry image */}
-          {previewUrl ? (
+          {previewUrl && !imageData?.url ? (
             <InnerImage
               uri={previewUrl}
               contentType={previewContentType as ImageContentType}
               style={{
-                position: imageData ? 'absolute' : 'relative',
+                // position: imageData ? 'absolute' : 'relative',
+                position: 'absolute', // Absolute so it takes up the full imageSize defined by the wrapper view
                 top: 0,
                 left: 0,
                 right: 0,
                 bottom: 0,
                 resizeMode: fit,
-                // ...imageSize,
                 ...style,
               }}
               imageSize={imageSize}
