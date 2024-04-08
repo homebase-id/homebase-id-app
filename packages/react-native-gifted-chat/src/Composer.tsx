@@ -1,5 +1,4 @@
-import PropTypes from 'prop-types';
-import React, { useCallback, useRef } from 'react';
+import React, { memo, useCallback, useRef } from 'react';
 import {
   Platform,
   StyleSheet,
@@ -10,7 +9,6 @@ import {
 } from 'react-native';
 import { MIN_COMPOSER_HEIGHT, DEFAULT_PLACEHOLDER } from './Constant';
 import Color from './Color';
-import { StylePropType } from './utils';
 
 const styles = StyleSheet.create({
   textInput: {
@@ -52,94 +50,82 @@ export interface ComposerProps {
   onInputSizeChanged?(layout: { width: number; height: number }): void;
 }
 
-export function Composer({
-  composerHeight = MIN_COMPOSER_HEIGHT,
-  disableComposer = false,
-  keyboardAppearance = 'default',
-  multiline = true,
-  onInputSizeChanged = () => {},
-  onTextChanged = () => {},
-  placeholder = DEFAULT_PLACEHOLDER,
-  placeholderTextColor = Color.defaultColor,
-  text = '',
-  textInputAutoFocus = false,
-  textInputProps = {},
-  textInputStyle,
-}: ComposerProps): React.ReactElement {
-  const dimensionsRef = useRef<{ width: number; height: number }>();
+export const Composer = memo(
+  ({
+    composerHeight = MIN_COMPOSER_HEIGHT,
+    disableComposer = false,
+    keyboardAppearance = 'default',
+    multiline = true,
+    onInputSizeChanged = () => {},
+    onTextChanged = () => {},
+    placeholder = DEFAULT_PLACEHOLDER,
+    placeholderTextColor = Color.defaultColor,
+    text = '',
+    textInputAutoFocus = false,
+    textInputProps = {},
+    textInputStyle,
+  }: ComposerProps): React.ReactElement => {
+    console.log('composer');
+    const dimensionsRef = useRef<{ width: number; height: number }>();
 
-  const determineInputSizeChange = useCallback(
-    (dimensions: { width: number; height: number }) => {
-      // Support earlier versions of React Native on Android.
-      if (!dimensions) {
-        return;
-      }
+    const determineInputSizeChange = useCallback(
+      (dimensions: { width: number; height: number }) => {
+        // Support earlier versions of React Native on Android.
+        if (!dimensions) {
+          return;
+        }
 
-      if (
-        !dimensionsRef ||
-        !dimensionsRef.current ||
-        (dimensionsRef.current &&
-          (dimensionsRef.current.width !== dimensions.width ||
-            dimensionsRef.current.height !== dimensions.height))
-      ) {
-        dimensionsRef.current = dimensions;
-        onInputSizeChanged(dimensions);
-      }
-    },
-    [onInputSizeChanged],
-  );
+        if (
+          !dimensionsRef ||
+          !dimensionsRef.current ||
+          (dimensionsRef.current &&
+            (dimensionsRef.current.width !== dimensions.width ||
+              dimensionsRef.current.height !== dimensions.height))
+        ) {
+          dimensionsRef.current = dimensions;
+          onInputSizeChanged(dimensions);
+        }
+      },
+      [onInputSizeChanged],
+    );
 
-  const handleContentSizeChange = ({
-    nativeEvent: { contentSize },
-  }: NativeSyntheticEvent<TextInputContentSizeChangeEventData>) =>
-    determineInputSizeChange(contentSize);
+    const handleContentSizeChange = ({
+      nativeEvent: { contentSize },
+    }: NativeSyntheticEvent<TextInputContentSizeChangeEventData>) =>
+      determineInputSizeChange(contentSize);
 
-  return (
-    <TextInput
-      testID={placeholder}
-      accessible
-      accessibilityLabel={placeholder}
-      placeholder={placeholder}
-      placeholderTextColor={placeholderTextColor}
-      multiline={multiline}
-      editable={!disableComposer}
-      onContentSizeChange={handleContentSizeChange}
-      onChangeText={onTextChanged}
-      style={[
-        styles.textInput,
-        textInputStyle,
-        {
-          height: composerHeight,
-          ...Platform.select({
-            web: {
-              outlineWidth: 0,
-              outlineColor: 'transparent',
-              outlineOffset: 0,
-            },
-          }),
-        },
-      ]}
-      autoFocus={textInputAutoFocus}
-      value={text}
-      enablesReturnKeyAutomatically
-      underlineColorAndroid='transparent'
-      keyboardAppearance={keyboardAppearance}
-      {...textInputProps}
-    />
-  );
-}
-
-Composer.propTypes = {
-  composerHeight: PropTypes.number,
-  text: PropTypes.string,
-  placeholder: PropTypes.string,
-  placeholderTextColor: PropTypes.string,
-  textInputProps: PropTypes.object,
-  onTextChanged: PropTypes.func,
-  onInputSizeChanged: PropTypes.func,
-  multiline: PropTypes.bool,
-  disableComposer: PropTypes.bool,
-  textInputStyle: StylePropType,
-  textInputAutoFocus: PropTypes.bool,
-  keyboardAppearance: PropTypes.string,
-};
+    return (
+      <TextInput
+        testID={placeholder}
+        accessible
+        accessibilityLabel={placeholder}
+        placeholder={placeholder}
+        placeholderTextColor={placeholderTextColor}
+        multiline={multiline}
+        editable={!disableComposer}
+        onContentSizeChange={handleContentSizeChange}
+        onChangeText={onTextChanged}
+        style={[
+          styles.textInput,
+          textInputStyle,
+          {
+            height: composerHeight,
+            ...Platform.select({
+              web: {
+                outlineWidth: 0,
+                outlineColor: 'transparent',
+                outlineOffset: 0,
+              },
+            }),
+          },
+        ]}
+        autoFocus={textInputAutoFocus}
+        value={text}
+        enablesReturnKeyAutomatically
+        underlineColorAndroid='transparent'
+        keyboardAppearance={keyboardAppearance}
+        {...textInputProps}
+      />
+    );
+  },
+);

@@ -5,6 +5,7 @@ import {
   Bubble,
   BubbleProps,
   Composer,
+  ComposerProps,
   GiftedChat,
   IMessage,
   InputToolbar,
@@ -14,6 +15,7 @@ import {
   MessageText,
   MessageTextProps,
   Send,
+  SendProps,
   Time,
 } from 'react-native-gifted-chat';
 import { useCallback, memo } from 'react';
@@ -111,7 +113,6 @@ export const ChatDetail = memo(
       return (
         <ChatMessageBox
           {...props}
-          // onMessageLayout={onLayout}
           setReplyOnSwipeOpen={setReplyMessage}
           onLeftSwipeOpen={onLeftSwipe}
         />
@@ -173,10 +174,7 @@ export const ChatDetail = memo(
     const imagesIcon = useCallback(() => <Images />, []);
     const microphoneIcon = useCallback(() => <Microphone />, []);
     const crossIcon = useCallback(() => <Times />, []);
-
-    const cancelRecording = useCallback(async () => {
-      await stop();
-    }, [stop]);
+    const cancelRecording = useCallback(async () => await stop(), [stop]);
 
     const onStopRecording = useCallback(async () => {
       const audioPath = await stop();
@@ -195,106 +193,110 @@ export const ChatDetail = memo(
       ] as Asset[]);
     }, [setAssets, stop]);
 
+    // TODO: Shouldn'the whole "CustomInputToolbar" render differently?
+    const renderComposer = useCallback((props: ComposerProps) => {
+      if (isRecording) {
+        return (
+          <View
+            style={{
+              flex: 1,
+              alignContent: 'center',
+              alignItems: 'center',
+              marginLeft: 10,
+              marginTop: Platform.select({
+                ios: 6,
+                android: 0,
+                web: 6,
+              }),
+              marginBottom: Platform.select({
+                ios: 5,
+                android: 3,
+                web: 4,
+              }),
+              flexDirection: 'row',
+              height: props.composerHeight,
+            }}
+          >
+            <Microphone color={Colors.red[600]} />
+
+            <Text style={{ marginLeft: 8, fontSize: 16 }}>
+              {millisToMinutesAndSeconds(duration)}
+            </Text>
+          </View>
+        );
+      }
+      return (
+        <Composer
+          {...props}
+          textInputStyle={{
+            color: isDarkMode ? 'white' : 'black',
+          }}
+        />
+      );
+    }, [duration, isDarkMode, isRecording]);
+
+    const renderSend = useCallback((props: SendProps<IMessage>) => {
+      return (<View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'flex-end',
+        }}
+      >
+        <Actions
+          icon={!isRecording ? microphoneIcon : crossIcon}
+          containerStyle={props.containerStyle}
+          onPressActionButton={async () => {
+            if (isRecording) {
+              await cancelRecording();
+              return;
+            } else {
+              await record();
+            }
+          }}
+        />
+
+        <View style={{ width: 12 }} />
+
+        <Send
+          {...props}
+          disabled={isRecording ? false : !props.text && assets?.length === 0}
+          onSend={isRecording ? async (_) => await onStopRecording() : props.onSend}
+          text={props.text || ' '}
+          containerStyle={styles.send}
+        >
+          <SendChat
+            size={'md'}
+            color={
+              isRecording ? 'blue' : !props.text && assets?.length === 0 ? 'grey' : 'blue'
+            }
+          />
+        </Send>
+      </View>);
+    }, [assets?.length, cancelRecording, crossIcon, isRecording, microphoneIcon, onStopRecording, record]);
+
+    const renderActions = useCallback(() => (
+            <Actions
+              icon={imagesIcon}
+              onPressActionButton={async () => {
+                const medias = await launchImageLibrary({
+                  mediaType: 'mixed',
+                  selectionLimit: 10,
+                });
+                if (medias.didCancel) return;
+                setAssets(medias.assets ?? []);
+              }}
+            />
+          ),[imagesIcon, setAssets]);
+
     const renderCustomInputToolbar = useCallback(
       (props: InputToolbarProps<IMessage>) => {
+        console.log('renderCustomInputToolbar');
         return (
           <InputToolbar
             {...props}
-            renderComposer={(props) => {
-              if (isRecording) {
-                return (
-                  <View
-                    style={{
-                      flex: 1,
-                      alignContent: 'center',
-                      alignItems: 'center',
-                      marginLeft: 10,
-                      marginTop: Platform.select({
-                        ios: 6,
-                        android: 0,
-                        web: 6,
-                      }),
-                      marginBottom: Platform.select({
-                        ios: 5,
-                        android: 3,
-                        web: 4,
-                      }),
-                      flexDirection: 'row',
-                      height: props.composerHeight,
-                    }}
-                  >
-                    <Microphone color={Colors.red[600]} />
-
-                    <Text style={{ marginLeft: 8, fontSize: 16 }}>
-                      {millisToMinutesAndSeconds(duration)}
-                    </Text>
-                  </View>
-                );
-              }
-              return (
-                <Composer
-                  {...props}
-                  textInputStyle={{
-                    color: isDarkMode ? 'white' : 'black',
-                  }}
-                />
-              );
-            }}
-            renderSend={(props) => (
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'flex-end',
-                }}
-              >
-                <Actions
-                  icon={!isRecording ? microphoneIcon : crossIcon}
-                  containerStyle={props.containerStyle}
-                  onPressActionButton={async () => {
-                    if (isRecording) {
-                      await cancelRecording();
-                      return;
-                    } else {
-                      await record();
-                    }
-                  }}
-                />
-
-                <View style={{ width: 12 }} />
-
-                <Send
-                  {...props}
-                  disabled={isRecording ? false : !props.text && assets?.length === 0}
-                  onSend={isRecording ? async (_) => await onStopRecording() : props.onSend}
-                  text={props.text || ' '}
-                  containerStyle={styles.send}
-                >
-                  <SendChat
-                    size={'md'}
-                    color={
-                      isRecording ? 'blue' : !props.text && assets?.length === 0 ? 'grey' : 'blue'
-                    }
-                  />
-                </Send>
-              </View>
-            )}
-            renderActions={
-              isRecording
-                ? () => null
-                : () => (
-                    <Actions
-                      icon={imagesIcon}
-                      onPressActionButton={async () => {
-                        const medias = await launchImageLibrary({
-                          mediaType: 'mixed',
-                          selectionLimit: 10,
-                        });
-                        if (medias.didCancel) return;
-                        setAssets(medias.assets ?? []);
-                      }}
-                    />
-                  )
-            }
+            renderComposer={renderComposer}
+            renderSend={renderSend}
+            renderActions={isRecording ? () => null : renderActions}
             containerStyle={[
               styles.inputContainer,
               {
@@ -307,19 +309,7 @@ export const ChatDetail = memo(
           />
         );
       },
-      [
-        isRecording,
-        isDarkMode,
-        duration,
-        microphoneIcon,
-        crossIcon,
-        assets?.length,
-        onStopRecording,
-        cancelRecording,
-        record,
-        imagesIcon,
-        setAssets,
-      ]
+      [renderComposer, renderSend, isRecording, renderActions, isDarkMode]
     );
 
     const renderAvatar = useCallback((props: AvatarProps<IMessage>) => {
