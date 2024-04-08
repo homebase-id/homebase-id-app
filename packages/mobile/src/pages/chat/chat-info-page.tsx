@@ -44,51 +44,48 @@ export function ChatInfoPage(prop: ChatInfoProp) {
   const group =
     (conversation && 'recipients' in conversation.fileMetadata.appData.content) || false;
 
+  const headerLeft = useCallback(
+    () => (
+      <HeaderBackButton canGoBack={true} labelVisible={false} onPress={prop.navigation.goBack} />
+    ),
+    [prop.navigation.goBack]
+  );
+
+  const headerRight = useCallback(
+    () => (
+      <TextButton
+        title="Edit"
+        style={{ marginRight: 8 }}
+        onPress={() => {
+          prop.navigation.navigate('EditGroup', {
+            convoId: conversationId,
+          });
+        }}
+      />
+    ),
+    [conversationId, prop.navigation]
+  );
+
   if (!conversation) return null;
 
   const conversationContent = conversation.fileMetadata.appData.content;
 
-  const headerLeft = () => (
-    <HeaderBackButton canGoBack={true} labelVisible={false} onPress={prop.navigation.goBack} />
-  );
-
-  const headerRight = () => (
-    <TextButton
-      title="Edit"
-      style={{ marginRight: 8 }}
-      onPress={() => {
-        prop.navigation.navigate('EditGroup', {
-          convoId: conversationId,
-        });
-      }}
-    />
-  );
-
   return (
     <>
-      <View
-        style={[
-          {
-            paddingVertical: 3,
-            width: '100%',
-            zIndex: 10,
-          },
-        ]}
-      >
-        <Header
-          title={group ? 'Group Info' : 'Chat Info'}
-          headerLeft={headerLeft}
-          headerRight={group ? headerRight : undefined}
-        />
-      </View>
+      <Header
+        title={group ? 'Group Info' : 'Chat Info'}
+        headerLeft={headerLeft}
+        headerRight={group ? headerRight : undefined}
+      />
       <View style={styles.content}>
         {!group ? (
           isSelf ? (
-            <OwnerAvatar style={styles.avatar} />
+            <OwnerAvatar style={styles.avatar} imageSize={{ width: 81, height: 81 }} />
           ) : (
             <Avatar
               odinId={(conversationContent as SingleConversation).recipient}
               style={styles.avatar}
+              imageSize={{ width: 81, height: 81 }}
             />
           )
         ) : (
@@ -99,6 +96,7 @@ export function ChatInfoPage(prop: ChatInfoProp) {
             styles.title,
             {
               color: isDarkMode ? Colors.white : Colors.black,
+              marginTop: 24,
             },
           ]}
         >
