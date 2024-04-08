@@ -232,7 +232,6 @@ export const ChatDetail = memo(
       }
       return (
         <Composer
-        onTextChanged={props.onTextChanged}
           {...props}
           textInputStyle={inputStyle}
         />

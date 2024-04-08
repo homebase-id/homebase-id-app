@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
 
 export interface ComposerProps {
   composerHeight?: number;
-  text?: string;
+  defaultValue?: string;
   placeholder?: string;
   placeholderTextColor?: string;
   textInputProps?: Partial<TextInputProps>;
@@ -61,7 +61,7 @@ export const Composer = memo(
       onTextChanged = () => {},
       placeholder = DEFAULT_PLACEHOLDER,
       placeholderTextColor = Color.defaultColor,
-      text = '',
+      defaultValue = '',
       textInputAutoFocus = false,
       textInputProps = {},
       textInputStyle,
@@ -121,7 +121,7 @@ export const Composer = memo(
           },
         ]}
         autoFocus={textInputAutoFocus}
-        defaultValue={text}
+        defaultValue={defaultValue}
         enablesReturnKeyAutomatically
         underlineColorAndroid='transparent'
         keyboardAppearance={keyboardAppearance}

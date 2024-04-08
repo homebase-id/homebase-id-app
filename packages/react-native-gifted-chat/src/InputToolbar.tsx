@@ -36,6 +36,7 @@ export interface InputToolbarProps<TMessage extends IMessage> {
   renderSend?(props: SendProps<TMessage>): React.ReactNode;
   renderComposer?(props: ComposerProps): React.ReactNode;
   onPressActionButton?(): void;
+  text?: string;
 }
 
 export const InputToolbar = memo(
@@ -58,14 +59,16 @@ export const InputToolbar = memo(
       };
     }, []);
 
-    const { containerStyle, ...rest } = props;
     const {
+      containerStyle,
       renderActions,
       onPressActionButton,
       renderComposer,
       renderSend,
       renderAccessory,
-    } = rest;
+      text, // We only pass text to Send as only send should re-render when it changes
+      ...rest
+    } = props;
 
     return (
       <View
@@ -74,10 +77,10 @@ export const InputToolbar = memo(
         <View style={[styles.primary, props.primaryStyle]}>
           {renderActions?.(rest) ||
             (onPressActionButton && <Actions {...rest} />)}
-          {renderComposer?.(props as ComposerProps) || (
-            <Composer {...(props as ComposerProps)} />
+          {renderComposer?.(rest as ComposerProps) || (
+            <Composer {...(rest as ComposerProps)} />
           )}
-          {renderSend?.(props) || <Send {...props} />}
+          {renderSend?.({ ...props, text }) || <Send {...props} text={text} />}
         </View>
         {renderAccessory && (
           <View style={[styles.accessory, props.accessoryStyle]}>
