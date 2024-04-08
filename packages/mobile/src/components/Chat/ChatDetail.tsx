@@ -18,7 +18,7 @@ import {
   SendProps,
   Time,
 } from 'react-native-gifted-chat';
-import { useCallback, memo } from 'react';
+import { useCallback, memo, useMemo } from 'react';
 import {
   GestureResponderEvent,
   ImageBackground,
@@ -26,8 +26,10 @@ import {
   Pressable,
   ScrollView,
   StatusBar,
+  StyleProp,
   StyleSheet,
   View,
+  ViewStyle,
 } from 'react-native';
 import { Close, Images, Microphone, SendChat, Times } from '../../components/ui/Icons/icons';
 import MediaMessage from './MediaMessage';
@@ -193,8 +195,11 @@ export const ChatDetail = memo(
       ] as Asset[]);
     }, [setAssets, stop]);
 
-    // TODO: Shouldn'the whole "renderInputToolbar" render differently?
+    const inputStyle = useMemo(() => ({
+      color: isDarkMode ? 'white' : 'black',
+    }),[isDarkMode]);
     const renderComposer = useCallback((props: ComposerProps) => {
+      // TODO: Shouldn'the whole "renderInputToolbar" render differently?
       if (isRecording) {
         return (
           <View
@@ -227,10 +232,9 @@ export const ChatDetail = memo(
       }
       return (
         <Composer
+        onTextChanged={props.onTextChanged}
           {...props}
-          textInputStyle={{
-            color: isDarkMode ? 'white' : 'black',
-          }}
+          textInputStyle={inputStyle}
         />
       );
     }, [duration, isDarkMode, isRecording]);
@@ -288,6 +292,16 @@ export const ChatDetail = memo(
             />
           ),[imagesIcon, setAssets]);
 
+    const inputContainerStyle: StyleProp<ViewStyle> = useMemo(() => {return [
+      styles.inputContainer,
+      {
+        backgroundColor: isDarkMode ? Colors.slate[900] : Colors.white,
+        borderTopWidth: 0,
+        borderRadius: 10,
+        marginTop: Platform.OS === 'android' ? 'auto' : undefined,
+      },
+    ];},[isDarkMode]);
+
     const renderInputToolbar = useCallback(
       (props: InputToolbarProps<IMessage>) => {
         return (
@@ -296,19 +310,11 @@ export const ChatDetail = memo(
             renderComposer={renderComposer}
             renderSend={renderSend}
             renderActions={isRecording ? () => null : renderActions}
-            containerStyle={[
-              styles.inputContainer,
-              {
-                backgroundColor: isDarkMode ? Colors.slate[900] : Colors.white,
-                borderTopWidth: 0,
-                borderRadius: 10,
-                marginTop: Platform.OS === 'android' ? 'auto' : undefined,
-              },
-            ]}
+            containerStyle={inputContainerStyle}
           />
         );
       },
-      [renderComposer, renderSend, isRecording, renderActions, isDarkMode]
+      [renderComposer, renderSend, isRecording, renderActions, inputContainerStyle]
     );
 
     const renderAvatar = useCallback((props: AvatarProps<IMessage>) => {

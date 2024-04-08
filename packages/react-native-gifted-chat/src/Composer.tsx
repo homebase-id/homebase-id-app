@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useRef } from 'react';
+import React, { memo, useCallback, useEffect, useRef } from 'react';
 import {
   Platform,
   StyleSheet,
@@ -51,21 +51,22 @@ export interface ComposerProps {
 }
 
 export const Composer = memo(
-  ({
-    composerHeight = MIN_COMPOSER_HEIGHT,
-    disableComposer = false,
-    keyboardAppearance = 'default',
-    multiline = true,
-    onInputSizeChanged = () => {},
-    onTextChanged = () => {},
-    placeholder = DEFAULT_PLACEHOLDER,
-    placeholderTextColor = Color.defaultColor,
-    text = '',
-    textInputAutoFocus = false,
-    textInputProps = {},
-    textInputStyle,
-  }: ComposerProps): React.ReactElement => {
-    console.log('composer');
+  (props: ComposerProps): React.ReactElement => {
+    const {
+      composerHeight = MIN_COMPOSER_HEIGHT,
+      disableComposer = false,
+      keyboardAppearance = 'default',
+      multiline = true,
+      onInputSizeChanged = () => {},
+      onTextChanged = () => {},
+      placeholder = DEFAULT_PLACEHOLDER,
+      placeholderTextColor = Color.defaultColor,
+      text = '',
+      textInputAutoFocus = false,
+      textInputProps = {},
+      textInputStyle,
+    } = props;
+
     const dimensionsRef = useRef<{ width: number; height: number }>();
 
     const determineInputSizeChange = useCallback(
@@ -120,7 +121,7 @@ export const Composer = memo(
           },
         ]}
         autoFocus={textInputAutoFocus}
-        value={text}
+        defaultValue={text}
         enablesReturnKeyAutomatically
         underlineColorAndroid='transparent'
         keyboardAppearance={keyboardAppearance}
