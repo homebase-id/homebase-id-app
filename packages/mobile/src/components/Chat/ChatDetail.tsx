@@ -237,7 +237,7 @@ export const ChatDetail = memo(
           textInputStyle={inputStyle}
         />
       );
-    }, [duration, isDarkMode, isRecording]);
+    }, [duration, inputStyle, isRecording]);
 
     const renderSend = useCallback((props: SendProps<IMessage>) => {
       return (<View
