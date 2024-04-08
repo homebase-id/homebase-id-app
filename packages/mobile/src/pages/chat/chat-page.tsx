@@ -32,6 +32,7 @@ import Toast from 'react-native-toast-message';
 import Clipboard from '@react-native-clipboard/clipboard';
 import { ErrorBoundary } from '../../components/ui/ErrorBoundary/ErrorBoundary';
 import { ChatStackParamList } from '../../app/App';
+import { NoConversationHeader } from '../../components/Chat/NoConversationHeader';
 
 export type ChatProp = NativeStackScreenProps<ChatStackParamList, 'ChatScreen'>;
 const ChatPage = memo(({ route, navigation }: ChatProp) => {
@@ -225,7 +226,11 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
     setSelectedMessage(undefined);
   }, []);
 
-  if (!conversation) return null;
+  if (!conversation) {
+    return (
+      <NoConversationHeader title="No conversation found" goBack={navigation.goBack}/>
+    );
+  }
 
   return (
     <BottomSheetModalProvider>
