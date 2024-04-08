@@ -43,9 +43,7 @@ export const FollowersPage = (_props: FollowersProps) => {
               style={{
                 padding: 1,
               }}
-              onPress={() =>
-                Linking.openURL(`https://${identity}/owner/connections/${item.item.senderOdinId}`)
-              }
+              onPress={() => Linking.openURL(`https://${identity}/owner/connections/${item.item}`)}
             >
               <IdentityItem odinId={item.item} key={item.item} />
             </TouchableOpacity>

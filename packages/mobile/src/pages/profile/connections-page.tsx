@@ -48,9 +48,7 @@ export const ConnectionsPage = (_props: ConnectionsProps) => {
               style={{
                 padding: 1,
               }}
-              onPress={() =>
-                Linking.openURL(`https://${identity}/owner/connections/${item.item.senderOdinId}`)
-              }
+              onPress={() => Linking.openURL(`https://${identity}/owner/connections/${item.item}`)}
             >
               <IdentityItem odinId={item.item} key={item.item} />
             </TouchableOpacity>

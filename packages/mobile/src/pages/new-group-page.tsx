@@ -7,7 +7,7 @@ import { Header, HeaderBackButtonProps } from '@react-navigation/elements';
 import { BackButton } from '../components/ui/convo-app-bar';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { AppStackParamList, ChatStackParamList } from '../app/App';
+import { ChatStackParamList } from '../app/App';
 import { useConversation } from '../hooks/chat/useConversation';
 import Dialog from 'react-native-dialog';
 import { DotYouProfile } from '@youfoundation/js-lib/network';
@@ -20,7 +20,7 @@ export const NewGroupPage = memo(() => {
 
   const [selectedContacts, setSetselectedContacts] = useState<DotYouProfile[]>([]);
   const navigation = useNavigation<NavigationProp<ChatStackParamList, 'NewChat'>>();
-  const appStackNavigation = useNavigation<NavigationProp<AppStackParamList, 'TabStack'>>();
+
   const { mutateAsync: createNew } = useConversation().create;
 
   const [groupTitle, setgroupTitle] = useState<string>();
@@ -34,11 +34,11 @@ export const NewGroupPage = memo(() => {
       setDialogVisible(false);
       navigation.goBack();
       navigation.goBack();
-      appStackNavigation.navigate('ChatScreen', {
+      navigation.navigate('ChatScreen', {
         convoId: newConversationId,
       });
     }
-  }, [createNew, navigation, appStackNavigation, selectedContacts, groupTitle]);
+  }, [createNew, navigation, selectedContacts, groupTitle]);
 
   const headerLeft = useCallback(
     (props: HeaderBackButtonProps) => {
