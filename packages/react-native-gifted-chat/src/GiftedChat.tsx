@@ -506,7 +506,7 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
     );
     setMessagesContainerHeight(newMessagesContainerHeight);
 
-    setText(text);
+    setText('');
     setComposerHeight(minComposerHeight);
   };
 
