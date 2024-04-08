@@ -1,5 +1,5 @@
 import { NativeModules } from 'react-native';
-import RNFS from 'react-native-fs';
+import { unlink } from 'react-native-fs';
 const RNAudioTranscoder = NativeModules.RNAudioTranscoder;
 
 /**
@@ -35,8 +35,8 @@ export const transcodeAudio = async (
   await RNAudioTranscoder.transcode({ input, temp: scratch, output });
 
   try {
-    await RNFS.unlink(input);
-    await RNFS.unlink(scratch);
+    await unlink(input);
+    await unlink(scratch);
   } catch (e) {
     console.error('[AudioTranscoder]', 'Error cleaning up temp files:', e);
   }

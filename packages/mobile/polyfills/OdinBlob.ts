@@ -29,7 +29,7 @@ const { OdinBlobModule } = NativeModules;
  * Reference: https://developer.mozilla.org/en-US/docs/Web/API/Blob
  */
 import { base64ToUint8Array, getNewId, uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
-import RNFS from 'react-native-fs';
+import { CachesDirectoryPath, readFile, writeFile, unlink } from 'react-native-fs';
 
 class Blob {
   _data: BlobData;
@@ -59,9 +59,9 @@ class Blob {
 
       // We need to convert to a cached file on the system, as RN is dumb that way... It can't handle blobs in a data uri, as it will always load it as a bitmap... 🤷
       // See getFileInputStream in RequestBodyUtil.class within RN for more info
-      const localPath = RNFS.CachesDirectoryPath + `/${id}` + `.${mimeType.split('/')[1]}`;
+      const localPath = CachesDirectoryPath + `/${id}` + `.${mimeType.split('/')[1]}`;
       this.uri = `file://${localPath}`;
-      RNFS.writeFile(localPath, base64Data, 'base64').then(() => {
+      writeFile(localPath, base64Data, 'base64').then(() => {
         this.written = true;
       });
     } else if (typeof parts === 'string') {
@@ -111,7 +111,7 @@ class Blob {
   close() {
     // const BlobManager = require('react-native/Libraries/Blob/BlobManager');
     // BlobManager.release(this.data.blobId);
-    RNFS.unlink(this.uri);
+    unlink(this.uri);
     this.data = null;
   }
 
@@ -126,7 +126,7 @@ class Blob {
     });
 
     return writePromise.then(() =>
-      RNFS.readFile(this.uri, 'base64')
+      readFile(this.uri, 'base64')
         .then((base64) => {
           if (!base64) return new Uint8Array(0).buffer;
           return base64ToUint8Array(base64).buffer;
@@ -148,7 +148,7 @@ class Blob {
       }, 100);
     });
 
-    const destinationUri = `file://${RNFS.CachesDirectoryPath}/${this.data.blobId}-encrypted.${
+    const destinationUri = `file://${CachesDirectoryPath}/${this.data.blobId}-encrypted.${
       this.data.type.split('/')[1]
     }`;
 
@@ -161,7 +161,7 @@ class Blob {
 
     if (encryptStatus === 1) {
       //Remove the original file
-      await RNFS.unlink(this.uri);
+      await unlink(this.uri);
 
       return new Blob(destinationUri, { type: this.data.type });
     } else {
@@ -180,7 +180,7 @@ class Blob {
     });
 
     const extension = this.data.type === 'audio/mpeg' ? 'mp3' : this.data.type.split('/')[1];
-    const destinationUri = `file://${RNFS.CachesDirectoryPath}/${this.data.blobId}.${extension}`;
+    const destinationUri = `file://${CachesDirectoryPath}/${this.data.blobId}.${extension}`;
 
     const decryptStatus = await OdinBlobModule.decryptFileWithAesCbc16(
       this.uri,
@@ -191,7 +191,7 @@ class Blob {
 
     if (decryptStatus === 1) {
       //Remove the original file
-      await RNFS.unlink(this.uri);
+      await unlink(this.uri);
 
       return new Blob(destinationUri, { type: this.data.type });
     } else {
