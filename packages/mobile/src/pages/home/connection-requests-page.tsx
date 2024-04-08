@@ -1,6 +1,6 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
-import { FlatList, Linking, RefreshControl, View } from 'react-native';
+import { FlatList, RefreshControl, View } from 'react-native';
 import NoItems from '../../components/list/noItems';
 import IdentityItem from '../../components/list/identityItem';
 import { useCallback, useMemo, useState } from 'react';
@@ -8,6 +8,7 @@ import { HomeStackParamList } from '../../app/App';
 import { usePendingConnections } from '../../hooks/connections/usePendingConnections';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { useDotYouClientContext } from 'feed-app-common';
+import { openURL } from '../../utils/utils';
 
 type ConnectionRequestProps = NativeStackScreenProps<HomeStackParamList, 'ConnectionRequests'>;
 export const ConnectionRequestsPage = (_props: ConnectionRequestProps) => {
@@ -37,7 +38,7 @@ export const ConnectionRequestsPage = (_props: ConnectionRequestProps) => {
                 padding: 1,
               }}
               onPress={() =>
-                Linking.openURL(`https://${identity}/owner/connections/${item.item.senderOdinId}`)
+                openURL(`https://${identity}/owner/connections/${item.item.senderOdinId}`)
               }
             >
               <IdentityItem odinId={item.item.senderOdinId} />

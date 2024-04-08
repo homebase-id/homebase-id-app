@@ -1,5 +1,5 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Linking, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { useConversation } from '../../hooks/chat/useConversation';
 import { Avatar, GroupAvatar, OwnerAvatar } from '../../components/Chat/Conversation-tile';
 import {
@@ -10,7 +10,6 @@ import {
 import { Home } from '../../components/ui/Icons/icons';
 
 import { useCallback } from 'react';
-import InAppBrowser from 'react-native-inappbrowser-reborn';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 
 import { Colors } from '../../app/Colors';
@@ -21,6 +20,7 @@ import { useDarkMode } from '../../hooks/useDarkMode';
 import { useProfile } from '../../hooks/profile/useProfile';
 import { ConnectionName } from '../../components/ui/Name';
 import { ChatStackParamList } from '../../app/App';
+import { openURL } from '../../utils/utils';
 
 export type ChatInfoProp = NativeStackScreenProps<ChatStackParamList, 'ChatInfo'>;
 
@@ -38,13 +38,7 @@ export function ChatInfoPage(prop: ChatInfoProp) {
       ? identity
       : (conversation?.fileMetadata.appData.content as SingleConversation).recipient;
     const url = `https://${recipient}/`;
-    if (await InAppBrowser.isAvailable()) {
-      await InAppBrowser.open(url, {
-        enableUrlBarHiding: false,
-        enableDefaultShare: false,
-        animated: true,
-      });
-    } else Linking.openURL(url);
+    await openURL(url);
   }, [conversation?.fileMetadata.appData.content, isSelf, identity]);
 
   const group =
