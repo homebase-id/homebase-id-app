@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { ImageSize, TargetDrive, ImageContentType } from '@youfoundation/js-lib/core';
-import RNFS from 'react-native-fs';
+import {exists} from 'react-native-fs';
 import { useAuth } from '../../../../hooks/auth/useAuth';
 import { getDecryptedImageData } from '../../../../provider/image/RNImageProvider';
 
@@ -101,7 +101,7 @@ const useImage = (props?: {
     );
     if (cachedEntry) {
       const cachedData = queryClient.getQueryData<ImageData | undefined>(cachedEntry.queryKey);
-      if (cachedData && (await RNFS.exists(cachedData.url))) return cachedData;
+      if (cachedData && (await exists(cachedData.url))) return cachedData;
     }
 
     const imageBlob = await getDecryptedImageData(

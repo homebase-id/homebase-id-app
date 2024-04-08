@@ -35,7 +35,7 @@ import {
 import { createThumbnails } from './RNThumbnailProvider';
 import { OdinBlob } from '../../../polyfills/OdinBlob';
 import { AxiosRequestConfig } from 'axios';
-import RNFS from 'react-native-fs';
+import { readFile } from 'react-native-fs';
 
 import ReactNativeBlobUtil from 'react-native-blob-util';
 
@@ -117,7 +117,7 @@ export const uploadImage = async (
   };
 
   // Read payload
-  const imageData = await RNFS.readFile((photo.filepath || photo.uri) as string, 'base64');
+  const imageData = await readFile((photo.filepath || photo.uri) as string, 'base64');
   const result = await uploadFile(
     dotYouClient,
     instructionSet,

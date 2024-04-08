@@ -1,7 +1,7 @@
 import { ImageSource } from './RNImageProvider';
 import { getNewId } from '@youfoundation/js-lib/helpers';
 
-import RNFS from 'react-native-fs';
+import { CachesDirectoryPath, exists, read, stat } from 'react-native-fs';
 import { Video } from 'react-native-compressor';
 import { Platform } from 'react-native';
 
@@ -14,7 +14,7 @@ const CompressVideo = async (video: ImageSource): Promise<ImageSource> => {
   try {
     const source = video.filepath || video.uri;
 
-    if (!source || !(await RNFS.exists(source))) {
+    if (!source || !(await exists(source))) {
       throw new Error(`File not found: ${source}`);
     }
 
@@ -48,18 +48,18 @@ const FragmentVideo = async (video: ImageSource) => {
   try {
     const source = video.filepath || video.uri;
 
-    if (!source || !(await RNFS.exists(source))) {
+    if (!source || !(await exists(source))) {
       throw new Error(`File not found: ${source}`);
     }
 
-    const sourceFileSize = await RNFS.stat(source).then((stats) => stats.size);
+    const sourceFileSize = await stat(source).then((stats) => stats.size);
     if (sourceFileSize < 10 * MB) {
       return {
         ...video,
       };
     }
 
-    const dirPath = RNFS.CachesDirectoryPath;
+    const dirPath = CachesDirectoryPath;
 
     const destinationPrefix = Platform.OS === 'ios' ? '' : 'file://';
     const destinationUri = `${destinationPrefix}${dirPath}/ffmpeg-fragmented-${getNewId()}.mp4`;
@@ -85,7 +85,7 @@ const FragmentVideo = async (video: ImageSource) => {
         throw new Error(`FFmpeg process failed with state: ${state} and rc: ${returnCode}.`);
       }
 
-      const fileSize = await RNFS.stat(destinationUri).then((stats) => stats.size);
+      const fileSize = await stat(destinationUri).then((stats) => stats.size);
 
       return {
         ...video,
@@ -105,12 +105,12 @@ const FragmentVideo = async (video: ImageSource) => {
 export const grabThumbnail = async (video: ImageSource) => {
   const source = video.filepath || video.uri;
 
-  if (!source || !(await RNFS.exists(source))) {
+  if (!source || !(await exists(source))) {
     console.error(`File not found: ${source}`);
     return null;
   }
 
-  const dirPath = RNFS.CachesDirectoryPath;
+  const dirPath = CachesDirectoryPath;
   const destinationPrefix = Platform.OS === 'ios' ? '' : 'file://';
 
   const newId = getNewId();
@@ -176,11 +176,11 @@ type ExtendedBuffer = ArrayBuffer & { fileStart?: number };
 const getMp4Info = async (video: ImageSource) => {
   const source = video.filepath || video.uri;
 
-  if (!source || !(await RNFS.exists(source))) {
+  if (!source || !(await exists(source))) {
     throw new Error(`File not found: ${source}`);
   }
 
-  const stat = await RNFS.stat(source);
+  const stats = await stat(source);
 
   const mp4File = MP4Box.createFile(true);
 
@@ -193,10 +193,10 @@ const getMp4Info = async (video: ImageSource) => {
     let offset = 0;
     // let totalBytesRead = 0;
 
-    while (offset < stat.size) {
-      const bytesToRead = Math.min(readChunkSize, stat.size - offset);
+    while (offset < stats.size) {
+      const bytesToRead = Math.min(readChunkSize, stats.size - offset);
 
-      const base64String = await RNFS.read(source, bytesToRead, offset, 'base64');
+      const base64String = await read(source, bytesToRead, offset, 'base64');
       const rawString = atob(base64String);
       const arrayBuffer = new ArrayBuffer(rawString.length) as ExtendedBuffer;
       const byteArray = new Uint8Array(arrayBuffer);
