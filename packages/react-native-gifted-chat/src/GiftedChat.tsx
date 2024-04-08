@@ -416,7 +416,7 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
     setTypingDisabled(false);
   };
 
-  const renderMessages = useCallback(() => {
+  const RenderedMessages = useMemo(() => {
     isDebug && console.log('renderMessages', messagesContainerHeight);
     const { messagesContainerStyle, ...messagesContainerProps } = props;
 
@@ -656,7 +656,7 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
         <View testID={TEST_ID.WRAPPER} style={styles.wrapper}>
           <ActionSheetProvider ref={actionSheetRef}>
             <View onLayout={onMainViewLayout} style={styles.container}>
-              {renderMessages()}
+              {RenderedMessages}
               {renderInputToolbar ? (
                 renderInputToolbar(inputToolbarProps)
               ) : (
