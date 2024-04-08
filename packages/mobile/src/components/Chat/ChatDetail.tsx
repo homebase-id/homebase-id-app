@@ -193,7 +193,7 @@ export const ChatDetail = memo(
       ] as Asset[]);
     }, [setAssets, stop]);
 
-    // TODO: Shouldn'the whole "CustomInputToolbar" render differently?
+    // TODO: Shouldn'the whole "renderInputToolbar" render differently?
     const renderComposer = useCallback((props: ComposerProps) => {
       if (isRecording) {
         return (
@@ -288,9 +288,8 @@ export const ChatDetail = memo(
             />
           ),[imagesIcon, setAssets]);
 
-    const renderCustomInputToolbar = useCallback(
+    const renderInputToolbar = useCallback(
       (props: InputToolbarProps<IMessage>) => {
-        console.log('renderCustomInputToolbar');
         return (
           <InputToolbar
             {...props}
@@ -375,7 +374,7 @@ export const ChatDetail = memo(
         showUserAvatar={false}
         renderUsernameOnMessage={isGroup}
         renderAvatar={isGroup ? renderAvatar : null}
-        renderInputToolbar={renderCustomInputToolbar}
+        renderInputToolbar={renderInputToolbar}
         user={{
           _id: identity || '',
         }}
