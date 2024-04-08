@@ -2,6 +2,7 @@ import { ReactNode, useState, FunctionComponent, useEffect, useCallback } from '
 import messaging from '@react-native-firebase/messaging';
 import { PushNotificationPermissionContext } from '../../provider/push-notification/PushNotificationContext';
 import { PermissionsAndroid, Platform } from 'react-native';
+import { getApiLevel } from 'react-native-device-info';
 
 interface PushNotificationProviderProps {
   children: ReactNode;
@@ -28,10 +29,14 @@ export const PushNotificationProvider: FunctionComponent<PushNotificationProvide
           authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
           authStatus === messaging.AuthorizationStatus.PROVISIONAL;
       } else if (Platform.OS === 'android') {
-        const authStatus = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
-        );
-        status = authStatus === PermissionsAndroid.RESULTS.GRANTED;
+        if ((await getApiLevel()) < 33) {
+          status = true;
+        } else {
+          const authStatus = await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
+          );
+          status = authStatus === PermissionsAndroid.RESULTS.GRANTED;
+        }
       }
 
       if (status) {
