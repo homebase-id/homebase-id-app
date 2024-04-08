@@ -37,19 +37,21 @@ export const FollowingPage = (_props: FollowingProps) => {
         <FlatList
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={doRefresh} />}
           data={flatIdentities}
-          renderItem={(item) => (
-            <TouchableOpacity
-              key={item.item}
-              style={{
-                padding: 1,
-              }}
-              onPress={() =>
-                Linking.openURL(`https://${identity}/owner/connections/${item.item.senderOdinId}`)
-              }
-            >
-              <IdentityItem odinId={item.item} key={item.item} />
-            </TouchableOpacity>
-          )}
+          renderItem={(item) => {
+            return (
+              <TouchableOpacity
+                key={item.item}
+                style={{
+                  padding: 1,
+                }}
+                onPress={() =>
+                  Linking.openURL(`https://${identity}/owner/connections/${item.item}`)
+                }
+              >
+                <IdentityItem odinId={item.item} key={item.item} />
+              </TouchableOpacity>
+            );
+          }}
           onEndReached={() => hasMoreIdentities && fetchNextPage()}
         />
       ) : (

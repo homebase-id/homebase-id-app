@@ -3,15 +3,15 @@ import { ChatDrive } from '../provider/chat/ConversationProvider';
 import { PhotoWithLoader } from '../components/ui/Media/PhotoWithLoader';
 import { VideoWithLoader } from '../components/ui/Media/VideoWithLoader';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AppStackParamList } from '../app/App';
 import { Dimensions, View } from 'react-native';
 import { useMemo, useState } from 'react';
 import Carousel from 'react-native-reanimated-carousel';
 import { OdinImage } from '../components/ui/OdinImage/OdinImage';
 import { useDarkMode } from '../hooks/useDarkMode';
 import { Colors } from '../app/Colors';
+import { ChatStackParamList } from '../app/App';
 
-export type MediaProp = NativeStackScreenProps<AppStackParamList, 'PreviewMedia'>;
+export type MediaProp = NativeStackScreenProps<ChatStackParamList, 'PreviewMedia'>;
 
 export const PreviewMedia = (prop: MediaProp) => {
   const msg = prop.route.params.msg;

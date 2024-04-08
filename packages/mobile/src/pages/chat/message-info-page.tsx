@@ -1,7 +1,6 @@
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Text } from '../../components/ui/Text/Text';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { AppStackParamList } from '../../app/App';
 import { useChatReaction } from '../../hooks/chat/useChatReaction';
 
 import { GroupConversation, SingleConversation } from '../../provider/chat/ConversationProvider';
@@ -9,8 +8,9 @@ import { AuthorName, ConnectionName } from '../../components/ui/Name';
 import { Avatar, OwnerAvatar } from '../../components/Chat/Conversation-tile';
 import { InnerDeliveryIndicator } from '../../components/Chat/Chat-Delivery-Indicator';
 import { useDotYouClientContext } from 'feed-app-common';
+import { ChatStackParamList } from '../../app/App';
 
-export type MessageInfoProp = NativeStackScreenProps<AppStackParamList, 'MessageInfo'>;
+export type MessageInfoProp = NativeStackScreenProps<ChatStackParamList, 'MessageInfo'>;
 
 const dateTimeFormat: Intl.DateTimeFormatOptions = {
   month: 'short',
