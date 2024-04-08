@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useEffect, useRef } from 'react';
+import React, { memo, useCallback, useRef } from 'react';
 import {
   Platform,
   StyleSheet,
@@ -6,6 +6,8 @@ import {
   TextInputProps,
   NativeSyntheticEvent,
   TextInputContentSizeChangeEventData,
+  ViewStyle,
+  View,
 } from 'react-native';
 import { MIN_COMPOSER_HEIGHT, DEFAULT_PLACEHOLDER } from './Constant';
 import Color from './Color';
@@ -22,14 +24,28 @@ const styles = StyleSheet.create({
         paddingLeft: 4,
       },
     }),
+    // marginTop: Platform.select({
+    //   ios: 6,
+    //   android: 4,
+    //   web: 6,
+    // }),
+    // marginBottom: Platform.select({
+    //   ios: 5,
+    //   android: 4,
+    //   web: 4,
+    // }),
+  },
+  container: {
+    flex: 1,
     marginTop: Platform.select({
       ios: 6,
-      android: 0,
+      android: 4,
       web: 6,
     }),
+    marginLeft: 10,
     marginBottom: Platform.select({
       ios: 5,
-      android: 3,
+      android: 4,
       web: 4,
     }),
   },
@@ -48,6 +64,7 @@ export interface ComposerProps {
   disableComposer?: boolean;
   onTextChanged?(text: string): void;
   onInputSizeChanged?(layout: { width: number; height: number }): void;
+  containerStyle?: ViewStyle;
 }
 
 export const Composer = memo(
@@ -96,37 +113,34 @@ export const Composer = memo(
       determineInputSizeChange(contentSize);
 
     return (
-      <TextInput
-        testID={placeholder}
-        accessible
-        accessibilityLabel={placeholder}
-        placeholder={placeholder}
-        placeholderTextColor={placeholderTextColor}
-        multiline={multiline}
-        editable={!disableComposer}
-        onContentSizeChange={handleContentSizeChange}
-        onChangeText={onTextChanged}
+      <View
         style={[
-          styles.textInput,
-          textInputStyle,
+          styles.container,
           {
             height: composerHeight,
-            ...Platform.select({
-              web: {
-                outlineWidth: 0,
-                outlineColor: 'transparent',
-                outlineOffset: 0,
-              },
-            }),
           },
+          props.containerStyle,
         ]}
-        autoFocus={textInputAutoFocus}
-        defaultValue={defaultValue}
-        enablesReturnKeyAutomatically
-        underlineColorAndroid='transparent'
-        keyboardAppearance={keyboardAppearance}
-        {...textInputProps}
-      />
+      >
+        <TextInput
+          testID={placeholder}
+          accessible
+          accessibilityLabel={placeholder}
+          placeholder={placeholder}
+          placeholderTextColor={placeholderTextColor}
+          multiline={multiline}
+          editable={!disableComposer}
+          onContentSizeChange={handleContentSizeChange}
+          onChangeText={onTextChanged}
+          style={[styles.textInput, textInputStyle]}
+          autoFocus={textInputAutoFocus}
+          defaultValue={defaultValue}
+          enablesReturnKeyAutomatically
+          underlineColorAndroid='transparent'
+          keyboardAppearance={keyboardAppearance}
+          {...textInputProps}
+        />
+      </View>
     );
   },
 );

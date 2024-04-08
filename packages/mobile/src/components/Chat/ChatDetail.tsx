@@ -195,111 +195,137 @@ export const ChatDetail = memo(
       ] as Asset[]);
     }, [setAssets, stop]);
 
-    const inputStyle = useMemo(() => ({
-      color: isDarkMode ? 'white' : 'black',
-    }),[isDarkMode]);
-    const renderComposer = useCallback((props: ComposerProps) => {
-      // TODO: Shouldn'the whole "renderInputToolbar" render differently?
-      if (isRecording) {
+    const inputStyle = useMemo(
+      () => ({
+        color: isDarkMode ? 'white' : 'black',
+      }),
+      [isDarkMode]
+    );
+    const renderComposer = useCallback(
+      (props: ComposerProps) => {
+        // TODO: Shouldn'the whole "renderInputToolbar" render differently?
+        if (isRecording) {
+          return (
+            <View
+              style={{
+                flex: 1,
+                alignContent: 'center',
+                alignItems: 'center',
+                marginLeft: 10,
+                marginTop: Platform.select({
+                  ios: 6,
+                  android: 0,
+                  web: 6,
+                }),
+                marginBottom: Platform.select({
+                  ios: 5,
+                  android: 3,
+                  web: 4,
+                }),
+                flexDirection: 'row',
+                height: props.composerHeight,
+              }}
+            >
+              <Microphone color={Colors.red[600]} />
+
+              <Text style={{ marginLeft: 8, fontSize: 16 }}>
+                {millisToMinutesAndSeconds(duration)}
+              </Text>
+            </View>
+          );
+        }
+        return (
+          <Composer
+            {...props}
+            textInputStyle={inputStyle}
+            containerStyle={{
+              borderRadius: 20,
+              backgroundColor: isDarkMode ? Colors.slate[800] : Colors.indigo[50],
+            }}
+          />
+        );
+      },
+      [duration, inputStyle, isDarkMode, isRecording]
+    );
+
+    const renderSend = useCallback(
+      (props: SendProps<IMessage>) => {
         return (
           <View
             style={{
-              flex: 1,
-              alignContent: 'center',
-              alignItems: 'center',
-              marginLeft: 10,
-              marginTop: Platform.select({
-                ios: 6,
-                android: 0,
-                web: 6,
-              }),
-              marginBottom: Platform.select({
-                ios: 5,
-                android: 3,
-                web: 4,
-              }),
               flexDirection: 'row',
-              height: props.composerHeight,
+              alignItems: 'flex-end',
             }}
           >
-            <Microphone color={Colors.red[600]} />
-
-            <Text style={{ marginLeft: 8, fontSize: 16 }}>
-              {millisToMinutesAndSeconds(duration)}
-            </Text>
-          </View>
-        );
-      }
-      return (
-        <Composer
-          {...props}
-          textInputStyle={inputStyle}
-        />
-      );
-    }, [duration, inputStyle, isRecording]);
-
-    const renderSend = useCallback((props: SendProps<IMessage>) => {
-      return (<View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'flex-end',
-        }}
-      >
-        <Actions
-          icon={!isRecording ? microphoneIcon : crossIcon}
-          containerStyle={props.containerStyle}
-          onPressActionButton={async () => {
-            if (isRecording) {
-              await cancelRecording();
-              return;
-            } else {
-              await record();
-            }
-          }}
-        />
-
-        <View style={{ width: 12 }} />
-
-        <Send
-          {...props}
-          disabled={isRecording ? false : !props.text && assets?.length === 0}
-          onSend={isRecording ? async (_) => await onStopRecording() : props.onSend}
-          text={props.text || ' '}
-          containerStyle={styles.send}
-        >
-          <SendChat
-            size={'md'}
-            color={
-              isRecording ? 'blue' : !props.text && assets?.length === 0 ? 'grey' : 'blue'
-            }
-          />
-        </Send>
-      </View>);
-    }, [assets?.length, cancelRecording, crossIcon, isRecording, microphoneIcon, onStopRecording, record]);
-
-    const renderActions = useCallback(() => (
             <Actions
-              icon={imagesIcon}
+              icon={!isRecording ? microphoneIcon : crossIcon}
+              containerStyle={props.containerStyle}
               onPressActionButton={async () => {
-                const medias = await launchImageLibrary({
-                  mediaType: 'mixed',
-                  selectionLimit: 10,
-                });
-                if (medias.didCancel) return;
-                setAssets(medias.assets ?? []);
+                if (isRecording) {
+                  await cancelRecording();
+                  return;
+                } else {
+                  await record();
+                }
               }}
             />
-          ),[imagesIcon, setAssets]);
 
-    const inputContainerStyle: StyleProp<ViewStyle> = useMemo(() => {return [
-      styles.inputContainer,
-      {
-        backgroundColor: isDarkMode ? Colors.slate[900] : Colors.white,
-        borderTopWidth: 0,
-        borderRadius: 10,
-        marginTop: Platform.OS === 'android' ? 'auto' : undefined,
+            <View style={{ width: 12 }} />
+
+            <Send
+              {...props}
+              disabled={isRecording ? false : !props.text && assets?.length === 0}
+              onSend={isRecording ? async (_) => await onStopRecording() : props.onSend}
+              text={props.text || ' '}
+              containerStyle={styles.send}
+            >
+              <SendChat
+                size={'md'}
+                color={isRecording ? 'blue' : !props.text && assets?.length === 0 ? 'grey' : 'blue'}
+              />
+            </Send>
+          </View>
+        );
       },
-    ];},[isDarkMode]);
+      [
+        assets?.length,
+        cancelRecording,
+        crossIcon,
+        isRecording,
+        microphoneIcon,
+        onStopRecording,
+        record,
+      ]
+    );
+
+    const renderActions = useCallback(
+      () => (
+        <Actions
+          icon={imagesIcon}
+          onPressActionButton={async () => {
+            const medias = await launchImageLibrary({
+              mediaType: 'mixed',
+              selectionLimit: 10,
+            });
+            if (medias.didCancel) return;
+            setAssets(medias.assets ?? []);
+          }}
+        />
+      ),
+      [imagesIcon, setAssets]
+    );
+
+    const inputContainerStyle: StyleProp<ViewStyle> = useMemo(() => {
+      return [
+        styles.inputContainer,
+        {
+          backgroundColor: isDarkMode ? Colors.slate[900] : Colors.white,
+          borderTopWidth: 0,
+          borderRadius: 10,
+          marginTop: Platform.OS === 'android' ? 'auto' : undefined,
+        },
+      ];
+    }, [isDarkMode]);
 
     const renderInputToolbar = useCallback(
       (props: InputToolbarProps<IMessage>) => {
@@ -457,11 +483,11 @@ const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
               lineHeight: 60,
             }
           : deleted
-          ? {
-              textDecorationLine: 'line-through',
-              color: Colors.gray[500],
-            }
-          : undefined
+            ? {
+                textDecorationLine: 'line-through',
+                color: Colors.gray[500],
+              }
+            : undefined
       }
     />
   );
