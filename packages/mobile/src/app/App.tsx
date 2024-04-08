@@ -135,7 +135,6 @@ const asyncPersist = createAsyncStoragePersister({
 const INCLUDED_QUERY_KEYS = [
   'chat-message',
   'chat-messages',
-  'conversation',
   'conversations',
   'chat-reaction',
   'connectionDetails',
@@ -337,7 +336,13 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
     });
   }, [navigation]);
 
-  console.log('render chat stack');
+  const headerBackButton = useCallback((props: HeaderBackButtonProps) => {
+    return BackButton({
+      onPress: () => navigation.navigate('Conversation'),
+      prop: props,
+    });
+  }, [navigation]);
+
   return (
     <StackChat.Navigator
       screenOptions={{
@@ -368,15 +373,11 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
           name="NewChat"
           component={ContactPage}
           options={{
+            headerShown: true,
             headerTitle: 'New Message',
             headerLeft:
               Platform.OS === 'ios'
-                ? (props: HeaderBackButtonProps) => {
-                    return BackButton({
-                      onPress: () => navigation.navigate('Conversation'),
-                      prop: props,
-                    });
-                  }
+                ? headerBackButton
                 : undefined,
           }}
         />
@@ -386,20 +387,14 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
           options={{
             headerTitle: 'New Group',
             headerShown: false,
-            headerLeft: (props: HeaderBackButtonProps) => {
-              return BackButton({
-                onPress: () => navigation.navigate('Conversation'),
-                prop: props,
-                label: '',
-              });
-            },
+            headerLeft: headerBackButton,
           }}
         />
       </StackChat.Group>
 
       <StackChat.Screen
         name="ChatScreen"
-        // component={(props) => <ChatPage {...props} />} // This is faster, but not react-navigation goes crazy with warnings
+        // component={(props) => <ChatPage {...props} />} // This is faster, but react-navigation goes crazy with warnings
         component={ChatPage}
         options={{
           gestureEnabled: true,

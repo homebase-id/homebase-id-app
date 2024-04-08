@@ -1,5 +1,6 @@
 import { FlatList } from 'react-native-gesture-handler';
 
+import { View } from 'react-native';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { ChatStackParamList } from '../app/App';
 
@@ -12,7 +13,7 @@ import { memo } from 'react';
 const ListHeaderComponent = () => {
   const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
   return (
-    <>
+    <View style={{ marginTop: 3 }}>
       <Tile
         title="New Group"
         onClick={() => {
@@ -20,7 +21,7 @@ const ListHeaderComponent = () => {
         }}
         icon={<Users size={'lg'} />}
       />
-    </>
+    </View>
   );
 };
 

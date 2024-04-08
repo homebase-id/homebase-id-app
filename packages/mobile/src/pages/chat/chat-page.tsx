@@ -83,7 +83,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
   );
 
   // Conversation & Contact
-  const { data: conversation } = useConversation({
+  const { data: conversation, isLoading: isLoadingConversation } = useConversation({
     conversationId: route.params.convoId,
   }).single;
   const contact = useContact(
@@ -227,6 +227,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
   }, []);
 
   if (!conversation) {
+    if (isLoadingConversation) return null;
     return (
       <NoConversationHeader title="No conversation found" goBack={navigation.goBack}/>
     );

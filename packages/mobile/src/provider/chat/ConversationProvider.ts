@@ -15,7 +15,7 @@ import {
   uploadFile,
   uploadHeader,
 } from '@youfoundation/js-lib/core';
-import { jsonStringify64 } from '@youfoundation/js-lib/helpers';
+import { jsonStringify64, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { ImageSource } from '../image/RNImageProvider';
 
 export const ConversationFileType = 8888;
@@ -95,7 +95,7 @@ export const getConversations = async (
 };
 
 export const getConversation = async (dotYouClient: DotYouClient, conversationId: string) => {
-  if (conversationId === ConversationWithYourselfId) return ConversationWithYourself;
+  if (stringGuidsEqual(conversationId, ConversationWithYourselfId)) return ConversationWithYourself;
 
   const conversationHeader = await getFileHeaderByUniqueId<Conversation>(
     dotYouClient,

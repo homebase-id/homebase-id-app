@@ -75,13 +75,12 @@ export const useConversation = (props?: { conversationId?: string | undefined })
         includeMetadataHeader: boolean;
     }>>(['conversations']);
 
-    queryData?.pages.forEach((page) => {
-      const conversation = page.searchResults.find((conversation) => {
-        return stringGuidsEqual(conversation.fileMetadata.appData.uniqueId, conversationId);
-      });
-
-      if (conversation) return conversation;
-    });
+    const conversationFromCache = queryData?.pages
+      .flatMap((page) => page.searchResults)
+      .find((conversation) =>
+        stringGuidsEqual(conversation.fileMetadata.appData.uniqueId, conversationId)
+      );
+    if (conversationFromCache) return conversationFromCache;
 
     return await getSingleConversation(dotYouClient, conversationId);
   };
@@ -207,7 +206,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
   return {
     single: useQuery({
       queryKey: ['conversation', conversationId],
-      queryFn: () => fetchSingleConversation(dotYouClient, conversationId),
+      queryFn: () => fetchSingleConversation(dotYouClient, conversationId as string),
       refetchOnMount: false,
       staleTime: 1000 * 60 * 60, // 1 hour
       enabled: !!conversationId,

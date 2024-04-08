@@ -203,6 +203,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
             await markCommandComplete(dotYouClient, ChatDrive, [processedCommand]);
           }
         }
+        // TODO: Should we handle updates to conversations? Probabaly mostly if there's multiple clients connected
       }
     },
     [dotYouClient, identity, queryClient, restoreChat]
