@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Dimensions, Pressable, StyleSheet, Text, View } from 'react-native';
 import { memo } from 'react';
 
 import { MessageImageProps } from 'react-native-gifted-chat';
@@ -14,17 +14,14 @@ import { OdinAudio } from '../ui/OdinAudio/OdinAudio';
 
 const MediaMessage = memo((props: MessageImageProps<ChatMessageIMessage>) => {
   const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
+  const { width, height } = Dimensions.get('screen');
   if (!props.currentMessage) return null;
   const { currentMessage } = props;
   const payloads = currentMessage.fileMetadata.payloads;
 
   if (payloads.length === 1) {
-    const aspectRatio =
-      (currentMessage.fileMetadata.appData.previewThumbnail?.pixelWidth || 1) /
-        (currentMessage.fileMetadata.appData.previewThumbnail?.pixelHeight || 1) >
-      1.33
-        ? 19 / 18
-        : 18 / 19 || 1;
+    const previewThumbnail = currentMessage.fileMetadata.appData.previewThumbnail;
+    const aspectRatio = (previewThumbnail?.pixelWidth || 1) / (previewThumbnail?.pixelHeight || 1);
     if (payloads[0].contentType.startsWith('video')) {
       return (
         <VideoWithLoader
@@ -63,16 +60,13 @@ const MediaMessage = memo((props: MessageImageProps<ChatMessageIMessage>) => {
             targetDrive={ChatDrive}
             fit="cover"
             previewThumbnail={currentMessage.fileMetadata.appData.previewThumbnail}
-            // imageSize={{
-            //   width: 200,
-            //   height: 200,
-            // }}
+            imageSize={{
+              width: aspectRatio <= 1 ? width * 0.8 : width * 0.6,
+              height: aspectRatio >= 1 ? height * 0.4 : height * 0.5,
+            }}
             style={{
               borderRadius: 10,
-              aspectRatio: aspectRatio,
-              minWidth: 200,
-              minHeight: 200,
-              width: '100%',
+              // aspectRatio: aspectRatio,
             }}
             onClick={() => {
               navigation.navigate('PreviewMedia', {
