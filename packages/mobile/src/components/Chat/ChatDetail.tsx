@@ -201,6 +201,13 @@ export const ChatDetail = memo(
       }),
       [isDarkMode]
     );
+    const composerContainerStyle = useMemo(
+      () => ({
+        borderRadius: 20,
+        backgroundColor: isDarkMode ? Colors.slate[800] : Colors.indigo[50],
+      }),
+      [isDarkMode]
+    );
     const renderComposer = useCallback(
       (props: ComposerProps) => {
         // TODO: Shouldn'the whole "renderInputToolbar" render differently?
@@ -234,9 +241,15 @@ export const ChatDetail = memo(
             </View>
           );
         }
-        return <Composer {...props} textInputStyle={inputStyle} />;
+        return (
+          <Composer
+            {...props}
+            textInputStyle={inputStyle}
+            containerStyle={composerContainerStyle}
+          />
+        );
       },
-      [duration, inputStyle, isRecording]
+      [composerContainerStyle, duration, inputStyle, isRecording]
     );
 
     const renderSend = useCallback(
@@ -248,33 +261,42 @@ export const ChatDetail = memo(
               alignItems: 'flex-end',
             }}
           >
-            <Actions
-              icon={!isRecording ? microphoneIcon : crossIcon}
-              containerStyle={props.containerStyle}
-              onPressActionButton={async () => {
-                if (isRecording) {
-                  await cancelRecording();
-                  return;
-                } else {
-                  await record();
-                }
-              }}
-            />
+            {!props.text && (
+              <Actions
+                icon={!isRecording ? microphoneIcon : crossIcon}
+                containerStyle={props.containerStyle}
+                onPressActionButton={async () => {
+                  if (isRecording) {
+                    await cancelRecording();
+                    return;
+                  } else {
+                    await record();
+                  }
+                }}
+              />
+            )}
 
             <View style={{ width: 12 }} />
 
-            <Send
-              {...props}
-              disabled={isRecording ? false : !props.text && assets?.length === 0}
-              onSend={isRecording ? async (_) => await onStopRecording() : props.onSend}
-              text={props.text || ' '}
-              containerStyle={styles.send}
-            >
-              <SendChat
-                size={'md'}
-                color={isRecording ? 'blue' : !props.text && assets?.length === 0 ? 'grey' : 'blue'}
-              />
-            </Send>
+            {(props.text || assets?.length > 0 || isRecording) && (
+              <Send
+                {...props}
+                disabled={isRecording ? false : !props.text && assets?.length === 0}
+                text={props.text || ' '}
+                onSend={isRecording ? async (_) => await onStopRecording() : props.onSend}
+                containerStyle={styles.send}
+              >
+                <View
+                  style={{
+                    padding: 10,
+                    justifyContent: 'center',
+                    transform: [{ rotate: '45deg' }],
+                  }}
+                >
+                  <SendChat size={'md'} color={Colors.white} />
+                </View>
+              </Send>
+            )}
           </View>
         );
       },
@@ -378,7 +400,6 @@ export const ChatDetail = memo(
         onSend={doSend}
         infiniteScroll
         scrollToBottom
-        alwaysShowSend
         onLongPress={(e, _, m: ChatMessageIMessage) => onLongPress(e, m)}
         isKeyboardInternallyHandled={true}
         keyboardShouldPersistTaps="never"
@@ -441,10 +462,11 @@ const styles = StyleSheet.create({
   },
 
   send: {
-    borderWidth: 0,
     justifyContent: 'center',
+    borderRadius: 60,
+    backgroundColor: Colors.indigo[500],
     marginRight: 8,
-    transform: [{ rotate: '30deg' }],
+    marginBottom: 2,
   },
 });
 
@@ -475,11 +497,11 @@ const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
               lineHeight: 60,
             }
           : deleted
-          ? {
-              textDecorationLine: 'line-through',
-              color: Colors.gray[500],
-            }
-          : undefined
+            ? {
+                textDecorationLine: 'line-through',
+                color: Colors.gray[500],
+              }
+            : undefined
       }
     />
   );

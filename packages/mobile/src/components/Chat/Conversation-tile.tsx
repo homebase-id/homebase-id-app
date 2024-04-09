@@ -50,9 +50,7 @@ export const Avatar = memo(
         targetDrive={ContactConfig.ContactTargetDrive}
         previewThumbnail={contact?.fileMetadata.appData.previewThumbnail}
         imageSize={props.imageSize || { width: 48, height: 48 }}
-        avoidPayload={true}
-        enableZoom={false}
-        fit="cover"
+        fit="contain"
         odinId={props.odinId}
         style={{
           ...styles.tinyLogo,
@@ -75,8 +73,6 @@ export const OwnerAvatar = memo(
         fileId={profileData?.profileImageFileId}
         fileKey={profileData?.profileImageFileKey}
         previewThumbnail={profileData?.profileImagePreviewThumbnail}
-        avoidPayload={true}
-        enableZoom={false}
         imageSize={props.imageSize || { width: 48, height: 48 }}
         style={{
           ...styles.tinyLogo,

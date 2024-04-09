@@ -510,9 +510,6 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
     setComposerHeight(minComposerHeight);
   };
 
-  // THis triggers to change the input toolbar Size. Not sure why it needs to calculate the composer height again
-  // Commented out for now as it didn't break anything and it fixes the problem.
-  // TODO: Will remove if this caused any performance issues and didn't break anything else
   const onInputSizeChanged = useCallback(
     (size: { height: number }) => {
       isDebug && console.log('onInputSizeChanged', size.height);

@@ -10,7 +10,6 @@ import {
   TextStyle,
   TouchableOpacityProps,
 } from 'react-native';
-import { useCallbackOne, useMemoOne } from 'use-memo-one';
 
 import Color from './Color';
 import { IMessage } from './Models';

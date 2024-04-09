@@ -1,19 +1,13 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import { ProfileStackParamList } from '../../app/App';
-import {
-  FlatList,
-  RefreshControl,
-  View,
-  TouchableOpacity,
-  Linking,
-  ListRenderItemInfo,
-} from 'react-native';
+import { FlatList, RefreshControl, View, TouchableOpacity, ListRenderItemInfo } from 'react-native';
 import { useConnections } from '../../hooks/connections/useConnections';
 import NoItems from '../../components/list/noItems';
 import IdentityItem from '../../components/list/identityItem';
 import { useCallback, useMemo, useState } from 'react';
 import { useDotYouClientContext } from 'feed-app-common';
+import { openURL } from '../../utils/utils';
 
 type ConnectionsProps = NativeStackScreenProps<ProfileStackParamList, 'Connections'>;
 
@@ -51,7 +45,7 @@ export const ConnectionsPage = (_props: ConnectionsProps) => {
         style={{
           padding: 1,
         }}
-        onPress={() => Linking.openURL(`https://${identity}/owner/connections/${item.item}`)}
+        onPress={() => openURL(`https://${identity}/owner/connections/${item.item}`)}
       >
         <IdentityItem odinId={item.item} key={item.item} />
       </TouchableOpacity>

@@ -1,18 +1,12 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback, useMemo, useState } from 'react';
 import { ProfileStackParamList } from '../../app/App';
-import {
-  FlatList,
-  Linking,
-  ListRenderItemInfo,
-  RefreshControl,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { FlatList, ListRenderItemInfo, RefreshControl, TouchableOpacity, View } from 'react-native';
 import { useFollowerInfinite } from '../../hooks/followers/useFollowers';
 import NoItems from '../../components/list/noItems';
 import IdentityItem from '../../components/list/identityItem';
 import { useDotYouClientContext } from 'feed-app-common';
+import { openURL } from '../../utils/utils';
 
 type FollowersProps = NativeStackScreenProps<ProfileStackParamList, 'Followers'>;
 
@@ -46,7 +40,7 @@ export const FollowersPage = (_props: FollowersProps) => {
         style={{
           padding: 1,
         }}
-        onPress={() => Linking.openURL(`https://${identity}/owner/connections/${item.item}`)}
+        onPress={() => openURL(`https://${identity}/owner/connections/${item.item}`)}
       >
         <IdentityItem odinId={item.item} key={item.item} />
       </TouchableOpacity>

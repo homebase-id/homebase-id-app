@@ -1,5 +1,5 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Linking, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { useConversation } from '../../hooks/chat/useConversation';
 import { Avatar, GroupAvatar, OwnerAvatar } from '../../components/Chat/Conversation-tile';
 import {
@@ -10,7 +10,6 @@ import {
 import { Home } from '../../components/ui/Icons/icons';
 
 import { useCallback } from 'react';
-import InAppBrowser from 'react-native-inappbrowser-reborn';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 
 import { Colors } from '../../app/Colors';
@@ -21,6 +20,7 @@ import { useDarkMode } from '../../hooks/useDarkMode';
 import { useProfile } from '../../hooks/profile/useProfile';
 import { ConnectionName } from '../../components/ui/Name';
 import { ChatStackParamList } from '../../app/App';
+import { openURL } from '../../utils/utils';
 
 export type ChatInfoProp = NativeStackScreenProps<ChatStackParamList, 'ChatInfo'>;
 
@@ -38,63 +38,54 @@ export function ChatInfoPage(prop: ChatInfoProp) {
       ? identity
       : (conversation?.fileMetadata.appData.content as SingleConversation).recipient;
     const url = `https://${recipient}/`;
-    if (await InAppBrowser.isAvailable()) {
-      await InAppBrowser.open(url, {
-        enableUrlBarHiding: false,
-        enableDefaultShare: false,
-        animated: true,
-      });
-    } else Linking.openURL(url);
+    await openURL(url);
   }, [conversation?.fileMetadata.appData.content, isSelf, identity]);
 
   const group =
     (conversation && 'recipients' in conversation.fileMetadata.appData.content) || false;
 
+  const headerLeft = useCallback(
+    () => (
+      <HeaderBackButton canGoBack={true} labelVisible={false} onPress={prop.navigation.goBack} />
+    ),
+    [prop.navigation.goBack]
+  );
+
+  const headerRight = useCallback(
+    () => (
+      <TextButton
+        title="Edit"
+        style={{ marginRight: 8 }}
+        onPress={() => {
+          prop.navigation.navigate('EditGroup', {
+            convoId: conversationId,
+          });
+        }}
+      />
+    ),
+    [conversationId, prop.navigation]
+  );
+
   if (!conversation) return null;
 
   const conversationContent = conversation.fileMetadata.appData.content;
 
-  const headerLeft = () => (
-    <HeaderBackButton canGoBack={true} labelVisible={false} onPress={prop.navigation.goBack} />
-  );
-
-  const headerRight = () => (
-    <TextButton
-      title="Edit"
-      style={{ marginRight: 8 }}
-      onPress={() => {
-        prop.navigation.navigate('EditGroup', {
-          convoId: conversationId,
-        });
-      }}
-    />
-  );
-
   return (
     <>
-      <View
-        style={[
-          {
-            paddingVertical: 3,
-            width: '100%',
-            zIndex: 10,
-          },
-        ]}
-      >
-        <Header
-          title={group ? 'Group Info' : 'Chat Info'}
-          headerLeft={headerLeft}
-          headerRight={group ? headerRight : undefined}
-        />
-      </View>
+      <Header
+        title={group ? 'Group Info' : 'Chat Info'}
+        headerLeft={headerLeft}
+        headerRight={group ? headerRight : undefined}
+      />
       <View style={styles.content}>
         {!group ? (
           isSelf ? (
-            <OwnerAvatar style={styles.avatar} />
+            <OwnerAvatar style={styles.avatar} imageSize={{ width: 81, height: 81 }} />
           ) : (
             <Avatar
               odinId={(conversationContent as SingleConversation).recipient}
               style={styles.avatar}
+              imageSize={{ width: 81, height: 81 }}
             />
           )
         ) : (
@@ -105,6 +96,7 @@ export function ChatInfoPage(prop: ChatInfoProp) {
             styles.title,
             {
               color: isDarkMode ? Colors.white : Colors.black,
+              marginTop: 24,
             },
           ]}
         >
