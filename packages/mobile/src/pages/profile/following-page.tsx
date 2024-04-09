@@ -18,6 +18,7 @@ export const FollowingPage = (_props: FollowingProps) => {
     hasNextPage: hasMoreIdentities,
     fetchNextPage,
     refetch: refetchIdentities,
+    isLoading: isLoadingIdentities,
   } = useFollowingInfinite({}).fetch;
   const flatIdentities = useMemo(
     () => (identities?.pages.flatMap((page) => page?.results).filter(Boolean) as string[]) ?? [],
@@ -56,7 +57,7 @@ export const FollowingPage = (_props: FollowingProps) => {
           renderItem={renderItem}
           onEndReached={() => hasMoreIdentities && fetchNextPage()}
         />
-      ) : (
+      ) : isLoadingIdentities ? null : (
         <NoItems>You&apos;re not following anyone :-(</NoItems>
       )}
     </View>

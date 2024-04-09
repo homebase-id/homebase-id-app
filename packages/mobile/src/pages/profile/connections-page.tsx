@@ -25,6 +25,7 @@ export const ConnectionsPage = (_props: ConnectionsProps) => {
     hasNextPage: hasMoreIdentities,
     fetchNextPage,
     refetch: refetchIdentities,
+    isLoading: isLoadingIdentities,
   } = useConnections({}).fetch;
   const flatIdentities = useMemo(
     () =>
@@ -67,7 +68,7 @@ export const ConnectionsPage = (_props: ConnectionsProps) => {
           renderItem={renderItem}
           onEndReached={() => hasMoreIdentities && fetchNextPage()}
         />
-      ) : (
+      ) : isLoadingIdentities ? null : (
         <NoItems>You don&apos;t have any connections :-(</NoItems>
       )}
     </View>

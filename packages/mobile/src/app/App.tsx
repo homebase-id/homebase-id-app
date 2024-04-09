@@ -137,9 +137,13 @@ const INCLUDED_QUERY_KEYS = [
   'chat-messages',
   'conversations',
   'chat-reaction',
-  'connectionDetails',
+  'connection-details',
   'contact',
   'profile-data',
+  'followers',
+  'following',
+  'active-connections',
+  'pending-connections',
 
   // Small data (blobs to local file Uri)
   'image',
@@ -336,12 +340,15 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
     });
   }, [navigation]);
 
-  const headerBackButton = useCallback((props: HeaderBackButtonProps) => {
-    return BackButton({
-      onPress: () => navigation.navigate('Conversation'),
-      prop: props,
-    });
-  }, [navigation]);
+  const headerBackButton = useCallback(
+    (props: HeaderBackButtonProps) => {
+      return BackButton({
+        onPress: () => navigation.navigate('Conversation'),
+        prop: props,
+      });
+    },
+    [navigation]
+  );
 
   return (
     <StackChat.Navigator
@@ -375,10 +382,7 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
           options={{
             headerShown: true,
             headerTitle: 'New Message',
-            headerLeft:
-              Platform.OS === 'ios'
-                ? headerBackButton
-                : undefined,
+            headerLeft: Platform.OS === 'ios' ? headerBackButton : undefined,
           }}
         />
         <StackChat.Screen

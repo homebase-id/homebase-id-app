@@ -24,6 +24,7 @@ export const FollowersPage = (_props: FollowersProps) => {
     hasNextPage: hasMoreIdentities,
     fetchNextPage,
     refetch: refetchIdentities,
+    isLoading: isLoadingIdentities,
   } = useFollowerInfinite({}).fetch;
   const flatIdentities = useMemo(
     () => (identities?.pages.flatMap((page) => page?.results).filter(Boolean) as string[]) ?? [],
@@ -62,7 +63,7 @@ export const FollowersPage = (_props: FollowersProps) => {
           renderItem={renderItem}
           onEndReached={() => hasMoreIdentities && fetchNextPage()}
         />
-      ) : (
+      ) : isLoadingIdentities ? null : (
         <NoItems>You don&apos;t have any followers :-(</NoItems>
       )}
     </View>

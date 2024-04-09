@@ -13,7 +13,11 @@ import { RedactedConnectionRequest } from '@youfoundation/js-lib/network';
 type ConnectionRequestProps = NativeStackScreenProps<HomeStackParamList, 'ConnectionRequests'>;
 export const ConnectionRequestsPage = (_props: ConnectionRequestProps) => {
   const identity = useDotYouClientContext().getIdentity();
-  const { data: identities, refetch: refetchIdentities } = usePendingConnections().fetch;
+  const {
+    data: identities,
+    refetch: refetchIdentities,
+    isLoading: isLoadingIdentities,
+  } = usePendingConnections().fetch;
 
   const flatIdentities = useMemo(() => identities && identities.results, [identities]);
 
@@ -50,7 +54,7 @@ export const ConnectionRequestsPage = (_props: ConnectionRequestProps) => {
           data={flatIdentities}
           renderItem={renderItem}
         />
-      ) : (
+      ) : isLoadingIdentities ? null : (
         <NoItems>You don&apos;t have any connection requests :-(</NoItems>
       )}
     </View>
