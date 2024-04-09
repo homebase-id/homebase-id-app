@@ -484,7 +484,7 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
     });
 
     if (shouldResetInputToolbar === true) {
-      setTypingDisabled(true);
+      // setTypingDisabled(true); => Breaks directly typing after sending a message
       resetInputToolbar();
     }
 
@@ -506,7 +506,7 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
     );
     setMessagesContainerHeight(newMessagesContainerHeight);
 
-    setText(text);
+    setText(initialText);
     setComposerHeight(minComposerHeight);
   };
 
