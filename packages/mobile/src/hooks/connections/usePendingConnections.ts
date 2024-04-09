@@ -28,13 +28,14 @@ export const usePendingConnections = (props?: useConnectionsProps) => {
 
   return {
     fetch: useQuery({
-      queryKey: ['pendingConnections', pendingPageSize, pendingPage],
+      queryKey: ['pending-connections', pendingPageSize, pendingPage],
       queryFn: () =>
         fetchPendingConnections({ pageSize: pendingPageSize, pageNumber: pendingPage }),
 
       refetchOnWindowFocus: false,
       refetchOnMount: false,
       enabled: !!pendingPage,
+      staleTime: 1000 * 60 * 60 * 24 * 1,
     }),
   };
 };

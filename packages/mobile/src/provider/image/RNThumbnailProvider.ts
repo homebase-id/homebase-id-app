@@ -7,7 +7,7 @@ import {
 import { ThumbnailInstruction } from '@youfoundation/js-lib/media';
 import { base64ToUint8Array, uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
 import { Platform } from 'react-native';
-import RNFS from 'react-native-fs';
+import { readFile } from 'react-native-fs';
 import ImageResizer, { ResizeFormat } from '@bam.tech/react-native-image-resizer';
 import { ImageSource } from './RNImageProvider';
 import { OdinBlob } from '../../../polyfills/OdinBlob';
@@ -119,7 +119,7 @@ const createVectorThumbnail = async (
   imageFilePath: string,
   key: string
 ): Promise<{ naturalSize: ImageSize; thumb: ThumbnailFile }> => {
-  const imageBytes = base64ToUint8Array(await RNFS.readFile(imageFilePath, 'base64'));
+  const imageBytes = base64ToUint8Array(await readFile(imageFilePath, 'base64'));
 
   return {
     naturalSize: {

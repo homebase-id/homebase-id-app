@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { ImageSize, TargetDrive, ImageContentType } from '@youfoundation/js-lib/core';
-import RNFS from 'react-native-fs';
+import { exists } from 'react-native-fs';
 import { useAuth } from '../../../../hooks/auth/useAuth';
 import { getDecryptedImageData } from '../../../../provider/image/RNImageProvider';
 
@@ -79,7 +79,8 @@ const useImage = (props?: {
     imageFileKey: string | undefined,
     imageDrive?: TargetDrive,
     size?: ImageSize,
-    naturalSize?: ImageSize
+    naturalSize?: ImageSize,
+    lastModified?: number
   ): Promise<ImageData | null> => {
     if (
       imageFileId === undefined ||
@@ -100,7 +101,7 @@ const useImage = (props?: {
     );
     if (cachedEntry) {
       const cachedData = queryClient.getQueryData<ImageData | undefined>(cachedEntry.queryKey);
-      if (cachedData && (await RNFS.exists(cachedData.url))) return cachedData;
+      if (cachedData && (await exists(cachedData.url))) return cachedData;
     }
 
     const imageBlob = await getDecryptedImageData(
@@ -137,9 +138,19 @@ const useImage = (props?: {
           : undefined,
         lastModified,
       ],
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
       queryFn: () =>
-        fetchImageData(odinId, imageFileId, imageFileKey, imageDrive, size, naturalSize),
-      staleTime: 1000 * 60 * 60 * 1, // 1h
+        fetchImageData(
+          odinId,
+          imageFileId,
+          imageFileKey,
+          imageDrive,
+          size,
+          naturalSize,
+          lastModified
+        ),
+      staleTime: 1000 * 60 * 60 * 24 * 7, // 1 week,
       enabled: !!imageFileId && imageFileId !== '',
     }),
     getFromCache: (

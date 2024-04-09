@@ -1,6 +1,8 @@
-import { useMutation, useQuery, useQueryClient, InfiniteData } from '@tanstack/react-query';
+import { InfiniteData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Conversation,
+  ConversationWithYourself,
+  ConversationWithYourselfId,
   GroupConversation,
   SingleConversation,
   getConversation,
@@ -15,7 +17,7 @@ import {
   NewHomebaseFile,
   SecurityGroupType,
 } from '@youfoundation/js-lib/core';
-import { getNewId, getNewXorId } from '@youfoundation/js-lib/helpers';
+import { getNewId, getNewXorId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useConversations } from './useConversations';
 
 import { useDotYouClientContext } from 'feed-app-common';
@@ -25,7 +27,10 @@ export const getSingleConversation = async (
   dotYouClient: DotYouClient,
   conversationId: string | undefined
 ) => {
-  return conversationId ? await getConversation(dotYouClient, conversationId) : null;
+  if (!conversationId) return null;
+  if (stringGuidsEqual(conversationId, ConversationWithYourselfId)) return ConversationWithYourself;
+
+  return await getConversation(dotYouClient, conversationId);
 };
 
 export const useConversation = (props?: { conversationId?: string | undefined }) => {
@@ -60,6 +65,24 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     }
 
     return null;
+  };
+
+  const fetchSingleConversation = async (dotYouClient: DotYouClient, conversationId: string) => {
+    const queryData = queryClient.getQueryData<InfiniteData<{
+        searchResults: HomebaseFile<Conversation>[];
+        cursorState: string;
+        queryTime: number;
+        includeMetadataHeader: boolean;
+    }>>(['conversations']);
+
+    const conversationFromCache = queryData?.pages
+      .flatMap((page) => page.searchResults)
+      .find((conversation) =>
+        stringGuidsEqual(conversation.fileMetadata.appData.uniqueId, conversationId)
+      );
+    if (conversationFromCache) return conversationFromCache;
+
+    return await getSingleConversation(dotYouClient, conversationId);
   };
 
   const createConversation = async ({
@@ -183,8 +206,9 @@ export const useConversation = (props?: { conversationId?: string | undefined })
   return {
     single: useQuery({
       queryKey: ['conversation', conversationId],
-      queryFn: () => getSingleConversation(dotYouClient, conversationId),
+      queryFn: () => fetchSingleConversation(dotYouClient, conversationId as string),
       refetchOnMount: false,
+      staleTime: 1000 * 60 * 60, // 1 hour
       enabled: !!conversationId,
     }),
     create: useMutation({

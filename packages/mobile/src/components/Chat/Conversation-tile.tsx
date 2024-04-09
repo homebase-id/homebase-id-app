@@ -36,77 +36,81 @@ type ConversationTileProps = {
   isSelf?: boolean;
 };
 
-export const Avatar = memo((props: {
-  odinId: string;
-  style?: ImageStyle;
-  imageSize?: { width: number; height: number };
-}) => {
-  const { data: contact } = useContact(props.odinId).fetch;
-  return (
-    <OdinImage
-      fileId={contact?.fileId}
-      fileKey={CONTACT_PROFILE_IMAGE_KEY}
-      targetDrive={ContactConfig.ContactTargetDrive}
-      previewThumbnail={contact?.fileMetadata.appData.previewThumbnail}
-      imageSize={props.imageSize || { width: 48, height: 48 }}
-      avoidPayload={true}
-      enableZoom={false}
-      fit="cover"
-      odinId={props.odinId}
-      style={{
-        ...styles.tinyLogo,
-        ...props.style,
-      }}
-      lastModified={contact?.fileMetadata.updated}
-    />
-  );
-});
+export const Avatar = memo(
+  (props: {
+    odinId: string;
+    style?: ImageStyle;
+    imageSize?: { width: number; height: number };
+  }) => {
+    const { data: contact } = useContact(props.odinId).fetch;
+    return (
+      <OdinImage
+        fileId={contact?.fileId}
+        fileKey={CONTACT_PROFILE_IMAGE_KEY}
+        targetDrive={ContactConfig.ContactTargetDrive}
+        previewThumbnail={contact?.fileMetadata.appData.previewThumbnail}
+        imageSize={props.imageSize || { width: 48, height: 48 }}
+        avoidPayload={true}
+        enableZoom={false}
+        fit="cover"
+        odinId={props.odinId}
+        style={{
+          ...styles.tinyLogo,
+          ...props.style,
+        }}
+        lastModified={contact?.fileMetadata.updated}
+      />
+    );
+  }
+);
 
-export const OwnerAvatar = memo((props: {
-  style?: ImageStyle;
-  imageSize?: { width: number; height: number };
-}) => {
-  const { data: profileData } = useProfile();
+export const OwnerAvatar = memo(
+  (props: { style?: ImageStyle; imageSize?: { width: number; height: number } }) => {
+    const { data: profileData } = useProfile();
 
-  return (
-    <OdinImage
-      fit="cover"
-      targetDrive={GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId)}
-      fileId={profileData?.profileImageFileId}
-      fileKey={profileData?.profileImageFileKey}
-      previewThumbnail={profileData?.profileImagePreviewThumbnail}
-      avoidPayload={true}
-      enableZoom={false}
-      imageSize={props.imageSize || { width: 48, height: 48 }}
-      style={{
-        ...styles.tinyLogo,
-        ...props.style,
-      }}
-    />
-  );
-});
+    return (
+      <OdinImage
+        fit="cover"
+        targetDrive={GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId)}
+        fileId={profileData?.profileImageFileId}
+        fileKey={profileData?.profileImageFileKey}
+        previewThumbnail={profileData?.profileImagePreviewThumbnail}
+        avoidPayload={true}
+        enableZoom={false}
+        imageSize={props.imageSize || { width: 48, height: 48 }}
+        style={{
+          ...styles.tinyLogo,
+          ...(props.imageSize || {}),
+          ...props.style,
+        }}
+      />
+    );
+  }
+);
 
-export const GroupAvatar = memo((props: {
-  style?: StyleProp<ViewStyle>;
-  iconSize?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl' | number;
-}) => {
-  const { isDarkMode } = useDarkMode();
-  return (
-    <View
-      style={[
-        styles.tinyLogo,
-        {
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: isDarkMode ? Colors.slate[800] : Colors.purple[200],
-        },
-        props.style,
-      ]}
-    >
-      <Users size={props.iconSize} />
-    </View>
-  );
-});
+export const GroupAvatar = memo(
+  (props: {
+    style?: StyleProp<ViewStyle>;
+    iconSize?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl' | number;
+  }) => {
+    const { isDarkMode } = useDarkMode();
+    return (
+      <View
+        style={[
+          styles.tinyLogo,
+          {
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: isDarkMode ? Colors.slate[800] : Colors.purple[200],
+          },
+          props.style,
+        ]}
+      >
+        <Users size={props.iconSize} />
+      </View>
+    );
+  }
+);
 
 const ConversationTile = memo((props: ConversationTileProps) => {
   const { data: chatMessages } = useChatMessages({

@@ -53,13 +53,24 @@ export const OdinImage = memo(
     style,
     onClick,
   }: OdinImageProps) => {
-    const loadSize = {
-      pixelHeight:
-        (imageSize?.height ? Math.round(imageSize?.height * (enableZoom ? 4 : 1)) : undefined) ||
-        800,
-      pixelWidth:
-        (imageSize?.width ? Math.round(imageSize?.width * (enableZoom ? 4 : 1)) : undefined) || 800,
-    };
+    // Don't set load size if it's a thumbnessLessContentType; As they don't have a thumb
+    const loadSize = useMemo(
+      () =>
+        previewThumbnail?.contentType &&
+        thumblessContentTypes.includes(previewThumbnail?.contentType)
+          ? undefined
+          : {
+              pixelHeight:
+                (imageSize?.height
+                  ? Math.round(imageSize?.height * (enableZoom ? 4 : 1))
+                  : undefined) || 800,
+              pixelWidth:
+                (imageSize?.width
+                  ? Math.round(imageSize?.width * (enableZoom ? 4 : 1))
+                  : undefined) || 800,
+            },
+      [enableZoom, imageSize?.height, imageSize?.width, previewThumbnail?.contentType]
+    );
 
     const { getFromCache } = useImage();
     const cachedImage = useMemo(
@@ -96,7 +107,7 @@ export const OdinImage = memo(
       fetch: { data: imageData },
     } = useImage({
       odinId,
-      imageFileId: enableZoom || loadSize !== undefined ? fileId : undefined,
+      imageFileId: fileId,
       imageFileKey: fileKey,
       imageDrive: targetDrive,
       size: loadSize,
@@ -119,17 +130,35 @@ export const OdinImage = memo(
               uri={previewUrl}
               contentType={previewContentType as ImageContentType}
               style={{
-                position: imageData ? 'absolute' : 'relative',
+                position: 'absolute', // Absolute so it takes up the full imageSize defined by the wrapper view
                 top: 0,
                 left: 0,
                 right: 0,
                 bottom: 0,
                 resizeMode: fit,
-                // ...imageSize,
+                zIndex: 5, // Displayed underneath the actual image
                 ...style,
               }}
               imageSize={imageSize}
               blurRadius={hasCachedImage ? 0 : 2}
+            />
+          ) : null}
+
+          {/* Actual image */}
+          {imageData?.url ? (
+            <ZoomableImage
+              uri={imageData.url}
+              contentType={imageData.type}
+              fit={fit}
+              imageSize={imageSize}
+              enableZoom={enableZoom}
+              alt={alt || title}
+              onClick={onClick}
+              style={{
+                position: 'relative',
+                ...style,
+                zIndex: 10,
+              }}
             />
           ) : null}
 
@@ -145,135 +174,126 @@ export const OdinImage = memo(
               <ActivityIndicator size="large" />
             </View>
           ) : null}
-
-          {/* Actual image */}
-          {imageData?.url ? (
-            <ZoomableImage
-              uri={imageData.url}
-              contentType={imageData.type}
-              fit={fit}
-              imageSize={imageSize}
-              enableZoom={enableZoom}
-              alt={alt || title}
-              onClick={onClick}
-              style={style}
-            />
-          ) : null}
         </View>
       </>
     );
   }
 );
 
-const InnerImage = ({
-  uri,
-  alt,
-  imageSize,
-  blurRadius,
-  style,
-  fit,
-  onClick,
+const InnerImage = memo(
+  ({
+    uri,
+    alt,
+    imageSize,
+    blurRadius,
+    style,
+    fit,
+    onClick,
 
-  contentType,
-}: {
-  uri: string;
-  imageSize?: { width: number; height: number };
-  blurRadius?: number;
-  alt?: string;
-  style?: ImageStyle;
-  fit?: 'cover' | 'contain';
-  onClick?: () => void;
+    contentType,
+  }: {
+    uri: string;
+    imageSize?: { width: number; height: number };
+    blurRadius?: number;
+    alt?: string;
+    style?: ImageStyle;
+    fit?: 'cover' | 'contain';
 
-  contentType?: ImageContentType;
-}) => {
-  return contentType === 'image/svg+xml' ? (
-    <TouchableWithoutFeedback onPress={onClick}>
-      <View
-        style={[
-          {
+    onClick?: () => void;
+
+    contentType?: ImageContentType;
+  }) => {
+    return contentType === 'image/svg+xml' ? (
+      <TouchableWithoutFeedback onPress={onClick}>
+        <View
+          style={[
+            {
+              ...imageSize,
+              ...style,
+            },
+            // SVGs styling are not supported on Android
+            Platform.OS === 'android' ? style : undefined,
+          ]}
+        >
+          <SvgUri
+            width={imageSize?.width}
+            height={imageSize?.height}
+            uri={uri}
+            style={{ overflow: 'hidden', ...style }}
+          />
+        </View>
+      </TouchableWithoutFeedback>
+    ) : (
+      <TouchableWithoutFeedback onPress={onClick}>
+        <Image
+          source={{ uri }}
+          alt={alt}
+          style={{
+            resizeMode: fit,
             ...imageSize,
             ...style,
-          },
-          // SVGs styling are not supported on Android
-          Platform.OS === 'android' ? style : undefined,
-        ]}
-      >
-        <SvgUri
-          width={imageSize?.width}
-          height={imageSize?.height}
-          uri={uri}
-          style={{ overflow: 'hidden', ...style }}
+          }}
+          blurRadius={blurRadius}
         />
-      </View>
-    </TouchableWithoutFeedback>
-  ) : (
-    <TouchableWithoutFeedback onPress={onClick}>
-      <Image
-        source={{ uri }}
-        alt={alt}
-        style={{
-          resizeMode: fit,
-          ...imageSize,
-          ...style,
-        }}
-        blurRadius={blurRadius}
-      />
-    </TouchableWithoutFeedback>
-  );
-};
-
-const ZoomableImage = ({
-  uri,
-  alt,
-  imageSize,
-  style,
-  fit,
-  enableZoom,
-  onClick,
-
-  contentType,
-}: {
-  uri: string;
-  imageSize?: { width: number; height: number };
-  alt?: string;
-  style?: ImageStyle;
-  fit?: 'cover' | 'contain';
-  enableZoom?: boolean;
-  onClick?: () => void;
-
-  contentType?: ImageContentType;
-}) => {
-  if (!enableZoom) {
-    return (
-      <InnerImage
-        uri={uri}
-        alt={alt}
-        imageSize={imageSize}
-        style={style}
-        fit={fit}
-        contentType={contentType}
-        onClick={onClick}
-      />
+      </TouchableWithoutFeedback>
     );
   }
+);
 
-  return (
-    <TouchableWithoutFeedback onPress={onClick}>
-      <View
-        style={{
-          ...imageSize,
-        }}
-      >
-        <ImageZoom
+const ZoomableImage = memo(
+  ({
+    uri,
+    alt,
+    imageSize,
+    style,
+    fit,
+    enableZoom,
+    onClick,
+
+    contentType,
+  }: {
+    uri: string;
+    imageSize?: { width: number; height: number };
+    alt?: string;
+    style?: ImageStyle;
+    fit?: 'cover' | 'contain';
+    enableZoom?: boolean;
+    onClick?: () => void;
+
+    contentType?: ImageContentType;
+  }) => {
+    if (!enableZoom) {
+      return (
+        <InnerImage
           uri={uri}
-          minScale={1}
-          maxScale={3}
-          resizeMode="contain"
+          alt={alt}
+          imageSize={imageSize}
+          style={style}
+          fit={fit}
+          contentType={contentType}
+          onClick={onClick}
+        />
+      );
+    }
+
+    return (
+      <TouchableWithoutFeedback onPress={onClick}>
+        <View
           style={{
             ...imageSize,
           }}
-        />
-      </View>
-    </TouchableWithoutFeedback>
-  );
-};
+        >
+          <ImageZoom
+            uri={uri}
+            minScale={1}
+            maxScale={3}
+            resizeMode="contain"
+            style={{
+              ...imageSize,
+            }}
+          />
+        </View>
+      </TouchableWithoutFeedback>
+    );
+  }
+);

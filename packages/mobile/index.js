@@ -2,6 +2,9 @@
  * @format
  */
 
+global.process = process || {}
+global.process.browser = false
+
 // Base64 polyfill
 import { decode, encode } from 'base-64';
 

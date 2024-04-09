@@ -9,7 +9,7 @@ import AudioRecorderPlayer, {
   AVModeIOSOption,
   OutputFormatAndroidType,
 } from 'react-native-audio-recorder-player';
-import RNFS from 'react-native-fs';
+import { CachesDirectoryPath } from 'react-native-fs';
 import { transcodeAudio } from '../../provider/audio/AudioTranscoder';
 import { getNewId } from '@youfoundation/js-lib/helpers';
 import { useAudioContext } from '../../components/AudioContext/useAudioContext';
@@ -27,7 +27,7 @@ const audioSet: AudioSet = {
 
 export const useAudioRecorder = () => {
   const audioRecorder = useMemo(() => new AudioRecorderPlayer(), []);
-  const dirs = RNFS.CachesDirectoryPath;
+  const dirs = CachesDirectoryPath;
   const runningId = getNewId();
   const path = Platform.select({
     ios: `file://${dirs}/audio-${runningId}.m4a`,

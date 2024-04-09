@@ -1,9 +1,8 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AppStackParamList } from '../../app/App';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Keyboard, Platform, Pressable, View } from 'react-native';
+import { Dimensions, Keyboard, Platform, Pressable, View } from 'react-native';
 import { ChatAppBar } from '../../components/Chat/Chat-app-bar';
 import { Asset } from 'react-native-image-picker';
 import { ChatDeletedArchivalStaus, ChatMessage } from '../../provider/chat/ChatProvider';
@@ -13,13 +12,12 @@ import { useChatMessage } from '../../hooks/chat/useChatMessage';
 import { useConversation } from '../../hooks/chat/useConversation';
 import {
   Conversation,
-  ConversationWithYourself,
   ConversationWithYourselfId,
   GroupConversation,
   SingleConversation,
 } from '../../provider/chat/ConversationProvider';
 import { ImageSource } from '../../provider/image/RNImageProvider';
-import { getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { getNewId } from '@youfoundation/js-lib/helpers';
 import useContact from '../../hooks/contact/useContact';
 import { useMarkMessagesAsRead } from '../../hooks/chat/useMarkMessagesAsRead';
 import ChatReaction from '../../components/Chat/Chat-Reaction';
@@ -33,10 +31,11 @@ import { ChatDetail, ChatMessageIMessage } from '../../components/Chat/ChatDetai
 import Toast from 'react-native-toast-message';
 import Clipboard from '@react-native-clipboard/clipboard';
 import { ErrorBoundary } from '../../components/ui/ErrorBoundary/ErrorBoundary';
+import { ChatStackParamList } from '../../app/App';
+import { NoConversationHeader } from '../../components/Chat/NoConversationHeader';
 
-export type ChatProp = NativeStackScreenProps<AppStackParamList, 'ChatScreen'>;
-
-const ChatPage = ({ route, navigation }: ChatProp) => {
+export type ChatProp = NativeStackScreenProps<ChatStackParamList, 'ChatScreen'>;
+const ChatPage = memo(({ route, navigation }: ChatProp) => {
   const insets = useSafeAreaInsets();
 
   const [replyMessage, setReplyMessage] = useState<ChatMessageIMessage | null>(null);
@@ -45,17 +44,11 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
   const [assets, setAssets] = useState<Asset[]>([]);
   // Messages
   const {
-    data: chatMessages,
-    hasNextPage: hasMoreMessages,
-    fetchNextPage: fetchMoreMessages,
-    error,
+    all: { data: chatMessages, hasNextPage: hasMoreMessages, fetchNextPage: fetchMoreMessages },
+    delete: { mutate: deleteMessage, error: deleteMessageError },
   } = useChatMessages({
     conversationId: route.params.convoId,
-  }).all;
-
-  const { mutate: deleteMessage, error: deleteMessageError } = useChatMessages({
-    conversationId: route.params.convoId,
-  }).delete;
+  });
 
   const messages: ChatMessageIMessage[] = useMemo(
     () =>
@@ -90,31 +83,22 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
   );
 
   // Conversation & Contact
-  let { data: conversationContent } = useConversation({
+  const { data: conversation, isLoading: isLoadingConversation } = useConversation({
     conversationId: route.params.convoId,
   }).single;
   const contact = useContact(
-    (conversationContent?.fileMetadata.appData.content as SingleConversation | undefined)?.recipient
+    (conversation?.fileMetadata.appData.content as SingleConversation | undefined)?.recipient
   ).fetch.data;
-
-  const { mutateAsync: inviteRecipient } = useConversation().inviteRecipient;
 
   const title = useMemo(
     () =>
       contact?.fileMetadata.appData.content.name?.displayName ||
       contact?.fileMetadata.appData.content.name?.surname ||
-      conversationContent?.fileMetadata.appData.content.title,
-    [contact, conversationContent]
+      conversation?.fileMetadata.appData.content.title,
+    [contact, conversation]
   );
 
-  if (
-    conversationContent == null &&
-    stringGuidsEqual(route.params.convoId, ConversationWithYourselfId)
-  ) {
-    conversationContent = ConversationWithYourself;
-  }
-  const isGroup =
-    conversationContent && 'recipients' in conversationContent.fileMetadata.appData.content;
+  const isGroup = conversation && 'recipients' in conversation.fileMetadata.appData.content;
 
   const [messageCordinates, setMessageCordinates] = useState({ x: 0, y: 0 });
   const [selectedMessage, setSelectedMessage] = useState<ChatMessageIMessage | undefined>();
@@ -135,10 +119,10 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
     (message: ChatMessageIMessage) => {
       navigation.navigate('MessageInfo', {
         message,
-        conversation: conversationContent as HomebaseFile<Conversation>,
+        conversation: conversation as HomebaseFile<Conversation>,
       });
     },
-    [conversationContent, navigation]
+    [conversation, navigation]
   );
 
   const {
@@ -148,10 +132,22 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
     error: sendMessageError,
   } = useChatMessage().send;
 
-  useMarkMessagesAsRead({ conversation: conversationContent || undefined, messages });
+  useMarkMessagesAsRead({ conversation: conversation || undefined, messages });
 
+  const { mutateAsync: inviteRecipient } = useConversation().inviteRecipient;
   const doSend = useCallback(
     (message: ChatMessageIMessage[]) => {
+      // If the chat was empty, invite the recipient
+      if (
+        messages.length === 0 &&
+        conversation &&
+        route.params.convoId !== ConversationWithYourselfId
+      ) {
+        inviteRecipient({
+          conversation: conversation,
+        });
+      }
+
       sendMessage({
         conversationId: route.params.convoId,
         message: message[0]?.text,
@@ -171,36 +167,40 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
           };
         }),
         recipients:
-          (conversationContent?.fileMetadata.appData.content as GroupConversation).recipients ||
-          [
-            (conversationContent?.fileMetadata.appData.content as SingleConversation).recipient,
-          ].filter(Boolean),
+          (conversation?.fileMetadata.appData.content as GroupConversation).recipients ||
+          [(conversation?.fileMetadata.appData.content as SingleConversation).recipient].filter(
+            Boolean
+          ),
       });
       setAssets([]);
       setReplyMessage(null);
     },
-    [conversationContent, route.params.convoId, sendMessage, assets, replyMessage]
+    [
+      messages.length,
+      conversation,
+      route.params.convoId,
+      sendMessage,
+      replyMessage?.fileMetadata.appData.uniqueId,
+      assets,
+      inviteRecipient,
+    ]
   );
 
   useEffect(() => {
-    if (messages.length === 0 && conversationContent) {
-      inviteRecipient({
-        conversation: conversationContent,
-      });
-    }
     // Send Audio after Recording
     if (assets.length === 1 && assets[0].type?.startsWith('audio/')) {
       doSend([]);
     }
     if (sendMessageState === 'pending') resetState();
   }, [
-    conversationContent,
+    conversation,
     inviteRecipient,
     messages.length,
     sendMessageState,
     resetState,
     assets,
     doSend,
+    route.params.convoId,
   ]);
 
   // ref
@@ -226,29 +226,33 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
     setSelectedMessage(undefined);
   }, []);
 
-  if (!conversationContent) return null;
+  if (!conversation) {
+    if (isLoadingConversation) return null;
+    return (
+      <NoConversationHeader title="No conversation found" goBack={navigation.goBack}/>
+    );
+  }
 
   return (
     <BottomSheetModalProvider>
-      <ErrorNotification error={sendMessageError} />
-      <ErrorNotification error={error} />
-      <ErrorNotification error={deleteMessageError} />
+      <ErrorNotification error={sendMessageError || deleteMessageError} />
       <View
         style={{
           paddingBottom:
             Platform.OS === 'ios' && (replyMessage || Keyboard.isVisible()) ? 0 : insets.bottom,
           flex: 1,
+          // Force the height on iOS to better support the keyboard handling
+          minHeight: Platform.OS === 'ios' ? Dimensions.get('window').height : undefined,
         }}
       >
         <ErrorBoundary>
           <ChatAppBar
             title={title || ''}
-            group={'recipients' in conversationContent.fileMetadata.appData.content}
+            group={'recipients' in conversation.fileMetadata.appData.content}
             odinId={
               route.params.convoId === ConversationWithYourselfId
                 ? identity || ''
-                : (conversationContent?.fileMetadata.appData.content as SingleConversation)
-                    .recipient
+                : (conversation?.fileMetadata.appData.content as SingleConversation).recipient
             }
             goBack={selectedMessage ? dismissSelectedMessage : navigation.goBack}
             onPress={() => navigation.navigate('ChatInfo', { convoId: route.params.convoId })}
@@ -271,13 +275,13 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
                 }
               },
               onDelete: () => {
-                if (selectedMessage && conversationContent) {
+                if (selectedMessage && conversation) {
                   console.log(
                     'Delete Message',
                     selectedMessage.fileMetadata.appData.archivalStatus
                   );
                   deleteMessage({
-                    conversation: conversationContent,
+                    conversation: conversation,
                     messages: [selectedMessage],
                     deleteForEveryone: true,
                   });
@@ -298,7 +302,7 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
               },
             }}
           />
-          <ChatConnectedState {...conversationContent} />
+          <ChatConnectedState {...conversation} />
           <Host>
             <Pressable
               onPress={dismissSelectedMessage}
@@ -347,6 +351,6 @@ const ChatPage = ({ route, navigation }: ChatProp) => {
       />
     </BottomSheetModalProvider>
   );
-};
+});
 
 export default ChatPage;

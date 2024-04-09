@@ -1,5 +1,4 @@
-import PropTypes from 'prop-types';
-import React, { ReactNode } from 'react';
+import React, { memo, ReactNode } from 'react';
 import {
   StyleSheet,
   Text,
@@ -10,7 +9,6 @@ import {
   TextStyle,
 } from 'react-native';
 import Color from './Color';
-import { StylePropType } from './utils';
 import { useChatContext } from './GiftedChatContext';
 import { useCallbackOne } from 'use-memo-one';
 
@@ -24,64 +22,56 @@ export interface ActionsProps {
   onPressActionButton?(): void;
 }
 
-export function Actions({
-  options = {},
-  optionTintColor = Color.optionTintColor,
-  icon,
-  wrapperStyle,
-  iconTextStyle,
-  onPressActionButton,
-  containerStyle,
-}: ActionsProps) {
-  const { actionSheet } = useChatContext();
-  const onActionsPress = useCallbackOne(() => {
-    const optionKeys = Object.keys(options);
-    const cancelButtonIndex = optionKeys.indexOf('Cancel');
-    actionSheet().showActionSheetWithOptions(
-      {
-        options: optionKeys,
-        cancelButtonIndex,
-        tintColor: optionTintColor,
-      },
-      (buttonIndex: number) => {
-        const key = optionKeys[buttonIndex];
-        if (key) {
-          options[key]();
-        }
-      },
-    );
-  }, []);
+export const Actions = memo(
+  ({
+    options = {},
+    optionTintColor = Color.optionTintColor,
+    icon,
+    wrapperStyle,
+    iconTextStyle,
+    onPressActionButton,
+    containerStyle,
+  }: ActionsProps) => {
+    const { actionSheet } = useChatContext();
+    const onActionsPress = useCallbackOne(() => {
+      const optionKeys = Object.keys(options);
+      const cancelButtonIndex = optionKeys.indexOf('Cancel');
+      actionSheet().showActionSheetWithOptions(
+        {
+          options: optionKeys,
+          cancelButtonIndex,
+          tintColor: optionTintColor,
+        },
+        (buttonIndex: number) => {
+          const key = optionKeys[buttonIndex];
+          if (key) {
+            options[key]();
+          }
+        },
+      );
+    }, []);
 
-  const renderIcon = useCallbackOne(() => {
-    if (icon) {
-      return icon();
-    }
+    const renderIcon = useCallbackOne(() => {
+      if (icon) {
+        return icon();
+      }
+      return (
+        <View style={[styles.wrapper, wrapperStyle]}>
+          <Text style={[styles.iconText, iconTextStyle]}>+</Text>
+        </View>
+      );
+    }, [icon]);
+
     return (
-      <View style={[styles.wrapper, wrapperStyle]}>
-        <Text style={[styles.iconText, iconTextStyle]}>+</Text>
-      </View>
+      <TouchableOpacity
+        style={[styles.container, containerStyle]}
+        onPress={onPressActionButton || onActionsPress}
+      >
+        {renderIcon()}
+      </TouchableOpacity>
     );
-  }, [icon]);
-
-  return (
-    <TouchableOpacity
-      style={[styles.container, containerStyle]}
-      onPress={onPressActionButton || onActionsPress}
-    >
-      {renderIcon()}
-    </TouchableOpacity>
-  );
-}
-
-Actions.propTypes = {
-  onSend: PropTypes.func,
-  options: PropTypes.object,
-  optionTintColor: PropTypes.string,
-  icon: PropTypes.func,
-  onPressActionButton: PropTypes.func,
-  wrapperStyle: StylePropType,
-  containerStyle: StylePropType,
-};
+  },
+);
 
 const styles = StyleSheet.create({
   container: {

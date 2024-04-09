@@ -59,13 +59,13 @@ export const Send = <TMessage extends IMessage = IMessage>({
   sendButtonProps,
   onSend = () => {},
 }: SendProps<TMessage>) => {
-  const handleOnPress = useCallbackOne(() => {
+  const handleOnPress = React.useCallback(() => {
     if (text && onSend) {
       onSend({ text: text.trim() } as Partial<TMessage>, true);
     }
   }, [text, onSend]);
 
-  const showSend = useMemoOne(
+  const showSend = React.useMemo(
     () => alwaysShowSend || (text && text.trim().length > 0),
     [alwaysShowSend, text],
   );

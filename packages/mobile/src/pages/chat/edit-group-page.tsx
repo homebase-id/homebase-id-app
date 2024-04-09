@@ -1,14 +1,14 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { View, StyleSheet, ActivityIndicator } from 'react-native';
-import { AppStackParamList } from '../../app/App';
 import { useConversation } from '../../hooks/chat/useConversation';
 import { useCallback, useEffect, useState } from 'react';
 import { GroupAvatar } from '../../components/Chat/Conversation-tile';
 import { Input } from '../../components/ui/Form/Input';
 import TextButton from '../../components/ui/Text/Text-Button';
 import { Header, HeaderBackButton } from '@react-navigation/elements';
+import { ChatStackParamList } from '../../app/App';
 
-export type EditGroupProp = NativeStackScreenProps<AppStackParamList, 'EditGroup'>;
+export type EditGroupProp = NativeStackScreenProps<ChatStackParamList, 'EditGroup'>;
 
 function EditGroupPage(props: EditGroupProp) {
   const { convoId: conversationId } = props.route.params;

@@ -3,6 +3,7 @@ import {
   DefaultTheme,
   NavigationContainer,
   NavigationProp,
+  createNavigationContainerRef,
   useNavigation,
 } from '@react-navigation/native';
 
@@ -20,10 +21,10 @@ import { DotYouClientProvider } from '../components/Auth/DotYouClientProvider';
 import { BackButton, HeaderActions } from '../components/ui/convo-app-bar';
 import { useLiveChatProcessor } from '../hooks/chat/useLiveChatProcessor';
 import { HeaderBackButtonProps } from '@react-navigation/elements';
-import { Platform } from 'react-native';
+import { Platform, View } from 'react-native';
 
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { useCallback } from 'react';
+import { memo, useCallback } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Colors } from './Colors';
 
@@ -45,9 +46,6 @@ import EditGroupPage from '../pages/chat/edit-group-page';
 import { ConnectionRequestsPage } from '../pages/home/connection-requests-page';
 import { useDarkMode } from '../hooks/useDarkMode';
 import { HomebaseFile, EmbeddedThumb } from '@youfoundation/js-lib/core';
-import { OdinImage } from '../components/ui/OdinImage/OdinImage';
-import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
-import { useProfile } from '../hooks/profile/useProfile';
 import { ChatMessage } from '../provider/chat/ChatProvider';
 import { useRefreshOnFocus } from '../hooks/chat/useRefetchOnFocus';
 import { PushNotificationProvider } from '../components/push-notification/PushNotificationProvider';
@@ -65,6 +63,8 @@ import {
 import { AudioContextProvider } from '../components/AudioContext/AudioContext';
 import { useInitialPushNotification } from '../hooks/push-notification/useInitialPushNotification';
 import { ErrorBoundary } from '../components/ui/ErrorBoundary/ErrorBoundary';
+import { RouteContextProvider, useRouteContext } from '../components/RouteContext/RouteContext';
+import { OwnerAvatar } from '../components/Chat/Conversation-tile';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -95,6 +95,22 @@ export type ChatStackParamList = {
   Conversation: undefined;
   NewChat: undefined;
   NewGroup: undefined;
+
+  ChatScreen: { convoId: string };
+  ChatInfo: { convoId: string };
+  MessageInfo: {
+    message: HomebaseFile<ChatMessage>;
+    conversation: HomebaseFile<Conversation>;
+  };
+  EditGroup: { convoId: string };
+  PreviewMedia: {
+    msg: HomebaseFile<ChatMessage>;
+    fileId: string;
+    payloadKey: string;
+    currIndex: number;
+    type?: string;
+    previewThumbnail?: EmbeddedThumb;
+  };
 };
 
 const queryClient = new QueryClient({
@@ -119,12 +135,15 @@ const asyncPersist = createAsyncStoragePersister({
 const INCLUDED_QUERY_KEYS = [
   'chat-message',
   'chat-messages',
-  'conversation',
   'conversations',
   'chat-reaction',
-  'connectionDetails',
+  'connection-details',
   'contact',
   'profile-data',
+  'followers',
+  'following',
+  'active-connections',
+  'pending-connections',
 
   // Small data (blobs to local file Uri)
   'image',
@@ -165,8 +184,10 @@ let App = () => {
     >
       <GestureHandlerRootView style={{ flex: 1 }}>
         <PushNotificationProvider>
-          <RootStack />
-          <Toast />
+          <RouteContextProvider>
+            <RootStack />
+            <Toast />
+          </RouteContextProvider>
         </PushNotificationProvider>
       </GestureHandlerRootView>
     </PersistQueryClientProvider>
@@ -176,13 +197,25 @@ let App = () => {
 const codePushOptions = { checkFrequency: CodePush.CheckFrequency.MANUAL };
 App = CodePush(codePushOptions)(App);
 
+const ref = createNavigationContainerRef();
 const StackRoot = createNativeStackNavigator<AuthStackParamList>();
 const RootStack = () => {
   const { isAuthenticated } = useAuth();
   const { isDarkMode } = useDarkMode();
+  const { setRouteName } = useRouteContext();
 
   return (
-    <NavigationContainer theme={isDarkMode ? DarkTheme : DefaultTheme}>
+    <NavigationContainer
+      ref={ref}
+      theme={isDarkMode ? DarkTheme : DefaultTheme}
+      onReady={() => {
+        setRouteName(ref.getCurrentRoute()?.name || null);
+      }}
+      onStateChange={async () => {
+        const currentRouteName = ref.getCurrentRoute()?.name || null;
+        setRouteName(currentRouteName);
+      }}
+    >
       <StackRoot.Navigator screenOptions={{ headerShown: false }}>
         {isAuthenticated ? (
           <StackRoot.Screen name="Authenticated" component={AuthenticatedRoot} />
@@ -195,7 +228,7 @@ const RootStack = () => {
   );
 };
 
-const AuthenticatedRoot = () => {
+const AuthenticatedRoot = memo(() => {
   return (
     <DotYouClientProvider>
       <AudioContextProvider>
@@ -205,98 +238,27 @@ const AuthenticatedRoot = () => {
       </AudioContextProvider>
     </DotYouClientProvider>
   );
-};
+});
 
-export type AppStackParamList = {
-  TabStack: undefined;
-  ChatScreen: { convoId: string };
-  ChatInfo: { convoId: string };
-  MessageInfo: {
-    message: HomebaseFile<ChatMessage>;
-    conversation: HomebaseFile<Conversation>;
-  };
-  EditGroup: { convoId: string };
-  PreviewMedia: {
-    msg: HomebaseFile<ChatMessage>;
-    fileId: string;
-    payloadKey: string;
-    currIndex: number;
-    type?: string;
-    previewThumbnail?: EmbeddedThumb;
-  };
-};
-
-const AppStack = createNativeStackNavigator<AppStackParamList>();
-const AppStackScreen = () => {
+const AppStackScreen = memo(() => {
+  // CHECK: Re-renders a lot because of all the hooks, is it faster to move them in a separate component?
   useValidTokenCheck();
   useRefreshOnFocus();
   useLiveChatProcessor();
   useAuthenticatedPushNotification();
   useInitialPushNotification();
 
-  return (
-    <AppStack.Navigator
-      screenOptions={{
-        headerShown: false,
-      }}
-    >
-      <AppStack.Screen name="TabStack" component={TabStack} />
-      <AppStack.Screen
-        name="ChatScreen"
-        component={ChatPage}
-        options={{
-          gestureEnabled: true,
-        }}
-      />
-      <AppStack.Screen
-        name="PreviewMedia"
-        component={PreviewMedia}
-        options={{
-          headerShown: true,
-          gestureEnabled: true,
-          title: '',
-          headerBackTitleVisible: false,
-
-          headerTransparent: true,
-        }}
-      />
-      <AppStack.Screen
-        name="ChatInfo"
-        component={ChatInfoPage}
-        options={{
-          gestureEnabled: true,
-          headerTitle: 'Chat Info',
-          headerBackTitleVisible: false,
-          headerShown: false,
-        }}
-      />
-      <AppStack.Screen
-        name="MessageInfo"
-        component={MessageInfoPage}
-        options={{
-          gestureEnabled: true,
-          headerTitle: 'Message Info',
-          headerBackTitleVisible: false,
-          headerShown: true,
-        }}
-      />
-      <AppStack.Screen
-        name="EditGroup"
-        component={EditGroupPage}
-        options={{
-          gestureEnabled: true,
-          headerTitle: 'Edit Group',
-          headerBackTitleVisible: false,
-          headerShown: false,
-        }}
-      />
-    </AppStack.Navigator>
-  );
-};
+  return <TabStack />;
+});
 
 const TabBottom = createBottomTabNavigator<TabStackParamList>();
-const TabStack = () => {
+const TabStack = memo(() => {
   const { isDarkMode } = useDarkMode();
+
+  const rootRoutes = ['Home', 'Feed', 'Chat', 'Profile', 'Conversation', 'NewChat', 'NewGroup'];
+  const { routeName } = useRouteContext();
+  const hide = !routeName || !rootRoutes.includes(routeName);
+  // TODO: Hide seems slow for the chat-page.. While actually it's the ChatScreen being slow in detecting it's correct size
 
   return (
     <TabBottom.Navigator
@@ -333,6 +295,9 @@ const TabStack = () => {
         options={{
           tabBarIcon: TabChatIcon,
           headerShown: false,
+          tabBarStyle: hide
+            ? { display: 'none' }
+            : { backgroundColor: isDarkMode ? Colors.indigo[900] : Colors.indigo[100] },
         }}
       />
       <TabBottom.Screen
@@ -344,7 +309,7 @@ const TabStack = () => {
       />
     </TabBottom.Navigator>
   );
-};
+});
 
 const StackProfile = createNativeStackNavigator<ProfileStackParamList>();
 const ProfileStack = () => {
@@ -375,8 +340,22 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
     });
   }, [navigation]);
 
+  const headerBackButton = useCallback(
+    (props: HeaderBackButtonProps) => {
+      return BackButton({
+        onPress: () => navigation.navigate('Conversation'),
+        prop: props,
+      });
+    },
+    [navigation]
+  );
+
   return (
-    <StackChat.Navigator>
+    <StackChat.Navigator
+      screenOptions={{
+        headerShown: false,
+      }}
+    >
       <StackChat.Screen
         name="Conversation"
         component={ConversationsPage}
@@ -401,16 +380,9 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
           name="NewChat"
           component={ContactPage}
           options={{
+            headerShown: true,
             headerTitle: 'New Message',
-            headerLeft:
-              Platform.OS === 'ios'
-                ? (props: HeaderBackButtonProps) => {
-                    return BackButton({
-                      onPress: () => navigation.navigate('Conversation'),
-                      prop: props,
-                    });
-                  }
-                : undefined,
+            headerLeft: Platform.OS === 'ios' ? headerBackButton : undefined,
           }}
         />
         <StackChat.Screen
@@ -419,31 +391,70 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
           options={{
             headerTitle: 'New Group',
             headerShown: false,
-            headerLeft: (props: HeaderBackButtonProps) => {
-              return BackButton({
-                onPress: () => navigation.navigate('Conversation'),
-                prop: props,
-                label: '',
-              });
-            },
+            headerLeft: headerBackButton,
           }}
         />
       </StackChat.Group>
+
+      <StackChat.Screen
+        name="ChatScreen"
+        // component={(props) => <ChatPage {...props} />} // This is faster, but react-navigation goes crazy with warnings
+        component={ChatPage}
+        options={{
+          gestureEnabled: true,
+        }}
+      />
+      <StackChat.Screen
+        name="PreviewMedia"
+        component={PreviewMedia}
+        options={{
+          headerShown: true,
+          gestureEnabled: true,
+          title: '',
+          headerBackTitleVisible: false,
+
+          headerTransparent: true,
+        }}
+      />
+      <StackChat.Screen
+        name="ChatInfo"
+        component={ChatInfoPage}
+        options={{
+          gestureEnabled: true,
+          headerTitle: 'Chat Info',
+          headerBackTitleVisible: false,
+          headerShown: false,
+        }}
+      />
+      <StackChat.Screen
+        name="MessageInfo"
+        component={MessageInfoPage}
+        options={{
+          gestureEnabled: true,
+          headerTitle: 'Message Info',
+          headerBackTitleVisible: false,
+          headerShown: true,
+        }}
+      />
+      <StackChat.Screen
+        name="EditGroup"
+        component={EditGroupPage}
+        options={{
+          gestureEnabled: true,
+          headerTitle: 'Edit Group',
+          headerBackTitleVisible: false,
+          headerShown: false,
+        }}
+      />
     </StackChat.Navigator>
   );
 };
 
 const ProfileAvatar = () => {
-  const { data: profile } = useProfile();
   return (
-    <OdinImage
-      fit="cover"
-      targetDrive={GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId)}
-      fileId={profile?.profileImageFileId}
-      fileKey={profile?.profileImageFileKey}
-      imageSize={{ width: 30, height: 30 }}
-      style={{ borderRadius: 30 / 2, marginRight: Platform.OS === 'android' ? 10 : 0 }}
-    />
+    <View style={{ marginRight: Platform.OS === 'android' ? 16 : 0 }}>
+      <OwnerAvatar imageSize={{ width: 30, height: 30 }} style={{ borderRadius: 30 / 2 }} />
+    </View>
   );
 };
 

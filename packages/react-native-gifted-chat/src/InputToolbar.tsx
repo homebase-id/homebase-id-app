@@ -1,12 +1,10 @@
-import PropTypes from 'prop-types';
-import React, { useEffect, useState } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import { StyleSheet, View, Keyboard, StyleProp, ViewStyle } from 'react-native';
 
 import { Composer, ComposerProps } from './Composer';
 import { Send, SendProps } from './Send';
 import { Actions, ActionsProps } from './Actions';
 import Color from './Color';
-import { StylePropType } from './utils';
 import { IMessage } from './Models';
 
 const styles = StyleSheet.create({
@@ -38,60 +36,58 @@ export interface InputToolbarProps<TMessage extends IMessage> {
   renderSend?(props: SendProps<TMessage>): React.ReactNode;
   renderComposer?(props: ComposerProps): React.ReactNode;
   onPressActionButton?(): void;
+  text?: string;
 }
 
-export function InputToolbar<TMessage extends IMessage = IMessage>(
-  props: InputToolbarProps<TMessage>,
-) {
-  const [position, setPosition] = useState('absolute');
-  useEffect(() => {
-    const keyboardWillShowListener = Keyboard.addListener(
-      'keyboardWillShow',
-      () => setPosition('relative'),
-    );
-    const keyboardWillHideListener = Keyboard.addListener(
-      'keyboardWillHide',
-      () => setPosition('absolute'),
-    );
-    return () => {
-      keyboardWillShowListener?.remove();
-      keyboardWillHideListener?.remove();
-    };
-  }, []);
+export const InputToolbar = memo(
+  <TMessage extends IMessage = IMessage>(
+    props: InputToolbarProps<TMessage>,
+  ) => {
+    const [position, setPosition] = useState('absolute');
+    useEffect(() => {
+      const keyboardWillShowListener = Keyboard.addListener(
+        'keyboardWillShow',
+        () => setPosition('relative'),
+      );
+      const keyboardWillHideListener = Keyboard.addListener(
+        'keyboardWillHide',
+        () => setPosition('absolute'),
+      );
+      return () => {
+        keyboardWillShowListener?.remove();
+        keyboardWillHideListener?.remove();
+      };
+    }, []);
 
-  const { containerStyle, ...rest } = props;
-  const {
-    renderActions,
-    onPressActionButton,
-    renderComposer,
-    renderSend,
-    renderAccessory,
-  } = rest;
+    const {
+      containerStyle,
+      renderActions,
+      onPressActionButton,
+      renderComposer,
+      renderSend,
+      renderAccessory,
+      text, // We only pass text to Send as only send should re-render when it changes
+      ...rest
+    } = props;
 
-  return (
-    <View style={[styles.container, { position }, containerStyle] as ViewStyle}>
-      <View style={[styles.primary, props.primaryStyle]}>
-        {renderActions?.(rest) ||
-          (onPressActionButton && <Actions {...rest} />)}
-        {renderComposer?.(props as ComposerProps) || <Composer {...props} />}
-        {renderSend?.(props) || <Send {...props} />}
-      </View>
-      {renderAccessory && (
-        <View style={[styles.accessory, props.accessoryStyle]}>
-          {renderAccessory(props)}
+    return (
+      <View
+        style={[styles.container, { position }, containerStyle] as ViewStyle}
+      >
+        <View style={[styles.primary, props.primaryStyle]}>
+          {renderActions?.(rest) ||
+            (onPressActionButton && <Actions {...rest} />)}
+          {renderComposer?.(rest as ComposerProps) || (
+            <Composer {...(rest as ComposerProps)} />
+          )}
+          {renderSend?.({ ...props, text }) || <Send {...props} text={text} />}
         </View>
-      )}
-    </View>
-  );
-}
-
-InputToolbar.propTypes = {
-  renderAccessory: PropTypes.func,
-  renderActions: PropTypes.func,
-  renderSend: PropTypes.func,
-  renderComposer: PropTypes.func,
-  onPressActionButton: PropTypes.func,
-  containerStyle: StylePropType,
-  primaryStyle: StylePropType,
-  accessoryStyle: StylePropType,
-};
+        {renderAccessory && (
+          <View style={[styles.accessory, props.accessoryStyle]}>
+            {renderAccessory(props)}
+          </View>
+        )}
+      </View>
+    );
+  },
+);

@@ -4,6 +4,7 @@ import { Message, MessageProps, isSameUser, isSameDay } from 'react-native-gifte
 import { ChatMessageIMessage } from './ChatDetail';
 import { Info, Reply } from '../ui/Icons/icons';
 import { ChatDeletedArchivalStaus } from '../../provider/chat/ChatProvider';
+import { memo } from 'react';
 
 type ChatMessageBoxProps = {
   setReplyOnSwipeOpen: (message: ChatMessageIMessage) => void;
@@ -12,7 +13,7 @@ type ChatMessageBoxProps = {
   onMessageLayout?: (e: LayoutChangeEvent) => void;
 } & MessageProps<ChatMessageIMessage>;
 
-const ChatMessageBox = ({ setReplyOnSwipeOpen, ...props }: ChatMessageBoxProps) => {
+const ChatMessageBox = memo(({ setReplyOnSwipeOpen, ...props }: ChatMessageBoxProps) => {
   const isNextMyMessage =
     props.currentMessage &&
     props.nextMessage &&
@@ -97,7 +98,7 @@ const ChatMessageBox = ({ setReplyOnSwipeOpen, ...props }: ChatMessageBoxProps) 
       <Message {...props} />
     </Swipeable>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {
