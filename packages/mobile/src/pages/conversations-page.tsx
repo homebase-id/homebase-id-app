@@ -113,6 +113,14 @@ const ConversationTileWithYourself = () => {
   const odinId = useAuth().getIdentity();
   const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
 
+  const doOpen = useCallback(
+    () =>
+      navigation.navigate('ChatScreen', {
+        convoId: ConversationWithYourselfId,
+      }),
+    [navigation]
+  );
+
   return (
     <ConversationTile
       odinId={odinId || ''}
@@ -122,11 +130,7 @@ const ConversationTileWithYourself = () => {
       }}
       conversationId={ConversationWithYourselfId}
       isSelf
-      onPress={() =>
-        navigation.navigate('ChatScreen', {
-          convoId: ConversationWithYourselfId,
-        })
-      }
+      onPress={doOpen}
     />
   );
 };
