@@ -420,7 +420,8 @@ export const ChatDetail = memo(
         loadEarlier={hasMoreMessages}
         onLoadEarlier={fetchMoreMessages}
         listViewProps={{
-          initialNumToRender: 10,
+          removeClippedSubviews: true,
+          windowSize: 15,
         }}
       />
     );

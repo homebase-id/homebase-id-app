@@ -33,13 +33,14 @@ export const useConnections = (
 
   return {
     fetch: useInfiniteQuery({
-      queryKey: ['activeConnections', activePageSize],
+      queryKey: ['active-connections', activePageSize],
       initialPageParam: undefined as number | undefined,
       queryFn: ({ pageParam }) => fetchConnections({ pageSize: activePageSize, cursor: pageParam }),
 
       getNextPageParam: (lastPage) =>
         lastPage.results?.length >= activePageSize ? lastPage.cursor : undefined,
       refetchOnWindowFocus: false,
+      staleTime: 1000 * 60 * 60 * 24 * 1,
     }),
   };
 };

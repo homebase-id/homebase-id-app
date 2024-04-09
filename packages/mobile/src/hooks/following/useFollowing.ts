@@ -25,7 +25,7 @@ export const useFollowingInfinite = ({ pageSize = 30 }: useFollowingInfiniteProp
           : undefined,
       refetchOnMount: false,
       refetchOnWindowFocus: false,
-      staleTime: Infinity,
+      staleTime: 1000 * 60 * 60 * 24 * 1,
     }),
   };
 };

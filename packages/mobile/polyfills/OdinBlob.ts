@@ -179,7 +179,12 @@ class Blob {
       }, 100);
     });
 
-    const extension = this.data.type === 'audio/mpeg' ? 'mp3' : this.data.type.split('/')[1];
+    const extension =
+      this.data.type === 'audio/mpeg'
+        ? 'mp3'
+        : this.data.type === 'image/svg+xml'
+          ? 'svg'
+          : this.data.type.split('/')[1];
     const destinationUri = `file://${CachesDirectoryPath}/${this.data.blobId}.${extension}`;
 
     const decryptStatus = await OdinBlobModule.decryptFileWithAesCbc16(

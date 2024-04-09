@@ -6,6 +6,7 @@ import { useFollowingInfinite } from '../../hooks/following/useFollowing';
 import NoItems from '../../components/list/noItems';
 import IdentityItem from '../../components/list/identityItem';
 import { useDotYouClientContext } from 'feed-app-common';
+import { ListRenderItemInfo } from 'react-native';
 import { openURL } from '../../utils/utils';
 
 type FollowingProps = NativeStackScreenProps<ProfileStackParamList, 'Following'>;
@@ -18,6 +19,7 @@ export const FollowingPage = (_props: FollowingProps) => {
     hasNextPage: hasMoreIdentities,
     fetchNextPage,
     refetch: refetchIdentities,
+    isLoading: isLoadingIdentities,
   } = useFollowingInfinite({}).fetch;
   const flatIdentities = useMemo(
     () => (identities?.pages.flatMap((page) => page?.results).filter(Boolean) as string[]) ?? [],
@@ -32,28 +34,31 @@ export const FollowingPage = (_props: FollowingProps) => {
     setRefreshing(false);
   }, [refetchIdentities]);
 
+  const renderItem = useCallback(
+    (item: ListRenderItemInfo<string>) => (
+      <TouchableOpacity
+        key={item.item}
+        style={{
+          padding: 1,
+        }}
+        onPress={() => openURL(`https://${identity}/owner/connections/${item.item}`)}
+      >
+        <IdentityItem odinId={item.item} key={item.item} />
+      </TouchableOpacity>
+    ),
+    [identity]
+  );
+
   return (
     <View style={{ position: 'relative', minHeight: '100%' }}>
       {flatIdentities?.length ? (
         <FlatList
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={doRefresh} />}
           data={flatIdentities}
-          renderItem={(item) => {
-            return (
-              <TouchableOpacity
-                key={item.item}
-                style={{
-                  padding: 1,
-                }}
-                onPress={() => openURL(`https://${identity}/owner/connections/${item.item}`)}
-              >
-                <IdentityItem odinId={item.item} key={item.item} />
-              </TouchableOpacity>
-            );
-          }}
+          renderItem={renderItem}
           onEndReached={() => hasMoreIdentities && fetchNextPage()}
         />
-      ) : (
+      ) : isLoadingIdentities ? null : (
         <NoItems>You&apos;re not following anyone :-(</NoItems>
       )}
     </View>
