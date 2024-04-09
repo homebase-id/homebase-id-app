@@ -1,4 +1,4 @@
-import { FlatList, StyleSheet } from 'react-native';
+import { FlatList, ListRenderItemInfo, StyleSheet } from 'react-native';
 import ConversationTile from '../components/Chat/Conversation-tile';
 
 import { NavigationProp, useNavigation } from '@react-navigation/native';
@@ -11,7 +11,7 @@ import {
 } from '../provider/chat/ConversationProvider';
 import { useAuth } from '../hooks/auth/useAuth';
 import { useProfile } from '../hooks/profile/useProfile';
-import { memo, useLayoutEffect, useMemo, useState } from 'react';
+import { memo, useCallback, useLayoutEffect, useMemo, useState } from 'react';
 import { useRemoveNotifications } from '../hooks/notifications/usePushNotifications';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Text } from '../components/ui/Text/Text';
@@ -60,6 +60,26 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
     });
   }, [isDarkMode, navigation]);
 
+  const renderItem = useCallback(
+    ({ item }: ListRenderItemInfo<ConversationWithRecentMessage>) => (
+      <ConversationTile
+        conversation={item.fileMetadata.appData.content}
+        conversationId={item.fileMetadata.appData.uniqueId}
+        onPress={() => {
+          if (item.fileMetadata.appData.uniqueId) {
+            navigation.navigate('ChatScreen', {
+              convoId: item.fileMetadata.appData.uniqueId,
+            });
+          }
+        }}
+        odinId={(item.fileMetadata.appData.content as SingleConversation).recipient}
+      />
+    ),
+    [navigation]
+  );
+
+  const keyExtractor = useCallback((item: ConversationWithRecentMessage) => item.fileId, []);
+
   const isQueryActive = !!(query && query.length >= 1);
   if (isQueryActive) {
     return (
@@ -74,23 +94,10 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
       <RemoveNotifications />
       <FlatList
         data={flatConversations}
-        keyExtractor={(item) => item.fileId}
+        keyExtractor={keyExtractor}
         ListHeaderComponent={ConversationTileWithYourself}
         contentInsetAdjustmentBehavior="automatic"
-        renderItem={({ item }) => (
-          <ConversationTile
-            conversation={item.fileMetadata.appData.content}
-            conversationId={item.fileMetadata.appData.uniqueId}
-            onPress={() => {
-              if (item.fileMetadata.appData.uniqueId) {
-                navigation.navigate('ChatScreen', {
-                  convoId: item.fileMetadata.appData.uniqueId,
-                });
-              }
-            }}
-            odinId={(item.fileMetadata.appData.content as SingleConversation).recipient}
-          />
-        )}
+        renderItem={renderItem}
       />
     </ErrorBoundary>
   );

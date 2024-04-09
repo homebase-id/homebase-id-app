@@ -1,7 +1,14 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import { ProfileStackParamList } from '../../app/App';
-import { FlatList, RefreshControl, View, TouchableOpacity, Linking } from 'react-native';
+import {
+  FlatList,
+  RefreshControl,
+  View,
+  TouchableOpacity,
+  Linking,
+  ListRenderItemInfo,
+} from 'react-native';
 import { useConnections } from '../../hooks/connections/useConnections';
 import NoItems from '../../components/list/noItems';
 import IdentityItem from '../../components/list/identityItem';
@@ -36,23 +43,28 @@ export const ConnectionsPage = (_props: ConnectionsProps) => {
     setRefreshing(false);
   }, [refetchIdentities]);
 
+  const renderItem = useCallback(
+    (item: ListRenderItemInfo<string>) => (
+      <TouchableOpacity
+        key={item.item}
+        style={{
+          padding: 1,
+        }}
+        onPress={() => Linking.openURL(`https://${identity}/owner/connections/${item.item}`)}
+      >
+        <IdentityItem odinId={item.item} key={item.item} />
+      </TouchableOpacity>
+    ),
+    [identity]
+  );
+
   return (
     <View style={{ position: 'relative', minHeight: '100%' }}>
       {flatIdentities?.length ? (
         <FlatList
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={doRefresh} />}
           data={flatIdentities}
-          renderItem={(item) => (
-            <TouchableOpacity
-              key={item.item}
-              style={{
-                padding: 1,
-              }}
-              onPress={() => Linking.openURL(`https://${identity}/owner/connections/${item.item}`)}
-            >
-              <IdentityItem odinId={item.item} key={item.item} />
-            </TouchableOpacity>
-          )}
+          renderItem={renderItem}
           onEndReached={() => hasMoreIdentities && fetchNextPage()}
         />
       ) : (

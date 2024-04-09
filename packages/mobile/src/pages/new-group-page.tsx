@@ -1,5 +1,5 @@
 import { useAllConnections } from 'feed-app-common';
-import { FlatList, Platform, Text } from 'react-native';
+import { FlatList, ListRenderItemInfo, Platform, Text } from 'react-native';
 import { ContactTile } from '../components/Contact/Contact-Tile';
 
 import { memo, useCallback, useState } from 'react';
@@ -64,6 +64,22 @@ export const NewGroupPage = memo(() => {
     [selectedContacts.length]
   );
 
+  const renderItem = useCallback(
+    ({ item }: ListRenderItemInfo<DotYouProfile>) => (
+      <ContactTile
+        item={item}
+        selectMode
+        isSelected={selectedContacts.includes(item)}
+        onPress={() => {
+          if (selectedContacts.includes(item)) {
+            setSetselectedContacts(selectedContacts.filter((contact) => contact !== item));
+          } else setSetselectedContacts([...selectedContacts, item]);
+        }}
+      />
+    ),
+    [selectedContacts]
+  );
+
   if (!contacts) return null;
 
   return (
@@ -74,22 +90,7 @@ export const NewGroupPage = memo(() => {
         headerLeft={headerLeft}
         headerRight={headerRight}
       />
-      <FlatList
-        data={contacts}
-        keyExtractor={(item) => item.odinId}
-        renderItem={({ item }) => (
-          <ContactTile
-            item={item}
-            selectMode
-            isSelected={selectedContacts.includes(item)}
-            onPress={() => {
-              if (selectedContacts.includes(item)) {
-                setSetselectedContacts(selectedContacts.filter((contact) => contact !== item));
-              } else setSetselectedContacts([...selectedContacts, item]);
-            }}
-          />
-        )}
-      />
+      <FlatList data={contacts} keyExtractor={(item) => item.odinId} renderItem={renderItem} />
       <Dialog.Container visible={dialogVisible} onBackdropPress={() => setDialogVisible(false)}>
         <Dialog.Title>New Group Name</Dialog.Title>
         <Dialog.Input
