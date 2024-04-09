@@ -1,7 +1,6 @@
 import { InfiniteData, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   HomebaseFile,
-  Notify,
   ReceivedCommand,
   TypedConnectionNotification,
   getCommands,
@@ -27,6 +26,8 @@ import { useAuth } from '../auth/useAuth';
 import {
   ChatDrive,
   Conversation,
+  ConversationFileType,
+  GroupConversationFileType,
   JOIN_CONVERSATION_COMMAND,
   JOIN_GROUP_CONVERSATION_COMMAND,
   UPDATE_GROUP_CONVERSATION_COMMAND,
@@ -177,6 +178,13 @@ const useChatWebsocket = (isEnabled: boolean) => {
         } else if (notification.header.fileMetadata.appData.fileType === ChatReactionFileType) {
           const messageId = notification.header.fileMetadata.appData.groupId;
           queryClient.invalidateQueries({ queryKey: ['chat-reaction', messageId] });
+        } else if (
+          notification.header.fileMetadata.appData.fileType === ConversationFileType ||
+          notification.header.fileMetadata.appData.fileType === GroupConversationFileType
+        ) {
+          // TODO: We should handle the direct update of conversations here;
+          //  But first useConversations needs to be split up so we can update and seperataly manage the latest message
+          queryClient.invalidateQueries({ queryKey: ['conversations'] });
         } else if (
           [
             JOIN_CONVERSATION_COMMAND,
