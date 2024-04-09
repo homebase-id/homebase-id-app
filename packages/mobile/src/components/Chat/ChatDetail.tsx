@@ -201,6 +201,13 @@ export const ChatDetail = memo(
       }),
       [isDarkMode]
     );
+    const composerContainerStyle = useMemo(
+      () => ({
+        borderRadius: 20,
+        backgroundColor: isDarkMode ? Colors.slate[800] : Colors.indigo[50],
+      }),
+      [isDarkMode]
+    );
     const renderComposer = useCallback(
       (props: ComposerProps) => {
         // TODO: Shouldn'the whole "renderInputToolbar" render differently?
@@ -238,14 +245,11 @@ export const ChatDetail = memo(
           <Composer
             {...props}
             textInputStyle={inputStyle}
-            containerStyle={{
-              borderRadius: 20,
-              backgroundColor: isDarkMode ? Colors.slate[800] : Colors.indigo[50],
-            }}
+            containerStyle={composerContainerStyle}
           />
         );
       },
-      [duration, inputStyle, isDarkMode, isRecording]
+      [composerContainerStyle, duration, inputStyle, isRecording]
     );
 
     const renderSend = useCallback(
