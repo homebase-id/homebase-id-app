@@ -72,7 +72,7 @@ export const useConversationsWithRecentMessage = () => {
           const messagesA = await queryClient.fetchInfiniteQuery({
             queryKey: ['chat-messages', conversationId],
             initialPageParam: undefined,
-            queryFn: () => getChatMessages(dotYouClient, conversationId as string, undefined, 100),
+            queryFn: () => getChatMessages(dotYouClient, conversationId as string, undefined, 100), // I know 100 seems a lot, but it's the same as the first pages on the chat detail screen; So we don't incorrectly fill the cache;
           });
           return {
             ...convo,

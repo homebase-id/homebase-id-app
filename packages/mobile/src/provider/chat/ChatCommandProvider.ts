@@ -164,10 +164,11 @@ const markChatAsRead = async (
   if (!recipients.filter(Boolean)?.length) return null;
 
   const chatMessages = await Promise.all(
-    Array.from(new Set(...chatGlobalTransIds)).map((msgId) =>
+    Array.from(new Set(chatGlobalTransIds)).map((msgId) =>
       getChatMessageByGlobalTransitId(dotYouClient, conversationId, msgId)
     )
   );
+
   const updateSuccess = await Promise.all(
     chatMessages
       // Only update messages from the current user
@@ -209,7 +210,7 @@ const markChatAsRead = async (
       })
   );
 
-  queryClient.invalidateQueries({ queryKey: ['chat-messages', conversationId] });
+  // queryClient.invalidateQueries({ queryKey: ['chat-messages', conversationId] });
   if (updateSuccess.every((success) => success)) return command.id;
 
   return null;
