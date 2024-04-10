@@ -18,6 +18,7 @@ import {
   Send,
   SendProps,
   Time,
+  User,
 } from 'react-native-gifted-chat';
 import { useCallback, memo, useMemo } from 'react';
 import {
@@ -349,6 +350,26 @@ export const ChatDetail = memo(
       [handleImageIconPress, imagesIcon]
     );
 
+    const renderUsername = useCallback(
+      (user: User) => {
+        if (user._id === identity || user._id === '') return null;
+        const color = getOdinIdColor(user._id as string);
+        return (
+          <Text
+            style={{
+              marginHorizontal: 10,
+              marginTop: 2,
+              fontSize: 14,
+              color: color.color(isDarkMode),
+            }}
+          >
+            <ConnectionName odinId={user.name} />
+          </Text>
+        );
+      },
+      [identity, isDarkMode]
+    );
+
     const inputContainerStyle: StyleProp<ViewStyle> = useMemo(() => {
       return [
         styles.inputContainer,
@@ -440,22 +461,7 @@ export const ChatDetail = memo(
         renderUsernameOnMessage={isGroup}
         renderAvatar={isGroup ? renderAvatar : null}
         renderInputToolbar={renderInputToolbar}
-        renderUsername={(user) => {
-          if (user._id === identity || user._id === '') return null;
-          const color = getOdinIdColor(user._id as string);
-          return (
-            <Text
-              style={{
-                marginHorizontal: 10,
-                marginTop: 2,
-                fontSize: 14,
-                color: color.color(isDarkMode),
-              }}
-            >
-              <ConnectionName odinId={user.name} />
-            </Text>
-          );
-        }}
+        renderUsername={renderUsername}
         user={{
           _id: identity || '',
         }}
