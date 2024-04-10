@@ -24,11 +24,11 @@ const styles = StyleSheet.create({
         paddingLeft: 4,
       },
     }),
-    // marginTop: Platform.select({
-    //   ios: 6,
-    //   android: 4,
-    //   web: 6,
-    // }),
+    marginTop: Platform.select({
+      ios: 4,
+      // android: 4,
+      // web: 6,
+    }),
     // marginBottom: Platform.select({
     //   ios: 5,
     //   android: 4,

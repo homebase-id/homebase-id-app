@@ -1,5 +1,6 @@
 import {
   Actions,
+  ActionsProps,
   Avatar,
   AvatarProps,
   Bubble,
@@ -264,7 +265,14 @@ export const ChatDetail = memo(
             {!props.text && (
               <Actions
                 icon={!isRecording ? microphoneIcon : crossIcon}
-                containerStyle={props.containerStyle}
+                containerStyle={[
+                  props.containerStyle,
+                  {
+                    justifyContent: 'center',
+                    paddingHorizontal: 20,
+                    paddingVertical: 12,
+                  },
+                ]}
                 onPressActionButton={async () => {
                   if (isRecording) {
                     await cancelRecording();
@@ -276,7 +284,7 @@ export const ChatDetail = memo(
               />
             )}
 
-            <View style={{ width: 12 }} />
+            <View style={{ width: 6 }} />
 
             {(props.text || assets?.length > 0 || isRecording) && (
               <Send
@@ -312,8 +320,15 @@ export const ChatDetail = memo(
     );
 
     const renderActions = useCallback(
-      () => (
+      (props: ActionsProps) => (
         <Actions
+          {...props}
+          containerStyle={[
+            props.containerStyle,
+            {
+              justifyContent: 'center',
+            },
+          ]}
           icon={imagesIcon}
           onPressActionButton={async () => {
             const medias = await launchImageLibrary({
@@ -400,6 +415,7 @@ export const ChatDetail = memo(
         onSend={doSend}
         infiniteScroll
         scrollToBottom
+        alwaysShowSend
         onLongPress={(e, _, m: ChatMessageIMessage) => onLongPress(e, m)}
         isKeyboardInternallyHandled={true}
         keyboardShouldPersistTaps="never"
