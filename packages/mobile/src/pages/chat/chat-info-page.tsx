@@ -1,5 +1,5 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, ViewStyle } from 'react-native';
 import { useConversation } from '../../hooks/chat/useConversation';
 import { Avatar, GroupAvatar, OwnerAvatar } from '../../components/Chat/Conversation-tile';
 import {
@@ -9,7 +9,7 @@ import {
 } from '../../provider/chat/ConversationProvider';
 import { Home } from '../../components/ui/Icons/icons';
 
-import { useCallback } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 
 import { Colors } from '../../app/Colors';
@@ -24,7 +24,7 @@ import { openURL } from '../../utils/utils';
 
 export type ChatInfoProp = NativeStackScreenProps<ChatStackParamList, 'ChatInfo'>;
 
-export function ChatInfoPage(prop: ChatInfoProp) {
+export const ChatInfoPage = memo((prop: ChatInfoProp) => {
   const { convoId: conversationId } = prop.route.params;
   const { data: conversation } = useConversation({ conversationId }).single;
   const { isDarkMode } = useDarkMode();
@@ -66,6 +66,26 @@ export function ChatInfoPage(prop: ChatInfoProp) {
     [conversationId, prop.navigation]
   );
 
+  const recipientGroupStyle = useMemo(() => {
+    return {
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'center',
+      alignContent: 'center',
+      backgroundColor: isDarkMode ? Colors.slate[900] : Colors.white,
+      width: '100%',
+      padding: 8,
+      paddingLeft: 0,
+      marginTop: 8,
+    } as ViewStyle;
+  }, [isDarkMode]);
+
+  const colorStyle = useMemo(() => {
+    return {
+      color: isDarkMode ? Colors.white : Colors.black,
+    };
+  }, [isDarkMode]);
+
   if (!conversation) return null;
 
   const conversationContent = conversation.fileMetadata.appData.content;
@@ -80,12 +100,12 @@ export function ChatInfoPage(prop: ChatInfoProp) {
       <View style={styles.content}>
         {!group ? (
           isSelf ? (
-            <OwnerAvatar style={styles.avatar} imageSize={{ width: 81, height: 81 }} />
+            <OwnerAvatar style={styles.avatar} imageSize={styles.largeAvatarSize} />
           ) : (
             <Avatar
               odinId={(conversationContent as SingleConversation).recipient}
               style={styles.avatar}
-              imageSize={{ width: 81, height: 81 }}
+              imageSize={styles.largeAvatarSize}
             />
           )
         ) : (
@@ -95,8 +115,8 @@ export function ChatInfoPage(prop: ChatInfoProp) {
           style={[
             styles.title,
             {
-              color: isDarkMode ? Colors.white : Colors.black,
-              marginTop: 24,
+              marginTop: group ? 0 : 24,
+              ...colorStyle,
             },
           ]}
         >
@@ -135,56 +155,32 @@ export function ChatInfoPage(prop: ChatInfoProp) {
           <View style={styles.groupRecipient}>
             <Text
               style={{
-                color: isDarkMode ? Colors.white : Colors.black,
                 fontSize: 22,
                 fontWeight: '500',
+                ...colorStyle,
               }}
             >
               Recipients
             </Text>
             {[...(conversationContent as GroupConversation).recipients, identity as string].map(
               (recipient, index) => (
-                <View
-                  key={index}
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    alignContent: 'center',
-                    backgroundColor: isDarkMode ? Colors.slate[900] : Colors.white,
-                    width: '100%',
-                    padding: 8,
-                    marginTop: 8,
-                  }}
-                >
+                <View key={index} style={recipientGroupStyle}>
                   {index === (conversationContent as GroupConversation).recipients.length ? (
-                    <OwnerAvatar
-                      style={{
-                        width: 50,
-                        height: 50,
-                      }}
-                    />
+                    <OwnerAvatar style={styles.mediumAvatarSize} />
                   ) : (
-                    <Avatar
-                      odinId={recipient}
-                      style={{
-                        width: 50,
-                        height: 50,
-                      }}
-                    />
+                    <Avatar odinId={recipient} style={styles.mediumAvatarSize} />
                   )}
                   <Text
                     style={[
                       {
                         fontWeight: '400',
                         fontSize: 18,
-                      },
-                      {
-                        color: isDarkMode ? Colors.white : Colors.black,
+                        marginLeft: 12,
+                        ...colorStyle,
                       },
                     ]}
                   >
-                    {recipient}
+                    <ConnectionName odinId={recipient} />
                     <Text style={styles.you}>
                       {index === (conversationContent as GroupConversation).recipients.length
                         ? ' (you)'
@@ -199,7 +195,7 @@ export function ChatInfoPage(prop: ChatInfoProp) {
       </View>
     </>
   );
-}
+});
 
 const styles = StyleSheet.create({
   content: {
@@ -214,6 +210,14 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     margin: 16,
   },
+  largeAvatarSize: {
+    width: 81,
+    height: 81,
+  },
+  mediumAvatarSize: {
+    width: 50,
+    height: 50,
+  },
   you: {
     fontSize: 16,
     color: Colors.slate[500],
@@ -226,8 +230,6 @@ const styles = StyleSheet.create({
   groupRecipient: {
     display: 'flex',
     flexDirection: 'column',
-    justifyContent: 'flex-start',
-    alignItems: 'flex-start',
     width: '100%',
     paddingTop: 24,
     paddingHorizontal: 16,

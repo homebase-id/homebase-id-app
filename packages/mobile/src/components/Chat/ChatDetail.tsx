@@ -177,24 +177,45 @@ export const ChatDetail = memo(
     const imagesIcon = useCallback(() => <Images />, []);
     const microphoneIcon = useCallback(() => <Microphone />, []);
     const crossIcon = useCallback(() => <Times />, []);
-    const cancelRecording = useCallback(async () => await stop(), [stop]);
 
-    const onStopRecording = useCallback(async () => {
-      const audioPath = await stop();
-      setAssets([
-        {
-          uri: audioPath,
-          type: 'audio/mp3',
-          fileName: 'recording',
-          fileSize: 0,
-          height: 0,
-          width: 0,
-          originalPath: audioPath,
-          timestamp: new Date().toUTCString(),
-          id: 'audio',
-        },
-      ] as Asset[]);
+    const onStopRecording = useCallback(() => {
+      requestAnimationFrame(async () => {
+        const audioPath = await stop();
+        setAssets([
+          {
+            uri: audioPath,
+            type: 'audio/mp3',
+            fileName: 'recording',
+            fileSize: 0,
+            height: 0,
+            width: 0,
+            originalPath: audioPath,
+            timestamp: new Date().toUTCString(),
+            id: 'audio',
+          },
+        ] as Asset[]);
+      });
     }, [setAssets, stop]);
+
+    const handleRecordButtonAction = useCallback(() => {
+      requestAnimationFrame(async () => {
+        if (isRecording) {
+          await stop();
+          return;
+        } else {
+          await record();
+        }
+      });
+    }, [stop, isRecording, record]);
+
+    const handleImageIconPress = useCallback(async () => {
+      const medias = await launchImageLibrary({
+        mediaType: 'mixed',
+        selectionLimit: 10,
+      });
+      if (medias.didCancel) return;
+      setAssets(medias.assets ?? []);
+    }, [setAssets]);
 
     const inputStyle = useMemo(
       () => ({
@@ -273,14 +294,7 @@ export const ChatDetail = memo(
                     paddingVertical: 12,
                   },
                 ]}
-                onPressActionButton={async () => {
-                  if (isRecording) {
-                    await cancelRecording();
-                    return;
-                  } else {
-                    await record();
-                  }
-                }}
+                onPressActionButton={handleRecordButtonAction}
               />
             )}
 
@@ -310,12 +324,11 @@ export const ChatDetail = memo(
       },
       [
         assets?.length,
-        cancelRecording,
         crossIcon,
+        handleRecordButtonAction,
         isRecording,
         microphoneIcon,
         onStopRecording,
-        record,
       ]
     );
 
@@ -330,17 +343,10 @@ export const ChatDetail = memo(
             },
           ]}
           icon={imagesIcon}
-          onPressActionButton={async () => {
-            const medias = await launchImageLibrary({
-              mediaType: 'mixed',
-              selectionLimit: 10,
-            });
-            if (medias.didCancel) return;
-            setAssets(medias.assets ?? []);
-          }}
+          onPressActionButton={handleImageIconPress}
         />
       ),
-      [imagesIcon, setAssets]
+      [handleImageIconPress, imagesIcon]
     );
 
     const inputContainerStyle: StyleProp<ViewStyle> = useMemo(() => {
