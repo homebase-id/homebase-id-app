@@ -4,7 +4,7 @@ import { PhotoWithLoader } from '../components/ui/Media/PhotoWithLoader';
 import { VideoWithLoader } from '../components/ui/Media/VideoWithLoader';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Dimensions, View } from 'react-native';
-import { useCallback, useMemo, useState } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 import Carousel from 'react-native-reanimated-carousel';
 import { OdinImage } from '../components/ui/OdinImage/OdinImage';
 import { useDarkMode } from '../hooks/useDarkMode';
@@ -15,7 +15,7 @@ import { CarouselRenderItemInfo } from 'react-native-reanimated-carousel/lib/typ
 
 export type MediaProp = NativeStackScreenProps<ChatStackParamList, 'PreviewMedia'>;
 
-export const PreviewMedia = (prop: MediaProp) => {
+export const PreviewMedia = memo((prop: MediaProp) => {
   const msg = prop.route.params.msg;
   const fileId = msg.fileId;
   const payloads = msg.fileMetadata.payloads;
@@ -142,4 +142,4 @@ export const PreviewMedia = (prop: MediaProp) => {
       )}
     </>
   );
-};
+});

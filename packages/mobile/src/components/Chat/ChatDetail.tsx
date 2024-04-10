@@ -1,5 +1,6 @@
 import {
   Actions,
+  ActionsProps,
   Avatar,
   AvatarProps,
   Bubble,
@@ -17,6 +18,7 @@ import {
   Send,
   SendProps,
   Time,
+  User,
 } from 'react-native-gifted-chat';
 import { useCallback, memo, useMemo } from 'react';
 import {
@@ -38,7 +40,7 @@ import { useAuth } from '../../hooks/auth/useAuth';
 import { useChatMessage } from '../../hooks/chat/useChatMessage';
 import { ChatDrive } from '../../provider/chat/ConversationProvider';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import { Colors } from '../../app/Colors';
+import { Colors, getOdinIdColor } from '../../app/Colors';
 import ReplyMessageBar from '../../components/Chat/Reply-Message-bar';
 import ChatMessageBox from '../../components/Chat/Chat-Message-box';
 import { OdinImage } from '../../components/ui/OdinImage/OdinImage';
@@ -176,24 +178,45 @@ export const ChatDetail = memo(
     const imagesIcon = useCallback(() => <Images />, []);
     const microphoneIcon = useCallback(() => <Microphone />, []);
     const crossIcon = useCallback(() => <Times />, []);
-    const cancelRecording = useCallback(async () => await stop(), [stop]);
 
-    const onStopRecording = useCallback(async () => {
-      const audioPath = await stop();
-      setAssets([
-        {
-          uri: audioPath,
-          type: 'audio/mp3',
-          fileName: 'recording',
-          fileSize: 0,
-          height: 0,
-          width: 0,
-          originalPath: audioPath,
-          timestamp: new Date().toUTCString(),
-          id: 'audio',
-        },
-      ] as Asset[]);
+    const onStopRecording = useCallback(() => {
+      requestAnimationFrame(async () => {
+        const audioPath = await stop();
+        setAssets([
+          {
+            uri: audioPath,
+            type: 'audio/mp3',
+            fileName: 'recording',
+            fileSize: 0,
+            height: 0,
+            width: 0,
+            originalPath: audioPath,
+            timestamp: new Date().toUTCString(),
+            id: 'audio',
+          },
+        ] as Asset[]);
+      });
     }, [setAssets, stop]);
+
+    const handleRecordButtonAction = useCallback(() => {
+      requestAnimationFrame(async () => {
+        if (isRecording) {
+          await stop();
+          return;
+        } else {
+          await record();
+        }
+      });
+    }, [stop, isRecording, record]);
+
+    const handleImageIconPress = useCallback(async () => {
+      const medias = await launchImageLibrary({
+        mediaType: 'mixed',
+        selectionLimit: 10,
+      });
+      if (medias.didCancel) return;
+      setAssets(medias.assets ?? []);
+    }, [setAssets]);
 
     const inputStyle = useMemo(
       () => ({
@@ -264,19 +287,19 @@ export const ChatDetail = memo(
             {!props.text && (
               <Actions
                 icon={!isRecording ? microphoneIcon : crossIcon}
-                containerStyle={props.containerStyle}
-                onPressActionButton={async () => {
-                  if (isRecording) {
-                    await cancelRecording();
-                    return;
-                  } else {
-                    await record();
-                  }
-                }}
+                containerStyle={[
+                  props.containerStyle,
+                  {
+                    justifyContent: 'center',
+                    paddingHorizontal: 20,
+                    paddingVertical: 12,
+                  },
+                ]}
+                onPressActionButton={handleRecordButtonAction}
               />
             )}
 
-            <View style={{ width: 12 }} />
+            <View style={{ width: 6 }} />
 
             {(props.text || assets?.length > 0 || isRecording) && (
               <Send
@@ -302,30 +325,49 @@ export const ChatDetail = memo(
       },
       [
         assets?.length,
-        cancelRecording,
         crossIcon,
+        handleRecordButtonAction,
         isRecording,
         microphoneIcon,
         onStopRecording,
-        record,
       ]
     );
 
     const renderActions = useCallback(
-      () => (
+      (props: ActionsProps) => (
         <Actions
+          {...props}
+          containerStyle={[
+            props.containerStyle,
+            {
+              justifyContent: 'center',
+            },
+          ]}
           icon={imagesIcon}
-          onPressActionButton={async () => {
-            const medias = await launchImageLibrary({
-              mediaType: 'mixed',
-              selectionLimit: 10,
-            });
-            if (medias.didCancel) return;
-            setAssets(medias.assets ?? []);
-          }}
+          onPressActionButton={handleImageIconPress}
         />
       ),
-      [imagesIcon, setAssets]
+      [handleImageIconPress, imagesIcon]
+    );
+
+    const renderUsername = useCallback(
+      (user: User) => {
+        if (user._id === identity || user._id === '') return null;
+        const color = getOdinIdColor(user._id as string);
+        return (
+          <Text
+            style={{
+              marginHorizontal: 10,
+              marginTop: 2,
+              fontSize: 14,
+              color: color.color(isDarkMode),
+            }}
+          >
+            <ConnectionName odinId={user.name} />
+          </Text>
+        );
+      },
+      [identity, isDarkMode]
     );
 
     const inputContainerStyle: StyleProp<ViewStyle> = useMemo(() => {
@@ -400,6 +442,7 @@ export const ChatDetail = memo(
         onSend={doSend}
         infiniteScroll
         scrollToBottom
+        alwaysShowSend
         onLongPress={(e, _, m: ChatMessageIMessage) => onLongPress(e, m)}
         isKeyboardInternallyHandled={true}
         keyboardShouldPersistTaps="never"
@@ -418,6 +461,7 @@ export const ChatDetail = memo(
         renderUsernameOnMessage={isGroup}
         renderAvatar={isGroup ? renderAvatar : null}
         renderInputToolbar={renderInputToolbar}
+        renderUsername={renderUsername}
         user={{
           _id: identity || '',
         }}

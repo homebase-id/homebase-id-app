@@ -288,3 +288,201 @@ export const Colors = {
     950: '#4c0519',
   },
 } as const;
+
+export interface OdinIdColorValue {
+  readonly lightTheme: string;
+  readonly darkTheme: string;
+  color(isDarkThemeEnabled: boolean): string;
+}
+
+const OdinIdColorValues: OdinIdColorValue[] = [
+  {
+    lightTheme: '#006da3',
+    darkTheme: '#00a7fa',
+    color: (isDark) => (isDark ? '#00a7fa' : '#006da3'),
+  },
+  {
+    lightTheme: '#007a3d',
+    darkTheme: '#00b85c',
+    color: (isDark) => (isDark ? '#00b85c' : '#007a3d'),
+  },
+  {
+    lightTheme: '#c13215',
+    darkTheme: '#ff6f52',
+    color: (isDark) => (isDark ? '#ff6f52' : '#c13215'),
+  },
+  {
+    lightTheme: '#b814b8',
+    darkTheme: '#f65af6',
+    color: (isDark) => (isDark ? '#f65af6' : '#b814b8'),
+  },
+  {
+    lightTheme: '#5b6976',
+    darkTheme: '#8ba1b6',
+    color: (isDark) => (isDark ? '#8ba1b6' : '#5b6976'),
+  },
+  {
+    lightTheme: '#3d7406',
+    darkTheme: '#5eb309',
+    color: (isDark) => (isDark ? '#5eb309' : '#3d7406'),
+  },
+  {
+    lightTheme: '#cc0066',
+    darkTheme: '#f76eb2',
+    color: (isDark) => (isDark ? '#f76eb2' : '#cc0066'),
+  },
+  {
+    lightTheme: '#2e51ff',
+    darkTheme: '#8599ff',
+    color: (isDark) => (isDark ? '#8599ff' : '#2e51ff'),
+  },
+  {
+    lightTheme: '#9c5711',
+    darkTheme: '#d5920b',
+    color: (isDark) => (isDark ? '#d5920b' : '#9c5711'),
+  },
+  {
+    lightTheme: '#007575',
+    darkTheme: '#00b2b2',
+    color: (isDark) => (isDark ? '#00b2b2' : '#007575'),
+  },
+  {
+    lightTheme: '#d00b4d',
+    darkTheme: '#ff6b9c',
+    color: (isDark) => (isDark ? '#ff6b9c' : '#d00b4d'),
+  },
+  {
+    lightTheme: '#8f2af4',
+    darkTheme: '#bf80ff',
+    color: (isDark) => (isDark ? '#bf80ff' : '#8f2af4'),
+  },
+  {
+    lightTheme: '#d00b0b',
+    darkTheme: '#ff7070',
+    color: (isDark) => (isDark ? '#ff7070' : '#d00b0b'),
+  },
+  {
+    lightTheme: '#067906',
+    darkTheme: '#0ab80a',
+    color: (isDark) => (isDark ? '#0ab80a' : '#067906'),
+  },
+  {
+    lightTheme: '#5151f6',
+    darkTheme: '#9494ff',
+    color: (isDark) => (isDark ? '#9494ff' : '#5151f6'),
+  },
+  {
+    lightTheme: '#866118',
+    darkTheme: '#d68f00',
+    color: (isDark) => (isDark ? '#d68f00' : '#866118'),
+  },
+  {
+    lightTheme: '#067953',
+    darkTheme: '#00b87a',
+    color: (isDark) => (isDark ? '#00b87a' : '#067953'),
+  },
+  {
+    lightTheme: '#a20ced',
+    darkTheme: '#cf7cf8',
+    color: (isDark) => (isDark ? '#cf7cf8' : '#a20ced'),
+  },
+  {
+    lightTheme: '#4b7000',
+    darkTheme: '#74ad00',
+    color: (isDark) => (isDark ? '#74ad00' : '#4b7000'),
+  },
+  {
+    lightTheme: '#c70a88',
+    darkTheme: '#f76ec9',
+    color: (isDark) => (isDark ? '#f76ec9' : '#c70a88'),
+  },
+  {
+    lightTheme: '#b34209',
+    darkTheme: '#f57a3d',
+    color: (isDark) => (isDark ? '#f57a3d' : '#b34209'),
+  },
+  {
+    lightTheme: '#06792d',
+    darkTheme: '#0ab844',
+    color: (isDark) => (isDark ? '#0ab844' : '#06792d'),
+  },
+  {
+    lightTheme: '#7a3df5',
+    darkTheme: '#af8af9',
+    color: (isDark) => (isDark ? '#af8af9' : '#7a3df5'),
+  },
+  {
+    lightTheme: '#6b6b24',
+    darkTheme: '#a4a437',
+    color: (isDark) => (isDark ? '#a4a437' : '#6b6b24'),
+  },
+  {
+    lightTheme: '#d00b2c',
+    darkTheme: '#f77389',
+    color: (isDark) => (isDark ? '#f77389' : '#d00b2c'),
+  },
+  {
+    lightTheme: '#2d7906',
+    darkTheme: '#42b309',
+    color: (isDark) => (isDark ? '#42b309' : '#2d7906'),
+  },
+  {
+    lightTheme: '#af0bd0',
+    darkTheme: '#e06ef7',
+    color: (isDark) => (isDark ? '#e06ef7' : '#af0bd0'),
+  },
+  {
+    lightTheme: '#32763e',
+    darkTheme: '#4baf5c',
+    color: (isDark) => (isDark ? '#4baf5c' : '#32763e'),
+  },
+  {
+    lightTheme: '#2662d9',
+    darkTheme: '#7da1e8',
+    color: (isDark) => (isDark ? '#7da1e8' : '#2662d9'),
+  },
+  {
+    lightTheme: '#76681e',
+    darkTheme: '#b89b0a',
+    color: (isDark) => (isDark ? '#b89b0a' : '#76681e'),
+  },
+  {
+    lightTheme: '#067462',
+    darkTheme: '#09b397',
+    color: (isDark) => (isDark ? '#09b397' : '#067462'),
+  },
+  {
+    lightTheme: '#6447f5',
+    darkTheme: '#a18ff9',
+    color: (isDark) => (isDark ? '#a18ff9' : '#6447f5'),
+  },
+  {
+    lightTheme: '#5e6e0c',
+    darkTheme: '#8faa09',
+    color: (isDark) => (isDark ? '#8faa09' : '#5e6e0c'),
+  },
+  {
+    lightTheme: '#077288',
+    darkTheme: '#00aed1',
+    color: (isDark) => (isDark ? '#00aed1' : '#077288'),
+  },
+  {
+    lightTheme: '#c20aa3',
+    darkTheme: '#f75fdd',
+    color: (isDark) => (isDark ? '#f75fdd' : '#c20aa3'),
+  },
+  {
+    lightTheme: '#2d761e',
+    darkTheme: '#43b42d',
+    color: (isDark) => (isDark ? '#43b42d' : '#2d761e'),
+  },
+];
+
+export function getOdinIdColor(odinId: string): OdinIdColorValue {
+  let c = 0;
+  for (let i = 0; i < odinId.length; i++) {
+    // eslint-disable-next-line no-bitwise
+    c = c ^ odinId.charCodeAt(i);
+  }
+  return OdinIdColorValues[c % OdinIdColorValues.length];
+}
