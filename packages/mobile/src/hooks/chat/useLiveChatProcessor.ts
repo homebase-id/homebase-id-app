@@ -1,7 +1,6 @@
 import { InfiniteData, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   HomebaseFile,
-  Notify,
   ReceivedCommand,
   TypedConnectionNotification,
   getCommands,
@@ -27,9 +26,12 @@ import { useAuth } from '../auth/useAuth';
 import {
   ChatDrive,
   Conversation,
+  ConversationFileType,
+  GroupConversationFileType,
   JOIN_CONVERSATION_COMMAND,
   JOIN_GROUP_CONVERSATION_COMMAND,
   UPDATE_GROUP_CONVERSATION_COMMAND,
+  dsrToConversation,
 } from '../../provider/chat/ConversationProvider';
 import { ChatReactionFileType } from '../../provider/chat/ChatReactionProvider';
 
@@ -177,6 +179,65 @@ const useChatWebsocket = (isEnabled: boolean) => {
         } else if (notification.header.fileMetadata.appData.fileType === ChatReactionFileType) {
           const messageId = notification.header.fileMetadata.appData.groupId;
           queryClient.invalidateQueries({ queryKey: ['chat-reaction', messageId] });
+        } else if (
+          notification.header.fileMetadata.appData.fileType === ConversationFileType ||
+          notification.header.fileMetadata.appData.fileType === GroupConversationFileType
+        ) {
+          const isNewFile = notification.notificationType === 'fileAdded';
+
+          const updatedConversation = await dsrToConversation(
+            dotYouClient,
+            notification.header,
+            ChatDrive,
+            true
+          );
+
+          if (
+            !updatedConversation ||
+            Object.keys(updatedConversation.fileMetadata.appData.content).length === 0
+          ) {
+            queryClient.invalidateQueries({ queryKey: ['conversations'] });
+            return;
+          }
+
+          const extistingConversations = queryClient.getQueryData<
+            InfiniteData<{
+              searchResults: HomebaseFile<Conversation>[];
+              cursorState: string;
+              queryTime: number;
+              includeMetadataHeader: boolean;
+            }>
+          >(['conversations']);
+
+          if (extistingConversations) {
+            const newData = {
+              ...extistingConversations,
+              pages: extistingConversations.pages.map((page, index) => ({
+                ...page,
+                searchResults: isNewFile
+                  ? index === 0
+                    ? [
+                        updatedConversation,
+                        // There shouldn't be any duplicates for a fileAdded, but just in case
+                        ...page.searchResults.filter(
+                          (msg) => !stringGuidsEqual(msg?.fileId, updatedConversation.fileId)
+                        ),
+                      ]
+                    : page.searchResults.filter(
+                        (msg) => !stringGuidsEqual(msg?.fileId, updatedConversation.fileId)
+                      ) // There shouldn't be any duplicates for a fileAdded, but just in case
+                  : page.searchResults.map((conversation) =>
+                      stringGuidsEqual(
+                        conversation.fileMetadata.appData.uniqueId,
+                        updatedConversation.fileMetadata.appData.uniqueId
+                      )
+                        ? updatedConversation
+                        : conversation
+                    ),
+              })),
+            };
+            queryClient.setQueryData(['conversations'], newData);
+          }
         } else if (
           [
             JOIN_CONVERSATION_COMMAND,
