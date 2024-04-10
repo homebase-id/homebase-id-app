@@ -39,7 +39,7 @@ import { useAuth } from '../../hooks/auth/useAuth';
 import { useChatMessage } from '../../hooks/chat/useChatMessage';
 import { ChatDrive } from '../../provider/chat/ConversationProvider';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import { Colors } from '../../app/Colors';
+import { Colors, getOdinIdColor } from '../../app/Colors';
 import ReplyMessageBar from '../../components/Chat/Reply-Message-bar';
 import ChatMessageBox from '../../components/Chat/Chat-Message-box';
 import { OdinImage } from '../../components/ui/OdinImage/OdinImage';
@@ -440,6 +440,22 @@ export const ChatDetail = memo(
         renderUsernameOnMessage={isGroup}
         renderAvatar={isGroup ? renderAvatar : null}
         renderInputToolbar={renderInputToolbar}
+        renderUsername={(user) => {
+          if (user._id === identity || user._id === '') return null;
+          const color = getOdinIdColor(user._id as string);
+          return (
+            <Text
+              style={{
+                marginHorizontal: 10,
+                marginTop: 2,
+                fontSize: 14,
+                color: color.color(isDarkMode),
+              }}
+            >
+              <ConnectionName odinId={user.name} />
+            </Text>
+          );
+        }}
         user={{
           _id: identity || '',
         }}

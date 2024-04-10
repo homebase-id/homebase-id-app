@@ -106,7 +106,7 @@ const styles = {
       marginRight: 10,
     },
     username: {
-      top: -3,
+      top: 0,
       left: 0,
       fontSize: 12,
       backgroundColor: 'transparent',
@@ -584,6 +584,7 @@ export default class Bubble<
             {...this.props.touchableProps}
           >
             <View>
+              {this.renderUsername()}
               {this.renderBubbleContent()}
               <View
                 style={[
@@ -592,7 +593,6 @@ export default class Bubble<
                   renderedReactions && { paddingBottom: 8 },
                 ]}
               >
-                {this.renderUsername()}
                 {this.renderTime()}
                 {this.renderTicks()}
               </View>
