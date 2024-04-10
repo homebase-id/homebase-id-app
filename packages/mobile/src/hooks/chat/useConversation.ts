@@ -68,12 +68,14 @@ export const useConversation = (props?: { conversationId?: string | undefined })
   };
 
   const fetchSingleConversation = async (dotYouClient: DotYouClient, conversationId: string) => {
-    const queryData = queryClient.getQueryData<InfiniteData<{
+    const queryData = queryClient.getQueryData<
+      InfiniteData<{
         searchResults: HomebaseFile<Conversation>[];
         cursorState: string;
         queryTime: number;
         includeMetadataHeader: boolean;
-    }>>(['conversations']);
+      }>
+    >(['conversations']);
 
     const conversationFromCache = queryData?.pages
       .flatMap((page) => page.searchResults)

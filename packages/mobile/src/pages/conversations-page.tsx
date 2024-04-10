@@ -3,7 +3,10 @@ import ConversationTile from '../components/Chat/Conversation-tile';
 
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { ChatStackParamList } from '../app/App';
-import { ConversationWithRecentMessage, useConversations } from '../hooks/chat/useConversations';
+import {
+  ConversationWithRecentMessage,
+  useConversationsWithRecentMessage,
+} from '../hooks/chat/useConversations';
 import {
   ConversationWithYourselfId,
   GroupConversation,
@@ -26,15 +29,7 @@ import { ErrorBoundary } from '../components/ui/ErrorBoundary/ErrorBoundary';
 type ConversationProp = NativeStackScreenProps<ChatStackParamList, 'Conversation'>;
 
 export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
-  const { data: conversations } = useConversations().all;
-  const flatConversations = useMemo(
-    () =>
-      conversations?.pages
-        ?.flatMap((page) => page.searchResults)
-        .filter((convo) => [0, undefined].includes(convo.fileMetadata.appData.archivalStatus)) ||
-      [],
-    [conversations]
-  );
+  const { data: conversations } = useConversationsWithRecentMessage().all;
 
   const [query, setQuery] = useState<string | undefined>(undefined);
   const { isDarkMode } = useDarkMode();
@@ -84,7 +79,7 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
   if (isQueryActive) {
     return (
       <ErrorBoundary>
-        <SearchConversationResults query={query} conversations={flatConversations} />
+        <SearchConversationResults query={query} conversations={conversations} />
       </ErrorBoundary>
     );
   }
@@ -93,7 +88,7 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
     <ErrorBoundary>
       <RemoveNotifications />
       <FlatList
-        data={flatConversations}
+        data={conversations}
         keyExtractor={keyExtractor}
         ListHeaderComponent={ConversationTileWithYourself}
         contentInsetAdjustmentBehavior="automatic"
