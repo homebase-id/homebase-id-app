@@ -656,11 +656,13 @@ const RenderBubble = memo(
 );
 
 const RenderReplyMessageView = memo((props: BubbleProps<ChatMessageIMessage>) => {
-  const replyMessage = useChatMessage({
+  const { data: replyMessage } = useChatMessage({
     messageId: props.currentMessage?.fileMetadata.appData.content.replyId,
-  }).get.data;
+  }).get;
   const { isDarkMode } = useDarkMode();
-  if (!replyMessage) return null;
+
+  if (!props.currentMessage?.fileMetadata.appData.content.replyId) return null;
+
   return (
     props.currentMessage &&
     props.currentMessage.fileMetadata.appData.content.replyId && (
@@ -674,28 +676,42 @@ const RenderReplyMessageView = memo((props: BubbleProps<ChatMessageIMessage>) =>
         ]}
       >
         <View style={styles.replyText}>
-          <Text
-            style={{
-              fontWeight: '600',
-              fontSize: 15,
-              color: isDarkMode ? Colors.slate[300] : Colors.slate[900],
-            }}
-          >
-            {replyMessage?.fileMetadata.senderOdinId?.length > 0 ? (
-              <ConnectionName odinId={replyMessage?.fileMetadata.senderOdinId} />
-            ) : (
-              'You'
-            )}
-          </Text>
-          <Text
-            style={{
-              fontSize: 14,
-              marginTop: 4,
-              color: isDarkMode ? Colors.slate[300] : Colors.slate[900],
-            }}
-          >
-            {replyMessage?.fileMetadata.appData.content.message || 'Media 📸'}
-          </Text>
+          {replyMessage ? (
+            <>
+              <Text
+                style={{
+                  fontWeight: '600',
+                  fontSize: 15,
+                  color: isDarkMode ? Colors.slate[300] : Colors.slate[900],
+                }}
+              >
+                {replyMessage?.fileMetadata.senderOdinId?.length > 0 ? (
+                  <ConnectionName odinId={replyMessage?.fileMetadata.senderOdinId} />
+                ) : (
+                  'You'
+                )}
+              </Text>
+              <Text
+                style={{
+                  fontSize: 14,
+                  marginTop: 4,
+                  color: isDarkMode ? Colors.slate[300] : Colors.slate[900],
+                }}
+              >
+                {replyMessage?.fileMetadata.appData.content.message || 'Media 📸'}
+              </Text>
+            </>
+          ) : (
+            <Text
+              style={{
+                fontSize: 14,
+                fontStyle: 'italic',
+                color: isDarkMode ? Colors.slate[400] : Colors.slate[600],
+              }}
+            >
+              Message not found
+            </Text>
+          )}
         </View>
         {replyMessage && replyMessage.fileMetadata.payloads?.length > 0 && (
           <OdinImage
