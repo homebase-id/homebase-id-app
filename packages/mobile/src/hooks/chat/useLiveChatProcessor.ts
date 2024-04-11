@@ -15,7 +15,7 @@ import { useNotificationSubscriber } from '../useNotificationSubscriber';
 import { useCallback, useEffect, useRef } from 'react';
 
 import { stringGuidsEqual, tryJsonParse } from '@youfoundation/js-lib/helpers';
-import { getSingleConversation, useConversation } from './useConversation';
+import { getConversationQueryOptions, useConversation } from './useConversation';
 import { processCommand } from '../../provider/chat/ChatCommandProvider';
 import { useDotYouClientContext } from 'feed-app-common';
 import {
@@ -144,10 +144,9 @@ const useChatWebsocket = (isEnabled: boolean) => {
 
           if (isNewFile) {
             // Check if the message is orphaned from a conversation
-            const conversation = await queryClient.fetchQuery<HomebaseFile<Conversation> | null>({
-              queryKey: ['conversation', conversationId],
-              queryFn: () => getSingleConversation(dotYouClient, conversationId),
-            });
+            const conversation = await queryClient.fetchQuery(
+              getConversationQueryOptions(dotYouClient, queryClient, conversationId)
+            );
 
             if (!conversation) {
               console.error('Orphaned message received', notification.header.fileId, conversation);
