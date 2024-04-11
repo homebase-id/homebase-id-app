@@ -404,13 +404,17 @@ export const ChatDetail = memo(
       if (!odinId) {
         return (
           <Avatar
+            {...prop}
             renderAvatar={(_: Omit<AvatarProps<ChatMessageIMessage>, 'renderAvatar'>) => {
               return (
                 <OwnerAvatar
+                  imageSize={{
+                    width: 30,
+                    height: 30,
+                  }}
                   style={{
                     width: 30,
                     height: 30,
-                    marginRight: 0,
                   }}
                 />
               );
@@ -420,14 +424,20 @@ export const ChatDetail = memo(
       }
       return (
         <Avatar
+          {...prop}
           renderAvatar={(_: Omit<AvatarProps<ChatMessageIMessage>, 'renderAvatar'>) => {
             return (
               <AppAvatar
                 odinId={odinId}
-                style={{
+                imageSize={{
                   width: 30,
                   height: 30,
-                  marginRight: 0,
+                }}
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: 18,
+                  backgroundColor: 'red',
                 }}
               />
             );
