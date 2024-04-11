@@ -132,5 +132,5 @@ export const getChatMessageInfiniteQueryOptions: (
       ? lastPage.cursorState
       : undefined,
   enabled: !!conversationId,
-  staleTime: 1000 * 60 * 5, // 5 minute; The chat messages are already invalidated by the websocket; But that fails often atm
+  staleTime: 1000 * 60 * 60, // 1 hour
 });
