@@ -3,7 +3,7 @@ import { focusManager, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useCallback } from 'react';
 import { AppState } from 'react-native';
 
-export const useRefreshOnFocus = () => {
+export const useRefetchOnFocus = () => {
   const firstTimeRef = useRef(true);
 
   // Alternative focus effect for React-Native
