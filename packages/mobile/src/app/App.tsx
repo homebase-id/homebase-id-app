@@ -151,6 +151,8 @@ const INCLUDED_QUERY_KEYS = [
 
   // Big data (base64 uri's)
   // 'tinyThumb',
+
+  'processInbox',
 ];
 const persistOptions: Omit<PersistQueryClientOptions, 'queryClient'> = {
   buster: '202404',
@@ -463,6 +465,7 @@ const ProfileAvatar = () => {
           position: 'absolute',
           bottom: 0,
           right: 0,
+          zIndex: 15,
         }}
       />
     </View>
@@ -482,6 +485,7 @@ const OfflineProfileAvatar = () => {
           position: 'absolute',
           bottom: 0,
           right: 0,
+          zIndex: 15,
         }}
       />
     </View>

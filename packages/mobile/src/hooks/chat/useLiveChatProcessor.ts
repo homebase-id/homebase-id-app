@@ -59,36 +59,48 @@ const useInboxProcessor = (connected?: boolean) => {
   const queryClient = useQueryClient();
 
   const fetchData = async () => {
-    const preProcessCursor = getQueryModifiedCursorFromTime(new Date().getTime());
+    // Need to find a timestamp from the last time we processed the inbox?
+    const lastProcessedTime = queryClient.getQueryState(['processInbox'])?.dataUpdatedAt;
+
+    const preProcessCursor = lastProcessedTime
+      ? getQueryModifiedCursorFromTime(lastProcessedTime - MINUTE_IN_MS * 5)
+      : undefined;
+
     const processedresult = await processInbox(dotYouClient, ChatDrive, 2000);
 
-    const newData = await queryModified(
-      dotYouClient,
-      {
-        targetDrive: ChatDrive,
-      },
-      {
-        maxRecords: 2000,
-        cursor: preProcessCursor,
-      }
-    );
-    const newMessages = newData.searchResults.filter(
-      (dsr) => dsr.fileMetadata.appData.fileType === ChatMessageFileType
-    );
-    new Set(newMessages.map((msg) => msg.fileMetadata.appData.groupId)).forEach(
-      (conversationId) => {
-        // Remove all but the first page, so when we refetch we don't fetch extra pages
-        queryClient.setQueryData(
-          ['chat-messages', conversationId],
-          (data: InfiniteData<unknown, unknown>) => ({
-            pages: data.pages.slice(0, 1),
-            pageParams: data.pageParams.slice(0, 1),
-          })
-        );
+    if (preProcessCursor) {
+      const newData = await queryModified(
+        dotYouClient,
+        {
+          targetDrive: ChatDrive,
+        },
+        {
+          maxRecords: 2000,
+          cursor: preProcessCursor,
+        }
+      );
+      const newMessages = newData.searchResults.filter(
+        (dsr) => dsr.fileMetadata.appData.fileType === ChatMessageFileType
+      );
 
-        queryClient.invalidateQueries({ queryKey: ['chat-messages', conversationId] });
-      }
-    );
+      new Set(newMessages.map((msg) => msg.fileMetadata.appData.groupId)).forEach(
+        (conversationId) => {
+          // Remove all but the first page, so when we refetch we don't fetch extra pages
+          queryClient.setQueryData(
+            ['chat-messages', conversationId],
+            (data: InfiniteData<unknown, unknown>) => ({
+              pages: data.pages.slice(0, 1),
+              pageParams: data.pageParams.slice(0, 1),
+            })
+          );
+
+          queryClient.invalidateQueries({ queryKey: ['chat-messages', conversationId] });
+        }
+      );
+    } else {
+      // We have no reference to the last time we processed the inbox, so we can only invalidate all chat messages
+      queryClient.invalidateQueries({ queryKey: ['chat-messages'], exact: false });
+    }
 
     return processedresult;
   };
@@ -96,10 +108,10 @@ const useInboxProcessor = (connected?: boolean) => {
   return useQuery({
     queryKey: ['processInbox'],
     queryFn: fetchData,
-    refetchOnMount: false,
+    // refetchOnMount: false,
     // We want to refetch on window focus, as we might have missed some messages while the window was not focused and the websocket might have lost connection
-    refetchOnWindowFocus: true,
-    staleTime: MINUTE_IN_MS * 5,
+    // refetchOnWindowFocus: true,
+    // staleTime: MINUTE_IN_MS * 5,
     enabled: connected,
   });
 };
