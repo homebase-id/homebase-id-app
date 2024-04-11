@@ -47,7 +47,8 @@ import { ConnectionRequestsPage } from '../pages/home/connection-requests-page';
 import { useDarkMode } from '../hooks/useDarkMode';
 import { HomebaseFile, EmbeddedThumb } from '@youfoundation/js-lib/core';
 import { ChatMessage } from '../provider/chat/ChatProvider';
-import { useRefreshOnFocus } from '../hooks/chat/useRefetchOnFocus';
+import { useRefetchOnFocus } from '../hooks/platform/useRefetchOnFocus';
+import { useOnlineManager } from '../hooks/platform/useOnlineManager';
 import { PushNotificationProvider } from '../components/push-notification/PushNotificationProvider';
 import { useAuthenticatedPushNotification } from '../hooks/push-notification/useAuthenticatedPushNotification';
 import Toast from 'react-native-toast-message';
@@ -241,7 +242,8 @@ const AuthenticatedRoot = memo(() => {
 const AppStackScreen = memo(() => {
   // CHECK: Re-renders a lot because of all the hooks, is it faster to move them in a separate component?
   useValidTokenCheck();
-  useRefreshOnFocus();
+  useRefetchOnFocus();
+  useOnlineManager();
   useAuthenticatedPushNotification();
   useInitialPushNotification();
 
