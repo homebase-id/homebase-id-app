@@ -279,7 +279,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
                 ? identity || ''
                 : (conversation?.fileMetadata.appData.content as SingleConversation).recipient
             }
-            goBack={selectedMessage ? dismissSelectedMessage : navigation.goBack}
+            goBack={selectedMessage.selectedMessage ? dismissSelectedMessage : navigation.goBack}
             onPress={() => navigation.navigate('ChatInfo', { convoId: route.params.convoId })}
             isSelf={route.params.convoId === ConversationWithYourselfId}
             selectedMessage={selectedMessage?.selectedMessage}
