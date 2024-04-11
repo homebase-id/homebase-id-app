@@ -4,12 +4,11 @@ import { Message, MessageProps, isSameUser, isSameDay } from 'react-native-gifte
 import { ChatMessageIMessage } from './ChatDetail';
 import { Info, Reply } from '../ui/Icons/icons';
 import { ChatDeletedArchivalStaus } from '../../provider/chat/ChatProvider';
-import { memo } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 
 type ChatMessageBoxProps = {
   setReplyOnSwipeOpen: (message: ChatMessageIMessage) => void;
   onLeftSwipeOpen: (message: ChatMessageIMessage) => void;
-
   onMessageLayout?: (e: LayoutChangeEvent) => void;
 } & MessageProps<ChatMessageIMessage>;
 
@@ -71,18 +70,24 @@ const ChatMessageBox = memo(({ setReplyOnSwipeOpen, ...props }: ChatMessageBoxPr
     );
   };
 
-  const onSwipeOpenAction = (direction: 'left' | 'right', swipeable: Swipeable) => {
-    if (props.currentMessage && direction === 'right') {
-      setReplyOnSwipeOpen({ ...props.currentMessage });
-      swipeable.close();
-    } else {
-      props.currentMessage && props.onLeftSwipeOpen({ ...props.currentMessage });
-      swipeable.close();
-    }
-  };
-  const enabled =
-    props.currentMessage &&
-    props.currentMessage.fileMetadata.appData.archivalStatus !== ChatDeletedArchivalStaus;
+  const onSwipeOpenAction = useCallback(
+    (direction: 'left' | 'right', swipeable: Swipeable) => {
+      if (props.currentMessage && direction === 'right') {
+        setReplyOnSwipeOpen({ ...props.currentMessage });
+        swipeable.close();
+      } else {
+        props.currentMessage && props.onLeftSwipeOpen({ ...props.currentMessage });
+        swipeable.close();
+      }
+    },
+    [props, setReplyOnSwipeOpen]
+  );
+  const enabled = useMemo(
+    () =>
+      props.currentMessage &&
+      props.currentMessage.fileMetadata.appData.archivalStatus !== ChatDeletedArchivalStaus,
+    [props.currentMessage]
+  );
 
   return (
     <Swipeable
