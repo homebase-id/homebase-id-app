@@ -244,7 +244,6 @@ const AppStackScreen = memo(() => {
   // CHECK: Re-renders a lot because of all the hooks, is it faster to move them in a separate component?
   useValidTokenCheck();
   useRefreshOnFocus();
-  useLiveChatProcessor();
   useAuthenticatedPushNotification();
   useInitialPushNotification();
 
@@ -333,6 +332,7 @@ const ProfileStack = () => {
 const StackChat = createNativeStackNavigator<ChatStackParamList>();
 const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) => {
   const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
+  const isOnline = useLiveChatProcessor();
 
   const headerRight = useCallback(() => {
     return HeaderActions({
@@ -363,7 +363,7 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
           title: 'Chats',
           headerShown: true,
           headerTitleAlign: 'left',
-          headerLeft: ProfileAvatar,
+          headerLeft: isOnline ? ProfileAvatar : OfflineProfileAvatar,
           headerRight: headerRight,
           headerSearchBarOptions: {
             shouldShowHintSearchIcon: true,
@@ -452,8 +452,38 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
 
 const ProfileAvatar = () => {
   return (
-    <View style={{ marginRight: Platform.OS === 'android' ? 16 : 0 }}>
+    <View style={{ marginRight: Platform.OS === 'android' ? 16 : 0, position: 'relative' }}>
       <OwnerAvatar imageSize={{ width: 30, height: 30 }} style={{ borderRadius: 30 / 2 }} />
+      <View
+        style={{
+          width: 8,
+          height: 8,
+          borderRadius: 4,
+          backgroundColor: Colors.green[500],
+          position: 'absolute',
+          bottom: 0,
+          right: 0,
+        }}
+      />
+    </View>
+  );
+};
+
+const OfflineProfileAvatar = () => {
+  return (
+    <View style={{ marginRight: Platform.OS === 'android' ? 16 : 0, position: 'relative' }}>
+      <OwnerAvatar imageSize={{ width: 30, height: 30 }} style={{ borderRadius: 30 / 2 }} />
+      <View
+        style={{
+          width: 8,
+          height: 8,
+          borderRadius: 4,
+          backgroundColor: Colors.red[500],
+          position: 'absolute',
+          bottom: 0,
+          right: 0,
+        }}
+      />
     </View>
   );
 };
