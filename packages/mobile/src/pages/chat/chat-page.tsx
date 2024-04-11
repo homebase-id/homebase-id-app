@@ -34,6 +34,12 @@ import { ErrorBoundary } from '../../components/ui/ErrorBoundary/ErrorBoundary';
 import { ChatStackParamList } from '../../app/App';
 import { NoConversationHeader } from '../../components/Chat/NoConversationHeader';
 
+export type SelectedMessageState = {
+  messageCordinates: { x: number; y: number };
+  selectedMessage: ChatMessageIMessage | undefined;
+  showChatReactionPopup: boolean;
+};
+
 export type ChatProp = NativeStackScreenProps<ChatStackParamList, 'ChatScreen'>;
 const ChatPage = memo(({ route, navigation }: ChatProp) => {
   const insets = useSafeAreaInsets();
@@ -100,17 +106,33 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
 
   const isGroup = conversation && 'recipients' in conversation.fileMetadata.appData.content;
 
-  const [messageCordinates, setMessageCordinates] = useState({ x: 0, y: 0 });
-  const [selectedMessage, setSelectedMessage] = useState<ChatMessageIMessage | undefined>();
+  // const [messageCordinates, setMessageCordinates] = useState({ x: 0, y: 0 });
+
+  const initalSelectedMessageState: SelectedMessageState = useMemo(
+    () => ({
+      messageCordinates: { x: 0, y: 0 },
+      selectedMessage: undefined,
+      showChatReactionPopup: false,
+    }),
+    []
+  );
+  const [selectedMessage, setSelectedMessage] = useState<SelectedMessageState>(
+    initalSelectedMessageState
+  );
+  // const [showChatReactionPopup, setshowChatReactionPopup] = useState(true);
 
   const doSelectMessage = useCallback(
     ({ coords, message }: { coords: { x: number; y: number }; message: ChatMessageIMessage }) => {
       if (message && message.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus) {
         return;
       }
-      setMessageCordinates(coords);
-      setSelectedMessage(message);
-      setshowChatReactionPopup(true);
+      // setMessageCordinates(coords);
+      setSelectedMessage({
+        messageCordinates: coords,
+        selectedMessage: message,
+        showChatReactionPopup: true,
+      });
+      // setshowChatReactionPopup(true);
     },
     []
   );
@@ -209,11 +231,10 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
 
   const openEmojiModal = useCallback(() => {
     emojiPickerSheetModalRef.current?.present();
-    setshowChatReactionPopup(false);
-  }, []);
+    setSelectedMessage({ ...selectedMessage, showChatReactionPopup: false });
+  }, [selectedMessage]);
 
   const [selectedReactionMessage, setSelectedReactionMessage] = useState<ChatMessageIMessage>();
-  const [showChatReactionPopup, setshowChatReactionPopup] = useState(true);
 
   const openReactionModal = useCallback((message: ChatMessageIMessage) => {
     setSelectedReactionMessage(message);
@@ -223,14 +244,18 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
   const dismissSelectedMessage = useCallback(() => {
     emojiPickerSheetModalRef.current?.dismiss();
     reactionModalRef.current?.dismiss();
-    setSelectedMessage(undefined);
-  }, []);
+    if (selectedMessage !== initalSelectedMessageState) {
+      setSelectedMessage(initalSelectedMessageState);
+    }
+  }, [initalSelectedMessageState, selectedMessage]);
+
+  const dismissReaction = useCallback(() => {
+    setSelectedMessage(initalSelectedMessageState);
+  }, [initalSelectedMessageState]);
 
   if (!conversation) {
     if (isLoadingConversation) return null;
-    return (
-      <NoConversationHeader title="No conversation found" goBack={navigation.goBack}/>
-    );
+    return <NoConversationHeader title="No conversation found" goBack={navigation.goBack} />;
   }
 
   return (
@@ -257,11 +282,11 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
             goBack={selectedMessage ? dismissSelectedMessage : navigation.goBack}
             onPress={() => navigation.navigate('ChatInfo', { convoId: route.params.convoId })}
             isSelf={route.params.convoId === ConversationWithYourselfId}
-            selectedMessage={selectedMessage}
+            selectedMessage={selectedMessage?.selectedMessage}
             selectedMessageActions={{
               onCopy: () => {
                 if (selectedMessage) {
-                  const message = selectedMessage.text;
+                  const message = selectedMessage.selectedMessage?.text;
                   if (message) {
                     Clipboard.setString(message);
                     Toast.show({
@@ -271,33 +296,33 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
                       position: 'bottom',
                     });
                   }
-                  setSelectedMessage(undefined);
+                  setSelectedMessage(initalSelectedMessageState);
                 }
               },
               onDelete: () => {
-                if (selectedMessage && conversation) {
+                if (selectedMessage?.selectedMessage && conversation) {
                   console.log(
                     'Delete Message',
-                    selectedMessage.fileMetadata.appData.archivalStatus
+                    selectedMessage.selectedMessage?.fileMetadata.appData.archivalStatus
                   );
                   deleteMessage({
                     conversation: conversation,
-                    messages: [selectedMessage],
+                    messages: [selectedMessage.selectedMessage],
                     deleteForEveryone: true,
                   });
-                  setSelectedMessage(undefined);
+                  setSelectedMessage(initalSelectedMessageState);
                 }
               },
               onReply: () => {
-                if (selectedMessage) {
-                  setReplyMessage(selectedMessage);
-                  setSelectedMessage(undefined);
+                if (selectedMessage?.selectedMessage) {
+                  setReplyMessage(selectedMessage.selectedMessage);
+                  setSelectedMessage(initalSelectedMessageState);
                 }
               },
               onInfo: () => {
-                if (selectedMessage) {
-                  doOpenMessageInfo(selectedMessage);
-                  setSelectedMessage(undefined);
+                if (selectedMessage?.selectedMessage) {
+                  doOpenMessageInfo(selectedMessage.selectedMessage);
+                  setSelectedMessage(initalSelectedMessageState);
                 }
               },
             }}
@@ -328,18 +353,16 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
             </Pressable>
 
             <ChatReaction
-              messageCordinates={messageCordinates}
               selectedMessage={selectedMessage}
-              setSelectedMessage={setSelectedMessage}
+              afterSendReaction={dismissReaction}
               openEmojiPicker={openEmojiModal}
-              showReaction={showChatReactionPopup}
             />
           </Host>
         </ErrorBoundary>
       </View>
       <EmojiPickerModal
         ref={emojiPickerSheetModalRef}
-        selectedMessage={selectedMessage as ChatMessageIMessage}
+        selectedMessage={selectedMessage.selectedMessage as ChatMessageIMessage}
       />
       <ReactionsModal
         ref={reactionModalRef}
