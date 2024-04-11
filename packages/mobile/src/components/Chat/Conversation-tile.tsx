@@ -231,7 +231,7 @@ const ConversationTile = memo((props: ConversationTileProps) => {
                   fontSize: 12,
                 }}
               >
-                {unreadCount}
+                {Math.min(unreadCount, 10)}
                 {unreadCount >= 10 ? '+' : ''}
               </Text>
             </View>

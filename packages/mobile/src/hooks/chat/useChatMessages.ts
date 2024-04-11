@@ -19,7 +19,7 @@ import {
 import { DotYouClient, HomebaseFile } from '@youfoundation/js-lib/core';
 import { useDotYouClientContext } from 'feed-app-common';
 
-const FIRST_PAGE_SIZE = 10;
+const FIRST_PAGE_SIZE = 15;
 const PAGE_SIZE = 100;
 
 export const useChatMessages = (props?: { conversationId: string | undefined }) => {
@@ -84,7 +84,7 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
     }),
     delete: useMutation({
       mutationFn: removeMessage,
-      onMutate: async ({ conversation, messages }) => {
+      onMutate: async () => {
         // TODO: Optimistic update of the chat messages delete the new message from the list
       },
       onSettled: async (_data, _error, variables) => {
@@ -132,5 +132,5 @@ export const getChatMessageInfiniteQueryOptions: (
       ? lastPage.cursorState
       : undefined,
   enabled: !!conversationId,
-  staleTime: 1000 * 60 * 60, // 1 hour
+  staleTime: 1000 * 60 * 60 * 24, // 24 hour
 });

@@ -84,8 +84,8 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
     const queries = queryClient.getQueriesData({ queryKey: ['chat-messages'], exact: false });
     queries.forEach(([key]) => {
       queryClient.setQueryData(key, (data: InfiniteData<unknown, unknown>) => ({
-        pages: data.pages.slice(0, 1),
-        pageParams: data.pageParams.slice(0, 1),
+        pages: data.pages?.slice(0, 1),
+        pageParams: data.pageParams?.slice(0, 1),
       }));
     });
     await queryClient.invalidateQueries({ queryKey: ['chat-messages'], exact: false });

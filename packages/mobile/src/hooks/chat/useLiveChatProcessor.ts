@@ -53,20 +53,20 @@ export const useLiveChatProcessor = () => {
   return isOnline;
 };
 
+const BATCH_SIZE = 2000;
 // Process the inbox on startup
 const useInboxProcessor = (connected?: boolean) => {
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
 
   const fetchData = async () => {
-    // Need to find a timestamp from the last time we processed the inbox?
     const lastProcessedTime = queryClient.getQueryState(['processInbox'])?.dataUpdatedAt;
 
     const preProcessCursor = lastProcessedTime
       ? getQueryModifiedCursorFromTime(lastProcessedTime - MINUTE_IN_MS * 5)
       : undefined;
 
-    const processedresult = await processInbox(dotYouClient, ChatDrive, 2000);
+    const processedresult = await processInbox(dotYouClient, ChatDrive, BATCH_SIZE);
 
     if (preProcessCursor) {
       const newData = await queryModified(
@@ -75,8 +75,11 @@ const useInboxProcessor = (connected?: boolean) => {
           targetDrive: ChatDrive,
         },
         {
-          maxRecords: 2000,
+          maxRecords: BATCH_SIZE,
           cursor: preProcessCursor,
+          // We just fetch the bare mimimum to know which conversations to invalidate
+          excludePreviewThumbnail: true,
+          includeHeaderContent: false,
         }
       );
       const newMessages = newData.searchResults.filter(
@@ -105,13 +108,10 @@ const useInboxProcessor = (connected?: boolean) => {
     return processedresult;
   };
 
+  // We refetch this one on mount as each mount the websocket would reconnect, and there might be a backlog of messages
   return useQuery({
     queryKey: ['processInbox'],
     queryFn: fetchData,
-    // refetchOnMount: false,
-    // We want to refetch on window focus, as we might have missed some messages while the window was not focused and the websocket might have lost connection
-    // refetchOnWindowFocus: true,
-    // staleTime: MINUTE_IN_MS * 5,
     enabled: connected,
   });
 };
