@@ -12,7 +12,6 @@ export const useConversations = () => {
   const dotYouClient = useDotYouClientContext();
 
   const fetchConversations = async (cursorState: string | undefined) => {
-    // console.log('fetch', ['conversations']);
     return await getConversations(dotYouClient, cursorState, PAGE_SIZE);
   };
 
@@ -24,7 +23,7 @@ export const useConversations = () => {
       getNextPageParam: (lastPage) =>
         lastPage.searchResults?.length >= PAGE_SIZE ? lastPage.cursorState : undefined,
       refetchOnMount: false,
-      staleTime: 1000 * 60 * 5,
+      staleTime: 1000 * 60 * 5, // 5min before conversations from another device are fetched on this one
     }),
   };
 };
