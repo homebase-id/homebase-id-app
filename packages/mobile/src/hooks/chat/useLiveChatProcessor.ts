@@ -5,7 +5,9 @@ import {
   TypedConnectionNotification,
   getCommands,
   markCommandComplete,
+  queryModified,
 } from '@youfoundation/js-lib/core';
+import { getQueryModifiedCursorFromTime } from '@youfoundation/js-lib/helpers';
 
 import { processInbox } from '@youfoundation/js-lib/peer';
 
@@ -57,9 +59,37 @@ const useInboxProcessor = (connected?: boolean) => {
   const queryClient = useQueryClient();
 
   const fetchData = async () => {
+    const preProcessCursor = getQueryModifiedCursorFromTime(new Date().getTime());
     const processedresult = await processInbox(dotYouClient, ChatDrive, 2000);
-    // We don't know how many messages we have processed, so we can only invalidate the entire chat query
-    queryClient.invalidateQueries({ queryKey: ['chat-messages'] });
+
+    const newData = await queryModified(
+      dotYouClient,
+      {
+        targetDrive: ChatDrive,
+      },
+      {
+        maxRecords: 2000,
+        cursor: preProcessCursor,
+      }
+    );
+    const newMessages = newData.searchResults.filter(
+      (dsr) => dsr.fileMetadata.appData.fileType === ChatMessageFileType
+    );
+    new Set(newMessages.map((msg) => msg.fileMetadata.appData.groupId)).forEach(
+      (conversationId) => {
+        // Remove all but the first page, so when we refetch we don't fetch extra pages
+        queryClient.setQueryData(
+          ['chat-messages', conversationId],
+          (data: InfiniteData<unknown, unknown>) => ({
+            pages: data.pages.slice(0, 1),
+            pageParams: data.pageParams.slice(0, 1),
+          })
+        );
+
+        queryClient.invalidateQueries({ queryKey: ['chat-messages', conversationId] });
+      }
+    );
+
     return processedresult;
   };
 

@@ -152,7 +152,7 @@ const INCLUDED_QUERY_KEYS = [
   // 'tinyThumb',
 ];
 const persistOptions: Omit<PersistQueryClientOptions, 'queryClient'> = {
-  buster: '202403',
+  buster: '202404',
   maxAge: Infinity,
   persister: asyncPersist,
   dehydrateOptions: {
@@ -178,9 +178,7 @@ let App = () => {
     <PersistQueryClientProvider
       client={queryClient}
       persistOptions={persistOptions}
-      onSuccess={() =>
-        queryClient.resumePausedMutations().then(() => queryClient.invalidateQueries())
-      }
+      onSuccess={() => queryClient.resumePausedMutations()}
     >
       <GestureHandlerRootView style={{ flex: 1 }}>
         <PushNotificationProvider>
