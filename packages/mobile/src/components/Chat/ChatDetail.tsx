@@ -497,12 +497,11 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
   },
-
   replyText: {
     justifyContent: 'center',
     marginLeft: 6,
     marginRight: 12,
-    maxWidth: '80%',
+    flexShrink: 1,
   },
   replyMessageContainer: {
     padding: 8,
