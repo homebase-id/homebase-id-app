@@ -113,15 +113,18 @@ export const ChatDetail = memo(
       [doOpenMessageInfo]
     );
 
-    const renderMessageBox = (props: MessageProps<ChatMessageIMessage>) => {
-      return (
-        <ChatMessageBox
-          {...props}
-          setReplyOnSwipeOpen={setReplyMessage}
-          onLeftSwipeOpen={onLeftSwipe}
-        />
-      );
-    };
+    const renderMessageBox = useCallback(
+      (props: MessageProps<ChatMessageIMessage>) => {
+        return (
+          <ChatMessageBox
+            {...props}
+            setReplyOnSwipeOpen={setReplyMessage}
+            onLeftSwipeOpen={onLeftSwipe}
+          />
+        );
+      },
+      [onLeftSwipe, setReplyMessage]
+    );
 
     const renderChatFooter = useCallback(() => {
       return (
@@ -404,13 +407,17 @@ export const ChatDetail = memo(
       if (!odinId) {
         return (
           <Avatar
+            {...prop}
             renderAvatar={(_: Omit<AvatarProps<ChatMessageIMessage>, 'renderAvatar'>) => {
               return (
                 <OwnerAvatar
+                  imageSize={{
+                    width: 30,
+                    height: 30,
+                  }}
                   style={{
                     width: 30,
                     height: 30,
-                    marginRight: 0,
                   }}
                 />
               );
@@ -420,14 +427,19 @@ export const ChatDetail = memo(
       }
       return (
         <Avatar
+          {...prop}
           renderAvatar={(_: Omit<AvatarProps<ChatMessageIMessage>, 'renderAvatar'>) => {
             return (
               <AppAvatar
                 odinId={odinId}
-                style={{
+                imageSize={{
                   width: 30,
                   height: 30,
-                  marginRight: 0,
+                }}
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: 18,
                 }}
               />
             );
@@ -575,126 +587,125 @@ const RenderBubble = memo(
     const flatReactions = reactions?.flatMap((val) => val.fileMetadata.appData.content.message);
 
     return (
-      <>
-        <Bubble
-          {...props}
-          renderTicks={(message: ChatMessageIMessage) => <ChatDeliveryIndicator msg={message} />}
-          renderReactions={
-            !hasReactions
-              ? undefined
-              : //TODO: Add LeftRight StyleProp
-                () => {
-                  const maxVisible = 2;
-                  const countExcludedFromView = reactions?.length
-                    ? reactions?.length - maxVisible
-                    : 0;
+      <Bubble
+        {...props}
+        renderTicks={(message: ChatMessageIMessage) => <ChatDeliveryIndicator msg={message} />}
+        renderReactions={
+          !hasReactions
+            ? undefined
+            : () => {
+                const maxVisible = 2;
+                const countExcludedFromView = reactions?.length
+                  ? reactions?.length - maxVisible
+                  : 0;
 
-                  return (
-                    <Pressable onPress={() => props.onReactionClick(message)}>
-                      <View
-                        style={{
-                          flexDirection: 'row',
-                          alignItems: 'center',
-                          justifyContent: 'flex-start',
-                          padding: 4,
-                          borderRadius: 15,
-                          backgroundColor: isDarkMode ? Colors.gray[800] : Colors.gray[100],
-                        }}
-                      >
-                        {flatReactions?.slice(0, maxVisible).map((reaction, index) => {
-                          return (
-                            <Text
-                              key={index}
-                              style={{
-                                fontSize: 18,
-                                marginRight: 2,
-                              }}
-                            >
-                              {reaction}
-                            </Text>
-                          );
-                        })}
-                        {countExcludedFromView > 0 && (
+                return (
+                  <Pressable onPress={() => props.onReactionClick(message)}>
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'flex-start',
+                        padding: 4,
+                        borderRadius: 15,
+                        backgroundColor: isDarkMode ? Colors.gray[800] : Colors.gray[100],
+                      }}
+                    >
+                      {flatReactions?.slice(0, maxVisible).map((reaction, index) => {
+                        return (
                           <Text
+                            key={index}
                             style={{
-                              color: isDarkMode ? Colors.white : Colors.black,
-                              fontSize: 16,
-                              fontWeight: '500',
+                              fontSize: 18,
                               marginRight: 2,
                             }}
                           >
-                            +{countExcludedFromView}
+                            {reaction}
                           </Text>
-                        )}
-                      </View>
-                    </Pressable>
-                  );
-                }
-          }
-          renderTime={(timeProp) => {
-            return (
-              <Time
-                {...timeProp}
-                timeTextStyle={
-                  !showBackground
-                    ? {
-                        left: {
-                          color: isDarkMode ? Colors.white : Colors.black,
-                          fontSize: 12,
-                        },
-                        right: {
-                          color: isDarkMode ? Colors.white : Colors.black,
-                          fontSize: 12,
-                        },
-                      }
-                    : {
-                        right: {
-                          fontSize: 12,
-                          color: !isDarkMode ? Colors.slate[600] : Colors.slate[200],
-                        },
-                        left: {
-                          fontSize: 12,
-                        },
-                      }
-                }
-              />
-            );
-          }}
-          tickStyle={{
-            color: isDarkMode ? Colors.white : Colors.black,
-          }}
-          textStyle={
-            showBackground
-              ? {
-                  left: { color: isDarkMode ? Colors.white : Colors.black },
-                  right: { color: isDarkMode ? Colors.white : Colors.black },
-                }
-              : {}
-          }
-          wrapperStyle={
-            !showBackground
-              ? {
-                  left: {
-                    backgroundColor: 'transparent',
-                  },
-                  right: {
-                    backgroundColor: 'transparent',
-                  },
-                }
-              : {
-                  left: {
-                    backgroundColor: isDarkMode ? `${Colors.gray[300]}4D` : `${Colors.gray[500]}1A`,
-                    minWidth: hasReactions ? 90 : undefined,
-                  },
-                  right: {
-                    backgroundColor: isDarkMode
-                      ? `${Colors.indigo[500]}33`
-                      : `${Colors.indigo[500]}1A`,
-                  },
-                }
-          }
-        />
-      </>
+                        );
+                      })}
+                      {countExcludedFromView > 0 && (
+                        <Text
+                          style={{
+                            color: isDarkMode ? Colors.white : Colors.black,
+                            fontSize: 16,
+                            fontWeight: '500',
+                            marginRight: 2,
+                          }}
+                        >
+                          +{countExcludedFromView}
+                        </Text>
+                      )}
+                    </View>
+                  </Pressable>
+                );
+              }
+        }
+        renderTime={(timeProp) => {
+          return (
+            <Time
+              {...timeProp}
+              timeTextStyle={
+                !showBackground
+                  ? {
+                      left: {
+                        color: isDarkMode ? Colors.white : Colors.black,
+                        fontSize: 12,
+                      },
+                      right: {
+                        color: isDarkMode ? Colors.white : Colors.black,
+                        fontSize: 12,
+                      },
+                    }
+                  : {
+                      right: {
+                        fontSize: 12,
+                        color: !isDarkMode ? Colors.slate[600] : Colors.slate[200],
+                      },
+                      left: {
+                        fontSize: 12,
+                      },
+                    }
+              }
+            />
+          );
+        }}
+        tickStyle={{
+          color: isDarkMode ? Colors.white : Colors.black,
+        }}
+        textStyle={
+          showBackground
+            ? {
+                left: { color: isDarkMode ? Colors.white : Colors.black },
+                right: { color: isDarkMode ? Colors.white : Colors.black },
+              }
+            : {}
+        }
+        wrapperStyle={
+          !showBackground
+            ? {
+                left: {
+                  backgroundColor: 'transparent',
+                },
+                right: {
+                  backgroundColor: 'transparent',
+                },
+              }
+            : {
+                left: {
+                  backgroundColor: isDarkMode ? `${Colors.gray[300]}4D` : `${Colors.gray[500]}1A`,
+                  minWidth: hasReactions ? 90 : undefined,
+                  justifyContent: 'flex-start',
+                },
+                right: {
+                  backgroundColor: isDarkMode
+                    ? `${Colors.indigo[500]}33`
+                    : `${Colors.indigo[500]}1A`,
+                  minWidth: hasReactions ? 90 : undefined,
+                },
+              }
+        }
+      />
     );
   }
 );
