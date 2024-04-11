@@ -232,6 +232,7 @@ const ConversationTile = memo((props: ConversationTileProps) => {
                 }}
               >
                 {unreadCount}
+                {unreadCount >= 10 ? '+' : ''}
               </Text>
             </View>
           ) : null}
