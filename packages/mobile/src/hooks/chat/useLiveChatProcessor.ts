@@ -141,12 +141,6 @@ const useChatWebsocket = (isEnabled: boolean) => {
         if (notification.header.fileMetadata.appData.fileType === ChatMessageFileType) {
           const conversationId = notification.header.fileMetadata.appData.groupId;
           const isNewFile = notification.notificationType === 'fileAdded';
-          const sender = notification.header.fileMetadata.senderOdinId;
-
-          if (!sender || sender === identity) {
-            // Ignore messages sent by the current user
-            return;
-          }
 
           if (isNewFile) {
             // Check if the message is orphaned from a conversation
