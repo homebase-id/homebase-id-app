@@ -5,13 +5,18 @@ import { TabStackParamList } from '../../app/App';
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 import WebView from 'react-native-webview';
 import { uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
-import { RefreshControl } from 'react-native';
+import { RefreshControl, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useAuth } from '../../hooks/auth/useAuth';
 import { Colors } from '../../app/Colors';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { ScrollView } from 'react-native-gesture-handler';
 import { useRemoveNotifications } from '../../hooks/notifications/usePushNotifications';
 import { FEED_APP_ID } from '../../app/constants';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { GetTargetDriveFromProfileId, BuiltInProfiles } from '@youfoundation/js-lib/profile';
+import { Bars, Ellipsis, Lol, Plus } from '../../components/ui/Icons/icons';
+import { OdinImage } from '../../components/ui/OdinImage/OdinImage';
+import { useProfile } from '../../hooks/profile/useProfile';
 
 type FeedProps = NativeStackScreenProps<TabStackParamList, 'Feed'>;
 
@@ -19,6 +24,8 @@ export const FeedPage = memo((_props: FeedProps) => {
   const { isDarkMode } = useDarkMode();
   const { authToken, getIdentity, getSharedSecret } = useAuth();
   const identity = getIdentity();
+
+  const [hideHeader, setHideHeader] = useState<boolean>();
 
   useRemoveNotifications({ appId: FEED_APP_ID });
 
@@ -65,10 +72,14 @@ export const FeedPage = memo((_props: FeedProps) => {
     } else if (refresherEnabled) {
       setEnableRefresher(false);
     }
+
+    if (yOffset > 20) setHideHeader(true);
+    else setHideHeader(false);
   };
 
   return (
     <SafeAreaView>
+      {hideHeader ? null : <PostComposer />}
       {identity && uri ? (
         <ScrollView
           contentContainerStyle={{ flex: 1 }}
@@ -100,3 +111,56 @@ export const FeedPage = memo((_props: FeedProps) => {
     </SafeAreaView>
   );
 });
+
+const PostComposer = () => {
+  const { isDarkMode } = useDarkMode();
+  const insets = useSafeAreaInsets();
+
+  return (
+    <View
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        paddingTop: insets.top,
+        paddingHorizontal: 8,
+        backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
+        zIndex: 10,
+      }}
+    >
+      <View
+        style={{
+          padding: 16,
+          backgroundColor: isDarkMode ? Colors.black : Colors.white,
+          borderWidth: 1,
+          borderColor: Colors.gray[100],
+          borderRadius: 6,
+        }}
+      >
+        <TextInput
+          placeholder="What's up?"
+          style={{ paddingVertical: 5, lineHeight: 20, fontSize: 16 }}
+        />
+        <View
+          style={{
+            marginTop: 12,
+            display: 'flex',
+            flexDirection: 'row',
+            gap: 10,
+          }}
+        >
+          <TouchableOpacity>
+            <Plus size={'sm'} />
+          </TouchableOpacity>
+          <TouchableOpacity>
+            <Lol size={'sm'} />
+          </TouchableOpacity>
+          <TouchableOpacity>
+            <Ellipsis size={'sm'} />
+          </TouchableOpacity>
+        </View>
+      </View>
+    </View>
+  );
+};
