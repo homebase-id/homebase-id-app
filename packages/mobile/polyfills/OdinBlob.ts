@@ -179,13 +179,7 @@ class Blob {
       }, 100);
     });
 
-    const extension =
-      this.data.type === 'audio/mpeg'
-        ? 'mp3'
-        : this.data.type === 'image/svg+xml'
-          ? 'svg'
-          : this.data.type.split('/')[1];
-    const destinationUri = `file://${CachesDirectoryPath}/${this.data.blobId}.${extension}`;
+    const destinationUri = `file://${CachesDirectoryPath}/${this.data.blobId}.${getExtensionForMimeType(this.data.type)}`;
 
     const decryptStatus = await OdinBlobModule.decryptFileWithAesCbc16(
       this.uri,
@@ -205,14 +199,7 @@ class Blob {
   }
 
   async fixExtension() {
-    const extension =
-      this.data.type === 'audio/mpeg'
-        ? 'mp3'
-        : this.data.type === 'image/svg+xml'
-          ? 'svg'
-          : this.data.type.split('/')[1];
-
-    const destinationUri = `file://${CachesDirectoryPath}/${this.data.blobId}.${extension}`;
+    const destinationUri = `file://${CachesDirectoryPath}/${this.data.blobId}.${getExtensionForMimeType(this.data.type)}`;
     await copyFile(this.uri, destinationUri);
 
     await unlink(this.uri);
@@ -236,5 +223,13 @@ class Blob {
     return this.data.type || '';
   }
 }
+
+const getExtensionForMimeType = (mimeType: string) => {
+  return mimeType === 'audio/mpeg'
+    ? 'mp3'
+    : mimeType === 'image/svg+xml'
+      ? 'svg'
+      : mimeType.split('/')[1];
+};
 
 export { Blob as OdinBlob };
