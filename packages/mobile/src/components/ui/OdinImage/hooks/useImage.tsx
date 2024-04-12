@@ -28,7 +28,7 @@ const useImage = (props?: {
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
 
-  const checkIfWeHaveLargerCachedImage = (
+  const checkIfWeHaveLargerCachedImage = async (
     odinId: string | undefined,
     imageFileId: string,
     imageFileKey: string,
@@ -41,7 +41,7 @@ const useImage = (props?: {
         queryKey: ['image', odinId || '', imageDrive?.alias, imageFileId, imageFileKey],
         exact: false,
       })
-      .filter((query) => query.state.status !== 'error' && !query.isStale);
+      .filter((query) => query.state.status !== 'error');
 
     const cachedEntriesWithSize = cachedEntries.map((entry) => {
       const sizeParts = (entry.queryKey[5] as string)?.split('x');
@@ -60,7 +60,7 @@ const useImage = (props?: {
 
     if (!size) return cachedEntriesWithSize.find((entry) => !entry.size);
 
-    return cachedEntriesWithSize
+    const cachedEntry = cachedEntriesWithSize
       .filter((entry) => !!entry.size)
       .find((entry) => {
         if (
@@ -71,6 +71,13 @@ const useImage = (props?: {
           return true;
         }
       });
+
+    // We only return it, if the file still exists on disk
+    const cachedData =
+      cachedEntry && queryClient.getQueryData<ImageData | undefined>(cachedEntry.queryKey);
+    if (cachedData && (await exists(cachedData.url))) return cachedEntry;
+
+    return null;
   };
 
   const fetchImageData = async (
@@ -92,13 +99,14 @@ const useImage = (props?: {
       return null;
     }
 
-    const cachedEntry = checkIfWeHaveLargerCachedImage(
+    const cachedEntry = await checkIfWeHaveLargerCachedImage(
       odinId,
       imageFileId,
       imageFileKey,
       imageDrive,
       size
     );
+
     if (cachedEntry) {
       const cachedData = queryClient.getQueryData<ImageData | undefined>(cachedEntry.queryKey);
       if (cachedData && (await exists(cachedData.url))) return cachedData;
@@ -150,7 +158,9 @@ const useImage = (props?: {
           naturalSize,
           lastModified
         ),
-      staleTime: 1000 * 60 * 60 * 24 * 7, // 1 week,
+      // Stale time is 0, to always trigger a fetch,
+      //   while the fetch checks if we have anything in cache from before and confirms it on disk
+      staleTime: 0,
       enabled: !!imageFileId && imageFileId !== '',
     }),
     getFromCache: (
