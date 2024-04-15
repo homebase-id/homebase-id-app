@@ -38,6 +38,7 @@ const RecipientConnectedState = ({ recipient }: { recipient: string }) => {
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
+        paddingVertical: 3,
       }}
     >
       <Text
@@ -84,7 +85,6 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 3,
     paddingHorizontal: 8,
     zIndex: 10,
   },
