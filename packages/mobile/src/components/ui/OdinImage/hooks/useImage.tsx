@@ -146,8 +146,6 @@ const useImage = (props?: {
           : undefined,
         lastModified,
       ],
-      refetchOnMount: false,
-      refetchOnWindowFocus: false,
       queryFn: () =>
         fetchImageData(
           odinId,

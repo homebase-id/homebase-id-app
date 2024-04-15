@@ -15,7 +15,7 @@ import { OdinAudio } from '../ui/OdinAudio/OdinAudio';
 const MediaMessage = memo((props: MessageImageProps<ChatMessageIMessage>) => {
   const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
   const { width, height } = Dimensions.get('screen');
-  if (!props.currentMessage) return null;
+  if (!props.currentMessage || !props.currentMessage.fileMetadata.payloads?.length) return null;
   const { currentMessage } = props;
   const payloads = currentMessage.fileMetadata.payloads;
 

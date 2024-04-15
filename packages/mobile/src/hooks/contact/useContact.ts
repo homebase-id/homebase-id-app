@@ -16,8 +16,7 @@ const useContact = (odinId?: string) => {
     fetch: useQuery({
       queryKey: ['contact', odinId],
       queryFn: () => fetchSingle(odinId as string),
-      refetchOnWindowFocus: false,
-      retry: false,
+      staleTime: 1000 * 60 * 60 * 24, // 1 day
       enabled: !!odinId,
     }),
   };
