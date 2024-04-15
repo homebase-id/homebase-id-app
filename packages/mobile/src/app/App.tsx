@@ -8,7 +8,7 @@ import {
 } from '@react-navigation/native';
 
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
-import { QueryClient } from '@tanstack/react-query';
+import { QueryClient, onlineManager } from '@tanstack/react-query';
 import {
   PersistQueryClientProvider,
   PersistQueryClientOptions,
@@ -21,10 +21,10 @@ import { DotYouClientProvider } from '../components/Auth/DotYouClientProvider';
 import { BackButton, HeaderActions } from '../components/ui/convo-app-bar';
 import { useLiveChatProcessor } from '../hooks/chat/useLiveChatProcessor';
 import { HeaderBackButtonProps } from '@react-navigation/elements';
-import { Platform, View } from 'react-native';
+import { Platform, StyleProp, View, ViewStyle } from 'react-native';
 
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Colors } from './Colors';
 
@@ -456,40 +456,70 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
 };
 
 const ProfileAvatar = () => {
+  const { isDarkMode } = useDarkMode();
+  const onlineDotStyle: StyleProp<ViewStyle> = useMemo(
+    () => ({
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+      backgroundColor: !isDarkMode ? Colors.white : Colors.black,
+      borderWidth: 1,
+      borderColor: Colors.slate[200],
+      position: 'absolute',
+      bottom: 0,
+      right: 0,
+      zIndex: 15,
+    }),
+    [isDarkMode]
+  );
+
   return (
     <View style={{ marginRight: Platform.OS === 'android' ? 16 : 0, position: 'relative' }}>
       <OwnerAvatar imageSize={{ width: 30, height: 30 }} style={{ borderRadius: 30 / 2 }} />
       <View
-        style={{
-          width: 8,
-          height: 8,
-          borderRadius: 4,
-          backgroundColor: Colors.green[500],
-          position: 'absolute',
-          bottom: 0,
-          right: 0,
-          zIndex: 15,
-        }}
+        style={[
+          onlineDotStyle,
+          onlineManager.isOnline()
+            ? {
+                backgroundColor: Colors.green[500],
+              }
+            : {},
+        ]}
       />
     </View>
   );
 };
 
 const OfflineProfileAvatar = () => {
+  const { isDarkMode } = useDarkMode();
+  const offlineDotStyle: StyleProp<ViewStyle> = useMemo(
+    () => ({
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+      backgroundColor: !isDarkMode ? Colors.white : Colors.black,
+      borderWidth: 1,
+      borderColor: Colors.slate[200],
+      position: 'absolute',
+      bottom: 0,
+      right: 0,
+      zIndex: 15,
+    }),
+    [isDarkMode]
+  );
+
   return (
     <View style={{ marginRight: Platform.OS === 'android' ? 16 : 0, position: 'relative' }}>
       <OwnerAvatar imageSize={{ width: 30, height: 30 }} style={{ borderRadius: 30 / 2 }} />
       <View
-        style={{
-          width: 8,
-          height: 8,
-          borderRadius: 4,
-          backgroundColor: Colors.red[500],
-          position: 'absolute',
-          bottom: 0,
-          right: 0,
-          zIndex: 15,
-        }}
+        style={[
+          offlineDotStyle,
+          onlineManager.isOnline()
+            ? {
+                backgroundColor: Colors.red[500],
+              }
+            : {},
+        ]}
       />
     </View>
   );
