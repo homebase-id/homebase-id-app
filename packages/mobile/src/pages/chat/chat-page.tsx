@@ -253,6 +253,11 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
     setSelectedMessage(initalSelectedMessageState);
   }, [initalSelectedMessageState]);
 
+  const doReturnToConversations = useCallback(
+    () => navigation.navigate('Conversation'),
+    [navigation]
+  );
+
   if (!conversation) {
     if (isLoadingConversation) return null;
     return <NoConversationHeader title="No conversation found" goBack={navigation.goBack} />;
@@ -279,7 +284,9 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
                 ? identity || ''
                 : (conversation?.fileMetadata.appData.content as SingleConversation).recipient
             }
-            goBack={selectedMessage.selectedMessage ? dismissSelectedMessage : navigation.goBack}
+            goBack={
+              selectedMessage.selectedMessage ? dismissSelectedMessage : doReturnToConversations
+            }
             onPress={() => navigation.navigate('ChatInfo', { convoId: route.params.convoId })}
             isSelf={route.params.convoId === ConversationWithYourselfId}
             selectedMessage={selectedMessage?.selectedMessage}

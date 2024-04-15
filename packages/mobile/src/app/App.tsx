@@ -297,7 +297,9 @@ const TabStack = memo(() => {
           tabBarIcon: TabChatIcon,
           headerShown: false,
           tabBarStyle: hide
-            ? { display: 'none' }
+            ? Platform.OS === 'android'
+              ? { height: 0, overflow: 'hidden', opacity: 0 }
+              : { display: 'none' }
             : { backgroundColor: isDarkMode ? Colors.indigo[900] : Colors.indigo[100] },
         }}
       />
@@ -403,6 +405,7 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
         // component={(props) => <ChatPage {...props} />} // This is faster, but react-navigation goes crazy with warnings
         component={ChatPage}
         options={{
+          headerShown: false,
           gestureEnabled: true,
         }}
       />
