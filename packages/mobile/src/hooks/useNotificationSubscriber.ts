@@ -7,7 +7,7 @@ import {
   TypedConnectionNotification,
   Notify,
 } from '@youfoundation/js-lib/core';
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, useCallback } from 'react';
 import { hasDebugFlag } from '@youfoundation/js-lib/helpers';
 
 const isDebug = hasDebugFlag();
@@ -29,27 +29,30 @@ export const useNotificationSubscriber = (
   const authToken = useAuth().authToken;
   if (!authToken) throw new Error('No auth token found');
 
-  const localHandler = subscriber
-    ? (notification: TypedConnectionNotification) => {
-        if (notification.notificationType === 'transitFileReceived') {
-          isDebug &&
-            console.debug(
-              '[NotificationSubscriber] Replying to TransitFileReceived by sending processInbox'
-            );
+  const wrappedSubscriber = useCallback(
+    (notification: TypedConnectionNotification) => {
+      if (notification.notificationType === 'transitFileReceived') {
+        isDebug &&
+          console.debug(
+            '[NotificationSubscriber] Replying to TransitFileReceived by sending processInbox'
+          );
 
-          Notify({
-            command: 'processInbox',
-            data: JSON.stringify({
-              targetDrive: notification.externalFileIdentifier.targetDrive,
-              batchSize: 100,
-            }),
-          });
-        }
-
-        if (types?.length >= 1 && !types.includes(notification.notificationType)) return;
-        subscriber && subscriber(notification);
+        Notify({
+          command: 'processInbox',
+          data: JSON.stringify({
+            targetDrive: notification.externalFileIdentifier.targetDrive,
+            batchSize: 100,
+          }),
+        });
       }
-    : undefined;
+
+      if (types?.length >= 1 && !types.includes(notification.notificationType)) return;
+      subscriber && subscriber(notification);
+    },
+    [subscriber]
+  );
+
+  const localHandler = subscriber ? wrappedSubscriber : undefined;
 
   useEffect(() => {
     if (
@@ -93,7 +96,7 @@ export const useNotificationSubscriber = (
         }
       }
     };
-  }, [subscriber]);
+  }, [localHandler]);
 
   return isActive;
 };

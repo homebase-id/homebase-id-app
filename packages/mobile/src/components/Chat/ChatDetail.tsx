@@ -236,7 +236,6 @@ export const ChatDetail = memo(
     );
     const renderComposer = useCallback(
       (props: ComposerProps) => {
-        // TODO: Shouldn'the whole "renderInputToolbar" render differently?
         if (isRecording) {
           return (
             <View
@@ -314,8 +313,11 @@ export const ChatDetail = memo(
               >
                 <View
                   style={{
-                    padding: 10,
+                    height: 40,
+                    width: 40,
                     justifyContent: 'center',
+                    borderRadius: 20,
+                    backgroundColor: Colors.indigo[500],
                     transform: [{ rotate: '45deg' }],
                   }}
                 >
@@ -518,10 +520,8 @@ const styles = StyleSheet.create({
 
   send: {
     justifyContent: 'center',
-    borderRadius: 60,
-    backgroundColor: Colors.indigo[500],
     marginRight: 8,
-    marginBottom: 2,
+    marginVertical: 'auto',
   },
 });
 

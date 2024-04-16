@@ -5,7 +5,9 @@ import {
   TypedConnectionNotification,
   getCommands,
   markCommandComplete,
+  queryModified,
 } from '@youfoundation/js-lib/core';
+import { getQueryModifiedCursorFromTime } from '@youfoundation/js-lib/helpers';
 
 import { processInbox } from '@youfoundation/js-lib/peer';
 
@@ -13,7 +15,7 @@ import { useNotificationSubscriber } from '../useNotificationSubscriber';
 import { useCallback, useEffect, useRef } from 'react';
 
 import { stringGuidsEqual, tryJsonParse } from '@youfoundation/js-lib/helpers';
-import { getSingleConversation, useConversation } from './useConversation';
+import { getConversationQueryOptions, useConversation } from './useConversation';
 import { processCommand } from '../../provider/chat/ChatCommandProvider';
 import { useDotYouClientContext } from 'feed-app-common';
 import {
@@ -51,25 +53,65 @@ export const useLiveChatProcessor = () => {
   return isOnline;
 };
 
+const BATCH_SIZE = 2000;
 // Process the inbox on startup
 const useInboxProcessor = (connected?: boolean) => {
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
 
   const fetchData = async () => {
-    const processedresult = await processInbox(dotYouClient, ChatDrive, 2000);
-    // We don't know how many messages we have processed, so we can only invalidate the entire chat query
-    queryClient.invalidateQueries({ queryKey: ['chat-messages'] });
+    const lastProcessedTime = queryClient.getQueryState(['processInbox'])?.dataUpdatedAt;
+
+    const preProcessCursor = lastProcessedTime
+      ? getQueryModifiedCursorFromTime(lastProcessedTime - MINUTE_IN_MS * 5)
+      : undefined;
+
+    const processedresult = await processInbox(dotYouClient, ChatDrive, BATCH_SIZE);
+
+    if (preProcessCursor) {
+      const newData = await queryModified(
+        dotYouClient,
+        {
+          targetDrive: ChatDrive,
+        },
+        {
+          maxRecords: BATCH_SIZE,
+          cursor: preProcessCursor,
+          // We just fetch the bare mimimum to know which conversations to invalidate
+          excludePreviewThumbnail: true,
+          includeHeaderContent: false,
+        }
+      );
+      const newMessages = newData.searchResults.filter(
+        (dsr) => dsr.fileMetadata.appData.fileType === ChatMessageFileType
+      );
+
+      new Set(newMessages.map((msg) => msg.fileMetadata.appData.groupId)).forEach(
+        (conversationId) => {
+          // Remove all but the first page, so when we refetch we don't fetch extra pages
+          queryClient.setQueryData(
+            ['chat-messages', conversationId],
+            (data: InfiniteData<unknown, unknown>) => ({
+              pages: data.pages.slice(0, 1),
+              pageParams: data.pageParams.slice(0, 1),
+            })
+          );
+
+          queryClient.invalidateQueries({ queryKey: ['chat-messages', conversationId] });
+        }
+      );
+    } else {
+      // We have no reference to the last time we processed the inbox, so we can only invalidate all chat messages
+      queryClient.invalidateQueries({ queryKey: ['chat-messages'], exact: false });
+    }
+
     return processedresult;
   };
 
+  // We refetch this one on mount as each mount the websocket would reconnect, and there might be a backlog of messages
   return useQuery({
     queryKey: ['processInbox'],
     queryFn: fetchData,
-    refetchOnMount: false,
-    // We want to refetch on window focus, as we might have missed some messages while the window was not focused and the websocket might have lost connection
-    refetchOnWindowFocus: true,
-    staleTime: MINUTE_IN_MS * 5,
     enabled: connected,
   });
 };
@@ -99,19 +141,12 @@ const useChatWebsocket = (isEnabled: boolean) => {
         if (notification.header.fileMetadata.appData.fileType === ChatMessageFileType) {
           const conversationId = notification.header.fileMetadata.appData.groupId;
           const isNewFile = notification.notificationType === 'fileAdded';
-          const sender = notification.header.fileMetadata.senderOdinId;
-
-          if (!sender || sender === identity) {
-            // Ignore messages sent by the current user
-            return;
-          }
 
           if (isNewFile) {
             // Check if the message is orphaned from a conversation
-            const conversation = await queryClient.fetchQuery<HomebaseFile<Conversation> | null>({
-              queryKey: ['conversation', conversationId],
-              queryFn: () => getSingleConversation(dotYouClient, conversationId),
-            });
+            const conversation = await queryClient.fetchQuery(
+              getConversationQueryOptions(dotYouClient, queryClient, conversationId)
+            );
 
             if (!conversation) {
               console.error('Orphaned message received', notification.header.fileId, conversation);
@@ -148,26 +183,33 @@ const useChatWebsocket = (isEnabled: boolean) => {
           if (extistingMessages) {
             const newData = {
               ...extistingMessages,
-              pages: extistingMessages?.pages?.map((page, index) => ({
-                ...page,
-                searchResults: isNewFile
-                  ? index === 0
-                    ? [
-                        updatedChatMessage,
-                        // There shouldn't be any duplicates, but just in case
-                        ...page.searchResults.filter(
-                          (msg) => !stringGuidsEqual(msg?.fileId, updatedChatMessage.fileId)
-                        ),
-                      ]
-                    : page.searchResults.filter(
-                        (msg) => !stringGuidsEqual(msg?.fileId, updatedChatMessage.fileId)
-                      ) // There shouldn't be any duplicates, but just in case
-                  : page.searchResults.map((msg) =>
-                      stringGuidsEqual(msg?.fileId, updatedChatMessage.fileId)
-                        ? updatedChatMessage
-                        : msg
-                    ),
-              })),
+              pages: extistingMessages?.pages?.map((page, index) => {
+                if (isNewFile) {
+                  const filteredSearchResults = page.searchResults.filter(
+                    // Remove messages without a fileId, as the optimistic mutations should be removed when there's actual data coming over the websocket;
+                    //   And There shouldn't be any duplicates, but just in case
+                    (msg) =>
+                      msg?.fileId && !stringGuidsEqual(msg?.fileId, updatedChatMessage.fileId)
+                  );
+
+                  return {
+                    ...page,
+                    searchResults:
+                      index === 0
+                        ? [updatedChatMessage, ...filteredSearchResults]
+                        : filteredSearchResults,
+                  };
+                }
+
+                return {
+                  ...page,
+                  searchResults: page.searchResults.map((msg) =>
+                    msg?.fileId && stringGuidsEqual(msg?.fileId, updatedChatMessage.fileId)
+                      ? updatedChatMessage
+                      : msg
+                  ),
+                };
+              }),
             };
             queryClient.setQueryData(['chat-messages', conversationId], newData);
           }

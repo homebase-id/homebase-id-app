@@ -1,4 +1,4 @@
-import { FlatList, ListRenderItemInfo, StyleSheet } from 'react-native';
+import { FlatList, ListRenderItemInfo, RefreshControl, StyleSheet } from 'react-native';
 import ConversationTile from '../components/Chat/Conversation-tile';
 
 import { NavigationProp, useNavigation } from '@react-navigation/native';
@@ -25,6 +25,7 @@ import { Colors } from '../app/Colors';
 import { useDarkMode } from '../hooks/useDarkMode';
 import { CHAT_APP_ID } from '../app/constants';
 import { ErrorBoundary } from '../components/ui/ErrorBoundary/ErrorBoundary';
+import { InfiniteData, useQueryClient } from '@tanstack/react-query';
 
 type ConversationProp = NativeStackScreenProps<ChatStackParamList, 'Conversation'>;
 
@@ -33,6 +34,7 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
 
   const [query, setQuery] = useState<string | undefined>(undefined);
   const { isDarkMode } = useDarkMode();
+  const queryClient = useQueryClient();
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -75,6 +77,23 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
 
   const keyExtractor = useCallback((item: ConversationWithRecentMessage) => item.fileId, []);
 
+  const [refreshing, setRefreshing] = useState(false);
+  const doRefresh = useCallback(async () => {
+    setRefreshing(true);
+
+    const queries = queryClient.getQueriesData({ queryKey: ['chat-messages'], exact: false });
+    queries.forEach(([key]) => {
+      queryClient.setQueryData(key, (data: InfiniteData<unknown, unknown>) => ({
+        pages: data?.pages?.slice(0, 1),
+        pageParams: data?.pageParams?.slice(0, 1),
+      }));
+    });
+    queryClient.invalidateQueries({ queryKey: ['chat-messages'], exact: false });
+    queryClient.invalidateQueries({ queryKey: ['conversations'] });
+
+    setRefreshing(false);
+  }, [queryClient]);
+
   const isQueryActive = !!(query && query.length >= 1);
   if (isQueryActive) {
     return (
@@ -93,6 +112,7 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
         ListHeaderComponent={ConversationTileWithYourself}
         contentInsetAdjustmentBehavior="automatic"
         renderItem={renderItem}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={doRefresh} />}
       />
     </ErrorBoundary>
   );

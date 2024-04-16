@@ -35,7 +35,7 @@ const ChatReaction = memo(
     } = selectedMessage;
     const scale = useSharedValue(0);
     const { height } = useWindowDimensions();
-    console.log('selectedMessage', !!selectedMessage.selectedMessage, !!showReaction);
+
     useEffect(() => {
       if (message && showReaction) {
         scale.value = withSpring(1);

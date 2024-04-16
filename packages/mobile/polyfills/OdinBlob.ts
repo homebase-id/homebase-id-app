@@ -29,7 +29,7 @@ const { OdinBlobModule } = NativeModules;
  * Reference: https://developer.mozilla.org/en-US/docs/Web/API/Blob
  */
 import { base64ToUint8Array, getNewId, uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
-import { CachesDirectoryPath, readFile, writeFile, unlink } from 'react-native-fs';
+import { CachesDirectoryPath, readFile, writeFile, unlink, copyFile } from 'react-native-fs';
 
 class Blob {
   _data: BlobData;
@@ -179,13 +179,7 @@ class Blob {
       }, 100);
     });
 
-    const extension =
-      this.data.type === 'audio/mpeg'
-        ? 'mp3'
-        : this.data.type === 'image/svg+xml'
-          ? 'svg'
-          : this.data.type.split('/')[1];
-    const destinationUri = `file://${CachesDirectoryPath}/${this.data.blobId}.${extension}`;
+    const destinationUri = `file://${CachesDirectoryPath}/${this.data.blobId}.${getExtensionForMimeType(this.data.type)}`;
 
     const decryptStatus = await OdinBlobModule.decryptFileWithAesCbc16(
       this.uri,
@@ -202,6 +196,14 @@ class Blob {
     } else {
       throw new Error('Failed to decrypt blob, with native encryption');
     }
+  }
+
+  async fixExtension() {
+    const destinationUri = `file://${CachesDirectoryPath}/${this.data.blobId}.${getExtensionForMimeType(this.data.type)}`;
+    await copyFile(this.uri, destinationUri);
+
+    await unlink(this.uri);
+    return new Blob(destinationUri, { type: this.data.type });
   }
 
   /**
@@ -221,5 +223,13 @@ class Blob {
     return this.data.type || '';
   }
 }
+
+const getExtensionForMimeType = (mimeType: string) => {
+  return mimeType === 'audio/mpeg'
+    ? 'mp3'
+    : mimeType === 'image/svg+xml'
+      ? 'svg'
+      : mimeType.split('/')[1];
+};
 
 export { Blob as OdinBlob };

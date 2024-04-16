@@ -217,7 +217,7 @@ export const getThumbBytes = async (
       } else if (res.info().headers.payloadencrypted === 'True') {
         throw new Error("Can't decrypt; missing keyheader");
       } else {
-        return imageBlob;
+        return await imageBlob.fixExtension();
       }
     })
     .catch((err) => {
@@ -295,7 +295,7 @@ export const getPayloadBytes = async (
       } else if (res.info().headers.payloadencrypted === 'True') {
         throw new Error("Can't decrypt; missing keyheader");
       } else {
-        return imageBlob;
+        return await imageBlob.fixExtension();
       }
     })
     .catch((err) => {

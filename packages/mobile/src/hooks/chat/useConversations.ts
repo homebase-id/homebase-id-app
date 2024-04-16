@@ -2,16 +2,18 @@ import { Conversation, getConversations } from '../../provider/chat/Conversation
 import { InfiniteData, useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { useDotYouClientContext } from 'feed-app-common';
-import { ChatMessage, getChatMessages } from '../../provider/chat/ChatProvider';
+import { ChatMessage } from '../../provider/chat/ChatProvider';
 import { useCallback, useEffect, useState } from 'react';
+import { getChatMessageInfiniteQueryOptions } from './useChatMessages';
 
 const PAGE_SIZE = 500;
 
 export const useConversations = () => {
   const dotYouClient = useDotYouClientContext();
 
-  const fetchConversations = async (cursorState: string | undefined) =>
-    await getConversations(dotYouClient, cursorState, PAGE_SIZE);
+  const fetchConversations = async (cursorState: string | undefined) => {
+    return await getConversations(dotYouClient, cursorState, PAGE_SIZE);
+  };
 
   return {
     all: useInfiniteQuery({
@@ -21,7 +23,7 @@ export const useConversations = () => {
       getNextPageParam: (lastPage) =>
         lastPage.searchResults?.length >= PAGE_SIZE ? lastPage.cursorState : undefined,
       refetchOnMount: false,
-      staleTime: 1000 * 60 * 5,
+      staleTime: 1000 * 60 * 5, // 5min before conversations from another device are fetched on this one
     }),
   };
 };
@@ -69,11 +71,9 @@ export const useConversationsWithRecentMessage = () => {
       const convoWithMessage: ConversationWithRecentMessage[] = await Promise.all(
         (flatConversations.filter(Boolean) as HomebaseFile<Conversation>[]).map(async (convo) => {
           const conversationId = convo.fileMetadata.appData.uniqueId;
-          const messagesA = await queryClient.fetchInfiniteQuery({
-            queryKey: ['chat-messages', conversationId],
-            initialPageParam: undefined,
-            queryFn: () => getChatMessages(dotYouClient, conversationId as string, undefined, 100), // I know 100 seems a lot, but it's the same as the first pages on the chat detail screen; So we don't incorrectly fill the cache;
-          });
+          const messagesA = await queryClient.fetchInfiniteQuery(
+            getChatMessageInfiniteQueryOptions(dotYouClient, conversationId)
+          );
           return {
             ...convo,
             lastMessage: messagesA.pages[0].searchResults[0],
