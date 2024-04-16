@@ -39,7 +39,7 @@ const ChatMessageBox = memo(({ setReplyOnSwipeOpen, ...props }: ChatMessageBoxPr
         ]}
       >
         <View style={styles.replyImageWrapper}>
-          <Reply />
+          <Info />
         </View>
       </Animated.View>
     );
@@ -64,7 +64,7 @@ const ChatMessageBox = memo(({ setReplyOnSwipeOpen, ...props }: ChatMessageBoxPr
         ]}
       >
         <View style={styles.replyImageWrapper}>
-          <Info />
+          <Reply />
         </View>
       </Animated.View>
     );
@@ -72,7 +72,7 @@ const ChatMessageBox = memo(({ setReplyOnSwipeOpen, ...props }: ChatMessageBoxPr
 
   const onSwipeOpenAction = useCallback(
     (direction: 'left' | 'right', swipeable: Swipeable) => {
-      if (props.currentMessage && direction === 'right') {
+      if (props.currentMessage && direction === 'left') {
         setReplyOnSwipeOpen({ ...props.currentMessage });
         swipeable.close();
       } else {
@@ -94,7 +94,7 @@ const ChatMessageBox = memo(({ setReplyOnSwipeOpen, ...props }: ChatMessageBoxPr
       friction={3}
       overshootFriction={8}
       rightThreshold={40}
-      leftThreshold={40}
+      leftThreshold={20}
       enabled={enabled}
       renderRightActions={renderRightAction}
       renderLeftActions={renderLeftAction}
