@@ -7,6 +7,7 @@ import { useDarkMode } from '../../hooks/useDarkMode';
 import { ChatMessageIMessage } from './ChatDetail';
 
 import { ChatMessageContent } from './Chat-Message-Content';
+import { useMemo } from 'react';
 
 type ReplyMessageBarProps = {
   clearReply: () => void;
@@ -16,8 +17,12 @@ type ReplyMessageBarProps = {
 const ReplyMessageBar = ({ clearReply, message }: ReplyMessageBarProps) => {
   const { isDarkMode } = useDarkMode();
   const { payloads } = message.fileMetadata;
-  const isImageOrVideo = payloads.some(
-    (payload) => payload.contentType.includes('image') || payload.contentType.includes('video')
+  const isImageOrVideo = useMemo(
+    () =>
+      payloads.some(
+        (payload) => payload.contentType.includes('image') || payload.contentType.includes('video')
+      ),
+    [payloads]
   );
 
   return (

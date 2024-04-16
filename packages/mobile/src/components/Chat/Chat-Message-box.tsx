@@ -93,6 +93,8 @@ const ChatMessageBox = memo(({ setReplyOnSwipeOpen, ...props }: ChatMessageBoxPr
     <Swipeable
       friction={3}
       overshootFriction={8}
+      activeOffsetX={[-30, 30]}
+      failOffsetY={[-30, 30]}
       rightThreshold={40}
       leftThreshold={20}
       enabled={enabled}
