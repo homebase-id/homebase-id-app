@@ -19,8 +19,8 @@ export const Dashboard = memo(() => {
         marginVertical: 16,
       }}
     >
-      <AppLink label="Owner console" appPath="/owner" appId={OWNER_APP_ID} icon={Homebase} />
-      <AppLink label="Mail" appPath="/apps/mail" appId={MAIL_APP_ID} icon={HomebaseMail} />
+      <AppLink label="Owner console" appPath="owner" appId={OWNER_APP_ID} icon={Homebase} />
+      <AppLink label="Mail" appPath="apps/mail" appId={MAIL_APP_ID} icon={HomebaseMail} />
     </View>
   );
 });
