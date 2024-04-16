@@ -17,23 +17,7 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: 10,
     fontSize: 16,
-    lineHeight: 16,
-    ...Platform.select({
-      web: {
-        paddingTop: 6,
-        paddingLeft: 4,
-      },
-    }),
-    marginTop: Platform.select({
-      ios: 4,
-      // android: 4,
-      // web: 6,
-    }),
-    // marginBottom: Platform.select({
-    //   ios: 5,
-    //   android: 4,
-    //   web: 4,
-    // }),
+    lineHeight: 20,
   },
   container: {
     flex: 1,

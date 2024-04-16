@@ -8,7 +8,7 @@ import {
 } from '@react-navigation/native';
 
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
-import { QueryClient } from '@tanstack/react-query';
+import { QueryClient, onlineManager } from '@tanstack/react-query';
 import {
   PersistQueryClientProvider,
   PersistQueryClientOptions,
@@ -21,10 +21,10 @@ import { DotYouClientProvider } from '../components/Auth/DotYouClientProvider';
 import { BackButton, HeaderActions } from '../components/ui/convo-app-bar';
 import { useLiveChatProcessor } from '../hooks/chat/useLiveChatProcessor';
 import { HeaderBackButtonProps } from '@react-navigation/elements';
-import { Platform, View } from 'react-native';
+import { Platform, StyleProp, View, ViewStyle } from 'react-native';
 
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Colors } from './Colors';
 
@@ -151,9 +151,11 @@ const INCLUDED_QUERY_KEYS = [
 
   // Big data (base64 uri's)
   // 'tinyThumb',
+
+  'processInbox',
 ];
 const persistOptions: Omit<PersistQueryClientOptions, 'queryClient'> = {
-  buster: '202403',
+  buster: '202404_4',
   maxAge: Infinity,
   persister: asyncPersist,
   dehydrateOptions: {
@@ -179,9 +181,7 @@ let App = () => {
     <PersistQueryClientProvider
       client={queryClient}
       persistOptions={persistOptions}
-      onSuccess={() =>
-        queryClient.resumePausedMutations().then(() => queryClient.invalidateQueries())
-      }
+      onSuccess={() => queryClient.resumePausedMutations()}
     >
       <GestureHandlerRootView style={{ flex: 1 }}>
         <PushNotificationProvider>
@@ -246,7 +246,6 @@ const AppStackScreen = memo(() => {
   useValidTokenCheck();
   useRefetchOnFocus();
   useOnlineManager();
-  useLiveChatProcessor();
   useAuthenticatedPushNotification();
   useInitialPushNotification();
 
@@ -298,7 +297,9 @@ const TabStack = memo(() => {
           tabBarIcon: TabChatIcon,
           headerShown: false,
           tabBarStyle: hide
-            ? { display: 'none' }
+            ? Platform.OS === 'android'
+              ? { height: 0, overflow: 'hidden', opacity: 0 }
+              : { display: 'none' }
             : { backgroundColor: isDarkMode ? Colors.indigo[900] : Colors.indigo[100] },
         }}
       />
@@ -335,6 +336,7 @@ const ProfileStack = () => {
 const StackChat = createNativeStackNavigator<ChatStackParamList>();
 const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) => {
   const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
+  const isOnline = useLiveChatProcessor();
 
   const headerRight = useCallback(() => {
     return HeaderActions({
@@ -365,7 +367,7 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
           title: 'Chats',
           headerShown: true,
           headerTitleAlign: 'left',
-          headerLeft: ProfileAvatar,
+          headerLeft: isOnline ? ProfileAvatar : OfflineProfileAvatar,
           headerRight: headerRight,
           headerSearchBarOptions: {
             shouldShowHintSearchIcon: true,
@@ -403,6 +405,7 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
         // component={(props) => <ChatPage {...props} />} // This is faster, but react-navigation goes crazy with warnings
         component={ChatPage}
         options={{
+          headerShown: false,
           gestureEnabled: true,
         }}
       />
@@ -453,9 +456,71 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
 };
 
 const ProfileAvatar = () => {
+  const { isDarkMode } = useDarkMode();
+  const onlineDotStyle: StyleProp<ViewStyle> = useMemo(
+    () => ({
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+      backgroundColor: !isDarkMode ? Colors.white : Colors.black,
+      borderWidth: 1,
+      borderColor: Colors.slate[200],
+      position: 'absolute',
+      bottom: 0,
+      right: 0,
+      zIndex: 15,
+    }),
+    [isDarkMode]
+  );
+
   return (
-    <View style={{ marginRight: Platform.OS === 'android' ? 16 : 0 }}>
+    <View style={{ marginRight: Platform.OS === 'android' ? 16 : 0, position: 'relative' }}>
       <OwnerAvatar imageSize={{ width: 30, height: 30 }} style={{ borderRadius: 30 / 2 }} />
+      <View
+        style={[
+          onlineDotStyle,
+          onlineManager.isOnline()
+            ? {
+                backgroundColor: Colors.green[500],
+              }
+            : {},
+        ]}
+      />
+    </View>
+  );
+};
+
+const OfflineProfileAvatar = () => {
+  const { isDarkMode } = useDarkMode();
+  const offlineDotStyle: StyleProp<ViewStyle> = useMemo(
+    () => ({
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+      backgroundColor: !isDarkMode ? Colors.white : Colors.black,
+      borderWidth: 1,
+      borderColor: Colors.slate[200],
+      position: 'absolute',
+      bottom: 0,
+      right: 0,
+      zIndex: 15,
+    }),
+    [isDarkMode]
+  );
+
+  return (
+    <View style={{ marginRight: Platform.OS === 'android' ? 16 : 0, position: 'relative' }}>
+      <OwnerAvatar imageSize={{ width: 30, height: 30 }} style={{ borderRadius: 30 / 2 }} />
+      <View
+        style={[
+          offlineDotStyle,
+          onlineManager.isOnline()
+            ? {
+                backgroundColor: Colors.red[500],
+              }
+            : {},
+        ]}
+      />
     </View>
   );
 };

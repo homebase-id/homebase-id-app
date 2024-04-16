@@ -88,6 +88,8 @@
 		<string></string>
 		<key>NSMicrophoneUsageDescription</key>
 		<string>$(PRODUCT_NAME) would like access to microphone to record audio</string>
+		<key>NSAppleMusicUsageDescription</key>
+		<string>${PRODUCT_NAME} would like to access audio to share it into the app</string>
 		<key>NSPhotoLibraryUsageDescription</key>
 		<string>${PRODUCT_NAME} would like to access gallery</string>
 		<key>UIBackgroundModes</key>

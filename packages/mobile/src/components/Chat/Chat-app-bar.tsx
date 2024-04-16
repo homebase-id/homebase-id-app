@@ -47,7 +47,7 @@ export const ChatAppBar = ({
         }}
       >
         <HeaderBackButton
-          style={{ left: 0, marginRight: Platform.OS === 'ios' ? -10 : 0 }}
+          style={{ marginRight: Platform.OS === 'ios' ? -10 : 0 }}
           canGoBack={true}
           onPress={goBack}
           labelVisible={false}
