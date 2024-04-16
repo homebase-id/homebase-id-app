@@ -10,7 +10,7 @@ import useContact from '../../hooks/contact/useContact';
 import { Colors } from '../../app/Colors';
 import { Times } from '../ui/Icons/icons';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { AppStackParamList, TabStackParamList } from '../../app/App';
+import { ChatStackParamList, TabStackParamList } from '../../app/App';
 import { useDarkMode } from '../../hooks/useDarkMode';
 
 export const NotificationsOverview = memo(() => {
@@ -117,12 +117,12 @@ const NotificationAppGroup = ({
   const appName = stringGuidsEqual(appId, OWNER_APP_ID)
     ? 'Homebase'
     : stringGuidsEqual(appId, FEED_APP_ID)
-    ? 'Homebase - Feed'
-    : stringGuidsEqual(appId, CHAT_APP_ID)
-    ? 'Homebase - Chat'
-    : stringGuidsEqual(appId, MAIL_APP_ID)
-    ? 'Homebase - Mail'
-    : 'Unknown';
+      ? 'Homebase - Feed'
+      : stringGuidsEqual(appId, CHAT_APP_ID)
+        ? 'Homebase - Chat'
+        : stringGuidsEqual(appId, MAIL_APP_ID)
+          ? 'Homebase - Mail'
+          : 'Unknown';
 
   const groupedByTypeNotifications =
     notifications.reduce(
@@ -162,7 +162,7 @@ const NotificationGroup = ({
   const visibleLength = isExpanded ? 10 : 3;
 
   const identity = useDotYouClientContext().getIdentity();
-  const chatNavigator = useNavigation<NavigationProp<AppStackParamList>>();
+  const chatNavigator = useNavigation<NavigationProp<ChatStackParamList>>();
   const feedNavigator = useNavigation<NavigationProp<TabStackParamList>>();
 
   return (
@@ -337,7 +337,7 @@ const bodyFormer = (
 export const navigateOnNotification = (
   notification: PushNotification,
   identity: string,
-  chatNavigator: NavigationProp<AppStackParamList>,
+  chatNavigator: NavigationProp<ChatStackParamList>,
   feedNavigator: NavigationProp<TabStackParamList>
 ) => {
   if (notification.options.appId === OWNER_APP_ID) {

@@ -31,7 +31,6 @@ type ConversationProp = NativeStackScreenProps<ChatStackParamList, 'Conversation
 
 export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
   const { data: conversations } = useConversationsWithRecentMessage().all;
-
   const [query, setQuery] = useState<string | undefined>(undefined);
   const { isDarkMode } = useDarkMode();
   const queryClient = useQueryClient();

@@ -1,5 +1,5 @@
 import messaging, { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
-import { PushNotificationOptions } from '@youfoundation/js-lib/dist';
+import { PushNotificationOptions } from '@youfoundation/js-lib/core';
 
 //
 // CAVEATS GALORE!
