@@ -1,4 +1,4 @@
-import { Linking, Text, TouchableOpacity, View } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
 
 import { usePushNotifications } from '../../hooks/notifications/usePushNotifications';
 import { memo, useMemo, useState } from 'react';
@@ -10,11 +10,11 @@ import useContact from '../../hooks/contact/useContact';
 import { Colors } from '../../app/Colors';
 import { Times } from '../ui/Icons/icons';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { AppStackParamList, TabStackParamList } from '../../app/App';
+import { ChatStackParamList, TabStackParamList } from '../../app/App';
 import { useDarkMode } from '../../hooks/useDarkMode';
+import { openURL } from '../../utils/utils';
 
 export const NotificationsOverview = memo(() => {
-  const { isDarkMode } = useDarkMode();
   const { data: notifications } = usePushNotifications().fetch;
 
   const groupedNotificationsPerDay = useMemo(
@@ -35,15 +35,6 @@ export const NotificationsOverview = memo(() => {
 
   return notifications?.results?.length ? (
     <>
-      <Text
-        style={{
-          fontSize: 18,
-          marginBottom: 5,
-          marginTop: 15,
-        }}
-      >
-        Notifications
-      </Text>
       <View
         style={{
           display: 'flex',
@@ -62,11 +53,7 @@ export const NotificationsOverview = memo(() => {
         ))}
       </View>
     </>
-  ) : (
-    <Text style={{ color: isDarkMode ? Colors.slate[400] : Colors.slate[500] }}>
-      {'No notifications'}
-    </Text>
-  );
+  ) : null;
 });
 
 const NotificationDay = ({
@@ -117,12 +104,12 @@ const NotificationAppGroup = ({
   const appName = stringGuidsEqual(appId, OWNER_APP_ID)
     ? 'Homebase'
     : stringGuidsEqual(appId, FEED_APP_ID)
-    ? 'Homebase - Feed'
-    : stringGuidsEqual(appId, CHAT_APP_ID)
-    ? 'Homebase - Chat'
-    : stringGuidsEqual(appId, MAIL_APP_ID)
-    ? 'Homebase - Mail'
-    : 'Unknown';
+      ? 'Homebase - Feed'
+      : stringGuidsEqual(appId, CHAT_APP_ID)
+        ? 'Homebase - Chat'
+        : stringGuidsEqual(appId, MAIL_APP_ID)
+          ? 'Homebase - Mail'
+          : 'Unknown';
 
   const groupedByTypeNotifications =
     notifications.reduce(
@@ -162,7 +149,7 @@ const NotificationGroup = ({
   const visibleLength = isExpanded ? 10 : 3;
 
   const identity = useDotYouClientContext().getIdentity();
-  const chatNavigator = useNavigation<NavigationProp<AppStackParamList>>();
+  const chatNavigator = useNavigation<NavigationProp<ChatStackParamList>>();
   const feedNavigator = useNavigation<NavigationProp<TabStackParamList>>();
 
   return (
@@ -337,7 +324,7 @@ const bodyFormer = (
 export const navigateOnNotification = (
   notification: PushNotification,
   identity: string,
-  chatNavigator: NavigationProp<AppStackParamList>,
+  chatNavigator: NavigationProp<ChatStackParamList>,
   feedNavigator: NavigationProp<TabStackParamList>
 ) => {
   if (notification.options.appId === OWNER_APP_ID) {
@@ -349,13 +336,13 @@ export const navigateOnNotification = (
         OWNER_CONNECTION_ACCEPTED_TYPE_ID,
       ].includes(notification.options.typeId)
     ) {
-      Linking.openURL(`https://${identity}/owner/connections/${notification.senderId}`);
+      openURL(`https://${identity}/owner/connections/${notification.senderId}`);
     }
   } else if (notification.options.appId === CHAT_APP_ID) {
     chatNavigator.navigate('ChatScreen', { convoId: notification.options.typeId });
   } else if (notification.options.appId === MAIL_APP_ID) {
     // Navigate to owner console:
-    return `https://${identity}/apps/mail/${notification.options.typeId}`;
+    openURL(`https://${identity}/apps/mail/${notification.options.typeId}`);
   } else if (notification.options.appId === FEED_APP_ID) {
     feedNavigator.navigate('Feed');
   }
