@@ -11,6 +11,7 @@ import {
   IMessage,
   InputToolbar,
   InputToolbarProps,
+  LoadEarlier,
   MessageImageProps,
   MessageProps,
   MessageText,
@@ -451,6 +452,12 @@ export const ChatDetail = memo(
       );
     }, []);
 
+    const scrollToBottomStyle = useMemo(() => {
+      return {
+        backgroundColor: isDarkMode ? Colors.indigo[900] : Colors.white,
+        opacity: 1,
+      };
+    }, [isDarkMode]);
     return (
       <SafeAreaView>
         <GiftedChat<ChatMessageIMessage>
@@ -483,6 +490,10 @@ export const ChatDetail = memo(
           }}
           loadEarlier={hasMoreMessages}
           onLoadEarlier={fetchMoreMessages}
+          scrollToBottomStyle={scrollToBottomStyle}
+          renderLoadEarlier={(prop) => (
+            <LoadEarlier {...prop} containerStyle={scrollToBottomStyle} />
+          )}
           listViewProps={{
             removeClippedSubviews: true,
             windowSize: 15,
