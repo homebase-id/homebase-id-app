@@ -65,7 +65,7 @@ import { AudioContextProvider } from '../components/AudioContext/AudioContext';
 import { useInitialPushNotification } from '../hooks/push-notification/useInitialPushNotification';
 import { ErrorBoundary } from '../components/ui/ErrorBoundary/ErrorBoundary';
 import { RouteContextProvider, useRouteContext } from '../components/RouteContext/RouteContext';
-import { OwnerAvatar } from '../components/Chat/Conversation-tile';
+import { OwnerAvatar } from '../components/ui/Avatars/Avatar';
 
 export type AuthStackParamList = {
   Login: undefined;

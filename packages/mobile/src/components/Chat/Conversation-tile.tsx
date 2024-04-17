@@ -1,31 +1,16 @@
 import { memo, useMemo } from 'react';
-import {
-  ImageStyle,
-  StyleProp,
-  StyleSheet,
-  Text,
-  TextStyle,
-  TouchableOpacity,
-  View,
-  ViewStyle,
-} from 'react-native';
-
+import { StyleSheet, Text, TextStyle, TouchableOpacity, View } from 'react-native';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
-
 import { Colors } from '../../app/Colors';
 import { Conversation } from '../../provider/chat/ConversationProvider';
 import { useChatMessages } from '../../hooks/chat/useChatMessages';
 import { ChatDeletedArchivalStaus, ChatMessage } from '../../provider/chat/ChatProvider';
-import { Users } from '../ui/Icons/icons';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { ChatSentTimeIndicator } from './Chat-Sent-Time-Indicator';
 import useContact from '../../hooks/contact/useContact';
-import { OdinImage } from '../ui/OdinImage/OdinImage';
-import { CONTACT_PROFILE_IMAGE_KEY, ContactConfig } from '@youfoundation/js-lib/network';
-import { useProfile } from '../../hooks/profile/useProfile';
-import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
 import { ChatDeliveryIndicator } from './Chat-Delivery-Indicator';
 import { ChatMessageContent } from './Chat-Message-Content';
+import { OwnerAvatar, GroupAvatar, Avatar } from '../ui/Avatars/Avatar';
 
 type ConversationTileProps = {
   onPress?: () => void;
@@ -35,78 +20,6 @@ type ConversationTileProps = {
   conversationId?: string;
   isSelf?: boolean;
 };
-
-export const Avatar = memo(
-  (props: {
-    odinId: string;
-    style?: ImageStyle;
-    imageSize?: { width: number; height: number };
-  }) => {
-    const { data: contact } = useContact(props.odinId).fetch;
-    return (
-      <OdinImage
-        fileId={contact?.fileId}
-        fileKey={CONTACT_PROFILE_IMAGE_KEY}
-        targetDrive={ContactConfig.ContactTargetDrive}
-        previewThumbnail={contact?.fileMetadata.appData.previewThumbnail}
-        imageSize={props.imageSize || { width: 48, height: 48 }}
-        fit="contain"
-        odinId={props.odinId}
-        style={{
-          ...styles.tinyLogo,
-          ...props.style,
-        }}
-        lastModified={contact?.fileMetadata.updated}
-      />
-    );
-  }
-);
-
-export const OwnerAvatar = memo(
-  (props: { style?: ImageStyle; imageSize?: { width: number; height: number } }) => {
-    const { data: profileData } = useProfile();
-
-    return (
-      <OdinImage
-        fit="cover"
-        targetDrive={GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId)}
-        fileId={profileData?.profileImageFileId}
-        fileKey={profileData?.profileImageFileKey}
-        previewThumbnail={profileData?.profileImagePreviewThumbnail}
-        imageSize={props.imageSize || { width: 48, height: 48 }}
-        style={{
-          ...styles.tinyLogo,
-          ...(props.imageSize || {}),
-          ...props.style,
-        }}
-      />
-    );
-  }
-);
-
-export const GroupAvatar = memo(
-  (props: {
-    style?: StyleProp<ViewStyle>;
-    iconSize?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl' | number;
-  }) => {
-    const { isDarkMode } = useDarkMode();
-    return (
-      <View
-        style={[
-          styles.tinyLogo,
-          {
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: isDarkMode ? Colors.slate[800] : Colors.purple[200],
-          },
-          props.style,
-        ]}
-      >
-        <Users size={props.iconSize} />
-      </View>
-    );
-  }
-);
 
 const ConversationTile = memo((props: ConversationTileProps) => {
   const { data: chatMessages } = useChatMessages({
@@ -139,13 +52,19 @@ const ConversationTile = memo((props: ConversationTileProps) => {
     [flatMessages, lastReadTime]
   );
 
+  const colorMode = useMemo(() => (isDarkMode ? Colors.white : Colors.slate[900]), [isDarkMode]);
+  const backgroundColor = useMemo(
+    () => (isDarkMode ? Colors.slate[900] : Colors.white),
+    [isDarkMode]
+  );
+
   return (
     <TouchableOpacity onPress={props.onPress} onLongPress={props.onLongPress}>
       <View
         style={[
           styles.tile,
           {
-            backgroundColor: isDarkMode ? Colors.slate[900] : Colors.white,
+            backgroundColor: backgroundColor,
           },
         ]}
       >
@@ -161,18 +80,13 @@ const ConversationTile = memo((props: ConversationTileProps) => {
           )}
         </View>
 
-        <View
-          style={{
-            ...styles.content,
-            flex: 1,
-          }}
-        >
+        <View style={styles.content}>
           <Text
             numberOfLines={1}
             style={[
               styles.title,
               {
-                color: isDarkMode ? Colors.white : Colors.slate[900],
+                color: colorMode,
               },
             ]}
           >
@@ -196,7 +110,7 @@ const ConversationTile = memo((props: ConversationTileProps) => {
                 style={[
                   styles.description,
                   {
-                    color: isDarkMode ? Colors.white : Colors.slate[900],
+                    color: colorMode,
                   },
                   lastMessage.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus
                     ? styles.deleted
@@ -215,32 +129,43 @@ const ConversationTile = memo((props: ConversationTileProps) => {
           }}
         >
           {lastMessage && <ChatSentTimeIndicator msg={lastMessage} keepDetail={false} />}
-          {unreadCount > 0 ? (
-            <View
-              style={{
-                backgroundColor: isDarkMode ? Colors.blue[500] : Colors.blue[100],
-                borderRadius: 8,
-                padding: 4,
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
-              <Text
-                style={{
-                  color: isDarkMode ? Colors.white : Colors.blue[900],
-                  fontSize: 12,
-                }}
-              >
-                {Math.min(unreadCount, 10)}
-                {unreadCount >= 10 ? '+' : ''}
-              </Text>
-            </View>
-          ) : null}
+          {unreadCount > 0 ? <UnreadCount count={unreadCount} /> : null}
         </View>
       </View>
     </TouchableOpacity>
   );
 });
+
+const UnreadCount = ({ count }: { count: number }) => {
+  const { isDarkMode } = useDarkMode();
+  const bgColor = useMemo(() => (isDarkMode ? Colors.blue[500] : Colors.blue[100]), [isDarkMode]);
+  const textColor = useMemo(() => (isDarkMode ? Colors.white : Colors.blue[900]), [isDarkMode]);
+  return (
+    <View
+      style={{
+        backgroundColor: bgColor,
+        borderRadius: 25,
+        padding: 4,
+        width: 24,
+        height: 24,
+        justifyContent: 'flex-end',
+        alignSelf: 'flex-end',
+        alignItems: 'center',
+      }}
+    >
+      <Text
+        style={{
+          color: textColor,
+          fontSize: 12,
+          textAlign: 'center',
+        }}
+      >
+        {Math.min(count, 10)}
+        {count >= 10 ? '+' : ''}
+      </Text>
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   tile: {
@@ -256,6 +181,7 @@ const styles = StyleSheet.create({
   content: {
     borderRadius: 8,
     alignSelf: 'center',
+    flex: 1,
   },
   you: {
     fontSize: 16,
@@ -266,14 +192,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
   },
-  tinyLogo: {
-    objectFit: 'cover',
-    marginLeft: 0,
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    overflow: 'hidden',
-  },
+
   description: {
     fontSize: 16,
     marginVertical: 4,
