@@ -359,6 +359,9 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
     <StackChat.Navigator
       screenOptions={{
         headerShown: false,
+        statusBarColor: backgroundColor,
+        /// StatusBarStyle throws error when changin in Ios (even setting to Ui UIControllerbasedStatusBar to yes)
+        statusBarStyle: Platform.OS === 'android' ? (isDarkMode ? 'light' : 'dark') : undefined,
       }}
     >
       <StackChat.Screen
@@ -369,7 +372,7 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
           headerShown: true,
           headerTitleAlign: 'left',
           headerLeft: isOnline ? ProfileAvatar : OfflineProfileAvatar,
-          headerRight: headerRight,
+          headerRight: Platform.OS === 'ios' ? headerRight : undefined,
           contentStyle: {
             backgroundColor: backgroundColor,
           },
