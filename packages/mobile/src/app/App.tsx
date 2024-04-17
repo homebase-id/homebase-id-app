@@ -393,7 +393,6 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
           headerTitleAlign: 'left',
           headerLeft: isOnline ? ProfileAvatar : OfflineProfileAvatar,
           headerRight: Platform.OS === 'ios' ? headerRight : undefined,
-
           headerShadowVisible: false,
           headerTransparent: Platform.OS === 'ios',
           headerBlurEffect: 'regular',
@@ -406,7 +405,11 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
         }}
       />
 
-      <StackChat.Group screenOptions={{ presentation: 'modal' }}>
+      <StackChat.Group
+        screenOptions={{
+          presentation: 'modal',
+        }}
+      >
         {/* TODO: Swiping effect like signal  */}
         <StackChat.Screen
           name="NewChat"
@@ -423,7 +426,6 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
           options={{
             headerTitle: 'New Group',
             headerShown: false,
-            headerLeft: headerBackButton,
           }}
         />
       </StackChat.Group>

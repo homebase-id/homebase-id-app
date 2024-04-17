@@ -2,7 +2,7 @@ import { useAllConnections } from 'feed-app-common';
 import { FlatList, ListRenderItemInfo, Platform, Text } from 'react-native';
 import { ContactTile } from '../components/Contact/Contact-Tile';
 
-import { memo, useCallback, useState } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 import { Header, HeaderBackButtonProps } from '@react-navigation/elements';
 import { BackButton } from '../components/ui/convo-app-bar';
 import { TouchableOpacity } from 'react-native-gesture-handler';
@@ -13,6 +13,7 @@ import Dialog from 'react-native-dialog';
 import { DotYouProfile } from '@youfoundation/js-lib/network';
 import { useDarkMode } from '../hooks/useDarkMode';
 import { Colors } from '../app/Colors';
+import { SafeAreaView } from '../components/ui/SafeAreaView/SafeAreaView';
 
 export const NewGroupPage = memo(() => {
   const contacts = useAllConnections(true).data;
@@ -79,6 +80,11 @@ export const NewGroupPage = memo(() => {
     ),
     [selectedContacts]
   );
+  const { isDarkMode } = useDarkMode();
+  const headerColor = useMemo(
+    () => (isDarkMode ? Colors.gray[900] : Colors.slate[50]),
+    [isDarkMode]
+  );
 
   if (!contacts) return null;
 
@@ -89,23 +95,28 @@ export const NewGroupPage = memo(() => {
         headerStatusBarHeight={Platform.OS === 'ios' ? 10 : 0}
         headerLeft={headerLeft}
         headerRight={headerRight}
+        headerStyle={{
+          backgroundColor: headerColor,
+        }}
       />
-      <FlatList data={contacts} keyExtractor={(item) => item.odinId} renderItem={renderItem} />
-      <Dialog.Container visible={dialogVisible} onBackdropPress={() => setDialogVisible(false)}>
-        <Dialog.Title>New Group Name</Dialog.Title>
-        <Dialog.Input
-          onChangeText={(value) => {
-            setgroupTitle(value);
-          }}
-        />
-        <Dialog.Button
-          label="Cancel"
-          onPress={() => {
-            setDialogVisible(false);
-          }}
-        />
-        <Dialog.Button label="Create" onPress={createGroupCallback} />
-      </Dialog.Container>
+      <SafeAreaView>
+        <FlatList data={contacts} keyExtractor={(item) => item.odinId} renderItem={renderItem} />
+        <Dialog.Container visible={dialogVisible} onBackdropPress={() => setDialogVisible(false)}>
+          <Dialog.Title>New Group Name</Dialog.Title>
+          <Dialog.Input
+            onChangeText={(value) => {
+              setgroupTitle(value);
+            }}
+          />
+          <Dialog.Button
+            label="Cancel"
+            onPress={() => {
+              setDialogVisible(false);
+            }}
+          />
+          <Dialog.Button label="Create" onPress={createGroupCallback} />
+        </Dialog.Container>
+      </SafeAreaView>
     </>
   );
 });
