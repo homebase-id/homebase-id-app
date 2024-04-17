@@ -1,6 +1,6 @@
 import { CONTACT_PROFILE_IMAGE_KEY, ContactConfig } from '@youfoundation/js-lib/network';
 import { GetTargetDriveFromProfileId, BuiltInProfiles } from '@youfoundation/js-lib/profile';
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import { ImageStyle, StyleProp, ViewStyle, View, StyleSheet } from 'react-native';
 import useContact from '../../../hooks/contact/useContact';
 import { useProfile } from '../../../hooks/profile/useProfile';
@@ -63,6 +63,10 @@ export const GroupAvatar = memo(
     iconSize?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl' | number;
   }) => {
     const { isDarkMode } = useDarkMode();
+    const backgroundColor = useMemo(
+      () => (isDarkMode ? Colors.slate[900] : Colors.white),
+      [isDarkMode]
+    );
     return (
       <View
         style={[
@@ -70,7 +74,7 @@ export const GroupAvatar = memo(
           {
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: isDarkMode ? Colors.slate[800] : Colors.purple[200],
+            backgroundColor: backgroundColor,
           },
           props.style,
         ]}

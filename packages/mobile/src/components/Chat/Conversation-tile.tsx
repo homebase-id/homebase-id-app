@@ -1,5 +1,5 @@
 import { memo, useMemo } from 'react';
-import { StyleSheet, Text, TextStyle, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TextStyle, TouchableHighlight, View } from 'react-native';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { Colors } from '../../app/Colors';
 import { Conversation } from '../../provider/chat/ConversationProvider';
@@ -53,21 +53,17 @@ const ConversationTile = memo((props: ConversationTileProps) => {
   );
 
   const colorMode = useMemo(() => (isDarkMode ? Colors.white : Colors.slate[900]), [isDarkMode]);
-  const backgroundColor = useMemo(
-    () => (isDarkMode ? Colors.slate[900] : Colors.white),
-    [isDarkMode]
-  );
 
   return (
-    <TouchableOpacity onPress={props.onPress} onLongPress={props.onLongPress}>
-      <View
-        style={[
-          styles.tile,
-          {
-            backgroundColor: backgroundColor,
-          },
-        ]}
-      >
+    <TouchableHighlight
+      onPress={props.onPress}
+      onLongPress={props.onLongPress}
+      underlayColor={Colors.slate[100]}
+      style={{
+        marginTop: 4,
+      }}
+    >
+      <View style={{ ...styles.tile }}>
         <View style={{ marginRight: 16 }}>
           {!isGroup ? (
             props.isSelf ? (
@@ -83,12 +79,10 @@ const ConversationTile = memo((props: ConversationTileProps) => {
         <View style={styles.content}>
           <Text
             numberOfLines={1}
-            style={[
-              styles.title,
-              {
-                color: colorMode,
-              },
-            ]}
+            style={{
+              ...styles.title,
+              color: colorMode,
+            }}
           >
             {isGroup || props.isSelf
               ? props.conversation.title
@@ -132,7 +126,7 @@ const ConversationTile = memo((props: ConversationTileProps) => {
           {unreadCount > 0 ? <UnreadCount count={unreadCount} /> : null}
         </View>
       </View>
-    </TouchableOpacity>
+    </TouchableHighlight>
   );
 });
 
@@ -143,14 +137,8 @@ const UnreadCount = ({ count }: { count: number }) => {
   return (
     <View
       style={{
+        ...styles.unreadStyle,
         backgroundColor: bgColor,
-        borderRadius: 25,
-        padding: 4,
-        width: 24,
-        height: 24,
-        justifyContent: 'flex-end',
-        alignSelf: 'flex-end',
-        alignItems: 'center',
       }}
     >
       <Text
@@ -170,7 +158,6 @@ const UnreadCount = ({ count }: { count: number }) => {
 const styles = StyleSheet.create({
   tile: {
     padding: 16,
-    marginTop: 4,
     flexDirection: 'row',
     borderRadius: 5,
   },
@@ -191,6 +178,15 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: '600',
+  },
+  unreadStyle: {
+    borderRadius: 25,
+    padding: 4,
+    width: 24,
+    height: 24,
+    justifyContent: 'flex-end',
+    alignSelf: 'flex-end',
+    alignItems: 'center',
   },
 
   description: {

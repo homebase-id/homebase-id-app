@@ -1,5 +1,4 @@
 import { Platform, Pressable, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { Avatar, GroupAvatar, OwnerAvatar } from './Conversation-tile';
 import { Header, HeaderBackButton } from '@react-navigation/elements';
 import { useProfile } from '../../hooks/profile/useProfile';
 import { Colors } from '../../app/Colors';
@@ -8,6 +7,7 @@ import { ChatMessageIMessage } from './ChatDetail';
 import { ReactNode, useCallback } from 'react';
 import { Copy, Info, Reply, Trash } from '../ui/Icons/icons';
 import Toast from 'react-native-toast-message';
+import { Avatar, GroupAvatar, OwnerAvatar } from '../ui/Avatars/Avatar';
 
 export type SelectedMessageProp = {
   onReply: () => void;

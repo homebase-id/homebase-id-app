@@ -337,7 +337,8 @@ const StackChat = createNativeStackNavigator<ChatStackParamList>();
 const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) => {
   const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
   const isOnline = useLiveChatProcessor();
-
+  const { isDarkMode } = useDarkMode();
+  const backgroundColor = useMemo(() => (isDarkMode ? Colors.black : Colors.white), [isDarkMode]);
   const headerRight = useCallback(() => {
     return HeaderActions({
       onPress: () => navigation.navigate('NewChat'),
@@ -369,6 +370,15 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
           headerTitleAlign: 'left',
           headerLeft: isOnline ? ProfileAvatar : OfflineProfileAvatar,
           headerRight: headerRight,
+          contentStyle: {
+            backgroundColor: backgroundColor,
+          },
+          headerStyle: {
+            backgroundColor: backgroundColor,
+          },
+          headerShadowVisible: Platform.OS === 'android',
+          headerTransparent: Platform.OS === 'ios',
+          headerBlurEffect: 'regular',
           headerSearchBarOptions: {
             shouldShowHintSearchIcon: true,
             hideWhenScrolling: true,
