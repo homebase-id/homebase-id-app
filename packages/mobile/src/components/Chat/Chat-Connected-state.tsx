@@ -1,11 +1,12 @@
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { Conversation, GroupConversation } from '../../provider/chat/ConversationProvider';
 import { useDotYouClientContext, useIsConnected } from 'feed-app-common';
-import { Linking, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Text } from '../ui/Text/Text';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { Colors } from '../../app/Colors';
 import { ReactNode } from 'react';
+import { openURL } from '../../utils/utils';
 
 export const ChatConnectedState = (conversation: HomebaseFile<Conversation> | undefined) => {
   const { isDarkMode } = useDarkMode();
@@ -51,7 +52,7 @@ const RecipientConnectedState = ({ recipient }: { recipient: string }) => {
         You can only chat with connected identites, messages will not be delivered to{' '}
         <Text
           onPress={async () => {
-            await Linking.openURL(`https://${recipient}`);
+            await openURL(`https://${recipient}`);
           }}
           style={{
             textDecorationLine: 'underline',
@@ -63,7 +64,7 @@ const RecipientConnectedState = ({ recipient }: { recipient: string }) => {
       </Text>
       <Button
         onPress={async () => {
-          await Linking.openURL(`https://${identity}/owner/connections/${recipient}/connect`);
+          await openURL(`https://${identity}/owner/connections/${recipient}/connect`);
         }}
       >
         <Text

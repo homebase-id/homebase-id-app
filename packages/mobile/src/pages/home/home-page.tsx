@@ -11,7 +11,8 @@ import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-
 import { useProfile } from '../../hooks/profile/useProfile';
 import { TabStackParamList } from '../../app/App';
 import { useDarkMode } from '../../hooks/useDarkMode';
-import { NotificationsOverview } from '../../components/Notifications/NotificationsOverview';
+import { NotificationsOverview } from '../../components/Dashboard/NotificationsOverview';
+import { Dashboard } from '../../components/Dashboard/Dashboard';
 
 type HomeProps = NativeStackScreenProps<TabStackParamList, 'Home'>;
 
@@ -24,7 +25,7 @@ export const HomePage = (_props: HomeProps) => {
   return (
     <SafeAreaView>
       <Container>
-        <ScrollView>
+        <ScrollView style={{ minHeight: '100%' }}>
           <View style={{ display: 'flex', flexDirection: 'column', paddingVertical: 12 }}>
             <View
               style={{
@@ -59,6 +60,7 @@ export const HomePage = (_props: HomeProps) => {
               </Text>
             </View>
           </View>
+          <Dashboard />
           <NotificationsOverview />
         </ScrollView>
       </Container>
