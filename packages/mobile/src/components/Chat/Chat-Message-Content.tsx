@@ -10,7 +10,7 @@ export const ChatMessageContent = (message: HomebaseFile<ChatMessage> | ChatMess
     return 'This message was deleted';
   }
   if (textMessage && textMessage.length > 0) {
-    return ellipsisAtMaxChar(textMessage, 30);
+    return ellipsisAtMaxChar(textMessage, 40);
   } else if (payloads.length > 1) {
     return '📸 Medias';
   } else {

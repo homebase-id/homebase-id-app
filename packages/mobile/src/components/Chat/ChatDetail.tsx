@@ -54,6 +54,7 @@ import { ChatDeletedArchivalStaus, ChatMessage } from '../../provider/chat/ChatP
 import { useAudioRecorder } from '../../hooks/audio/useAudioRecorderPlayer';
 import { Text } from '../ui/Text/Text';
 import { millisToMinutesAndSeconds } from '../../utils/utils';
+import { SafeAreaView } from '../ui/SafeAreaView/SafeAreaView';
 
 export type ChatMessageIMessage = IMessage & HomebaseFile<ChatMessage>;
 
@@ -451,79 +452,46 @@ export const ChatDetail = memo(
     }, []);
 
     return (
-      <GiftedChat<ChatMessageIMessage>
-        messages={messages}
-        onSend={doSend}
-        infiniteScroll
-        scrollToBottom
-        alwaysShowSend
-        onLongPress={(e, _, m: ChatMessageIMessage) => onLongPress(e, m)}
-        isKeyboardInternallyHandled={true}
-        keyboardShouldPersistTaps="never"
-        renderMessageImage={(prop: MessageImageProps<ChatMessageIMessage>) => (
-          <MediaMessage {...prop} />
-        )}
-        renderCustomView={(prop: BubbleProps<ChatMessageIMessage>) => (
-          <RenderReplyMessageView {...prop} />
-        )}
-        renderBubble={(prop) => <RenderBubble {...prop} onReactionClick={doOpenReactionModal} />}
-        renderMessageText={(prop) => <RenderMessageText {...prop} />}
-        renderMessage={renderMessageBox}
-        // renderChatFooter instead of renderFooter as the renderFooter renders within the scrollView
-        renderChatFooter={renderChatFooter}
-        showUserAvatar={false}
-        renderUsernameOnMessage={isGroup}
-        renderAvatar={isGroup ? renderAvatar : null}
-        renderInputToolbar={renderInputToolbar}
-        renderUsername={renderUsername}
-        user={{
-          _id: identity || '',
-        }}
-        loadEarlier={hasMoreMessages}
-        onLoadEarlier={fetchMoreMessages}
-        listViewProps={{
-          removeClippedSubviews: true,
-          windowSize: 15,
-        }}
-      />
+      <SafeAreaView>
+        <GiftedChat<ChatMessageIMessage>
+          messages={messages}
+          onSend={doSend}
+          infiniteScroll
+          scrollToBottom
+          alwaysShowSend
+          onLongPress={(e, _, m: ChatMessageIMessage) => onLongPress(e, m)}
+          isKeyboardInternallyHandled={true}
+          keyboardShouldPersistTaps="never"
+          renderMessageImage={(prop: MessageImageProps<ChatMessageIMessage>) => (
+            <MediaMessage {...prop} />
+          )}
+          renderCustomView={(prop: BubbleProps<ChatMessageIMessage>) => (
+            <RenderReplyMessageView {...prop} />
+          )}
+          renderBubble={(prop) => <RenderBubble {...prop} onReactionClick={doOpenReactionModal} />}
+          renderMessageText={(prop) => <RenderMessageText {...prop} />}
+          renderMessage={renderMessageBox}
+          // renderChatFooter instead of renderFooter as the renderFooter renders within the scrollView
+          renderChatFooter={renderChatFooter}
+          showUserAvatar={false}
+          renderUsernameOnMessage={isGroup}
+          renderAvatar={isGroup ? renderAvatar : null}
+          renderInputToolbar={renderInputToolbar}
+          renderUsername={renderUsername}
+          user={{
+            _id: identity || '',
+          }}
+          loadEarlier={hasMoreMessages}
+          onLoadEarlier={fetchMoreMessages}
+          listViewProps={{
+            removeClippedSubviews: true,
+            windowSize: 15,
+          }}
+        />
+      </SafeAreaView>
     );
   }
 );
-
-const styles = StyleSheet.create({
-  inputContainer: {
-    position: 'relative',
-    flexDirection: 'column-reverse',
-  },
-  container: {
-    flex: 1,
-    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
-  },
-  replyText: {
-    justifyContent: 'center',
-    marginLeft: 6,
-    marginRight: 12,
-    flexShrink: 1,
-  },
-  replyMessageContainer: {
-    padding: 8,
-    paddingBottom: 8,
-    display: 'flex',
-    flexDirection: 'row',
-    borderLeftWidth: 6,
-    borderLeftColor: 'lightgrey',
-    borderRadius: 6,
-    marginLeft: 6,
-    marginTop: 6,
-    marginRight: 6,
-  },
-
-  send: {
-    justifyContent: 'center',
-    marginRight: 8,
-    marginVertical: 'auto',
-  },
-});
 
 const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
   const message = props.currentMessage as ChatMessageIMessage;
@@ -716,6 +684,7 @@ const RenderReplyMessageView = memo((props: BubbleProps<ChatMessageIMessage>) =>
   const { isDarkMode } = useDarkMode();
 
   if (!props.currentMessage?.fileMetadata.appData.content.replyId) return null;
+  const color = getOdinIdColor(replyMessage?.fileMetadata.senderOdinId || '');
 
   return (
     props.currentMessage &&
@@ -724,7 +693,8 @@ const RenderReplyMessageView = memo((props: BubbleProps<ChatMessageIMessage>) =>
         style={[
           styles.replyMessageContainer,
           {
-            borderLeftColor: props.position === 'left' ? Colors.blue[500] : Colors.purple[500],
+            borderLeftColor:
+              props.position === 'left' ? color.color(isDarkMode) : Colors.purple[500],
             backgroundColor: `${Colors.indigo[500]}1A`,
           },
         ]}
@@ -736,7 +706,7 @@ const RenderReplyMessageView = memo((props: BubbleProps<ChatMessageIMessage>) =>
                 style={{
                   fontWeight: '600',
                   fontSize: 15,
-                  color: isDarkMode ? Colors.slate[300] : Colors.slate[900],
+                  color: color.color(isDarkMode),
                 }}
               >
                 {replyMessage?.fileMetadata.senderOdinId?.length > 0 ? (
@@ -746,6 +716,7 @@ const RenderReplyMessageView = memo((props: BubbleProps<ChatMessageIMessage>) =>
                 )}
               </Text>
               <Text
+                numberOfLines={3}
                 style={{
                   fontSize: 14,
                   marginTop: 4,
@@ -787,4 +758,39 @@ const RenderReplyMessageView = memo((props: BubbleProps<ChatMessageIMessage>) =>
       </View>
     )
   );
+});
+
+const styles = StyleSheet.create({
+  inputContainer: {
+    position: 'relative',
+    flexDirection: 'column-reverse',
+  },
+  container: {
+    flex: 1,
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+  },
+  replyText: {
+    justifyContent: 'center',
+    marginLeft: 6,
+    marginRight: 12,
+    flexShrink: 1,
+  },
+  replyMessageContainer: {
+    padding: 8,
+    paddingBottom: 8,
+    display: 'flex',
+    flexDirection: 'row',
+    borderLeftWidth: 6,
+    borderLeftColor: 'lightgrey',
+    borderRadius: 6,
+    marginLeft: 6,
+    marginTop: 6,
+    marginRight: 6,
+  },
+
+  send: {
+    justifyContent: 'center',
+    marginRight: 8,
+    marginVertical: 'auto',
+  },
 });
