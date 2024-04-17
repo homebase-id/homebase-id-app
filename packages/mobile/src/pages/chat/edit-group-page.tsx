@@ -1,16 +1,20 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import { useConversation } from '../../hooks/chat/useConversation';
-import { useCallback, useEffect, useState } from 'react';
-import { GroupAvatar } from '../../components/Chat/Conversation-tile';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+
 import { Input } from '../../components/ui/Form/Input';
 import TextButton from '../../components/ui/Text/Text-Button';
 import { Header, HeaderBackButton } from '@react-navigation/elements';
 import { ChatStackParamList } from '../../app/App';
+import { GroupAvatar } from '../../components/ui/Avatars/Avatar';
+import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
+import { useDarkMode } from '../../hooks/useDarkMode';
+import { Colors } from '../../app/Colors';
 
 export type EditGroupProp = NativeStackScreenProps<ChatStackParamList, 'EditGroup'>;
 
-function EditGroupPage(props: EditGroupProp) {
+export function EditGroupPage(props: EditGroupProp) {
   const { convoId: conversationId } = props.route.params;
   const { single: conversationFile } = useConversation({ conversationId });
   const { mutate: updateGroupConversation, status: updateStatus } = useConversation().update;
@@ -34,12 +38,14 @@ function EditGroupPage(props: EditGroupProp) {
     }
   }, [props.navigation, updateStatus]);
 
-  if (!conversation) return null;
-
-  const headerLeft = () => (
-    <HeaderBackButton canGoBack={true} labelVisible={false} onPress={props.navigation.goBack} />
+  const headerLeft = useCallback(
+    () => (
+      <HeaderBackButton canGoBack={true} labelVisible={false} onPress={props.navigation.goBack} />
+    ),
+    [props.navigation.goBack]
   );
-  const headerRight = () => {
+
+  const headerRight = useCallback(() => {
     if (title !== conversationContent?.title && title?.length > 0) {
       return <TextButton title="Save" style={{ marginRight: 8 }} onPress={save} />;
     }
@@ -47,7 +53,16 @@ function EditGroupPage(props: EditGroupProp) {
       return <ActivityIndicator size={'small'} style={{ marginRight: 8 }} />;
     }
     return undefined;
-  };
+  }, [conversationContent?.title, save, title, updateStatus]);
+
+  const { isDarkMode } = useDarkMode();
+  const headerColor = useMemo(
+    () => (isDarkMode ? Colors.slate[900] : Colors.gray[50]),
+    [isDarkMode]
+  );
+
+  if (!conversation) return null;
+
   return (
     <>
       <View
@@ -59,27 +74,36 @@ function EditGroupPage(props: EditGroupProp) {
           },
         ]}
       >
-        <Header title={'Edit Group Title'} headerLeft={headerLeft} headerRight={headerRight} />
+        <Header
+          title={'Edit Group Title'}
+          headerLeft={headerLeft}
+          headerRight={headerRight}
+          headerStyle={{
+            backgroundColor: headerColor,
+          }}
+        />
       </View>
-      <View style={styles.content}>
-        <GroupAvatar style={styles.avatar} iconSize={'2xl'} />
-        {/* <TextButton
+      <SafeAreaView>
+        <View style={styles.content}>
+          <GroupAvatar style={styles.avatar} iconSize={'2xl'} />
+          {/* <TextButton
           title="Edit Avatar"
           onPress={() => {
             //TODO Change Avatar
           }}
         /> */}
-        <Input
-          value={title}
-          onChangeText={(title) => setTitle(title)}
-          autoCorrect={false}
-          autoFocus={true}
-          autoCapitalize="sentences"
-          style={{
-            width: '70%',
-          }}
-        />
-      </View>
+          <Input
+            value={title}
+            onChangeText={(title) => setTitle(title)}
+            autoCorrect={false}
+            autoFocus={true}
+            autoCapitalize="sentences"
+            style={{
+              width: '70%',
+            }}
+          />
+        </View>
+      </SafeAreaView>
     </>
   );
 }

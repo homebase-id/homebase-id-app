@@ -9,7 +9,7 @@ import { useChatReaction } from '../../../../hooks/chat/useChatReaction';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ChatReaction } from '../../../../provider/chat/ChatReactionProvider';
 import useContact from '../../../../hooks/contact/useContact';
-import { Avatar, OwnerAvatar } from '../../Conversation-tile';
+import { Avatar, OwnerAvatar } from '../../../ui/Avatars/Avatar';
 
 export const ReactionsModal = forwardRef(
   (
