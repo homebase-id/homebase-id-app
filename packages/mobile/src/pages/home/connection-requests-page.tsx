@@ -10,6 +10,7 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import { useDotYouClientContext } from 'feed-app-common';
 import { RedactedConnectionRequest } from '@youfoundation/js-lib/network';
 import { openURL } from '../../utils/utils';
+import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 
 type ConnectionRequestProps = NativeStackScreenProps<HomeStackParamList, 'ConnectionRequests'>;
 export const ConnectionRequestsPage = (_props: ConnectionRequestProps) => {
@@ -46,16 +47,18 @@ export const ConnectionRequestsPage = (_props: ConnectionRequestProps) => {
   );
 
   return (
-    <View style={{ position: 'relative', minHeight: '100%' }}>
-      {flatIdentities?.length ? (
-        <FlatList
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={doRefresh} />}
-          data={flatIdentities}
-          renderItem={renderItem}
-        />
-      ) : isLoadingIdentities ? null : (
-        <NoItems>You don&apos;t have any connection requests :-(</NoItems>
-      )}
-    </View>
+    <SafeAreaView>
+      <View style={{ position: 'relative', minHeight: '100%' }}>
+        {flatIdentities?.length ? (
+          <FlatList
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={doRefresh} />}
+            data={flatIdentities}
+            renderItem={renderItem}
+          />
+        ) : isLoadingIdentities ? null : (
+          <NoItems>You don&apos;t have any connection requests :-(</NoItems>
+        )}
+      </View>
+    </SafeAreaView>
   );
 };

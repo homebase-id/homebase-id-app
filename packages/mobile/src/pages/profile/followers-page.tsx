@@ -7,6 +7,7 @@ import NoItems from '../../components/list/noItems';
 import IdentityItem from '../../components/list/identityItem';
 import { useDotYouClientContext } from 'feed-app-common';
 import { openURL } from '../../utils/utils';
+import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 
 type FollowersProps = NativeStackScreenProps<ProfileStackParamList, 'Followers'>;
 
@@ -49,17 +50,19 @@ export const FollowersPage = (_props: FollowersProps) => {
   );
 
   return (
-    <View style={{ position: 'relative', minHeight: '100%' }}>
-      {flatIdentities?.length ? (
-        <FlatList
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={doRefresh} />}
-          data={flatIdentities}
-          renderItem={renderItem}
-          onEndReached={() => hasMoreIdentities && fetchNextPage()}
-        />
-      ) : isLoadingIdentities ? null : (
-        <NoItems>You don&apos;t have any followers :-(</NoItems>
-      )}
-    </View>
+    <SafeAreaView>
+      <View style={{ position: 'relative', minHeight: '100%' }}>
+        {flatIdentities?.length ? (
+          <FlatList
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={doRefresh} />}
+            data={flatIdentities}
+            renderItem={renderItem}
+            onEndReached={() => hasMoreIdentities && fetchNextPage()}
+          />
+        ) : isLoadingIdentities ? null : (
+          <NoItems>You don&apos;t have any followers :-(</NoItems>
+        )}
+      </View>
+    </SafeAreaView>
   );
 };

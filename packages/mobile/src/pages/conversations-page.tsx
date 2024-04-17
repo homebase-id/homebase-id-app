@@ -34,7 +34,8 @@ import { CHAT_APP_ID } from '../app/constants';
 import { ErrorBoundary } from '../components/ui/ErrorBoundary/ErrorBoundary';
 import { InfiniteData, useQueryClient } from '@tanstack/react-query';
 import { Pencil } from '../components/ui/Icons/icons';
-import { TouchableHighlight, TouchableOpacity } from '@gorhom/bottom-sheet';
+import { TouchableOpacity } from '@gorhom/bottom-sheet';
+import { SafeAreaView } from '../components/ui/SafeAreaView/SafeAreaView';
 
 type ConversationProp = NativeStackScreenProps<ChatStackParamList, 'Conversation'>;
 
@@ -113,16 +114,18 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
 
   return (
     <ErrorBoundary>
-      <RemoveNotifications />
-      <FloatingActionButton />
-      <FlatList
-        data={conversations}
-        keyExtractor={keyExtractor}
-        ListHeaderComponent={ConversationTileWithYourself}
-        contentInsetAdjustmentBehavior="automatic"
-        renderItem={renderItem}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={doRefresh} />}
-      />
+      <SafeAreaView>
+        <RemoveNotifications />
+        <FloatingActionButton />
+        <FlatList
+          data={conversations}
+          keyExtractor={keyExtractor}
+          ListHeaderComponent={ConversationTileWithYourself}
+          contentInsetAdjustmentBehavior="automatic"
+          renderItem={renderItem}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={doRefresh} />}
+        />
+      </SafeAreaView>
     </ErrorBoundary>
   );
 });

@@ -8,6 +8,7 @@ import IdentityItem from '../../components/list/identityItem';
 import { useCallback, useMemo, useState } from 'react';
 import { useDotYouClientContext } from 'feed-app-common';
 import { openURL } from '../../utils/utils';
+import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 
 type ConnectionsProps = NativeStackScreenProps<ProfileStackParamList, 'Connections'>;
 
@@ -54,17 +55,19 @@ export const ConnectionsPage = (_props: ConnectionsProps) => {
   );
 
   return (
-    <View style={{ position: 'relative', minHeight: '100%' }}>
-      {flatIdentities?.length ? (
-        <FlatList
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={doRefresh} />}
-          data={flatIdentities}
-          renderItem={renderItem}
-          onEndReached={() => hasMoreIdentities && fetchNextPage()}
-        />
-      ) : isLoadingIdentities ? null : (
-        <NoItems>You don&apos;t have any connections :-(</NoItems>
-      )}
-    </View>
+    <SafeAreaView>
+      <View style={{ position: 'relative', minHeight: '100%' }}>
+        {flatIdentities?.length ? (
+          <FlatList
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={doRefresh} />}
+            data={flatIdentities}
+            renderItem={renderItem}
+            onEndReached={() => hasMoreIdentities && fetchNextPage()}
+          />
+        ) : isLoadingIdentities ? null : (
+          <NoItems>You don&apos;t have any connections :-(</NoItems>
+        )}
+      </View>
+    </SafeAreaView>
   );
 };

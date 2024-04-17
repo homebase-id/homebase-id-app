@@ -316,8 +316,22 @@ const TabStack = memo(() => {
 
 const StackProfile = createNativeStackNavigator<ProfileStackParamList>();
 const ProfileStack = () => {
+  const { isDarkMode } = useDarkMode();
+  const headerColor = useMemo(
+    () => (isDarkMode ? Colors.gray[900] : Colors.slate[50]),
+    [isDarkMode]
+  );
   return (
-    <StackProfile.Navigator screenOptions={{ headerBackTitle: 'Profile' }}>
+    <StackProfile.Navigator
+      screenOptions={{
+        headerBackTitle: 'Profile',
+        statusBarColor: headerColor,
+        statusBarStyle: Platform.OS === 'android' ? (isDarkMode ? 'light' : 'dark') : undefined,
+        headerStyle: {
+          backgroundColor: headerColor,
+        },
+      }}
+    >
       <StackProfile.Screen
         name="Overview"
         component={ProfilePage}
@@ -338,7 +352,10 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
   const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
   const isOnline = useLiveChatProcessor();
   const { isDarkMode } = useDarkMode();
-  const backgroundColor = useMemo(() => (isDarkMode ? Colors.black : Colors.white), [isDarkMode]);
+  const headerColor = useMemo(
+    () => (isDarkMode ? Colors.gray[900] : Colors.slate[50]),
+    [isDarkMode]
+  );
   const headerRight = useCallback(() => {
     return HeaderActions({
       onPress: () => navigation.navigate('NewChat'),
@@ -359,9 +376,12 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
     <StackChat.Navigator
       screenOptions={{
         headerShown: false,
-        statusBarColor: backgroundColor,
+        statusBarColor: headerColor,
         /// StatusBarStyle throws error when changin in Ios (even setting to Ui UIControllerbasedStatusBar to yes)
         statusBarStyle: Platform.OS === 'android' ? (isDarkMode ? 'light' : 'dark') : undefined,
+        headerStyle: {
+          backgroundColor: headerColor,
+        },
       }}
     >
       <StackChat.Screen
@@ -373,12 +393,7 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
           headerTitleAlign: 'left',
           headerLeft: isOnline ? ProfileAvatar : OfflineProfileAvatar,
           headerRight: Platform.OS === 'ios' ? headerRight : undefined,
-          contentStyle: {
-            backgroundColor: backgroundColor,
-          },
-          headerStyle: {
-            backgroundColor: backgroundColor,
-          },
+
           headerShadowVisible: false,
           headerTransparent: Platform.OS === 'ios',
           headerBlurEffect: 'regular',

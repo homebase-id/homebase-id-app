@@ -8,6 +8,7 @@ import IdentityItem from '../../components/list/identityItem';
 import { useDotYouClientContext } from 'feed-app-common';
 import { ListRenderItemInfo } from 'react-native';
 import { openURL } from '../../utils/utils';
+import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 
 type FollowingProps = NativeStackScreenProps<ProfileStackParamList, 'Following'>;
 
@@ -50,17 +51,19 @@ export const FollowingPage = (_props: FollowingProps) => {
   );
 
   return (
-    <View style={{ position: 'relative', minHeight: '100%' }}>
-      {flatIdentities?.length ? (
-        <FlatList
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={doRefresh} />}
-          data={flatIdentities}
-          renderItem={renderItem}
-          onEndReached={() => hasMoreIdentities && fetchNextPage()}
-        />
-      ) : isLoadingIdentities ? null : (
-        <NoItems>You&apos;re not following anyone :-(</NoItems>
-      )}
-    </View>
+    <SafeAreaView>
+      <View style={{ position: 'relative', minHeight: '100%' }}>
+        {flatIdentities?.length ? (
+          <FlatList
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={doRefresh} />}
+            data={flatIdentities}
+            renderItem={renderItem}
+            onEndReached={() => hasMoreIdentities && fetchNextPage()}
+          />
+        ) : isLoadingIdentities ? null : (
+          <NoItems>You&apos;re not following anyone :-(</NoItems>
+        )}
+      </View>
+    </SafeAreaView>
   );
 };
