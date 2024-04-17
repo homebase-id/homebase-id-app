@@ -51,6 +51,7 @@ export interface ImageSource {
   type?: string | null;
   date?: number | null;
   playableDuration?: number | null;
+  key?: string | null;
 }
 
 export interface RNMediaUploadMeta extends MediaUploadMeta {

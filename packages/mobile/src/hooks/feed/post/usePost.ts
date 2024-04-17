@@ -1,11 +1,7 @@
 import { InfiniteData, useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-  PostContent,
-  savePost as savePostFile,
-  getPost,
-  removePost,
-} from '@youfoundation/js-lib/public';
+import { PostContent, getPost, removePost } from '@youfoundation/js-lib/public';
 import { NewMediaFile, MediaFile } from '@youfoundation/js-lib/core';
+import { savePost as savePostFile } from '../../../provider/feed/RNPostUploadProvider';
 
 import {
   HomebaseFile,
@@ -14,6 +10,7 @@ import {
   UploadResult,
 } from '@youfoundation/js-lib/core';
 import { getRichTextFromString, useDotYouClientContext } from 'feed-app-common';
+import { ImageSource } from '../../../provider/image/RNImageProvider';
 
 export const usePost = () => {
   const dotYouClient = useDotYouClientContext();
@@ -27,7 +24,7 @@ export const usePost = () => {
   }: {
     postFile: NewHomebaseFile<PostContent> | HomebaseFile<PostContent>;
     channelId: string;
-    mediaFiles?: (NewMediaFile | MediaFile)[];
+    mediaFiles?: (ImageSource | MediaFile)[];
     onUpdate?: (progress: number) => void;
   }) => {
     return new Promise<UploadResult>((resolve, reject) => {
@@ -154,7 +151,7 @@ export const usePost = () => {
                   ...newPost.postFile.fileMetadata.appData.content,
 
                   primaryMediaFile: {
-                    fileKey: newPost.mediaFiles?.[0].key,
+                    fileKey: (newPost.mediaFiles?.[0] as MediaFile)?.key,
                     type: (newPost.mediaFiles?.[0] as MediaFile)?.contentType,
                   },
                 },

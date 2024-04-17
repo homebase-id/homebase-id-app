@@ -1,9 +1,4 @@
-import {
-  HomebaseFile,
-  NewHomebaseFile,
-  AccessControlList,
-  NewMediaFile,
-} from '@youfoundation/js-lib/core';
+import { HomebaseFile, NewHomebaseFile, AccessControlList } from '@youfoundation/js-lib/core';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { ChannelDefinition, BlogConfig, ReactAccess } from '@youfoundation/js-lib/public';
 import { t } from 'feed-app-common';
@@ -21,6 +16,7 @@ import { FileOverview } from '../../Files/FileOverview';
 import { Select, Option } from '../../ui/Form/Select';
 import { AclIcon, AclSummary } from './AclSummary';
 import { Colors } from '../../../app/Colors';
+import { ImageSource } from '../../../provider/image/RNImageProvider';
 
 export const PostComposer = () => {
   const { isDarkMode } = useDarkMode();
@@ -34,7 +30,6 @@ export const PostComposer = () => {
     HomebaseFile<ChannelDefinition> | NewHomebaseFile<ChannelDefinition>
   >(BlogConfig.PublicChannelNewDsr);
   const [customAcl, setCustomAcl] = useState<AccessControlList | undefined>(undefined);
-  const [files, setFiles] = useState<NewMediaFile[]>();
   const [assets, setAssets] = useState<Asset[]>([]);
 
   const [reactAccess, setReactAccess] = useState<ReactAccess | undefined>(undefined);
@@ -46,13 +41,33 @@ export const PostComposer = () => {
 
   const doPost = useCallback(async () => {
     if (isPosting) return;
-    await savePost(caption, files, undefined, channel, reactAccess, customAcl);
+    await savePost(
+      caption,
+      assets.map<ImageSource>((value) => {
+        return {
+          height: value.height || 0,
+          width: value.width || 0,
+          name: value.fileName,
+          type: value.type && value.type === 'image/jpg' ? 'image/jpeg' : value.type,
+          uri: value.uri,
+          filename: value.fileName,
+          date: Date.parse(value.timestamp || new Date().toUTCString()),
+          filepath: value.originalPath,
+          id: value.id,
+          fileSize: value.fileSize,
+        };
+      }),
+      undefined,
+      channel,
+      reactAccess,
+      customAcl
+    );
     resetUi();
-  }, [isPosting, caption, files, channel, reactAccess, customAcl]);
+  }, [isPosting, caption, assets, channel, reactAccess, customAcl]);
 
   const resetUi = useCallback(() => {
     setCaption('');
-    setFiles(undefined);
+    setAssets([]);
     setStateIndex((i) => i + 1);
   }, []);
 
@@ -61,11 +76,16 @@ export const PostComposer = () => {
       mediaType: 'mixed',
       selectionLimit: 10,
     });
-    if (imagePickerResult.didCancel) return;
-    setAssets(imagePickerResult.assets ?? []);
+    if (imagePickerResult.didCancel || imagePickerResult.errorCode) return;
+
+    setAssets(
+      imagePickerResult.assets
+        ?.filter(Boolean)
+        .filter((file) => Object.keys(file)?.length && file.type) ?? []
+    );
   }, [setAssets]);
 
-  const canPost = caption?.length || files?.length;
+  const canPost = caption?.length || assets?.length;
 
   return (
     <>
@@ -103,7 +123,7 @@ export const PostComposer = () => {
           <ProgressIndicator
             postState={postState}
             processingProgress={processingProgress}
-            files={files?.length || 0}
+            files={assets?.length || 0}
           />
 
           <View

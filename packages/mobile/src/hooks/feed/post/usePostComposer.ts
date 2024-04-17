@@ -17,6 +17,7 @@ import { getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useState } from 'react';
 import { usePost } from './usePost';
 import { useDotYouClientContext } from 'feed-app-common';
+import { ImageSource } from '../../../provider/image/RNImageProvider';
 
 type CollaborativeChannelDefinition = ChannelDefinition & { acl: AccessControlList };
 
@@ -29,7 +30,7 @@ export const usePostComposer = () => {
 
   const savePost = async (
     caption: string | undefined,
-    mediaFiles: NewMediaFile[] | undefined,
+    mediaFiles: ImageSource[] | undefined,
     embeddedPost: EmbeddedPost | undefined,
     channel: HomebaseFile<ChannelDefinition> | NewHomebaseFile<ChannelDefinition>,
     reactAccess: ReactAccess | undefined,
