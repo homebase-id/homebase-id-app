@@ -1,8 +1,13 @@
-import { HomebaseFile, NewHomebaseFile, AccessControlList } from '@youfoundation/js-lib/core';
+import {
+  HomebaseFile,
+  NewHomebaseFile,
+  AccessControlList,
+  SecurityGroupType,
+} from '@youfoundation/js-lib/core';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { ChannelDefinition, BlogConfig, ReactAccess } from '@youfoundation/js-lib/public';
 import { t } from 'feed-app-common';
-import React, { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useLayoutEffect, useRef } from 'react';
 import { View, TextInput, TouchableOpacity, Text } from 'react-native';
 import { Asset, launchImageLibrary } from 'react-native-image-picker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -17,6 +22,7 @@ import { Select, Option } from '../../ui/Form/Select';
 import { AclIcon, AclSummary } from './AclSummary';
 import { Colors } from '../../../app/Colors';
 import { ImageSource } from '../../../provider/image/RNImageProvider';
+import { BottomSheetModal } from '@gorhom/bottom-sheet';
 
 export const PostComposer = () => {
   const { isDarkMode } = useDarkMode();
@@ -38,6 +44,12 @@ export const PostComposer = () => {
     () => postState === 'uploading' || postState === 'encrypting',
     [postState]
   );
+
+  const resetUi = useCallback(() => {
+    setCaption('');
+    setAssets([]);
+    setStateIndex((i) => i + 1);
+  }, []);
 
   const doPost = useCallback(async () => {
     if (isPosting) return;
@@ -63,13 +75,7 @@ export const PostComposer = () => {
       customAcl
     );
     resetUi();
-  }, [isPosting, caption, assets, channel, reactAccess, customAcl]);
-
-  const resetUi = useCallback(() => {
-    setCaption('');
-    setAssets([]);
-    setStateIndex((i) => i + 1);
-  }, []);
+  }, [isPosting, savePost, caption, assets, channel, reactAccess, customAcl, resetUi]);
 
   const handleImageIconPress = useCallback(async () => {
     const imagePickerResult = await launchImageLibrary({
@@ -85,6 +91,14 @@ export const PostComposer = () => {
     );
   }, [setAssets]);
 
+  const handleChange = useCallback(
+    (channel: HomebaseFile<ChannelDefinition> | undefined, acl: AccessControlList | undefined) => {
+      channel && setChannel(channel);
+      setCustomAcl(acl);
+    },
+    []
+  );
+
   const canPost = caption?.length || assets?.length;
 
   return (
@@ -99,7 +113,7 @@ export const PostComposer = () => {
           paddingTop: insets.top,
           paddingHorizontal: 8,
           backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
-          zIndex: 10,
+          zIndex: 1,
         }}
       >
         <View
@@ -147,10 +161,7 @@ export const PostComposer = () => {
                 channel?.fileMetadata?.appData?.uniqueId || BlogConfig.PublicChannelId
               }
               defaultAcl={customAcl}
-              onChange={(channel, acl) => {
-                channel && setChannel(channel);
-                setCustomAcl(acl);
-              }}
+              onChange={handleChange}
             />
           </View>
           {canPost ? (
@@ -192,14 +203,12 @@ export const PostComposer = () => {
 };
 
 const ChannelOrAclSelector = ({
-  className,
   defaultChannelValue,
   defaultAcl,
   onChange,
   disabled,
   excludeCustom,
 }: {
-  className?: string;
   defaultChannelValue?: string;
   defaultAcl?: AccessControlList;
   onChange: (
@@ -210,8 +219,8 @@ const ChannelOrAclSelector = ({
   excludeCustom?: boolean;
 }) => {
   const { data: channels, isLoading } = useChannels({ isAuthenticated: true, isOwner: true });
-  const [isChnlMgmtOpen, setIsChnlMgmtOpen] = useState(false);
   const [isCustomAclOpen, setIsCustomAclOpen] = useState(false);
+  const [stateIndex, setStateIndex] = useState(0);
 
   const publicChannel = useMemo(
     () =>
@@ -219,6 +228,21 @@ const ChannelOrAclSelector = ({
         stringGuidsEqual(chnl.fileMetadata.appData.uniqueId, BlogConfig.PublicChannelId)
       ),
     [channels]
+  );
+
+  const handleChange = useCallback(
+    (value: string) => {
+      if (value === 'custom') {
+        setStateIndex((index) => index + 1);
+        setIsCustomAclOpen(true);
+      } else {
+        onChange(
+          channels?.find((chnl) => stringGuidsEqual(chnl.fileMetadata.appData.uniqueId, value)),
+          undefined
+        );
+      }
+    },
+    [channels, onChange]
   );
 
   if (isLoading || !channels) {
@@ -242,29 +266,13 @@ const ChannelOrAclSelector = ({
       stringGuidsEqual(chnl.fileMetadata.appData.uniqueId, defaultChannelValue)
     )?.fileMetadata.appData.uniqueId || getPublicChannel();
 
-  const handleChange = (value: string) => {
-    if (value === 'custom') {
-      setIsCustomAclOpen(true);
-      // value = getPublicChannel();
-    } else {
-      onChange(
-        channels.find((chnl) => stringGuidsEqual(chnl.fileMetadata.appData.uniqueId, value)),
-        undefined
-      );
-    }
-  };
-
   return (
     <>
       <Select
-        // className={`cursor-pointer bg-transparent px-3 py-2 text-sm ${
-        //   disabled ? 'pointer-events-none opacity-50' : ''
-        // } ${className ?? ''}`}
         style={{ marginLeft: 'auto' }}
         defaultValue={getDefaultChannel()}
-        key={'loaded-select'}
+        key={stateIndex || 'loaded-select'}
         onChange={handleChange}
-        // ref={ref}
         disabled={disabled}
       >
         {channels.map((channel) => (
@@ -282,21 +290,21 @@ const ChannelOrAclSelector = ({
           </Option>
         ) : null}
       </Select>
-      {/* <AclDialog
-          acl={
-            defaultAcl ||
-            publicChannel?.serverMetadata?.accessControlList || {
-              requiredSecurityGroup: SecurityGroupType.Anonymous,
-            }
+      <AclDialog
+        acl={
+          defaultAcl ||
+          publicChannel?.serverMetadata?.accessControlList || {
+            requiredSecurityGroup: SecurityGroupType.Anonymous,
           }
-          title={t('Who can see your post?')}
-          onConfirm={(acl) => {
-            onChange(publicChannel, acl);
-            setIsCustomAclOpen(false);
-          }}
-          isOpen={isCustomAclOpen}
-          onCancel={() => setIsCustomAclOpen(false)}
-        /> */}
+        }
+        title={t('Who can see your post?')}
+        onConfirm={(acl) => {
+          onChange(publicChannel, acl);
+          setIsCustomAclOpen(false);
+        }}
+        isOpen={isCustomAclOpen}
+        onCancel={() => setIsCustomAclOpen(false)}
+      />
     </>
   );
 };
@@ -314,11 +322,12 @@ export const ProgressIndicator = ({
   if (!postState) return null;
 
   let progressText = '';
-  if (postState === 'uploading')
-    if (processingProgress < 1)
+  if (postState === 'uploading') {
+    if (processingProgress < 1) {
       if (files > 1) progressText = t('Generating thumbnails');
       else progressText = t('Generating thumbnail');
-    else progressText = t(postState);
+    } else progressText = t(postState);
+  }
 
   return (
     <View style={{ marginTop: 4, display: 'flex', flexDirection: 'row-reverse' }}>
@@ -332,5 +341,237 @@ export const ProgressIndicator = ({
         </Text>
       )}
     </View>
+  );
+};
+
+const AclDialog = ({
+  title,
+  isOpen,
+
+  acl,
+
+  onConfirm,
+  onCancel,
+}: {
+  title: string;
+  isOpen: boolean;
+
+  acl: AccessControlList;
+
+  onConfirm: (acl: AccessControlList) => void;
+  onCancel: () => void;
+}) => {
+  const { isDarkMode } = useDarkMode();
+  const bottomSheetRef = useRef<BottomSheetModal>(null);
+
+  useLayoutEffect(() => {
+    if (isOpen) {
+      requestAnimationFrame(() => bottomSheetRef.current?.present());
+    }
+  }, [isOpen]);
+
+  if (!isOpen) {
+    return null;
+  }
+
+  return (
+    <BottomSheetModal
+      ref={bottomSheetRef}
+      snapPoints={['70%', '90%']}
+      backgroundStyle={{
+        backgroundColor: isDarkMode ? Colors.gray[900] : Colors.white,
+      }}
+      handleIndicatorStyle={{
+        backgroundColor: isDarkMode ? Colors.gray[100] : Colors.gray[500],
+      }}
+      onDismiss={onCancel}
+      enableDismissOnClose={true}
+      style={{
+        zIndex: 1000,
+        elevation: 1000,
+      }}
+    >
+      <View
+        style={{
+          flex: 1,
+          paddingHorizontal: 16,
+        }}
+      >
+        <Text style={{ marginBottom: 12, fontSize: 20 }}>{title}</Text>
+        <AclWizard acl={acl} onConfirm={onConfirm} onCancel={onCancel} />
+      </View>
+    </BottomSheetModal>
+  );
+};
+
+export const AclWizard = ({
+  acl,
+  onConfirm,
+  onCancel,
+}: {
+  acl: AccessControlList;
+  onConfirm: (acl: AccessControlList) => void;
+  onCancel?: () => void;
+}) => {
+  const [currentAcl, setCurrentAcl] = useState(
+    acl ?? { requiredSecurityGroup: SecurityGroupType.Owner }
+  );
+
+  const doConfirm = useCallback(() => {
+    onConfirm(currentAcl);
+  }, [currentAcl, onConfirm]);
+
+  return (
+    <>
+      <View style={{ marginBottom: 16 }}>
+        <RequiredSecurityGroupRadioGroup
+          defaultAcl={currentAcl}
+          onChange={(newAcl) => setCurrentAcl({ ...newAcl })}
+        />
+      </View>
+      {/* {currentAcl.requiredSecurityGroup.toLowerCase() ===
+        SecurityGroupType.Connected.toLowerCase() && Array.isArray(currentAcl.circleIdList) ? (
+        <div className="mb-16">
+          <h2 className="mb-2 text-lg">{t('Do you want to only allow certain circles?')}</h2>
+          <CircleSelector
+            defaultValue={currentAcl.circleIdList}
+            onChange={(e) => setCurrentAcl({ ...currentAcl, circleIdList: e.target.value })}
+          />
+        </div>
+      ) : null} */}
+
+      <View style={{ display: 'flex', flexDirection: 'row-reverse', gap: 8 }}>
+        <TouchableOpacity
+          onPress={doConfirm}
+          style={{
+            paddingHorizontal: 8,
+            paddingVertical: 8,
+            borderWidth: 1,
+            borderColor: Colors.slate[200],
+            borderRadius: 6,
+
+            backgroundColor: Colors.indigo[500],
+          }}
+        >
+          <Text style={{ color: Colors.white }}>{t('Continue')}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={onCancel}
+          style={{
+            paddingHorizontal: 8,
+            paddingVertical: 8,
+            borderWidth: 1,
+            borderColor: Colors.slate[200],
+            borderRadius: 6,
+          }}
+        >
+          <Text>{t('Cancel')}</Text>
+        </TouchableOpacity>
+      </View>
+    </>
+  );
+};
+
+const RequiredSecurityGroupRadioGroup = ({
+  defaultAcl,
+  onChange,
+}: {
+  defaultAcl?: AccessControlList;
+  onChange: (acl: AccessControlList) => void;
+}) => {
+  return (
+    <>
+      <View
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 8,
+        }}
+      >
+        <GroupOption
+          name={t('Owner')}
+          description={t('Only you')}
+          value={{ requiredSecurityGroup: SecurityGroupType.Owner }}
+          checked={
+            SecurityGroupType.Owner.toLowerCase() ===
+            defaultAcl?.requiredSecurityGroup.toLowerCase()
+          }
+          onChange={onChange}
+        />
+
+        <GroupOption
+          name={t('Circles')}
+          description={t('Only people that are member of a circle')}
+          value={{ requiredSecurityGroup: SecurityGroupType.Connected, circleIdList: [] }}
+          checked={
+            SecurityGroupType.Connected.toLowerCase() ===
+              defaultAcl?.requiredSecurityGroup.toLowerCase() &&
+            Array.isArray(defaultAcl.circleIdList) === true
+          }
+          onChange={onChange}
+        />
+
+        <GroupOption
+          name={t('Connected')}
+          description={t('Only people that are connected to you')}
+          value={{ requiredSecurityGroup: SecurityGroupType.Connected }}
+          checked={
+            SecurityGroupType.Connected.toLowerCase() ===
+              defaultAcl?.requiredSecurityGroup.toLowerCase() &&
+            Array.isArray(defaultAcl.circleIdList) === false
+          }
+          onChange={onChange}
+        />
+
+        <GroupOption
+          name={t('Authenticated')}
+          description={t('Only people that are authenticated')}
+          value={{ requiredSecurityGroup: SecurityGroupType.Authenticated }}
+          checked={
+            SecurityGroupType.Authenticated.toLowerCase() ===
+            defaultAcl?.requiredSecurityGroup.toLowerCase()
+          }
+          onChange={onChange}
+        />
+
+        <GroupOption
+          name={t('Public')}
+          description={t('Accessible by everyone on the internet')}
+          value={{ requiredSecurityGroup: SecurityGroupType.Anonymous }}
+          checked={
+            SecurityGroupType.Anonymous.toLowerCase() ===
+            defaultAcl?.requiredSecurityGroup.toLowerCase()
+          }
+          onChange={onChange}
+        />
+      </View>
+    </>
+  );
+};
+
+const GroupOption = (props: {
+  name: string;
+  description: string;
+  value: AccessControlList;
+  checked: boolean;
+  onChange: (value: AccessControlList) => void;
+}) => {
+  return (
+    <TouchableOpacity
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'flex-start',
+        borderRadius: 4,
+        padding: 8,
+        backgroundColor: props.checked ? Colors.indigo[500] : Colors.slate[100],
+      }}
+      onPress={() => props.onChange && props.onChange(props.value)}
+    >
+      <Text style={{ color: props.checked ? Colors.white : Colors.black }}>{props.name}</Text>
+      <Text style={{ fontSize: 12, color: props.checked ? Colors.slate[300] : Colors.slate[500] }}>
+        {props.description}
+      </Text>
+    </TouchableOpacity>
   );
 };

@@ -1,4 +1,4 @@
-import { ReactElement, useState, useMemo, useEffect } from 'react';
+import { ReactElement, useState, useMemo, useEffect, useRef } from 'react';
 import { StyleProp, ViewStyle, View, TouchableOpacity, Text } from 'react-native';
 
 import { ArrowDown } from '../Icons/icons';
@@ -14,10 +14,14 @@ interface SelectProps {
   style?: StyleProp<ViewStyle>;
   onChange?: (value: string) => void;
 }
+
 export const Select = ({ defaultValue, children, style, onChange }: SelectProps) => {
-  // console.log('Select', Array.isArray(children) ? children.flat() : [children]);
   const [currentVal, setCurrentVal] = useState(defaultValue);
   const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    setCurrentVal(defaultValue);
+  }, [defaultValue]);
 
   const flatOptions: Array<ReactElement<OptionProps>> = useMemo(
     () =>
@@ -36,7 +40,7 @@ export const Select = ({ defaultValue, children, style, onChange }: SelectProps)
     if (currentVal && onChange) {
       onChange(currentVal);
     }
-  }, [currentVal]);
+  }, [currentVal, onChange]);
 
   return (
     <View style={style}>
@@ -66,10 +70,11 @@ export const Select = ({ defaultValue, children, style, onChange }: SelectProps)
           style={{
             position: 'absolute',
             top: '100%',
-            left: 0,
+            minWidth: 180,
             right: 0,
             backgroundColor: Colors.white,
             zIndex: 999999,
+            elevation: 99999,
           }}
         >
           {flatOptions.map((child) => (
@@ -78,6 +83,10 @@ export const Select = ({ defaultValue, children, style, onChange }: SelectProps)
               onPress={() => {
                 setCurrentVal(child?.props.value);
                 setIsOpen(false);
+              }}
+              style={{
+                backgroundColor:
+                  currentVal === child?.props.value ? Colors.slate[200] : Colors.white,
               }}
             >
               {child}

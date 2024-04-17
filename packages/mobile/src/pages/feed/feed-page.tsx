@@ -14,6 +14,7 @@ import { useRemoveNotifications } from '../../hooks/notifications/usePushNotific
 import { FEED_APP_ID } from '../../app/constants';
 import React from 'react';
 import { PostComposer } from '../../components/Feed/Composer/PostComposer';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 
 type FeedProps = NativeStackScreenProps<TabStackParamList, 'Feed'>;
 
@@ -76,35 +77,37 @@ export const FeedPage = memo((_props: FeedProps) => {
 
   return (
     <SafeAreaView>
-      {hideHeader ? null : <PostComposer />}
-      {identity && uri ? (
-        <ScrollView
-          contentContainerStyle={{ flex: 1 }}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              enabled={refresherEnabled}
-              onRefresh={() => webviewRef.current?.reload()}
+      <BottomSheetModalProvider>
+        {hideHeader ? null : <PostComposer />}
+        {identity && uri ? (
+          <ScrollView
+            contentContainerStyle={{ flex: 1 }}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                enabled={refresherEnabled}
+                onRefresh={() => webviewRef.current?.reload()}
+              />
+            }
+          >
+            <WebView
+              ref={webviewRef}
+              source={{ uri }}
+              injectedJavaScriptBeforeContentLoaded={INJECTED_JAVASCRIPT}
+              pullToRefreshEnabled={true}
+              containerStyle={{
+                paddingTop: 0,
+              }}
+              style={{ backgroundColor: isDarkMode ? Colors.slate[900] : Colors.slate[50] }}
+              originWhitelist={originWhitelist} // Keeps the WebView from navigating away from the feed-app; Any links that don't match will be opened by the system.. Eg: open in the browser
+              // onMessage={(event) => console.warn(event)}
+              onScroll={handleScroll}
+              onLoadEnd={() => setRefreshing(false)}
+              forceDarkOn={isDarkMode}
             />
-          }
-        >
-          <WebView
-            ref={webviewRef}
-            source={{ uri }}
-            injectedJavaScriptBeforeContentLoaded={INJECTED_JAVASCRIPT}
-            pullToRefreshEnabled={true}
-            containerStyle={{
-              paddingTop: 0,
-            }}
-            style={{ backgroundColor: isDarkMode ? Colors.slate[900] : Colors.slate[50] }}
-            originWhitelist={originWhitelist} // Keeps the WebView from navigating away from the feed-app; Any links that don't match will be opened by the system.. Eg: open in the browser
-            // onMessage={(event) => console.warn(event)}
-            onScroll={handleScroll}
-            onLoadEnd={() => setRefreshing(false)}
-            forceDarkOn={isDarkMode}
-          />
-        </ScrollView>
-      ) : null}
+          </ScrollView>
+        ) : null}
+      </BottomSheetModalProvider>
     </SafeAreaView>
   );
 });
