@@ -47,7 +47,7 @@ import { OdinImage } from '../../components/ui/OdinImage/OdinImage';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { ChatDeliveryIndicator } from '../../components/Chat/Chat-Delivery-Indicator';
 import { useChatReaction } from '../../hooks/chat/useChatReaction';
-import { Avatar as AppAvatar, OwnerAvatar } from '../../components/Chat/Conversation-tile';
+import { Avatar as AppAvatar, OwnerAvatar } from '../../components/ui/Avatars/Avatar';
 import { ConnectionName } from '../../components/ui/Name';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ChatDeletedArchivalStaus, ChatMessage } from '../../provider/chat/ChatProvider';

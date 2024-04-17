@@ -5,10 +5,11 @@ import { useChatReaction } from '../../hooks/chat/useChatReaction';
 
 import { GroupConversation, SingleConversation } from '../../provider/chat/ConversationProvider';
 import { AuthorName, ConnectionName } from '../../components/ui/Name';
-import { Avatar, OwnerAvatar } from '../../components/Chat/Conversation-tile';
 import { InnerDeliveryIndicator } from '../../components/Chat/Chat-Delivery-Indicator';
 import { useDotYouClientContext } from 'feed-app-common';
 import { ChatStackParamList } from '../../app/App';
+import { Avatar, OwnerAvatar } from '../../components/ui/Avatars/Avatar';
+import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 
 export type MessageInfoProp = NativeStackScreenProps<ChatStackParamList, 'MessageInfo'>;
 
@@ -124,11 +125,13 @@ export const MessageInfoPage = ({ route }: MessageInfoProp) => {
   }
 
   return (
-    <ScrollView>
-      {renderDetails()}
-      {renderRecipients()}
-      {renderReactions()}
-    </ScrollView>
+    <SafeAreaView>
+      <ScrollView>
+        {renderDetails()}
+        {renderRecipients()}
+        {renderReactions()}
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 

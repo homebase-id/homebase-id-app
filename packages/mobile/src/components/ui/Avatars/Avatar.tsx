@@ -64,7 +64,7 @@ export const GroupAvatar = memo(
   }) => {
     const { isDarkMode } = useDarkMode();
     const backgroundColor = useMemo(
-      () => (isDarkMode ? Colors.slate[900] : Colors.violet[200]),
+      () => (isDarkMode ? Colors.indigo[900] : Colors.violet[200]),
       [isDarkMode]
     );
     return (

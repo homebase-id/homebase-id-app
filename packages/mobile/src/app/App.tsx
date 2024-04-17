@@ -379,6 +379,9 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
         statusBarColor: headerColor,
         /// StatusBarStyle throws error when changin in Ios (even setting to Ui UIControllerbasedStatusBar to yes)
         statusBarStyle: Platform.OS === 'android' ? (isDarkMode ? 'light' : 'dark') : undefined,
+        headerShadowVisible: false,
+        headerTransparent: Platform.OS === 'ios',
+        headerBlurEffect: 'regular',
         headerStyle: {
           backgroundColor: headerColor,
         },
@@ -393,9 +396,6 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
           headerTitleAlign: 'left',
           headerLeft: isOnline ? ProfileAvatar : OfflineProfileAvatar,
           headerRight: Platform.OS === 'ios' ? headerRight : undefined,
-          headerShadowVisible: false,
-          headerTransparent: Platform.OS === 'ios',
-          headerBlurEffect: 'regular',
           headerSearchBarOptions: {
             shouldShowHintSearchIcon: true,
             hideWhenScrolling: true,
