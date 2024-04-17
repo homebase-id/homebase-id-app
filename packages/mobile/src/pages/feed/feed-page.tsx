@@ -1,11 +1,12 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ReactElement, memo, useEffect, useMemo, useRef, useState } from 'react';
+import { ReactElement, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { TabStackParamList } from '../../app/App';
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 import WebView from 'react-native-webview';
 import { stringGuidsEqual, uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
 import {
+  ImageBackground,
   RefreshControl,
   StyleProp,
   Text,
@@ -25,6 +26,7 @@ import { GetTargetDriveFromProfileId, BuiltInProfiles } from '@youfoundation/js-
 import {
   ArrowDown,
   Bars,
+  Close,
   Ellipsis,
   IconProps,
   Lock,
@@ -48,6 +50,7 @@ import { useCircles } from '../../hooks/circles/useCircles';
 import { ellipsisAtMaxChar, t } from 'feed-app-common';
 import { usePostComposer } from '../../hooks/feed/post/usePostComposer';
 import { ErrorNotification } from '../../components/ui/Alert/ErrorNotification';
+import { Asset, launchImageLibrary } from 'react-native-image-picker';
 
 type FeedProps = NativeStackScreenProps<TabStackParamList, 'Feed'>;
 
@@ -156,22 +159,35 @@ const PostComposer = () => {
   >(BlogConfig.PublicChannelNewDsr);
   const [customAcl, setCustomAcl] = useState<AccessControlList | undefined>(undefined);
   const [files, setFiles] = useState<NewMediaFile[]>();
+  const [assets, setAssets] = useState<Asset[]>([]);
 
   const [reactAccess, setReactAccess] = useState<ReactAccess | undefined>(undefined);
 
-  const isPosting = postState === 'uploading' || postState === 'encrypting';
+  const isPosting = useMemo(
+    () => postState === 'uploading' || postState === 'encrypting',
+    [postState]
+  );
 
-  const doPost = async () => {
+  const doPost = useCallback(async () => {
     if (isPosting) return;
     await savePost(caption, files, undefined, channel, reactAccess, customAcl);
     resetUi();
-  };
+  }, [isPosting, caption, files, channel, reactAccess, customAcl]);
 
-  const resetUi = () => {
+  const resetUi = useCallback(() => {
     setCaption('');
     setFiles(undefined);
     setStateIndex((i) => i + 1);
-  };
+  }, []);
+
+  const handleImageIconPress = useCallback(async () => {
+    const imagePickerResult = await launchImageLibrary({
+      mediaType: 'mixed',
+      selectionLimit: 10,
+    });
+    if (imagePickerResult.didCancel) return;
+    setAssets(imagePickerResult.assets ?? []);
+  }, [setAssets]);
 
   const canPost = caption?.length || files?.length;
 
@@ -206,6 +222,14 @@ const PostComposer = () => {
             onChange={(event) => setCaption(event.nativeEvent.text)}
             key={stateIndex}
           />
+
+          <FileOverview assets={assets} setAssets={setAssets} />
+          <ProgressIndicator
+            postState={postState}
+            processingProgress={processingProgress}
+            files={files?.length || 0}
+          />
+
           <View
             style={{
               marginVertical: 12,
@@ -215,11 +239,8 @@ const PostComposer = () => {
               gap: 10,
             }}
           >
-            <TouchableOpacity>
+            <TouchableOpacity onPress={handleImageIconPress}>
               <Plus size={'sm'} />
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <Lol size={'sm'} />
             </TouchableOpacity>
             <TouchableOpacity>
               <Ellipsis size={'sm'} />
@@ -384,6 +405,40 @@ const ChannelOrAclSelector = ({
   );
 };
 
+const ProgressIndicator = ({
+  postState,
+  processingProgress,
+  files,
+}: {
+  postState: 'uploading' | 'encrypting' | 'error' | undefined;
+  processingProgress: number;
+  files: number;
+}) => {
+  const { isDarkMode } = useDarkMode();
+  if (!postState) return null;
+
+  let progressText = '';
+  if (postState === 'uploading')
+    if (processingProgress < 1)
+      if (files > 1) progressText = t('Generating thumbnails');
+      else progressText = t('Generating thumbnail');
+    else progressText = t(postState);
+
+  return (
+    <View style={{ marginTop: 4, display: 'flex', flexDirection: 'row-reverse' }}>
+      {postState === 'error' ? (
+        <Text>{t('Error')}</Text>
+      ) : (
+        <Text
+          style={{ fontSize: 12, color: isDarkMode ? Colors.white : Colors.black, opacity: 0.4 }}
+        >
+          {progressText}
+        </Text>
+      )}
+    </View>
+  );
+};
+
 interface SelectProps {
   defaultValue: string | undefined;
   children:
@@ -518,5 +573,50 @@ export const AclIcon = ({ acl, ...props }: { acl: AccessControlList } & IconProp
     <OpenLock {...props} />
   ) : (
     <Lock {...props} />
+  );
+};
+
+const FileOverview = ({
+  assets,
+  setAssets,
+}: {
+  assets: Asset[];
+  setAssets: (newAssets: Asset[]) => void;
+}) => {
+  return (
+    <ScrollView
+      horizontal
+      contentContainerStyle={{
+        gap: 2,
+      }}
+      showsHorizontalScrollIndicator={false}
+    >
+      {assets.map((value, index) => {
+        // const isVideo = value.type?.startsWith('video') ?? false;
+        return (
+          <View
+            key={index}
+            style={{
+              borderRadius: 15,
+            }}
+          >
+            <ImageBackground
+              key={index}
+              source={{ uri: value.uri || value.originalPath }}
+              style={{
+                width: 65,
+                height: 65,
+                alignItems: 'flex-end',
+                padding: 4,
+              }}
+            >
+              <TouchableOpacity onPress={() => setAssets(assets.filter((_, i) => i !== index))}>
+                <Close size={'sm'} color="white" />
+              </TouchableOpacity>
+            </ImageBackground>
+          </View>
+        );
+      })}
+    </ScrollView>
   );
 };
