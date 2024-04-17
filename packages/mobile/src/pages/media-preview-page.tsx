@@ -2,16 +2,15 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ChatDrive } from '../provider/chat/ConversationProvider';
 import { PhotoWithLoader } from '../components/ui/Media/PhotoWithLoader';
 import { VideoWithLoader } from '../components/ui/Media/VideoWithLoader';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { Dimensions, View } from 'react-native';
 import { memo, useCallback, useMemo, useState } from 'react';
 import Carousel from 'react-native-reanimated-carousel';
 import { OdinImage } from '../components/ui/OdinImage/OdinImage';
-import { useDarkMode } from '../hooks/useDarkMode';
-import { Colors } from '../app/Colors';
+
 import { ChatStackParamList } from '../app/App';
 import { PayloadDescriptor } from '@youfoundation/js-lib/core';
 import { CarouselRenderItemInfo } from 'react-native-reanimated-carousel/lib/typescript/types';
+import { SafeAreaView } from '../components/ui/SafeAreaView/SafeAreaView';
 
 export type MediaProp = NativeStackScreenProps<ChatStackParamList, 'PreviewMedia'>;
 
@@ -22,7 +21,6 @@ export const PreviewMedia = memo((prop: MediaProp) => {
   const [initialIndex, setInitialIndex] = useState(prop.route.params.currIndex);
   const [currIndex, setCurrIndex] = useState(initialIndex);
   const { height, width } = useMemo(() => Dimensions.get('window'), []);
-  const { isDarkMode } = useDarkMode();
 
   const renderItem = useCallback(
     ({ item }: CarouselRenderItemInfo<PayloadDescriptor>) => {
@@ -61,7 +59,7 @@ export const PreviewMedia = memo((prop: MediaProp) => {
   );
 
   return (
-    <>
+    <SafeAreaView>
       <Carousel
         width={width}
         height={height}
@@ -85,7 +83,6 @@ export const PreviewMedia = memo((prop: MediaProp) => {
             flex: 1,
             right: 0,
             left: 0,
-            backgroundColor: isDarkMode ? Colors.slate[900] : Colors.slate[200],
             flexDirection: 'row',
             alignSelf: 'center',
             gap: 2,
@@ -140,6 +137,6 @@ export const PreviewMedia = memo((prop: MediaProp) => {
           })}
         </View>
       )}
-    </>
+    </SafeAreaView>
   );
 });

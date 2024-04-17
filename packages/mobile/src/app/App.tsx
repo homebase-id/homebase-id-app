@@ -447,7 +447,7 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
           gestureEnabled: true,
           title: '',
           headerBackTitleVisible: false,
-
+          headerShadowVisible: false,
           headerTransparent: true,
         }}
       />
