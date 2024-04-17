@@ -29,8 +29,8 @@ import { Colors } from '../../app/Colors';
 import { OdinImage } from '../../components/ui/OdinImage/OdinImage';
 import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
 import { useProfile } from '../../hooks/profile/useProfile';
-import InAppBrowser from 'react-native-inappbrowser-reborn';
 import { useDarkMode } from '../../hooks/useDarkMode';
+import { openURL } from '../../utils/utils';
 
 type SettingsProps = NativeStackScreenProps<ProfileStackParamList, 'Overview'>;
 
@@ -191,12 +191,7 @@ export const ProfilePage = (_props: SettingsProps) => {
                   {
                     text: 'Open owner console',
                     onPress: async () => {
-                      if (await InAppBrowser.isAvailable()) {
-                        await InAppBrowser.open(`https://${getIdentity()}/owner/settings/delete`, {
-                          enableUrlBarHiding: false,
-                          enableDefaultShare: false,
-                        });
-                      } else Linking.openURL(`https://${getIdentity()}/owner/settings/delete`);
+                      openURL(`https://${getIdentity()}/owner/settings/delete`);
                     },
                     style: 'destructive',
                   },
@@ -313,10 +308,10 @@ export const CheckForUpdates = ({
           {codePushResult === codePush.SyncStatus.UP_TO_DATE
             ? 'Up to date'
             : codePushResult === codePush.SyncStatus.UPDATE_INSTALLED
-            ? 'Installed'
-            : codePushResult === codePush.SyncStatus.SYNC_IN_PROGRESS
-            ? 'Unknown'
-            : null}
+              ? 'Installed'
+              : codePushResult === codePush.SyncStatus.SYNC_IN_PROGRESS
+                ? 'Unknown'
+                : null}
         </Text>
       ) : null}
     </TouchableOpacity>
