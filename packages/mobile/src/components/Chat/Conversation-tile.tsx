@@ -53,12 +53,16 @@ const ConversationTile = memo((props: ConversationTileProps) => {
   );
 
   const colorMode = useMemo(() => (isDarkMode ? Colors.white : Colors.slate[900]), [isDarkMode]);
+  const underlayColor = useMemo(
+    () => (isDarkMode ? Colors.slate[900] : Colors.slate[100]),
+    [isDarkMode]
+  );
 
   return (
     <TouchableHighlight
       onPress={props.onPress}
       onLongPress={props.onLongPress}
-      underlayColor={Colors.slate[100]}
+      underlayColor={underlayColor}
       style={{
         marginTop: 4,
       }}
