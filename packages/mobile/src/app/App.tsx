@@ -379,7 +379,7 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
           headerStyle: {
             backgroundColor: backgroundColor,
           },
-          headerShadowVisible: Platform.OS === 'android',
+          headerShadowVisible: false,
           headerTransparent: Platform.OS === 'ios',
           headerBlurEffect: 'regular',
           headerSearchBarOptions: {
