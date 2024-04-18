@@ -13,6 +13,7 @@ import {
 } from 'react-native-reanimated-carousel/lib/typescript/types';
 import { SafeAreaView } from '../components/ui/SafeAreaView/SafeAreaView';
 import { useSafeAreaFrame } from 'react-native-safe-area-context';
+import { View } from 'react-native';
 
 export type MediaProp = NativeStackScreenProps<ChatStackParamList, 'PreviewMedia'>;
 
