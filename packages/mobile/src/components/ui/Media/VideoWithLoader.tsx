@@ -1,6 +1,6 @@
 import { EmbeddedThumb, TargetDrive } from '@youfoundation/js-lib/core';
 import { memo, useCallback, useMemo, useState } from 'react';
-import { TouchableOpacity, View } from 'react-native';
+import { ImageStyle, TouchableOpacity, View } from 'react-native';
 import { Colors } from '../../../app/Colors';
 import WebView from 'react-native-webview';
 import { TouchableWithoutFeedback } from 'react-native';
@@ -9,7 +9,6 @@ import { uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
 import { Play } from '../Icons/icons';
 import { OdinImage } from '../OdinImage/OdinImage';
 
-// Memo to performance optimize the FlatList
 export const VideoWithLoader = memo(
   ({
     fileId,
@@ -19,8 +18,8 @@ export const VideoWithLoader = memo(
     preview,
     imageSize,
     fileKey,
-
     onClick,
+    style,
   }: {
     fileId: string;
     targetDrive: TargetDrive;
@@ -31,6 +30,7 @@ export const VideoWithLoader = memo(
     fullscreen?: boolean;
     imageSize?: { width: number; height: number };
     onClick?: () => void;
+    style?: ImageStyle;
   }) => {
     const [loadVideo, setLoadVideo] = useState(true);
     const doLoadVideo = useCallback(() => setLoadVideo(true), []);
@@ -54,10 +54,12 @@ export const VideoWithLoader = memo(
               imageSize={imageSize}
               onClick={onClick}
               avoidPayload={true}
+              style={style}
             />
             <View
               style={{
                 position: 'absolute',
+                pointerEvents: 'none',
                 top: 0,
                 left: 0,
                 bottom: 0,
@@ -94,6 +96,7 @@ export const VideoWithLoader = memo(
               imageSize={imageSize}
               onClick={doLoadVideo}
               avoidPayload={true}
+              style={style}
             />
             <View
               style={{
@@ -203,49 +206,3 @@ const OdinVideo = ({
     );
   } else return null;
 };
-
-// const OdinVideoDownload = ({ fileId }: { fileId: string }) => {
-//   const { getDotYouClient } = useAuth();
-
-//   // Hook to download the video
-//   const { data: videoUrl, isFetched } = useVideo(fileId, PhotoConfig.PhotoDrive).fetchVideo;
-
-//   // Loading
-//   if (!isFetched) {
-//     return (
-//       <View
-//         style={{
-//           alignItems: 'center',
-//           justifyContent: 'center',
-//           flex: 1,
-//           position: 'absolute',
-//           top: 0,
-//           left: 0,
-//           bottom: 0,
-//           right: 0,
-//         }}
-//       >
-//         <ActivityIndicator size="large" />
-//       </View>
-//     );
-//   }
-
-//   // Error
-//   if (!videoUrl) return null;
-
-//   // Playback of the locally downloaded file
-//   return (
-//     <Video
-//       source={{ uri: videoUrl }}
-//       onError={(e) => console.error(e)}
-//       style={{
-//         position: 'absolute',
-//         top: 0,
-//         left: 0,
-//         bottom: 0,
-//         right: 0,
-//       }}
-//       controls={true}
-//     />
-//   );
-// };

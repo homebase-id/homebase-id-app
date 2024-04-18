@@ -24,27 +24,32 @@ const MediaMessage = memo((props: MessageImageProps<ChatMessageIMessage>) => {
     const aspectRatio = (previewThumbnail?.pixelWidth || 1) / (previewThumbnail?.pixelHeight || 1);
     if (payloads[0].contentType.startsWith('video')) {
       return (
-        <VideoWithLoader
-          fileId={currentMessage.fileId}
-          fileKey={payloads[0].key}
-          targetDrive={ChatDrive}
-          previewThumbnail={currentMessage.fileMetadata.appData.previewThumbnail}
-          fit="cover"
-          imageSize={{
-            width: 200,
-            height: 200,
-          }}
-          preview={true}
-          onClick={() => {
-            navigation.navigate('PreviewMedia', {
-              fileId: currentMessage.fileId,
-              payloadKey: payloads[0].key,
-              type: payloads[0].contentType,
-              msg: currentMessage,
-              currIndex: 0,
-            });
-          }}
-        />
+        <View style={props.containerStyle}>
+          <VideoWithLoader
+            fileId={currentMessage.fileId}
+            fileKey={payloads[0].key}
+            targetDrive={ChatDrive}
+            previewThumbnail={currentMessage.fileMetadata.appData.previewThumbnail}
+            fit="cover"
+            imageSize={{
+              width: aspectRatio <= 1 ? width * 0.8 : width * 0.6,
+              height: aspectRatio >= 1 ? height * 0.4 : height * 0.5,
+            }}
+            preview
+            style={{
+              borderRadius: 10,
+            }}
+            onClick={() => {
+              navigation.navigate('PreviewMedia', {
+                fileId: currentMessage.fileId,
+                payloadKey: payloads[0].key,
+                type: payloads[0].contentType,
+                msg: currentMessage,
+                currIndex: 0,
+              });
+            }}
+          />
+        </View>
       );
     }
     if (payloads[0].contentType.startsWith('audio/')) {

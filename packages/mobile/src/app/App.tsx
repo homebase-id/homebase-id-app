@@ -444,7 +444,6 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
         component={PreviewMedia}
         options={{
           headerShown: true,
-          gestureEnabled: true,
           title: '',
           headerBackTitleVisible: false,
           headerShadowVisible: false,

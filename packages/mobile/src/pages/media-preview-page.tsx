@@ -1,16 +1,18 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ChatDrive } from '../provider/chat/ConversationProvider';
-import { PhotoWithLoader } from '../components/ui/Media/PhotoWithLoader';
 import { VideoWithLoader } from '../components/ui/Media/VideoWithLoader';
-import { Dimensions, View } from 'react-native';
-import { memo, useCallback, useMemo, useState } from 'react';
+
+import { memo, useCallback, useRef, useState } from 'react';
 import Carousel from 'react-native-reanimated-carousel';
 import { OdinImage } from '../components/ui/OdinImage/OdinImage';
-
 import { ChatStackParamList } from '../app/App';
 import { PayloadDescriptor } from '@youfoundation/js-lib/core';
-import { CarouselRenderItemInfo } from 'react-native-reanimated-carousel/lib/typescript/types';
+import {
+  CarouselRenderItemInfo,
+  ICarouselInstance,
+} from 'react-native-reanimated-carousel/lib/typescript/types';
 import { SafeAreaView } from '../components/ui/SafeAreaView/SafeAreaView';
+import { useSafeAreaFrame } from 'react-native-safe-area-context';
 
 export type MediaProp = NativeStackScreenProps<ChatStackParamList, 'PreviewMedia'>;
 
@@ -18,17 +20,20 @@ export const PreviewMedia = memo((prop: MediaProp) => {
   const msg = prop.route.params.msg;
   const fileId = msg.fileId;
   const payloads = msg.fileMetadata.payloads;
-  const [initialIndex, setInitialIndex] = useState(prop.route.params.currIndex);
+  const initialIndex = prop.route.params.currIndex;
+
   const [currIndex, setCurrIndex] = useState(initialIndex);
-  const { height, width } = useMemo(() => Dimensions.get('window'), []);
+  const ref = useRef<ICarouselInstance>(null);
+  const { height, width } = useSafeAreaFrame();
 
   const renderItem = useCallback(
     ({ item }: CarouselRenderItemInfo<PayloadDescriptor>) => {
       const fileKey = item.key;
       const type = item.contentType;
+
       const isVideo = type?.startsWith('video') || false;
       return !isVideo ? (
-        <PhotoWithLoader
+        <OdinImage
           fileId={fileId}
           fileKey={fileKey}
           enableZoom={true}
@@ -38,6 +43,7 @@ export const PreviewMedia = memo((prop: MediaProp) => {
             height: height,
           }}
           targetDrive={ChatDrive}
+          previewThumbnail={msg.fileMetadata.appData.previewThumbnail}
         />
       ) : (
         <SafeAreaView>
@@ -46,32 +52,34 @@ export const PreviewMedia = memo((prop: MediaProp) => {
             fileKey={fileKey}
             targetDrive={ChatDrive}
             fullscreen={true}
+            previewThumbnail={msg.fileMetadata.appData.previewThumbnail}
             imageSize={{
               width: width,
               height: height,
             }}
-            preview={false}
           />
         </SafeAreaView>
       );
     },
-    [fileId, height, width]
+    [fileId, height, msg.fileMetadata.appData.previewThumbnail, width]
   );
 
   return (
-    <SafeAreaView>
+    <>
       <Carousel
+        ref={ref}
         width={width}
         height={height}
         autoPlay={false}
         data={payloads}
         scrollAnimationDuration={1000}
-        windowSize={5}
-        loop={false}
-        defaultIndex={initialIndex}
         onSnapToItem={(index) => {
           setCurrIndex(index);
         }}
+        overscrollEnabled={false}
+        windowSize={5}
+        loop={false}
+        defaultIndex={initialIndex}
         renderItem={renderItem}
       />
       {payloads.length > 1 && (
@@ -104,10 +112,12 @@ export const PreviewMedia = memo((prop: MediaProp) => {
                     width: 200,
                     height: 200,
                   }}
-                  preview={true}
+                  preview={false}
                   onClick={() => {
-                    setInitialIndex(index);
-                    setCurrIndex(index);
+                    ref.current?.scrollTo({
+                      index,
+                      animated: true,
+                    });
                   }}
                 />
               );
@@ -125,8 +135,10 @@ export const PreviewMedia = memo((prop: MediaProp) => {
                 }}
                 avoidPayload={true}
                 onClick={() => {
-                  setInitialIndex(index);
-                  setCurrIndex(index);
+                  ref.current?.scrollTo({
+                    index,
+                    animated: true,
+                  });
                 }}
                 style={{
                   borderRadius: 10,
@@ -137,6 +149,6 @@ export const PreviewMedia = memo((prop: MediaProp) => {
           })}
         </View>
       )}
-    </SafeAreaView>
+    </>
   );
 });
