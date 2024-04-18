@@ -13,7 +13,7 @@ import {
 } from 'react-native-reanimated-carousel/lib/typescript/types';
 
 import { useSafeAreaFrame } from 'react-native-safe-area-context';
-import { View } from 'react-native';
+import { Platform, View } from 'react-native';
 import { Colors } from '../app/Colors';
 import { useDarkMode } from '../hooks/useDarkMode';
 import { AuthorName } from '../components/ui/Name';
@@ -39,7 +39,7 @@ export const PreviewMedia = memo((prop: MediaProp) => {
       <View
         style={{
           display: 'flex',
-          alignItems: 'center',
+          alignItems: Platform.OS === 'ios' ? 'center' : 'flex-start',
         }}
       >
         <HeaderTitle>
