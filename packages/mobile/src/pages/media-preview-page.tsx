@@ -2,7 +2,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ChatDrive } from '../provider/chat/ConversationProvider';
 import { VideoWithLoader } from '../components/ui/Media/VideoWithLoader';
 
-import { memo, useCallback, useRef, useState } from 'react';
+import { memo, useCallback, useLayoutEffect, useRef, useState } from 'react';
 import Carousel from 'react-native-reanimated-carousel';
 import { OdinImage } from '../components/ui/OdinImage/OdinImage';
 import { ChatStackParamList } from '../app/App';
@@ -16,6 +16,10 @@ import { useSafeAreaFrame } from 'react-native-safe-area-context';
 import { View } from 'react-native';
 import { Colors } from '../app/Colors';
 import { useDarkMode } from '../hooks/useDarkMode';
+import { AuthorName } from '../components/ui/Name';
+import { HeaderTitle } from '@react-navigation/elements';
+import { Text } from '../components/ui/Text/Text';
+import { formatToTimeAgoWithRelativeDetail } from 'feed-app-common';
 
 export type MediaProp = NativeStackScreenProps<ChatStackParamList, 'PreviewMedia'>;
 
@@ -29,6 +33,29 @@ export const PreviewMedia = memo((prop: MediaProp) => {
   const ref = useRef<ICarouselInstance>(null);
   const { height, width } = useSafeAreaFrame();
   const { isDarkMode } = useDarkMode();
+
+  const headerTitle = useCallback(() => {
+    return (
+      <View
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+        }}
+      >
+        <HeaderTitle>
+          <AuthorName odinId={msg.fileMetadata.senderOdinId} showYou />
+        </HeaderTitle>
+        <Text>{formatToTimeAgoWithRelativeDetail(new Date(msg.fileMetadata.created), true)}</Text>
+      </View>
+    );
+  }, [msg.fileMetadata.created, msg.fileMetadata.senderOdinId]);
+
+  useLayoutEffect(() => {
+    const navigation = prop.navigation;
+    navigation.setOptions({
+      headerTitle: headerTitle,
+    });
+  });
 
   const renderItem = useCallback(
     ({ item }: CarouselRenderItemInfo<PayloadDescriptor>) => {
