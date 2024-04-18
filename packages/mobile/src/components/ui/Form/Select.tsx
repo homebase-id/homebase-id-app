@@ -1,4 +1,4 @@
-import { ReactElement, useState, useMemo, useEffect, useRef } from 'react';
+import { ReactElement, useState, useMemo, useEffect } from 'react';
 import { StyleProp, ViewStyle, View, TouchableOpacity, Text } from 'react-native';
 
 import { ArrowDown } from '../Icons/icons';

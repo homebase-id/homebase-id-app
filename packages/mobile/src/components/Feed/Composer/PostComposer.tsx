@@ -6,7 +6,7 @@ import {
 } from '@youfoundation/js-lib/core';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { ChannelDefinition, BlogConfig, ReactAccess } from '@youfoundation/js-lib/public';
-import { t } from 'feed-app-common';
+import { t, useDotYouClientContext } from 'feed-app-common';
 import { useState, useMemo, useCallback, useLayoutEffect, useRef, useEffect } from 'react';
 import { View, TextInput, TouchableOpacity } from 'react-native';
 import { Asset, launchImageLibrary } from 'react-native-image-picker';
@@ -16,7 +16,7 @@ import { useChannels } from '../../../hooks/feed/channels/useChannels';
 import { usePostComposer } from '../../../hooks/feed/post/usePostComposer';
 import { useDarkMode } from '../../../hooks/useDarkMode';
 import { ErrorNotification } from '../../ui/Alert/ErrorNotification';
-import { Plus, Ellipsis } from '../../ui/Icons/icons';
+import { Plus, Ellipsis, Globe, Lock, Pencil } from '../../ui/Icons/icons';
 import { FileOverview } from '../../Files/FileOverview';
 import { Select, Option } from '../../ui/Form/Select';
 import { AclIcon, AclSummary } from './AclSummary';
@@ -26,11 +26,15 @@ import { BottomSheetModal } from '@gorhom/bottom-sheet';
 import { useCircles } from '../../../hooks/circles/useCircles';
 import { ScrollView } from 'react-native-gesture-handler';
 import { Text } from '../../ui/Text/Text';
+import { ActionGroup } from '../../ui/Form/ActionGroup';
+import { openURL } from '../../../utils/utils';
 
 export const PostComposer = () => {
   const { isDarkMode } = useDarkMode();
   const insets = useSafeAreaInsets();
   const [stateIndex, setStateIndex] = useState(0); // Used to force a re-render of the component, to reset the input
+
+  const identity = useDotYouClientContext().getIdentity();
 
   const { savePost, postState, processingProgress, error } = usePostComposer();
 
@@ -161,9 +165,28 @@ export const PostComposer = () => {
             <TouchableOpacity onPress={handleImageIconPress}>
               <Plus size={'sm'} />
             </TouchableOpacity>
-            <TouchableOpacity>
+            <ActionGroup
+              options={[
+                reactAccess === false
+                  ? {
+                      label: t('Enable reactions'),
+                      icon: Globe,
+                      onPress: () => setReactAccess(true),
+                    }
+                  : {
+                      label: t('Disable reactions'),
+                      icon: Lock,
+                      onPress: () => setReactAccess(false),
+                    },
+                {
+                  label: t('See my drafts'),
+                  onPress: () => openURL(`https://${identity}/apps/feed/articles`),
+                  icon: Pencil,
+                },
+              ]}
+            >
               <Ellipsis size={'sm'} />
-            </TouchableOpacity>
+            </ActionGroup>
 
             <ChannelOrAclSelector
               defaultChannelValue={
