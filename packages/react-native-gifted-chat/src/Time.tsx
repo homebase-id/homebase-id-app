@@ -1,13 +1,13 @@
-import * as React from 'react'
-import PropTypes from 'prop-types'
-import { StyleSheet, Text, View, ViewStyle, TextStyle } from 'react-native'
-import dayjs from 'dayjs'
+import * as React from 'react';
+import PropTypes from 'prop-types';
+import { StyleSheet, Text, View, ViewStyle, TextStyle } from 'react-native';
+import dayjs from 'dayjs';
 
-import Color from './Color'
-import { TIME_FORMAT } from './Constant'
-import { LeftRightStyle, IMessage } from './Models'
-import { StylePropType } from './utils'
-import { useChatContext } from './GiftedChatContext'
+import Color from './Color';
+import { TIME_FORMAT } from './Constant';
+import { LeftRightStyle, IMessage } from './Models';
+import { StylePropType } from './utils';
+import { useChatContext } from './GiftedChatContext';
 
 const { containerStyle } = StyleSheet.create({
   containerStyle: {
@@ -15,14 +15,14 @@ const { containerStyle } = StyleSheet.create({
     marginRight: 10,
     marginBottom: 5,
   },
-})
+});
 const { textStyle } = StyleSheet.create({
   textStyle: {
     fontSize: 10,
     backgroundColor: 'transparent',
     textAlign: 'right',
-  },
-})
+  } as TextStyle,
+});
 
 const styles = {
   left: StyleSheet.create({
@@ -43,14 +43,14 @@ const styles = {
       ...textStyle,
     },
   }),
-}
+};
 
 export interface TimeProps<TMessage extends IMessage> {
-  position?: 'left' | 'right'
-  currentMessage?: TMessage
-  containerStyle?: LeftRightStyle<ViewStyle>
-  timeTextStyle?: LeftRightStyle<TextStyle>
-  timeFormat?: string
+  position?: 'left' | 'right';
+  currentMessage?: TMessage;
+  containerStyle?: LeftRightStyle<ViewStyle>;
+  timeTextStyle?: LeftRightStyle<TextStyle>;
+  timeFormat?: string;
 }
 
 export function Time<TMessage extends IMessage = IMessage>({
@@ -60,9 +60,9 @@ export function Time<TMessage extends IMessage = IMessage>({
   timeFormat = TIME_FORMAT,
   timeTextStyle,
 }: TimeProps<TMessage>) {
-  const { getLocale } = useChatContext()
+  const { getLocale } = useChatContext();
   if (currentMessage == null) {
-    return null
+    return null;
   }
 
   return (
@@ -81,7 +81,7 @@ export function Time<TMessage extends IMessage = IMessage>({
         {dayjs(currentMessage.createdAt).locale(getLocale()).format(timeFormat)}
       </Text>
     </View>
-  )
+  );
 }
 
 Time.propTypes = {
@@ -96,4 +96,4 @@ Time.propTypes = {
     left: StylePropType,
     right: StylePropType,
   }),
-}
+};
