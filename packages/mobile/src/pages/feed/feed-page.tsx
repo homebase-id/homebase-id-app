@@ -1,11 +1,11 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { memo, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useMemo, useRef, useState } from 'react';
 
 import { TabStackParamList } from '../../app/App';
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 import WebView from 'react-native-webview';
 import { uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
-import { RefreshControl } from 'react-native';
+import { RefreshControl, TouchableOpacity } from 'react-native';
 import { useAuth } from '../../hooks/auth/useAuth';
 import { Colors } from '../../app/Colors';
 import { useDarkMode } from '../../hooks/useDarkMode';
@@ -14,6 +14,7 @@ import { useRemoveNotifications } from '../../hooks/notifications/usePushNotific
 import { FEED_APP_ID } from '../../app/constants';
 import { PostComposer } from '../../components/Feed/Composer/PostComposer';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import { Plus } from '../../components/ui/Icons/icons';
 
 type FeedProps = NativeStackScreenProps<TabStackParamList, 'Feed'>;
 
@@ -22,7 +23,7 @@ export const FeedPage = memo((_props: FeedProps) => {
   const { authToken, getIdentity, getSharedSecret } = useAuth();
   const identity = getIdentity();
 
-  const [hideHeader, setHideHeader] = useState<boolean>();
+  const [isPostComposerOpen, setIsPostComposerOpen] = useState<boolean>();
 
   useRemoveNotifications({ appId: FEED_APP_ID });
 
@@ -69,10 +70,16 @@ export const FeedPage = memo((_props: FeedProps) => {
     } else if (refresherEnabled) {
       setEnableRefresher(false);
     }
-
-    if (yOffset > 20) setHideHeader(true);
-    else setHideHeader(false);
   };
+
+  const doCloseComposer = useCallback(() => {
+    setIsPostComposerOpen(false);
+  }, []);
+
+  const doCloseAndRefresh = useCallback(() => {
+    setIsPostComposerOpen(false);
+    webviewRef.current?.reload();
+  }, []);
 
   return (
     <SafeAreaView>
@@ -93,21 +100,35 @@ export const FeedPage = memo((_props: FeedProps) => {
               source={{ uri }}
               injectedJavaScriptBeforeContentLoaded={INJECTED_JAVASCRIPT}
               pullToRefreshEnabled={true}
-              containerStyle={{
-                paddingTop: 0,
-              }}
               style={{ backgroundColor: isDarkMode ? Colors.slate[900] : Colors.slate[50] }}
               originWhitelist={originWhitelist} // Keeps the WebView from navigating away from the feed-app; Any links that don't match will be opened by the system.. Eg: open in the browser
-              // onMessage={(event) => console.warn(event)}
               onScroll={handleScroll}
               onLoadEnd={() => setRefreshing(false)}
               forceDarkOn={isDarkMode}
             />
+            <TouchableOpacity
+              style={{
+                width: 50,
+                height: 50,
+                borderRadius: 25,
+                backgroundColor: Colors.indigo[500],
+                flexDirection: 'row',
+                justifyContent: 'center',
+                alignItems: 'center',
+                position: 'absolute',
+                bottom: 20,
+                right: 20,
+              }}
+              onPress={() => setIsPostComposerOpen(true)}
+            >
+              <Plus color={Colors.white} size="lg" />
+            </TouchableOpacity>
           </ScrollView>
         ) : null}
 
-        {/* Rendered after ScrollView as we position absolute, and it's easier than managing zIndex in RN */}
-        {hideHeader ? null : <PostComposer />}
+        {isPostComposerOpen ? (
+          <PostComposer onPost={doCloseAndRefresh} onCancel={doCloseComposer} />
+        ) : null}
       </BottomSheetModalProvider>
     </SafeAreaView>
   );

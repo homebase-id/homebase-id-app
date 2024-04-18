@@ -1,4 +1,4 @@
-import { ReactElement, useState, useMemo, useEffect } from 'react';
+import { ReactElement, useState, useMemo, memo } from 'react';
 import { StyleProp, ViewStyle, View, TouchableOpacity, Text } from 'react-native';
 
 import { ArrowDown } from '../Icons/icons';
@@ -16,14 +16,10 @@ interface SelectProps {
   onChange?: (value: string) => void;
 }
 
-export const Select = ({ defaultValue, children, style, onChange }: SelectProps) => {
+export const Select = memo(({ defaultValue, children, style, onChange }: SelectProps) => {
   const [currentVal, setCurrentVal] = useState(defaultValue);
   const [isOpen, setIsOpen] = useState(false);
   const { isDarkMode } = useDarkMode();
-
-  useEffect(() => {
-    setCurrentVal(defaultValue);
-  }, [defaultValue]);
 
   const flatOptions: Array<ReactElement<OptionProps>> = useMemo(
     () =>
@@ -37,12 +33,6 @@ export const Select = ({ defaultValue, children, style, onChange }: SelectProps)
     const selected = flatOptions.find((child) => child.props.value === currentVal);
     return selected?.props.children || 'Make a selection';
   }, [flatOptions, currentVal]);
-
-  useEffect(() => {
-    if (currentVal && onChange) {
-      onChange(currentVal);
-    }
-  }, [currentVal, onChange]);
 
   return (
     <View style={style}>
@@ -84,6 +74,10 @@ export const Select = ({ defaultValue, children, style, onChange }: SelectProps)
             backgroundColor: isDarkMode ? Colors.black : Colors.white,
             zIndex: 20,
             elevation: 20,
+
+            borderWidth: 1,
+            borderColor: isDarkMode ? Colors.slate[700] : Colors.gray[200],
+            borderRadius: 4,
           }}
         >
           {flatOptions.map((child) => (
@@ -91,6 +85,7 @@ export const Select = ({ defaultValue, children, style, onChange }: SelectProps)
               key={child?.key}
               onPress={() => {
                 setCurrentVal(child?.props.value);
+                onChange && child?.props.value && onChange(child?.props.value);
                 setIsOpen(false);
               }}
               style={{
@@ -111,7 +106,7 @@ export const Select = ({ defaultValue, children, style, onChange }: SelectProps)
       ) : null}
     </View>
   );
-};
+});
 
 interface OptionProps {
   value?: string;
