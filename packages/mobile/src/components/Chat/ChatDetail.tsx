@@ -21,7 +21,7 @@ import {
   Time,
   User,
 } from 'react-native-gifted-chat';
-import { useCallback, memo, useMemo } from 'react';
+import { useCallback, memo, useMemo, useState } from 'react';
 import {
   GestureResponderEvent,
   ImageBackground,
@@ -31,10 +31,11 @@ import {
   StatusBar,
   StyleProp,
   StyleSheet,
+  TextStyle,
   View,
   ViewStyle,
 } from 'react-native';
-import { Close, Images, Microphone, SendChat, Times } from '../../components/ui/Icons/icons';
+import { Close, Images, Microphone, Plus, SendChat, Times } from '../../components/ui/Icons/icons';
 import MediaMessage from './MediaMessage';
 import { Asset, launchImageLibrary } from 'react-native-image-picker';
 import { useAuth } from '../../hooks/auth/useAuth';
@@ -132,7 +133,7 @@ export const ChatDetail = memo(
       return (
         <View
           style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
+            backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
           }}
         >
           {replyMessage ? (
@@ -180,7 +181,7 @@ export const ChatDetail = memo(
     }, [assets, isDarkMode, replyMessage, setAssets, setReplyMessage]);
 
     const { record, stop, duration, isRecording } = useAudioRecorder();
-    const imagesIcon = useCallback(() => <Images />, []);
+
     const microphoneIcon = useCallback(() => <Microphone />, []);
     const crossIcon = useCallback(() => <Times />, []);
 
@@ -224,18 +225,24 @@ export const ChatDetail = memo(
     }, [setAssets]);
 
     const inputStyle = useMemo(
-      () => ({
-        color: isDarkMode ? 'white' : 'black',
-      }),
+      () =>
+        ({
+          color: isDarkMode ? 'white' : 'black',
+          flex: 1,
+        }) as TextStyle,
       [isDarkMode]
     );
     const composerContainerStyle = useMemo(
-      () => ({
-        borderRadius: 20,
-        backgroundColor: isDarkMode ? Colors.slate[800] : Colors.indigo[50],
-      }),
+      () =>
+        ({
+          borderRadius: 20,
+          backgroundColor: isDarkMode ? Colors.slate[800] : Colors.indigo[50],
+          flex: 1,
+          flexDirection: 'row',
+        }) as ViewStyle,
       [isDarkMode]
     );
+
     const renderComposer = useCallback(
       (props: ComposerProps) => {
         if (isRecording) {
@@ -269,14 +276,32 @@ export const ChatDetail = memo(
           );
         }
         return (
-          <Composer
-            {...props}
-            textInputStyle={inputStyle}
-            containerStyle={composerContainerStyle}
-          />
+          <Composer {...props} textInputStyle={inputStyle} containerStyle={composerContainerStyle}>
+            {!props.text && (
+              <Actions
+                icon={microphoneIcon}
+                containerStyle={[
+                  {
+                    paddingHorizontal: 20,
+                    marginTop: 'auto',
+                    marginBottom: 'auto',
+                    alignItems: 'center',
+                  },
+                ]}
+                onPressActionButton={handleRecordButtonAction}
+              />
+            )}
+          </Composer>
         );
       },
-      [composerContainerStyle, duration, inputStyle, isRecording]
+      [
+        composerContainerStyle,
+        duration,
+        handleRecordButtonAction,
+        inputStyle,
+        isRecording,
+        microphoneIcon,
+      ]
     );
 
     const renderSend = useCallback(
@@ -288,73 +313,65 @@ export const ChatDetail = memo(
               alignItems: 'flex-end',
             }}
           >
-            {!props.text && (
+            {isRecording && (
               <Actions
-                icon={!isRecording ? microphoneIcon : crossIcon}
+                icon={crossIcon}
                 containerStyle={[
-                  props.containerStyle,
                   {
-                    justifyContent: 'center',
                     paddingHorizontal: 20,
-                    paddingVertical: 12,
+                    justifyContent: 'center',
                   },
                 ]}
                 onPressActionButton={handleRecordButtonAction}
               />
             )}
-
             <View style={{ width: 6 }} />
 
-            {(props.text || assets?.length > 0 || isRecording) && (
-              <Send
-                {...props}
-                disabled={isRecording ? false : !props.text && assets?.length === 0}
-                text={props.text || ' '}
-                onSend={isRecording ? async (_) => await onStopRecording() : props.onSend}
-                containerStyle={styles.send}
+            <Send
+              {...props}
+              // disabled={isRecording ? false : !props.text && assets?.length === 0}
+              disabled={false}
+              text={props.text || ' '}
+              // onSend={isRecording ? async (_) => onStopRecording() : props.onSend}
+              onSend={
+                isRecording
+                  ? async (_) => onStopRecording()
+                  : !props.text && assets?.length === 0
+                    ? handleImageIconPress
+                    : props.onSend
+              }
+              containerStyle={styles.send}
+            >
+              <View
+                style={{
+                  height: 40,
+                  width: 40,
+                  justifyContent: 'center',
+                  borderRadius: 20,
+                  backgroundColor: Colors.indigo[500],
+                  transform: [
+                    { rotate: props.text || assets.length !== 0 || isRecording ? '50deg' : '0deg' },
+                  ],
+                }}
               >
-                <View
-                  style={{
-                    height: 40,
-                    width: 40,
-                    justifyContent: 'center',
-                    borderRadius: 20,
-                    backgroundColor: Colors.indigo[500],
-                    transform: [{ rotate: '45deg' }],
-                  }}
-                >
+                {props.text || assets.length !== 0 || isRecording ? (
                   <SendChat size={'md'} color={Colors.white} />
-                </View>
-              </Send>
-            )}
+                ) : (
+                  <Plus color={Colors.white} />
+                )}
+              </View>
+            </Send>
           </View>
         );
       },
       [
-        assets?.length,
+        assets.length,
         crossIcon,
+        handleImageIconPress,
         handleRecordButtonAction,
         isRecording,
-        microphoneIcon,
         onStopRecording,
       ]
-    );
-
-    const renderActions = useCallback(
-      (props: ActionsProps) => (
-        <Actions
-          {...props}
-          containerStyle={[
-            props.containerStyle,
-            {
-              justifyContent: 'center',
-            },
-          ]}
-          icon={imagesIcon}
-          onPressActionButton={handleImageIconPress}
-        />
-      ),
-      [handleImageIconPress, imagesIcon]
     );
 
     const renderUsername = useCallback(
@@ -381,7 +398,7 @@ export const ChatDetail = memo(
       return [
         styles.inputContainer,
         {
-          backgroundColor: isDarkMode ? Colors.slate[900] : Colors.white,
+          backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
           borderTopWidth: 0,
           borderRadius: 10,
           marginTop: Platform.OS === 'android' ? 'auto' : undefined,
@@ -396,12 +413,11 @@ export const ChatDetail = memo(
             {...props}
             renderComposer={renderComposer}
             renderSend={renderSend}
-            renderActions={isRecording ? () => null : renderActions}
             containerStyle={inputContainerStyle}
           />
         );
       },
-      [renderComposer, renderSend, isRecording, renderActions, inputContainerStyle]
+      [renderComposer, renderSend, inputContainerStyle]
     );
 
     const renderAvatar = useCallback((props: AvatarProps<IMessage>) => {

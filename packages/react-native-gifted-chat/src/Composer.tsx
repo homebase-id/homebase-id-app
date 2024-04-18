@@ -49,6 +49,8 @@ export interface ComposerProps {
   onTextChanged?(text: string): void;
   onInputSizeChanged?(layout: { width: number; height: number }): void;
   containerStyle?: ViewStyle;
+  children?: React.ReactNode;
+  text: string | undefined;
 }
 
 export const Composer = memo(
@@ -124,6 +126,7 @@ export const Composer = memo(
           keyboardAppearance={keyboardAppearance}
           {...textInputProps}
         />
+        {props.children}
       </View>
     );
   },
