@@ -62,11 +62,11 @@ export const OdinImage = memo(
           : {
               pixelHeight:
                 (imageSize?.height
-                  ? Math.round(imageSize?.height * (enableZoom ? 4 : 1))
+                  ? Math.round(imageSize?.height * (enableZoom ? 6 : 1))
                   : undefined) || 800,
               pixelWidth:
                 (imageSize?.width
-                  ? Math.round(imageSize?.width * (enableZoom ? 4 : 1))
+                  ? Math.round(imageSize?.width * (enableZoom ? 6 : 1))
                   : undefined) || 800,
             },
       [enableZoom, imageSize?.height, imageSize?.width, previewThumbnail?.contentType]
@@ -125,7 +125,8 @@ export const OdinImage = memo(
           }}
         >
           {/* Blurry image */}
-          {previewUrl ? (
+          {/* Hide preview image when it's an enableZoom as the position absolute conflicts on the gestures */}
+          {previewUrl && (!enableZoom || (enableZoom && !imageData?.url)) ? (
             <InnerImage
               uri={previewUrl}
               contentType={previewContentType as ImageContentType}
