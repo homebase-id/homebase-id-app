@@ -124,7 +124,7 @@ export const PostComposer = memo(
             left: 0,
             right: 0,
             bottom: 0,
-            paddingTop: insets.top,
+            paddingTop: insets.top + 8,
             paddingBottom: 8,
             paddingHorizontal: 8,
             backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
