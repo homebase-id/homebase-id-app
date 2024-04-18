@@ -48,7 +48,7 @@ export const FeedPage = memo((_props: FeedProps) => {
         const APP_SHARED_SECRET = '${base64SharedSecret}';
         const APP_AUTH_TOKEN = '${authToken}';
         const IDENTITY = '${identity}';
-        const APP_CLIENT_TYPE = 'react-native';
+        const APP_CLIENT_TYPE = 'react-native-v2';
 
         window.localStorage.setItem(APP_SHARED_SECRET_KEY, APP_SHARED_SECRET);
         window.localStorage.setItem(APP_AUTH_TOKEN_KEY, APP_AUTH_TOKEN);
