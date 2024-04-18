@@ -12,7 +12,6 @@ import { useDarkMode } from '../../hooks/useDarkMode';
 import { ScrollView } from 'react-native-gesture-handler';
 import { useRemoveNotifications } from '../../hooks/notifications/usePushNotifications';
 import { FEED_APP_ID } from '../../app/constants';
-import React from 'react';
 import { PostComposer } from '../../components/Feed/Composer/PostComposer';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 
@@ -78,7 +77,6 @@ export const FeedPage = memo((_props: FeedProps) => {
   return (
     <SafeAreaView>
       <BottomSheetModalProvider>
-        {hideHeader ? null : <PostComposer />}
         {identity && uri ? (
           <ScrollView
             contentContainerStyle={{ flex: 1 }}
@@ -107,6 +105,9 @@ export const FeedPage = memo((_props: FeedProps) => {
             />
           </ScrollView>
         ) : null}
+
+        {/* Rendered after ScrollView as we position absolute, and it's easier than managing zIndex in RN */}
+        {hideHeader ? null : <PostComposer />}
       </BottomSheetModalProvider>
     </SafeAreaView>
   );

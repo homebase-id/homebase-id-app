@@ -7,7 +7,7 @@ import {
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { ChannelDefinition, BlogConfig, ReactAccess } from '@youfoundation/js-lib/public';
 import { t } from 'feed-app-common';
-import { useState, useMemo, useCallback, useLayoutEffect, useRef } from 'react';
+import { useState, useMemo, useCallback, useLayoutEffect, useRef, useEffect } from 'react';
 import { View, TextInput, TouchableOpacity, Text } from 'react-native';
 import { Asset, launchImageLibrary } from 'react-native-image-picker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -23,6 +23,8 @@ import { AclIcon, AclSummary } from './AclSummary';
 import { Colors } from '../../../app/Colors';
 import { ImageSource } from '../../../provider/image/RNImageProvider';
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
+import { useCircles } from '../../../hooks/circles/useCircles';
+import { ScrollView } from 'react-native-gesture-handler';
 
 export const PostComposer = () => {
   const { isDarkMode } = useDarkMode();
@@ -113,7 +115,7 @@ export const PostComposer = () => {
           paddingTop: insets.top,
           paddingHorizontal: 8,
           backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
-          zIndex: 1,
+          zIndex: 0,
         }}
       >
         <View
@@ -175,6 +177,7 @@ export const PostComposer = () => {
                 flexDirection: 'row',
                 alignItems: 'center',
                 gap: 8,
+                zIndex: -1,
               }}
               onPress={doPost}
             >
@@ -233,7 +236,6 @@ const ChannelOrAclSelector = ({
   const handleChange = useCallback(
     (value: string) => {
       if (value === 'custom') {
-        setStateIndex((index) => index + 1);
         setIsCustomAclOpen(true);
       } else {
         onChange(
@@ -252,6 +254,7 @@ const ChannelOrAclSelector = ({
         // className={`cursor-pointer bg-transparent px-3 py-2 text-sm ${className ?? ''}`}
         defaultValue={defaultChannelValue}
         key={'loading-select'}
+        style={{ zIndex: 20, elevation: 20, position: 'relative' }}
       >
         <Option>Public Posts</Option>
       </Select>
@@ -269,7 +272,7 @@ const ChannelOrAclSelector = ({
   return (
     <>
       <Select
-        style={{ marginLeft: 'auto' }}
+        style={{ marginLeft: 'auto', zIndex: 20, elevation: 20, position: 'relative' }}
         defaultValue={getDefaultChannel()}
         key={stateIndex || 'loaded-select'}
         onChange={handleChange}
@@ -303,7 +306,10 @@ const ChannelOrAclSelector = ({
           setIsCustomAclOpen(false);
         }}
         isOpen={isCustomAclOpen}
-        onCancel={() => setIsCustomAclOpen(false)}
+        onCancel={() => {
+          setIsCustomAclOpen(false);
+          setStateIndex((i) => i + 1);
+        }}
       />
     </>
   );
@@ -377,7 +383,7 @@ const AclDialog = ({
   return (
     <BottomSheetModal
       ref={bottomSheetRef}
-      snapPoints={['70%', '90%']}
+      snapPoints={['95%']}
       backgroundStyle={{
         backgroundColor: isDarkMode ? Colors.gray[900] : Colors.white,
       }}
@@ -387,11 +393,11 @@ const AclDialog = ({
       onDismiss={onCancel}
       enableDismissOnClose={true}
       style={{
-        zIndex: 1000,
-        elevation: 1000,
+        zIndex: 20,
+        elevation: 20,
       }}
     >
-      <View
+      <ScrollView
         style={{
           flex: 1,
           paddingHorizontal: 16,
@@ -399,7 +405,7 @@ const AclDialog = ({
       >
         <Text style={{ marginBottom: 12, fontSize: 20 }}>{title}</Text>
         <AclWizard acl={acl} onConfirm={onConfirm} onCancel={onCancel} />
-      </View>
+      </ScrollView>
     </BottomSheetModal>
   );
 };
@@ -421,6 +427,10 @@ export const AclWizard = ({
     onConfirm(currentAcl);
   }, [currentAcl, onConfirm]);
 
+  const doChange = useCallback((newCircleIds: string[]) => {
+    setCurrentAcl((currentAcl) => ({ ...currentAcl, circleIdList: newCircleIds }));
+  }, []);
+
   return (
     <>
       <View style={{ marginBottom: 16 }}>
@@ -429,18 +439,17 @@ export const AclWizard = ({
           onChange={(newAcl) => setCurrentAcl({ ...newAcl })}
         />
       </View>
-      {/* {currentAcl.requiredSecurityGroup.toLowerCase() ===
+      {currentAcl.requiredSecurityGroup.toLowerCase() ===
         SecurityGroupType.Connected.toLowerCase() && Array.isArray(currentAcl.circleIdList) ? (
-        <div className="mb-16">
-          <h2 className="mb-2 text-lg">{t('Do you want to only allow certain circles?')}</h2>
-          <CircleSelector
-            defaultValue={currentAcl.circleIdList}
-            onChange={(e) => setCurrentAcl({ ...currentAcl, circleIdList: e.target.value })}
-          />
-        </div>
-      ) : null} */}
+        <View style={{ marginBottom: 16 }}>
+          <Text style={{ marginBottom: 4, fontSize: 18 }}>
+            {t('Do you want to only allow certain circles?')}
+          </Text>
+          <CircleSelector defaultValue={currentAcl.circleIdList} onChange={doChange} />
+        </View>
+      ) : null}
 
-      <View style={{ display: 'flex', flexDirection: 'row-reverse', gap: 8 }}>
+      <View style={{ display: 'flex', flexDirection: 'row-reverse', gap: 8, paddingBottom: 16 }}>
         <TouchableOpacity
           onPress={doConfirm}
           style={{
@@ -573,5 +582,83 @@ const GroupOption = (props: {
         {props.description}
       </Text>
     </TouchableOpacity>
+  );
+};
+
+const CircleSelector = ({
+  defaultValue,
+  onChange,
+  excludeSystemCircles = false,
+}: {
+  defaultValue: string[];
+  onChange: (value: string[]) => void;
+  excludeSystemCircles?: boolean;
+}) => {
+  const { isDarkMode } = useDarkMode();
+  const {
+    fetch: { data: circles, isLoading: isCirclesLoading },
+  } = useCircles(excludeSystemCircles);
+  const [selection, setSelection] = useState<string[]>([...(defaultValue ?? [])]);
+
+  useEffect(() => {
+    onChange([...selection]);
+  }, [selection, onChange]);
+
+  return (
+    <>
+      {!circles?.length && !isCirclesLoading && (
+        <Text
+          style={{
+            padding: 16,
+            borderRadius: 6,
+            backgroundColor: isDarkMode ? Colors.black : Colors.white,
+            borderWidth: 1,
+            borderColor: isDarkMode ? Colors.slate[800] : Colors.slate[200],
+          }}
+        >
+          {t('No circles found on your identity')}
+        </Text>
+      )}
+      <View style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        {circles?.map((circle) => {
+          const isChecked = selection.some((circleGrant) =>
+            stringGuidsEqual(circleGrant, circle.id || '')
+          );
+          const clickHandler = () => {
+            if (!circle.id) {
+              return;
+            }
+            const clickedCircleId = circle.id;
+
+            if (!selection.some((circleGrant) => stringGuidsEqual(circleGrant, clickedCircleId))) {
+              setSelection([...selection, clickedCircleId]);
+            } else {
+              setSelection(
+                selection.filter((circleId) => !stringGuidsEqual(circleId, clickedCircleId))
+              );
+            }
+          };
+
+          return (
+            <TouchableOpacity
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                gap: 8,
+                padding: 8,
+                borderRadius: 6,
+                borderWidth: 1,
+                borderColor: isDarkMode ? Colors.slate[800] : Colors.slate[200],
+                backgroundColor: isChecked ? Colors.indigo[500] : 'transparent',
+              }}
+              key={circle.id}
+              onPress={clickHandler}
+            >
+              <Text style={{ color: isChecked ? Colors.white : Colors.black }}>{circle.name}</Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+    </>
   );
 };

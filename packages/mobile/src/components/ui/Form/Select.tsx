@@ -53,7 +53,8 @@ export const Select = ({ defaultValue, children, style, onChange }: SelectProps)
             borderColor: Colors.gray[200],
             borderRadius: 4,
             position: 'relative',
-            zIndex: 999999,
+            zIndex: 20,
+            elevation: 20,
             display: 'flex',
             flexDirection: 'row',
             alignItems: 'center',
@@ -73,8 +74,8 @@ export const Select = ({ defaultValue, children, style, onChange }: SelectProps)
             minWidth: 180,
             right: 0,
             backgroundColor: Colors.white,
-            zIndex: 999999,
-            elevation: 99999,
+            zIndex: 20,
+            elevation: 20,
           }}
         >
           {flatOptions.map((child) => (
