@@ -470,7 +470,13 @@ export const ChatDetail = memo(
 
     const scrollToBottomStyle = useMemo(() => {
       return {
-        backgroundColor: isDarkMode ? Colors.indigo[900] : Colors.white,
+        backgroundColor: isDarkMode ? Colors.indigo[900] : Colors.slate[50],
+        opacity: 1,
+      };
+    }, [isDarkMode]);
+    const wrapperStyle = useMemo(() => {
+      return {
+        backgroundColor: isDarkMode ? Colors.indigo[900] : Colors.slate[50],
         opacity: 1,
       };
     }, [isDarkMode]);
@@ -507,9 +513,7 @@ export const ChatDetail = memo(
           loadEarlier={hasMoreMessages}
           onLoadEarlier={fetchMoreMessages}
           scrollToBottomStyle={scrollToBottomStyle}
-          renderLoadEarlier={(prop) => (
-            <LoadEarlier {...prop} containerStyle={scrollToBottomStyle} />
-          )}
+          renderLoadEarlier={(prop) => <LoadEarlier {...prop} wrapperStyle={wrapperStyle} />}
           listViewProps={{
             removeClippedSubviews: true,
             windowSize: 15,
@@ -579,6 +583,11 @@ const RenderBubble = memo(
 
     const hasReactions = (reactions && reactions?.length > 0) || false;
     const flatReactions = reactions?.flatMap((val) => val.fileMetadata.appData.content.message);
+    // has pauload and no text but no audio payload
+    // const hasPayloadandNoText =
+    //   message?.fileMetadata.payloads?.length > 0 &&
+    //   !content?.message &&
+    //   !message.fileMetadata.payloads?.some((val) => val.contentType.startsWith('audio'));
 
     return (
       <Bubble
@@ -673,7 +682,7 @@ const RenderBubble = memo(
                 left: { color: isDarkMode ? Colors.white : Colors.black },
                 right: { color: isDarkMode ? Colors.white : Colors.black },
               }
-            : {}
+            : undefined
         }
         wrapperStyle={
           !showBackground
