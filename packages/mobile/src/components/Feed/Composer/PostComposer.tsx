@@ -8,7 +8,7 @@ import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { ChannelDefinition, BlogConfig, ReactAccess } from '@youfoundation/js-lib/public';
 import { t } from 'feed-app-common';
 import { useState, useMemo, useCallback, useLayoutEffect, useRef, useEffect } from 'react';
-import { View, TextInput, TouchableOpacity, Text } from 'react-native';
+import { View, TextInput, TouchableOpacity } from 'react-native';
 import { Asset, launchImageLibrary } from 'react-native-image-picker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -25,6 +25,7 @@ import { ImageSource } from '../../../provider/image/RNImageProvider';
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
 import { useCircles } from '../../../hooks/circles/useCircles';
 import { ScrollView } from 'react-native-gesture-handler';
+import { Text } from '../../ui/Text/Text';
 
 export const PostComposer = () => {
   const { isDarkMode } = useDarkMode();
@@ -123,13 +124,19 @@ export const PostComposer = () => {
             padding: 16,
             backgroundColor: isDarkMode ? Colors.black : Colors.white,
             borderWidth: 1,
-            borderColor: Colors.gray[100],
+            borderColor: isDarkMode ? Colors.slate[800] : Colors.gray[100],
             borderRadius: 6,
           }}
         >
           <TextInput
             placeholder="What's up?"
-            style={{ paddingVertical: 5, lineHeight: 20, fontSize: 16, minHeight: 45 }}
+            style={{
+              paddingVertical: 5,
+              lineHeight: 20,
+              fontSize: 16,
+              minHeight: 45,
+              color: isDarkMode ? Colors.white : Colors.black,
+            }}
             multiline={true}
             onChange={(event) => setCaption(event.nativeEvent.text)}
             key={stateIndex}
@@ -324,7 +331,6 @@ export const ProgressIndicator = ({
   processingProgress: number;
   files: number;
 }) => {
-  const { isDarkMode } = useDarkMode();
   if (!postState) return null;
 
   let progressText = '';
@@ -340,11 +346,7 @@ export const ProgressIndicator = ({
       {postState === 'error' ? (
         <Text>{t('Error')}</Text>
       ) : (
-        <Text
-          style={{ fontSize: 12, color: isDarkMode ? Colors.white : Colors.black, opacity: 0.4 }}
-        >
-          {progressText}
-        </Text>
+        <Text style={{ fontSize: 12, opacity: 0.4 }}>{progressText}</Text>
       )}
     </View>
   );
@@ -403,7 +405,14 @@ const AclDialog = ({
           paddingHorizontal: 16,
         }}
       >
-        <Text style={{ marginBottom: 12, fontSize: 20 }}>{title}</Text>
+        <Text
+          style={{
+            marginBottom: 12,
+            fontSize: 20,
+          }}
+        >
+          {title}
+        </Text>
         <AclWizard acl={acl} onConfirm={onConfirm} onCancel={onCancel} />
       </ScrollView>
     </BottomSheetModal>
@@ -419,6 +428,7 @@ export const AclWizard = ({
   onConfirm: (acl: AccessControlList) => void;
   onCancel?: () => void;
 }) => {
+  const { isDarkMode } = useDarkMode();
   const [currentAcl, setCurrentAcl] = useState(
     acl ?? { requiredSecurityGroup: SecurityGroupType.Owner }
   );
@@ -456,7 +466,7 @@ export const AclWizard = ({
             paddingHorizontal: 8,
             paddingVertical: 8,
             borderWidth: 1,
-            borderColor: Colors.slate[200],
+            borderColor: isDarkMode ? Colors.slate[700] : Colors.slate[200],
             borderRadius: 6,
 
             backgroundColor: Colors.indigo[500],
@@ -470,7 +480,7 @@ export const AclWizard = ({
             paddingHorizontal: 8,
             paddingVertical: 8,
             borderWidth: 1,
-            borderColor: Colors.slate[200],
+            borderColor: isDarkMode ? Colors.slate[700] : Colors.slate[200],
             borderRadius: 6,
           }}
         >
@@ -565,6 +575,7 @@ const GroupOption = (props: {
   checked: boolean;
   onChange: (value: AccessControlList) => void;
 }) => {
+  const { isDarkMode } = useDarkMode();
   return (
     <TouchableOpacity
       style={{
@@ -573,12 +584,28 @@ const GroupOption = (props: {
         justifyContent: 'flex-start',
         borderRadius: 4,
         padding: 8,
-        backgroundColor: props.checked ? Colors.indigo[500] : Colors.slate[100],
+        backgroundColor: props.checked
+          ? Colors.indigo[500]
+          : isDarkMode
+            ? Colors.slate[700]
+            : Colors.slate[100],
       }}
       onPress={() => props.onChange && props.onChange(props.value)}
     >
-      <Text style={{ color: props.checked ? Colors.white : Colors.black }}>{props.name}</Text>
-      <Text style={{ fontSize: 12, color: props.checked ? Colors.slate[300] : Colors.slate[500] }}>
+      <Text
+        style={{
+          color: props.checked || isDarkMode ? Colors.white : Colors.black,
+          fontWeight: '500',
+        }}
+      >
+        {props.name}
+      </Text>
+      <Text
+        style={{
+          fontSize: 12,
+          color: props.checked || isDarkMode ? Colors.slate[300] : Colors.slate[500],
+        }}
+      >
         {props.description}
       </Text>
     </TouchableOpacity>
@@ -649,12 +676,18 @@ const CircleSelector = ({
                 borderRadius: 6,
                 borderWidth: 1,
                 borderColor: isDarkMode ? Colors.slate[800] : Colors.slate[200],
-                backgroundColor: isChecked ? Colors.indigo[500] : 'transparent',
+                backgroundColor: isChecked
+                  ? Colors.indigo[500]
+                  : isDarkMode
+                    ? Colors.slate[700]
+                    : Colors.slate[100],
               }}
               key={circle.id}
               onPress={clickHandler}
             >
-              <Text style={{ color: isChecked ? Colors.white : Colors.black }}>{circle.name}</Text>
+              <Text style={{ color: isChecked || isDarkMode ? Colors.white : Colors.black }}>
+                {circle.name}
+              </Text>
             </TouchableOpacity>
           );
         })}

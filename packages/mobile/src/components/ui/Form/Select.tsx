@@ -3,6 +3,7 @@ import { StyleProp, ViewStyle, View, TouchableOpacity, Text } from 'react-native
 
 import { ArrowDown } from '../Icons/icons';
 import { Colors } from '../../../app/Colors';
+import { useDarkMode } from '../../../hooks/useDarkMode';
 
 interface SelectProps {
   defaultValue: string | undefined;
@@ -18,6 +19,7 @@ interface SelectProps {
 export const Select = ({ defaultValue, children, style, onChange }: SelectProps) => {
   const [currentVal, setCurrentVal] = useState(defaultValue);
   const [isOpen, setIsOpen] = useState(false);
+  const { isDarkMode } = useDarkMode();
 
   useEffect(() => {
     setCurrentVal(defaultValue);
@@ -50,7 +52,7 @@ export const Select = ({ defaultValue, children, style, onChange }: SelectProps)
           {
             padding: 8,
             borderWidth: 1,
-            borderColor: Colors.gray[200],
+            borderColor: isDarkMode ? Colors.slate[700] : Colors.gray[200],
             borderRadius: 4,
             position: 'relative',
             zIndex: 20,
@@ -62,7 +64,13 @@ export const Select = ({ defaultValue, children, style, onChange }: SelectProps)
           },
         ]}
       >
-        <Text>{currentLabel}</Text>
+        <Text
+          style={{
+            color: isDarkMode ? Colors.white : Colors.black,
+          }}
+        >
+          {currentLabel}
+        </Text>
         <ArrowDown size={'sm'} />
       </TouchableOpacity>
 
@@ -73,7 +81,7 @@ export const Select = ({ defaultValue, children, style, onChange }: SelectProps)
             top: '100%',
             minWidth: 180,
             right: 0,
-            backgroundColor: Colors.white,
+            backgroundColor: isDarkMode ? Colors.black : Colors.white,
             zIndex: 20,
             elevation: 20,
           }}
@@ -87,7 +95,13 @@ export const Select = ({ defaultValue, children, style, onChange }: SelectProps)
               }}
               style={{
                 backgroundColor:
-                  currentVal === child?.props.value ? Colors.slate[200] : Colors.white,
+                  currentVal === child?.props.value
+                    ? isDarkMode
+                      ? Colors.slate[700]
+                      : Colors.slate[200]
+                    : isDarkMode
+                      ? Colors.black
+                      : Colors.white,
               }}
             >
               {child}
@@ -104,9 +118,10 @@ interface OptionProps {
   children: string;
 }
 export const Option = ({ children }: OptionProps) => {
+  const { isDarkMode } = useDarkMode();
   return (
     <View style={{ paddingHorizontal: 8, paddingVertical: 4 }}>
-      <Text>{children}</Text>
+      <Text style={{ color: isDarkMode ? Colors.white : Colors.black }}>{children}</Text>
     </View>
   );
 };
