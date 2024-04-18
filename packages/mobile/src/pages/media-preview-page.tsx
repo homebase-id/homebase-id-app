@@ -11,9 +11,11 @@ import {
   CarouselRenderItemInfo,
   ICarouselInstance,
 } from 'react-native-reanimated-carousel/lib/typescript/types';
-import { SafeAreaView } from '../components/ui/SafeAreaView/SafeAreaView';
+
 import { useSafeAreaFrame } from 'react-native-safe-area-context';
 import { View } from 'react-native';
+import { Colors } from '../app/Colors';
+import { useDarkMode } from '../hooks/useDarkMode';
 
 export type MediaProp = NativeStackScreenProps<ChatStackParamList, 'PreviewMedia'>;
 
@@ -26,6 +28,7 @@ export const PreviewMedia = memo((prop: MediaProp) => {
   const [currIndex, setCurrIndex] = useState(initialIndex);
   const ref = useRef<ICarouselInstance>(null);
   const { height, width } = useSafeAreaFrame();
+  const { isDarkMode } = useDarkMode();
 
   const renderItem = useCallback(
     ({ item }: CarouselRenderItemInfo<PayloadDescriptor>) => {
@@ -47,19 +50,17 @@ export const PreviewMedia = memo((prop: MediaProp) => {
           previewThumbnail={msg.fileMetadata.appData.previewThumbnail}
         />
       ) : (
-        <SafeAreaView>
-          <VideoWithLoader
-            fileId={fileId}
-            fileKey={fileKey}
-            targetDrive={ChatDrive}
-            fullscreen={true}
-            previewThumbnail={msg.fileMetadata.appData.previewThumbnail}
-            imageSize={{
-              width: width,
-              height: height,
-            }}
-          />
-        </SafeAreaView>
+        <VideoWithLoader
+          fileId={fileId}
+          fileKey={fileKey}
+          targetDrive={ChatDrive}
+          fullscreen={true}
+          previewThumbnail={msg.fileMetadata.appData.previewThumbnail}
+          imageSize={{
+            width: width,
+            height: height,
+          }}
+        />
       );
     },
     [fileId, height, msg.fileMetadata.appData.previewThumbnail, width]
@@ -82,7 +83,11 @@ export const PreviewMedia = memo((prop: MediaProp) => {
         loop={false}
         defaultIndex={initialIndex}
         renderItem={renderItem}
+        style={{
+          backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
+        }}
       />
+
       {payloads.length > 1 && (
         <View
           style={{
