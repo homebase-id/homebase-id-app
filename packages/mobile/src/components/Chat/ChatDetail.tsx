@@ -54,6 +54,7 @@ import { ChatDeletedArchivalStaus, ChatMessage } from '../../provider/chat/ChatP
 import { useAudioRecorder } from '../../hooks/audio/useAudioRecorderPlayer';
 import { Text } from '../ui/Text/Text';
 import { millisToMinutesAndSeconds } from '../../utils/utils';
+import { FileOverview } from '../Files/FileOverview';
 
 export type ChatMessageIMessage = IMessage & HomebaseFile<ChatMessage>;
 
@@ -137,42 +138,7 @@ export const ChatDetail = memo(
             <ReplyMessageBar message={replyMessage} clearReply={() => setReplyMessage(null)} />
           ) : null}
 
-          <ScrollView
-            horizontal
-            contentContainerStyle={{
-              gap: 2,
-            }}
-            showsHorizontalScrollIndicator={false}
-          >
-            {assets.map((value, index) => {
-              // const isVideo = value.type?.startsWith('video') ?? false;
-              return (
-                <View
-                  key={index}
-                  style={{
-                    borderRadius: 15,
-                  }}
-                >
-                  <ImageBackground
-                    key={index}
-                    source={{ uri: value.uri || value.originalPath }}
-                    style={{
-                      width: 65,
-                      height: 65,
-                      alignItems: 'flex-end',
-                      padding: 4,
-                    }}
-                  >
-                    <TouchableOpacity
-                      onPress={() => setAssets(assets.filter((_, i) => i !== index))}
-                    >
-                      <Close size={'sm'} color="white" />
-                    </TouchableOpacity>
-                  </ImageBackground>
-                </View>
-              );
-            })}
-          </ScrollView>
+          <FileOverview assets={assets} setAssets={setAssets} />
         </View>
       );
     }, [assets, isDarkMode, replyMessage, setAssets, setReplyMessage]);

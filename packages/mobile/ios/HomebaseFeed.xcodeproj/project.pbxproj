@@ -14,6 +14,7 @@
 		12099FA12BB5BFEC0036F910 /* AVFAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 12099FA02BB5BFEC0036F910 /* AVFAudio.framework */; };
 		12A0DF8A2B909CAA00E1A798 /* RCTOdinBlobModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 12A0DF892B909CAA00E1A798 /* RCTOdinBlobModule.m */; };
 		12A0DF8B2B909CAA00E1A798 /* RCTOdinBlobModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 12A0DF892B909CAA00E1A798 /* RCTOdinBlobModule.m */; };
+		12E411132BCFAA930015B401 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 12E411122BCFAA930015B401 /* PrivacyInfo.xcprivacy */; };
 		13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
@@ -43,6 +44,7 @@
 		12099FA02BB5BFEC0036F910 /* AVFAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFAudio.framework; path = System/Library/Frameworks/AVFAudio.framework; sourceTree = SDKROOT; };
 		12A0DF882B909C8E00E1A798 /* RCTOdinBlobModule.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = RCTOdinBlobModule.h; path = OdinBlob/RCTOdinBlobModule.h; sourceTree = "<group>"; };
 		12A0DF892B909CAA00E1A798 /* RCTOdinBlobModule.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = RCTOdinBlobModule.m; path = OdinBlob/RCTOdinBlobModule.m; sourceTree = "<group>"; };
+		12E411122BCFAA930015B401 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* HomebaseFeed.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HomebaseFeed.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = HomebaseFeed/AppDelegate.h; sourceTree = "<group>"; };
 		13B07FB01A68108700A75B9A /* AppDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AppDelegate.mm; path = HomebaseFeed/AppDelegate.mm; sourceTree = "<group>"; };
@@ -140,6 +142,7 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
+				12E411122BCFAA930015B401 /* PrivacyInfo.xcprivacy */,
 				965585F72BA87C2E00277AF2 /* GoogleService-Info.plist */,
 				13B07FAE1A68108700A75B9A /* HomebaseFeed */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
@@ -269,6 +272,7 @@
 			files = (
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
+				12E411132BCFAA930015B401 /* PrivacyInfo.xcprivacy in Resources */,
 				965585F82BA87C2E00277AF2 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -571,7 +575,7 @@
 					"\"$(SRCROOT)/../../../node_modules/react-native/Libraries/LinkingIOS",
 				);
 				INFOPLIST_FILE = HomebaseFeed/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Homebase Feed";
+				INFOPLIST_KEY_CFBundleDisplayName = "Homebase";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -669,7 +673,7 @@
 					"\"$(SRCROOT)/../../../node_modules/react-native/Libraries/LinkingIOS",
 				);
 				INFOPLIST_FILE = HomebaseFeed/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Homebase Feed";
+				INFOPLIST_KEY_CFBundleDisplayName = "Homebase";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -806,7 +810,10 @@
 					"-DFOLLY_USE_LIBCPP=1",
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 				);
-				OTHER_LDFLAGS = "$(inherited)  ";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					" ",
+				);
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				USE_HERMES = true;
@@ -924,7 +931,10 @@
 					"-DFOLLY_USE_LIBCPP=1",
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 				);
-				OTHER_LDFLAGS = "$(inherited)  ";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					" ",
+				);
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				USE_HERMES = true;
