@@ -1,6 +1,6 @@
 import { EmbeddedThumb, TargetDrive } from '@youfoundation/js-lib/core';
 import { memo, useCallback, useMemo, useState } from 'react';
-import { ImageStyle, TouchableOpacity, View } from 'react-native';
+import { GestureResponderEvent, ImageStyle, TouchableOpacity, View } from 'react-native';
 import { Colors } from '../../../app/Colors';
 import WebView from 'react-native-webview';
 import { TouchableWithoutFeedback } from 'react-native';
@@ -20,6 +20,7 @@ export const VideoWithLoader = memo(
     fileKey,
     onClick,
     style,
+    onLongPress,
   }: {
     fileId: string;
     targetDrive: TargetDrive;
@@ -30,6 +31,7 @@ export const VideoWithLoader = memo(
     fullscreen?: boolean;
     imageSize?: { width: number; height: number };
     onClick?: () => void;
+    onLongPress?: (e: GestureResponderEvent) => void;
     style?: ImageStyle;
   }) => {
     const [loadVideo, setLoadVideo] = useState(true);
@@ -55,6 +57,7 @@ export const VideoWithLoader = memo(
               onClick={onClick}
               avoidPayload={true}
               style={style}
+              onLongPress={onLongPress}
             />
             <View
               style={{

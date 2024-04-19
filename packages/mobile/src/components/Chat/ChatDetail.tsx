@@ -492,7 +492,7 @@ export const ChatDetail = memo(
           isKeyboardInternallyHandled={true}
           keyboardShouldPersistTaps="never"
           renderMessageImage={(prop: MessageImageProps<ChatMessageIMessage>) => (
-            <MediaMessage {...prop} />
+            <MediaMessage props={prop} onLongPress={onLongPress} />
           )}
           renderCustomView={(prop: BubbleProps<ChatMessageIMessage>) => (
             <RenderReplyMessageView {...prop} />
