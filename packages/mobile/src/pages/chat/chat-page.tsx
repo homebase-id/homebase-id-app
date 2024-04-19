@@ -335,7 +335,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
           <Host>
             <Pressable
               onPress={dismissSelectedMessage}
-              disabled={selectedMessage === undefined}
+              disabled={selectedMessage.selectedMessage === undefined}
               style={{ flex: 1 }}
             >
               <ErrorBoundary>
