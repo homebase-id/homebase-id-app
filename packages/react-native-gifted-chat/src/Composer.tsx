@@ -50,7 +50,7 @@ export interface ComposerProps {
   onInputSizeChanged?(layout: { width: number; height: number }): void;
   containerStyle?: ViewStyle;
   children?: React.ReactNode;
-  text: string | undefined;
+  hasText: boolean | undefined;
 }
 
 export const Composer = memo(
@@ -71,7 +71,6 @@ export const Composer = memo(
     } = props;
 
     const dimensionsRef = useRef<{ width: number; height: number }>();
-
     const determineInputSizeChange = useCallback(
       (dimensions: { width: number; height: number }) => {
         // Support earlier versions of React Native on Android.

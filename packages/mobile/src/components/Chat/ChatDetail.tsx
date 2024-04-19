@@ -277,7 +277,7 @@ export const ChatDetail = memo(
         }
         return (
           <Composer {...props} textInputStyle={inputStyle} containerStyle={composerContainerStyle}>
-            {!props.text && (
+            {!props.hasText && (
               <Actions
                 icon={microphoneIcon}
                 containerStyle={[
