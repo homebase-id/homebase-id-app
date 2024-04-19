@@ -1,6 +1,5 @@
 import {
   Actions,
-  ActionsProps,
   Avatar,
   AvatarProps,
   Bubble,
@@ -19,9 +18,10 @@ import {
   Send,
   SendProps,
   Time,
+  TimeProps,
   User,
 } from 'react-native-gifted-chat';
-import { useCallback, memo, useMemo, useState } from 'react';
+import { useCallback, memo, useMemo } from 'react';
 import {
   GestureResponderEvent,
   ImageBackground,
@@ -35,7 +35,7 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
-import { Close, Images, Microphone, Plus, SendChat, Times } from '../../components/ui/Icons/icons';
+import { Close, Microphone, Plus, SendChat, Times } from '../../components/ui/Icons/icons';
 import MediaMessage from './MediaMessage';
 import { Asset, launchImageLibrary } from 'react-native-image-picker';
 import { useAuth } from '../../hooks/auth/useAuth';
@@ -582,12 +582,59 @@ const RenderBubble = memo(
     }).get;
 
     const hasReactions = (reactions && reactions?.length > 0) || false;
-    const flatReactions = reactions?.flatMap((val) => val.fileMetadata.appData.content.message);
+    const flatReactions = useMemo(
+      () => reactions?.flatMap((val) => val.fileMetadata.appData.content.message),
+      [reactions]
+    );
     // has pauload and no text but no audio payload
-    // const hasPayloadandNoText =
-    //   message?.fileMetadata.payloads?.length > 0 &&
-    //   !content?.message &&
-    //   !message.fileMetadata.payloads?.some((val) => val.contentType.startsWith('audio'));
+    const hasPayloadandNoText =
+      message?.fileMetadata.payloads?.length > 0 &&
+      !content?.message &&
+      !message.fileMetadata.payloads?.some((val) => val.contentType.startsWith('audio'));
+
+    const renderTime = useCallback(
+      (timeProp: TimeProps<ChatMessageIMessage>) => {
+        return (
+          <Time
+            {...timeProp}
+            timeTextStyle={
+              !showBackground
+                ? {
+                    left: {
+                      color: isDarkMode ? Colors.white : Colors.black,
+                      fontSize: 12,
+                    },
+                    right: {
+                      color: isDarkMode ? Colors.white : Colors.black,
+                      fontSize: 12,
+                    },
+                  }
+                : hasPayloadandNoText
+                  ? {
+                      right: {
+                        color: Colors.slate[100],
+                        fontSize: 12,
+                      },
+                      left: {
+                        color: Colors.slate[100],
+                        fontSize: 12,
+                      },
+                    }
+                  : {
+                      right: {
+                        fontSize: 12,
+                        color: !isDarkMode ? Colors.slate[600] : Colors.slate[200],
+                      },
+                      left: {
+                        fontSize: 12,
+                      },
+                    }
+            }
+          />
+        );
+      },
+      [hasPayloadandNoText, isDarkMode, showBackground]
+    );
 
     return (
       <Bubble
@@ -644,37 +691,9 @@ const RenderBubble = memo(
                 );
               }
         }
-        renderTime={(timeProp) => {
-          return (
-            <Time
-              {...timeProp}
-              timeTextStyle={
-                !showBackground
-                  ? {
-                      left: {
-                        color: isDarkMode ? Colors.white : Colors.black,
-                        fontSize: 12,
-                      },
-                      right: {
-                        color: isDarkMode ? Colors.white : Colors.black,
-                        fontSize: 12,
-                      },
-                    }
-                  : {
-                      right: {
-                        fontSize: 12,
-                        color: !isDarkMode ? Colors.slate[600] : Colors.slate[200],
-                      },
-                      left: {
-                        fontSize: 12,
-                      },
-                    }
-              }
-            />
-          );
-        }}
+        renderTime={renderTime}
         tickStyle={{
-          color: isDarkMode ? Colors.white : Colors.black,
+          color: isDarkMode ? Colors.white : hasPayloadandNoText ? Colors.white : Colors.black,
         }}
         textStyle={
           showBackground
@@ -707,6 +726,24 @@ const RenderBubble = memo(
                   minWidth: hasReactions ? 90 : undefined,
                 },
               }
+        }
+        bottomContainerStyle={
+          hasPayloadandNoText
+            ? {
+                right: {
+                  position: 'absolute',
+                  bottom: 0,
+                  right: 0,
+                  zIndex: 10,
+                },
+                left: {
+                  position: 'absolute',
+                  bottom: 0,
+                  left: 0,
+                  zIndex: 10,
+                },
+              }
+            : undefined
         }
       />
     );
