@@ -232,7 +232,7 @@ const NotificationItem = ({
 
   const title = useMemo(() => `${appName}`, [appName]);
   const body = useMemo(
-    () => bodyFormer(notification, true, appName, senderName),
+    () => bodyFormer(notification, false, appName, senderName),
     [notification, senderName, appName]
   );
 
