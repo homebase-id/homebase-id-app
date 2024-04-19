@@ -10,24 +10,23 @@ export const ChatSentTimeIndicator = memo(
   ({ msg, keepDetail }: { msg: HomebaseFile<ChatMessage>; keepDetail?: boolean }) => {
     const { isDarkMode } = useDarkMode();
     const date = useMemo(() => new Date(msg.fileMetadata.created), [msg.fileMetadata.created]);
-    const [formattedDate, setformattedDate] = useState<string | undefined>(
-      formatToTimeAgoWithRelativeDetail(date, keepDetail)
-    );
+    const [_, setStateIndex] = useState(0);
 
     useEffect(() => {
-      const interval = setInterval(() => {
-        const newFormattedDate = formatToTimeAgoWithRelativeDetail(date, keepDetail);
-        if (newFormattedDate !== formattedDate) {
-          setformattedDate(newFormattedDate);
-        }
-      }, 1000 * 60);
-      return () => clearInterval(interval);
-    }, [date, formattedDate, keepDetail]);
+      if (date.getTime() > Date.now() - 3600000) {
+        const interval = setInterval(() => {
+          // If the date is less than 1 hour ago, update every 1 minute
+          setStateIndex((old) => old + 1);
+        }, 1000 * 60);
+
+        return () => clearInterval(interval);
+      }
+    }, [date]);
 
     if (!msg.fileMetadata.created) return null;
     return (
       <Text style={{ fontSize: 12, color: isDarkMode ? Colors.slate[300] : Colors.slate[500] }}>
-        {formattedDate || 'Unknown'}
+        {formatToTimeAgoWithRelativeDetail(date, keepDetail) || 'Unknown'}
       </Text>
     );
   }
