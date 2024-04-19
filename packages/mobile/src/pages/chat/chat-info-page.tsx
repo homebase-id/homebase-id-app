@@ -87,8 +87,10 @@ export const ChatInfoPage = memo((prop: ChatInfoProp) => {
       color: isDarkMode ? Colors.white : Colors.black,
     };
   }, [isDarkMode]);
-  const headerColor = useMemo(() => {
-    return isDarkMode ? Colors.slate[900] : Colors.gray[50];
+  const headerStyle = useMemo(() => {
+    return {
+      backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
+    };
   }, [isDarkMode]);
   if (!conversation) return null;
 
@@ -100,9 +102,7 @@ export const ChatInfoPage = memo((prop: ChatInfoProp) => {
         title={group ? 'Group Info' : 'Chat Info'}
         headerLeft={headerLeft}
         headerRight={group ? headerRight : undefined}
-        headerStyle={{
-          backgroundColor: headerColor,
-        }}
+        headerStyle={headerStyle}
       />
       <SafeAreaView>
         <View style={styles.content}>

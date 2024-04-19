@@ -49,17 +49,14 @@ export const useAuthenticatedPushNotification = () => {
     });
   }, [dotYouClient, deviceToken]);
 
-  // TODO: Waiting for BE to implement this endpoint
-  // const removeDeviceToken = useCallback(async () => {
-  //   const client = dotYouClient.createAxiosClient({
-  //     headers: {
-  //       'X-ODIN-FILE-SYSTEM-TYPE': 'Standard',
-  //     },
-  //   });
-  //   await client.post('/notify/push/unsubscribe', {
-  //     DeviceToken: deviceToken,
-  //   });
-  // }, [deviceToken, dotYouClient]);
+  const removeDeviceToken = useCallback(async () => {
+    const client = dotYouClient.createAxiosClient({
+      headers: {
+        'X-ODIN-FILE-SYSTEM-TYPE': 'Standard',
+      },
+    });
+    await client.post('/notify/push/unsubscribe');
+  }, [dotYouClient]);
 
   const { mutate } = useMutation({
     mutationKey: ['deviceToken', deviceToken],
@@ -81,6 +78,8 @@ export const useAuthenticatedPushNotification = () => {
     };
     uploadDeviceToken();
   }, [deviceToken, mutate]);
+
+  return { removeDeviceToken };
 
   //////////////////////////////////////////////////////////////////////////////////////////
 };

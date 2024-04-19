@@ -37,8 +37,10 @@ export const ChatAppBar = ({
 }) => {
   const user = useProfile().data;
   const { isDarkMode } = useDarkMode();
-  const headerColor = useMemo(
-    () => (isDarkMode ? Colors.slate[900] : Colors.gray[50]),
+  const headerStyle = useMemo(
+    () => ({
+      backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
+    }),
     [isDarkMode]
   );
   const headerLeft = useCallback(
@@ -116,9 +118,7 @@ export const ChatAppBar = ({
         headerTitleAlign="left"
         headerLeft={headerLeft}
         headerRight={headerRight}
-        headerStyle={{
-          backgroundColor: headerColor,
-        }}
+        headerStyle={headerStyle}
         headerShadowVisible={false}
       />
     </Pressable>

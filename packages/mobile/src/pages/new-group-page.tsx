@@ -81,10 +81,11 @@ export const NewGroupPage = memo(() => {
     [selectedContacts]
   );
   const { isDarkMode } = useDarkMode();
-  const headerColor = useMemo(
-    () => (isDarkMode ? Colors.gray[900] : Colors.slate[50]),
-    [isDarkMode]
-  );
+  const headerStyle = useMemo(() => {
+    return {
+      backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
+    };
+  }, [isDarkMode]);
 
   if (!contacts) return null;
 
@@ -95,9 +96,7 @@ export const NewGroupPage = memo(() => {
         headerStatusBarHeight={Platform.OS === 'ios' ? 10 : 0}
         headerLeft={headerLeft}
         headerRight={headerRight}
-        headerStyle={{
-          backgroundColor: headerColor,
-        }}
+        headerStyle={headerStyle}
       />
       <SafeAreaView>
         <FlatList data={contacts} keyExtractor={(item) => item.odinId} renderItem={renderItem} />

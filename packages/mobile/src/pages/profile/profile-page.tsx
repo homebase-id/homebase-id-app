@@ -30,18 +30,21 @@ import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-
 import { useProfile } from '../../hooks/profile/useProfile';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { openURL } from '../../utils/utils';
+import { useAuthenticatedPushNotification } from '../../hooks/push-notification/useAuthenticatedPushNotification';
 
 type SettingsProps = NativeStackScreenProps<ProfileStackParamList, 'Overview'>;
 
 export const ProfilePage = (_props: SettingsProps) => {
   const { isDarkMode } = useDarkMode();
   const { logout, getIdentity } = useAuth();
+  const { removeDeviceToken } = useAuthenticatedPushNotification();
   const [logoutPending, setLogoutPending] = useState(false);
 
   const { data: profile } = useProfile();
 
   const doLogout = async () => {
     setLogoutPending(true);
+    removeDeviceToken();
     logout();
   };
 
