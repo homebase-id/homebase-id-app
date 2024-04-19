@@ -151,6 +151,7 @@ const FloatingActionButton = memo(() => {
         padding: 16,
         borderRadius: 15,
         backgroundColor: backgroundColor,
+        zIndex: 100,
       }}
     >
       <TouchableOpacity onPress={onPress}>
