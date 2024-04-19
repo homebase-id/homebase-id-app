@@ -575,7 +575,7 @@
 					"\"$(SRCROOT)/../../../node_modules/react-native/Libraries/LinkingIOS",
 				);
 				INFOPLIST_FILE = HomebaseFeed/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Homebase Feed";
+				INFOPLIST_KEY_CFBundleDisplayName = "Homebase";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -673,7 +673,7 @@
 					"\"$(SRCROOT)/../../../node_modules/react-native/Libraries/LinkingIOS",
 				);
 				INFOPLIST_FILE = HomebaseFeed/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Homebase Feed";
+				INFOPLIST_KEY_CFBundleDisplayName = "Homebase";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
