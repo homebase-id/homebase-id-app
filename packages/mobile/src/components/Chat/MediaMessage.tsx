@@ -115,74 +115,27 @@ const MediaGallery = ({
   const isGallery = payloads.length >= 2;
 
   return (
-    <Pressable
-      onLongPress={(e) => onLongPress(e, currentMessage)}
-      hitSlop={10}
-      pointerEvents="auto"
-    >
-      <View style={styles.grid}>
-        {payloads.slice(0, maxVisible).map((item, index) => {
-          if (item.contentType.startsWith('video')) {
-            return (
-              <VideoWithLoader
-                key={index}
-                fileId={currentMessage.fileId}
-                fileKey={item.key}
-                targetDrive={ChatDrive}
-                previewThumbnail={
-                  payloads.length === 1
-                    ? currentMessage.fileMetadata.appData.previewThumbnail
-                    : undefined
-                }
-                fit="cover"
-                imageSize={{
-                  width: 200,
-                  height: 200,
-                }}
-                preview={true}
-                onClick={() => {
-                  navigation.navigate('PreviewMedia', {
-                    fileId: currentMessage.fileId,
-                    payloadKey: item.key,
-                    type: item.contentType,
-                    msg: currentMessage,
-                    currIndex: index,
-                  });
-                }}
-              />
-            );
-          }
-          if (item.contentType.startsWith('audio/')) {
-            return <OdinAudio key={item.key} fileId={currentMessage.fileId} payload={item} />;
-          }
+    <View style={styles.grid}>
+      {payloads.slice(0, maxVisible).map((item, index) => {
+        if (item.contentType.startsWith('video')) {
           return (
-            <OdinImage
+            <VideoWithLoader
+              key={index}
               fileId={currentMessage.fileId}
               fileKey={item.key}
-              key={item.key}
               targetDrive={ChatDrive}
-              fit="cover"
-              previewThumbnail={currentMessage.fileMetadata.appData.previewThumbnail}
-              imageSize={{
-                width: !isGallery ? 200 : 150,
-                height: !isGallery ? 200 : 150,
-              }}
-              avoidPayload={true}
-              style={
-                !isGallery
-                  ? {
-                      borderRadius: 10,
-                    }
-                  : {
-                      borderTopLeftRadius: index === 0 ? 10 : 0,
-                      borderBottomLeftRadius: index === 2 ? 10 : 0,
-                      borderTopRightRadius: index === 1 ? 10 : 0,
-                      borderBottomRightRadius: index === 3 ? 10 : 0,
-                      margin: 1,
-                      aspectRatio: payloads.length === 3 && index === 2 ? 1 : undefined,
-                      width: payloads.length === 3 && index === 2 ? '100%' : 150,
-                    }
+              previewThumbnail={
+                payloads.length === 1
+                  ? currentMessage.fileMetadata.appData.previewThumbnail
+                  : undefined
               }
+              fit="cover"
+              imageSize={{
+                width: 200,
+                height: 200,
+              }}
+              preview={true}
+              onLongPress={(e) => onLongPress(e, currentMessage)}
               onClick={() => {
                 navigation.navigate('PreviewMedia', {
                   fileId: currentMessage.fileId,
@@ -194,39 +147,83 @@ const MediaGallery = ({
               }}
             />
           );
-        })}
-        {countExcludedFromView > 0 && (
-          <Pressable
-            style={{
-              width: 150,
-              height: 150,
-              position: 'absolute',
-              bottom: 0,
-              right: 0,
-              zIndex: 10,
-              // borderRadius: 10,
-              backgroundColor: 'rgba(0,0,0,0.5)',
-              alignItems: 'center',
-              justifyContent: 'center',
+        }
+        if (item.contentType.startsWith('audio/')) {
+          return <OdinAudio key={item.key} fileId={currentMessage.fileId} payload={item} />;
+        }
+        return (
+          <OdinImage
+            fileId={currentMessage.fileId}
+            fileKey={item.key}
+            key={item.key}
+            targetDrive={ChatDrive}
+            fit="cover"
+            previewThumbnail={currentMessage.fileMetadata.appData.previewThumbnail}
+            imageSize={{
+              width: !isGallery ? 200 : 150,
+              height: !isGallery ? 200 : 150,
             }}
-            onPress={() => {
-              const item = payloads[maxVisible - 1];
+            avoidPayload={true}
+            style={
+              !isGallery
+                ? {
+                    borderRadius: 10,
+                  }
+                : {
+                    borderTopLeftRadius: index === 0 ? 10 : 0,
+                    borderBottomLeftRadius: index === 2 ? 10 : 0,
+                    borderTopRightRadius: index === 1 ? 10 : 0,
+                    borderBottomRightRadius: index === 3 ? 10 : 0,
+                    margin: 1,
+                    aspectRatio: payloads.length === 3 && index === 2 ? 1 : undefined,
+                    width: payloads.length === 3 && index === 2 ? '100%' : 150,
+                  }
+            }
+            onLongPress={(e) => onLongPress(e, currentMessage)}
+            onClick={() => {
               navigation.navigate('PreviewMedia', {
                 fileId: currentMessage.fileId,
                 payloadKey: item.key,
                 type: item.contentType,
                 msg: currentMessage,
-                currIndex: maxVisible - 1,
+                currIndex: index,
               });
             }}
-          >
-            <Text style={{ color: 'white', fontSize: 22, fontWeight: '500' }}>
-              +{countExcludedFromView}
-            </Text>
-          </Pressable>
-        )}
-      </View>
-    </Pressable>
+          />
+        );
+      })}
+      {countExcludedFromView > 0 && (
+        <Pressable
+          style={{
+            width: 150,
+            height: 150,
+            position: 'absolute',
+            bottom: 0,
+            right: 0,
+            zIndex: 10,
+            // borderRadius: 10,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+          onLongPress={(e) => onLongPress(e, currentMessage)}
+          onPress={() => {
+            const item = payloads[maxVisible - 1];
+            navigation.navigate('PreviewMedia', {
+              fileId: currentMessage.fileId,
+              payloadKey: item.key,
+              type: item.contentType,
+              msg: currentMessage,
+              currIndex: maxVisible - 1,
+            });
+          }}
+        >
+          <Text style={{ color: 'white', fontSize: 22, fontWeight: '500' }}>
+            +{countExcludedFromView}
+          </Text>
+        </Pressable>
+      )}
+    </View>
   );
 };
 
