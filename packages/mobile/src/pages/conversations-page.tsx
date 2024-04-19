@@ -1,4 +1,11 @@
-import { FlatList, ListRenderItemInfo, RefreshControl, StyleSheet } from 'react-native';
+import {
+  FlatList,
+  ListRenderItemInfo,
+  Platform,
+  RefreshControl,
+  StyleSheet,
+  View,
+} from 'react-native';
 import ConversationTile from '../components/Chat/Conversation-tile';
 
 import { NavigationProp, useNavigation } from '@react-navigation/native';
@@ -26,12 +33,14 @@ import { useDarkMode } from '../hooks/useDarkMode';
 import { CHAT_APP_ID } from '../app/constants';
 import { ErrorBoundary } from '../components/ui/ErrorBoundary/ErrorBoundary';
 import { InfiniteData, useQueryClient } from '@tanstack/react-query';
+import { Pencil } from '../components/ui/Icons/icons';
+import { TouchableOpacity } from '@gorhom/bottom-sheet';
+import { SafeAreaView } from '../components/ui/SafeAreaView/SafeAreaView';
 
 type ConversationProp = NativeStackScreenProps<ChatStackParamList, 'Conversation'>;
 
 export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
   const { data: conversations } = useConversationsWithRecentMessage().all;
-
   const [query, setQuery] = useState<string | undefined>(undefined);
   const { isDarkMode } = useDarkMode();
   const queryClient = useQueryClient();
@@ -105,16 +114,49 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
 
   return (
     <ErrorBoundary>
-      <RemoveNotifications />
-      <FlatList
-        data={conversations}
-        keyExtractor={keyExtractor}
-        ListHeaderComponent={ConversationTileWithYourself}
-        contentInsetAdjustmentBehavior="automatic"
-        renderItem={renderItem}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={doRefresh} />}
-      />
+      <SafeAreaView>
+        <RemoveNotifications />
+        <FloatingActionButton />
+        <FlatList
+          data={conversations}
+          keyExtractor={keyExtractor}
+          ListHeaderComponent={ConversationTileWithYourself}
+          contentInsetAdjustmentBehavior="automatic"
+          renderItem={renderItem}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={doRefresh} />}
+        />
+      </SafeAreaView>
     </ErrorBoundary>
+  );
+});
+
+const FloatingActionButton = memo(() => {
+  const { isDarkMode } = useDarkMode();
+  const backgroundColor = useMemo(
+    () => (isDarkMode ? Colors.indigo[700] : Colors.indigo[200]),
+    [isDarkMode]
+  );
+  const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
+  const onPress = useCallback(() => {
+    navigation.navigate('NewChat');
+  }, [navigation]);
+  if (Platform.OS === 'ios') return;
+
+  return (
+    <View
+      style={{
+        position: 'absolute',
+        bottom: 32,
+        right: 12,
+        padding: 16,
+        borderRadius: 15,
+        backgroundColor: backgroundColor,
+      }}
+    >
+      <TouchableOpacity onPress={onPress}>
+        <Pencil size={'md'} />
+      </TouchableOpacity>
+    </View>
   );
 });
 

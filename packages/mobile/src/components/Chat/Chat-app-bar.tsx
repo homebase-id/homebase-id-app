@@ -1,13 +1,13 @@
 import { Platform, Pressable, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { Avatar, GroupAvatar, OwnerAvatar } from './Conversation-tile';
 import { Header, HeaderBackButton } from '@react-navigation/elements';
 import { useProfile } from '../../hooks/profile/useProfile';
 import { Colors } from '../../app/Colors';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { ChatMessageIMessage } from './ChatDetail';
-import { ReactNode, useCallback } from 'react';
+import { ReactNode, useCallback, useMemo } from 'react';
 import { Copy, Info, Reply, Trash } from '../ui/Icons/icons';
 import Toast from 'react-native-toast-message';
+import { Avatar, GroupAvatar, OwnerAvatar } from '../ui/Avatars/Avatar';
 
 export type SelectedMessageProp = {
   onReply: () => void;
@@ -37,6 +37,12 @@ export const ChatAppBar = ({
 }) => {
   const user = useProfile().data;
   const { isDarkMode } = useDarkMode();
+  const headerStyle = useMemo(
+    () => ({
+      backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
+    }),
+    [isDarkMode]
+  );
   const headerLeft = useCallback(
     () => (
       <View
@@ -67,13 +73,13 @@ export const ChatAppBar = ({
     [goBack, group, isDarkMode, isSelf, odinId, selectedMessage]
   );
 
-  const defaultActions = () => {
+  const defaultActions = useCallback(() => {
     Toast.show({
       type: 'info',
       text1: 'No action provided',
       text2: 'Make sure u are passing the props correctly',
     });
-  };
+  }, []);
 
   const headerRight = useCallback(() => {
     if (!selectedMessage) {
@@ -97,7 +103,14 @@ export const ChatAppBar = ({
         )}
       </View>
     );
-  }, [selectedMessage, selectedMessageActions]);
+  }, [
+    defaultActions,
+    selectedMessage,
+    selectedMessageActions?.onCopy,
+    selectedMessageActions?.onDelete,
+    selectedMessageActions?.onInfo,
+    selectedMessageActions?.onReply,
+  ]);
   return (
     <Pressable onPress={onPress}>
       <Header
@@ -105,6 +118,8 @@ export const ChatAppBar = ({
         headerTitleAlign="left"
         headerLeft={headerLeft}
         headerRight={headerRight}
+        headerStyle={headerStyle}
+        headerShadowVisible={false}
       />
     </Pressable>
   );

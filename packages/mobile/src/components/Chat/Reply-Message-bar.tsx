@@ -1,12 +1,14 @@
 import { Text, StyleSheet, View, TouchableOpacity } from 'react-native';
 import { Close, Reply } from '../ui/Icons/icons';
 import { ChatDrive } from '../../provider/chat/ConversationProvider';
-import { Colors } from '../../app/Colors';
+import { Colors, getOdinIdColor } from '../../app/Colors';
 import { OdinImage } from '../ui/OdinImage/OdinImage';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { ChatMessageIMessage } from './ChatDetail';
 
 import { ChatMessageContent } from './Chat-Message-Content';
+import { useMemo } from 'react';
+import { ConnectionName } from '../ui/Name';
 
 type ReplyMessageBarProps = {
   clearReply: () => void;
@@ -16,9 +18,14 @@ type ReplyMessageBarProps = {
 const ReplyMessageBar = ({ clearReply, message }: ReplyMessageBarProps) => {
   const { isDarkMode } = useDarkMode();
   const { payloads } = message.fileMetadata;
-  const isImageOrVideo = payloads.some(
-    (payload) => payload.contentType.includes('image') || payload.contentType.includes('video')
+  const isImageOrVideo = useMemo(
+    () =>
+      payloads.some(
+        (payload) => payload.contentType.includes('image') || payload.contentType.includes('video')
+      ),
+    [payloads]
   );
+  const color = getOdinIdColor(message.user._id as string);
 
   return (
     <View style={styles.container}>
@@ -29,15 +36,19 @@ const ReplyMessageBar = ({ clearReply, message }: ReplyMessageBarProps) => {
       <View style={styles.messageContainer}>
         <Text
           style={{
-            color: isDarkMode ? Colors.white : Colors.black,
+            color: color.color(isDarkMode),
             fontWeight: '600',
             fontSize: 14,
           }}
         >
-          {message.fileMetadata.senderOdinId.length > 0 ? message.fileMetadata.senderOdinId : 'You'}
+          {message.fileMetadata.senderOdinId.length > 0 ? (
+            <ConnectionName odinId={message.fileMetadata.senderOdinId} />
+          ) : (
+            'You'
+          )}
         </Text>
         <Text
-          numberOfLines={1}
+          numberOfLines={3}
           style={{
             color: isDarkMode ? Colors.white : Colors.black,
           }}

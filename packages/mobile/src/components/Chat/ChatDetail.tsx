@@ -1,6 +1,5 @@
 import {
   Actions,
-  ActionsProps,
   Avatar,
   AvatarProps,
   Bubble,
@@ -11,6 +10,7 @@ import {
   IMessage,
   InputToolbar,
   InputToolbarProps,
+  LoadEarlier,
   MessageImageProps,
   MessageProps,
   MessageText,
@@ -18,28 +18,27 @@ import {
   Send,
   SendProps,
   Time,
+  TimeProps,
   User,
 } from 'react-native-gifted-chat';
 import { useCallback, memo, useMemo } from 'react';
 import {
   GestureResponderEvent,
-  ImageBackground,
   Platform,
   Pressable,
-  ScrollView,
   StatusBar,
   StyleProp,
   StyleSheet,
+  TextStyle,
   View,
   ViewStyle,
 } from 'react-native';
-import { Close, Images, Microphone, SendChat, Times } from '../../components/ui/Icons/icons';
+import { Microphone, Plus, SendChat, Times } from '../../components/ui/Icons/icons';
 import MediaMessage from './MediaMessage';
 import { Asset, launchImageLibrary } from 'react-native-image-picker';
 import { useAuth } from '../../hooks/auth/useAuth';
 import { useChatMessage } from '../../hooks/chat/useChatMessage';
 import { ChatDrive } from '../../provider/chat/ConversationProvider';
-import { TouchableOpacity } from 'react-native-gesture-handler';
 import { Colors, getOdinIdColor } from '../../app/Colors';
 import ReplyMessageBar from '../../components/Chat/Reply-Message-bar';
 import ChatMessageBox from '../../components/Chat/Chat-Message-box';
@@ -47,13 +46,14 @@ import { OdinImage } from '../../components/ui/OdinImage/OdinImage';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { ChatDeliveryIndicator } from '../../components/Chat/Chat-Delivery-Indicator';
 import { useChatReaction } from '../../hooks/chat/useChatReaction';
-import { Avatar as AppAvatar, OwnerAvatar } from '../../components/Chat/Conversation-tile';
+import { Avatar as AppAvatar, OwnerAvatar } from '../../components/ui/Avatars/Avatar';
 import { ConnectionName } from '../../components/ui/Name';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ChatDeletedArchivalStaus, ChatMessage } from '../../provider/chat/ChatProvider';
 import { useAudioRecorder } from '../../hooks/audio/useAudioRecorderPlayer';
 import { Text } from '../ui/Text/Text';
 import { millisToMinutesAndSeconds } from '../../utils/utils';
+import { SafeAreaView } from '../ui/SafeAreaView/SafeAreaView';
 import { FileOverview } from '../Files/FileOverview';
 
 export type ChatMessageIMessage = IMessage & HomebaseFile<ChatMessage>;
@@ -131,7 +131,7 @@ export const ChatDetail = memo(
       return (
         <View
           style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
+            backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
           }}
         >
           {replyMessage ? (
@@ -144,7 +144,7 @@ export const ChatDetail = memo(
     }, [assets, isDarkMode, replyMessage, setAssets, setReplyMessage]);
 
     const { record, stop, duration, isRecording } = useAudioRecorder();
-    const imagesIcon = useCallback(() => <Images />, []);
+
     const microphoneIcon = useCallback(() => <Microphone />, []);
     const crossIcon = useCallback(() => <Times />, []);
 
@@ -188,18 +188,24 @@ export const ChatDetail = memo(
     }, [setAssets]);
 
     const inputStyle = useMemo(
-      () => ({
-        color: isDarkMode ? 'white' : 'black',
-      }),
+      () =>
+        ({
+          color: isDarkMode ? 'white' : 'black',
+          flex: 1,
+        }) as TextStyle,
       [isDarkMode]
     );
     const composerContainerStyle = useMemo(
-      () => ({
-        borderRadius: 20,
-        backgroundColor: isDarkMode ? Colors.slate[800] : Colors.indigo[50],
-      }),
+      () =>
+        ({
+          borderRadius: 20,
+          backgroundColor: isDarkMode ? Colors.slate[800] : Colors.indigo[50],
+          flex: 1,
+          flexDirection: 'row',
+        }) as ViewStyle,
       [isDarkMode]
     );
+
     const renderComposer = useCallback(
       (props: ComposerProps) => {
         if (isRecording) {
@@ -233,14 +239,32 @@ export const ChatDetail = memo(
           );
         }
         return (
-          <Composer
-            {...props}
-            textInputStyle={inputStyle}
-            containerStyle={composerContainerStyle}
-          />
+          <Composer {...props} textInputStyle={inputStyle} containerStyle={composerContainerStyle}>
+            {!props.hasText && (
+              <Actions
+                icon={microphoneIcon}
+                containerStyle={[
+                  {
+                    paddingHorizontal: 20,
+                    marginTop: 'auto',
+                    marginBottom: 'auto',
+                    alignItems: 'center',
+                  },
+                ]}
+                onPressActionButton={handleRecordButtonAction}
+              />
+            )}
+          </Composer>
         );
       },
-      [composerContainerStyle, duration, inputStyle, isRecording]
+      [
+        composerContainerStyle,
+        duration,
+        handleRecordButtonAction,
+        inputStyle,
+        isRecording,
+        microphoneIcon,
+      ]
     );
 
     const renderSend = useCallback(
@@ -252,73 +276,65 @@ export const ChatDetail = memo(
               alignItems: 'flex-end',
             }}
           >
-            {!props.text && (
+            {isRecording && (
               <Actions
-                icon={!isRecording ? microphoneIcon : crossIcon}
+                icon={crossIcon}
                 containerStyle={[
-                  props.containerStyle,
                   {
-                    justifyContent: 'center',
                     paddingHorizontal: 20,
-                    paddingVertical: 12,
+                    justifyContent: 'center',
                   },
                 ]}
                 onPressActionButton={handleRecordButtonAction}
               />
             )}
-
             <View style={{ width: 6 }} />
 
-            {(props.text || assets?.length > 0 || isRecording) && (
-              <Send
-                {...props}
-                disabled={isRecording ? false : !props.text && assets?.length === 0}
-                text={props.text || ' '}
-                onSend={isRecording ? async (_) => await onStopRecording() : props.onSend}
-                containerStyle={styles.send}
+            <Send
+              {...props}
+              // disabled={isRecording ? false : !props.text && assets?.length === 0}
+              disabled={false}
+              text={props.text || ' '}
+              // onSend={isRecording ? async (_) => onStopRecording() : props.onSend}
+              onSend={
+                isRecording
+                  ? async (_) => onStopRecording()
+                  : !props.text && assets?.length === 0
+                    ? handleImageIconPress
+                    : props.onSend
+              }
+              containerStyle={styles.send}
+            >
+              <View
+                style={{
+                  height: 40,
+                  width: 40,
+                  justifyContent: 'center',
+                  borderRadius: 20,
+                  backgroundColor: Colors.indigo[500],
+                  transform: [
+                    { rotate: props.text || assets.length !== 0 || isRecording ? '50deg' : '0deg' },
+                  ],
+                }}
               >
-                <View
-                  style={{
-                    height: 40,
-                    width: 40,
-                    justifyContent: 'center',
-                    borderRadius: 20,
-                    backgroundColor: Colors.indigo[500],
-                    transform: [{ rotate: '45deg' }],
-                  }}
-                >
+                {props.text || assets.length !== 0 || isRecording ? (
                   <SendChat size={'md'} color={Colors.white} />
-                </View>
-              </Send>
-            )}
+                ) : (
+                  <Plus color={Colors.white} />
+                )}
+              </View>
+            </Send>
           </View>
         );
       },
       [
-        assets?.length,
+        assets.length,
         crossIcon,
+        handleImageIconPress,
         handleRecordButtonAction,
         isRecording,
-        microphoneIcon,
         onStopRecording,
       ]
-    );
-
-    const renderActions = useCallback(
-      (props: ActionsProps) => (
-        <Actions
-          {...props}
-          containerStyle={[
-            props.containerStyle,
-            {
-              justifyContent: 'center',
-            },
-          ]}
-          icon={imagesIcon}
-          onPressActionButton={handleImageIconPress}
-        />
-      ),
-      [handleImageIconPress, imagesIcon]
     );
 
     const renderUsername = useCallback(
@@ -345,7 +361,7 @@ export const ChatDetail = memo(
       return [
         styles.inputContainer,
         {
-          backgroundColor: isDarkMode ? Colors.slate[900] : Colors.white,
+          backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
           borderTopWidth: 0,
           borderRadius: 10,
           marginTop: Platform.OS === 'android' ? 'auto' : undefined,
@@ -360,12 +376,11 @@ export const ChatDetail = memo(
             {...props}
             renderComposer={renderComposer}
             renderSend={renderSend}
-            renderActions={isRecording ? () => null : renderActions}
             containerStyle={inputContainerStyle}
           />
         );
       },
-      [renderComposer, renderSend, isRecording, renderActions, inputContainerStyle]
+      [renderComposer, renderSend, inputContainerStyle]
     );
 
     const renderAvatar = useCallback((props: AvatarProps<IMessage>) => {
@@ -416,80 +431,61 @@ export const ChatDetail = memo(
       );
     }, []);
 
+    const scrollToBottomStyle = useMemo(() => {
+      return {
+        backgroundColor: isDarkMode ? Colors.indigo[900] : Colors.slate[50],
+        opacity: 1,
+      };
+    }, [isDarkMode]);
+    const wrapperStyle = useMemo(() => {
+      return {
+        backgroundColor: isDarkMode ? Colors.indigo[900] : Colors.slate[50],
+        opacity: 1,
+      };
+    }, [isDarkMode]);
     return (
-      <GiftedChat<ChatMessageIMessage>
-        messages={messages}
-        onSend={doSend}
-        infiniteScroll
-        scrollToBottom
-        alwaysShowSend
-        onLongPress={(e, _, m: ChatMessageIMessage) => onLongPress(e, m)}
-        isKeyboardInternallyHandled={true}
-        keyboardShouldPersistTaps="never"
-        renderMessageImage={(prop: MessageImageProps<ChatMessageIMessage>) => (
-          <MediaMessage {...prop} />
-        )}
-        renderCustomView={(prop: BubbleProps<ChatMessageIMessage>) => (
-          <RenderReplyMessageView {...prop} />
-        )}
-        renderBubble={(prop) => <RenderBubble {...prop} onReactionClick={doOpenReactionModal} />}
-        renderMessageText={(prop) => <RenderMessageText {...prop} />}
-        renderMessage={renderMessageBox}
-        // renderChatFooter instead of renderFooter as the renderFooter renders within the scrollView
-        renderChatFooter={renderChatFooter}
-        showUserAvatar={false}
-        renderUsernameOnMessage={isGroup}
-        renderAvatar={isGroup ? renderAvatar : null}
-        renderInputToolbar={renderInputToolbar}
-        renderUsername={renderUsername}
-        user={{
-          _id: identity || '',
-        }}
-        loadEarlier={hasMoreMessages}
-        onLoadEarlier={fetchMoreMessages}
-        listViewProps={{
-          removeClippedSubviews: true,
-          windowSize: 15,
-        }}
-      />
+      <SafeAreaView>
+        <GiftedChat<ChatMessageIMessage>
+          messages={messages}
+          onSend={doSend}
+          infiniteScroll
+          scrollToBottom
+          alwaysShowSend
+          onLongPress={(e, _, m: ChatMessageIMessage) => onLongPress(e, m)}
+          isKeyboardInternallyHandled={true}
+          keyboardShouldPersistTaps="never"
+          renderMessageImage={(prop: MessageImageProps<ChatMessageIMessage>) => (
+            <MediaMessage props={prop} onLongPress={onLongPress} />
+          )}
+          renderCustomView={(prop: BubbleProps<ChatMessageIMessage>) => (
+            <RenderReplyMessageView {...prop} />
+          )}
+          renderBubble={(prop) => <RenderBubble {...prop} onReactionClick={doOpenReactionModal} />}
+          renderMessageText={(prop) => <RenderMessageText {...prop} />}
+          renderMessage={renderMessageBox}
+          // renderChatFooter instead of renderFooter as the renderFooter renders within the scrollView
+          renderChatFooter={renderChatFooter}
+          showUserAvatar={false}
+          renderUsernameOnMessage={isGroup}
+          renderAvatar={isGroup ? renderAvatar : null}
+          renderInputToolbar={renderInputToolbar}
+          renderUsername={renderUsername}
+          user={{
+            _id: identity || '',
+          }}
+          loadEarlier={hasMoreMessages}
+          onLoadEarlier={fetchMoreMessages}
+          scrollToBottomStyle={scrollToBottomStyle}
+          renderLoadEarlier={(prop) => <LoadEarlier {...prop} wrapperStyle={wrapperStyle} />}
+          listViewProps={{
+            removeClippedSubviews: true,
+            windowSize: 15,
+          }}
+        />
+      </SafeAreaView>
     );
   }
 );
-
-const styles = StyleSheet.create({
-  inputContainer: {
-    position: 'relative',
-    flexDirection: 'column-reverse',
-  },
-  container: {
-    flex: 1,
-    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
-  },
-  replyText: {
-    justifyContent: 'center',
-    marginLeft: 6,
-    marginRight: 12,
-    flexShrink: 1,
-  },
-  replyMessageContainer: {
-    padding: 8,
-    paddingBottom: 8,
-    display: 'flex',
-    flexDirection: 'row',
-    borderLeftWidth: 6,
-    borderLeftColor: 'lightgrey',
-    borderRadius: 6,
-    marginLeft: 6,
-    marginTop: 6,
-    marginRight: 6,
-  },
-
-  send: {
-    justifyContent: 'center',
-    marginRight: 8,
-    marginVertical: 'auto',
-  },
-});
 
 const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
   const message = props.currentMessage as ChatMessageIMessage;
@@ -549,7 +545,59 @@ const RenderBubble = memo(
     }).get;
 
     const hasReactions = (reactions && reactions?.length > 0) || false;
-    const flatReactions = reactions?.flatMap((val) => val.fileMetadata.appData.content.message);
+    const flatReactions = useMemo(
+      () => reactions?.flatMap((val) => val.fileMetadata.appData.content.message),
+      [reactions]
+    );
+    // has pauload and no text but no audio payload
+    const hasPayloadandNoText =
+      message?.fileMetadata.payloads?.length > 0 &&
+      !content?.message &&
+      !message.fileMetadata.payloads?.some((val) => val.contentType.startsWith('audio'));
+
+    const renderTime = useCallback(
+      (timeProp: TimeProps<ChatMessageIMessage>) => {
+        return (
+          <Time
+            {...timeProp}
+            timeTextStyle={
+              !showBackground
+                ? {
+                    left: {
+                      color: isDarkMode ? Colors.white : Colors.black,
+                      fontSize: 12,
+                    },
+                    right: {
+                      color: isDarkMode ? Colors.white : Colors.black,
+                      fontSize: 12,
+                    },
+                  }
+                : hasPayloadandNoText
+                  ? {
+                      right: {
+                        color: Colors.slate[100],
+                        fontSize: 12,
+                      },
+                      left: {
+                        color: Colors.slate[100],
+                        fontSize: 12,
+                      },
+                    }
+                  : {
+                      right: {
+                        fontSize: 12,
+                        color: !isDarkMode ? Colors.slate[600] : Colors.slate[200],
+                      },
+                      left: {
+                        fontSize: 12,
+                      },
+                    }
+            }
+          />
+        );
+      },
+      [hasPayloadandNoText, isDarkMode, showBackground]
+    );
 
     return (
       <Bubble
@@ -606,37 +654,9 @@ const RenderBubble = memo(
                 );
               }
         }
-        renderTime={(timeProp) => {
-          return (
-            <Time
-              {...timeProp}
-              timeTextStyle={
-                !showBackground
-                  ? {
-                      left: {
-                        color: isDarkMode ? Colors.white : Colors.black,
-                        fontSize: 12,
-                      },
-                      right: {
-                        color: isDarkMode ? Colors.white : Colors.black,
-                        fontSize: 12,
-                      },
-                    }
-                  : {
-                      right: {
-                        fontSize: 12,
-                        color: !isDarkMode ? Colors.slate[600] : Colors.slate[200],
-                      },
-                      left: {
-                        fontSize: 12,
-                      },
-                    }
-              }
-            />
-          );
-        }}
+        renderTime={renderTime}
         tickStyle={{
-          color: isDarkMode ? Colors.white : Colors.black,
+          color: isDarkMode ? Colors.white : hasPayloadandNoText ? Colors.white : Colors.black,
         }}
         textStyle={
           showBackground
@@ -644,7 +664,7 @@ const RenderBubble = memo(
                 left: { color: isDarkMode ? Colors.white : Colors.black },
                 right: { color: isDarkMode ? Colors.white : Colors.black },
               }
-            : {}
+            : undefined
         }
         wrapperStyle={
           !showBackground
@@ -670,6 +690,24 @@ const RenderBubble = memo(
                 },
               }
         }
+        bottomContainerStyle={
+          hasPayloadandNoText
+            ? {
+                right: {
+                  position: 'absolute',
+                  bottom: 0,
+                  right: 0,
+                  zIndex: 10,
+                },
+                left: {
+                  position: 'absolute',
+                  bottom: 0,
+                  left: 0,
+                  zIndex: 10,
+                },
+              }
+            : undefined
+        }
       />
     );
   }
@@ -682,6 +720,7 @@ const RenderReplyMessageView = memo((props: BubbleProps<ChatMessageIMessage>) =>
   const { isDarkMode } = useDarkMode();
 
   if (!props.currentMessage?.fileMetadata.appData.content.replyId) return null;
+  const color = getOdinIdColor(replyMessage?.fileMetadata.senderOdinId || '');
 
   return (
     props.currentMessage &&
@@ -690,7 +729,8 @@ const RenderReplyMessageView = memo((props: BubbleProps<ChatMessageIMessage>) =>
         style={[
           styles.replyMessageContainer,
           {
-            borderLeftColor: props.position === 'left' ? Colors.blue[500] : Colors.purple[500],
+            borderLeftColor:
+              props.position === 'left' ? color.color(isDarkMode) : Colors.purple[500],
             backgroundColor: `${Colors.indigo[500]}1A`,
           },
         ]}
@@ -702,7 +742,7 @@ const RenderReplyMessageView = memo((props: BubbleProps<ChatMessageIMessage>) =>
                 style={{
                   fontWeight: '600',
                   fontSize: 15,
-                  color: isDarkMode ? Colors.slate[300] : Colors.slate[900],
+                  color: color.color(isDarkMode),
                 }}
               >
                 {replyMessage?.fileMetadata.senderOdinId?.length > 0 ? (
@@ -712,6 +752,7 @@ const RenderReplyMessageView = memo((props: BubbleProps<ChatMessageIMessage>) =>
                 )}
               </Text>
               <Text
+                numberOfLines={3}
                 style={{
                   fontSize: 14,
                   marginTop: 4,
@@ -753,4 +794,39 @@ const RenderReplyMessageView = memo((props: BubbleProps<ChatMessageIMessage>) =>
       </View>
     )
   );
+});
+
+const styles = StyleSheet.create({
+  inputContainer: {
+    position: 'relative',
+    flexDirection: 'column-reverse',
+  },
+  container: {
+    flex: 1,
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+  },
+  replyText: {
+    justifyContent: 'center',
+    marginLeft: 6,
+    marginRight: 12,
+    flexShrink: 1,
+  },
+  replyMessageContainer: {
+    padding: 8,
+    paddingBottom: 8,
+    display: 'flex',
+    flexDirection: 'row',
+    borderLeftWidth: 6,
+    borderLeftColor: 'lightgrey',
+    borderRadius: 6,
+    marginLeft: 6,
+    marginTop: 6,
+    marginRight: 6,
+  },
+
+  send: {
+    justifyContent: 'center',
+    marginRight: 8,
+    marginVertical: 'auto',
+  },
 });

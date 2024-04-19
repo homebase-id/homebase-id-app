@@ -44,13 +44,19 @@ export const useAuthenticatedPushNotification = () => {
     await client.post('/notify/push/subscribe-firebase', {
       DeviceToken: deviceToken,
       DevicePlatform: Platform.OS,
-      FriendlyName: `${
-        Platform.OS === 'ios' ? 'iOS' : Platform.OS === 'android' ? 'Android' : Platform.OS
-      } | ${Platform.Version}`,
+      FriendlyName: `${Platform.OS === 'ios' ? 'iOS' : Platform.OS === 'android' ? 'Android' : Platform.OS
+        } | ${Platform.Version}`,
     });
   }, [dotYouClient, deviceToken]);
 
-  //
+  const removeDeviceToken = useCallback(async () => {
+    const client = dotYouClient.createAxiosClient({
+      headers: {
+        'X-ODIN-FILE-SYSTEM-TYPE': 'Standard',
+      },
+    });
+    await client.post('/notify/push/unsubscribe');
+  }, [dotYouClient]);
 
   const { mutate } = useMutation({
     mutationKey: ['deviceToken', deviceToken],
@@ -72,6 +78,8 @@ export const useAuthenticatedPushNotification = () => {
     };
     uploadDeviceToken();
   }, [deviceToken, mutate]);
+
+  return { removeDeviceToken };
 
   //////////////////////////////////////////////////////////////////////////////////////////
 };

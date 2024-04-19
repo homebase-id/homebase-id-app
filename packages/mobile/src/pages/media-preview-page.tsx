@@ -1,17 +1,25 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ChatDrive } from '../provider/chat/ConversationProvider';
-import { PhotoWithLoader } from '../components/ui/Media/PhotoWithLoader';
 import { VideoWithLoader } from '../components/ui/Media/VideoWithLoader';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Dimensions, View } from 'react-native';
-import { memo, useCallback, useMemo, useState } from 'react';
+
+import { memo, useCallback, useLayoutEffect, useRef, useState } from 'react';
 import Carousel from 'react-native-reanimated-carousel';
 import { OdinImage } from '../components/ui/OdinImage/OdinImage';
-import { useDarkMode } from '../hooks/useDarkMode';
-import { Colors } from '../app/Colors';
 import { ChatStackParamList } from '../app/App';
 import { PayloadDescriptor } from '@youfoundation/js-lib/core';
-import { CarouselRenderItemInfo } from 'react-native-reanimated-carousel/lib/typescript/types';
+import {
+  CarouselRenderItemInfo,
+  ICarouselInstance,
+} from 'react-native-reanimated-carousel/lib/typescript/types';
+
+import { useSafeAreaFrame } from 'react-native-safe-area-context';
+import { Platform, View } from 'react-native';
+import { Colors } from '../app/Colors';
+import { useDarkMode } from '../hooks/useDarkMode';
+import { AuthorName } from '../components/ui/Name';
+import { HeaderTitle } from '@react-navigation/elements';
+import { Text } from '../components/ui/Text/Text';
+import { formatToTimeAgoWithRelativeDetail } from 'feed-app-common';
 
 export type MediaProp = NativeStackScreenProps<ChatStackParamList, 'PreviewMedia'>;
 
@@ -19,18 +27,44 @@ export const PreviewMedia = memo((prop: MediaProp) => {
   const msg = prop.route.params.msg;
   const fileId = msg.fileId;
   const payloads = msg.fileMetadata.payloads;
-  const [initialIndex, setInitialIndex] = useState(prop.route.params.currIndex);
+  const initialIndex = prop.route.params.currIndex;
+
   const [currIndex, setCurrIndex] = useState(initialIndex);
-  const { height, width } = useMemo(() => Dimensions.get('window'), []);
+  const ref = useRef<ICarouselInstance>(null);
+  const { height, width } = useSafeAreaFrame();
   const { isDarkMode } = useDarkMode();
+
+  const headerTitle = useCallback(() => {
+    return (
+      <View
+        style={{
+          display: 'flex',
+          alignItems: Platform.OS === 'ios' ? 'center' : 'flex-start',
+        }}
+      >
+        <HeaderTitle>
+          <AuthorName odinId={msg.fileMetadata.senderOdinId} showYou />
+        </HeaderTitle>
+        <Text>{formatToTimeAgoWithRelativeDetail(new Date(msg.fileMetadata.created), true)}</Text>
+      </View>
+    );
+  }, [msg.fileMetadata.created, msg.fileMetadata.senderOdinId]);
+
+  useLayoutEffect(() => {
+    const navigation = prop.navigation;
+    navigation.setOptions({
+      headerTitle: headerTitle,
+    });
+  });
 
   const renderItem = useCallback(
     ({ item }: CarouselRenderItemInfo<PayloadDescriptor>) => {
       const fileKey = item.key;
       const type = item.contentType;
+
       const isVideo = type?.startsWith('video') || false;
       return !isVideo ? (
-        <PhotoWithLoader
+        <OdinImage
           fileId={fileId}
           fileKey={fileKey}
           enableZoom={true}
@@ -40,42 +74,47 @@ export const PreviewMedia = memo((prop: MediaProp) => {
             height: height,
           }}
           targetDrive={ChatDrive}
+          previewThumbnail={msg.fileMetadata.appData.previewThumbnail}
         />
       ) : (
-        <SafeAreaView>
-          <VideoWithLoader
-            fileId={fileId}
-            fileKey={fileKey}
-            targetDrive={ChatDrive}
-            fullscreen={true}
-            imageSize={{
-              width: width,
-              height: height,
-            }}
-            preview={false}
-          />
-        </SafeAreaView>
+        <VideoWithLoader
+          fileId={fileId}
+          fileKey={fileKey}
+          targetDrive={ChatDrive}
+          fullscreen={true}
+          previewThumbnail={msg.fileMetadata.appData.previewThumbnail}
+          imageSize={{
+            width: width,
+            height: height,
+          }}
+        />
       );
     },
-    [fileId, height, width]
+    [fileId, height, msg.fileMetadata.appData.previewThumbnail, width]
   );
 
   return (
     <>
       <Carousel
+        ref={ref}
         width={width}
         height={height}
         autoPlay={false}
         data={payloads}
         scrollAnimationDuration={1000}
-        windowSize={5}
-        loop={false}
-        defaultIndex={initialIndex}
         onSnapToItem={(index) => {
           setCurrIndex(index);
         }}
+        overscrollEnabled={false}
+        windowSize={5}
+        loop={false}
+        defaultIndex={initialIndex}
         renderItem={renderItem}
+        style={{
+          backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
+        }}
       />
+
       {payloads.length > 1 && (
         <View
           style={{
@@ -85,7 +124,6 @@ export const PreviewMedia = memo((prop: MediaProp) => {
             flex: 1,
             right: 0,
             left: 0,
-            backgroundColor: isDarkMode ? Colors.slate[900] : Colors.slate[200],
             flexDirection: 'row',
             alignSelf: 'center',
             gap: 2,
@@ -107,10 +145,12 @@ export const PreviewMedia = memo((prop: MediaProp) => {
                     width: 200,
                     height: 200,
                   }}
-                  preview={true}
+                  preview={false}
                   onClick={() => {
-                    setInitialIndex(index);
-                    setCurrIndex(index);
+                    ref.current?.scrollTo({
+                      index,
+                      animated: true,
+                    });
                   }}
                 />
               );
@@ -128,8 +168,10 @@ export const PreviewMedia = memo((prop: MediaProp) => {
                 }}
                 avoidPayload={true}
                 onClick={() => {
-                  setInitialIndex(index);
-                  setCurrIndex(index);
+                  ref.current?.scrollTo({
+                    index,
+                    animated: true,
+                  });
                 }}
                 style={{
                   borderRadius: 10,

@@ -1,7 +1,7 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { StyleSheet, Text, View, ViewStyle } from 'react-native';
 import { useConversation } from '../../hooks/chat/useConversation';
-import { Avatar, GroupAvatar, OwnerAvatar } from '../../components/Chat/Conversation-tile';
+
 import {
   ConversationWithYourselfId,
   GroupConversation,
@@ -21,6 +21,8 @@ import { useProfile } from '../../hooks/profile/useProfile';
 import { ConnectionName } from '../../components/ui/Name';
 import { ChatStackParamList } from '../../app/App';
 import { openURL } from '../../utils/utils';
+import { Avatar, GroupAvatar, OwnerAvatar } from '../../components/ui/Avatars/Avatar';
+import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 
 export type ChatInfoProp = NativeStackScreenProps<ChatStackParamList, 'ChatInfo'>;
 
@@ -85,7 +87,11 @@ export const ChatInfoPage = memo((prop: ChatInfoProp) => {
       color: isDarkMode ? Colors.white : Colors.black,
     };
   }, [isDarkMode]);
-
+  const headerStyle = useMemo(() => {
+    return {
+      backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
+    };
+  }, [isDarkMode]);
   if (!conversation) return null;
 
   const conversationContent = conversation.fileMetadata.appData.content;
@@ -96,103 +102,106 @@ export const ChatInfoPage = memo((prop: ChatInfoProp) => {
         title={group ? 'Group Info' : 'Chat Info'}
         headerLeft={headerLeft}
         headerRight={group ? headerRight : undefined}
+        headerStyle={headerStyle}
       />
-      <View style={styles.content}>
-        {!group ? (
-          isSelf ? (
-            <OwnerAvatar style={styles.avatar} imageSize={styles.largeAvatarSize} />
+      <SafeAreaView>
+        <View style={styles.content}>
+          {!group ? (
+            isSelf ? (
+              <OwnerAvatar style={styles.avatar} imageSize={styles.largeAvatarSize} />
+            ) : (
+              <Avatar
+                odinId={(conversationContent as SingleConversation).recipient}
+                style={styles.avatar}
+                imageSize={styles.largeAvatarSize}
+              />
+            )
           ) : (
-            <Avatar
-              odinId={(conversationContent as SingleConversation).recipient}
-              style={styles.avatar}
-              imageSize={styles.largeAvatarSize}
-            />
-          )
-        ) : (
-          <GroupAvatar style={styles.avatar} iconSize={'2xl'} />
-        )}
-        <Text
-          style={[
-            styles.title,
-            {
-              marginTop: group ? 0 : 24,
-              ...colorStyle,
-            },
-          ]}
-        >
-          {isSelf ? (
-            `${profile?.firstName} ${profile?.surName}`
-          ) : group ? (
-            conversationContent.title
-          ) : (
-            <ConnectionName odinId={(conversationContent as SingleConversation).recipient} />
+            <GroupAvatar style={styles.avatar} iconSize={'2xl'} />
           )}
-        </Text>
-        {!group && (
-          <View
-            style={{
-              display: 'flex',
-              flexDirection: 'row',
-              alignItems: 'flex-end',
-            }}
-          >
-            <Home />
-            <TouchableOpacity onPress={onPress}>
-              <Text
-                style={[
-                  styles.subtitle,
-                  {
-                    color: isDarkMode ? Colors.purple[300] : Colors.purple[800],
-                  },
-                ]}
-              >
-                {isSelf ? identity : (conversationContent as SingleConversation).recipient}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        )}
-        {group && (
-          <View style={styles.groupRecipient}>
-            <Text
-              style={{
-                fontSize: 22,
-                fontWeight: '500',
+          <Text
+            style={[
+              styles.title,
+              {
+                marginTop: group ? 0 : 24,
                 ...colorStyle,
+              },
+            ]}
+          >
+            {isSelf ? (
+              `${profile?.firstName} ${profile?.surName}`
+            ) : group ? (
+              conversationContent.title
+            ) : (
+              <ConnectionName odinId={(conversationContent as SingleConversation).recipient} />
+            )}
+          </Text>
+          {!group && (
+            <View
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'flex-end',
               }}
             >
-              Recipients
-            </Text>
-            {[...(conversationContent as GroupConversation).recipients, identity as string].map(
-              (recipient, index) => (
-                <View key={index} style={recipientGroupStyle}>
-                  {index === (conversationContent as GroupConversation).recipients.length ? (
-                    <OwnerAvatar style={styles.mediumAvatarSize} />
-                  ) : (
-                    <Avatar odinId={recipient} style={styles.mediumAvatarSize} />
-                  )}
-                  <Text
-                    style={[
-                      {
-                        fontWeight: '400',
-                        fontSize: 18,
-                        marginLeft: 12,
-                        ...colorStyle,
-                      },
-                    ]}
-                  >
-                    <ConnectionName odinId={recipient} />
-                    <Text style={styles.you}>
-                      {index === (conversationContent as GroupConversation).recipients.length
-                        ? ' (you)'
-                        : null}
+              <Home />
+              <TouchableOpacity onPress={onPress}>
+                <Text
+                  style={[
+                    styles.subtitle,
+                    {
+                      color: isDarkMode ? Colors.purple[300] : Colors.purple[800],
+                    },
+                  ]}
+                >
+                  {isSelf ? identity : (conversationContent as SingleConversation).recipient}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+          {group && (
+            <View style={styles.groupRecipient}>
+              <Text
+                style={{
+                  fontSize: 22,
+                  fontWeight: '500',
+                  ...colorStyle,
+                }}
+              >
+                Recipients
+              </Text>
+              {[...(conversationContent as GroupConversation).recipients, identity as string].map(
+                (recipient, index) => (
+                  <View key={index} style={recipientGroupStyle}>
+                    {index === (conversationContent as GroupConversation).recipients.length ? (
+                      <OwnerAvatar style={styles.mediumAvatarSize} />
+                    ) : (
+                      <Avatar odinId={recipient} style={styles.mediumAvatarSize} />
+                    )}
+                    <Text
+                      style={[
+                        {
+                          fontWeight: '400',
+                          fontSize: 18,
+                          marginLeft: 12,
+                          ...colorStyle,
+                        },
+                      ]}
+                    >
+                      <ConnectionName odinId={recipient} />
+                      <Text style={styles.you}>
+                        {index === (conversationContent as GroupConversation).recipients.length
+                          ? ' (you)'
+                          : null}
+                      </Text>
                     </Text>
-                  </Text>
-                </View>
-              )
-            )}
-          </View>
-        )}
-      </View>
+                  </View>
+                )
+              )}
+            </View>
+          )}
+        </View>
+      </SafeAreaView>
     </>
   );
 });

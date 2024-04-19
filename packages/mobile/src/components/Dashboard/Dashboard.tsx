@@ -1,12 +1,13 @@
 import { useDotYouClientContext } from 'feed-app-common';
 import { FC, memo } from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
 import { openURL } from '../../utils/utils';
 import { BrandIconProps, Homebase, HomebaseMail } from '../ui/Icons/brandIcons';
 import { useUnreadPushNotificationsCount } from '../../hooks/notifications/usePushNotifications';
 import { MAIL_APP_ID, OWNER_APP_ID } from '../../app/constants';
 import { Colors } from '../../app/Colors';
 import { useDarkMode } from '../../hooks/useDarkMode';
+import { Text } from '../ui/Text/Text';
 
 export const Dashboard = memo(() => {
   return (

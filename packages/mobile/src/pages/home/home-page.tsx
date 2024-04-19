@@ -1,5 +1,5 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ScrollView, View } from 'react-native';
+import { ScrollView, StatusBar, View } from 'react-native';
 import { Text } from '../../components/ui/Text/Text';
 
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
@@ -24,6 +24,10 @@ export const HomePage = (_props: HomeProps) => {
 
   return (
     <SafeAreaView>
+      <StatusBar
+        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+        backgroundColor={isDarkMode ? Colors.gray[900] : Colors.slate[50]}
+      />
       <Container>
         <ScrollView style={{ minHeight: '100%' }}>
           <View style={{ display: 'flex', flexDirection: 'column', paddingVertical: 12 }}>

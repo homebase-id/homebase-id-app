@@ -7,6 +7,7 @@ import {
 import { memo, useMemo } from 'react';
 import {
   ActivityIndicator,
+  GestureResponderEvent,
   Image,
   ImageStyle,
   Platform,
@@ -33,6 +34,7 @@ export interface OdinImageProps {
   enableZoom?: boolean;
   style?: ImageStyle;
   onClick?: () => void;
+  onLongPress?: (e: GestureResponderEvent) => void;
 }
 
 const thumblessContentTypes = ['image/svg+xml', 'image/gif'];
@@ -52,6 +54,7 @@ export const OdinImage = memo(
     enableZoom,
     style,
     onClick,
+    onLongPress,
   }: OdinImageProps) => {
     // Don't set load size if it's a thumbnessLessContentType; As they don't have a thumb
     const loadSize = useMemo(
@@ -62,11 +65,11 @@ export const OdinImage = memo(
           : {
               pixelHeight:
                 (imageSize?.height
-                  ? Math.round(imageSize?.height * (enableZoom ? 4 : 1))
+                  ? Math.round(imageSize?.height * (enableZoom ? 6 : 1))
                   : undefined) || 800,
               pixelWidth:
                 (imageSize?.width
-                  ? Math.round(imageSize?.width * (enableZoom ? 4 : 1))
+                  ? Math.round(imageSize?.width * (enableZoom ? 6 : 1))
                   : undefined) || 800,
             },
       [enableZoom, imageSize?.height, imageSize?.width, previewThumbnail?.contentType]
@@ -125,7 +128,8 @@ export const OdinImage = memo(
           }}
         >
           {/* Blurry image */}
-          {previewUrl ? (
+          {/* Hide preview image when it's an enableZoom as the position absolute conflicts on the gestures */}
+          {previewUrl && (!enableZoom || (enableZoom && !imageData?.url)) ? (
             <InnerImage
               uri={previewUrl}
               contentType={previewContentType as ImageContentType}
@@ -141,6 +145,7 @@ export const OdinImage = memo(
               }}
               imageSize={imageSize}
               blurRadius={hasCachedImage ? 0 : 2}
+              // onLongPress={onLongPress}
             />
           ) : null}
 
@@ -154,6 +159,7 @@ export const OdinImage = memo(
               enableZoom={enableZoom}
               alt={alt || title}
               onClick={onClick}
+              onLongPress={onLongPress}
               style={{
                 position: 'relative',
                 ...style,
@@ -189,7 +195,7 @@ const InnerImage = memo(
     style,
     fit,
     onClick,
-
+    onLongPress,
     contentType,
   }: {
     uri: string;
@@ -198,13 +204,13 @@ const InnerImage = memo(
     alt?: string;
     style?: ImageStyle;
     fit?: 'cover' | 'contain';
-
+    onLongPress?: (e: GestureResponderEvent) => void;
     onClick?: () => void;
 
     contentType?: ImageContentType;
   }) => {
     return contentType === 'image/svg+xml' ? (
-      <TouchableWithoutFeedback onPress={onClick}>
+      <TouchableWithoutFeedback onPress={onClick} onLongPress={onLongPress}>
         <View
           style={[
             {
@@ -224,7 +230,7 @@ const InnerImage = memo(
         </View>
       </TouchableWithoutFeedback>
     ) : (
-      <TouchableWithoutFeedback onPress={onClick}>
+      <TouchableWithoutFeedback onPress={onClick} onLongPress={onLongPress}>
         <Image
           source={{ uri }}
           alt={alt}
@@ -249,7 +255,7 @@ const ZoomableImage = memo(
     fit,
     enableZoom,
     onClick,
-
+    onLongPress,
     contentType,
   }: {
     uri: string;
@@ -259,6 +265,7 @@ const ZoomableImage = memo(
     fit?: 'cover' | 'contain';
     enableZoom?: boolean;
     onClick?: () => void;
+    onLongPress?: (e: GestureResponderEvent) => void;
 
     contentType?: ImageContentType;
   }) => {
@@ -272,6 +279,7 @@ const ZoomableImage = memo(
           fit={fit}
           contentType={contentType}
           onClick={onClick}
+          onLongPress={onLongPress}
         />
       );
     }
@@ -287,6 +295,8 @@ const ZoomableImage = memo(
             uri={uri}
             minScale={1}
             maxScale={3}
+            isDoubleTapEnabled={true}
+            isPinchEnabled
             resizeMode="contain"
             style={{
               ...imageSize,

@@ -49,6 +49,8 @@ export interface ComposerProps {
   onTextChanged?(text: string): void;
   onInputSizeChanged?(layout: { width: number; height: number }): void;
   containerStyle?: ViewStyle;
+  children?: React.ReactNode;
+  hasText: boolean | undefined;
 }
 
 export const Composer = memo(
@@ -69,7 +71,6 @@ export const Composer = memo(
     } = props;
 
     const dimensionsRef = useRef<{ width: number; height: number }>();
-
     const determineInputSizeChange = useCallback(
       (dimensions: { width: number; height: number }) => {
         // Support earlier versions of React Native on Android.
@@ -124,6 +125,7 @@ export const Composer = memo(
           keyboardAppearance={keyboardAppearance}
           {...textInputProps}
         />
+        {props.children}
       </View>
     );
   },

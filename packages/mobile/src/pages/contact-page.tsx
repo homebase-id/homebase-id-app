@@ -10,6 +10,7 @@ import { ContactTile, Tile } from '../components/Contact/Contact-Tile';
 import { Users } from '../components/ui/Icons/icons';
 import { memo, useCallback } from 'react';
 import { DotYouProfile } from '@youfoundation/js-lib/network';
+import { SafeAreaView } from '../components/ui/SafeAreaView/SafeAreaView';
 
 const ListHeaderComponent = () => {
   const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
@@ -47,12 +48,14 @@ export const ContactPage = memo(
     if (!connections) return null;
 
     return (
-      <FlatList
-        data={connections}
-        keyExtractor={(item) => item.odinId}
-        ListHeaderComponent={ListHeaderComponent}
-        renderItem={renderItem}
-      />
+      <SafeAreaView>
+        <FlatList
+          data={connections}
+          keyExtractor={(item) => item.odinId}
+          ListHeaderComponent={ListHeaderComponent}
+          renderItem={renderItem}
+        />
+      </SafeAreaView>
     );
   }
 );

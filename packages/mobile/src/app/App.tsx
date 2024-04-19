@@ -65,7 +65,8 @@ import { AudioContextProvider } from '../components/AudioContext/AudioContext';
 import { useInitialPushNotification } from '../hooks/push-notification/useInitialPushNotification';
 import { ErrorBoundary } from '../components/ui/ErrorBoundary/ErrorBoundary';
 import { RouteContextProvider, useRouteContext } from '../components/RouteContext/RouteContext';
-import { OwnerAvatar } from '../components/Chat/Conversation-tile';
+import { OwnerAvatar } from '../components/ui/Avatars/Avatar';
+import { NativeStackNavigationOptions } from '@react-navigation/native-stack';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -316,8 +317,21 @@ const TabStack = memo(() => {
 
 const StackProfile = createNativeStackNavigator<ProfileStackParamList>();
 const ProfileStack = () => {
+  const { isDarkMode } = useDarkMode();
+  const screenOptions = useMemo(
+    () =>
+      ({
+        headerBackTitle: 'Profile',
+        statusBarColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
+        statusBarStyle: Platform.OS === 'android' ? (isDarkMode ? 'light' : 'dark') : undefined,
+        headerStyle: {
+          backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
+        },
+      }) as NativeStackNavigationOptions,
+    [isDarkMode]
+  );
   return (
-    <StackProfile.Navigator screenOptions={{ headerBackTitle: 'Profile' }}>
+    <StackProfile.Navigator screenOptions={screenOptions}>
       <StackProfile.Screen
         name="Overview"
         component={ProfilePage}
@@ -337,7 +351,23 @@ const StackChat = createNativeStackNavigator<ChatStackParamList>();
 const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) => {
   const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
   const isOnline = useLiveChatProcessor();
-
+  const { isDarkMode } = useDarkMode();
+  const screenOptions = useMemo(
+    () =>
+      ({
+        headerShown: false,
+        statusBarColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
+        /// StatusBarStyle throws error when changin in Ios (even setting to Ui UIControllerbasedStatusBar to yes)
+        statusBarStyle: Platform.OS === 'android' ? (isDarkMode ? 'light' : 'dark') : undefined,
+        headerShadowVisible: false,
+        headerTransparent: Platform.OS === 'ios',
+        headerBlurEffect: 'regular',
+        headerStyle: {
+          backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
+        },
+      }) as NativeStackNavigationOptions,
+    [isDarkMode]
+  );
   const headerRight = useCallback(() => {
     return HeaderActions({
       onPress: () => navigation.navigate('NewChat'),
@@ -355,11 +385,7 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
   );
 
   return (
-    <StackChat.Navigator
-      screenOptions={{
-        headerShown: false,
-      }}
-    >
+    <StackChat.Navigator screenOptions={screenOptions}>
       <StackChat.Screen
         name="Conversation"
         component={ConversationsPage}
@@ -368,7 +394,7 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
           headerShown: true,
           headerTitleAlign: 'left',
           headerLeft: isOnline ? ProfileAvatar : OfflineProfileAvatar,
-          headerRight: headerRight,
+          headerRight: Platform.OS === 'ios' ? headerRight : undefined,
           headerSearchBarOptions: {
             shouldShowHintSearchIcon: true,
             hideWhenScrolling: true,
@@ -378,7 +404,11 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
         }}
       />
 
-      <StackChat.Group screenOptions={{ presentation: 'modal' }}>
+      <StackChat.Group
+        screenOptions={{
+          presentation: 'modal',
+        }}
+      >
         {/* TODO: Swiping effect like signal  */}
         <StackChat.Screen
           name="NewChat"
@@ -395,7 +425,6 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
           options={{
             headerTitle: 'New Group',
             headerShown: false,
-            headerLeft: headerBackButton,
           }}
         />
       </StackChat.Group>
@@ -414,10 +443,9 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
         component={PreviewMedia}
         options={{
           headerShown: true,
-          gestureEnabled: true,
           title: '',
           headerBackTitleVisible: false,
-
+          headerShadowVisible: false,
           headerTransparent: true,
         }}
       />

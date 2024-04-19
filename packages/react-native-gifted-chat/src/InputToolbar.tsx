@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useState } from 'react';
+import React, { memo, useEffect, useMemo, useState } from 'react';
 import { StyleSheet, View, Keyboard, StyleProp, ViewStyle } from 'react-native';
 
 import { Composer, ComposerProps } from './Composer';
@@ -70,6 +70,8 @@ export const InputToolbar = memo(
       ...rest
     } = props;
 
+    const hasText = useMemo(() => !!text, [text]);
+
     return (
       <View
         style={[styles.container, { position }, containerStyle] as ViewStyle}
@@ -77,7 +79,7 @@ export const InputToolbar = memo(
         <View style={[styles.primary, props.primaryStyle]}>
           {renderActions?.(rest) ||
             (onPressActionButton && <Actions {...rest} />)}
-          {renderComposer?.(rest as ComposerProps) || (
+          {renderComposer?.({ ...rest, hasText }) || (
             <Composer {...(rest as ComposerProps)} />
           )}
           {renderSend?.({ ...props, text }) || <Send {...props} text={text} />}

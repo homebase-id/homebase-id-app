@@ -61,6 +61,7 @@ const styles = {
       marginVertical: 4,
       bottom: -22,
       right: 7,
+      zIndex: 20,
       position: 'absolute',
     },
   }),
@@ -92,6 +93,7 @@ const styles = {
       marginVertical: 4,
       bottom: -22,
       left: 7,
+      zIndex: 20,
       position: 'absolute',
     },
   }),
@@ -537,13 +539,13 @@ export default class Bubble<
   renderReactions() {
     if (this.props.renderReactions) {
       const child = this.props.renderReactions();
-      const { position, bottomContainerStyle } = this.props;
+      const { position } = this.props;
 
       return (
         <View
           style={[
             styles[position].reactions,
-            bottomContainerStyle && bottomContainerStyle[position],
+            // bottomContainerStyle && bottomContainerStyle[position],
           ]}
         >
           {child}

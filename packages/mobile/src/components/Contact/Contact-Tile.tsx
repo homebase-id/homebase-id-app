@@ -1,4 +1,4 @@
-import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
+import { TouchableOpacity, View, StyleSheet } from 'react-native';
 import { useConversation } from '../../hooks/chat/useConversation';
 import { ContactConfig, ContactFile, DotYouProfile } from '@youfoundation/js-lib/network';
 import { CheckCircle, ChevronRight, CircleOutlined } from '../ui/Icons/icons';
@@ -6,6 +6,8 @@ import { Colors } from '../../app/Colors';
 import { OdinImage } from '../ui/OdinImage/OdinImage';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import useContact from '../../hooks/contact/useContact';
+import { useMemo } from 'react';
+import { Text } from '../ui/Text/Text';
 export const ContactTile = ({
   item: profile,
   onOpen,
@@ -36,6 +38,9 @@ export const ContactTile = ({
       console.error(e);
     }
   };
+  const backgroundColor = useMemo(() => {
+    return isDarkMode ? Colors.slate[900] : Colors.slate[50];
+  }, [isDarkMode]);
 
   return (
     <TouchableOpacity onPress={selectMode ? onPress : onClick}>
@@ -43,7 +48,7 @@ export const ContactTile = ({
         style={[
           styles.tile,
           {
-            backgroundColor: isDarkMode ? Colors.slate[900] : Colors.white,
+            backgroundColor: backgroundColor,
           },
         ]}
       >
@@ -64,28 +69,12 @@ export const ContactTile = ({
           </View>
         )}
         <View style={[styles.content]}>
-          <Text
-            style={[
-              styles.title,
-              {
-                color: isDarkMode ? Colors.white : Colors.black,
-              },
-            ]}
-          >
+          <Text style={styles.title}>
             {contact?.name?.displayName ??
               contact?.name?.givenName ??
               contact?.name?.additionalName}
           </Text>
-          <Text
-            style={[
-              styles.description,
-              {
-                color: isDarkMode ? Colors.white : Colors.black,
-              },
-            ]}
-          >
-            {contact?.odinId}
-          </Text>
+          <Text style={styles.description}>{contact?.odinId}</Text>
         </View>
         {selectMode && (
           <View
@@ -140,16 +129,7 @@ export const Tile = ({
             flexGrow: 1,
           }}
         >
-          <Text
-            style={[
-              styles.title1,
-              {
-                color: isDarkMode ? Colors.white : Colors.black,
-              },
-            ]}
-          >
-            {title}
-          </Text>
+          <Text style={styles.title1}>{title}</Text>
           <ChevronRight size={'lg'} />
         </View>
       </View>
