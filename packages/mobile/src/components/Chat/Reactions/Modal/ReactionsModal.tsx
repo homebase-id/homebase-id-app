@@ -1,5 +1,10 @@
-import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet';
-import { forwardRef } from 'react';
+import {
+  BottomSheetBackdrop,
+  BottomSheetBackdropProps,
+  BottomSheetModal,
+  BottomSheetScrollView,
+} from '@gorhom/bottom-sheet';
+import { forwardRef, useCallback } from 'react';
 import { Text, View } from 'react-native';
 import { Colors } from '../../../../app/Colors';
 import { useDarkMode } from '../../../../hooks/useDarkMode';
@@ -8,13 +13,14 @@ import { ChatMessageIMessage } from '../../ChatDetail';
 import { useChatReaction } from '../../../../hooks/chat/useChatReaction';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ChatReaction } from '../../../../provider/chat/ChatReactionProvider';
-import useContact from '../../../../hooks/contact/useContact';
 import { Avatar, OwnerAvatar } from '../../../ui/Avatars/Avatar';
+import { AuthorName } from '../../../ui/Name';
+import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 
 export const ReactionsModal = forwardRef(
   (
     { message, onClose }: { message: ChatMessageIMessage | undefined; onClose: () => void },
-    ref
+    ref: React.Ref<BottomSheetModalMethods>
   ) => {
     const { isDarkMode } = useDarkMode();
     const { data: reactions } = useChatReaction({
@@ -22,13 +28,24 @@ export const ReactionsModal = forwardRef(
       conversationId: message?.fileMetadata.appData.groupId,
     }).get;
 
+    const renderBackdrop = useCallback(
+      (props: BottomSheetBackdropProps) => (
+        <BottomSheetBackdrop {...props} opacity={0.5} appearsOnIndex={0} disappearsOnIndex={-1} />
+      ),
+      []
+    );
+
     return (
       <BottomSheetModal
-        ref={ref as any}
+        ref={ref}
         snapPoints={['50%']}
+        backdropComponent={renderBackdrop}
         onDismiss={onClose}
+        enableDismissOnClose={true}
+        enablePanDownToClose
+        index={0}
         backgroundStyle={{
-          backgroundColor: isDarkMode ? Colors.gray[900] : Colors.white,
+          backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
         }}
         handleIndicatorStyle={{
           backgroundColor: isDarkMode ? Colors.gray[100] : Colors.gray[500],
@@ -62,15 +79,14 @@ export const ReactionsModal = forwardRef(
 const ReactionTile = (prop: HomebaseFile<ChatReaction>) => {
   const reaction = prop.fileMetadata.appData.content.message;
   const senderOdinId = prop.fileMetadata.senderOdinId;
-  const contact = useContact(senderOdinId).fetch.data;
   const { isDarkMode } = useDarkMode();
   return (
     <View
       style={{
         display: 'flex',
         flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
+        alignItems: 'flex-start',
+
         marginTop: 10,
       }}
     >
@@ -88,31 +104,37 @@ const ReactionTile = (prop: HomebaseFile<ChatReaction>) => {
           style={{
             width: 36,
             height: 36,
-            marginRight: 10,
+            marginRight: 16,
           }}
         />
       )}
-      <Text
+      <View
         style={{
-          fontSize: 18,
-          fontWeight: '500',
-          color: isDarkMode ? Colors.white : Colors.slate[700],
-        }}
-      >
-        {!senderOdinId
-          ? ' You'
-          : contact?.fileMetadata.appData.content.name?.displayName || senderOdinId}
-      </Text>
-      <Text
-        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
           flex: 1,
-          textAlign: 'right',
-          fontSize: 24,
-          color: isDarkMode ? Colors.white : Colors.slate[700],
         }}
       >
-        {reaction}
-      </Text>
+        <Text
+          style={{
+            fontSize: 18,
+            fontWeight: '500',
+            color: isDarkMode ? Colors.white : Colors.slate[700],
+          }}
+        >
+          <AuthorName odinId={senderOdinId} showYou />
+        </Text>
+        <Text
+          style={{
+            fontSize: 24,
+            color: isDarkMode ? Colors.white : Colors.slate[700],
+          }}
+        >
+          {reaction}
+        </Text>
+      </View>
     </View>
   );
 };

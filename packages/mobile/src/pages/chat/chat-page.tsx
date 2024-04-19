@@ -119,20 +119,17 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
   const [selectedMessage, setSelectedMessage] = useState<SelectedMessageState>(
     initalSelectedMessageState
   );
-  // const [showChatReactionPopup, setshowChatReactionPopup] = useState(true);
 
   const doSelectMessage = useCallback(
     ({ coords, message }: { coords: { x: number; y: number }; message: ChatMessageIMessage }) => {
       if (message && message.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus) {
         return;
       }
-      // setMessageCordinates(coords);
       setSelectedMessage({
         messageCordinates: coords,
         selectedMessage: message,
         showChatReactionPopup: true,
       });
-      // setshowChatReactionPopup(true);
     },
     []
   );
@@ -370,13 +367,13 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
       <EmojiPickerModal
         ref={emojiPickerSheetModalRef}
         selectedMessage={selectedMessage.selectedMessage as ChatMessageIMessage}
+        onDismiss={dismissSelectedMessage}
       />
       <ReactionsModal
         ref={reactionModalRef}
         message={selectedReactionMessage}
         onClose={() => {
           setSelectedReactionMessage(undefined);
-          reactionModalRef.current?.dismiss();
         }}
       />
     </BottomSheetModalProvider>
