@@ -197,7 +197,7 @@ const InnerMediaItem = ({
     ) {
       return (
         <Image
-          source={{ uri: ((payload as NewPayloadDescriptor).pendingFile as any as OdinBlob)?.uri }}
+          src={((payload as NewPayloadDescriptor).pendingFile as any as OdinBlob)?.uri}
           style={{ ...imageSize, ...(style || { borderRadius: 10 }) }}
         />
       );

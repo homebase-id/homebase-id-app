@@ -138,7 +138,7 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
               contentType: file.type || undefined,
               pendingFile:
                 file.filepath || file.uri
-                  ? (new OdinBlob((file.filepath || file.uri) as string, {
+                  ? (new OdinBlob((file.uri || file.filepath) as string, {
                       type: file.type || undefined,
                     }) as any as Blob)
                   : undefined,
