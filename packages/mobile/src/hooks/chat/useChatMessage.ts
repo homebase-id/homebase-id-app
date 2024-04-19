@@ -22,6 +22,7 @@ import {
   GroupConversation,
   SingleConversation,
 } from '../../provider/chat/ConversationProvider';
+import { OdinBlob } from '../../../polyfills/OdinBlob';
 
 export const useChatMessage = (props?: { messageId: string | undefined }) => {
   const queryClient = useQueryClient();
@@ -128,11 +129,20 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
             appData: {
               groupId: conversationId,
               content: {
-                message: message || (files?.length ? '📷 Media' : ''),
+                message: message,
                 deliveryStatus: ChatDeliveryStatus.Sending,
                 replyId: replyId,
               },
             },
+            payloads: files?.map((file) => ({
+              contentType: file.type || undefined,
+              pendingFile:
+                file.filepath || file.uri
+                  ? (new OdinBlob((file.filepath || file.uri) as string, {
+                      type: file.type || undefined,
+                    }) as any as Blob)
+                  : undefined,
+            })),
           },
           serverMetadata: {
             accessControlList: {
@@ -153,7 +163,10 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
       },
       onError: (err, messageParams, context) => {
         console.error('Failed to send the chat message', err);
-        queryClient.setQueryData(['chat-messages', messageParams.conversationId], context?.existingData);
+        queryClient.setQueryData(
+          ['chat-messages', messageParams.conversationId],
+          context?.existingData
+        );
       },
       onSettled: async (_data, _error, variables) => {
         queryClient.invalidateQueries({ queryKey: ['chat-messages', variables.conversationId] });
