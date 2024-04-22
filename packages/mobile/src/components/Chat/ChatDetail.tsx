@@ -33,7 +33,7 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
-import { Microphone, Plus, SendChat, Times } from '../../components/ui/Icons/icons';
+import { ArrowDown, Microphone, Plus, SendChat, Times } from '../../components/ui/Icons/icons';
 import MediaMessage from './MediaMessage';
 import { Asset, launchImageLibrary } from 'react-native-image-picker';
 import { useAuth } from '../../hooks/auth/useAuth';
@@ -437,12 +437,17 @@ export const ChatDetail = memo(
         opacity: 1,
       };
     }, [isDarkMode]);
-    const wrapperStyle = useMemo(() => {
+    const wrapperStyle: StyleProp<ViewStyle> = useMemo(() => {
       return {
         backgroundColor: isDarkMode ? Colors.indigo[900] : Colors.slate[50],
         opacity: 1,
       };
     }, [isDarkMode]);
+
+    const scrollToBottomComponent = useCallback(() => {
+      return <ArrowDown />;
+    }, []);
+
     return (
       <SafeAreaView>
         <GiftedChat<ChatMessageIMessage>
@@ -476,6 +481,7 @@ export const ChatDetail = memo(
           loadEarlier={hasMoreMessages}
           onLoadEarlier={fetchMoreMessages}
           scrollToBottomStyle={scrollToBottomStyle}
+          scrollToBottomComponent={scrollToBottomComponent}
           renderLoadEarlier={(prop) => <LoadEarlier {...prop} wrapperStyle={wrapperStyle} />}
           listViewProps={{
             removeClippedSubviews: true,
