@@ -1,4 +1,4 @@
-import { Text, TouchableOpacity, View } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
 
 import { usePushNotifications } from '../../hooks/notifications/usePushNotifications';
 import { memo, useMemo, useState } from 'react';
@@ -13,6 +13,7 @@ import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { ChatStackParamList, TabStackParamList } from '../../app/App';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { openURL } from '../../utils/utils';
+import { Text } from '../ui/Text/Text';
 
 export const NotificationsOverview = memo(() => {
   const { data: notifications } = usePushNotifications().fetch;
