@@ -1,5 +1,5 @@
 import { ReactElement, useState, useMemo, memo } from 'react';
-import { StyleProp, ViewStyle, View, TouchableOpacity, Text } from 'react-native';
+import { StyleProp, ViewStyle, View, TouchableOpacity, Text, Pressable } from 'react-native';
 
 import { ArrowDown } from '../Icons/icons';
 import { Colors } from '../../../app/Colors';
@@ -36,7 +36,7 @@ export const Select = memo(({ defaultValue, children, style, onChange }: SelectP
 
   return (
     <View style={style}>
-      <TouchableOpacity
+      <Pressable
         onPress={() => setIsOpen(!isOpen)}
         style={[
           {
@@ -62,7 +62,7 @@ export const Select = memo(({ defaultValue, children, style, onChange }: SelectP
           {currentLabel}
         </Text>
         <ArrowDown size={'sm'} />
-      </TouchableOpacity>
+      </Pressable>
 
       {isOpen ? (
         <View
