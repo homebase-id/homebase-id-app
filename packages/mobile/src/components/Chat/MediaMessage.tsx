@@ -285,6 +285,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 2,
+    width: 302,
   },
 });
 
