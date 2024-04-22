@@ -356,6 +356,8 @@ export const ChatDetail = memo(
 
     const inputContainerStyle: StyleProp<ViewStyle> = useMemo(() => {
       return {
+        position: 'relative',
+        flexDirection: 'column-reverse',
         backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
         justifyContent: 'center',
         alignContent: 'center',
