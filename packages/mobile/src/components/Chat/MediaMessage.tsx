@@ -1,4 +1,14 @@
-import { Dimensions, GestureResponderEvent, Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  Dimensions,
+  GestureResponderEvent,
+  Image,
+  ImageStyle,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  ViewStyle,
+} from 'react-native';
 import { memo } from 'react';
 
 import { MessageImageProps } from 'react-native-gifted-chat';
@@ -10,6 +20,11 @@ import { OdinImage } from '../ui/OdinImage/OdinImage';
 
 import { ChatMessageIMessage } from './ChatDetail';
 import { OdinAudio } from '../ui/OdinAudio/OdinAudio';
+import { NewPayloadDescriptor, PayloadDescriptor } from '@youfoundation/js-lib/core';
+import { StyleProp } from 'react-native';
+import { OdinBlob } from '../../../polyfills/OdinBlob';
+import { Colors } from '../../app/Colors';
+import { useDarkMode } from '../../hooks/useDarkMode';
 
 const MediaMessage = memo(
   ({
@@ -29,72 +44,28 @@ const MediaMessage = memo(
       const previewThumbnail = currentMessage.fileMetadata.appData.previewThumbnail;
       const aspectRatio =
         (previewThumbnail?.pixelWidth || 1) / (previewThumbnail?.pixelHeight || 1);
-      if (payloads[0].contentType.startsWith('video')) {
-        return (
-          <View style={props.containerStyle}>
-            <VideoWithLoader
-              fileId={currentMessage.fileId}
-              fileKey={payloads[0].key}
-              targetDrive={ChatDrive}
-              previewThumbnail={currentMessage.fileMetadata.appData.previewThumbnail}
-              fit="cover"
-              imageSize={{
-                width: aspectRatio <= 1 ? width * 0.8 : width * 0.6,
-                height: aspectRatio >= 1 ? height * 0.4 : height * 0.5,
-              }}
-              preview
-              style={{
-                borderRadius: 10,
-              }}
-              onLongPress={(e) => onLongPress(e, currentMessage)}
-              onClick={() => {
-                navigation.navigate('PreviewMedia', {
-                  fileId: currentMessage.fileId,
-                  payloadKey: payloads[0].key,
-                  type: payloads[0].contentType,
-                  msg: currentMessage,
-                  currIndex: 0,
-                });
-              }}
-            />
-          </View>
-        );
-      }
-      if (payloads[0].contentType.startsWith('audio/')) {
-        return (
-          <OdinAudio key={payloads[0].key} fileId={currentMessage.fileId} payload={payloads[0]} />
-        );
-      } else {
-        return (
-          <View style={props.containerStyle}>
-            <OdinImage
-              fileId={currentMessage.fileId}
-              fileKey={payloads[0].key}
-              targetDrive={ChatDrive}
-              fit="cover"
-              previewThumbnail={currentMessage.fileMetadata.appData.previewThumbnail}
-              imageSize={{
-                width: aspectRatio <= 1 ? width * 0.8 : width * 0.6,
-                height: aspectRatio >= 1 ? height * 0.4 : height * 0.5,
-              }}
-              style={{
-                borderRadius: 10,
-                // aspectRatio: aspectRatio,
-              }}
-              onLongPress={(e) => onLongPress(e, currentMessage)}
-              onClick={() => {
-                navigation.navigate('PreviewMedia', {
-                  fileId: currentMessage.fileId,
-                  payloadKey: payloads[0].key,
-                  type: payloads[0].contentType,
-                  msg: currentMessage,
-                  currIndex: 0,
-                });
-              }}
-            />
-          </View>
-        );
-      }
+
+      return (
+        <InnerMediaItem
+          payload={payloads[0]}
+          msg={currentMessage}
+          imageSize={{
+            width: aspectRatio <= 1 ? width * 0.8 : width * 0.6,
+            height: aspectRatio >= 1 ? height * 0.4 : height * 0.5,
+          }}
+          containerStyle={props.containerStyle}
+          onLongPress={(e) => onLongPress(e, currentMessage)}
+          onClick={() => {
+            navigation.navigate('PreviewMedia', {
+              fileId: currentMessage.fileId,
+              payloadKey: payloads[0].key,
+              type: payloads[0].contentType,
+              msg: currentMessage,
+              currIndex: 0,
+            });
+          }}
+        />
+      );
     }
 
     return <MediaGallery msg={props.currentMessage} onLongPress={onLongPress} />;
@@ -117,67 +88,29 @@ const MediaGallery = ({
   return (
     <View style={styles.grid}>
       {payloads.slice(0, maxVisible).map((item, index) => {
-        if (item.contentType.startsWith('video')) {
-          return (
-            <VideoWithLoader
-              key={index}
-              fileId={currentMessage.fileId}
-              fileKey={item.key}
-              targetDrive={ChatDrive}
-              previewThumbnail={
-                payloads.length === 1
-                  ? currentMessage.fileMetadata.appData.previewThumbnail
-                  : undefined
-              }
-              fit="cover"
-              imageSize={{
-                width: 200,
-                height: 200,
-              }}
-              preview={true}
-              onLongPress={(e) => onLongPress(e, currentMessage)}
-              onClick={() => {
-                navigation.navigate('PreviewMedia', {
-                  fileId: currentMessage.fileId,
-                  payloadKey: item.key,
-                  type: item.contentType,
-                  msg: currentMessage,
-                  currIndex: index,
-                });
-              }}
-            />
-          );
-        }
-        if (item.contentType.startsWith('audio/')) {
-          return <OdinAudio key={item.key} fileId={currentMessage.fileId} payload={item} />;
-        }
         return (
-          <OdinImage
-            fileId={currentMessage.fileId}
-            fileKey={item.key}
-            key={item.key}
-            targetDrive={ChatDrive}
-            fit="cover"
-            previewThumbnail={currentMessage.fileMetadata.appData.previewThumbnail}
+          <InnerMediaItem
+            key={item.key || index}
+            payload={item}
+            msg={currentMessage}
             imageSize={{
-              width: !isGallery ? 200 : 150,
+              width: payloads.length === 3 && index === 2 ? 302 : !isGallery ? 200 : 150,
               height: !isGallery ? 200 : 150,
             }}
-            avoidPayload={true}
+            containerStyle={{
+              flexGrow: 1,
+            }}
             style={
-              !isGallery
+              isGallery
                 ? {
-                    borderRadius: 10,
-                  }
-                : {
                     borderTopLeftRadius: index === 0 ? 10 : 0,
                     borderBottomLeftRadius: index === 2 ? 10 : 0,
                     borderTopRightRadius: index === 1 ? 10 : 0,
-                    borderBottomRightRadius: index === 3 ? 10 : 0,
-                    margin: 1,
-                    aspectRatio: payloads.length === 3 && index === 2 ? 1 : undefined,
+                    borderBottomRightRadius:
+                      index === 3 || (payloads.length === 3 && index === 2) ? 10 : 0,
                     width: payloads.length === 3 && index === 2 ? '100%' : 150,
                   }
+                : undefined
             }
             onLongPress={(e) => onLongPress(e, currentMessage)}
             onClick={() => {
@@ -201,7 +134,6 @@ const MediaGallery = ({
             bottom: 0,
             right: 0,
             zIndex: 10,
-            // borderRadius: 10,
             backgroundColor: 'rgba(0,0,0,0.5)',
             alignItems: 'center',
             justifyContent: 'center',
@@ -227,6 +159,116 @@ const MediaGallery = ({
   );
 };
 
+const InnerMediaItem = ({
+  payload,
+  msg,
+  containerStyle,
+  style,
+  imageSize,
+  onLongPress,
+  onClick,
+}: {
+  payload: PayloadDescriptor | NewPayloadDescriptor;
+  msg: ChatMessageIMessage;
+  containerStyle?: StyleProp<ViewStyle>;
+  style?: ImageStyle;
+  imageSize:
+    | {
+        width: number;
+        height: number;
+      }
+    | undefined;
+  onLongPress: ((e: GestureResponderEvent) => void) | undefined;
+  onClick: () => void;
+}) => {
+  const { isDarkMode } = useDarkMode();
+
+  if (!payload.contentType || !payload.key || !msg.fileId) {
+    if (
+      payload.contentType?.startsWith('image/') &&
+      (payload as NewPayloadDescriptor).pendingFile
+    ) {
+      return (
+        <Image
+          src={((payload as NewPayloadDescriptor).pendingFile as any as OdinBlob)?.uri}
+          style={{ ...imageSize, ...(style || { borderRadius: 10 }) }}
+        />
+      );
+    }
+    return (
+      <View
+        style={{
+          backgroundColor: isDarkMode ? Colors.slate[700] : Colors.slate[300],
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'center',
+          alignItems: 'center',
+          ...imageSize,
+          ...(style || { borderRadius: 10 }),
+        }}
+      >
+        <Text style={{ fontSize: 48 }}>
+          {payload.contentType?.startsWith('image/')
+            ? '📷'
+            : payload.contentType?.startsWith('audio/')
+              ? '🎵'
+              : payload.contentType?.startsWith('video/')
+                ? '📹'
+                : '📋'}
+        </Text>
+      </View>
+    );
+  }
+
+  if (payload.contentType.startsWith('video')) {
+    return (
+      <View style={containerStyle}>
+        <VideoWithLoader
+          fileId={msg.fileId}
+          fileKey={payload.key}
+          targetDrive={ChatDrive}
+          previewThumbnail={msg.fileMetadata.appData.previewThumbnail}
+          fit="cover"
+          imageSize={imageSize}
+          preview
+          style={
+            style || {
+              borderRadius: 10,
+            }
+          }
+          onLongPress={onLongPress}
+          onClick={onClick}
+        />
+      </View>
+    );
+  }
+  if (payload.contentType.startsWith('audio/')) {
+    return (
+      <OdinAudio key={payload.key} fileId={msg.fileId} payload={payload as PayloadDescriptor} />
+    );
+  } else {
+    return (
+      <View style={containerStyle}>
+        <OdinImage
+          fileId={msg.fileId}
+          fileKey={payload.key}
+          targetDrive={ChatDrive}
+          fit="cover"
+          previewThumbnail={msg.fileMetadata.appData.previewThumbnail}
+          imageSize={imageSize}
+          style={
+            style || {
+              borderRadius: 10,
+            }
+          }
+          onLongPress={onLongPress}
+          onClick={onClick}
+        />
+      </View>
+    );
+  }
+};
+
 const styles = StyleSheet.create({
   view: {
     flexDirection: 'row',
@@ -235,7 +277,8 @@ const styles = StyleSheet.create({
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    gap: 2,
+    width: 300 + 2,
   },
 });
 
