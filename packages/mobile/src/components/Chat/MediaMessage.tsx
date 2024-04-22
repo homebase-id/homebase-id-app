@@ -86,14 +86,7 @@ const MediaGallery = ({
   const isGallery = payloads.length >= 2;
 
   return (
-    <View
-      style={[
-        styles.grid,
-        {
-          width: 300 + 2,
-        },
-      ]}
-    >
+    <View style={styles.grid}>
       {payloads.slice(0, maxVisible).map((item, index) => {
         return (
           <InnerMediaItem
@@ -285,6 +278,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 2,
+    width: 300 + 2,
   },
 });
 
