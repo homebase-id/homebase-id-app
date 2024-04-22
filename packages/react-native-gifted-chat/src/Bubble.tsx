@@ -53,7 +53,7 @@ const styles = {
     },
     bottom: {
       flexDirection: 'row',
-      justifyContent: 'flex-start',
+      justifyContent: 'flex-end',
     },
     reactions: {
       flexDirection: 'row',

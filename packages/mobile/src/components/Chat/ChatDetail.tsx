@@ -33,7 +33,7 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
-import { Microphone, Plus, SendChat, Times } from '../../components/ui/Icons/icons';
+import { ArrowDown, Microphone, Plus, SendChat, Times } from '../../components/ui/Icons/icons';
 import MediaMessage from './MediaMessage';
 import { Asset, launchImageLibrary } from 'react-native-image-picker';
 import { useAuth } from '../../hooks/auth/useAuth';
@@ -273,7 +273,9 @@ export const ChatDetail = memo(
           <View
             style={{
               flexDirection: 'row',
-              alignItems: 'flex-end',
+              alignItems: 'center',
+              marginBottom: 'auto',
+              marginTop: 'auto',
             }}
           >
             {isRecording && (
@@ -307,11 +309,6 @@ export const ChatDetail = memo(
             >
               <View
                 style={{
-                  height: 40,
-                  width: 40,
-                  justifyContent: 'center',
-                  borderRadius: 20,
-                  backgroundColor: Colors.indigo[500],
                   transform: [
                     { rotate: props.text || assets.length !== 0 || isRecording ? '50deg' : '0deg' },
                   ],
@@ -358,15 +355,15 @@ export const ChatDetail = memo(
     );
 
     const inputContainerStyle: StyleProp<ViewStyle> = useMemo(() => {
-      return [
-        styles.inputContainer,
-        {
-          backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
-          borderTopWidth: 0,
-          borderRadius: 10,
-          marginTop: Platform.OS === 'android' ? 'auto' : undefined,
-        },
-      ];
+      return {
+        backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
+        justifyContent: 'center',
+        alignContent: 'center',
+        alignItems: 'center',
+        borderTopWidth: 0,
+        borderRadius: 10,
+        marginTop: Platform.OS === 'android' ? 'auto' : undefined,
+      };
     }, [isDarkMode]);
 
     const renderInputToolbar = useCallback(
@@ -437,12 +434,17 @@ export const ChatDetail = memo(
         opacity: 1,
       };
     }, [isDarkMode]);
-    const wrapperStyle = useMemo(() => {
+    const wrapperStyle: StyleProp<ViewStyle> = useMemo(() => {
       return {
         backgroundColor: isDarkMode ? Colors.indigo[900] : Colors.slate[50],
         opacity: 1,
       };
     }, [isDarkMode]);
+
+    const scrollToBottomComponent = useCallback(() => {
+      return <ArrowDown />;
+    }, []);
+
     return (
       <SafeAreaView>
         <GiftedChat<ChatMessageIMessage>
@@ -476,6 +478,7 @@ export const ChatDetail = memo(
           loadEarlier={hasMoreMessages}
           onLoadEarlier={fetchMoreMessages}
           scrollToBottomStyle={scrollToBottomStyle}
+          scrollToBottomComponent={scrollToBottomComponent}
           renderLoadEarlier={(prop) => <LoadEarlier {...prop} wrapperStyle={wrapperStyle} />}
           listViewProps={{
             removeClippedSubviews: true,
@@ -797,10 +800,6 @@ const RenderReplyMessageView = memo((props: BubbleProps<ChatMessageIMessage>) =>
 });
 
 const styles = StyleSheet.create({
-  inputContainer: {
-    position: 'relative',
-    flexDirection: 'column-reverse',
-  },
   container: {
     flex: 1,
     paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
@@ -825,8 +824,12 @@ const styles = StyleSheet.create({
   },
 
   send: {
-    justifyContent: 'center',
+    alignContent: 'center',
     marginRight: 8,
-    marginVertical: 'auto',
+    height: 40,
+    width: 40,
+    justifyContent: 'center',
+    borderRadius: 20,
+    backgroundColor: Colors.indigo[500],
   },
 });

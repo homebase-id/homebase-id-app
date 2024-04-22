@@ -1,5 +1,5 @@
 import { useAllConnections } from 'feed-app-common';
-import { FlatList, ListRenderItemInfo, Platform, Text } from 'react-native';
+import { FlatList, ListRenderItemInfo, Platform, StatusBar, Text } from 'react-native';
 import { ContactTile } from '../components/Contact/Contact-Tile';
 
 import { memo, useCallback, useMemo, useState } from 'react';
@@ -99,6 +99,7 @@ export const NewGroupPage = memo(() => {
         headerStyle={headerStyle}
       />
       <SafeAreaView>
+        {Platform.OS === 'ios' && <StatusBar barStyle="light-content" />}
         <FlatList data={contacts} keyExtractor={(item) => item.odinId} renderItem={renderItem} />
         <Dialog.Container visible={dialogVisible} onBackdropPress={() => setDialogVisible(false)}>
           <Dialog.Title>New Group Name</Dialog.Title>

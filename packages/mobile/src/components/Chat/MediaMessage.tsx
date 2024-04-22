@@ -25,6 +25,7 @@ import { StyleProp } from 'react-native';
 import { OdinBlob } from '../../../polyfills/OdinBlob';
 import { Colors } from '../../app/Colors';
 import { useDarkMode } from '../../hooks/useDarkMode';
+import { calculateScaledDimensions } from '../../utils/utils';
 
 const MediaMessage = memo(
   ({
@@ -42,19 +43,33 @@ const MediaMessage = memo(
 
     if (payloads.length === 1) {
       const previewThumbnail = currentMessage.fileMetadata.appData.previewThumbnail;
+
       const aspectRatio =
         (previewThumbnail?.pixelWidth || 1) / (previewThumbnail?.pixelHeight || 1);
+
+      const { width: newWidth, height: newHeight } = calculateScaledDimensions(
+        previewThumbnail?.pixelWidth || 300,
+        previewThumbnail?.pixelHeight || 300,
+        { width: width * 0.8, height: height * 0.68 }
+      );
 
       return (
         <InnerMediaItem
           payload={payloads[0]}
           msg={currentMessage}
           imageSize={{
-            width: aspectRatio <= 1 ? width * 0.8 : width * 0.6,
-            height: aspectRatio >= 1 ? height * 0.4 : height * 0.5,
+            width: newWidth,
+            height: newHeight,
           }}
+          fit={'contain'}
           containerStyle={props.containerStyle}
           onLongPress={(e) => onLongPress(e, currentMessage)}
+          style={{
+            // maxWidth: aspectRatio === 1 ? 300 : aspectRatio > 1 ? '100%' : '80%',
+            // maxHeight: aspectRatio === 1 ? 300 : aspectRatio > 1 ? undefined : '100%',
+            borderRadius: 10,
+            aspectRatio: aspectRatio,
+          }}
           onClick={() => {
             navigation.navigate('PreviewMedia', {
               fileId: currentMessage.fileId,
@@ -86,7 +101,7 @@ const MediaGallery = ({
   const isGallery = payloads.length >= 2;
 
   return (
-    <View style={styles.grid}>
+    <View style={[styles.grid]}>
       {payloads.slice(0, maxVisible).map((item, index) => {
         return (
           <InnerMediaItem
@@ -166,12 +181,14 @@ const InnerMediaItem = ({
   style,
   imageSize,
   onLongPress,
+  fit,
   onClick,
 }: {
   payload: PayloadDescriptor | NewPayloadDescriptor;
   msg: ChatMessageIMessage;
   containerStyle?: StyleProp<ViewStyle>;
   style?: ImageStyle;
+  fit?: 'cover' | 'contain';
   imageSize:
     | {
         width: number;
@@ -228,7 +245,7 @@ const InnerMediaItem = ({
           fileKey={payload.key}
           targetDrive={ChatDrive}
           previewThumbnail={msg.fileMetadata.appData.previewThumbnail}
-          fit="cover"
+          fit={fit}
           imageSize={imageSize}
           preview
           style={
@@ -253,7 +270,7 @@ const InnerMediaItem = ({
           fileId={msg.fileId}
           fileKey={payload.key}
           targetDrive={ChatDrive}
-          fit="cover"
+          fit={fit}
           previewThumbnail={msg.fileMetadata.appData.previewThumbnail}
           imageSize={imageSize}
           style={
@@ -278,7 +295,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 2,
-    width: 300 + 2,
+    width: 302,
   },
 });
 

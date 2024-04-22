@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
+  Platform,
 } from 'react-native';
 import { Text } from '../../components/ui/Text/Text';
 import { AuthStackParamList } from '../../app/App';
@@ -205,11 +206,12 @@ const LoginComponent = () => {
 
   return (
     <>
-      <Text style={{ fontSize: 18 }}>Your Homebase id</Text>
+      <Text style={{ fontSize: Platform.OS === 'ios' ? 20 : 18 }}>Your Homebase id</Text>
       <Input
         placeholder="Homebase id"
         style={{
           height: 40,
+          fontSize: Platform.OS === 'ios' ? 16 : 14,
         }}
         onChangeText={setOdinId}
         autoCapitalize="none"

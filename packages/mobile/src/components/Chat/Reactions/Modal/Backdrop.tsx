@@ -4,7 +4,6 @@ import Animated, { Extrapolation, interpolate, useAnimatedStyle } from 'react-na
 import { Pressable } from 'react-native';
 
 const Backdrop = ({ animatedIndex, style }: BottomSheetBackdropProps) => {
-  console.log('Backdrop', animatedIndex);
   // animated variables
   const containerAnimatedStyle = useAnimatedStyle(() => ({
     opacity: interpolate(animatedIndex.value, [0, 1], [0, 1], Extrapolation.CLAMP),

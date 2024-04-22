@@ -305,10 +305,10 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
               },
               onDelete: () => {
                 if (selectedMessage?.selectedMessage && conversation) {
-                  console.log(
-                    'Delete Message',
-                    selectedMessage.selectedMessage?.fileMetadata.appData.archivalStatus
-                  );
+                  // console.log(
+                  //   'Delete Message',
+                  //   selectedMessage.selectedMessage?.fileMetadata.appData.archivalStatus
+                  // );
                   deleteMessage({
                     conversation: conversation,
                     messages: [selectedMessage.selectedMessage],
