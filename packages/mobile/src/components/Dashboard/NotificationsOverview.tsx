@@ -5,7 +5,13 @@ import { memo, useMemo, useState } from 'react';
 import { PushNotification } from '@youfoundation/js-lib/core';
 import { formatToTimeAgoWithRelativeDetail, useDotYouClientContext } from 'feed-app-common';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import { CHAT_APP_ID, FEED_APP_ID, MAIL_APP_ID, OWNER_APP_ID } from '../../app/constants';
+import {
+  CHAT_APP_ID,
+  FEED_APP_ID,
+  FEED_CHAT_APP_ID,
+  MAIL_APP_ID,
+  OWNER_APP_ID,
+} from '../../app/constants';
 import useContact from '../../hooks/contact/useContact';
 import { Colors } from '../../app/Colors';
 import { Times } from '../ui/Icons/icons';
@@ -107,9 +113,11 @@ const NotificationAppGroup = ({
       ? 'Homebase - Feed'
       : stringGuidsEqual(appId, CHAT_APP_ID)
         ? 'Homebase - Chat'
-        : stringGuidsEqual(appId, MAIL_APP_ID)
-          ? 'Homebase - Mail'
-          : 'Unknown';
+        : stringGuidsEqual(appId, FEED_CHAT_APP_ID) // We shouldn't ever have this one, but for sanity
+          ? 'Homebase - Feed & Chat'
+          : stringGuidsEqual(appId, MAIL_APP_ID)
+            ? 'Homebase - Mail'
+            : `Unknown (${appId})`;
 
   const groupedByTypeNotifications =
     notifications.reduce(
