@@ -42,6 +42,7 @@ const MediaMessage = memo(
 
     if (payloads.length === 1) {
       const previewThumbnail = currentMessage.fileMetadata.appData.previewThumbnail;
+
       const aspectRatio =
         (previewThumbnail?.pixelWidth || 1) / (previewThumbnail?.pixelHeight || 1);
 
@@ -50,9 +51,10 @@ const MediaMessage = memo(
           payload={payloads[0]}
           msg={currentMessage}
           imageSize={{
-            width: aspectRatio <= 1 ? width * 0.8 : width * 0.6,
-            height: aspectRatio >= 1 ? height * 0.4 : height * 0.5,
+            width: aspectRatio === 1 ? 300 : aspectRatio > 1 ? width * 0.8 : 300,
+            height: aspectRatio === 1 ? 300 : aspectRatio > 1 ? 200 : height * 0.68,
           }}
+          fit={'contain'}
           containerStyle={props.containerStyle}
           onLongPress={(e) => onLongPress(e, currentMessage)}
           onClick={() => {
@@ -173,12 +175,14 @@ const InnerMediaItem = ({
   style,
   imageSize,
   onLongPress,
+  fit,
   onClick,
 }: {
   payload: PayloadDescriptor | NewPayloadDescriptor;
   msg: ChatMessageIMessage;
   containerStyle?: StyleProp<ViewStyle>;
   style?: ImageStyle;
+  fit?: 'cover' | 'contain';
   imageSize:
     | {
         width: number;
@@ -235,7 +239,7 @@ const InnerMediaItem = ({
           fileKey={payload.key}
           targetDrive={ChatDrive}
           previewThumbnail={msg.fileMetadata.appData.previewThumbnail}
-          fit="cover"
+          fit={fit}
           imageSize={imageSize}
           preview
           style={
@@ -260,7 +264,7 @@ const InnerMediaItem = ({
           fileId={msg.fileId}
           fileKey={payload.key}
           targetDrive={ChatDrive}
-          fit="cover"
+          fit={fit}
           previewThumbnail={msg.fileMetadata.appData.previewThumbnail}
           imageSize={imageSize}
           style={
