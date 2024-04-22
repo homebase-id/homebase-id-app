@@ -99,7 +99,7 @@ export const NewGroupPage = memo(() => {
         headerStyle={headerStyle}
       />
       <SafeAreaView>
-        <StatusBar barStyle="light-content" />
+        {Platform.OS === 'ios' && <StatusBar barStyle="light-content" />}
         <FlatList data={contacts} keyExtractor={(item) => item.odinId} renderItem={renderItem} />
         <Dialog.Container visible={dialogVisible} onBackdropPress={() => setDialogVisible(false)}>
           <Dialog.Title>New Group Name</Dialog.Title>

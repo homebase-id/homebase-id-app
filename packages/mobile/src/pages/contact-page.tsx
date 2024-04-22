@@ -1,6 +1,6 @@
 import { FlatList } from 'react-native-gesture-handler';
 
-import { ListRenderItemInfo, StatusBar, View } from 'react-native';
+import { ListRenderItemInfo, Platform, StatusBar, View } from 'react-native';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { ChatStackParamList } from '../app/App';
 
@@ -49,7 +49,7 @@ export const ContactPage = memo(
 
     return (
       <SafeAreaView>
-        <StatusBar barStyle="light-content" />
+        {Platform.OS === 'ios' && <StatusBar barStyle="light-content" />}
         <FlatList
           data={connections}
           keyExtractor={(item) => item.odinId}
