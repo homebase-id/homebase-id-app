@@ -12,6 +12,7 @@ import {
   ICarouselInstance,
 } from 'react-native-reanimated-carousel/lib/typescript/types';
 
+import Share from 'react-native-share';
 import { useSafeAreaFrame } from 'react-native-safe-area-context';
 import { Platform, View } from 'react-native';
 import { Colors } from '../app/Colors';
@@ -20,6 +21,10 @@ import { AuthorName } from '../components/ui/Name';
 import { HeaderTitle } from '@react-navigation/elements';
 import { Text } from '../components/ui/Text/Text';
 import { formatToTimeAgoWithRelativeDetail } from 'feed-app-common';
+import { IconButton } from '../components/Chat/Chat-app-bar';
+import { Forward, ShareNode } from '../components/ui/Icons/icons';
+import Toast from 'react-native-toast-message';
+import useImage from '../components/ui/OdinImage/hooks/useImage';
 
 export type MediaProp = NativeStackScreenProps<ChatStackParamList, 'PreviewMedia'>;
 
@@ -33,6 +38,7 @@ export const PreviewMedia = memo((prop: MediaProp) => {
   const ref = useRef<ICarouselInstance>(null);
   const { height, width } = useSafeAreaFrame();
   const { isDarkMode } = useDarkMode();
+  const getImage = useImage().getFromCache;
 
   const headerTitle = useCallback(() => {
     return (
@@ -56,6 +62,17 @@ export const PreviewMedia = memo((prop: MediaProp) => {
       headerTitle: headerTitle,
     });
   });
+
+  const onShare = useCallback(async () => {
+    const imageData = getImage(undefined, fileId, payloads[currIndex].key, ChatDrive);
+    if (!imageData) {
+      return;
+    }
+    Share.open({
+      type: imageData.type,
+      url: imageData.url,
+    });
+  }, [currIndex, fileId, getImage, payloads]);
 
   const renderItem = useCallback(
     ({ item }: CarouselRenderItemInfo<PayloadDescriptor>) => {
@@ -115,73 +132,113 @@ export const PreviewMedia = memo((prop: MediaProp) => {
         }}
       />
 
-      {payloads.length > 1 && (
-        <View
-          style={{
-            position: 'absolute',
-            bottom: 0,
-            padding: 5,
-            flex: 1,
-            right: 0,
-            left: 0,
-            flexDirection: 'row',
-            alignSelf: 'center',
-            gap: 2,
-          }}
-        >
-          {payloads.map((item, index) => {
-            if (item.contentType.startsWith('video')) {
+      <View
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          padding: 5,
+          right: 0,
+          left: 0,
+          flex: 1,
+          display: 'flex',
+          zIndex: 20,
+          backgroundColor: '#00000060',
+          borderTopLeftRadius: 10,
+          borderTopRightRadius: 10,
+          flexDirection: 'column',
+        }}
+      >
+        {payloads.length > 1 && (
+          <View
+            style={{
+              flexDirection: 'row',
+              alignSelf: 'center',
+              gap: 2,
+            }}
+          >
+            {payloads.map((item, index) => {
+              if (item.contentType.startsWith('video')) {
+                return (
+                  <VideoWithLoader
+                    key={index}
+                    fileId={msg.fileId}
+                    fileKey={item.key}
+                    targetDrive={ChatDrive}
+                    previewThumbnail={
+                      payloads.length === 1 ? msg.fileMetadata.appData.previewThumbnail : undefined
+                    }
+                    fit="cover"
+                    imageSize={{
+                      width: 200,
+                      height: 200,
+                    }}
+                    preview={false}
+                    onClick={() => {
+                      ref.current?.scrollTo({
+                        index,
+                        animated: true,
+                      });
+                    }}
+                  />
+                );
+              }
               return (
-                <VideoWithLoader
-                  key={index}
+                <OdinImage
                   fileId={msg.fileId}
                   fileKey={item.key}
+                  key={item.key}
                   targetDrive={ChatDrive}
-                  previewThumbnail={
-                    payloads.length === 1 ? msg.fileMetadata.appData.previewThumbnail : undefined
-                  }
                   fit="cover"
                   imageSize={{
-                    width: 200,
-                    height: 200,
+                    width: 50,
+                    height: 50,
                   }}
-                  preview={false}
+                  avoidPayload={true}
                   onClick={() => {
                     ref.current?.scrollTo({
                       index,
                       animated: true,
                     });
                   }}
+                  style={{
+                    borderRadius: 10,
+                    opacity: index === currIndex ? 0.2 : 1,
+                  }}
                 />
               );
-            }
-            return (
-              <OdinImage
-                fileId={msg.fileId}
-                fileKey={item.key}
-                key={item.key}
-                targetDrive={ChatDrive}
-                fit="cover"
-                imageSize={{
-                  width: 50,
-                  height: 50,
-                }}
-                avoidPayload={true}
-                onClick={() => {
-                  ref.current?.scrollTo({
-                    index,
-                    animated: true,
-                  });
-                }}
-                style={{
-                  borderRadius: 10,
-                  opacity: index === currIndex ? 0.2 : 1,
-                }}
-              />
-            );
-          })}
+            })}
+          </View>
+        )}
+        <View
+          style={{
+            display: 'flex',
+            flex: 1,
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+          }}
+        >
+          <IconButton
+            icon={<ShareNode />}
+            touchableProps={{
+              'aria-label': 'Share',
+            }}
+            onPress={onShare}
+          />
+          <IconButton
+            icon={<Forward />}
+            touchableProps={{
+              'aria-label': 'Forward',
+            }}
+            onPress={() => {
+              Toast.show({
+                type: 'info',
+                text1: 'Forwarding not yet supported',
+                position: 'bottom',
+              });
+            }}
+          />
         </View>
-      )}
+      </View>
     </>
   );
 });

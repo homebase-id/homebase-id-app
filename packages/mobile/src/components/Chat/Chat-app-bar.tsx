@@ -1,4 +1,11 @@
-import { Platform, Pressable, StyleSheet, TouchableOpacity, View } from 'react-native';
+import {
+  Platform,
+  Pressable,
+  StyleSheet,
+  TouchableOpacity,
+  TouchableOpacityProps,
+  View,
+} from 'react-native';
 import { Header, HeaderBackButton } from '@react-navigation/elements';
 import { useProfile } from '../../hooks/profile/useProfile';
 import { Colors } from '../../app/Colors';
@@ -137,9 +144,17 @@ const styles = StyleSheet.create({
   },
 });
 
-const IconButton = ({ icon, onPress }: { icon: ReactNode; onPress: () => void }) => {
+export const IconButton = ({
+  icon,
+  onPress,
+  touchableProps,
+}: {
+  icon: ReactNode;
+  onPress: () => void;
+  touchableProps?: Omit<TouchableOpacityProps, 'onPress'>;
+}) => {
   return (
-    <TouchableOpacity onPress={onPress} style={{ padding: 10 }}>
+    <TouchableOpacity onPress={onPress} style={{ padding: 10 }} {...touchableProps}>
       {icon}
     </TouchableOpacity>
   );
