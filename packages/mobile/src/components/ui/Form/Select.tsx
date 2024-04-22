@@ -46,7 +46,6 @@ export const Select = memo(({ defaultValue, children, style, onChange }: SelectP
             borderRadius: 4,
             position: 'relative',
             zIndex: 20,
-            elevation: 20,
             display: 'flex',
             flexDirection: 'row',
             alignItems: 'center',
