@@ -21,3 +21,32 @@ export async function openURL(url: string): Promise<void> {
         });
     } else Linking.openURL(url);
 }
+
+// Calculate the scaled dimensions of an image
+export function calculateScaledDimensions(
+    pixelWidth: number,
+    pixelHeight: number,
+    maxSize: { width: number; height: number }
+) {
+    const maxWidth = maxSize.width;
+    const maxHeight = maxSize.height;
+
+    let newWidth, newHeight;
+
+    // Check if the width needs to be scaled down
+    if (pixelWidth > maxWidth) {
+        newWidth = maxWidth;
+        newHeight = (pixelHeight * maxWidth) / pixelWidth;
+    } else {
+        newWidth = pixelWidth;
+        newHeight = pixelHeight;
+    }
+
+    // If after scaling the height exceeds the maxHeight, scale down the height
+    if (newHeight > maxHeight) {
+        newHeight = maxHeight;
+        newWidth = (pixelWidth * maxHeight) / pixelHeight;
+    }
+
+    return { width: newWidth, height: newHeight };
+}

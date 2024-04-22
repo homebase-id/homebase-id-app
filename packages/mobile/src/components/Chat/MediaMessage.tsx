@@ -25,6 +25,7 @@ import { StyleProp } from 'react-native';
 import { OdinBlob } from '../../../polyfills/OdinBlob';
 import { Colors } from '../../app/Colors';
 import { useDarkMode } from '../../hooks/useDarkMode';
+import { calculateScaledDimensions } from '../../utils/utils';
 
 const MediaMessage = memo(
   ({
@@ -46,17 +47,29 @@ const MediaMessage = memo(
       const aspectRatio =
         (previewThumbnail?.pixelWidth || 1) / (previewThumbnail?.pixelHeight || 1);
 
+      const { width: newWidth, height: newHeight } = calculateScaledDimensions(
+        previewThumbnail?.pixelWidth || 300,
+        previewThumbnail?.pixelHeight || 300,
+        { width: width * 0.8, height: height * 0.68 }
+      );
+
       return (
         <InnerMediaItem
           payload={payloads[0]}
           msg={currentMessage}
           imageSize={{
-            width: aspectRatio === 1 ? 300 : aspectRatio > 1 ? width * 0.8 : 300,
-            height: aspectRatio === 1 ? 300 : aspectRatio > 1 ? 200 : height * 0.68,
+            width: newWidth,
+            height: newHeight,
           }}
           fit={'contain'}
           containerStyle={props.containerStyle}
           onLongPress={(e) => onLongPress(e, currentMessage)}
+          style={{
+            // maxWidth: aspectRatio === 1 ? 300 : aspectRatio > 1 ? '100%' : '80%',
+            // maxHeight: aspectRatio === 1 ? 300 : aspectRatio > 1 ? undefined : '100%',
+            borderRadius: 10,
+            aspectRatio: aspectRatio,
+          }}
           onClick={() => {
             navigation.navigate('PreviewMedia', {
               fileId: currentMessage.fileId,
