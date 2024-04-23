@@ -12,7 +12,6 @@ import { useChatReaction } from '../../../../hooks/chat/useChatReaction';
 import { useConversation } from '../../../../hooks/chat/useConversation';
 import { Colors } from '../../../../app/Colors';
 import { ChatMessageIMessage } from '../../ChatDetail';
-import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import { Emoji } from 'rn-emoji-picker/dist/interfaces';
 
 export const EmojiPickerModal = forwardRef(
@@ -24,7 +23,7 @@ export const EmojiPickerModal = forwardRef(
       selectedMessage: ChatMessageIMessage | undefined;
       onDismiss: () => void;
     },
-    ref: React.Ref<BottomSheetModalMethods>
+    ref: React.Ref<BottomSheetModal>
   ) => {
     const { isDarkMode } = useDarkMode();
 
@@ -61,7 +60,7 @@ export const EmojiPickerModal = forwardRef(
     return (
       <BottomSheetModal
         ref={ref}
-        snapPoints={['50%', '90%']}
+        snapPoints={['0%', '90%']}
         backdropComponent={renderBackdrop}
         onDismiss={onDismiss}
         backgroundStyle={{

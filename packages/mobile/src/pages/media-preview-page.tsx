@@ -25,6 +25,7 @@ import { IconButton } from '../components/Chat/Chat-app-bar';
 import { Forward, ShareNode } from '../components/ui/Icons/icons';
 import Toast from 'react-native-toast-message';
 import useImage from '../components/ui/OdinImage/hooks/useImage';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 
 export type MediaProp = NativeStackScreenProps<ChatStackParamList, 'PreviewMedia'>;
 
@@ -111,7 +112,7 @@ export const PreviewMedia = memo((prop: MediaProp) => {
   );
 
   return (
-    <>
+    <BottomSheetModalProvider>
       <Carousel
         ref={ref}
         width={width}
@@ -239,6 +240,6 @@ export const PreviewMedia = memo((prop: MediaProp) => {
           />
         </View>
       </View>
-    </>
+    </BottomSheetModalProvider>
   );
 });
