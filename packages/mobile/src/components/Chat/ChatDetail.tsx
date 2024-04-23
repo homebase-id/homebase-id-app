@@ -432,7 +432,7 @@ export const ChatDetail = memo(
 
     const scrollToBottomStyle = useMemo(() => {
       return {
-        backgroundColor: isDarkMode ? Colors.indigo[900] : Colors.slate[50],
+        backgroundColor: isDarkMode ? Colors.indigo[900] : Colors.indigo[200],
         opacity: 1,
       };
     }, [isDarkMode]);

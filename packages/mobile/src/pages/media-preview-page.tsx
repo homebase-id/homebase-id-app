@@ -142,7 +142,7 @@ export const PreviewMedia = memo((prop: MediaProp) => {
           flex: 1,
           display: 'flex',
           zIndex: 20,
-          backgroundColor: '#00000060',
+          backgroundColor: isDarkMode ? '#00000060' : '#AFAFAF44',
           borderTopLeftRadius: 10,
           borderTopRightRadius: 10,
           flexDirection: 'column',
