@@ -15,7 +15,7 @@ export const usePushNotifications = (props?: { appId?: string }) => {
   const queryClient = useQueryClient();
 
   const getNotifications = async (cursor: number | undefined) => {
-    return await GetNotifications(dotYouClient, props?.appId, PAGE_SIZE, cursor);
+    return await GetNotifications(dotYouClient, undefined, PAGE_SIZE, cursor);
   };
 
   const markAsRead = async (notificationIds: string[]) =>
@@ -26,7 +26,7 @@ export const usePushNotifications = (props?: { appId?: string }) => {
 
   return {
     fetch: useQuery({
-      queryKey: ['push-notifications', ''],
+      queryKey: ['push-notifications'],
       queryFn: () => getNotifications(undefined),
       staleTime: 1000 * 60 * 5, // 5 minutes
       select: (data) => ({

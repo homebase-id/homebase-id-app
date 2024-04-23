@@ -19,7 +19,7 @@ export const useLivePushNotifications = () => {
         const existingNotificationData = queryClient.getQueryData<{
           results: PushNotification[];
           cursor: number;
-        }>(['push-notifications', '']);
+        }>(['push-notifications']);
 
         if (!existingNotificationData) return;
         const newNotificationData = {
@@ -33,7 +33,7 @@ export const useLivePushNotifications = () => {
           ],
         };
 
-        queryClient.setQueryData(['push-notifications', ''], newNotificationData);
+        queryClient.setQueryData(['push-notifications'], newNotificationData);
       }
     },
     [queryClient]
