@@ -20,6 +20,8 @@ import { ChatStackParamList, TabStackParamList } from '../../app/App';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { openURL } from '../../utils/utils';
 import { Text } from '../ui/Text/Text';
+import Toast from 'react-native-toast-message';
+import Clipboard from '@react-native-clipboard/clipboard';
 
 export const NotificationsOverview = memo(() => {
   const { data: notifications } = usePushNotifications().fetch;
@@ -354,5 +356,15 @@ export const navigateOnNotification = (
     openURL(`https://${identity}/apps/mail/${notification.options.typeId}`);
   } else if (notification.options.appId === FEED_APP_ID) {
     feedNavigator.navigate('Feed');
+  } else {
+    // You shouldn't come here
+    Toast.show({
+      type: 'error',
+      text1: `Error Navigating to ${notification.options.appId}  `,
+      text2: 'Blame the developer for not handling this case properly',
+      onPress: () => {
+        Clipboard.setString(notification.options.appId);
+      },
+    });
   }
 };
