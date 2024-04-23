@@ -18,6 +18,7 @@ import {
 import { ChatDrive } from './ConversationProvider';
 import { assertIfDefined, getNewId, jsonStringify64 } from '@youfoundation/js-lib/helpers';
 import { appId } from '../../hooks/auth/useAuth';
+import { CHAT_APP_ID } from '../../app/constants';
 
 export const ChatReactionFileType = 7979;
 const PAGE_SIZE = 100;
@@ -82,7 +83,7 @@ export const uploadReaction = async (
           useGlobalTransitId: true,
           useAppNotification: true,
           appNotificationOptions: {
-            appId: appId,
+            appId: CHAT_APP_ID,
             typeId: conversationId,
             tagId: getNewId(),
             silent: false,
