@@ -5,7 +5,7 @@ import {
   MarkNotificationsAsRead,
 } from '@youfoundation/js-lib/core';
 import { useEffect } from 'react';
-import { hasDebugFlag } from '@youfoundation/js-lib/helpers';
+import { hasDebugFlag, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useDotYouClientContext } from 'feed-app-common';
 
 const isDebug = hasDebugFlag();
@@ -26,8 +26,15 @@ export const usePushNotifications = (props?: { appId?: string }) => {
 
   return {
     fetch: useQuery({
-      queryKey: ['push-notifications', props?.appId],
+      queryKey: ['push-notifications', ''],
       queryFn: () => getNotifications(undefined),
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      select: (data) => ({
+        ...data,
+        results: data.results.filter(
+          (n) => !props?.appId || stringGuidsEqual(n.options.appId, props.appId)
+        ),
+      }),
     }),
     markAsRead: useMutation({
       mutationFn: markAsRead,
@@ -56,7 +63,7 @@ export const useUnreadPushNotificationsCount = (props?: { appId?: string }) => {
   return notifications?.results.filter((n) => n.unread).length ?? 0;
 };
 
-export const useRemoveNotifications = (props?: { appId?: string }) => {
+export const useRemoveNotifications = (props?: { enabled: boolean; appId?: string }) => {
   const {
     fetch: { data: notifcationsData },
     remove: { mutateAsync: removeListOfNotifications },
@@ -64,11 +71,12 @@ export const useRemoveNotifications = (props?: { appId?: string }) => {
 
   useEffect(() => {
     (async () => {
+      if (!props?.enabled) return;
       const notifications = notifcationsData?.results;
       if (notifications && notifications?.length > 0) {
         isDebug && console.debug('Removing all notifications', props?.appId);
         await removeListOfNotifications(notifications.map((n) => n.id));
       }
     })();
-  }, [notifcationsData, props?.appId, removeListOfNotifications]);
+  }, [notifcationsData, props?.enabled, props?.appId, removeListOfNotifications]);
 };

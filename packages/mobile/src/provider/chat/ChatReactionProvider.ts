@@ -17,7 +17,6 @@ import {
 } from '@youfoundation/js-lib/core';
 import { ChatDrive } from './ConversationProvider';
 import { assertIfDefined, getNewId, jsonStringify64 } from '@youfoundation/js-lib/helpers';
-import { appId } from '../../hooks/auth/useAuth';
 import { CHAT_APP_ID } from '../../app/constants';
 
 export const ChatReactionFileType = 7979;

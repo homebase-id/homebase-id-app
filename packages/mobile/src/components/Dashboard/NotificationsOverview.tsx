@@ -20,10 +20,11 @@ import { ChatStackParamList, TabStackParamList } from '../../app/App';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { openURL } from '../../utils/utils';
 import { Text } from '../ui/Text/Text';
+import { useLivePushNotifications } from '../../hooks/notifications/useLivePushNotifications';
 
 export const NotificationsOverview = memo(() => {
+  useLivePushNotifications();
   const { data: notifications } = usePushNotifications().fetch;
-
   const groupedNotificationsPerDay = useMemo(
     () =>
       notifications?.results.reduce(
