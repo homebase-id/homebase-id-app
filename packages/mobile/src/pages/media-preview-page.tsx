@@ -61,9 +61,9 @@ export const PreviewMedia = memo((prop: MediaProp) => {
     navigation.setOptions({
       headerTitle: headerTitle,
     });
-  });
+  }, [headerTitle, prop.navigation]);
 
-  const onShare = useCallback(async () => {
+  const onShare = useCallback(() => {
     const imageData = getImage(undefined, fileId, payloads[currIndex].key, ChatDrive);
     if (!imageData) {
       return;
