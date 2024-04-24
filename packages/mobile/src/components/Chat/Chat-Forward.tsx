@@ -7,7 +7,7 @@ import {
   BottomSheetModal,
   TouchableHighlight,
 } from '@gorhom/bottom-sheet';
-import { forwardRef, useCallback, useState } from 'react';
+import { forwardRef, memo, useCallback, useState } from 'react';
 import { Text } from '../ui/Text/Text';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { Colors } from '../../app/Colors';
@@ -27,7 +27,10 @@ import { ChatStackParamList } from '../../app/App';
 import { ErrorNotification } from '../ui/Alert/ErrorNotification';
 import useImage from '../ui/OdinImage/hooks/useImage';
 import { ImageSource } from '../../provider/image/RNImageProvider';
-import { ChatDrive } from '../../provider/chat/ConversationProvider';
+import { ChatDrive, GroupConversation } from '../../provider/chat/ConversationProvider';
+import { useConversations } from '../../hooks/chat/useConversations';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { GroupConversationTile } from './Conversation-tile';
 
 export type ChatForwardModalProps = {
   onClose: () => void;
@@ -42,11 +45,22 @@ export const ChatForwardModal = forwardRef(
     const { mutateAsync: fetchConversation } = useConversation().create;
     const { mutate: sendMessage, error } = useChatMessage().send;
     const [selectedContact, setselectedContact] = useState<DotYouProfile[]>([]);
+    const [selectedGroup, setselectedGroup] = useState<HomebaseFile<GroupConversation>[]>([]);
     const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
     const { getFromCache } = useImage();
 
+    const onDismiss = useCallback(() => {
+      if (selectedContact.length > 0) {
+        setselectedContact([]);
+      }
+      if (selectedGroup.length > 0) {
+        setselectedGroup([]);
+      }
+      onClose();
+    }, [onClose, selectedContact.length, selectedGroup.length]);
+
     /// Limit to forward maximum number of contacts
-    const maxContactForward = 3;
+    const maxConnectionsForward = 3;
     const renderBackdrop = useCallback(
       (props: BottomSheetBackdropProps) => (
         <BottomSheetBackdrop {...props} opacity={0.5} appearsOnIndex={0} disappearsOnIndex={-1} />
@@ -55,13 +69,14 @@ export const ChatForwardModal = forwardRef(
     );
 
     const onForward = useCallback(async () => {
-      if (selectedContact.length === 0 || !message) return;
-      const promises = selectedContact.flatMap(async (contact) => {
-        const { newConversationId: conversationId } = await fetchConversation({
-          recipients: [contact.odinId],
-        });
+      if ((selectedContact.length === 0 && selectedGroup.length === 0) || !message) return;
+
+      async function forwardMessages(
+        conversationId: string,
+        recipients: string[],
+        message: ChatMessageIMessage
+      ) {
         let imageSource: ImageSource[] = [];
-        //TODO: Need to cover cases for payloads and group conversations
         if (message.fileMetadata.payloads.length > 0) {
           const payloads = message.fileMetadata.payloads;
           imageSource = payloads
@@ -79,23 +94,56 @@ export const ChatForwardModal = forwardRef(
             })
             .filter(Boolean) as ImageSource[];
         }
-        sendMessage({
+        return sendMessage({
           conversationId,
-          recipients: [contact.odinId],
+          recipients: recipients,
           message: message.fileMetadata.appData.content.message,
           files: imageSource,
         });
-      });
+      }
+      const promises: Promise<void>[] = [];
+      if (selectedContact.length > 0) {
+        promises.push(
+          ...selectedContact.flatMap(async (contact) => {
+            const { newConversationId: conversationId } = await fetchConversation({
+              recipients: [contact.odinId],
+            });
+
+            return forwardMessages(conversationId, [contact.odinId], message);
+          })
+        );
+      }
+
+      if (selectedGroup.length > 0) {
+        promises.push(
+          ...selectedGroup.flatMap((group) => {
+            return forwardMessages(
+              group.fileMetadata.appData.uniqueId as string,
+              group.fileMetadata.appData.content.recipients,
+              message
+            );
+          })
+        );
+      }
 
       await Promise.all(promises);
       if (promises.length === 1) {
-        const contact = selectedContact[0];
-        const { newConversationId: conversationId } = await fetchConversation({
-          recipients: [contact.odinId],
-        });
-        navigation.navigate('ChatScreen', {
-          convoId: conversationId,
-        });
+        if (selectedContact.length === 1) {
+          const contact = selectedContact[0];
+
+          const { newConversationId: conversationId } = await fetchConversation({
+            recipients: [contact.odinId],
+          });
+          navigation.navigate('ChatScreen', {
+            convoId: conversationId,
+          });
+        }
+        if (selectedGroup.length === 1) {
+          const group = selectedGroup[0];
+          navigation.navigate('ChatScreen', {
+            convoId: group.fileMetadata.appData.uniqueId as string,
+          });
+        }
       } else {
         Toast.show({
           type: 'success',
@@ -103,41 +151,57 @@ export const ChatForwardModal = forwardRef(
           position: 'bottom',
         });
       }
-      onClose();
+      onDismiss();
     }, [
       fetchConversation,
       getFromCache,
       message,
       navigation,
-      onClose,
+      onDismiss,
       selectedContact,
+      selectedGroup,
       sendMessage,
     ]);
 
     const renderItem = useCallback(
-      ({ item }: ListRenderItemInfo<DotYouProfile>) => (
-        <ContactTile
-          item={item}
-          onPress={() => {
-            if (selectedContact.includes(item)) {
-              setselectedContact(selectedContact.filter((contact) => contact !== item));
-            } else {
-              if (selectedContact.length === maxContactForward) {
-                Toast.show({
-                  type: 'error',
-                  text1: `You can only forward to ${maxContactForward} contacts at a time`,
-                  position: 'bottom',
-                  visibilityTime: 2000,
-                });
+      ({ item, index }: ListRenderItemInfo<DotYouProfile>) => (
+        <>
+          {index === 0 && (
+            <Text
+              style={{
+                ...styles.headerText,
+                textAlign: 'left',
+                fontSize: 18,
+                marginLeft: 16,
+                marginTop: 16,
+              }}
+            >
+              Contacts
+            </Text>
+          )}
+          <ContactTile
+            item={item}
+            onPress={() => {
+              if (selectedContact.includes(item)) {
+                setselectedContact(selectedContact.filter((contact) => contact !== item));
+              } else {
+                if (selectedContact.length === maxConnectionsForward) {
+                  Toast.show({
+                    type: 'error',
+                    text1: `You can only forward to ${maxConnectionsForward} contacts at a time`,
+                    position: 'bottom',
+                    visibilityTime: 2000,
+                  });
 
-                return;
+                  return;
+                }
+                setselectedContact([...selectedContact, item]);
               }
-              setselectedContact([...selectedContact, item]);
-            }
-          }}
-          isSelected={selectedContact.includes(item)}
-          selectMode
-        />
+            }}
+            isSelected={selectedContact.includes(item)}
+            selectMode
+          />
+        </>
       ),
       [selectedContact]
     );
@@ -154,6 +218,23 @@ export const ChatForwardModal = forwardRef(
           }}
         >
           <View style={styles.namesContainer}>
+            {selectedGroup.map((group) => {
+              return (
+                <Text
+                  key={group.fileId}
+                  style={{
+                    fontSize: 14,
+                    fontWeight: '500',
+                    borderRadius: 15,
+                    backgroundColor: isDarkMode ? Colors.slate[800] : Colors.slate[100],
+                    padding: 10,
+                    overflow: 'hidden',
+                  }}
+                >
+                  {group.fileMetadata.appData.content.title}
+                </Text>
+              );
+            })}
             {selectedContact.map((contact) => {
               return (
                 <Text
@@ -197,15 +278,8 @@ export const ChatForwardModal = forwardRef(
           </TouchableHighlight>
         </BottomSheetFooter>
       ),
-      [isDarkMode, onForward, selectedContact]
+      [isDarkMode, onForward, selectedContact, selectedGroup]
     );
-
-    const onDismiss = useCallback(() => {
-      if (selectedContact.length > 0) {
-        setselectedContact([]);
-      }
-      onClose();
-    }, [onClose, selectedContact.length]);
 
     return (
       <BottomSheetModal
@@ -222,16 +296,90 @@ export const ChatForwardModal = forwardRef(
         handleIndicatorStyle={{
           backgroundColor: isDarkMode ? Colors.gray[100] : Colors.gray[500],
         }}
-        footerComponent={selectedContact.length > 0 ? renderFooter : undefined}
+        footerComponent={
+          selectedContact.length > 0 || selectedGroup.length > 0 ? renderFooter : undefined
+        }
       >
         <ErrorNotification error={error} />
         <Text style={styles.headerText}>Forward To</Text>
         <BottomSheetFlatList
           data={connections}
           keyExtractor={(item) => item.odinId}
+          ListHeaderComponent={
+            <ListHeaderComponent
+              selectedGroup={selectedGroup}
+              setselectedGroup={setselectedGroup}
+            />
+          }
           renderItem={renderItem}
         />
       </BottomSheetModal>
+    );
+  }
+);
+
+const ListHeaderComponent = memo(
+  ({
+    selectedGroup,
+    setselectedGroup,
+  }: {
+    selectedGroup: HomebaseFile<GroupConversation>[];
+    setselectedGroup: (group: HomebaseFile<GroupConversation>[]) => void;
+  }) => {
+    const { data: conversations } = useConversations().all;
+    const flatConversations =
+      (conversations?.pages
+        .flatMap((page) => page.searchResults)
+        .filter(
+          (convo) =>
+            convo &&
+            [0, undefined].includes(convo.fileMetadata.appData.archivalStatus) &&
+            'recipients' in convo.fileMetadata.appData.content
+        ) as HomebaseFile<GroupConversation>[]) || [];
+
+    const onSelect = useCallback(
+      (group: HomebaseFile<GroupConversation>) => {
+        if (selectedGroup.includes(group)) {
+          setselectedGroup(selectedGroup.filter((grp) => grp !== group));
+        } else {
+          setselectedGroup([...selectedGroup, group]);
+        }
+      },
+      [selectedGroup, setselectedGroup]
+    );
+    if (!flatConversations || flatConversations.length === 0) {
+      return null;
+    }
+
+    return (
+      <View
+        style={{
+          flexDirection: 'column',
+          flex: 1,
+
+          // alignItems: 'flex-start',
+        }}
+      >
+        <Text
+          style={{
+            ...styles.headerText,
+            textAlign: 'left',
+            fontSize: 18,
+            marginLeft: 16,
+          }}
+        >
+          Groups
+        </Text>
+        {flatConversations.map((convo) => (
+          <GroupConversationTile
+            key={convo.fileId}
+            conversation={convo.fileMetadata.appData.content}
+            onPress={() => onSelect(convo)}
+            isSelected={selectedGroup.includes(convo)}
+            selectMode
+          />
+        ))}
+      </View>
     );
   }
 );
