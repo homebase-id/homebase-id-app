@@ -25,6 +25,9 @@ import { ChatMessageIMessage } from './ChatDetail';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { ChatStackParamList } from '../../app/App';
 import { ErrorNotification } from '../ui/Alert/ErrorNotification';
+import useImage from '../ui/OdinImage/hooks/useImage';
+import { ImageSource } from '../../provider/image/RNImageProvider';
+import { ChatDrive } from '../../provider/chat/ConversationProvider';
 
 export type ChatForwardModalProps = {
   onClose: () => void;
@@ -40,6 +43,7 @@ export const ChatForwardModal = forwardRef(
     const { mutate: sendMessage, error } = useChatMessage().send;
     const [selectedContact, setselectedContact] = useState<DotYouProfile[]>([]);
     const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
+    const { getFromCache } = useImage();
 
     /// Limit to forward maximum number of contacts
     const maxContactForward = 3;
@@ -56,11 +60,30 @@ export const ChatForwardModal = forwardRef(
         const { newConversationId: conversationId } = await fetchConversation({
           recipients: [contact.odinId],
         });
+        let imageSource: ImageSource[] = [];
         //TODO: Need to cover cases for payloads and group conversations
+        if (message.fileMetadata.payloads.length > 0) {
+          const payloads = message.fileMetadata.payloads;
+          imageSource = payloads
+            .map((payload) => {
+              // We don't support sending videos and audio files for now
+              if (!payload.contentType.startsWith('image')) return;
+              const image = getFromCache(undefined, message.fileId, payload.key, ChatDrive);
+              if (!image) return;
+              return {
+                uri: image.url,
+                width: image.naturalSize?.pixelWidth,
+                height: image.naturalSize?.pixelHeight,
+                type: image.type,
+              } as ImageSource;
+            })
+            .filter(Boolean) as ImageSource[];
+        }
         sendMessage({
           conversationId,
           recipients: [contact.odinId],
           message: message.fileMetadata.appData.content.message,
+          files: imageSource,
         });
       });
 
@@ -81,7 +104,15 @@ export const ChatForwardModal = forwardRef(
         });
       }
       onClose();
-    }, [fetchConversation, message, navigation, onClose, selectedContact, sendMessage]);
+    }, [
+      fetchConversation,
+      getFromCache,
+      message,
+      navigation,
+      onClose,
+      selectedContact,
+      sendMessage,
+    ]);
 
     const renderItem = useCallback(
       ({ item }: ListRenderItemInfo<DotYouProfile>) => (
