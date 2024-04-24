@@ -13,10 +13,10 @@ import { useDarkMode } from '../../hooks/useDarkMode';
 import { Colors } from '../../app/Colors';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import { useAllConnections } from 'feed-app-common';
-import { ListRenderItemInfo, StyleSheet, View } from 'react-native';
+import { ListRenderItemInfo, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { DotYouProfile } from '@youfoundation/js-lib/network';
 import { ContactTile } from '../Contact/Contact-Tile';
-import { SendChat } from '../ui/Icons/icons';
+import { CheckCircle, CircleOutlined, SendChat } from '../ui/Icons/icons';
 import { AuthorName } from '../ui/Name';
 import Toast from 'react-native-toast-message';
 import { useConversation } from '../../hooks/chat/useConversation';
@@ -30,7 +30,7 @@ import { ImageSource } from '../../provider/image/RNImageProvider';
 import { ChatDrive, GroupConversation } from '../../provider/chat/ConversationProvider';
 import { useConversations } from '../../hooks/chat/useConversations';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
-import { GroupConversationTile } from './Conversation-tile';
+import { GroupAvatar } from '../ui/Avatars/Avatar';
 
 export type ChatForwardModalProps = {
   onClose: () => void;
@@ -382,6 +382,53 @@ const ListHeaderComponent = memo(
   }
 );
 
+const GroupConversationTile = memo(
+  ({
+    selectMode,
+    isSelected,
+    conversation,
+    onPress,
+  }: {
+    selectMode?: boolean;
+    isSelected?: boolean;
+    onPress?: () => void;
+    conversation: GroupConversation;
+  }) => {
+    const { isDarkMode } = useDarkMode();
+    return (
+      <TouchableOpacity onPress={onPress}>
+        <View
+          style={{
+            flexDirection: 'row',
+            borderRadius: 5,
+            paddingHorizontal: 16,
+            paddingVertical: 4,
+            alignItems: 'center',
+          }}
+        >
+          <View style={{ marginRight: 16 }}>
+            <GroupAvatar />
+          </View>
+
+          <View style={styles.content}>
+            <Text
+              numberOfLines={1}
+              style={{
+                fontSize: 18,
+                fontWeight: '400',
+                color: isDarkMode ? Colors.white : Colors.slate[900],
+              }}
+            >
+              {conversation.title}
+            </Text>
+          </View>
+          {selectMode && isSelected ? <CheckCircle size={'lg'} /> : <CircleOutlined size={'lg'} />}
+        </View>
+      </TouchableOpacity>
+    );
+  }
+);
+
 const styles = StyleSheet.create({
   footerContainer: {
     padding: 12,
@@ -410,5 +457,10 @@ const styles = StyleSheet.create({
     margin: 6,
     fontSize: 16,
     fontWeight: '500',
+  },
+  content: {
+    borderRadius: 8,
+    alignSelf: 'center',
+    flex: 1,
   },
 });

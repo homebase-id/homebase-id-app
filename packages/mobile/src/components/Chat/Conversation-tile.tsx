@@ -2,7 +2,7 @@ import { memo, useMemo } from 'react';
 import { StyleProp, StyleSheet, Text, TextStyle, TouchableHighlight, View } from 'react-native';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { Colors } from '../../app/Colors';
-import { Conversation, GroupConversation } from '../../provider/chat/ConversationProvider';
+import { Conversation } from '../../provider/chat/ConversationProvider';
 import { useChatMessages } from '../../hooks/chat/useChatMessages';
 import { ChatDeletedArchivalStaus, ChatMessage } from '../../provider/chat/ChatProvider';
 import { useDarkMode } from '../../hooks/useDarkMode';
@@ -11,8 +11,6 @@ import useContact from '../../hooks/contact/useContact';
 import { ChatDeliveryIndicator } from './Chat-Delivery-Indicator';
 import { ChatMessageContent } from './Chat-Message-Content';
 import { OwnerAvatar, GroupAvatar, Avatar } from '../ui/Avatars/Avatar';
-import { TouchableOpacity } from 'react-native-gesture-handler';
-import { CheckCircle, CircleOutlined } from '../ui/Icons/icons';
 
 type ConversationTileProps = {
   onPress?: () => void;
@@ -162,54 +160,6 @@ const UnreadCount = ({ count }: { count: number }) => {
     </View>
   );
 };
-
-export const GroupConversationTile = memo(
-  ({
-    selectMode,
-    isSelected,
-    conversation,
-    onPress,
-  }: {
-    selectMode?: boolean;
-    isSelected?: boolean;
-    onPress?: () => void;
-    conversation: GroupConversation;
-  }) => {
-    const { isDarkMode } = useDarkMode();
-    return (
-      <TouchableOpacity onPress={onPress}>
-        <View
-          style={{
-            ...styles.tile,
-            paddingHorizontal: 16,
-            padding: 0,
-            paddingVertical: 4,
-
-            alignItems: 'center',
-          }}
-        >
-          <View style={{ marginRight: 16 }}>
-            <GroupAvatar />
-          </View>
-
-          <View style={styles.content}>
-            <Text
-              numberOfLines={1}
-              style={{
-                ...styles.title,
-                fontWeight: '500',
-                color: isDarkMode ? Colors.white : Colors.slate[900],
-              }}
-            >
-              {conversation.title}
-            </Text>
-          </View>
-          {selectMode && isSelected ? <CheckCircle size={'lg'} /> : <CircleOutlined size={'lg'} />}
-        </View>
-      </TouchableOpacity>
-    );
-  }
-);
 
 const styles = StyleSheet.create({
   tile: {
