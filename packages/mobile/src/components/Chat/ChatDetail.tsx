@@ -285,6 +285,7 @@ export const ChatDetail = memo(
                   containerStyle={[
                     {
                       padding: 10,
+                      marginRight: 10,
                       alignContent: 'center',
                       alignItems: 'center',
                       alignSelf: 'center',
