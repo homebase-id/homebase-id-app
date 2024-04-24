@@ -1,4 +1,4 @@
-import { ReactNode, useState, FunctionComponent, useEffect } from 'react';
+import { ReactNode, useState, FC, useEffect } from 'react';
 import messaging from '@react-native-firebase/messaging';
 import { PushNotificationPermissionContext } from '../../provider/push-notification/PushNotificationContext';
 import { PermissionsAndroid, Platform } from 'react-native';
@@ -8,9 +8,7 @@ interface PushNotificationProviderProps {
   children: ReactNode;
 }
 
-export const PushNotificationProvider: FunctionComponent<PushNotificationProviderProps> = ({
-  children,
-}) => {
+export const PushNotificationProvider: FC<PushNotificationProviderProps> = ({ children }) => {
   const [notificationPermissionGranted, setNotificationPermissionGranted] =
     useState<boolean>(false);
 

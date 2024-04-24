@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import ConversationTile from '../components/Chat/Conversation-tile';
 
-import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { NavigationProp, useIsFocused, useNavigation } from '@react-navigation/native';
 import { ChatStackParamList } from '../app/App';
 import {
   ConversationWithRecentMessage,
@@ -162,7 +162,8 @@ const FloatingActionButton = memo(() => {
 });
 
 const RemoveNotifications = memo(() => {
-  useRemoveNotifications({ appId: CHAT_APP_ID });
+  const isFocused = useIsFocused();
+  useRemoveNotifications({ appId: CHAT_APP_ID, enabled: isFocused });
   return null;
 });
 
