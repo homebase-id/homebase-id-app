@@ -135,18 +135,6 @@ export const getChatMessage = async (dotYouClient: DotYouClient, chatMessageId: 
   return fileHeader;
 };
 
-// It's a hack... This needs to change to a better way of getting the message
-export const getChatMessageByGlobalTransitId = async (
-  dotYouClient: DotYouClient,
-  conversationId: string,
-  messageGlobalTransitId: string
-) => {
-  const allChatMessages = await getChatMessages(dotYouClient, conversationId, undefined, 2000);
-  return allChatMessages?.searchResults?.find(
-    (chat) => chat?.fileMetadata.globalTransitId === messageGlobalTransitId
-  );
-};
-
 export const dsrToMessage = async (
   dotYouClient: DotYouClient,
   dsr: HomebaseFile,
@@ -197,18 +185,18 @@ export const uploadChatMessage = async (
     },
     transitOptions: distribute
       ? {
-        recipients: [...recipients],
-        schedule: ScheduleOptions.SendNowAwaitResponse,
-        sendContents: SendContents.All,
-        useGlobalTransitId: true,
-        useAppNotification: true,
-        appNotificationOptions: {
-          appId: CHAT_APP_ID,
-          typeId: message.fileMetadata.appData.groupId as string,
-          tagId: getNewId(),
-          silent: false,
-        },
-      }
+          recipients: [...recipients],
+          schedule: ScheduleOptions.SendNowAwaitResponse,
+          sendContents: SendContents.All,
+          useGlobalTransitId: true,
+          useAppNotification: true,
+          appNotificationOptions: {
+            appId: CHAT_APP_ID,
+            typeId: message.fileMetadata.appData.groupId as string,
+            tagId: getNewId(),
+            silent: false,
+          },
+        }
       : undefined,
   };
 
@@ -248,17 +236,17 @@ export const uploadChatMessage = async (
       const thumbnail = await grabThumbnail(newMediaFile);
       const thumbSource: ImageSource | null = thumbnail
         ? {
-          uri: thumbnail.uri,
-          width: 1920,
-          height: 1080,
-          type: thumbnail.type,
-        }
+            uri: thumbnail.uri,
+            width: 1920,
+            height: 1080,
+            type: thumbnail.type,
+          }
         : null;
       const { tinyThumb, additionalThumbnails } =
         thumbSource && thumbnail
           ? await createThumbnails(thumbSource, payloadKey, thumbnail.type as ImageContentType, [
-            { quality: 100, width: 250, height: 250 },
-          ])
+              { quality: 100, width: 250, height: 250 },
+            ])
           : { tinyThumb: undefined, additionalThumbnails: undefined };
       if (additionalThumbnails) {
         thumbnails.push(...additionalThumbnails);
@@ -270,8 +258,7 @@ export const uploadChatMessage = async (
       });
 
       if (tinyThumb) previewThumbnails.push(tinyThumb);
-    }
-    else if (newMediaFile.type?.startsWith('audio/')) {
+    } else if (newMediaFile.type?.startsWith('audio/')) {
       const payloadBlob = new OdinBlob(newMediaFile.filepath || newMediaFile.uri, {
         type: newMediaFile.type,
       }) as any as Blob;
@@ -280,8 +267,7 @@ export const uploadChatMessage = async (
         key: payloadKey,
         payload: payloadBlob,
       });
-    }
-    else {
+    } else {
       const blob = new OdinBlob(newMediaFile.filepath || newMediaFile.uri, {
         type: newMediaFile?.type || undefined,
       }) as any as Blob;
@@ -342,11 +328,11 @@ export const updateChatMessage = async (
     },
     transitOptions: distribute
       ? {
-        recipients: [...recipients],
-        schedule: ScheduleOptions.SendNowAwaitResponse,
-        sendContents: SendContents.All,
-        useGlobalTransitId: true,
-      }
+          recipients: [...recipients],
+          schedule: ScheduleOptions.SendNowAwaitResponse,
+          sendContents: SendContents.All,
+          useGlobalTransitId: true,
+        }
       : undefined,
   };
 
@@ -415,11 +401,11 @@ export interface MarkAsReadRequest {
 export const requestMarkAsRead = async (
   dotYouClient: DotYouClient,
   conversation: HomebaseFile<Conversation>,
-  chatGlobalTransitIds: string[]
+  chatUniqueIds: string[]
 ) => {
   const request: MarkAsReadRequest = {
     conversationId: conversation.fileMetadata.appData.uniqueId as string,
-    messageIds: chatGlobalTransitIds,
+    messageIds: chatUniqueIds,
   };
 
   const conversationContent = conversation.fileMetadata.appData.content;
