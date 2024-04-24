@@ -356,8 +356,6 @@ const ListHeaderComponent = memo(
         style={{
           flexDirection: 'column',
           flex: 1,
-
-          // alignItems: 'flex-start',
         }}
       >
         <Text

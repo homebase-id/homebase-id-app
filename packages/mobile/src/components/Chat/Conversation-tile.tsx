@@ -197,6 +197,7 @@ export const GroupConversationTile = memo(
               numberOfLines={1}
               style={{
                 ...styles.title,
+                fontWeight: '500',
                 color: isDarkMode ? Colors.white : Colors.slate[900],
               }}
             >

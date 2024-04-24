@@ -22,8 +22,8 @@ import { HeaderTitle } from '@react-navigation/elements';
 import { Text } from '../components/ui/Text/Text';
 import { formatToTimeAgoWithRelativeDetail } from 'feed-app-common';
 import { IconButton } from '../components/Chat/Chat-app-bar';
-import { Forward, ShareNode } from '../components/ui/Icons/icons';
-import Toast from 'react-native-toast-message';
+import { ShareNode } from '../components/ui/Icons/icons';
+
 import useImage from '../components/ui/OdinImage/hooks/useImage';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 
@@ -224,19 +224,6 @@ export const PreviewMedia = memo((prop: MediaProp) => {
               'aria-label': 'Share',
             }}
             onPress={onShare}
-          />
-          <IconButton
-            icon={<Forward />}
-            touchableProps={{
-              'aria-label': 'Forward',
-            }}
-            onPress={() => {
-              Toast.show({
-                type: 'info',
-                text1: 'Forwarding not yet supported',
-                position: 'bottom',
-              });
-            }}
           />
         </View>
       </View>
