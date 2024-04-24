@@ -33,9 +33,16 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
-import { ArrowDown, Microphone, Plus, SendChat, Times } from '../../components/ui/Icons/icons';
+import {
+  ArrowDown,
+  Camera,
+  Microphone,
+  Plus,
+  SendChat,
+  Times,
+} from '../../components/ui/Icons/icons';
 import MediaMessage from './MediaMessage';
-import { Asset, launchImageLibrary } from 'react-native-image-picker';
+import { Asset, launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { useAuth } from '../../hooks/auth/useAuth';
 import { useChatMessage } from '../../hooks/chat/useChatMessage';
 import { ChatDrive } from '../../provider/chat/ConversationProvider';
@@ -146,6 +153,7 @@ export const ChatDetail = memo(
     const { record, stop, duration, isRecording } = useAudioRecorder();
 
     const microphoneIcon = useCallback(() => <Microphone />, []);
+    const cameraIcon = useCallback(() => <Camera />, []);
     const crossIcon = useCallback(() => <Times />, []);
 
     const onStopRecording = useCallback(() => {
@@ -177,6 +185,19 @@ export const ChatDetail = memo(
         }
       });
     }, [stop, isRecording, record]);
+
+    const handleCameraButtonAction = useCallback(() => {
+      requestAnimationFrame(async () => {
+        const media = await launchCamera({
+          mediaType: 'mixed',
+          formatAsMp4: true,
+          videoQuality: 'medium',
+          presentationStyle: 'overFullScreen',
+        });
+        if (media.didCancel) return;
+        setAssets(media.assets ?? []);
+      });
+    }, [setAssets]);
 
     const handleImageIconPress = useCallback(async () => {
       const medias = await launchImageLibrary({
@@ -241,25 +262,46 @@ export const ChatDetail = memo(
         return (
           <Composer {...props} textInputStyle={inputStyle} containerStyle={composerContainerStyle}>
             {!props.hasText && (
-              <Actions
-                icon={microphoneIcon}
-                containerStyle={[
-                  {
-                    paddingHorizontal: 20,
-                    marginTop: 'auto',
-                    marginBottom: 'auto',
-                    alignItems: 'center',
-                  },
-                ]}
-                onPressActionButton={handleRecordButtonAction}
-              />
+              <View
+                style={{
+                  flexDirection: 'row',
+                  gap: 4,
+                }}
+              >
+                <Actions
+                  icon={cameraIcon}
+                  containerStyle={[
+                    {
+                      padding: 10,
+                      alignContent: 'center',
+                      alignItems: 'center',
+                      alignSelf: 'center',
+                    },
+                  ]}
+                  onPressActionButton={handleCameraButtonAction}
+                />
+                <Actions
+                  icon={microphoneIcon}
+                  containerStyle={[
+                    {
+                      padding: 10,
+                      alignContent: 'center',
+                      alignItems: 'center',
+                      alignSelf: 'center',
+                    },
+                  ]}
+                  onPressActionButton={handleRecordButtonAction}
+                />
+              </View>
             )}
           </Composer>
         );
       },
       [
+        cameraIcon,
         composerContainerStyle,
         duration,
+        handleCameraButtonAction,
         handleRecordButtonAction,
         inputStyle,
         isRecording,
