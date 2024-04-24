@@ -1,5 +1,5 @@
 import { memo, useMemo } from 'react';
-import { StyleSheet, Text, TextStyle, TouchableHighlight, View } from 'react-native';
+import { StyleProp, StyleSheet, Text, TextStyle, TouchableHighlight, View } from 'react-native';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { Colors } from '../../app/Colors';
 import { Conversation } from '../../provider/chat/ConversationProvider';
@@ -136,22 +136,24 @@ const ConversationTile = memo((props: ConversationTileProps) => {
 
 const UnreadCount = ({ count }: { count: number }) => {
   const { isDarkMode } = useDarkMode();
-  const bgColor = useMemo(() => (isDarkMode ? Colors.blue[500] : Colors.blue[100]), [isDarkMode]);
-  const textColor = useMemo(() => (isDarkMode ? Colors.white : Colors.blue[900]), [isDarkMode]);
+
+  const textStyle = useMemo(
+    () =>
+      ({
+        fontSize: 12,
+        textAlign: 'center',
+        color: isDarkMode ? Colors.white : Colors.blue[900],
+      }) as StyleProp<TextStyle>,
+    [isDarkMode]
+  );
   return (
     <View
       style={{
         ...styles.unreadStyle,
-        backgroundColor: bgColor,
+        backgroundColor: isDarkMode ? Colors.blue[500] : Colors.blue[100],
       }}
     >
-      <Text
-        style={{
-          color: textColor,
-          fontSize: 12,
-          textAlign: 'center',
-        }}
-      >
+      <Text style={textStyle}>
         {Math.min(count, 10)}
         {count >= 10 ? '+' : ''}
       </Text>

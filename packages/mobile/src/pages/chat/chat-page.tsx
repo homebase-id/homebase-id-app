@@ -3,7 +3,7 @@ import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Dimensions, Keyboard, Platform, Pressable, View } from 'react-native';
-import { ChatAppBar } from '../../components/Chat/Chat-app-bar';
+import { ChatAppBar, SelectedMessageProp } from '../../components/Chat/Chat-app-bar';
 import { Asset } from 'react-native-image-picker';
 import { ChatDeletedArchivalStaus, ChatMessage } from '../../provider/chat/ChatProvider';
 import { useAuth } from '../../hooks/auth/useAuth';
@@ -33,6 +33,7 @@ import Clipboard from '@react-native-clipboard/clipboard';
 import { ErrorBoundary } from '../../components/ui/ErrorBoundary/ErrorBoundary';
 import { ChatStackParamList } from '../../app/App';
 import { NoConversationHeader } from '../../components/Chat/NoConversationHeader';
+import { ChatForwardModal } from '../../components/Chat/Chat-Forward';
 
 export type SelectedMessageState = {
   messageCordinates: { x: number; y: number };
@@ -225,6 +226,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
   // ref
   const emojiPickerSheetModalRef = useRef<BottomSheetModal>(null);
   const reactionModalRef = useRef<BottomSheetModal>(null);
+  const forwardModalRef = useRef<BottomSheetModal>(null);
 
   const openEmojiModal = useCallback(() => {
     emojiPickerSheetModalRef.current?.present();
@@ -241,6 +243,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
   const dismissSelectedMessage = useCallback(() => {
     emojiPickerSheetModalRef.current?.dismiss();
     reactionModalRef.current?.dismiss();
+    forwardModalRef.current?.dismiss();
     if (selectedMessage !== initalSelectedMessageState) {
       setSelectedMessage(initalSelectedMessageState);
     }
@@ -254,6 +257,56 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
     () => navigation.navigate('Conversation'),
     [navigation]
   );
+
+  const selectedMessageActions: SelectedMessageProp = useMemo(() => {
+    return {
+      onCopy: () => {
+        if (selectedMessage) {
+          const message = selectedMessage.selectedMessage?.text;
+          if (message) {
+            Clipboard.setString(message);
+            Toast.show({
+              text1: 'Copied to Clipboard',
+              type: 'success',
+              visibilityTime: 2000,
+              position: 'bottom',
+            });
+          }
+          setSelectedMessage(initalSelectedMessageState);
+        }
+      },
+      onDelete: () => {
+        if (selectedMessage?.selectedMessage && conversation) {
+          // console.log(
+          //   'Delete Message',
+          //   selectedMessage.selectedMessage?.fileMetadata.appData.archivalStatus
+          // );
+          deleteMessage({
+            conversation: conversation,
+            messages: [selectedMessage.selectedMessage],
+            deleteForEveryone: true,
+          });
+          setSelectedMessage(initalSelectedMessageState);
+        }
+      },
+      onReply: () => {
+        if (selectedMessage?.selectedMessage) {
+          setReplyMessage(selectedMessage.selectedMessage);
+          setSelectedMessage(initalSelectedMessageState);
+        }
+      },
+      onInfo: () => {
+        if (selectedMessage?.selectedMessage) {
+          doOpenMessageInfo(selectedMessage.selectedMessage);
+          setSelectedMessage(initalSelectedMessageState);
+        }
+      },
+      onForward: () => {
+        setSelectedMessage({ ...selectedMessage, showChatReactionPopup: false });
+        forwardModalRef.current?.present();
+      },
+    };
+  }, [conversation, deleteMessage, doOpenMessageInfo, initalSelectedMessageState, selectedMessage]);
 
   if (!conversation) {
     if (isLoadingConversation) return null;
@@ -287,49 +340,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
             onPress={() => navigation.navigate('ChatInfo', { convoId: route.params.convoId })}
             isSelf={route.params.convoId === ConversationWithYourselfId}
             selectedMessage={selectedMessage?.selectedMessage}
-            selectedMessageActions={{
-              onCopy: () => {
-                if (selectedMessage) {
-                  const message = selectedMessage.selectedMessage?.text;
-                  if (message) {
-                    Clipboard.setString(message);
-                    Toast.show({
-                      text1: 'Copied to Clipboard',
-                      type: 'success',
-                      visibilityTime: 2000,
-                      position: 'bottom',
-                    });
-                  }
-                  setSelectedMessage(initalSelectedMessageState);
-                }
-              },
-              onDelete: () => {
-                if (selectedMessage?.selectedMessage && conversation) {
-                  // console.log(
-                  //   'Delete Message',
-                  //   selectedMessage.selectedMessage?.fileMetadata.appData.archivalStatus
-                  // );
-                  deleteMessage({
-                    conversation: conversation,
-                    messages: [selectedMessage.selectedMessage],
-                    deleteForEveryone: true,
-                  });
-                  setSelectedMessage(initalSelectedMessageState);
-                }
-              },
-              onReply: () => {
-                if (selectedMessage?.selectedMessage) {
-                  setReplyMessage(selectedMessage.selectedMessage);
-                  setSelectedMessage(initalSelectedMessageState);
-                }
-              },
-              onInfo: () => {
-                if (selectedMessage?.selectedMessage) {
-                  doOpenMessageInfo(selectedMessage.selectedMessage);
-                  setSelectedMessage(initalSelectedMessageState);
-                }
-              },
-            }}
+            selectedMessageActions={selectedMessageActions}
           />
           <ChatConnectedState {...conversation} />
           <Host>
@@ -375,6 +386,11 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
         onClose={() => {
           setSelectedReactionMessage(undefined);
         }}
+      />
+      <ChatForwardModal
+        ref={forwardModalRef}
+        onClose={dismissSelectedMessage}
+        selectedMessage={selectedMessage.selectedMessage}
       />
     </BottomSheetModalProvider>
   );

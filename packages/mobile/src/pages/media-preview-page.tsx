@@ -22,9 +22,10 @@ import { HeaderTitle } from '@react-navigation/elements';
 import { Text } from '../components/ui/Text/Text';
 import { formatToTimeAgoWithRelativeDetail } from 'feed-app-common';
 import { IconButton } from '../components/Chat/Chat-app-bar';
-import { Forward, ShareNode } from '../components/ui/Icons/icons';
-import Toast from 'react-native-toast-message';
+import { ShareNode } from '../components/ui/Icons/icons';
+
 import useImage from '../components/ui/OdinImage/hooks/useImage';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 
 export type MediaProp = NativeStackScreenProps<ChatStackParamList, 'PreviewMedia'>;
 
@@ -61,9 +62,9 @@ export const PreviewMedia = memo((prop: MediaProp) => {
     navigation.setOptions({
       headerTitle: headerTitle,
     });
-  });
+  }, [headerTitle, prop.navigation]);
 
-  const onShare = useCallback(async () => {
+  const onShare = useCallback(() => {
     const imageData = getImage(undefined, fileId, payloads[currIndex].key, ChatDrive);
     if (!imageData) {
       return;
@@ -111,7 +112,7 @@ export const PreviewMedia = memo((prop: MediaProp) => {
   );
 
   return (
-    <>
+    <BottomSheetModalProvider>
       <Carousel
         ref={ref}
         width={width}
@@ -142,7 +143,7 @@ export const PreviewMedia = memo((prop: MediaProp) => {
           flex: 1,
           display: 'flex',
           zIndex: 20,
-          backgroundColor: '#00000060',
+          backgroundColor: isDarkMode ? '#00000060' : '#AFAFAF44',
           borderTopLeftRadius: 10,
           borderTopRightRadius: 10,
           flexDirection: 'column',
@@ -224,21 +225,8 @@ export const PreviewMedia = memo((prop: MediaProp) => {
             }}
             onPress={onShare}
           />
-          <IconButton
-            icon={<Forward />}
-            touchableProps={{
-              'aria-label': 'Forward',
-            }}
-            onPress={() => {
-              Toast.show({
-                type: 'info',
-                text1: 'Forwarding not yet supported',
-                position: 'bottom',
-              });
-            }}
-          />
         </View>
       </View>
-    </>
+    </BottomSheetModalProvider>
   );
 });

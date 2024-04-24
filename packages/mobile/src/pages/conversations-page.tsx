@@ -167,7 +167,7 @@ const RemoveNotifications = memo(() => {
   return null;
 });
 
-const ConversationTileWithYourself = () => {
+const ConversationTileWithYourself = memo(() => {
   const { data: profile } = useProfile();
   const odinId = useAuth().getIdentity();
   const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
@@ -192,7 +192,7 @@ const ConversationTileWithYourself = () => {
       onPress={doOpen}
     />
   );
-};
+});
 
 const SearchConversationResults = memo(
   ({

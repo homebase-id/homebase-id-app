@@ -11,8 +11,8 @@ import { useProfile } from '../../hooks/profile/useProfile';
 import { Colors } from '../../app/Colors';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { ChatMessageIMessage } from './ChatDetail';
-import { ReactNode, useCallback, useMemo } from 'react';
-import { Copy, Info, Reply, Trash } from '../ui/Icons/icons';
+import { memo, ReactNode, useCallback, useMemo } from 'react';
+import { Copy, Forward, Info, Reply, Trash } from '../ui/Icons/icons';
 import Toast from 'react-native-toast-message';
 import { Avatar, GroupAvatar, OwnerAvatar } from '../ui/Avatars/Avatar';
 
@@ -21,6 +21,7 @@ export type SelectedMessageProp = {
   onInfo: () => void;
   onCopy: () => void;
   onDelete: () => void;
+  onForward: () => void;
 };
 
 export const ChatAppBar = ({
@@ -108,6 +109,10 @@ export const ChatAppBar = ({
             onPress={selectedMessageActions?.onDelete || defaultActions}
           />
         )}
+        <IconButton
+          icon={<Forward />}
+          onPress={selectedMessageActions?.onForward || defaultActions}
+        />
       </View>
     );
   }, [
@@ -115,6 +120,7 @@ export const ChatAppBar = ({
     selectedMessage,
     selectedMessageActions?.onCopy,
     selectedMessageActions?.onDelete,
+    selectedMessageActions?.onForward,
     selectedMessageActions?.onInfo,
     selectedMessageActions?.onReply,
   ]);
@@ -144,18 +150,20 @@ const styles = StyleSheet.create({
   },
 });
 
-export const IconButton = ({
-  icon,
-  onPress,
-  touchableProps,
-}: {
-  icon: ReactNode;
-  onPress: () => void;
-  touchableProps?: Omit<TouchableOpacityProps, 'onPress'>;
-}) => {
-  return (
-    <TouchableOpacity onPress={onPress} style={{ padding: 10 }} {...touchableProps}>
-      {icon}
-    </TouchableOpacity>
-  );
-};
+export const IconButton = memo(
+  ({
+    icon,
+    onPress,
+    touchableProps,
+  }: {
+    icon: ReactNode;
+    onPress: () => void;
+    touchableProps?: Omit<TouchableOpacityProps, 'onPress'>;
+  }) => {
+    return (
+      <TouchableOpacity onPress={onPress} style={{ padding: 10 }} {...touchableProps}>
+        {icon}
+      </TouchableOpacity>
+    );
+  }
+);
