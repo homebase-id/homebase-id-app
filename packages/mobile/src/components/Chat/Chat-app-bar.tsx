@@ -104,12 +104,17 @@ export const ChatAppBar = ({
         <IconButton icon={<Reply />} onPress={selectedMessageActions?.onReply || defaultActions} />
         <IconButton icon={<Info />} onPress={selectedMessageActions?.onInfo || defaultActions} />
         <IconButton icon={<Copy />} onPress={selectedMessageActions?.onCopy || defaultActions} />
-        <IconButton icon={<Pencil />} onPress={selectedMessageActions?.onEdit || defaultActions} />
         {selectedMessage.fileMetadata.senderOdinId === '' && (
-          <IconButton
-            icon={<Trash />}
-            onPress={selectedMessageActions?.onDelete || defaultActions}
-          />
+          <>
+            <IconButton
+              icon={<Pencil />}
+              onPress={selectedMessageActions?.onEdit || defaultActions}
+            />
+            <IconButton
+              icon={<Trash />}
+              onPress={selectedMessageActions?.onDelete || defaultActions}
+            />
+          </>
         )}
         <IconButton
           icon={<Forward />}
