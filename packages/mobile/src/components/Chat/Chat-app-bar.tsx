@@ -12,7 +12,7 @@ import { Colors } from '../../app/Colors';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { ChatMessageIMessage } from './ChatDetail';
 import { memo, ReactNode, useCallback, useMemo } from 'react';
-import { Copy, Forward, Info, Reply, Trash } from '../ui/Icons/icons';
+import { Copy, Forward, Info, Pencil, Reply, Trash } from '../ui/Icons/icons';
 import Toast from 'react-native-toast-message';
 import { Avatar, GroupAvatar, OwnerAvatar } from '../ui/Avatars/Avatar';
 
@@ -22,6 +22,7 @@ export type SelectedMessageProp = {
   onCopy: () => void;
   onDelete: () => void;
   onForward: () => void;
+  onEdit: () => void;
 };
 
 export const ChatAppBar = ({
@@ -103,6 +104,7 @@ export const ChatAppBar = ({
         <IconButton icon={<Reply />} onPress={selectedMessageActions?.onReply || defaultActions} />
         <IconButton icon={<Info />} onPress={selectedMessageActions?.onInfo || defaultActions} />
         <IconButton icon={<Copy />} onPress={selectedMessageActions?.onCopy || defaultActions} />
+        <IconButton icon={<Pencil />} onPress={selectedMessageActions?.onEdit || defaultActions} />
         {selectedMessage.fileMetadata.senderOdinId === '' && (
           <IconButton
             icon={<Trash />}
@@ -120,6 +122,7 @@ export const ChatAppBar = ({
     selectedMessage,
     selectedMessageActions?.onCopy,
     selectedMessageActions?.onDelete,
+    selectedMessageActions?.onEdit,
     selectedMessageActions?.onForward,
     selectedMessageActions?.onInfo,
     selectedMessageActions?.onReply,
