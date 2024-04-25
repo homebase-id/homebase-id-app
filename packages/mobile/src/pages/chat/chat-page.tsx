@@ -421,7 +421,7 @@ type DialogBoxProp = {
   handleDialogClose: () => void;
 };
 
-const EditDialogBox = ({ visible, handleDialogClose, selectedMessage }: DialogBoxProp) => {
+const EditDialogBox = memo(({ visible, handleDialogClose, selectedMessage }: DialogBoxProp) => {
   const { mutate: updateMessage, error } = useChatMessage().update;
   const { data: conversation } = useConversation({
     conversationId: selectedMessage?.fileMetadata.appData.groupId,
@@ -481,6 +481,6 @@ const EditDialogBox = ({ visible, handleDialogClose, selectedMessage }: DialogBo
       </Dialog.Container>
     </>
   );
-};
+});
 
 export default ChatPage;
