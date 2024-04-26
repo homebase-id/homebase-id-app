@@ -614,7 +614,7 @@ const RenderBubble = memo(
         return (
           <Time
             {...timeProp}
-            timeFormat={is24Hour ? 'HH:mm' : 'LA'}
+            timeFormat={is24Hour ? 'HH:mm' : 'LT'}
             timeTextStyle={
               !showBackground
                 ? {
