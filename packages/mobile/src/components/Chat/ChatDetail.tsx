@@ -63,6 +63,8 @@ import { millisToMinutesAndSeconds } from '../../utils/utils';
 import { SafeAreaView } from '../ui/SafeAreaView/SafeAreaView';
 import { FileOverview } from '../Files/FileOverview';
 
+import { getLocales, uses24HourClock } from 'react-native-localize';
+
 export type ChatMessageIMessage = IMessage & HomebaseFile<ChatMessage>;
 
 export const ChatDetail = memo(
@@ -490,11 +492,14 @@ export const ChatDetail = memo(
       return <ArrowDown />;
     }, []);
 
+    const locale = getLocales()[0].languageTag;
+
     return (
       <SafeAreaView>
         <GiftedChat<ChatMessageIMessage>
           messages={messages}
           onSend={doSend}
+          locale={locale}
           infiniteScroll
           scrollToBottom
           alwaysShowSend
@@ -605,9 +610,11 @@ const RenderBubble = memo(
 
     const renderTime = useCallback(
       (timeProp: TimeProps<ChatMessageIMessage>) => {
+        const is24Hour = uses24HourClock();
         return (
           <Time
             {...timeProp}
+            timeFormat={is24Hour ? 'HH:mm' : 'LA'}
             timeTextStyle={
               !showBackground
                 ? {
