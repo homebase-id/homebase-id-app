@@ -17,6 +17,8 @@ import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 import { Container } from '../../components/ui/Container/Container';
 import {
   AddressBook,
+  CheckCircle,
+  Cog,
   Download,
   HardDisk,
   People,
@@ -32,6 +34,7 @@ import { useProfile } from '../../hooks/profile/useProfile';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { openURL } from '../../utils/utils';
 import { useAuthenticatedPushNotification } from '../../hooks/push-notification/useAuthenticatedPushNotification';
+import { useQueryClient } from '@tanstack/react-query';
 
 type SettingsProps = NativeStackScreenProps<ProfileStackParamList, 'Overview'>;
 
@@ -86,7 +89,6 @@ export const ProfilePage = (_props: SettingsProps) => {
                 : getIdentity()}
             </Text>
           </View>
-
           <TouchableOpacity
             onPress={() => navigate('Followers')}
             style={{
@@ -106,7 +108,6 @@ export const ProfilePage = (_props: SettingsProps) => {
               My followers
             </Text>
           </TouchableOpacity>
-
           <TouchableOpacity
             onPress={() => navigate('Following')}
             style={{
@@ -126,7 +127,6 @@ export const ProfilePage = (_props: SettingsProps) => {
               Who I&apos;m folowing
             </Text>
           </TouchableOpacity>
-
           <TouchableOpacity
             onPress={() => navigate('ConnectionRequests')}
             style={{
@@ -165,7 +165,6 @@ export const ProfilePage = (_props: SettingsProps) => {
               My connections
             </Text>
           </TouchableOpacity>
-
           <TouchableOpacity
             onPress={() => doLogout()}
             style={{
@@ -230,6 +229,7 @@ export const ProfilePage = (_props: SettingsProps) => {
               width: '100%',
             }}
           />
+          <DeleteCache />
           <TouchableOpacity
             onPress={() => navigate('DriveStatus')}
             style={{
@@ -334,6 +334,52 @@ export const CheckForUpdates = ({
                 ? 'Unknown'
                 : null}
         </Text>
+      ) : null}
+    </TouchableOpacity>
+  );
+};
+
+//TODO: Remove this when length of undefined fixed
+const DeleteCache = () => {
+  const query = useQueryClient();
+  const [done, setDone] = useState(false);
+  const doDeleteCache = async () => {
+    query.removeQueries({
+      queryKey: ['chat-messages'],
+      exact: false,
+    });
+    query.removeQueries({
+      queryKey: ['conversations'],
+      exact: false,
+    });
+    setDone(true);
+    setTimeout(() => {
+      setDone(false);
+    }, 5000);
+  };
+  return (
+    <TouchableOpacity
+      onPress={doDeleteCache}
+      style={{
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 12,
+        width: '100%',
+      }}
+    >
+      <Cog size={'lg'} />
+      <Text
+        style={{
+          marginLeft: 16,
+        }}
+      >
+        Delete Cache
+      </Text>
+      {done ? (
+        <View style={{ marginLeft: 'auto' }}>
+          <CheckCircle />
+        </View>
       ) : null}
     </TouchableOpacity>
   );
