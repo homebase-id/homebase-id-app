@@ -30,7 +30,7 @@ export const useMarkMessagesAsRead = ({
       const unreadMessages = messages.filter(
         (msg) =>
           msg?.fileMetadata.created >
-            (conversation.fileMetadata.appData.content.lastReadTime || 0) &&
+          (conversation.fileMetadata.appData.content.lastReadTime || 0) &&
           msg.fileMetadata.senderOdinId
       );
 
@@ -46,7 +46,7 @@ export const useMarkMessagesAsRead = ({
 
       setMessagesMarkedAsRead(true);
     })();
-  }, [messages]);
+  }, [conversation, markAsRead, messages]);
 
   useEffect(() => {
     if (!conversation || !messages) return;
@@ -59,5 +59,5 @@ export const useMarkMessagesAsRead = ({
       setMessagesMarkedAsRead(false);
       isProcessing.current = false;
     }
-  }, [messagesMarkedAsRead]);
+  }, [conversation, messages, messagesMarkedAsRead, pendingReadTime, updateConversation]);
 };
