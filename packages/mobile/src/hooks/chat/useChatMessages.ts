@@ -128,7 +128,7 @@ export const getChatMessageInfiniteQueryOptions: (
   queryFn: ({ pageParam }) =>
     fetchMessages(dotYouClient, conversationId as string, pageParam as string | undefined),
   getNextPageParam: (lastPage, pages) =>
-    lastPage.searchResults?.length >= (lastPage === pages[0] ? FIRST_PAGE_SIZE : PAGE_SIZE)
+    lastPage && lastPage.searchResults?.length >= (lastPage === pages[0] ? FIRST_PAGE_SIZE : PAGE_SIZE)
       ? lastPage.cursorState
       : undefined,
   enabled: !!conversationId,
