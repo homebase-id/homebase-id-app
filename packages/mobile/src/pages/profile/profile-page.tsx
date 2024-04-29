@@ -3,6 +3,7 @@ import { useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  ScrollView,
   StyleProp,
   TouchableOpacity,
   View,
@@ -56,7 +57,10 @@ export const ProfilePage = (_props: SettingsProps) => {
   return (
     <SafeAreaView>
       <Container>
-        <View style={{ display: 'flex', flexDirection: 'column', paddingVertical: 12 }}>
+        <ScrollView
+          style={{ display: 'flex', flexDirection: 'column', paddingVertical: 12 }}
+          showsVerticalScrollIndicator={false}
+        >
           <View
             style={{
               display: 'flex',
@@ -249,7 +253,7 @@ export const ProfilePage = (_props: SettingsProps) => {
             </Text>
           </TouchableOpacity>
           <VersionInfo />
-        </View>
+        </ScrollView>
       </Container>
     </SafeAreaView>
   );
