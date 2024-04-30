@@ -24,7 +24,6 @@ import { ImageSource } from '../../provider/image/RNImageProvider';
 import { Image } from 'react-native';
 
 export type ShareChatProp = NativeStackScreenProps<ChatStackParamList, 'ShareChat'>;
-
 export const ShareChatPage = (prop: ShareChatProp) => {
   const { data, mimeType } = prop.route.params;
   const { isDarkMode } = useDarkMode();
@@ -58,6 +57,7 @@ export const ShareChatPage = (prop: ShareChatProp) => {
           type: mimeType,
         });
       }
+      //TODO: Handle a case where if a conversation doesn't exist and a command needs to be sent
       return sendMessage({
         conversationId,
         recipients: recipients,
