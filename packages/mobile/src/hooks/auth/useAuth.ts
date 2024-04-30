@@ -224,7 +224,7 @@ export const useYouAuthAuthorization = () => {
 
   const finalizeAuthentication = useCallback(
     async (identity: string, publicKey: string, salt: string) => {
-      if (!identity || !publicKey || !salt) {
+      if (!identity || !publicKey || !salt || !privateKey) {
         console.error('Missing data');
         return false;
       }
