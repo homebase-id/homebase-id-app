@@ -23,6 +23,7 @@ import { InAppBrowser } from 'react-native-inappbrowser-reborn';
 
 import logo from '../../assets/homebase.png';
 import { Input } from '../../components/ui/Form/Input';
+import { YouAuthorizationParams } from '@youfoundation/js-lib/auth';
 
 type LoginProps = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 
@@ -96,12 +97,24 @@ const useFinalize = () => {
     Linking.addEventListener('url', ({ url }) => setUrl(url));
   }, []);
 
+  useEffect(() => {
+    // State is only reset when the url is updated; If it failed last time.. it will still fail
+    setState(null);
+  }, [url]);
+
   const { finalizeAuthentication } = useYouAuthAuthorization();
 
   useEffect(() => {
     // Finalize
     (async () => {
-      if (state === 'preparing' || state === 'success' || state === 'loading') return;
+      if (
+        state === 'error' ||
+        state === 'preparing' ||
+        state === 'success' ||
+        state === 'loading'
+      ) {
+        return;
+      }
       try {
         if (url?.startsWith(FINALIZE_PATH)) {
           setState('loading');
@@ -114,23 +127,35 @@ const useFinalize = () => {
           const salt = params.get('salt');
 
           if (!identity || !public_key || !salt) return;
-          await finalizeAuthentication(identity, public_key, salt);
-
-          setState('success');
+          const success = await finalizeAuthentication(identity, public_key, salt);
+          setState(success ? 'success' : 'error');
         }
       } catch (e) {
         setState('error');
         setUrl(null);
       }
     })();
-  }, [url, finalizeAuthentication, state]);
+  }, [url, state, finalizeAuthentication]);
 
   return state;
 };
 
 const useParams = () => {
   const { getRegistrationParams } = useYouAuthAuthorization();
-  return { data: useMemo(() => getRegistrationParams(), [getRegistrationParams]) };
+
+  const [params, setParams] = useState<YouAuthorizationParams | null>(null);
+  useEffect(() => {
+    (async () => setParams(await getRegistrationParams()))();
+  }, [getRegistrationParams]);
+
+  const refetch = useCallback(() => {
+    (async () => setParams(await getRegistrationParams()))();
+  }, [getRegistrationParams]);
+
+  return {
+    data: params,
+    refetch,
+  };
 };
 
 const LoginComponent = () => {
@@ -139,7 +164,12 @@ const LoginComponent = () => {
 
   const [invalid, setInvalid] = useState<boolean>(false);
   const [odinId, setOdinId] = useState<string>('');
-  const { data: authParams } = useParams();
+  const { data: authParams, refetch } = useParams();
+  useEffect(() => {
+    if (finalizeState === 'error') {
+      refetch();
+    }
+  }, [finalizeState, refetch]);
 
   useEffect(() => setInvalid(false), [odinId]);
 
