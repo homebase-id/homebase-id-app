@@ -1,8 +1,8 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Dimensions, Keyboard, Platform, Pressable, View } from 'react-native';
+import { Dimensions, Keyboard, Platform, Pressable, StyleSheet, View } from 'react-native';
 import { ChatAppBar, SelectedMessageProp } from '../../components/Chat/Chat-app-bar';
 import { Asset } from 'react-native-image-picker';
 import { ChatDeletedArchivalStaus, ChatMessage } from '../../provider/chat/ChatProvider';
@@ -34,6 +34,8 @@ import { ErrorBoundary } from '../../components/ui/ErrorBoundary/ErrorBoundary';
 import { ChatStackParamList } from '../../app/App';
 import { NoConversationHeader } from '../../components/Chat/NoConversationHeader';
 import { ChatForwardModal } from '../../components/Chat/Chat-Forward';
+import Dialog from 'react-native-dialog';
+import { BlurView } from '@react-native-community/blur';
 
 export type SelectedMessageState = {
   messageCordinates: { x: number; y: number };
@@ -258,6 +260,8 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
     [navigation]
   );
 
+  const [dialogVisible, setDialogVisible] = useState<boolean>(false);
+
   const selectedMessageActions: SelectedMessageProp = useMemo(() => {
     return {
       onCopy: () => {
@@ -305,8 +309,17 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
         setSelectedMessage({ ...selectedMessage, showChatReactionPopup: false });
         forwardModalRef.current?.present();
       },
+      onEdit: () => {
+        setDialogVisible(true);
+        setSelectedMessage({ ...selectedMessage, showChatReactionPopup: false });
+      },
     };
   }, [conversation, deleteMessage, doOpenMessageInfo, initalSelectedMessageState, selectedMessage]);
+
+  const handleDialogClose = useCallback(() => {
+    setDialogVisible(false);
+    setSelectedMessage(initalSelectedMessageState);
+  }, [initalSelectedMessageState]);
 
   if (!conversation) {
     if (isLoadingConversation) return null;
@@ -392,7 +405,81 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
         onClose={dismissSelectedMessage}
         selectedMessage={selectedMessage.selectedMessage}
       />
+
+      <EditDialogBox
+        visible={dialogVisible}
+        handleDialogClose={handleDialogClose}
+        selectedMessage={selectedMessage.selectedMessage}
+      />
     </BottomSheetModalProvider>
+  );
+});
+
+type DialogBoxProp = {
+  visible: boolean;
+  selectedMessage?: ChatMessageIMessage;
+  handleDialogClose: () => void;
+};
+
+const EditDialogBox = memo(({ visible, handleDialogClose, selectedMessage }: DialogBoxProp) => {
+  const { mutate: updateMessage, error } = useChatMessage().update;
+  const { data: conversation } = useConversation({
+    conversationId: selectedMessage?.fileMetadata.appData.groupId,
+  }).single;
+  const [value, setValue] = useState<string | undefined>();
+
+  useLayoutEffect(() => {
+    if (selectedMessage) {
+      setValue(selectedMessage.fileMetadata.appData.content.message);
+    }
+  }, [selectedMessage]);
+
+  const handleEditMessage = useCallback(() => {
+    if (!value || !selectedMessage || !conversation) {
+      return;
+    }
+    const updatedChatMessage: HomebaseFile<ChatMessage> = {
+      ...selectedMessage,
+      fileMetadata: {
+        ...selectedMessage?.fileMetadata,
+        appData: {
+          ...selectedMessage?.fileMetadata.appData,
+          content: {
+            ...selectedMessage?.fileMetadata.appData.content,
+            message: value,
+          },
+        },
+      },
+    };
+    updateMessage({
+      updatedChatMessage: updatedChatMessage,
+      conversation,
+    });
+    handleDialogClose();
+  }, [conversation, handleDialogClose, selectedMessage, updateMessage, value]);
+  const blurComponentIOS = (
+    <BlurView style={StyleSheet.absoluteFill} blurType="xlight" blurAmount={50} />
+  );
+  return (
+    <>
+      <ErrorNotification error={error} />
+      <Dialog.Container
+        visible={visible}
+        blurComponentIOS={blurComponentIOS}
+        onBackdropPress={handleDialogClose}
+      >
+        <Dialog.Title>Edit Message</Dialog.Title>
+        <Dialog.Input
+          value={value}
+          onChangeText={(text) => {
+            setValue(text);
+          }}
+          autoFocus
+        />
+        <Dialog.Button label="Cancel" onPress={handleDialogClose} />
+        <Dialog.Button label="Save" onPress={handleEditMessage} />
+      </Dialog.Container>
+    </>
   );
 });
 

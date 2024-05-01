@@ -67,6 +67,7 @@ import { ErrorBoundary } from '../components/ui/ErrorBoundary/ErrorBoundary';
 import { RouteContextProvider, useRouteContext } from '../components/RouteContext/RouteContext';
 import { OwnerAvatar } from '../components/ui/Avatars/Avatar';
 import { NativeStackNavigationOptions } from '@react-navigation/native-stack';
+import { DriveStatusPage } from '../pages/profile/drive-status-page';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -91,6 +92,7 @@ export type ProfileStackParamList = {
   ConnectionRequests: undefined;
   Connections: undefined;
   Following: undefined;
+  DriveStatus: undefined;
 };
 
 export type ChatStackParamList = {
@@ -343,6 +345,7 @@ const ProfileStack = () => {
       <StackProfile.Screen name="ConnectionRequests" component={ConnectionRequestsPage} />
       <StackProfile.Screen name="Connections" component={ConnectionsPage} />
       <StackProfile.Screen name="Following" component={FollowingPage} />
+      <StackProfile.Screen name="DriveStatus" component={DriveStatusPage} />
     </StackProfile.Navigator>
   );
 };

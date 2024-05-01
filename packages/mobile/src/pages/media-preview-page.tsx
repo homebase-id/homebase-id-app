@@ -26,6 +26,7 @@ import { ShareNode } from '../components/ui/Icons/icons';
 
 import useImage from '../components/ui/OdinImage/hooks/useImage';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import { SafeAreaView } from '../components/ui/SafeAreaView/SafeAreaView';
 
 export type MediaProp = NativeStackScreenProps<ChatStackParamList, 'PreviewMedia'>;
 
@@ -133,7 +134,7 @@ export const PreviewMedia = memo((prop: MediaProp) => {
         }}
       />
 
-      <View
+      <SafeAreaView
         style={{
           position: 'absolute',
           bottom: 0,
@@ -210,6 +211,7 @@ export const PreviewMedia = memo((prop: MediaProp) => {
             })}
           </View>
         )}
+
         <View
           style={{
             display: 'flex',
@@ -226,7 +228,7 @@ export const PreviewMedia = memo((prop: MediaProp) => {
             onPress={onShare}
           />
         </View>
-      </View>
+      </SafeAreaView>
     </BottomSheetModalProvider>
   );
 });
