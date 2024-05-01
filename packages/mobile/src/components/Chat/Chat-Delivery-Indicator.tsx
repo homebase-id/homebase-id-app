@@ -29,11 +29,9 @@ export const InnerDeliveryIndicator = ({ state }: { state?: ChatDeliveryStatus }
     <View
       style={{
         flexDirection: 'row',
-        alignSelf: 'center',
+
         alignContent: 'flex-start',
         alignItems: 'center',
-        position: 'relative',
-        bottom: 2,
       }}
     >
       {isDelivered ? (
@@ -42,6 +40,7 @@ export const InnerDeliveryIndicator = ({ state }: { state?: ChatDeliveryStatus }
       <View
         style={{
           right: isSent ? 8 : 0,
+          marginRight: !isSent ? 8 : 0,
           zIndex: 10,
         }}
       >
