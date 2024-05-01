@@ -25,126 +25,133 @@ export type SelectedMessageProp = {
   onEdit: () => void;
 };
 
-export const ChatAppBar = ({
-  odinId,
-  group = false,
-  title,
-  goBack,
-  isSelf,
-  onPress,
-  selectedMessage,
-  selectedMessageActions,
-}: {
-  odinId: string;
-  group?: boolean;
-  title: string;
-  goBack: () => void;
-  isSelf?: boolean;
-  onPress: () => void;
-  selectedMessage?: ChatMessageIMessage;
-  selectedMessageActions?: SelectedMessageProp;
-}) => {
-  const user = useProfile().data;
-  const { isDarkMode } = useDarkMode();
-  const headerStyle = useMemo(
-    () => ({
-      backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
-    }),
-    [isDarkMode]
-  );
-  const headerLeft = useCallback(
-    () => (
-      <View
-        style={{
-          flexDirection: 'row',
-          display: 'flex',
-          alignItems: 'center',
-        }}
-      >
-        <HeaderBackButton
-          style={{ marginRight: Platform.OS === 'ios' ? -10 : 0 }}
-          canGoBack={true}
-          onPress={goBack}
-          labelVisible={false}
-          tintColor={isDarkMode ? Colors.white : Colors.black}
-        />
-        {selectedMessage ? null : !group ? (
-          isSelf ? (
-            <OwnerAvatar style={styles.avatar} imageSize={{ width: 36, height: 36 }} />
-          ) : (
-            <Avatar odinId={odinId} style={styles.avatar} imageSize={{ width: 36, height: 36 }} />
-          )
-        ) : (
-          <GroupAvatar style={styles.avatar} />
-        )}
-      </View>
-    ),
-    [goBack, group, isDarkMode, isSelf, odinId, selectedMessage]
-  );
-
-  const defaultActions = useCallback(() => {
-    Toast.show({
-      type: 'info',
-      text1: 'No action provided',
-      text2: 'Make sure u are passing the props correctly',
-    });
-  }, []);
-
-  const headerRight = useCallback(() => {
-    if (!selectedMessage) {
-      return null;
-    }
-    return (
-      <View
-        style={{
-          display: 'flex',
-          flexDirection: 'row',
-        }}
-      >
-        <IconButton icon={<Reply />} onPress={selectedMessageActions?.onReply || defaultActions} />
-        <IconButton icon={<Info />} onPress={selectedMessageActions?.onInfo || defaultActions} />
-        <IconButton icon={<Copy />} onPress={selectedMessageActions?.onCopy || defaultActions} />
-        {selectedMessage.fileMetadata.senderOdinId === '' && (
-          <>
-            <IconButton
-              icon={<Pencil />}
-              onPress={selectedMessageActions?.onEdit || defaultActions}
-            />
-            <IconButton
-              icon={<Trash />}
-              onPress={selectedMessageActions?.onDelete || defaultActions}
-            />
-          </>
-        )}
-        <IconButton
-          icon={<Forward />}
-          onPress={selectedMessageActions?.onForward || defaultActions}
-        />
-      </View>
-    );
-  }, [
-    defaultActions,
+export const ChatAppBar = memo(
+  ({
+    odinId,
+    group = false,
+    title,
+    goBack,
+    isSelf,
+    onPress,
     selectedMessage,
-    selectedMessageActions?.onCopy,
-    selectedMessageActions?.onDelete,
-    selectedMessageActions?.onEdit,
-    selectedMessageActions?.onForward,
-    selectedMessageActions?.onInfo,
-    selectedMessageActions?.onReply,
-  ]);
-  return (
-    <Pressable onPress={onPress}>
-      <Header
-        title={selectedMessage ? '' : !isSelf ? title : `${user?.firstName} ${user?.surName} (you)`}
-        headerTitleAlign="left"
-        headerLeft={headerLeft}
-        headerRight={headerRight}
-        headerStyle={headerStyle}
-        headerShadowVisible={false}
-      />
-    </Pressable>
-  );
-};
+    selectedMessageActions,
+  }: {
+    odinId: string;
+    group?: boolean;
+    title: string;
+    goBack: () => void;
+    isSelf?: boolean;
+    onPress: () => void;
+    selectedMessage?: ChatMessageIMessage;
+    selectedMessageActions?: SelectedMessageProp;
+  }) => {
+    const user = useProfile().data;
+    const { isDarkMode } = useDarkMode();
+    const headerStyle = useMemo(
+      () => ({
+        backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
+      }),
+      [isDarkMode]
+    );
+    const headerLeft = useCallback(
+      () => (
+        <View
+          style={{
+            flexDirection: 'row',
+            display: 'flex',
+            alignItems: 'center',
+          }}
+        >
+          <HeaderBackButton
+            style={{ marginRight: Platform.OS === 'ios' ? -10 : 0 }}
+            canGoBack={true}
+            onPress={goBack}
+            labelVisible={false}
+            tintColor={isDarkMode ? Colors.white : Colors.black}
+          />
+          {selectedMessage ? null : !group ? (
+            isSelf ? (
+              <OwnerAvatar style={styles.avatar} imageSize={{ width: 36, height: 36 }} />
+            ) : (
+              <Avatar odinId={odinId} style={styles.avatar} imageSize={{ width: 36, height: 36 }} />
+            )
+          ) : (
+            <GroupAvatar style={styles.avatar} />
+          )}
+        </View>
+      ),
+      [goBack, group, isDarkMode, isSelf, odinId, selectedMessage]
+    );
+
+    const defaultActions = useCallback(() => {
+      Toast.show({
+        type: 'info',
+        text1: 'No action provided',
+        text2: 'Make sure u are passing the props correctly',
+      });
+    }, []);
+
+    const headerRight = useCallback(() => {
+      if (!selectedMessage) {
+        return null;
+      }
+      return (
+        <View
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+          }}
+        >
+          <IconButton
+            icon={<Reply />}
+            onPress={selectedMessageActions?.onReply || defaultActions}
+          />
+          <IconButton icon={<Info />} onPress={selectedMessageActions?.onInfo || defaultActions} />
+          <IconButton icon={<Copy />} onPress={selectedMessageActions?.onCopy || defaultActions} />
+          {selectedMessage.fileMetadata.senderOdinId === '' && (
+            <>
+              <IconButton
+                icon={<Pencil />}
+                onPress={selectedMessageActions?.onEdit || defaultActions}
+              />
+              <IconButton
+                icon={<Trash />}
+                onPress={selectedMessageActions?.onDelete || defaultActions}
+              />
+            </>
+          )}
+          <IconButton
+            icon={<Forward />}
+            onPress={selectedMessageActions?.onForward || defaultActions}
+          />
+        </View>
+      );
+    }, [
+      defaultActions,
+      selectedMessage,
+      selectedMessageActions?.onCopy,
+      selectedMessageActions?.onDelete,
+      selectedMessageActions?.onEdit,
+      selectedMessageActions?.onForward,
+      selectedMessageActions?.onInfo,
+      selectedMessageActions?.onReply,
+    ]);
+    return (
+      <Pressable onPress={onPress}>
+        <Header
+          title={
+            selectedMessage ? '' : !isSelf ? title : `${user?.firstName} ${user?.surName} (you)`
+          }
+          headerTitleAlign="left"
+          headerLeft={headerLeft}
+          headerRight={headerRight}
+          headerStyle={headerStyle}
+          headerShadowVisible={false}
+        />
+      </Pressable>
+    );
+  }
+);
 const styles = StyleSheet.create({
   titleStyle: {
     fontSize: 18,
