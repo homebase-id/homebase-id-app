@@ -113,6 +113,7 @@ export const ShareChatPage = (prop: ShareChatProp) => {
         text1: 'Message sent successfully',
         position: 'bottom',
       });
+      navigation.goBack();
     }
   }, [data, fetchConversation, mimeType, navigation, selectedContact, selectedGroup, sendMessage]);
 
@@ -239,13 +240,6 @@ export const ShareChatPage = (prop: ShareChatProp) => {
   return (
     <SafeAreaView>
       <ErrorNotification error={error} />
-      <Image
-        source={{
-          uri: data,
-        }}
-        width={200}
-        height={200}
-      />
       <FlatList
         data={connections}
         renderItem={renderItem}
