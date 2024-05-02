@@ -9,7 +9,6 @@ import PropTypes from 'prop-types';
 import React, {
   createRef,
   useCallback,
-  useEffect,
   useMemo,
   useRef,
   useState,
