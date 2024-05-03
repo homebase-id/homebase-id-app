@@ -204,7 +204,7 @@ let App = () => {
 const codePushOptions = { checkFrequency: CodePush.CheckFrequency.MANUAL };
 App = CodePush(codePushOptions)(App);
 
-const ref = createNavigationContainerRef();
+export const navigationContainerRef = createNavigationContainerRef();
 const StackRoot = createNativeStackNavigator<AuthStackParamList>();
 const RootStack = () => {
   const { isAuthenticated } = useAuth();
@@ -213,13 +213,13 @@ const RootStack = () => {
 
   return (
     <NavigationContainer
-      ref={ref}
+      ref={navigationContainerRef}
       theme={isDarkMode ? DarkTheme : DefaultTheme}
       onReady={() => {
-        setRouteName(ref.getCurrentRoute()?.name || null);
+        setRouteName(navigationContainerRef.getCurrentRoute()?.name || null);
       }}
       onStateChange={async () => {
-        const currentRouteName = ref.getCurrentRoute()?.name || null;
+        const currentRouteName = navigationContainerRef.getCurrentRoute()?.name || null;
         setRouteName(currentRouteName);
       }}
     >
