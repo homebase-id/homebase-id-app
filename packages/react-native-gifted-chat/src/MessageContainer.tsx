@@ -352,6 +352,7 @@ export default class MessageContainer<
           contentContainerStyle={styles.contentContainerStyle}
           renderItem={this.renderRow}
           {...this.props.invertibleScrollViewProps}
+          keyboardShouldPersistTaps='handled'
           ListEmptyComponent={this.renderChatEmpty}
           ListFooterComponent={
             inverted ? this.renderHeaderWrapper : this.renderFooter
