@@ -2,7 +2,6 @@ import {
   DotYouClient,
   HomebaseFile,
   NewHomebaseFile,
-  NewMediaFile,
   MediaFile,
   PayloadFile,
   ThumbnailFile,
@@ -79,13 +78,14 @@ export const savePost = async <T extends PostContent>(
   }
   const newMediaFiles = toSaveFiles as ImageSource[];
 
-  if (!file.fileMetadata.appData.content.authorOdinId)
+  if (!file.fileMetadata.appData.content.authorOdinId) {
     file.fileMetadata.appData.content.authorOdinId = dotYouClient.getIdentity();
+  }
   if (!file.serverMetadata?.accessControlList) throw 'ACL is required to save a post';
 
   // Delete embeddedPost of embeddedPost (we don't want to embed an embed)
   if (file.fileMetadata.appData.content.embeddedPost) {
-    delete (file.fileMetadata.appData.content.embeddedPost as PostContent)['embeddedPost'];
+    delete (file.fileMetadata.appData.content.embeddedPost as PostContent).embeddedPost;
   }
 
   const targetDrive = GetTargetDriveFromChannelId(channelId);
@@ -135,7 +135,7 @@ export const savePost = async <T extends PostContent>(
 
       if (tinyThumb) previewThumbnails.push(tinyThumb);
       onUpdate?.((i + 1) / newMediaFiles.length);
-    } else {
+    } else if (newMediaFile.type?.startsWith('image/')) {
       const { additionalThumbnails, tinyThumb } = await createThumbnails(newMediaFile, payloadKey);
 
       // Custom blob to avoid reading and writing the file to disk again
@@ -151,6 +151,17 @@ export const savePost = async <T extends PostContent>(
       });
 
       if (tinyThumb) previewThumbnails.push(tinyThumb);
+    } else {
+      // Custom blob to avoid reading and writing the file to disk again
+      const payloadBlob = new OdinBlob((newMediaFile.filepath || newMediaFile.uri) as string, {
+        type: newMediaFile.type || 'image/jpeg',
+      }) as any as Blob;
+
+      payloads.push({
+        key: payloadKey,
+        payload: payloadBlob,
+        descriptorContent: newMediaFile.filename || newMediaFile.type || undefined,
+      });
     }
     onUpdate?.((i + 1) / newMediaFiles.length);
   }
@@ -274,7 +285,7 @@ const uploadPost = async <T extends PostContent>(
     encrypt,
     onVersionConflict
   );
-  if (!result) throw new Error(`Upload failed`);
+  if (!result) throw new Error('Upload failed');
 
   return result;
 };
@@ -405,18 +416,21 @@ const updatePost = async <T extends PostContent>(
   const header = await getFileHeader(dotYouClient, targetDrive, file.fileId as string);
 
   if (!header) throw new Error('Cannot update a post that does not exist');
-  if (header?.fileMetadata.versionTag !== file.fileMetadata.versionTag)
+  if (header?.fileMetadata.versionTag !== file.fileMetadata.versionTag) {
     throw new Error('Version conflict');
+  }
 
   if (
     !file.fileId ||
     !file.serverMetadata?.accessControlList ||
     !file.fileMetadata.appData.content.id
-  )
-    throw new Error(`[DotYouCore-js] PostProvider: fileId is required to update a post`);
+  ) {
+    throw new Error('[DotYouCore-js] PostProvider: fileId is required to update a post');
+  }
 
-  if (!file.fileMetadata.appData.content.authorOdinId)
+  if (!file.fileMetadata.appData.content.authorOdinId) {
     file.fileMetadata.appData.content.authorOdinId = dotYouClient.getIdentity();
+  }
 
   let runningVersionTag: string = file.fileMetadata.versionTag;
   const existingMediaFiles =
@@ -453,8 +467,9 @@ const updatePost = async <T extends PostContent>(
   }
 
   // When all media is removed from the post, remove the preview thumbnail
-  if (existingMediaFiles.length === deletedMediaFiles.length)
+  if (existingMediaFiles.length === deletedMediaFiles.length) {
     file.fileMetadata.appData.previewThumbnail = undefined;
+  }
 
   // Process new files:
   const payloads: PayloadFile[] = [];
@@ -509,12 +524,13 @@ const updatePost = async <T extends PostContent>(
   }
 
   if (file.fileMetadata.appData.content.type !== 'Article') {
-    if (existingMediaFiles?.length)
+    if (existingMediaFiles?.length) {
       file.fileMetadata.appData.content.primaryMediaFile = {
         fileId: file.fileId,
         fileKey: existingMediaFiles[0].key,
         type: existingMediaFiles[0].contentType,
       };
+    }
   }
 
   file.fileMetadata.appData.previewThumbnail =
@@ -529,7 +545,7 @@ const updatePost = async <T extends PostContent>(
   file.fileMetadata.isEncrypted = encrypt;
   file.fileMetadata.versionTag = runningVersionTag;
   const result = await uploadPostHeader(dotYouClient, file, channelId, targetDrive);
-  if (!result) throw new Error(`[DotYouCore-js] PostProvider: Post update failed`);
+  if (!result) throw new Error('[DotYouCore-js] PostProvider: Post update failed');
 
   return result;
 };
