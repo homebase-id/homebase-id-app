@@ -21,7 +21,7 @@ import {
   TimeProps,
   User,
 } from 'react-native-gifted-chat';
-import { useCallback, memo, useMemo } from 'react';
+import { useCallback, memo, useMemo, useRef, useEffect } from 'react';
 import {
   GestureResponderEvent,
   Platform,
@@ -29,6 +29,7 @@ import {
   StatusBar,
   StyleProp,
   StyleSheet,
+  TextInput,
   TextStyle,
   View,
   ViewStyle,
@@ -107,6 +108,7 @@ export const ChatDetail = memo(
   }) => {
     const { isDarkMode } = useDarkMode();
     const identity = useAuth().getIdentity();
+    const textRef = useRef<TextInput>(null);
 
     const onLongPress = useCallback(
       (e: GestureResponderEvent, message: ChatMessageIMessage) => {
@@ -311,6 +313,11 @@ export const ChatDetail = memo(
         microphoneIcon,
       ]
     );
+    useEffect(() => {
+      if (replyMessage !== null && textRef.current) {
+        textRef.current?.focus();
+      }
+    }, [textRef, replyMessage]);
 
     const renderSend = useCallback(
       (props: SendProps<IMessage>) => {
@@ -500,6 +507,7 @@ export const ChatDetail = memo(
           messages={messages}
           onSend={doSend}
           locale={locale}
+          textInputRef={textRef}
           infiniteScroll
           scrollToBottom
           alwaysShowSend
