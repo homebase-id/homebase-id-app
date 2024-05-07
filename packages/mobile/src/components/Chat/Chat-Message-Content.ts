@@ -12,7 +12,7 @@ export const ChatMessageContent = memo(
       return 'This message was deleted';
     }
     if (textMessage && textMessage.length > 0) {
-      return ellipsisAtMaxChar(textMessage, 40);
+      return ellipsisAtMaxChar(textMessage, 30);
     } else if (payloads.length > 1) {
       return '📸 Medias';
     } else {

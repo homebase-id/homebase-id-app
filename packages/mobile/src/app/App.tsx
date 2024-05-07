@@ -68,6 +68,8 @@ import { RouteContextProvider, useRouteContext } from '../components/RouteContex
 import { OwnerAvatar } from '../components/ui/Avatars/Avatar';
 import { NativeStackNavigationOptions } from '@react-navigation/native-stack';
 import { DriveStatusPage } from '../pages/profile/drive-status-page';
+import { SharedItem, useShareManager } from '../hooks/platform/useShareManager';
+import { ShareChatPage } from '../pages/chat/share-chat-page';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -107,6 +109,7 @@ export type ChatStackParamList = {
     conversation: HomebaseFile<Conversation>;
   };
   EditGroup: { convoId: string };
+  ShareChat: SharedItem;
   PreviewMedia: {
     msg: HomebaseFile<ChatMessage>;
     fileId: string;
@@ -201,7 +204,7 @@ let App = () => {
 const codePushOptions = { checkFrequency: CodePush.CheckFrequency.MANUAL };
 App = CodePush(codePushOptions)(App);
 
-const ref = createNavigationContainerRef();
+const navigationContainerRef = createNavigationContainerRef();
 const StackRoot = createNativeStackNavigator<AuthStackParamList>();
 const RootStack = () => {
   const { isAuthenticated } = useAuth();
@@ -210,13 +213,13 @@ const RootStack = () => {
 
   return (
     <NavigationContainer
-      ref={ref}
+      ref={navigationContainerRef}
       theme={isDarkMode ? DarkTheme : DefaultTheme}
       onReady={() => {
-        setRouteName(ref.getCurrentRoute()?.name || null);
+        setRouteName(navigationContainerRef.getCurrentRoute()?.name || null);
       }}
       onStateChange={async () => {
-        const currentRouteName = ref.getCurrentRoute()?.name || null;
+        const currentRouteName = navigationContainerRef.getCurrentRoute()?.name || null;
         setRouteName(currentRouteName);
       }}
     >
@@ -251,6 +254,7 @@ const AppStackScreen = memo(() => {
   useOnlineManager();
   useAuthenticatedPushNotification();
   useInitialPushNotification();
+  useShareManager();
 
   return <TabStack />;
 });
@@ -439,6 +443,15 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
         options={{
           headerShown: false,
           gestureEnabled: true,
+        }}
+      />
+      <StackChat.Screen
+        name="ShareChat"
+        component={ShareChatPage}
+        options={{
+          headerShown: true,
+          gestureEnabled: true,
+          title: 'Share',
         }}
       />
       <StackChat.Screen

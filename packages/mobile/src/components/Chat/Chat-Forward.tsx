@@ -37,6 +37,9 @@ export type ChatForwardModalProps = {
   selectedMessage: ChatMessageIMessage | undefined;
 };
 
+/// Limit to forward maximum number of contacts
+export const maxConnectionsForward = 3;
+
 export const ChatForwardModal = forwardRef(
   (props: ChatForwardModalProps, ref: React.Ref<BottomSheetModalMethods>) => {
     const { onClose, selectedMessage: message } = props;
@@ -59,8 +62,6 @@ export const ChatForwardModal = forwardRef(
       onClose();
     }, [onClose, selectedContact.length, selectedGroup.length]);
 
-    /// Limit to forward maximum number of contacts
-    const maxConnectionsForward = 3;
     const renderBackdrop = useCallback(
       (props: BottomSheetBackdropProps) => (
         <BottomSheetBackdrop {...props} opacity={0.5} appearsOnIndex={0} disappearsOnIndex={-1} />
@@ -318,7 +319,7 @@ export const ChatForwardModal = forwardRef(
   }
 );
 
-const ListHeaderComponent = memo(
+export const ListHeaderComponent = memo(
   ({
     selectedGroup,
     setselectedGroup,

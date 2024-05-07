@@ -10,6 +10,7 @@ import { RefreshControl, StyleSheet } from 'react-native';
 import { Colors } from '../../app/Colors';
 import { ScrollView } from 'react-native-gesture-handler';
 import { useDarkMode } from '../../hooks/useDarkMode';
+import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 
 export const DriveStatusPage = memo(() => {
   const { data: status, error, refetch } = useDrive(ChatDrive).getStatus;
@@ -30,25 +31,27 @@ export const DriveStatusPage = memo(() => {
   const sizeInfo = status.sizeInfo;
 
   return (
-    <ErrorBoundary>
-      <ErrorNotification error={error} />
-      <Container
-        style={{
-          flex: 1,
-        }}
-      >
-        <ScrollView
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={doRefresh} />}
+    <SafeAreaView>
+      <ErrorBoundary>
+        <ErrorNotification error={error} />
+        <Container
+          style={{
+            flex: 1,
+          }}
         >
-          <Text style={styles.header}>Inbox</Text>
-          <InboxItems {...inbox} />
-          <Text style={styles.header}>Outbox</Text>
-          <OutBoxItems {...outbox} />
-          <Text style={styles.header}>Size Info</Text>
-          <SizeInfo {...sizeInfo} />
-        </ScrollView>
-      </Container>
-    </ErrorBoundary>
+          <ScrollView
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={doRefresh} />}
+          >
+            <Text style={styles.header}>Inbox</Text>
+            <InboxItems {...inbox} />
+            <Text style={styles.header}>Outbox</Text>
+            <OutBoxItems {...outbox} />
+            <Text style={styles.header}>Size Info</Text>
+            <SizeInfo {...sizeInfo} />
+          </ScrollView>
+        </Container>
+      </ErrorBoundary>
+    </SafeAreaView>
   );
 });
 
