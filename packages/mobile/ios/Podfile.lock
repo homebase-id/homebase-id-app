@@ -1211,6 +1211,11 @@ PODS:
     - React-Core
   - RNLocalize (3.1.0):
     - React-Core
+  - RNNotifee (7.8.2):
+    - React-Core
+    - RNNotifee/NotifeeCore (= 7.8.2)
+  - RNNotifee/NotifeeCore (7.8.2):
+    - React-Core
   - RNPermissions (4.1.5):
     - React-Core
   - RNReanimated (3.8.1):
@@ -1310,6 +1315,7 @@ DEPENDENCIES:
   - RNGestureHandler (from `../../../node_modules/react-native-gesture-handler`)
   - RNInAppBrowser (from `../../../node_modules/react-native-inappbrowser-reborn`)
   - RNLocalize (from `../../../node_modules/react-native-localize`)
+  - "RNNotifee (from `../../../node_modules/@notifee/react-native`)"
   - RNPermissions (from `../../../node_modules/react-native-permissions`)
   - RNReanimated (from `../../../node_modules/react-native-reanimated`)
   - RNScreens (from `../../../node_modules/react-native-screens`)
@@ -1493,6 +1499,8 @@ EXTERNAL SOURCES:
     :path: "../../../node_modules/react-native-inappbrowser-reborn"
   RNLocalize:
     :path: "../../../node_modules/react-native-localize"
+  RNNotifee:
+    :path: "../../../node_modules/@notifee/react-native"
   RNPermissions:
     :path: "../../../node_modules/react-native-permissions"
   RNReanimated:
@@ -1601,6 +1609,7 @@ SPEC CHECKSUMS:
   RNGestureHandler: 0c8b0283d2aff561162b2f55c604d2f1f8e2c4ea
   RNInAppBrowser: e36d6935517101ccba0e875bac8ad7b0cb655364
   RNLocalize: e8694475db034bf601e17bd3dfa8986565e769eb
+  RNNotifee: 8e2d3df3f0e9ce8f5d1fe4c967431138190b6175
   RNPermissions: 2ee1472892d0346d1db3f31abf2fbe5d399a4ba8
   RNReanimated: 4b1bce37b188450e3a2d03c925edd5fb11d4bb2d
   RNScreens: 97a2a32820e632c5978d75250afa397ed9053910
