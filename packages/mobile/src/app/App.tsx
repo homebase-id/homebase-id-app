@@ -204,7 +204,7 @@ let App = () => {
 const codePushOptions = { checkFrequency: CodePush.CheckFrequency.MANUAL };
 App = CodePush(codePushOptions)(App);
 
-export const navigationContainerRef = createNavigationContainerRef();
+const navigationContainerRef = createNavigationContainerRef();
 const StackRoot = createNativeStackNavigator<AuthStackParamList>();
 const RootStack = () => {
   const { isAuthenticated } = useAuth();
@@ -447,7 +447,6 @@ const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Chat'>) =>
       />
       <StackChat.Screen
         name="ShareChat"
-        // component={(props) => <ChatPage {...props} />} // This is faster, but react-navigation goes crazy with warnings
         component={ShareChatPage}
         options={{
           headerShown: true,

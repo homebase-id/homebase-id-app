@@ -15,17 +15,25 @@ import { FEED_APP_ID } from '../../app/constants';
 import { PostComposer } from '../../components/Feed/Composer/PostComposer';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { Plus } from '../../components/ui/Icons/icons';
+import { useIsFocused } from '@react-navigation/native';
+import { useNetInfo } from '@react-native-community/netinfo';
+
+import { Text, View } from 'react-native';
+import { t } from 'feed-app-common';
 
 type FeedProps = NativeStackScreenProps<TabStackParamList, 'Feed'>;
 
 export const FeedPage = memo((_props: FeedProps) => {
+  const netInfo = useNetInfo();
+
   const { isDarkMode } = useDarkMode();
   const { authToken, getIdentity, getSharedSecret } = useAuth();
   const identity = getIdentity();
 
   const [isPostComposerOpen, setIsPostComposerOpen] = useState<boolean>();
 
-  useRemoveNotifications({ appId: FEED_APP_ID });
+  const isFocused = useIsFocused();
+  useRemoveNotifications({ enabled: isFocused, appId: FEED_APP_ID });
 
   const sharedSecret = getSharedSecret();
   const base64SharedSecret = sharedSecret ? uint8ArrayToBase64(sharedSecret) : '';
@@ -84,53 +92,68 @@ export const FeedPage = memo((_props: FeedProps) => {
   return (
     <SafeAreaView>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <BottomSheetModalProvider>
-        {identity && uri ? (
-          <ScrollView
-            contentContainerStyle={{ flex: 1 }}
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                enabled={refresherEnabled}
-                onRefresh={() => webviewRef.current?.reload()}
-              />
-            }
-          >
-            <WebView
-              ref={webviewRef}
-              source={{ uri }}
-              injectedJavaScriptBeforeContentLoaded={INJECTED_JAVASCRIPT}
-              pullToRefreshEnabled={true}
-              style={{ backgroundColor: isDarkMode ? Colors.slate[900] : Colors.slate[50] }}
-              originWhitelist={originWhitelist} // Keeps the WebView from navigating away from the feed-app; Any links that don't match will be opened by the system.. Eg: open in the browser
-              onScroll={handleScroll}
-              onLoadEnd={() => setRefreshing(false)}
-              forceDarkOn={isDarkMode}
-            />
-            <TouchableOpacity
-              style={{
-                width: 50,
-                height: 50,
-                borderRadius: 25,
-                backgroundColor: Colors.indigo[500],
-                flexDirection: 'row',
-                justifyContent: 'center',
-                alignItems: 'center',
-                position: 'absolute',
-                bottom: 20,
-                right: 20,
-              }}
-              onPress={() => setIsPostComposerOpen(true)}
+      {netInfo.isConnected === false ? (
+        <View
+          style={{
+            flex: 1,
+            alignItems: 'center',
+            flexDirection: 'column',
+            justifyContent: 'center',
+          }}
+        >
+          <Text style={{ textAlign: 'center', paddingHorizontal: 7 }}>
+            {t("You're identity can't be reached. Make sure you're online or try again later")}
+          </Text>
+        </View>
+      ) : (
+        <BottomSheetModalProvider>
+          {identity && uri ? (
+            <ScrollView
+              contentContainerStyle={{ flex: 1 }}
+              refreshControl={
+                <RefreshControl
+                  refreshing={refreshing}
+                  enabled={refresherEnabled}
+                  onRefresh={() => webviewRef.current?.reload()}
+                />
+              }
             >
-              <Plus color={Colors.white} size="lg" />
-            </TouchableOpacity>
-          </ScrollView>
-        ) : null}
+              <WebView
+                ref={webviewRef}
+                source={{ uri }}
+                injectedJavaScriptBeforeContentLoaded={INJECTED_JAVASCRIPT}
+                pullToRefreshEnabled={true}
+                style={{ backgroundColor: isDarkMode ? Colors.slate[900] : Colors.slate[50] }}
+                originWhitelist={originWhitelist} // Keeps the WebView from navigating away from the feed-app; Any links that don't match will be opened by the system.. Eg: open in the browser
+                onScroll={handleScroll}
+                onLoadEnd={() => setRefreshing(false)}
+                forceDarkOn={isDarkMode}
+              />
+              <TouchableOpacity
+                style={{
+                  width: 50,
+                  height: 50,
+                  borderRadius: 25,
+                  backgroundColor: Colors.indigo[500],
+                  flexDirection: 'row',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  position: 'absolute',
+                  bottom: 20,
+                  right: 20,
+                }}
+                onPress={() => setIsPostComposerOpen(true)}
+              >
+                <Plus color={Colors.white} size="lg" />
+              </TouchableOpacity>
+            </ScrollView>
+          ) : null}
 
-        {isPostComposerOpen ? (
-          <PostComposer onPost={doCloseAndRefresh} onCancel={doCloseComposer} />
-        ) : null}
-      </BottomSheetModalProvider>
+          {isPostComposerOpen ? (
+            <PostComposer onPost={doCloseAndRefresh} onCancel={doCloseComposer} />
+          ) : null}
+        </BottomSheetModalProvider>
+      )}
     </SafeAreaView>
   );
 });
