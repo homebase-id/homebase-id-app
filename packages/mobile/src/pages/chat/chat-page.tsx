@@ -328,20 +328,23 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
       return;
     }
     const pastedItems: Asset[] = await Promise.all(
-      files.map(async (file) => {
-        const { width, height } = await new Promise<{
-          width: number;
-          height: number;
-        }>((resolve) => Image.getSize(file.uri, (width, height) => resolve({ width, height })));
-        return {
-          uri: file.uri,
-          type: file.type,
-          fileName: file.fileName,
-          fileSize: file.fileSize,
-          height: height,
-          width: width,
-        };
-      })
+      files
+        .map(async (file) => {
+          if (!file.type.startsWith('image')) return {};
+          const { width, height } = await new Promise<{
+            width: number;
+            height: number;
+          }>((resolve) => Image.getSize(file.uri, (width, height) => resolve({ width, height })));
+          return {
+            uri: file.uri,
+            type: file.type,
+            fileName: file.fileName,
+            fileSize: file.fileSize,
+            height: height,
+            width: width,
+          };
+        })
+        .filter((value) => Object.keys(value).length > 0)
     );
     setAssets((old) => [...old, ...pastedItems]);
   }, []);
