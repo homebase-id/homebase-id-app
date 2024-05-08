@@ -11,6 +11,8 @@ import useContact from '../../hooks/contact/useContact';
 import { ChatDeliveryIndicator } from './Chat-Delivery-Indicator';
 import { ChatMessageContent } from './Chat-Message-Content';
 import { OwnerAvatar, GroupAvatar, Avatar } from '../ui/Avatars/Avatar';
+import { useDraftMessage } from '../../hooks/chat/useDraftMessage';
+import { ellipsisAtMaxChar } from 'feed-app-common';
 
 type ConversationTileProps = {
   onPress?: () => void;
@@ -32,6 +34,7 @@ const ConversationTile = memo((props: ConversationTileProps) => {
         ?.filter(Boolean) as HomebaseFile<ChatMessage>[],
     [chatMessages]
   );
+  const { data: draftMessage } = useDraftMessage(props.conversationId).get;
   const { isDarkMode } = useDarkMode();
   const { data: connection } = useContact(props.odinId).fetch;
 
@@ -52,7 +55,6 @@ const ConversationTile = memo((props: ConversationTileProps) => {
     [flatMessages, lastReadTime]
   );
 
-  const colorMode = useMemo(() => (isDarkMode ? Colors.white : Colors.slate[900]), [isDarkMode]);
   const underlayColor = useMemo(
     () => (isDarkMode ? Colors.slate[900] : Colors.slate[100]),
     [isDarkMode]
@@ -85,7 +87,7 @@ const ConversationTile = memo((props: ConversationTileProps) => {
             numberOfLines={1}
             style={{
               ...styles.title,
-              color: colorMode,
+              color: isDarkMode ? Colors.white : Colors.slate[900],
             }}
           >
             {isGroup || props.isSelf
@@ -95,7 +97,9 @@ const ConversationTile = memo((props: ConversationTileProps) => {
             {props.isSelf ? <Text style={styles.you}>(you)</Text> : null}
           </Text>
 
-          {lastMessage && lastMessageContent ? (
+          {draftMessage ? (
+            <DraftMessage message={draftMessage} />
+          ) : lastMessage && lastMessageContent ? (
             <View
               style={{
                 flexDirection: 'row',
@@ -108,7 +112,7 @@ const ConversationTile = memo((props: ConversationTileProps) => {
                 style={[
                   styles.description,
                   {
-                    color: colorMode,
+                    color: isDarkMode ? Colors.white : Colors.slate[900],
                   },
                   lastMessage.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus
                     ? styles.deleted
@@ -133,6 +137,29 @@ const ConversationTile = memo((props: ConversationTileProps) => {
     </TouchableHighlight>
   );
 });
+
+const DraftMessage = ({ message }: { message: string }) => {
+  const { isDarkMode } = useDarkMode();
+  return (
+    <Text
+      style={{
+        ...styles.description,
+        fontWeight: '500',
+        color: Colors.gray[500],
+      }}
+    >
+      Draft:{' '}
+      <Text
+        style={{
+          color: isDarkMode ? Colors.slate[400] : Colors.slate[700],
+          fontWeight: '400',
+        }}
+      >
+        {ellipsisAtMaxChar(message, 30)}
+      </Text>
+    </Text>
+  );
+};
 
 const UnreadCount = ({ count }: { count: number }) => {
   const { isDarkMode } = useDarkMode();

@@ -405,6 +405,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
                   setAssets={setAssets}
                   hasMoreMessages={hasMoreMessages}
                   fetchMoreMessages={fetchMoreMessages}
+                  conversationId={route.params.convoId}
                 />
               </ErrorBoundary>
             </Pressable>
