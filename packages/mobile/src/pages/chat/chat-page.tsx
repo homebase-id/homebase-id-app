@@ -2,7 +2,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Dimensions, Keyboard, Platform, Pressable, StyleSheet, View } from 'react-native';
+import { Dimensions, Image, Keyboard, Platform, Pressable, StyleSheet, View } from 'react-native';
 import { ChatAppBar, SelectedMessageProp } from '../../components/Chat/Chat-app-bar';
 import { Asset } from 'react-native-image-picker';
 import { ChatDeletedArchivalStaus, ChatMessage } from '../../provider/chat/ChatProvider';
@@ -36,6 +36,7 @@ import { NoConversationHeader } from '../../components/Chat/NoConversationHeader
 import { ChatForwardModal } from '../../components/Chat/Chat-Forward';
 import Dialog from 'react-native-dialog';
 import { BlurView } from '@react-native-community/blur';
+import { PastedFile } from '@mattermost/react-native-paste-input';
 
 export type SelectedMessageState = {
   messageCordinates: { x: number; y: number };
@@ -321,6 +322,30 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
     setSelectedMessage(initalSelectedMessageState);
   }, [initalSelectedMessageState]);
 
+  const onPaste = useCallback(async (error: string | null | undefined, files: PastedFile[]) => {
+    if (error) {
+      console.error('Error while pasting:', error);
+      return;
+    }
+    const pastedItems: Asset[] = await Promise.all(
+      files.map(async (file) => {
+        const { width, height } = await new Promise<{
+          width: number;
+          height: number;
+        }>((resolve) => Image.getSize(file.uri, (width, height) => resolve({ width, height })));
+        return {
+          uri: file.uri,
+          type: file.type,
+          fileName: file.fileName,
+          fileSize: file.fileSize,
+          height: height,
+          width: width,
+        };
+      })
+    );
+    setAssets((old) => [...old, ...pastedItems]);
+  }, []);
+
   if (!conversation) {
     if (isLoadingConversation) return null;
     return <NoConversationHeader title="No conversation found" goBack={navigation.goBack} />;
@@ -373,6 +398,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
                   replyMessage={replyMessage}
                   setReplyMessage={setReplyMessage}
                   assets={assets}
+                  onPaste={onPaste}
                   setAssets={setAssets}
                   hasMoreMessages={hasMoreMessages}
                   fetchMoreMessages={fetchMoreMessages}

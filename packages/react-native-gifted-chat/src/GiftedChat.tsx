@@ -56,6 +56,10 @@ import { Send, SendProps } from './Send';
 import { SystemMessage, SystemMessageProps } from './SystemMessage';
 import { Time, TimeProps } from './Time';
 import * as utils from './utils';
+import {
+  PasteInputProps,
+  PasteInputRef,
+} from '@mattermost/react-native-paste-input';
 
 dayjs.extend(localizedFormat);
 
@@ -222,6 +226,7 @@ export interface GiftedChatProps<TMessage extends IMessage = IMessage> {
     props: Message<TMessage>['props'],
     nextProps: Message<TMessage>['props'],
   ): boolean;
+  onPaste: PasteInputProps['onPaste'];
 }
 
 const isDebug = false;
@@ -257,7 +262,8 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
     minComposerHeight = MIN_COMPOSER_HEIGHT,
     maxComposerHeight = MAX_COMPOSER_HEIGHT,
     messageContainerRef = createRef<FlatList<IMessage>>(),
-    textInputRef = createRef<TextInput>(),
+    textInputRef = createRef<PasteInputRef>(),
+    onPaste = null,
   } = props;
 
   const keyboardHeightRef = useRef(0);
@@ -628,6 +634,7 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
         ref: textInputRef,
         maxLength: typingDisabled ? 0 : maxInputLength,
       },
+      onPaste,
     }),
     [props, _composerHeight, typingDisabled],
   );

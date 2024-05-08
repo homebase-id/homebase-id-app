@@ -2,8 +2,6 @@ import React, { memo, useCallback, useRef } from 'react';
 import {
   Platform,
   StyleSheet,
-  TextInput,
-  TextInputProps,
   NativeSyntheticEvent,
   TextInputContentSizeChangeEventData,
   ViewStyle,
@@ -11,6 +9,9 @@ import {
 } from 'react-native';
 import { MIN_COMPOSER_HEIGHT, DEFAULT_PLACEHOLDER } from './Constant';
 import Color from './Color';
+import PasteInput, {
+  PasteInputProps,
+} from '@mattermost/react-native-paste-input';
 
 const styles = StyleSheet.create({
   textInput: {
@@ -40,10 +41,10 @@ export interface ComposerProps {
   defaultValue?: string;
   placeholder?: string;
   placeholderTextColor?: string;
-  textInputProps?: Partial<TextInputProps>;
-  textInputStyle?: TextInputProps['style'];
+  textInputProps?: Partial<PasteInputProps>;
+  textInputStyle?: PasteInputProps['style'];
   textInputAutoFocus?: boolean;
-  keyboardAppearance?: TextInputProps['keyboardAppearance'];
+  keyboardAppearance?: PasteInputProps['keyboardAppearance'];
   multiline?: boolean;
   disableComposer?: boolean;
   onTextChanged?(text: string): void;
@@ -51,6 +52,7 @@ export interface ComposerProps {
   containerStyle?: ViewStyle;
   children?: React.ReactNode;
   hasText: boolean | undefined;
+  onPaste: PasteInputProps['onPaste'];
 }
 
 export const Composer = memo(
@@ -68,6 +70,7 @@ export const Composer = memo(
       textInputAutoFocus = false,
       textInputProps = {},
       textInputStyle,
+      onPaste,
     } = props;
 
     const dimensionsRef = useRef<{ width: number; height: number }>();
@@ -107,7 +110,7 @@ export const Composer = memo(
           props.containerStyle,
         ]}
       >
-        <TextInput
+        <PasteInput
           testID={placeholder}
           accessible
           accessibilityLabel={placeholder}
@@ -115,6 +118,7 @@ export const Composer = memo(
           placeholderTextColor={placeholderTextColor}
           multiline={multiline}
           editable={!disableComposer}
+          onPaste={onPaste}
           onContentSizeChange={handleContentSizeChange}
           onChangeText={onTextChanged}
           style={[styles.textInput, textInputStyle]}

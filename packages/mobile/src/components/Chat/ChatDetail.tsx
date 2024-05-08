@@ -65,6 +65,7 @@ import { SafeAreaView } from '../ui/SafeAreaView/SafeAreaView';
 import { FileOverview } from '../Files/FileOverview';
 
 import { getLocales, uses24HourClock } from 'react-native-localize';
+import { type PastedFile } from '@mattermost/react-native-paste-input';
 
 export type ChatMessageIMessage = IMessage & HomebaseFile<ChatMessage>;
 
@@ -80,7 +81,7 @@ export const ChatDetail = memo(
     setReplyMessage,
     assets,
     setAssets,
-
+    onPaste,
     hasMoreMessages,
     fetchMoreMessages,
   }: {
@@ -96,6 +97,7 @@ export const ChatDetail = memo(
     }) => void;
     doOpenMessageInfo: (message: ChatMessageIMessage) => void;
     doOpenReactionModal: (message: ChatMessageIMessage) => void;
+    onPaste: (error: string | null | undefined, files: PastedFile[]) => void;
 
     replyMessage: ChatMessageIMessage | null;
     setReplyMessage: (message: ChatMessageIMessage | null) => void;
@@ -514,6 +516,7 @@ export const ChatDetail = memo(
           onLongPress={(e, _, m: ChatMessageIMessage) => onLongPress(e, m)}
           isKeyboardInternallyHandled={true}
           keyboardShouldPersistTaps="never"
+          onPaste={onPaste}
           renderMessageImage={(prop: MessageImageProps<ChatMessageIMessage>) => (
             <MediaMessage props={prop} onLongPress={onLongPress} />
           )}
