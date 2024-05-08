@@ -17,10 +17,13 @@ export const useDraftMessage = (conversationId: string | undefined) => {
             queryKey: ['draft', conversationId],
             queryFn: getDraftMessage,
             enabled: !!conversationId,
+            staleTime: 0,
+            gcTime: 0,
         }),
         set: useMutation({
             mutationKey: ['draft', conversationId],
             mutationFn: setDraftMessage,
+            gcTime: 0,
             onSettled: () => {
                 queryClient.invalidateQueries({ queryKey: ['draft', conversationId] });
             },
