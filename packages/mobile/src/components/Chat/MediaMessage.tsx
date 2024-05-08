@@ -26,6 +26,7 @@ import { OdinBlob } from '../../../polyfills/OdinBlob';
 import { Colors } from '../../app/Colors';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { calculateScaledDimensions } from '../../utils/utils';
+import { BoringFile } from '../ui/Media/BoringFile';
 
 const MediaMessage = memo(
   ({
@@ -65,8 +66,6 @@ const MediaMessage = memo(
           containerStyle={props.containerStyle}
           onLongPress={(e) => onLongPress(e, currentMessage)}
           style={{
-            // maxWidth: aspectRatio === 1 ? 300 : aspectRatio > 1 ? '100%' : '80%',
-            // maxHeight: aspectRatio === 1 ? 300 : aspectRatio > 1 ? undefined : '100%',
             borderRadius: 10,
             aspectRatio: aspectRatio,
           }}
@@ -262,6 +261,11 @@ const InnerMediaItem = ({
   if (payload.contentType.startsWith('audio/')) {
     return (
       <OdinAudio key={payload.key} fileId={msg.fileId} payload={payload as PayloadDescriptor} />
+    );
+  }
+  if (payload.contentType.startsWith('application/')) {
+    return (
+      <BoringFile file={payload} fileId={msg.fileId} targetDrive={ChatDrive} odinId={undefined} />
     );
   } else {
     return (

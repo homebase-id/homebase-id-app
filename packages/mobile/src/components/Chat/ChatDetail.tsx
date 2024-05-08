@@ -636,7 +636,9 @@ const RenderBubble = memo(
     const hasPayloadandNoText =
       message?.fileMetadata.payloads?.length > 0 &&
       !content?.message &&
-      !message.fileMetadata.payloads?.some((val) => val.contentType.startsWith('audio'));
+      !message.fileMetadata.payloads?.some(
+        (val) => val.contentType.startsWith('audio') || val.contentType.startsWith('application')
+      );
 
     const renderTime = useCallback(
       (timeProp: TimeProps<ChatMessageIMessage>) => {
