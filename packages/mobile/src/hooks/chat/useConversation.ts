@@ -308,4 +308,5 @@ export const getConversationQueryOptions: (
   refetchOnMount: false,
   staleTime: 1000 * 60 * 60, // 1 hour
   enabled: !!conversationId,
+  networkMode: 'offlineFirst',
 });
