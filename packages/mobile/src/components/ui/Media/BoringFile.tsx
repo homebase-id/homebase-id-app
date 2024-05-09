@@ -1,6 +1,6 @@
 import { NewPayloadDescriptor, PayloadDescriptor, TargetDrive } from '@youfoundation/js-lib/core';
-import { memo, useEffect, useState } from 'react';
-import { ActivityIndicator, Linking, Platform, Pressable, View } from 'react-native';
+import { memo, useCallback, useEffect, useState } from 'react';
+import { ActivityIndicator, Platform, Pressable, View } from 'react-native';
 import { Download, Pdf } from '../Icons/icons';
 import { Text } from '../Text/Text';
 import { getPayloadSize } from '../../../utils/utils';
@@ -24,40 +24,42 @@ export const BoringFile = memo(
     const [loading, setLoading] = useState(false);
     const [blob, setBlob] = useState<OdinBlob | null>(null);
 
-    const downloadAndOpen = async () => {
+    const openDocument = useCallback(
+      async (payload?: OdinBlob) => {
+        if (!blob && !payload) {
+          console.error('No file to open');
+          return;
+        }
+        const uri = blob?.uri || payload?.uri;
+        if (!uri) {
+          return;
+        }
+        if (Platform.OS === 'ios') {
+          await ReactNativeBlobUtil.ios.openDocument(uri);
+        } else if (Platform.OS === 'android') {
+          try {
+            await ReactNativeBlobUtil.android.actionViewIntent(
+              uri,
+              blob?.type || payload?.type || 'application/pdf'
+            );
+          } catch (error) {
+            console.error('Error opening document', error);
+          }
+        }
+      },
+      [blob]
+    );
+
+    const downloadAndOpen = useCallback(async () => {
       setLoading(true);
       const payload = await downloadFile(odinId, fileId, file.key);
       setLoading(false);
       if (!payload) return;
       else {
-        console.log('payload', payload);
         setBlob(payload);
         await openDocument(payload);
       }
-    };
-
-    const openDocument = async (payload?: OdinBlob) => {
-      if (!blob && !payload) {
-        console.error('No file to open');
-        return;
-      }
-      const uri = blob?.uri || payload?.uri;
-      if (!uri) {
-        return;
-      }
-      if (Platform.OS === 'ios') {
-        await ReactNativeBlobUtil.ios.openDocument(uri);
-      } else if (Platform.OS === 'android') {
-        try {
-          await ReactNativeBlobUtil.android.actionViewIntent(
-            uri,
-            blob?.type || payload?.type || 'application/pdf'
-          );
-        } catch (error) {
-          console.error('Error opening document', error);
-        }
-      }
-    };
+    }, [downloadFile, file.key, fileId, odinId, openDocument]);
 
     useEffect(() => {
       const prefetchFile = async () => {
