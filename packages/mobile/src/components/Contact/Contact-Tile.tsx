@@ -58,6 +58,7 @@ export const ContactTile = ({
               targetDrive={ContactConfig.ContactTargetDrive}
               fit="cover"
               alt={contact.name?.displayName}
+              odinId={profile.odinId}
               fileId={contactData?.fileId}
               enableZoom={false}
               avoidPayload={true}

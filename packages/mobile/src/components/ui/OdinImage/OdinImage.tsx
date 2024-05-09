@@ -95,7 +95,8 @@ export const OdinImage = memo(
       imageDrive: targetDrive,
     });
 
-    const previewUrl = cachedImage?.url || embeddedThumbUrl || tinyThumb?.url;
+    const previewUrl =
+      cachedImage?.url || embeddedThumbUrl || tinyThumb?.url || `https://${odinId}/pub/image`;
     const previewContentType =
       cachedImage?.type || previewThumbnail?.contentType || tinyThumb?.contentType;
 
