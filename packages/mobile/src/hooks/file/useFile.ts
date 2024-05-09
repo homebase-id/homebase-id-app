@@ -1,20 +1,35 @@
 import { TargetDrive } from '@youfoundation/js-lib/core';
 import { useDotYouClientContext } from 'feed-app-common';
-import { getPayloadBytes } from '../../provider/image/RNImageProvider';
 import { useAuth } from '../auth/useAuth';
+import { getPayloadFile } from '../../provider/files/RNFileProvider';
+import { CachesDirectoryPath, exists } from 'react-native-fs';
+import { OdinBlob } from '../../../polyfills/OdinBlob';
 
 export const useFile = ({ targetDrive }: { targetDrive: TargetDrive }) => {
     const dotYouClient = useDotYouClientContext();
     const authToken = useAuth().authToken;
 
-    const fetchFile = async (odinId: string | undefined, fileId: string, payloadKey?: string) => {
+    const downloadFile = async (odinId: string | undefined, fileId: string, payloadKey?: string) => {
         if (!fileId || !payloadKey || !authToken) return null;
-        const payload = await getPayloadBytes(dotYouClient, targetDrive, fileId, payloadKey, authToken);
+        const payload = await getPayloadFile(dotYouClient, targetDrive, fileId, payloadKey, authToken);
         if (!payload) return null;
         return payload;
     };
 
+    const fetchLocalFile = async (fileId: string, contentType: string) => {
+        const localPath = CachesDirectoryPath + `/${fileId}` + `.${contentType.split('/')[1]}`;
+        const uri = `file://${localPath}`;
+        console.log('localPath', uri);
+        if (await exists(localPath)) {
+            return new OdinBlob(uri, { type: contentType });
+        }
+        return null;
+    };
+
     return {
-        fetchFile: fetchFile,
+        downloadFile: downloadFile,
+        fetchFile: fetchLocalFile,
     };
 };
+
+
