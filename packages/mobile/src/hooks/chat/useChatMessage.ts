@@ -1,6 +1,13 @@
-import { InfiniteData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  InfiniteData,
+  UseMutationOptions,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 
 import {
+  DotYouClient,
   HomebaseFile,
   NewHomebaseFile,
   SecurityGroupType,
@@ -23,6 +30,62 @@ import {
   SingleConversation,
 } from '../../provider/chat/ConversationProvider';
 import { OdinBlob } from '../../../polyfills/OdinBlob';
+import { getSynchronousDotYouClient } from './getSynchronousDotYouClient';
+
+export const sendMessage = async ({
+  conversationId,
+  recipients,
+  replyId,
+  files,
+  message,
+}: {
+  conversationId: string;
+  recipients: string[];
+  replyId?: string;
+  files?: ImageSource[];
+  message: string;
+}): Promise<NewHomebaseFile<ChatMessage> | null> => {
+  const dotYouClient = await getSynchronousDotYouClient();
+
+  const newChatId = getNewId();
+  const newChat: NewHomebaseFile<ChatMessage> = {
+    fileMetadata: {
+      appData: {
+        uniqueId: newChatId,
+        groupId: conversationId,
+        content: {
+          message: message,
+          deliveryStatus: ChatDeliveryStatus.Sent,
+          replyId: replyId,
+        },
+        userDate: new Date().getTime(),
+      },
+    },
+    serverMetadata: {
+      accessControlList: {
+        requiredSecurityGroup: SecurityGroupType.Connected,
+      },
+    },
+  };
+
+  const uploadResult = await uploadChatMessage(dotYouClient, newChat, recipients, files);
+  if (!uploadResult) throw new Error('Failed to send the chat message');
+
+  newChat.fileId = uploadResult.file.fileId;
+  newChat.fileMetadata.versionTag = uploadResult.newVersionTag;
+  newChat.fileMetadata.appData.previewThumbnail = uploadResult.previewThumbnail;
+
+  const deliveredToInboxes = recipients.map(
+    (recipient) =>
+      uploadResult.recipientStatus[recipient].toLowerCase() === TransferStatus.DeliveredToInbox
+  );
+
+  if (recipients.length && deliveredToInboxes.every((delivered) => delivered)) {
+    newChat.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Delivered;
+    await updateChatMessage(dotYouClient, newChat, recipients, uploadResult.keyHeader);
+  }
+  return newChat;
+};
 
 export const useChatMessage = (props?: { messageId: string | undefined }) => {
   const queryClient = useQueryClient();
@@ -31,59 +94,6 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
   const getMessageByUniqueId = async (messageId: string) => {
     // TODO: Improve by fetching the message from the cache on conversations first
     return await getChatMessage(dotYouClient, messageId);
-  };
-
-  const sendMessage = async ({
-    conversationId,
-    recipients,
-    replyId,
-    files,
-    message,
-  }: {
-    conversationId: string;
-    recipients: string[];
-    replyId?: string;
-    files?: ImageSource[];
-    message: string;
-  }): Promise<NewHomebaseFile<ChatMessage> | null> => {
-    const newChatId = getNewId();
-    const newChat: NewHomebaseFile<ChatMessage> = {
-      fileMetadata: {
-        appData: {
-          uniqueId: newChatId,
-          groupId: conversationId,
-          content: {
-            message: message,
-            deliveryStatus: ChatDeliveryStatus.Sent,
-            replyId: replyId,
-          },
-          userDate: new Date().getTime(),
-        },
-      },
-      serverMetadata: {
-        accessControlList: {
-          requiredSecurityGroup: SecurityGroupType.Connected,
-        },
-      },
-    };
-
-    const uploadResult = await uploadChatMessage(dotYouClient, newChat, recipients, files);
-    if (!uploadResult) throw new Error('Failed to send the chat message');
-
-    newChat.fileId = uploadResult.file.fileId;
-    newChat.fileMetadata.versionTag = uploadResult.newVersionTag;
-    newChat.fileMetadata.appData.previewThumbnail = uploadResult.previewThumbnail;
-
-    const deliveredToInboxes = recipients.map(
-      (recipient) =>
-        uploadResult.recipientStatus[recipient].toLowerCase() === TransferStatus.DeliveredToInbox
-    );
-
-    if (recipients.length && deliveredToInboxes.every((delivered) => delivered)) {
-      newChat.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Delivered;
-      await updateChatMessage(dotYouClient, newChat, recipients, uploadResult.keyHeader);
-    }
-    return newChat;
   };
 
   const updateMessage = async ({
@@ -111,6 +121,7 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
       refetchOnWindowFocus: false,
     }),
     send: useMutation({
+      mutationKey: ['send-chat-message'],
       mutationFn: sendMessage,
       onMutate: async ({ conversationId, recipients, replyId, files, message }) => {
         const existingData = queryClient.getQueryData<
@@ -231,3 +242,7 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
     }),
   };
 };
+
+// export const sendChatMessageMutationOptions: () => UseMutationOptions = () => ({
+
+// })

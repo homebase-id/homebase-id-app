@@ -70,6 +70,7 @@ import { NativeStackNavigationOptions } from '@react-navigation/native-stack';
 import { DriveStatusPage } from '../pages/profile/drive-status-page';
 import { SharedItem, useShareManager } from '../hooks/platform/useShareManager';
 import { ShareChatPage } from '../pages/chat/share-chat-page';
+import { sendMessage } from '../hooks/chat/useChatMessage';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -130,6 +131,13 @@ const queryClient = new QueryClient({
       retry: 2,
       gcTime: Infinity,
     },
+  },
+});
+
+queryClient.setMutationDefaults(['send-chat-message'], {
+  mutationFn: sendMessage,
+  onError: (err, messageParams, context) => {
+    console.error('Failed to send the chat message', err);
   },
 });
 
