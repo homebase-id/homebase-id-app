@@ -1,5 +1,6 @@
 import messaging, { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
 import { PushNotificationOptions } from '@youfoundation/js-lib/core';
+import notifee from '@notifee/react-native';
 
 //
 // CAVEATS GALORE!
@@ -64,6 +65,7 @@ const onMessageReceived = async (message: FirebaseMessagingTypes.RemoteMessage):
   let notification: PushNotificationMessage;
   try {
     notification = parseNotificationMessage(message);
+    await notifee.incrementBadgeCount();
   } catch (error) {
     console.error('Failed to parse notification message:', error);
     return;

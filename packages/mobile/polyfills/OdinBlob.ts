@@ -65,7 +65,7 @@ class Blob {
         this.written = true;
       });
     } else if (typeof parts === 'string') {
-      const id = getNewId();
+      const id = options?.id || getNewId();
       this.data = {
         blobId: id,
         offset: 0,
@@ -148,9 +148,9 @@ class Blob {
       }, 100);
     });
 
-    const destinationUri = `file://${CachesDirectoryPath}/${this.data.blobId}-encrypted.${
-      this.data.type.split('/')[1]
-    }`;
+    const destinationUri = `file://${CachesDirectoryPath}/${this.data.blobId}-encrypted.${this.data.type.split('/')[1]
+      }`;
+
 
     const encryptStatus = await OdinBlobModule.encryptFileWithAesCbc16(
       this.uri,

@@ -6,6 +6,7 @@ import { ChatStackParamList, TabStackParamList } from '../../app/App';
 import { PushNotification } from '@youfoundation/js-lib/core';
 import { useDotYouClientContext } from 'feed-app-common';
 import { useEffect } from 'react';
+import notifee from '@notifee/react-native';
 
 export const useInitialPushNotification = () => {
   const identity = useDotYouClientContext().getIdentity();
@@ -25,6 +26,7 @@ export const useInitialPushNotification = () => {
           initialNotification.data.data
         );
         if (notification) {
+          await notifee.decrementBadgeCount();
           navigateOnNotification(notification, identity, chatNavigator, feedNavigator);
         }
       }

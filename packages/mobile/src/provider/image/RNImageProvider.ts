@@ -365,9 +365,8 @@ const buildIvFromQueryString = async (querystring: string) => {
   const uniqueQueryKey = (() => {
     // Check if it's a direct file request
     if (searchParams.has('fileId')) {
-      return `${searchParams.get('fileId')} ${
-        searchParams.get('key') || searchParams.get('payloadKey')
-      }-${searchParams.get('height')}x${searchParams.get('width')}`;
+      return `${searchParams.get('fileId')} ${searchParams.get('key') || searchParams.get('payloadKey')
+        }-${searchParams.get('height')}x${searchParams.get('width')}`;
     }
     // Check if it's a query-batch/modifed request; Queries on a single drive (alias)
     else if (searchParams.has('alias')) return querystring;
@@ -389,7 +388,7 @@ const buildIvFromQueryString = async (querystring: string) => {
   return returnBytes;
 };
 
-const encryptUrl = async (url: string, ss: Uint8Array) => {
+export const encryptUrl = async (url: string, ss: Uint8Array) => {
   const parts = (url ?? '').split('?');
   const querystring = parts.length === 2 ? parts[1] : '';
   if (!querystring.length) return url;

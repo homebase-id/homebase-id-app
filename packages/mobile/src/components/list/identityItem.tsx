@@ -1,9 +1,8 @@
 import { View, Text } from 'react-native';
 import useContact from '../../hooks/contact/useContact';
-import { OdinImage } from '../ui/OdinImage/OdinImage';
-import { CONTACT_PROFILE_IMAGE_KEY, ContactConfig } from '@youfoundation/js-lib/network';
 import { Colors } from '../../app/Colors';
 import { useDarkMode } from '../../hooks/useDarkMode';
+import { Avatar } from '../ui/Avatars/Avatar';
 
 export const IdentityItem = ({ odinId }: { odinId: string }) => {
   const { isDarkMode } = useDarkMode();
@@ -20,12 +19,10 @@ export const IdentityItem = ({ odinId }: { odinId: string }) => {
       }}
     >
       {contactFile ? (
-        <OdinImage
-          fileId={contactFile?.fileId}
-          fileKey={CONTACT_PROFILE_IMAGE_KEY}
-          targetDrive={ContactConfig.ContactTargetDrive}
-          imageSize={{ width: 50, height: 50 }}
+        <Avatar
+          odinId={odinId}
           style={{ borderRadius: 25, overflow: 'hidden' }}
+          imageSize={{ width: 50, height: 50 }}
         />
       ) : (
         <View

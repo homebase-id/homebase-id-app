@@ -112,6 +112,8 @@ export const PreviewMedia = memo((prop: MediaProp) => {
     [fileId, height, msg.fileMetadata.appData.previewThumbnail, width]
   );
 
+  const hasVideoPayload = payloads.some((item) => item.contentType?.startsWith('video'));
+
   return (
     <BottomSheetModalProvider>
       <Carousel
@@ -212,22 +214,24 @@ export const PreviewMedia = memo((prop: MediaProp) => {
           </View>
         )}
 
-        <View
-          style={{
-            display: 'flex',
-            flex: 1,
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-          }}
-        >
-          <IconButton
-            icon={<ShareNode />}
-            touchableProps={{
-              'aria-label': 'Share',
+        {!hasVideoPayload && (
+          <View
+            style={{
+              display: 'flex',
+              flex: 1,
+              flexDirection: 'row',
+              justifyContent: 'space-between',
             }}
-            onPress={onShare}
-          />
-        </View>
+          >
+            <IconButton
+              icon={<ShareNode />}
+              touchableProps={{
+                'aria-label': 'Share',
+              }}
+              onPress={onShare}
+            />
+          </View>
+        )}
       </SafeAreaView>
     </BottomSheetModalProvider>
   );

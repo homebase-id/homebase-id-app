@@ -22,6 +22,11 @@
         <data android:mimeType="text/plain" />
       </intent-filter>
     </activity>
-
   </application>
+  <queries>
+    <intent>
+      <action android:name="android.intent.action.VIEW" />
+      <data android:mimeType="*/*" />
+    </intent>
+  </queries>
 </manifest>

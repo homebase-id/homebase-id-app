@@ -50,3 +50,16 @@ export function calculateScaledDimensions(
 
     return { width: newWidth, height: newHeight };
 }
+
+export function getPayloadSize(size: number): string {
+    if (size < 1024) {
+        return `${size.toFixed(0)} Bytes`;
+    } else if (size < 1024 * 1024) {
+        return `${(size / 1024).toFixed(0)} KB`;
+    } else if (size < 1024 * 1024 * 1024) {
+        return `${(size / (1024 * 1024)).toFixed(0)} MB`;
+    } else {
+        return `${(size / (1024 * 1024 * 1024)).toFixed(0)} GB`;
+    }
+}
+

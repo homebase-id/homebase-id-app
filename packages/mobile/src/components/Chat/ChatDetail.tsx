@@ -21,7 +21,7 @@ import {
   TimeProps,
   User,
 } from 'react-native-gifted-chat';
-import { useCallback, memo, useMemo } from 'react';
+import { useCallback, memo, useMemo, useRef, useEffect } from 'react';
 import {
   GestureResponderEvent,
   Platform,
@@ -29,6 +29,7 @@ import {
   StatusBar,
   StyleProp,
   StyleSheet,
+  TextInput,
   TextStyle,
   View,
   ViewStyle,
@@ -64,6 +65,8 @@ import { SafeAreaView } from '../ui/SafeAreaView/SafeAreaView';
 import { FileOverview } from '../Files/FileOverview';
 
 import { getLocales, uses24HourClock } from 'react-native-localize';
+import { type PastedFile } from '@mattermost/react-native-paste-input';
+import { useDraftMessage } from '../../hooks/chat/useDraftMessage';
 
 export type ChatMessageIMessage = IMessage & HomebaseFile<ChatMessage>;
 
@@ -79,9 +82,10 @@ export const ChatDetail = memo(
     setReplyMessage,
     assets,
     setAssets,
-
+    onPaste,
     hasMoreMessages,
     fetchMoreMessages,
+    conversationId,
   }: {
     isGroup: boolean;
     messages: ChatMessageIMessage[];
@@ -95,7 +99,8 @@ export const ChatDetail = memo(
     }) => void;
     doOpenMessageInfo: (message: ChatMessageIMessage) => void;
     doOpenReactionModal: (message: ChatMessageIMessage) => void;
-
+    onPaste: (error: string | null | undefined, files: PastedFile[]) => void;
+    conversationId: string;
     replyMessage: ChatMessageIMessage | null;
     setReplyMessage: (message: ChatMessageIMessage | null) => void;
 
@@ -107,6 +112,16 @@ export const ChatDetail = memo(
   }) => {
     const { isDarkMode } = useDarkMode();
     const identity = useAuth().getIdentity();
+    const textRef = useRef<TextInput>(null);
+
+    const { data: draftMessage } = useDraftMessage(conversationId).get;
+    const { mutate } = useDraftMessage(conversationId).set;
+    const onInputTextChanged = useCallback(
+      (text: string) => {
+        mutate(text);
+      },
+      [mutate]
+    );
 
     const onLongPress = useCallback(
       (e: GestureResponderEvent, message: ChatMessageIMessage) => {
@@ -218,6 +233,7 @@ export const ChatDetail = memo(
         }) as TextStyle,
       [isDarkMode]
     );
+
     const composerContainerStyle = useMemo(
       () =>
         ({
@@ -263,7 +279,7 @@ export const ChatDetail = memo(
         }
         return (
           <Composer {...props} textInputStyle={inputStyle} containerStyle={composerContainerStyle}>
-            {!props.hasText && (
+            {!props.hasText && !draftMessage && (
               <View
                 style={{
                   flexDirection: 'row',
@@ -303,6 +319,7 @@ export const ChatDetail = memo(
       [
         cameraIcon,
         composerContainerStyle,
+        draftMessage,
         duration,
         handleCameraButtonAction,
         handleRecordButtonAction,
@@ -311,9 +328,15 @@ export const ChatDetail = memo(
         microphoneIcon,
       ]
     );
+    useEffect(() => {
+      if (replyMessage !== null && textRef.current) {
+        textRef.current?.focus();
+      }
+    }, [textRef, replyMessage]);
 
     const renderSend = useCallback(
       (props: SendProps<IMessage>) => {
+        const hasText = draftMessage || props.text;
         return (
           <View
             style={{
@@ -341,12 +364,12 @@ export const ChatDetail = memo(
               {...props}
               // disabled={isRecording ? false : !props.text && assets?.length === 0}
               disabled={false}
-              text={props.text || ' '}
+              text={draftMessage || props.text || ' '}
               // onSend={isRecording ? async (_) => onStopRecording() : props.onSend}
               onSend={
                 isRecording
                   ? async (_) => onStopRecording()
-                  : !props.text && assets?.length === 0
+                  : !hasText && assets?.length === 0
                     ? handleImageIconPress
                     : props.onSend
               }
@@ -355,11 +378,13 @@ export const ChatDetail = memo(
               <View
                 style={{
                   transform: [
-                    { rotate: props.text || assets.length !== 0 || isRecording ? '50deg' : '0deg' },
+                    {
+                      rotate: hasText || assets.length !== 0 || isRecording ? '50deg' : '0deg',
+                    },
                   ],
                 }}
               >
-                {props.text || assets.length !== 0 || isRecording ? (
+                {hasText || assets.length !== 0 || isRecording ? (
                   <SendChat size={'md'} color={Colors.white} />
                 ) : (
                   <Plus color={Colors.white} />
@@ -372,6 +397,7 @@ export const ChatDetail = memo(
       [
         assets.length,
         crossIcon,
+        draftMessage,
         handleImageIconPress,
         handleRecordButtonAction,
         isRecording,
@@ -500,12 +526,16 @@ export const ChatDetail = memo(
           messages={messages}
           onSend={doSend}
           locale={locale}
+          onInputTextChanged={onInputTextChanged}
+          defaultValue={draftMessage}
+          textInputRef={textRef}
           infiniteScroll
           scrollToBottom
           alwaysShowSend
           onLongPress={(e, _, m: ChatMessageIMessage) => onLongPress(e, m)}
           isKeyboardInternallyHandled={true}
           keyboardShouldPersistTaps="never"
+          onPaste={onPaste}
           renderMessageImage={(prop: MessageImageProps<ChatMessageIMessage>) => (
             <MediaMessage props={prop} onLongPress={onLongPress} />
           )}
@@ -606,7 +636,9 @@ const RenderBubble = memo(
     const hasPayloadandNoText =
       message?.fileMetadata.payloads?.length > 0 &&
       !content?.message &&
-      !message.fileMetadata.payloads?.some((val) => val.contentType.startsWith('audio'));
+      !message.fileMetadata.payloads?.some(
+        (val) => val.contentType.startsWith('audio') || val.contentType.startsWith('application')
+      );
 
     const renderTime = useCallback(
       (timeProp: TimeProps<ChatMessageIMessage>) => {

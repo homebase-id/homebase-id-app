@@ -1,4 +1,4 @@
-import React, { memo, ReactNode } from 'react';
+import React, { memo, ReactNode, useCallback } from 'react';
 import {
   StyleSheet,
   Text,
@@ -10,7 +10,6 @@ import {
 } from 'react-native';
 import Color from './Color';
 import { useChatContext } from './GiftedChatContext';
-import { useCallbackOne } from 'use-memo-one';
 
 export interface ActionsProps {
   options?: { [key: string]: any };
@@ -33,7 +32,7 @@ export const Actions = memo(
     containerStyle,
   }: ActionsProps) => {
     const { actionSheet } = useChatContext();
-    const onActionsPress = useCallbackOne(() => {
+    const onActionsPress = useCallback(() => {
       const optionKeys = Object.keys(options);
       const cancelButtonIndex = optionKeys.indexOf('Cancel');
       actionSheet().showActionSheetWithOptions(
@@ -51,7 +50,7 @@ export const Actions = memo(
       );
     }, []);
 
-    const renderIcon = useCallbackOne(() => {
+    const renderIcon = useCallback(() => {
       if (icon) {
         return icon();
       }

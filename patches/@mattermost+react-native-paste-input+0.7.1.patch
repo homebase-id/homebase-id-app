@@ -1,0 +1,13 @@
+diff --git a/node_modules/@mattermost/react-native-paste-input/ios/UIPasteboard+GetImageInfo.m b/node_modules/@mattermost/react-native-paste-input/ios/UIPasteboard+GetImageInfo.m
+index df52bb7..884b7f3 100644
+--- a/node_modules/@mattermost/react-native-paste-input/ios/UIPasteboard+GetImageInfo.m
++++ b/node_modules/@mattermost/react-native-paste-input/ios/UIPasteboard+GetImageInfo.m
+@@ -8,7 +8,7 @@
+ 
+ #import "UIPasteboard+GetImageInfo.h"
+ #import "NSData+MimeType.h"
+-#import "react_native_paste_input-Swift.h"
++#import "react_native_paste_input/react_native_paste_input-Swift.h"
+ #import "UIImage+vImageScaling.h"
+ 
+ @implementation UIPasteboard (GetImageInfo)
