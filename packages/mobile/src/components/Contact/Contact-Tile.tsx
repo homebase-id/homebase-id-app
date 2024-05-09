@@ -1,14 +1,16 @@
 import { TouchableOpacity, View, StyleSheet } from 'react-native';
 import { useConversation } from '../../hooks/chat/useConversation';
-import { ContactConfig, ContactFile, DotYouProfile } from '@youfoundation/js-lib/network';
+import { ContactFile, DotYouProfile } from '@youfoundation/js-lib/network';
 import { CheckCircle, ChevronRight, CircleOutlined } from '../ui/Icons/icons';
 import { Colors } from '../../app/Colors';
-import { OdinImage } from '../ui/OdinImage/OdinImage';
+
 import { useDarkMode } from '../../hooks/useDarkMode';
 import useContact from '../../hooks/contact/useContact';
 import { useMemo } from 'react';
 import { Text } from '../ui/Text/Text';
 import { ConnectionName } from '../ui/Name';
+import { Avatar } from '../ui/Avatars/Avatar';
+
 export const ContactTile = ({
   item: profile,
   onOpen,
@@ -55,7 +57,7 @@ export const ContactTile = ({
       >
         {contact && contactData && (
           <View style={{ marginRight: 16 }}>
-            <OdinImage
+            {/* <OdinImage
               targetDrive={ContactConfig.ContactTargetDrive}
               fit="cover"
               alt={contact.name?.displayName}
@@ -67,6 +69,11 @@ export const ContactTile = ({
               imageSize={{ width: 48, height: 48 }}
               fileKey={'prfl_pic'}
               style={styles.tinyLogo}
+            /> */}
+            <Avatar
+              odinId={profile.odinId}
+              style={styles.tinyLogo}
+              imageSize={{ width: 48, height: 48 }}
             />
           </View>
         )}

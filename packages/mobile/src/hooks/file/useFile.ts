@@ -19,7 +19,6 @@ export const useFile = ({ targetDrive }: { targetDrive: TargetDrive }) => {
     const fetchLocalFile = async (fileId: string, contentType: string) => {
         const localPath = CachesDirectoryPath + `/${fileId}` + `.${contentType.split('/')[1]}`;
         const uri = `file://${localPath}`;
-        console.log('localPath', uri);
         if (await exists(localPath)) {
             return new OdinBlob(uri, { type: contentType });
         }
