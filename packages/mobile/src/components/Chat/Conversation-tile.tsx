@@ -13,6 +13,7 @@ import { ChatMessageContent } from './Chat-Message-Content';
 import { OwnerAvatar, GroupAvatar, Avatar } from '../ui/Avatars/Avatar';
 import { useDraftMessage } from '../../hooks/chat/useDraftMessage';
 import { ellipsisAtMaxChar } from 'feed-app-common';
+import { ConnectionName } from '../ui/Name';
 
 type ConversationTileProps = {
   onPress?: () => void;
@@ -92,8 +93,9 @@ const ConversationTile = memo((props: ConversationTileProps) => {
           >
             {isGroup || props.isSelf
               ? props.conversation.title
-              : (connectionDetails?.name?.displayName || connectionDetails?.name?.givenName) ??
-                props.odinId}
+              : (connectionDetails?.name?.displayName || connectionDetails?.name?.givenName) ?? (
+                  <ConnectionName odinId={props.odinId} />
+                )}
             {props.isSelf ? <Text style={styles.you}>(you)</Text> : null}
           </Text>
 

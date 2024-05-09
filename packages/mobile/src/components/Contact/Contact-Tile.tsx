@@ -8,6 +8,7 @@ import { useDarkMode } from '../../hooks/useDarkMode';
 import useContact from '../../hooks/contact/useContact';
 import { useMemo } from 'react';
 import { Text } from '../ui/Text/Text';
+import { ConnectionName } from '../ui/Name';
 export const ContactTile = ({
   item: profile,
   onOpen,
@@ -73,7 +74,7 @@ export const ContactTile = ({
           <Text style={styles.title}>
             {contact?.name?.displayName ??
               contact?.name?.givenName ??
-              contact?.name?.additionalName}
+              contact?.name?.additionalName ?? <ConnectionName odinId={profile.odinId} />}
           </Text>
           <Text style={styles.description}>{contact?.odinId}</Text>
         </View>
