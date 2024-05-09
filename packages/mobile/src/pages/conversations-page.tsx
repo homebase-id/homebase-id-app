@@ -236,7 +236,7 @@ const SearchConversationResults = memo(
                 (contact) =>
                   contact.odinId &&
                   (contact.odinId?.includes(query) ||
-                    contact.name?.displayName.toLowerCase().includes(query.toLowerCase()))
+                    contact.name?.displayName?.toLowerCase().includes(query.toLowerCase()))
               )
           : [],
       [contacts, query]
@@ -302,6 +302,11 @@ const SearchConversationResults = memo(
                 key={item.odinId}
                 item={{
                   odinId: item.odinId as string,
+                }}
+                onOpen={(convoId) => {
+                  navigation.navigate('ChatScreen', {
+                    convoId,
+                  });
                 }}
               />
             ))}
