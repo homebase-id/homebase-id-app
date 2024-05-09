@@ -216,8 +216,11 @@ const SearchConversationResults = memo(
               const content = conversation.fileMetadata.appData.content;
               return (
                 (content as GroupConversation).recipients?.some((recipient) =>
-                  recipient.includes(query)
-                ) || (content as SingleConversation).recipient?.includes(query)
+                  recipient.toLowerCase().includes(query.toLowerCase())
+                ) ||
+                (content as SingleConversation).recipient
+                  ?.toLowerCase()
+                  ?.includes(query.toLowerCase())
               );
             })
           : [],
@@ -232,7 +235,8 @@ const SearchConversationResults = memo(
               .filter(
                 (contact) =>
                   contact.odinId &&
-                  (contact.odinId?.includes(query) || contact.name?.displayName.includes(query))
+                  (contact.odinId?.includes(query) ||
+                    contact.name?.displayName.toLowerCase().includes(query.toLowerCase()))
               )
           : [],
       [contacts, query]
@@ -245,7 +249,10 @@ const SearchConversationResults = memo(
             contact.odinId &&
             !conversationResults.some((conversation) => {
               const content = conversation.fileMetadata.appData.content;
-              return (content as SingleConversation).recipient === contact.odinId;
+              return (
+                (content as SingleConversation).recipient.toLowerCase() ===
+                contact.odinId?.toLowerCase()
+              );
             })
         ),
       [contactResults, conversationResults]
