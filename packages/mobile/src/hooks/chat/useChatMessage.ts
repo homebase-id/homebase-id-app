@@ -171,7 +171,6 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
       onSettled: async (_data, _error, variables) => {
         queryClient.invalidateQueries({ queryKey: ['chat-messages', variables.conversationId] });
       },
-      networkMode,
     }),
     update: useMutation({
       mutationFn: updateMessage,
