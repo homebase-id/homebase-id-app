@@ -1,7 +1,7 @@
 import { CONTACT_PROFILE_IMAGE_KEY, ContactConfig } from '@youfoundation/js-lib/network';
 import { GetTargetDriveFromProfileId, BuiltInProfiles } from '@youfoundation/js-lib/profile';
 import { memo, useMemo } from 'react';
-import { ImageStyle, StyleProp, ViewStyle, View, StyleSheet } from 'react-native';
+import { ImageStyle, StyleProp, ViewStyle, View, StyleSheet, Image } from 'react-native';
 import useContact from '../../../hooks/contact/useContact';
 import { useProfile } from '../../../hooks/profile/useProfile';
 import { useDarkMode } from '../../../hooks/useDarkMode';
@@ -16,22 +16,28 @@ export const Avatar = memo(
     imageSize?: { width: number; height: number };
   }) => {
     const { data: contact } = useContact(props.odinId).fetch;
-    return (
-      <OdinImage
-        fileId={contact?.fileId}
-        fileKey={CONTACT_PROFILE_IMAGE_KEY}
-        targetDrive={ContactConfig.ContactTargetDrive}
-        previewThumbnail={contact?.fileMetadata.appData.previewThumbnail}
-        imageSize={props.imageSize || { width: 48, height: 48 }}
-        fit="contain"
-        odinId={props.odinId}
-        style={{
-          ...styles.tinyLogo,
-          ...props.style,
-        }}
-        lastModified={contact?.fileMetadata.updated}
-      />
-    );
+    if (contact?.fileMetadata.payloads.some((p) => p.key === CONTACT_PROFILE_IMAGE_KEY)) {
+      return (
+        <OdinImage
+          fileId={contact?.fileId}
+          fileKey={CONTACT_PROFILE_IMAGE_KEY}
+          targetDrive={ContactConfig.ContactTargetDrive}
+          previewThumbnail={contact?.fileMetadata.appData.previewThumbnail}
+          imageSize={props.imageSize || { width: 48, height: 48 }}
+          fit="contain"
+          odinId={props.odinId}
+          style={{
+            ...styles.tinyLogo,
+            ...props.style,
+          }}
+          lastModified={contact?.fileMetadata.updated}
+        />
+      );
+    } else {
+      return (
+        <Image style={styles.tinyLogo} source={{ uri: `https://${props.odinId}/pub/image` }} />
+      );
+    }
   }
 );
 

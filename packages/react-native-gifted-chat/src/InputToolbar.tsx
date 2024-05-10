@@ -79,7 +79,7 @@ export const InputToolbar = memo(
         <View style={[styles.primary, props.primaryStyle]}>
           {renderActions?.(rest) ||
             (onPressActionButton && <Actions {...rest} />)}
-          {renderComposer?.({ ...rest, hasText }) || (
+          {renderComposer?.({ ...(rest as ComposerProps), hasText }) || (
             <Composer {...(rest as ComposerProps)} />
           )}
           {renderSend?.({ ...props, text }) || <Send {...props} text={text} />}

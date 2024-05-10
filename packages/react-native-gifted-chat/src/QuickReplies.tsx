@@ -1,5 +1,5 @@
-import PropTypes from 'prop-types'
-import React, { useState, useMemo } from 'react'
+import PropTypes from 'prop-types';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
   Text,
   StyleSheet,
@@ -8,12 +8,11 @@ import {
   StyleProp,
   ViewStyle,
   TextStyle,
-} from 'react-native'
-import { useCallbackOne } from 'use-memo-one'
-import { IMessage, Reply } from './Models'
-import Color from './Color'
-import { StylePropType } from './utils'
-import { warning } from './logging'
+} from 'react-native';
+import { IMessage, Reply } from './Models';
+import Color from './Color';
+import { StylePropType } from './utils';
+import { warning } from './logging';
 
 const styles = StyleSheet.create({
   container: {
@@ -43,24 +42,24 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: 17,
   },
-})
+});
 
 export interface QuickRepliesProps<TMessage extends IMessage = IMessage> {
-  nextMessage?: TMessage
-  currentMessage?: TMessage
-  color?: string
-  sendText?: string
-  quickReplyStyle?: StyleProp<ViewStyle>
-  quickReplyTextStyle?: StyleProp<TextStyle>
-  onQuickReply?(reply: Reply[]): void
-  renderQuickReplySend?(): React.ReactNode
+  nextMessage?: TMessage;
+  currentMessage?: TMessage;
+  color?: string;
+  sendText?: string;
+  quickReplyStyle?: StyleProp<ViewStyle>;
+  quickReplyTextStyle?: StyleProp<TextStyle>;
+  onQuickReply?(reply: Reply[]): void;
+  renderQuickReplySend?(): React.ReactNode;
 }
 
 const sameReply = (currentReply: Reply) => (reply: Reply) =>
-  currentReply.value === reply.value
+  currentReply.value === reply.value;
 
 const diffReply = (currentReply: Reply) => (reply: Reply) =>
-  currentReply.value !== reply.value
+  currentReply.value !== reply.value;
 
 export function QuickReplies({
   currentMessage,
@@ -72,51 +71,51 @@ export function QuickReplies({
   sendText = 'Send',
   renderQuickReplySend,
 }: QuickRepliesProps<IMessage>) {
-  const { type } = currentMessage!.quickReplies!
-  const [replies, setReplies] = useState<Reply[]>([])
+  const { type } = currentMessage!.quickReplies!;
+  const [replies, setReplies] = useState<Reply[]>([]);
 
   const shouldComponentDisplay = useMemo(() => {
-    const hasReplies = !!currentMessage && !!currentMessage!.quickReplies
-    const hasNext = !!nextMessage && !!nextMessage!._id
-    const keepIt = currentMessage!.quickReplies!.keepIt
+    const hasReplies = !!currentMessage && !!currentMessage!.quickReplies;
+    const hasNext = !!nextMessage && !!nextMessage!._id;
+    const keepIt = currentMessage!.quickReplies!.keepIt;
 
     if (hasReplies && !hasNext) {
-      return true
+      return true;
     }
 
     if (hasReplies && hasNext && keepIt) {
-      return true
+      return true;
     }
 
-    return false
-  }, [currentMessage, nextMessage])
+    return false;
+  }, [currentMessage, nextMessage]);
 
-  const handlePress = useCallbackOne(
+  const handlePress = useCallback(
     (reply: Reply) => () => {
       if (currentMessage) {
-        const { type } = currentMessage.quickReplies!
+        const { type } = currentMessage.quickReplies!;
         switch (type) {
           case 'radio': {
-            handleSend([reply])()
-            return
+            handleSend([reply])();
+            return;
           }
           case 'checkbox': {
             if (replies.find(sameReply(reply))) {
-              setReplies(replies.filter(diffReply(reply)))
+              setReplies(replies.filter(diffReply(reply)));
             } else {
-              setReplies([...replies, reply])
+              setReplies([...replies, reply]);
             }
-            return
+            return;
           }
           default: {
-            warning(`onQuickReply unknown type: ${type}`)
-            return
+            warning(`onQuickReply unknown type: ${type}`);
+            return;
           }
         }
       }
     },
     [replies, currentMessage],
-  )
+  );
 
   const handleSend = (repliesData: Reply[]) => () => {
     onQuickReply?.(
@@ -124,18 +123,19 @@ export function QuickReplies({
         ...reply,
         messageId: currentMessage!._id,
       })),
-    )
-  }
+    );
+  };
 
   if (!shouldComponentDisplay) {
-    return null
+    return null;
   }
 
   return (
     <View style={styles.container}>
       {currentMessage!.quickReplies!.values.map(
         (reply: Reply, index: number) => {
-          const selected = type === 'checkbox' && replies.find(sameReply(reply))
+          const selected =
+            type === 'checkbox' && replies.find(sameReply(reply));
 
           return (
             <TouchableOpacity
@@ -160,7 +160,7 @@ export function QuickReplies({
                 {reply.title}
               </Text>
             </TouchableOpacity>
-          )
+          );
         },
       )}
       {replies.length > 0 && (
@@ -174,7 +174,7 @@ export function QuickReplies({
         </TouchableOpacity>
       )}
     </View>
-  )
+  );
 }
 
 QuickReplies.propTypes = {
@@ -184,4 +184,4 @@ QuickReplies.propTypes = {
   sendText: PropTypes.string,
   renderQuickReplySend: PropTypes.func,
   quickReplyStyle: StylePropType,
-}
+};

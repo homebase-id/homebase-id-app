@@ -129,6 +129,15 @@ export const getSendChatMessageMutationOptions: (queryClient: QueryClient) => Us
             deliveryStatus: ChatDeliveryStatus.Sending,
             replyId: replyId,
           },
+          previewThumbnail:
+            files && files.length === 1
+              ? {
+                  contentType: files[0].type as string,
+                  content: files[0].uri || files[0].filepath || '',
+                  pixelWidth: files[0].width,
+                  pixelHeight: files[0].height,
+                }
+              : undefined,
         },
         payloads: files?.map((file) => ({
           contentType: file.type || undefined,
