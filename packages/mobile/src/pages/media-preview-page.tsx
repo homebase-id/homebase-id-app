@@ -5,7 +5,7 @@ import { VideoWithLoader } from '../components/ui/Media/VideoWithLoader';
 import { memo, useCallback, useLayoutEffect, useRef, useState } from 'react';
 import Carousel from 'react-native-reanimated-carousel';
 import { OdinImage } from '../components/ui/OdinImage/OdinImage';
-import { ChatStackParamList } from '../app/App';
+import { ChatStackParamList } from '../app/ChatStack';
 import { PayloadDescriptor } from '@youfoundation/js-lib/core';
 import {
   CarouselRenderItemInfo,

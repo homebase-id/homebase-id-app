@@ -13,7 +13,7 @@ import { Text } from '../../components/ui/Text/Text';
 import { getVersion, getBuildNumber } from 'react-native-device-info';
 import { version } from '../../../package.json';
 
-import { ProfileStackParamList } from '../../app/App';
+import { ProfileStackParamList } from '../../app/ProfileStack';
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 import { Container } from '../../components/ui/Container/Container';
 import {

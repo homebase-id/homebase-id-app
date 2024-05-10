@@ -1,5 +1,5 @@
 import { type ListRenderItemInfo, StyleSheet, TouchableHighlight, View } from 'react-native';
-import { ChatStackParamList } from '../../app/App';
+import { ChatStackParamList } from '../../app/ChatStack';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { useAllConnections } from 'feed-app-common';

@@ -19,7 +19,7 @@ import TextButton from '../../components/ui/Text/Text-Button';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { useProfile } from '../../hooks/profile/useProfile';
 import { ConnectionName } from '../../components/ui/Name';
-import { ChatStackParamList } from '../../app/App';
+import { ChatStackParamList } from '../../app/ChatStack';
 import { openURL } from '../../utils/utils';
 import { Avatar, GroupAvatar, OwnerAvatar } from '../../components/ui/Avatars/Avatar';
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';

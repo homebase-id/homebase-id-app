@@ -6,7 +6,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Input } from '../../components/ui/Form/Input';
 import TextButton from '../../components/ui/Text/Text-Button';
 import { Header, HeaderBackButton } from '@react-navigation/elements';
-import { ChatStackParamList } from '../../app/App';
+import { ChatStackParamList } from '../../app/ChatStack';
 import { GroupAvatar } from '../../components/ui/Avatars/Avatar';
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 import { useDarkMode } from '../../hooks/useDarkMode';

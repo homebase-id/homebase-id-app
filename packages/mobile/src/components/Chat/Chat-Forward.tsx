@@ -23,7 +23,7 @@ import { useConversation } from '../../hooks/chat/useConversation';
 import { useChatMessage } from '../../hooks/chat/useChatMessage';
 import { ChatMessageIMessage } from './ChatDetail';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { ChatStackParamList } from '../../app/App';
+import { ChatStackParamList } from '../../app/ChatStack';
 import { ErrorNotification } from '../ui/Alert/ErrorNotification';
 import useImage from '../ui/OdinImage/hooks/useImage';
 import { ImageSource } from '../../provider/image/RNImageProvider';

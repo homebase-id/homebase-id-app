@@ -2,7 +2,7 @@ import { FlatList } from 'react-native-gesture-handler';
 
 import { ListRenderItemInfo, Platform, StatusBar, View } from 'react-native';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { ChatStackParamList } from '../app/App';
+import { ChatStackParamList } from '../app/ChatStack';
 
 import { useAllConnections } from 'feed-app-common';
 

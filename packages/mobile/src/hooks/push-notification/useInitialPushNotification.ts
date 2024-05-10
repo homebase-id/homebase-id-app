@@ -2,10 +2,11 @@ import messaging from '@react-native-firebase/messaging';
 import { NavigationProp, useFocusEffect, useNavigation } from '@react-navigation/native';
 import { tryJsonParse } from '@youfoundation/js-lib/helpers';
 import { navigateOnNotification } from '../../components/Dashboard/NotificationsOverview';
-import { ChatStackParamList, TabStackParamList } from '../../app/App';
+import { TabStackParamList } from '../../app/App';
 import { PushNotification } from '@youfoundation/js-lib/core';
 import { useDotYouClientContext } from 'feed-app-common';
 import { useEffect } from 'react';
+import { ChatStackParamList } from '../../app/ChatStack';
 
 export const useInitialPushNotification = () => {
   const identity = useDotYouClientContext().getIdentity();

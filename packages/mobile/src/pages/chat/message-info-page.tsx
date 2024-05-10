@@ -7,7 +7,7 @@ import { GroupConversation, SingleConversation } from '../../provider/chat/Conve
 import { AuthorName, ConnectionName } from '../../components/ui/Name';
 import { InnerDeliveryIndicator } from '../../components/Chat/Chat-Delivery-Indicator';
 import { useDotYouClientContext } from 'feed-app-common';
-import { ChatStackParamList } from '../../app/App';
+import { ChatStackParamList } from '../../app/ChatStack';
 import { Avatar, OwnerAvatar } from '../../components/ui/Avatars/Avatar';
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 

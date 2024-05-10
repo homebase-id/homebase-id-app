@@ -1,6 +1,6 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useMemo, useState, useCallback } from 'react';
-import { ProfileStackParamList } from '../../app/App';
+import { ProfileStackParamList } from '../../app/ProfileStack';
 import { FlatList, RefreshControl, TouchableOpacity, View } from 'react-native';
 import { useFollowingInfinite } from '../../hooks/following/useFollowing';
 import NoItems from '../../components/list/noItems';

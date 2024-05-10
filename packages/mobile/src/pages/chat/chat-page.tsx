@@ -31,7 +31,7 @@ import { ChatDetail, ChatMessageIMessage } from '../../components/Chat/ChatDetai
 import Toast from 'react-native-toast-message';
 import Clipboard from '@react-native-clipboard/clipboard';
 import { ErrorBoundary } from '../../components/ui/ErrorBoundary/ErrorBoundary';
-import { ChatStackParamList } from '../../app/App';
+import { ChatStackParamList } from '../../app/ChatStack';
 import { NoConversationHeader } from '../../components/Chat/NoConversationHeader';
 import { ChatForwardModal } from '../../components/Chat/Chat-Forward';
 import Dialog from 'react-native-dialog';
