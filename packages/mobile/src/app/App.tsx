@@ -70,7 +70,14 @@ import { NativeStackNavigationOptions } from '@react-navigation/native-stack';
 import { DriveStatusPage } from '../pages/profile/drive-status-page';
 import { SharedItem, useShareManager } from '../hooks/platform/useShareManager';
 import { ShareChatPage } from '../pages/chat/share-chat-page';
-import { sendMessage } from '../hooks/chat/useChatMessage';
+import {
+  getSendChatMessageMutationOptions,
+  getUpdateChatMessageMutationOptions,
+} from '../hooks/chat/useChatMessage';
+import {
+  getAddReactionMutationOptions,
+  getRemoveReactionMutationOptions,
+} from '../hooks/chat/useChatReaction';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -134,12 +141,16 @@ const queryClient = new QueryClient({
   },
 });
 
-queryClient.setMutationDefaults(['send-chat-message'], {
-  mutationFn: sendMessage,
-  onError: (err, messageParams, context) => {
-    console.error('Failed to send the chat message', err);
-  },
-});
+queryClient.setMutationDefaults(
+  ['send-chat-message'],
+  getSendChatMessageMutationOptions(queryClient)
+);
+queryClient.setMutationDefaults(
+  ['update-chat-message'],
+  getUpdateChatMessageMutationOptions(queryClient)
+);
+queryClient.setMutationDefaults(['add-reaction'], getAddReactionMutationOptions(queryClient));
+queryClient.setMutationDefaults(['remove-reaction'], getRemoveReactionMutationOptions(queryClient));
 
 const asyncPersist = createAsyncStoragePersister({
   storage: AsyncStorage,
