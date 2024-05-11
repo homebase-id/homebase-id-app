@@ -6,6 +6,7 @@ import {
   TextInputContentSizeChangeEventData,
   ViewStyle,
   View,
+  TextInput,
 } from 'react-native';
 import { MIN_COMPOSER_HEIGHT, DEFAULT_PLACEHOLDER } from './Constant';
 import Color from './Color';
@@ -110,7 +111,7 @@ export const Composer = memo(
           props.containerStyle,
         ]}
       >
-        <PasteInput
+        <TextInput
           testID={placeholder}
           accessible
           accessibilityLabel={placeholder}
@@ -118,7 +119,7 @@ export const Composer = memo(
           placeholderTextColor={placeholderTextColor}
           multiline={multiline}
           editable={!disableComposer}
-          onPaste={onPaste}
+          // onPaste={onPaste}
           onContentSizeChange={handleContentSizeChange}
           onChangeText={onTextChanged}
           style={[styles.textInput, textInputStyle]}
