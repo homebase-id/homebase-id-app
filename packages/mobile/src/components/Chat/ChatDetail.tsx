@@ -364,7 +364,7 @@ export const ChatDetail = memo(
               {...props}
               // disabled={isRecording ? false : !props.text && assets?.length === 0}
               disabled={false}
-              text={draftMessage || props.text || ' '}
+              text={props.text || draftMessage || ' '}
               // onSend={isRecording ? async (_) => onStopRecording() : props.onSend}
               onSend={
                 isRecording
@@ -527,7 +527,7 @@ export const ChatDetail = memo(
           onSend={doSend}
           locale={locale}
           onInputTextChanged={onInputTextChanged}
-          defaultValue={draftMessage}
+          defaultValue={draftMessage} // TODO: Update so that draftMessage doesn't update constantly
           textInputRef={textRef}
           infiniteScroll
           scrollToBottom

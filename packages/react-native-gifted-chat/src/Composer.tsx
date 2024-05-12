@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useRef } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import {
   Platform,
   StyleSheet,
@@ -100,6 +100,14 @@ export const Composer = memo(
       nativeEvent: { contentSize },
     }: NativeSyntheticEvent<TextInputContentSizeChangeEventData>) =>
       determineInputSizeChange(contentSize);
+
+    // Only set defaultValue once?
+    const [_defaultValue, setDefaultValue] = useState(defaultValue);
+    useEffect(() => {
+      if (!_defaultValue) {
+        setDefaultValue(defaultValue);
+      }
+    }, [defaultValue]);
 
     return (
       <View
