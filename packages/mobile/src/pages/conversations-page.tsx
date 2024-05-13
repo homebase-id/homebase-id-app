@@ -9,7 +9,7 @@ import {
 import ConversationTile from '../components/Chat/Conversation-tile';
 
 import { NavigationProp, useIsFocused, useNavigation } from '@react-navigation/native';
-import { ChatStackParamList } from '../app/App';
+import { ChatStackParamList } from '../app/ChatStack';
 import {
   ConversationWithRecentMessage,
   useConversationsWithRecentMessage,

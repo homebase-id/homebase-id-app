@@ -21,7 +21,7 @@ import {
   TimeProps,
   User,
 } from 'react-native-gifted-chat';
-import { useCallback, memo, useMemo, useRef, useEffect } from 'react';
+import { useCallback, memo, useMemo, useRef, useEffect, useState } from 'react';
 import {
   GestureResponderEvent,
   Platform,
@@ -67,6 +67,7 @@ import { FileOverview } from '../Files/FileOverview';
 import { getLocales, uses24HourClock } from 'react-native-localize';
 import { type PastedFile } from '@mattermost/react-native-paste-input';
 import { useDraftMessage } from '../../hooks/chat/useDraftMessage';
+import { debounce } from 'lodash-es';
 
 export type ChatMessageIMessage = IMessage & HomebaseFile<ChatMessage>;
 
@@ -114,13 +115,28 @@ export const ChatDetail = memo(
     const identity = useAuth().getIdentity();
     const textRef = useRef<TextInput>(null);
 
-    const { data: draftMessage } = useDraftMessage(conversationId).get;
-    const { mutate } = useDraftMessage(conversationId).set;
-    const onInputTextChanged = useCallback(
+    // We will fetch the draft message from the cache only once
+    const { mutate: onInputTextChanged } = useDraftMessage(conversationId).set;
+    const [draftMessage, setdraftMessage] = useState<string | undefined>();
+
+    const { getDraftMessage } = useDraftMessage(conversationId);
+    useEffect(() => {
+      (async () => {
+        const draft = await getDraftMessage();
+        if (!draft) return;
+        setdraftMessage(draft);
+      })();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    const debounceInputText = useCallback(
       (text: string) => {
-        mutate(text);
+        if (text === '' && draftMessage) {
+          setdraftMessage(undefined);
+        }
+        return onInputTextChanged(text);
       },
-      [mutate]
+      [draftMessage, onInputTextChanged]
     );
 
     const onLongPress = useCallback(
@@ -278,7 +294,12 @@ export const ChatDetail = memo(
           );
         }
         return (
-          <Composer {...props} textInputStyle={inputStyle} containerStyle={composerContainerStyle}>
+          <Composer
+            {...props}
+            textInputStyle={inputStyle}
+            containerStyle={composerContainerStyle}
+            defaultValue={draftMessage}
+          >
             {!props.hasText && !draftMessage && (
               <View
                 style={{
@@ -336,7 +357,7 @@ export const ChatDetail = memo(
 
     const renderSend = useCallback(
       (props: SendProps<IMessage>) => {
-        const hasText = draftMessage || props.text;
+        const hasText = props.text || draftMessage;
         return (
           <View
             style={{
@@ -364,7 +385,7 @@ export const ChatDetail = memo(
               {...props}
               // disabled={isRecording ? false : !props.text && assets?.length === 0}
               disabled={false}
-              text={draftMessage || props.text || ' '}
+              text={props.text || draftMessage || ' '}
               // onSend={isRecording ? async (_) => onStopRecording() : props.onSend}
               onSend={
                 isRecording
@@ -526,9 +547,8 @@ export const ChatDetail = memo(
           messages={messages}
           onSend={doSend}
           locale={locale}
-          onInputTextChanged={onInputTextChanged}
-          defaultValue={draftMessage}
           textInputRef={textRef}
+          onInputTextChanged={debounceInputText}
           infiniteScroll
           scrollToBottom
           alwaysShowSend

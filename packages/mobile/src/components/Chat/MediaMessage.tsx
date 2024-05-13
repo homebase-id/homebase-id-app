@@ -14,7 +14,7 @@ import { memo } from 'react';
 import { MessageImageProps } from 'react-native-gifted-chat';
 import { ChatDrive } from '../../provider/chat/ConversationProvider';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { ChatStackParamList } from '../../app/App';
+import { ChatStackParamList } from '../../app/ChatStack';
 import { VideoWithLoader } from '../ui/Media/VideoWithLoader';
 import { OdinImage } from '../ui/OdinImage/OdinImage';
 

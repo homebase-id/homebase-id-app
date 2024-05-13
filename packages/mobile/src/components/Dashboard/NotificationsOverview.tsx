@@ -16,7 +16,7 @@ import useContact from '../../hooks/contact/useContact';
 import { Colors } from '../../app/Colors';
 import { Times } from '../ui/Icons/icons';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { ChatStackParamList, TabStackParamList } from '../../app/App';
+import { ChatStackParamList } from '../../app/ChatStack';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { openURL } from '../../utils/utils';
 import { Text } from '../ui/Text/Text';
@@ -24,6 +24,7 @@ import Toast from 'react-native-toast-message';
 import Clipboard from '@react-native-clipboard/clipboard';
 import { useLivePushNotifications } from '../../hooks/notifications/useLivePushNotifications';
 import notifee from '@notifee/react-native';
+import { TabStackParamList } from '../../app/App';
 
 export const NotificationsOverview = memo(() => {
   useLivePushNotifications();

@@ -71,7 +71,6 @@ export const InputToolbar = memo(
     } = props;
 
     const hasText = useMemo(() => !!text, [text]);
-
     return (
       <View
         style={[styles.container, { position }, containerStyle] as ViewStyle}

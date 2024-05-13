@@ -94,7 +94,6 @@ export const Composer = memo(
       },
       [onInputSizeChanged],
     );
-
     const handleContentSizeChange = ({
       nativeEvent: { contentSize },
     }: NativeSyntheticEvent<TextInputContentSizeChangeEventData>) =>
