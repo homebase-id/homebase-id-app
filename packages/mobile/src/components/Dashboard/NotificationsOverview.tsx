@@ -25,6 +25,7 @@ import Clipboard from '@react-native-clipboard/clipboard';
 import { useLivePushNotifications } from '../../hooks/notifications/useLivePushNotifications';
 import notifee from '@notifee/react-native';
 import { TabStackParamList } from '../../app/App';
+import { ErrorNotification } from '../ui/Alert/ErrorNotification';
 
 export const NotificationsOverview = memo(() => {
   useLivePushNotifications();
@@ -48,6 +49,11 @@ export const NotificationsOverview = memo(() => {
     [notifications]
   );
 
+  const { mutate: remove, error: removeError } = usePushNotifications().remove;
+  const doClearAll = () => {
+    remove(notifications?.results.map((n) => n.id) || []);
+  };
+
   return notifications?.results?.length ? (
     <>
       <View
@@ -66,6 +72,10 @@ export const NotificationsOverview = memo(() => {
             key={day}
           />
         ))}
+        <ErrorNotification error={removeError} />
+        <TouchableOpacity onPress={doClearAll}>
+          <Text>Clear All</Text>
+        </TouchableOpacity>
       </View>
     </>
   ) : null;
