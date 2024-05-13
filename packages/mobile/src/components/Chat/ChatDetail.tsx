@@ -129,7 +129,15 @@ export const ChatDetail = memo(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // const debounceInputText = debounce(onInputTextChanged, 500);
+    const debounceInputText = useCallback(
+      (text: string) => {
+        if (text === '' && draftMessage) {
+          setdraftMessage(undefined);
+        }
+        return onInputTextChanged(text);
+      },
+      [draftMessage, onInputTextChanged]
+    );
 
     const onLongPress = useCallback(
       (e: GestureResponderEvent, message: ChatMessageIMessage) => {
@@ -291,7 +299,6 @@ export const ChatDetail = memo(
             textInputStyle={inputStyle}
             containerStyle={composerContainerStyle}
             defaultValue={draftMessage}
-            onTextChanged={onInputTextChanged}
           >
             {!props.hasText && !draftMessage && (
               <View
@@ -340,7 +347,6 @@ export const ChatDetail = memo(
         inputStyle,
         isRecording,
         microphoneIcon,
-        onInputTextChanged,
       ]
     );
     useEffect(() => {
@@ -351,7 +357,7 @@ export const ChatDetail = memo(
 
     const renderSend = useCallback(
       (props: SendProps<IMessage>) => {
-        const hasText = draftMessage || props.text;
+        const hasText = props.text || draftMessage;
         return (
           <View
             style={{
@@ -542,6 +548,7 @@ export const ChatDetail = memo(
           onSend={doSend}
           locale={locale}
           textInputRef={textRef}
+          onInputTextChanged={debounceInputText}
           infiniteScroll
           scrollToBottom
           alwaysShowSend
