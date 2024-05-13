@@ -11,7 +11,7 @@ import useContact from '../../hooks/contact/useContact';
 import { ChatDeliveryIndicator } from './Chat-Delivery-Indicator';
 import { ChatMessageContent } from './Chat-Message-Content';
 import { OwnerAvatar, GroupAvatar, Avatar } from '../ui/Avatars/Avatar';
-import { useDraftMessage } from '../../hooks/chat/useDraftMessage';
+import { useDraftMessage, useDraftMessageValue } from '../../hooks/chat/useDraftMessage';
 import { ellipsisAtMaxChar } from 'feed-app-common';
 import { ConnectionName } from '../ui/Name';
 
@@ -35,7 +35,7 @@ const ConversationTile = memo((props: ConversationTileProps) => {
         ?.filter(Boolean) as HomebaseFile<ChatMessage>[],
     [chatMessages]
   );
-  const { data: draftMessage } = useDraftMessage(props.conversationId).get;
+  const { data: draftMessage } = useDraftMessageValue(props.conversationId).get;
   const { isDarkMode } = useDarkMode();
   const { data: connection } = useContact(props.odinId).fetch;
 

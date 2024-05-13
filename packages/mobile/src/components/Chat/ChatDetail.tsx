@@ -21,7 +21,7 @@ import {
   TimeProps,
   User,
 } from 'react-native-gifted-chat';
-import { useCallback, memo, useMemo, useRef, useEffect } from 'react';
+import { useCallback, memo, useMemo, useRef, useEffect, useState } from 'react';
 import {
   GestureResponderEvent,
   Platform,
@@ -67,6 +67,7 @@ import { FileOverview } from '../Files/FileOverview';
 import { getLocales, uses24HourClock } from 'react-native-localize';
 import { type PastedFile } from '@mattermost/react-native-paste-input';
 import { useDraftMessage } from '../../hooks/chat/useDraftMessage';
+import { debounce } from 'lodash-es';
 
 export type ChatMessageIMessage = IMessage & HomebaseFile<ChatMessage>;
 
@@ -114,14 +115,21 @@ export const ChatDetail = memo(
     const identity = useAuth().getIdentity();
     const textRef = useRef<TextInput>(null);
 
-    const { data: draftMessage } = useDraftMessage(conversationId).get;
-    const { mutate } = useDraftMessage(conversationId).set;
-    const onInputTextChanged = useCallback(
-      (text: string) => {
-        mutate(text);
-      },
-      [mutate]
-    );
+    // We will fetch the draft message from the cache only once
+    const { mutate: onInputTextChanged } = useDraftMessage(conversationId).set;
+    const [draftMessage, setdraftMessage] = useState<string | undefined>();
+
+    const { getDraftMessage } = useDraftMessage(conversationId);
+    useEffect(() => {
+      (async () => {
+        const draft = await getDraftMessage();
+        if (!draft) return;
+        setdraftMessage(draft);
+      })();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    // const debounceInputText = debounce(onInputTextChanged, 500);
 
     const onLongPress = useCallback(
       (e: GestureResponderEvent, message: ChatMessageIMessage) => {
@@ -278,7 +286,13 @@ export const ChatDetail = memo(
           );
         }
         return (
-          <Composer {...props} textInputStyle={inputStyle} containerStyle={composerContainerStyle}>
+          <Composer
+            {...props}
+            textInputStyle={inputStyle}
+            containerStyle={composerContainerStyle}
+            defaultValue={draftMessage}
+            onTextChanged={onInputTextChanged}
+          >
             {!props.hasText && !draftMessage && (
               <View
                 style={{
@@ -326,6 +340,7 @@ export const ChatDetail = memo(
         inputStyle,
         isRecording,
         microphoneIcon,
+        onInputTextChanged,
       ]
     );
     useEffect(() => {
@@ -526,8 +541,6 @@ export const ChatDetail = memo(
           messages={messages}
           onSend={doSend}
           locale={locale}
-          onInputTextChanged={onInputTextChanged}
-          defaultValue={draftMessage} // TODO: Update so that draftMessage doesn't update constantly
           textInputRef={textRef}
           infiniteScroll
           scrollToBottom

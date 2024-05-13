@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
+import React, { memo, useCallback, useRef } from 'react';
 import {
   Platform,
   StyleSheet,
@@ -6,7 +6,6 @@ import {
   TextInputContentSizeChangeEventData,
   ViewStyle,
   View,
-  TextInput,
 } from 'react-native';
 import { MIN_COMPOSER_HEIGHT, DEFAULT_PLACEHOLDER } from './Constant';
 import Color from './Color';
@@ -95,19 +94,10 @@ export const Composer = memo(
       },
       [onInputSizeChanged],
     );
-
     const handleContentSizeChange = ({
       nativeEvent: { contentSize },
     }: NativeSyntheticEvent<TextInputContentSizeChangeEventData>) =>
       determineInputSizeChange(contentSize);
-
-    // Only set defaultValue once?
-    const [_defaultValue, setDefaultValue] = useState(defaultValue);
-    useEffect(() => {
-      if (!_defaultValue) {
-        setDefaultValue(defaultValue);
-      }
-    }, [defaultValue]);
 
     return (
       <View
@@ -119,7 +109,7 @@ export const Composer = memo(
           props.containerStyle,
         ]}
       >
-        <TextInput
+        <PasteInput
           testID={placeholder}
           accessible
           accessibilityLabel={placeholder}
@@ -127,7 +117,7 @@ export const Composer = memo(
           placeholderTextColor={placeholderTextColor}
           multiline={multiline}
           editable={!disableComposer}
-          // onPaste={onPaste}
+          onPaste={onPaste}
           onContentSizeChange={handleContentSizeChange}
           onChangeText={onTextChanged}
           style={[styles.textInput, textInputStyle]}
