@@ -235,20 +235,23 @@ export const ChatDetail = memo(
 
     const handleAttachmentButtonAction = useCallback(() => {
       requestAnimationFrame(async () => {
-        const document = await Document.pickSingle();
+        const document = await Document.pickSingle({
+          copyTo: 'cachesDirectory',
+          type: [Document.types.allFiles],
+          mode: 'open',
+        });
         console.log(document);
         const asset: Asset = {
-          uri: document.uri,
+          uri: document.fileCopyUri || document.uri,
           type: document.type || 'application/pdf',
           fileName: document.name || 'file',
           fileSize: document.size || 0,
           height: 0,
           width: 0,
-          originalPath: document.uri,
+          originalPath: document.fileCopyUri || document.uri,
           timestamp: new Date().toUTCString(),
           id: document.name || 'file',
         };
-
         // if (media.didCancel) return;
         setAssets([asset]);
       });
