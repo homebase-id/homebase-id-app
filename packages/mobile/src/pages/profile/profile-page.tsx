@@ -28,24 +28,17 @@ import {
 } from '../../components/ui/Icons/icons';
 import codePush from 'react-native-code-push';
 import { useAuth } from '../../hooks/auth/useAuth';
-import { Colors } from '../../app/Colors';
-import { OdinImage } from '../../components/ui/OdinImage/OdinImage';
-import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
-import { useProfile } from '../../hooks/profile/useProfile';
-import { useDarkMode } from '../../hooks/useDarkMode';
 import { openURL } from '../../utils/utils';
 import { useAuthenticatedPushNotification } from '../../hooks/push-notification/useAuthenticatedPushNotification';
 import { useQueryClient } from '@tanstack/react-query';
+import { ProfileInfo } from '../../components/Profile/ProfileInfo';
 
 type SettingsProps = NativeStackScreenProps<ProfileStackParamList, 'Overview'>;
 
 export const ProfilePage = (_props: SettingsProps) => {
-  const { isDarkMode } = useDarkMode();
   const { logout, getIdentity } = useAuth();
   const { removeDeviceToken } = useAuthenticatedPushNotification();
   const [logoutPending, setLogoutPending] = useState(false);
-
-  const { data: profile } = useProfile();
 
   const doLogout = async () => {
     setLogoutPending(true);
@@ -61,38 +54,8 @@ export const ProfilePage = (_props: SettingsProps) => {
           style={{ display: 'flex', flexDirection: 'column', paddingVertical: 12 }}
           showsVerticalScrollIndicator={false}
         >
-          <View
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              borderBottomWidth: 1,
-              borderBottomColor: isDarkMode ? Colors.slate[700] : Colors.slate[200],
-              width: '100%',
-              height: 200,
-            }}
-          >
-            <OdinImage
-              fit="cover"
-              targetDrive={GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId)}
-              fileId={profile?.profileImageFileId}
-              fileKey={profile?.profileImageFileKey}
-              imageSize={{ width: 160, height: 160 }}
-              style={{ borderRadius: 160 / 2 }}
-            />
-            <Text
-              style={{
-                fontSize: 18,
-                fontWeight: 'bold',
-                marginBottom: 8,
-                paddingTop: 4,
-              }}
-            >
-              {profile?.firstName || profile?.surName
-                ? `${profile.firstName} ${profile.surName}`
-                : getIdentity()}
-            </Text>
-          </View>
+          <ProfileInfo />
+
           <TouchableOpacity
             onPress={() => navigate('Followers')}
             style={{
