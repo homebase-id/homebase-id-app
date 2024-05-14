@@ -591,6 +591,7 @@ export const ChatDetail = memo(
 );
 
 const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
+  const { isDarkMode } = useDarkMode();
   const message = props.currentMessage as ChatMessageIMessage;
   const deleted = message?.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus;
 
@@ -604,10 +605,10 @@ const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
       {...props}
       linkStyle={{
         left: {
-          color: Colors.indigo[500],
+          color: isDarkMode ? Colors.indigo[300] : Colors.indigo[500],
         },
         right: {
-          color: Colors.indigo[500],
+          color: isDarkMode ? Colors.indigo[300] : Colors.indigo[500],
         },
       }}
       customTextStyle={

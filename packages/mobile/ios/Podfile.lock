@@ -1325,7 +1325,7 @@ DEPENDENCIES:
   - RNReanimated (from `../../../node_modules/react-native-reanimated`)
   - RNScreens (from `../../../node_modules/react-native-screens`)
   - RNShare (from `../../../node_modules/react-native-share`)
-  - RNSVG (from `../node_modules/react-native-svg`)
+  - RNSVG (from `../../../node_modules/react-native-svg`)
   - Yoga (from `../../../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
@@ -1518,7 +1518,7 @@ EXTERNAL SOURCES:
   RNShare:
     :path: "../../../node_modules/react-native-share"
   RNSVG:
-    :path: "../node_modules/react-native-svg"
+    :path: "../../../node_modules/react-native-svg"
   Yoga:
     :path: "../../../node_modules/react-native/ReactCommon/yoga"
 

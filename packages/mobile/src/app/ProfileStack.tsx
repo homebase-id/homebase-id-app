@@ -13,6 +13,7 @@ import { ConnectionRequestsPage } from '../pages/home/connection-requests-page';
 import { useDarkMode } from '../hooks/useDarkMode';
 import { NativeStackNavigationOptions } from '@react-navigation/native-stack';
 import { DriveStatusPage } from '../pages/profile/drive-status-page';
+import { ConnectQrPage } from '../pages/profile/connect-qr-page';
 
 export type ProfileStackParamList = {
   Overview: undefined;
@@ -21,6 +22,7 @@ export type ProfileStackParamList = {
   Connections: undefined;
   Following: undefined;
   DriveStatus: undefined;
+  ConnectQr: undefined;
 };
 
 const StackProfile = createNativeStackNavigator<ProfileStackParamList>();
@@ -45,6 +47,13 @@ export const ProfileStack = () => {
         component={ProfilePage}
         options={{
           headerShown: false,
+        }}
+      />
+      <StackProfile.Screen
+        name="ConnectQr"
+        component={ConnectQrPage}
+        options={{
+          title: 'QR Code',
         }}
       />
       <StackProfile.Screen name="Followers" component={FollowersPage} />
