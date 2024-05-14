@@ -258,16 +258,7 @@ export const uploadChatMessage = async (
       });
 
       if (tinyThumb) previewThumbnails.push(tinyThumb);
-    } else if (newMediaFile.type?.startsWith('audio/')) {
-      const payloadBlob = new OdinBlob(newMediaFile.filepath || newMediaFile.uri, {
-        type: newMediaFile.type,
-      }) as any as Blob;
-
-      payloads.push({
-        key: payloadKey,
-        payload: payloadBlob,
-      });
-    } else {
+    } else if (newMediaFile.type?.startsWith('image/')) {
       const blob = new OdinBlob(newMediaFile.filepath || newMediaFile.uri, {
         type: newMediaFile?.type || undefined,
       }) as any as Blob;
@@ -289,7 +280,19 @@ export const uploadChatMessage = async (
       });
 
       if (tinyThumb) previewThumbnails.push(tinyThumb);
+    } else {
+      if (newMediaFile?.type) {
+        const payloadBlob = new OdinBlob(newMediaFile.filepath || newMediaFile.uri, {
+          type: newMediaFile.type,
+        }) as any as Blob;
+
+        payloads.push({
+          key: payloadKey,
+          payload: payloadBlob,
+        });
+      }
     }
+
   }
 
   uploadMetadata.appData.previewThumbnail = previewThumbnails[0];

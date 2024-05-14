@@ -38,6 +38,7 @@ import {
   ArrowDown,
   Camera,
   Microphone,
+  PaperClip,
   Plus,
   SendChat,
   Times,
@@ -63,11 +64,10 @@ import { Text } from '../ui/Text/Text';
 import { millisToMinutesAndSeconds } from '../../utils/utils';
 import { SafeAreaView } from '../ui/SafeAreaView/SafeAreaView';
 import { FileOverview } from '../Files/FileOverview';
-
+import Document from 'react-native-document-picker';
 import { getLocales, uses24HourClock } from 'react-native-localize';
 import { type PastedFile } from '@mattermost/react-native-paste-input';
 import { useDraftMessage } from '../../hooks/chat/useDraftMessage';
-import { debounce } from 'lodash-es';
 
 export type ChatMessageIMessage = IMessage & HomebaseFile<ChatMessage>;
 
@@ -188,6 +188,7 @@ export const ChatDetail = memo(
     const microphoneIcon = useCallback(() => <Microphone />, []);
     const cameraIcon = useCallback(() => <Camera />, []);
     const crossIcon = useCallback(() => <Times />, []);
+    const attachmentIcon = useCallback(() => <PaperClip />, []);
 
     const onStopRecording = useCallback(() => {
       requestAnimationFrame(async () => {
@@ -229,6 +230,27 @@ export const ChatDetail = memo(
         });
         if (media.didCancel) return;
         setAssets(media.assets ?? []);
+      });
+    }, [setAssets]);
+
+    const handleAttachmentButtonAction = useCallback(() => {
+      requestAnimationFrame(async () => {
+        const document = await Document.pickSingle();
+        console.log(document);
+        const asset: Asset = {
+          uri: document.uri,
+          type: document.type || 'application/pdf',
+          fileName: document.name || 'file',
+          fileSize: document.size || 0,
+          height: 0,
+          width: 0,
+          originalPath: document.uri,
+          timestamp: new Date().toUTCString(),
+          id: document.name || 'file',
+        };
+
+        // if (media.didCancel) return;
+        setAssets([asset]);
       });
     }, [setAssets]);
 
@@ -324,7 +346,6 @@ export const ChatDetail = memo(
                   containerStyle={[
                     {
                       padding: 10,
-                      marginRight: 10,
                       alignContent: 'center',
                       alignItems: 'center',
                       alignSelf: 'center',
@@ -332,16 +353,31 @@ export const ChatDetail = memo(
                   ]}
                   onPressActionButton={handleRecordButtonAction}
                 />
+                <Actions
+                  icon={attachmentIcon}
+                  containerStyle={[
+                    {
+                      padding: 10,
+                      marginRight: 10,
+                      alignContent: 'center',
+                      alignItems: 'center',
+                      alignSelf: 'center',
+                    },
+                  ]}
+                  onPressActionButton={handleAttachmentButtonAction}
+                />
               </View>
             )}
           </Composer>
         );
       },
       [
+        attachmentIcon,
         cameraIcon,
         composerContainerStyle,
         draftMessage,
         duration,
+        handleAttachmentButtonAction,
         handleCameraButtonAction,
         handleRecordButtonAction,
         inputStyle,

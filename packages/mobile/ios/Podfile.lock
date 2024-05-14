@@ -983,6 +983,8 @@ PODS:
     - glog
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
+  - react-native-document-picker (9.2.0):
+    - React-Core
   - react-native-image-picker (7.1.2):
     - glog
     - RCT-Folly (= 2022.05.16.00)
@@ -1278,6 +1280,7 @@ DEPENDENCIES:
   - "react-native-blur (from `../../../node_modules/@react-native-community/blur`)"
   - "react-native-cameraroll (from `../../../node_modules/@react-native-camera-roll/camera-roll`)"
   - react-native-compressor (from `../../../node_modules/react-native-compressor`)
+  - react-native-document-picker (from `../../../node_modules/react-native-document-picker`)
   - react-native-image-picker (from `../../../node_modules/react-native-image-picker`)
   - "react-native-image-resizer (from `../../../node_modules/@bam.tech/react-native-image-resizer`)"
   - react-native-mmkv-storage (from `../../../node_modules/react-native-mmkv-storage`)
@@ -1423,6 +1426,8 @@ EXTERNAL SOURCES:
     :path: "../../../node_modules/@react-native-camera-roll/camera-roll"
   react-native-compressor:
     :path: "../../../node_modules/react-native-compressor"
+  react-native-document-picker:
+    :path: "../../../node_modules/react-native-document-picker"
   react-native-image-picker:
     :path: "../../../node_modules/react-native-image-picker"
   react-native-image-resizer:
@@ -1576,6 +1581,7 @@ SPEC CHECKSUMS:
   react-native-blur: 73561b0608a43d76f2874738aee8e3909c11d083
   react-native-cameraroll: 608899afa4747b11cb1503b946c323814bdaf4f4
   react-native-compressor: 7bd1ca14f7fff6347d6de13479ab93eb08dd95e6
+  react-native-document-picker: 2b3efb60622b7be891b8d0e0e5424632150e0c94
   react-native-image-picker: 7c3a279e7a518628910f2ea02917bd3b90049465
   react-native-image-resizer: 681f7607418b97c084ba2d0999b153b103040d8a
   react-native-mmkv-storage: cfb6854594cfdc5f7383a9e464bb025417d1721c
@@ -1627,7 +1633,7 @@ SPEC CHECKSUMS:
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
   SSZipArchive: 62d4947b08730e4cda640473b0066d209ff033c9
   Swime: d7b2c277503b6cea317774aedc2dce05613f8b0b
-  Yoga: d17d2cc8105eed528474683b42e2ea310e1daf61
+  Yoga: 805bf71192903b20fc14babe48080582fee65a80
   ZIPFoundation: b8c29ea7ae353b309bc810586181fd073cb3312c
 
 PODFILE CHECKSUM: 31d09e1a266339b924379e558579620c8bcffe6b
