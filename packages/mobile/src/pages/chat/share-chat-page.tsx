@@ -8,7 +8,7 @@ import { useChatMessage } from '../../hooks/chat/useChatMessage';
 import { useCallback, useState } from 'react';
 import { DotYouProfile } from '@youfoundation/js-lib/network';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
-import { GroupConversation } from '../../provider/chat/ConversationProvider';
+import { UnifiedConversation } from '../../provider/chat/ConversationProvider';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 import { ContactTile } from '../../components/Contact/Contact-Tile';
@@ -29,10 +29,10 @@ export const ShareChatPage = (prop: ShareChatProp) => {
   const { data, mimeType } = prop.route.params;
   const { isDarkMode } = useDarkMode();
   const { data: connections } = useAllConnections(true);
-  const { mutateAsync: fetchConversation } = useConversation().create;
+  const { mutateAsync: createConversation } = useConversation().create;
   const { mutate: sendMessage, error } = useChatMessage().send;
   const [selectedContact, setselectedContact] = useState<DotYouProfile[]>([]);
-  const [selectedGroup, setselectedGroup] = useState<HomebaseFile<GroupConversation>[]>([]);
+  const [selectedGroup, setselectedGroup] = useState<HomebaseFile<UnifiedConversation>[]>([]);
   const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
   // console.log('data', decodeURIComponent(data));
 
@@ -41,7 +41,7 @@ export const ShareChatPage = (prop: ShareChatProp) => {
       navigation.goBack();
     }
 
-    async function forwardMessages(conversationId: string, recipients: string[]) {
+    async function forwardMessages(conversation: HomebaseFile<UnifiedConversation>) {
       let text = '';
       const imageSource: ImageSource[] = [];
       if (mimeType.startsWith('text')) {
@@ -62,8 +62,7 @@ export const ShareChatPage = (prop: ShareChatProp) => {
       }
       //TODO: Handle a case where if a conversation doesn't exist and a command needs to be sent
       return sendMessage({
-        conversationId,
-        recipients: recipients,
+        conversation,
         message: text,
         files: imageSource,
       });
@@ -72,22 +71,19 @@ export const ShareChatPage = (prop: ShareChatProp) => {
     if (selectedContact.length > 0) {
       promises.push(
         ...selectedContact.flatMap(async (contact) => {
-          const { newConversationId: conversationId } = await fetchConversation({
+          const conversation = await createConversation({
             recipients: [contact.odinId],
           });
 
-          return forwardMessages(conversationId, [contact.odinId]);
+          return forwardMessages(conversation);
         })
       );
     }
 
     if (selectedGroup.length > 0) {
       promises.push(
-        ...selectedGroup.flatMap((group) => {
-          return forwardMessages(
-            group.fileMetadata.appData.uniqueId as string,
-            group.fileMetadata.appData.content.recipients
-          );
+        ...selectedGroup.flatMap((conversation) => {
+          return forwardMessages(conversation);
         })
       );
     }
@@ -97,11 +93,12 @@ export const ShareChatPage = (prop: ShareChatProp) => {
       if (selectedContact.length === 1) {
         const contact = selectedContact[0];
 
-        const { newConversationId: conversationId } = await fetchConversation({
+        // TODO: needs to change to fetch instead of still trying to create
+        const conversation = await createConversation({
           recipients: [contact.odinId],
         });
         navigation.navigate('ChatScreen', {
-          convoId: conversationId,
+          convoId: conversation.fileMetadata.appData.uniqueId as string,
         });
       }
       if (selectedGroup.length === 1) {
@@ -118,7 +115,7 @@ export const ShareChatPage = (prop: ShareChatProp) => {
       });
       navigation.goBack();
     }
-  }, [data, fetchConversation, mimeType, navigation, selectedContact, selectedGroup, sendMessage]);
+  }, [data, createConversation, mimeType, navigation, selectedContact, selectedGroup, sendMessage]);
 
   const renderItem = useCallback(
     ({ item, index }: ListRenderItemInfo<DotYouProfile>) => (

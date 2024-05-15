@@ -14,11 +14,7 @@ import {
   ConversationWithRecentMessage,
   useConversationsWithRecentMessage,
 } from '../hooks/chat/useConversations';
-import {
-  ConversationWithYourselfId,
-  GroupConversation,
-  SingleConversation,
-} from '../provider/chat/ConversationProvider';
+import { ConversationWithYourselfId } from '../provider/chat/ConversationProvider';
 import { useAuth } from '../hooks/auth/useAuth';
 import { useProfile } from '../hooks/profile/useProfile';
 import { memo, useCallback, useLayoutEffect, useMemo, useState } from 'react';
@@ -27,7 +23,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Text } from '../components/ui/Text/Text';
 import { ScrollView } from 'react-native-gesture-handler';
 import { ContactTile } from '../components/Contact/Contact-Tile';
-import { useAllContacts } from 'feed-app-common';
+import { useAllContacts, useDotYouClientContext } from 'feed-app-common';
 import { Colors } from '../app/Colors';
 import { useDarkMode } from '../hooks/useDarkMode';
 import { CHAT_APP_ID } from '../app/constants';
@@ -44,6 +40,7 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
   const [query, setQuery] = useState<string | undefined>(undefined);
   const { isDarkMode } = useDarkMode();
   const queryClient = useQueryClient();
+  const identity = useDotYouClientContext().getIdentity();
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -78,10 +75,14 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
             });
           }
         }}
-        odinId={(item.fileMetadata.appData.content as SingleConversation).recipient}
+        odinId={
+          item.fileMetadata.appData.content.recipients.filter(
+            (recipient) => recipient !== identity
+          )[0]
+        }
       />
     ),
-    [navigation]
+    [identity, navigation]
   );
 
   const keyExtractor = useCallback((item: ConversationWithRecentMessage) => item.fileId, []);
@@ -208,6 +209,7 @@ const SearchConversationResults = memo(
   }) => {
     const isActive = !!(query && query.length >= 1);
     const { data: contacts } = useAllContacts(isActive);
+    const identity = useDotYouClientContext().getIdentity();
 
     const conversationResults = useMemo(
       () =>
@@ -215,12 +217,8 @@ const SearchConversationResults = memo(
           ? conversations.filter((conversation) => {
               const content = conversation.fileMetadata.appData.content;
               return (
-                (content as GroupConversation).recipients?.some((recipient) =>
-                  recipient.toLowerCase().includes(query.toLowerCase())
-                ) ||
-                (content as SingleConversation).recipient
-                  ?.toLowerCase()
-                  ?.includes(query.toLowerCase())
+                content.recipients?.some((recipient) => recipient?.toLowerCase().includes(query)) ||
+                content.title?.toLowerCase().includes(query)
               );
             })
           : [],
@@ -249,10 +247,7 @@ const SearchConversationResults = memo(
             contact.odinId &&
             !conversationResults.some((conversation) => {
               const content = conversation.fileMetadata.appData.content;
-              return (
-                (content as SingleConversation).recipient?.toLowerCase() ===
-                contact.odinId?.toLowerCase()
-              );
+              return content.recipients.includes(contact.odinId as string);
             })
         ),
       [contactResults, conversationResults]
@@ -291,7 +286,11 @@ const SearchConversationResults = memo(
                     });
                   }
                 }}
-                odinId={(item.fileMetadata.appData.content as SingleConversation).recipient}
+                odinId={
+                  item.fileMetadata.appData.content.recipients.filter(
+                    (recipient) => recipient !== identity
+                  )[0]
+                }
               />
             ))}
             {contactsWithoutAConversation?.length ? (

@@ -11,10 +11,8 @@ import { useChatMessages } from '../../hooks/chat/useChatMessages';
 import { useChatMessage } from '../../hooks/chat/useChatMessage';
 import { useConversation } from '../../hooks/chat/useConversation';
 import {
-  Conversation,
   ConversationWithYourselfId,
-  GroupConversation,
-  SingleConversation,
+  UnifiedConversation,
 } from '../../provider/chat/ConversationProvider';
 import { ImageSource } from '../../provider/image/RNImageProvider';
 import { getNewId } from '@youfoundation/js-lib/helpers';
@@ -96,9 +94,12 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
   const { data: conversation, isLoading: isLoadingConversation } = useConversation({
     conversationId: route.params.convoId,
   }).single;
-  const contact = useContact(
-    (conversation?.fileMetadata.appData.content as SingleConversation | undefined)?.recipient
-  ).fetch.data;
+
+  const filteredRecipients = conversation?.fileMetadata.appData.content.recipients.filter(
+    (recipient) => recipient !== identity
+  );
+  const contact = useContact(filteredRecipients?.length === 1 ? filteredRecipients[0] : undefined)
+    .fetch.data;
 
   const title = useMemo(
     () =>
@@ -108,7 +109,12 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
     [contact, conversation]
   );
 
-  const isGroup = conversation && 'recipients' in conversation.fileMetadata.appData.content;
+  const isGroupChat =
+    (
+      conversation?.fileMetadata.appData.content?.recipients?.filter(
+        (recipient) => recipient !== identity
+      ) || []
+    )?.length > 1;
 
   // const [messageCordinates, setMessageCordinates] = useState({ x: 0, y: 0 });
 
@@ -142,7 +148,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
     (message: ChatMessageIMessage) => {
       navigation.navigate('MessageInfo', {
         message,
-        conversation: conversation as HomebaseFile<Conversation>,
+        conversation: conversation as HomebaseFile<UnifiedConversation>,
       });
     },
     [conversation, navigation]
@@ -160,9 +166,10 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
   const { mutateAsync: inviteRecipient } = useConversation().inviteRecipient;
   const doSend = useCallback(
     (message: ChatMessageIMessage[]) => {
+      if (!conversation) return;
       // If the chat was empty, invite the recipient
       if (
-        messages.length === 0 &&
+        messages?.filter((msg) => msg.fileId).length === 0 &&
         conversation &&
         route.params.convoId !== ConversationWithYourselfId
       ) {
@@ -172,7 +179,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
       }
 
       sendMessage({
-        conversationId: route.params.convoId,
+        conversation: conversation,
         message: message[0]?.text,
         replyId: replyMessage?.fileMetadata.appData.uniqueId,
         files: assets.map<ImageSource>((value) => {
@@ -189,17 +196,12 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
             fileSize: value.fileSize,
           };
         }),
-        recipients:
-          (conversation?.fileMetadata.appData.content as GroupConversation).recipients ||
-          [(conversation?.fileMetadata.appData.content as SingleConversation).recipient].filter(
-            Boolean
-          ),
       });
       setAssets([]);
       setReplyMessage(null);
     },
     [
-      messages.length,
+      messages,
       conversation,
       route.params.convoId,
       sendMessage,
@@ -369,11 +371,11 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
         <ErrorBoundary>
           <ChatAppBar
             title={title || ''}
-            group={'recipients' in conversation.fileMetadata.appData.content}
+            group={!!isGroupChat}
             odinId={
               route.params.convoId === ConversationWithYourselfId
                 ? identity || ''
-                : (conversation?.fileMetadata.appData.content as SingleConversation).recipient
+                : (filteredRecipients?.length === 1 && filteredRecipients[0]) || ''
             }
             goBack={
               selectedMessage.selectedMessage ? dismissSelectedMessage : doReturnToConversations
@@ -392,7 +394,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
             >
               <ErrorBoundary>
                 <ChatDetail
-                  isGroup={!!isGroup}
+                  isGroup={!!isGroupChat}
                   messages={messages}
                   doSend={doSend}
                   doSelectMessage={doSelectMessage}

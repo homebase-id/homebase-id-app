@@ -4,8 +4,7 @@ import { useConversation } from '../../hooks/chat/useConversation';
 
 import {
   ConversationWithYourselfId,
-  GroupConversation,
-  SingleConversation,
+  UnifiedConversation,
 } from '../../provider/chat/ConversationProvider';
 import { Home } from '../../components/ui/Icons/icons';
 
@@ -23,28 +22,32 @@ import { ChatStackParamList } from '../../app/ChatStack';
 import { openURL } from '../../utils/utils';
 import { Avatar, GroupAvatar, OwnerAvatar } from '../../components/ui/Avatars/Avatar';
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
+import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 
 export type ChatInfoProp = NativeStackScreenProps<ChatStackParamList, 'ChatInfo'>;
 
 export const ChatInfoPage = memo((prop: ChatInfoProp) => {
   const { convoId: conversationId } = prop.route.params;
   const { data: conversation } = useConversation({ conversationId }).single;
+  const conversationContent = conversation?.fileMetadata.appData.content;
+
   const { isDarkMode } = useDarkMode();
   const identity = useAuth().getIdentity();
   const profile = useProfile().data;
 
-  const isSelf = conversationId === ConversationWithYourselfId;
+  const recipients = conversationContent?.recipients.filter((recipient) => recipient !== identity);
+
+  const withYourself = stringGuidsEqual(
+    conversation?.fileMetadata.appData.uniqueId,
+    ConversationWithYourselfId
+  );
+  const recipient = recipients && recipients.length === 1 ? recipients[0] : undefined;
 
   const onPress = useCallback(async () => {
-    const recipient = isSelf
-      ? identity
-      : (conversation?.fileMetadata.appData.content as SingleConversation).recipient;
-    const url = `https://${recipient}/`;
-    await openURL(url);
-  }, [conversation?.fileMetadata.appData.content, isSelf, identity]);
+    await openURL(`https://${withYourself ? identity : recipient}/`);
+  }, [withYourself, identity, recipient]);
 
-  const group =
-    (conversation && 'recipients' in conversation.fileMetadata.appData.content) || false;
+  const isGroup = conversationContent && conversationContent?.recipients.length > 1;
 
   const headerLeft = useCallback(
     () => (
@@ -94,24 +97,22 @@ export const ChatInfoPage = memo((prop: ChatInfoProp) => {
   }, [isDarkMode]);
   if (!conversation) return null;
 
-  const conversationContent = conversation.fileMetadata.appData.content;
-
   return (
     <>
       <Header
-        title={group ? 'Group Info' : 'Chat Info'}
+        title={isGroup ? 'Group Info' : 'Chat Info'}
         headerLeft={headerLeft}
-        headerRight={group ? headerRight : undefined}
+        headerRight={isGroup ? headerRight : undefined}
         headerStyle={headerStyle}
       />
       <SafeAreaView>
         <View style={styles.content}>
-          {!group ? (
-            isSelf ? (
+          {!isGroup ? (
+            withYourself ? (
               <OwnerAvatar style={styles.avatar} imageSize={styles.largeAvatarSize} />
             ) : (
               <Avatar
-                odinId={(conversationContent as SingleConversation).recipient}
+                odinId={recipient as string}
                 style={styles.avatar}
                 imageSize={styles.largeAvatarSize}
               />
@@ -123,20 +124,20 @@ export const ChatInfoPage = memo((prop: ChatInfoProp) => {
             style={[
               styles.title,
               {
-                marginTop: group ? 0 : 24,
+                marginTop: isGroup ? 0 : 24,
                 ...colorStyle,
               },
             ]}
           >
-            {isSelf ? (
+            {withYourself ? (
               `${profile?.firstName} ${profile?.surName}`
-            ) : group ? (
-              conversationContent.title
+            ) : isGroup ? (
+              conversationContent?.title
             ) : (
-              <ConnectionName odinId={(conversationContent as SingleConversation).recipient} />
+              <ConnectionName odinId={recipient as string} />
             )}
           </Text>
-          {!group && (
+          {!isGroup && (
             <View
               style={{
                 display: 'flex',
@@ -154,12 +155,12 @@ export const ChatInfoPage = memo((prop: ChatInfoProp) => {
                     },
                   ]}
                 >
-                  {isSelf ? identity : (conversationContent as SingleConversation).recipient}
+                  {withYourself ? identity : (recipient as string)}
                 </Text>
               </TouchableOpacity>
             </View>
           )}
-          {group && (
+          {isGroup && (
             <View style={styles.groupRecipient}>
               <Text
                 style={{
@@ -170,34 +171,28 @@ export const ChatInfoPage = memo((prop: ChatInfoProp) => {
               >
                 Recipients
               </Text>
-              {[...(conversationContent as GroupConversation).recipients, identity as string].map(
-                (recipient, index) => (
-                  <View key={index} style={recipientGroupStyle}>
-                    {index === (conversationContent as GroupConversation).recipients.length ? (
-                      <OwnerAvatar style={styles.mediumAvatarSize} />
-                    ) : (
-                      <Avatar odinId={recipient} style={styles.mediumAvatarSize} />
-                    )}
-                    <Text
-                      style={[
-                        {
-                          fontWeight: '400',
-                          fontSize: 18,
-                          marginLeft: 12,
-                          ...colorStyle,
-                        },
-                      ]}
-                    >
-                      <ConnectionName odinId={recipient} />
-                      <Text style={styles.you}>
-                        {index === (conversationContent as GroupConversation).recipients.length
-                          ? ' (you)'
-                          : null}
-                      </Text>
-                    </Text>
-                  </View>
-                )
-              )}
+              {[recipients, identity as string].map((recipient, index) => (
+                <View key={index} style={recipientGroupStyle}>
+                  {index === recipients?.length ? (
+                    <OwnerAvatar style={styles.mediumAvatarSize} />
+                  ) : (
+                    <Avatar odinId={recipient as string} style={styles.mediumAvatarSize} />
+                  )}
+                  <Text
+                    style={[
+                      {
+                        fontWeight: '400',
+                        fontSize: 18,
+                        marginLeft: 12,
+                        ...colorStyle,
+                      },
+                    ]}
+                  >
+                    <ConnectionName odinId={recipient as string} />
+                    <Text style={styles.you}>{index === recipients?.length ? ' (you)' : null}</Text>
+                  </Text>
+                </View>
+              ))}
             </View>
           )}
         </View>

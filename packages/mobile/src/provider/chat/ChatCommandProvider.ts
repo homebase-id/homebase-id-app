@@ -1,15 +1,10 @@
 import { DotYouClient, SecurityGroupType } from '@youfoundation/js-lib/core';
 import {
-  GroupConversation,
   JOIN_CONVERSATION_COMMAND,
   JOIN_GROUP_CONVERSATION_COMMAND,
   JoinConversationRequest,
   JoinGroupConversationRequest,
-  SingleConversation,
-  UPDATE_GROUP_CONVERSATION_COMMAND,
-  UpdateGroupConversationRequest,
   getConversation,
-  updateConversation,
   uploadConversation,
 } from './ConversationProvider';
 import { tryJsonParse } from '@youfoundation/js-lib/helpers';
@@ -22,7 +17,6 @@ import {
   getChatMessage,
   updateChatMessage,
 } from './ChatProvider';
-import { getSingleConversation } from '../../hooks/chat/useConversation';
 
 export const processCommand = async (
   dotYouClient: DotYouClient,
@@ -42,9 +36,9 @@ export const processCommand = async (
     return await markChatAsRead(dotYouClient, queryClient, command);
   }
 
-  if (command.clientCode === UPDATE_GROUP_CONVERSATION_COMMAND) {
-    return await updateGroupConversation(dotYouClient, queryClient, command);
-  }
+  // if (command.clientCode === UPDATE_GROUP_CONVERSATION_COMMAND) {
+  //   return await updateGroupConversation(dotYouClient, queryClient, command);
+  // }
 };
 
 const joinConversation = async (
@@ -60,7 +54,7 @@ const joinConversation = async (
           uniqueId: joinConversationRequest.conversationId,
           content: {
             title: joinConversationRequest.title,
-            recipient: command.sender,
+            recipients: [...new Set([command.sender, dotYouClient.getIdentity()])],
           },
         },
       },
@@ -71,6 +65,7 @@ const joinConversation = async (
       },
     });
     queryClient.invalidateQueries({ queryKey: ['conversations'] });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (ex: any) {
     if (ex?.response?.data?.errorCode === 'existingFileWithUniqueId') return command.id;
 
@@ -104,7 +99,7 @@ const joinGroupConversation = async (
           uniqueId: joinConversationRequest.conversationId,
           content: {
             title: joinConversationRequest.title,
-            recipients: recipients,
+            recipients: [...new Set([...recipients, dotYouClient.getIdentity()])],
           },
         },
       },
@@ -115,6 +110,7 @@ const joinGroupConversation = async (
       },
     });
     queryClient.invalidateQueries({ queryKey: ['conversations'] });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (ex: any) {
     if (ex?.response?.data?.errorCode === 'existingFileWithUniqueId') return command.id;
 
@@ -125,24 +121,24 @@ const joinGroupConversation = async (
   return command.id;
 };
 
-const updateGroupConversation = async (
-  dotYouClient: DotYouClient,
-  queryClient: QueryClient,
-  command: ReceivedCommand
-) => {
-  const updateGroupConversation = tryJsonParse<UpdateGroupConversationRequest>(
-    command.clientJsonMessage
-  );
-  const conversation = await getSingleConversation(
-    dotYouClient,
-    updateGroupConversation.conversationId
-  );
-  if (!conversation) return null;
-  conversation.fileMetadata.appData.content.title = updateGroupConversation.title;
-  await updateConversation(dotYouClient, conversation);
-  queryClient.invalidateQueries({ queryKey: ['conversations'] });
-  return command.id;
-};
+// const updateGroupConversation = async (
+//   dotYouClient: DotYouClient,
+//   queryClient: QueryClient,
+//   command: ReceivedCommand
+// ) => {
+//   const updateGroupConversation = tryJsonParse<UpdateGroupConversationRequest>(
+//     command.clientJsonMessage
+//   );
+//   const conversation = await getSingleConversation(
+//     dotYouClient,
+//     updateGroupConversation.conversationId
+//   );
+//   if (!conversation) return null;
+//   conversation.fileMetadata.appData.content.title = updateGroupConversation.title;
+//   await updateConversation(dotYouClient, conversation);
+//   queryClient.invalidateQueries({ queryKey: ['conversations'] });
+//   return command.id;
+// };
 
 const markChatAsRead = async (
   dotYouClient: DotYouClient,
@@ -152,19 +148,19 @@ const markChatAsRead = async (
   const markAsReadRequest = tryJsonParse<MarkAsReadRequest>(command.clientJsonMessage);
   const conversationId = markAsReadRequest.conversationId;
   const chatUniqueIds = markAsReadRequest.messageIds;
+  const identity = dotYouClient.getIdentity();
 
   if (!conversationId || !chatUniqueIds) return null;
 
   const conversation = await getConversation(dotYouClient, conversationId);
   if (!conversation) return null;
   const conversationContent = conversation.fileMetadata.appData.content;
-  const recipients = (conversationContent as GroupConversation).recipients || [
-    (conversationContent as SingleConversation).recipient,
-  ];
+  const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
   if (!recipients.filter(Boolean)?.length) return null;
   const chatMessages = await Promise.all(
     Array.from(new Set(chatUniqueIds)).map((msgId) => getChatMessage(dotYouClient, msgId))
   );
+  console.log('marking as read', chatMessages);
 
   const updateSuccess = await Promise.all(
     chatMessages
@@ -197,7 +193,6 @@ const markChatAsRead = async (
         if (recipients.length === keys.length && allRead) {
           chatMessage.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Read;
         }
-
         try {
           const updateResult = await updateChatMessage(dotYouClient, chatMessage, recipients);
           return !!updateResult;
@@ -209,7 +204,7 @@ const markChatAsRead = async (
   );
 
   queryClient.invalidateQueries({ queryKey: ['chat-messages', conversationId] });
-  if (updateSuccess.every((success) => success)) return command.id;
 
+  if (updateSuccess.every((success) => success)) return command.id;
   return null;
 };

@@ -25,28 +25,29 @@ import {
 } from '../../provider/chat/ChatProvider';
 import { ImageSource } from '../../provider/image/RNImageProvider';
 import {
-  Conversation,
   ConversationWithYourselfId,
-  GroupConversation,
-  SingleConversation,
+  UnifiedConversation,
 } from '../../provider/chat/ConversationProvider';
 import { OdinBlob } from '../../../polyfills/OdinBlob';
 import { getSynchronousDotYouClient } from './getSynchronousDotYouClient';
 
 const sendMessage = async ({
-  conversationId,
-  recipients,
+  conversation,
   replyId,
   files,
   message,
 }: {
-  conversationId: string;
-  recipients: string[];
+  conversation: HomebaseFile<UnifiedConversation>;
   replyId?: string;
   files?: ImageSource[];
   message: string;
 }): Promise<NewHomebaseFile<ChatMessage> | null> => {
   const dotYouClient = await getSynchronousDotYouClient();
+
+  const conversationId = conversation.fileMetadata.appData.uniqueId as string;
+  const conversationContent = conversation.fileMetadata.appData.content;
+  const identity = dotYouClient.getIdentity();
+  const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
 
   const newChatId = getNewId();
   const newChat: NewHomebaseFile<ChatMessage> = {
@@ -94,8 +95,7 @@ export const getSendChatMessageMutationOptions: (queryClient: QueryClient) => Us
   unknown,
   unknown,
   {
-    conversationId: string;
-    recipients: string[];
+    conversation: HomebaseFile<UnifiedConversation>;
     replyId?: string;
     files?: ImageSource[];
     message: string;
@@ -111,7 +111,7 @@ export const getSendChatMessageMutationOptions: (queryClient: QueryClient) => Us
 > = (queryClient) => ({
   mutationKey: ['send-chat-message'],
   mutationFn: sendMessage,
-  onMutate: async ({ conversationId, recipients, replyId, files, message }) => {
+  onMutate: async ({ conversation, replyId, files, message }) => {
     const existingData = queryClient.getQueryData<
       InfiniteData<{
         searchResults: (HomebaseFile<ChatMessage> | null)[];
@@ -119,14 +119,14 @@ export const getSendChatMessageMutationOptions: (queryClient: QueryClient) => Us
         queryTime: number;
         includeMetadataHeader: boolean;
       }>
-    >(['chat-messages', conversationId]);
+    >(['chat-messages', conversation.fileMetadata.appData.uniqueId]);
 
     if (!existingData) return;
 
     const newMessageDsr: NewHomebaseFile<ChatMessage> = {
       fileMetadata: {
         appData: {
-          groupId: conversationId,
+          groupId: conversation.fileMetadata.appData.uniqueId,
           content: {
             message: message,
             deliveryStatus: ChatDeliveryStatus.Sending,
@@ -166,18 +166,23 @@ export const getSendChatMessageMutationOptions: (queryClient: QueryClient) => Us
       })),
     };
 
-    queryClient.setQueryData(['chat-messages', conversationId], newData);
+    queryClient.setQueryData(
+      ['chat-messages', conversation.fileMetadata.appData.uniqueId],
+      newData
+    );
     return { existingData };
   },
   onError: (err, messageParams, context) => {
     console.error('Failed to send the chat message', err);
     queryClient.setQueryData(
-      ['chat-messages', messageParams.conversationId],
+      ['chat-messages', messageParams.conversation.fileMetadata.appData.uniqueId],
       context?.existingData
     );
   },
   onSettled: async (_data, _error, variables) => {
-    queryClient.invalidateQueries({ queryKey: ['chat-messages', variables.conversationId] });
+    queryClient.invalidateQueries({
+      queryKey: ['chat-messages', variables.conversation.fileMetadata.appData.uniqueId],
+    });
   },
 });
 
@@ -186,14 +191,12 @@ const updateMessage = async ({
   conversation,
 }: {
   updatedChatMessage: HomebaseFile<ChatMessage>;
-  conversation: HomebaseFile<Conversation>;
+  conversation: HomebaseFile<UnifiedConversation>;
 }) => {
   const dotYouClient = await getSynchronousDotYouClient();
   const conversationContent = conversation.fileMetadata.appData.content;
-
-  const recipients =
-    (conversationContent as GroupConversation).recipients ||
-    [(conversationContent as SingleConversation).recipient].filter(Boolean);
+  const identity = dotYouClient.getIdentity();
+  const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
 
   await updateChatMessage(dotYouClient, updatedChatMessage, recipients);
 };
@@ -203,7 +206,7 @@ export const getUpdateChatMessageMutationOptions: (queryClient: QueryClient) => 
   unknown,
   {
     updatedChatMessage: HomebaseFile<ChatMessage>;
-    conversation: HomebaseFile<Conversation>;
+    conversation: HomebaseFile<UnifiedConversation>;
   },
   {
     extistingMessages:

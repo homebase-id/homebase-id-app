@@ -27,7 +27,7 @@ import { ChatStackParamList } from '../../app/ChatStack';
 import { ErrorNotification } from '../ui/Alert/ErrorNotification';
 import useImage from '../ui/OdinImage/hooks/useImage';
 import { ImageSource } from '../../provider/image/RNImageProvider';
-import { ChatDrive, GroupConversation } from '../../provider/chat/ConversationProvider';
+import { ChatDrive, UnifiedConversation } from '../../provider/chat/ConversationProvider';
 import { useConversations } from '../../hooks/chat/useConversations';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { GroupAvatar } from '../ui/Avatars/Avatar';
@@ -45,10 +45,10 @@ export const ChatForwardModal = forwardRef(
     const { onClose, selectedMessage: message } = props;
     const { isDarkMode } = useDarkMode();
     const { data: connections } = useAllConnections(true);
-    const { mutateAsync: fetchConversation } = useConversation().create;
+    const { mutateAsync: createConversation } = useConversation().create;
     const { mutate: sendMessage, error } = useChatMessage().send;
     const [selectedContact, setselectedContact] = useState<DotYouProfile[]>([]);
-    const [selectedGroup, setselectedGroup] = useState<HomebaseFile<GroupConversation>[]>([]);
+    const [selectedGroup, setselectedGroup] = useState<HomebaseFile<UnifiedConversation>[]>([]);
     const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
     const { getFromCache } = useImage();
 
@@ -73,8 +73,7 @@ export const ChatForwardModal = forwardRef(
       if ((selectedContact.length === 0 && selectedGroup.length === 0) || !message) return;
 
       async function forwardMessages(
-        conversationId: string,
-        recipients: string[],
+        conversation: HomebaseFile<UnifiedConversation>,
         message: ChatMessageIMessage
       ) {
         let imageSource: ImageSource[] = [];
@@ -96,21 +95,21 @@ export const ChatForwardModal = forwardRef(
             .filter(Boolean) as ImageSource[];
         }
         return sendMessage({
-          conversationId,
-          recipients: recipients,
+          conversation,
           message: message.fileMetadata.appData.content.message,
           files: imageSource,
         });
       }
+
       const promises: Promise<void>[] = [];
       if (selectedContact.length > 0) {
         promises.push(
           ...selectedContact.flatMap(async (contact) => {
-            const { newConversationId: conversationId } = await fetchConversation({
+            const newConversation = await createConversation({
               recipients: [contact.odinId],
             });
 
-            return forwardMessages(conversationId, [contact.odinId], message);
+            return forwardMessages(newConversation, message);
           })
         );
       }
@@ -118,11 +117,7 @@ export const ChatForwardModal = forwardRef(
       if (selectedGroup.length > 0) {
         promises.push(
           ...selectedGroup.flatMap((group) => {
-            return forwardMessages(
-              group.fileMetadata.appData.uniqueId as string,
-              group.fileMetadata.appData.content.recipients,
-              message
-            );
+            return forwardMessages(group, message);
           })
         );
       }
@@ -132,11 +127,12 @@ export const ChatForwardModal = forwardRef(
         if (selectedContact.length === 1) {
           const contact = selectedContact[0];
 
-          const { newConversationId: conversationId } = await fetchConversation({
+          // TODO: needs to change to fetch instead of still trying to create
+          const newConversation = await createConversation({
             recipients: [contact.odinId],
           });
           navigation.navigate('ChatScreen', {
-            convoId: conversationId,
+            convoId: newConversation.fileMetadata.appData.uniqueId as string,
           });
         }
         if (selectedGroup.length === 1) {
@@ -154,7 +150,7 @@ export const ChatForwardModal = forwardRef(
       }
       onDismiss();
     }, [
-      fetchConversation,
+      createConversation,
       getFromCache,
       message,
       navigation,
@@ -324,22 +320,22 @@ export const ListHeaderComponent = memo(
     selectedGroup,
     setselectedGroup,
   }: {
-    selectedGroup: HomebaseFile<GroupConversation>[];
-    setselectedGroup: (group: HomebaseFile<GroupConversation>[]) => void;
+    selectedGroup: HomebaseFile<UnifiedConversation>[];
+    setselectedGroup: (group: HomebaseFile<UnifiedConversation>[]) => void;
   }) => {
     const { data: conversations } = useConversations().all;
     const flatConversations =
       (conversations?.pages
-        .flatMap((page) => page.searchResults)
+        .flatMap((page) => page?.searchResults)
         .filter(
           (convo) =>
             convo &&
             [0, undefined].includes(convo.fileMetadata.appData.archivalStatus) &&
-            'recipients' in convo.fileMetadata.appData.content
-        ) as HomebaseFile<GroupConversation>[]) || [];
+            convo.fileMetadata.appData.content.recipients.length > 2
+        ) as HomebaseFile<UnifiedConversation>[]) || [];
 
     const onSelect = useCallback(
-      (group: HomebaseFile<GroupConversation>) => {
+      (group: HomebaseFile<UnifiedConversation>) => {
         if (selectedGroup.includes(group)) {
           setselectedGroup(selectedGroup.filter((grp) => grp !== group));
         } else {
@@ -393,7 +389,7 @@ const GroupConversationTile = memo(
     selectMode?: boolean;
     isSelected?: boolean;
     onPress?: () => void;
-    conversation: GroupConversation;
+    conversation: UnifiedConversation;
   }) => {
     const { isDarkMode } = useDarkMode();
     return (
