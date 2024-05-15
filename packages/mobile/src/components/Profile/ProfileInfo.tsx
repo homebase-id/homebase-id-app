@@ -6,9 +6,10 @@ import { useDarkMode } from '../../hooks/useDarkMode';
 import { OdinImage } from '../ui/OdinImage/OdinImage';
 import { Colors } from '../../app/Colors';
 import { Text } from '../ui/Text/Text';
-import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { NavigationProp, useNavigation, useRoute } from '@react-navigation/native';
 import { ProfileStackParamList } from '../../app/ProfileStack';
 import { QrIcon } from '../ui/Icons/icons';
+import { useCallback } from 'react';
 
 export const ProfileInfo = () => {
   const { isDarkMode } = useDarkMode();
@@ -16,9 +17,15 @@ export const ProfileInfo = () => {
 
   const { data: profile } = useProfile();
   const navigation = useNavigation<NavigationProp<ProfileStackParamList>>();
+  const { name } = useRoute();
+
+  const showQr = !(name === 'Home');
+  const onNavigate = useCallback(() => {
+    return navigation.navigate('ConnectQr');
+  }, [navigation]);
 
   return (
-    <TouchableOpacity onPress={() => navigation.navigate('ConnectQr')}>
+    <TouchableOpacity disabled={!showQr} onPress={onNavigate}>
       <View
         style={{
           display: 'flex',
@@ -37,7 +44,7 @@ export const ProfileInfo = () => {
           fileKey={profile?.profileImageFileKey}
           imageSize={{ width: 160, height: 160 }}
           style={{ borderRadius: 160 / 2 }}
-          onClick={() => navigation.navigate('ConnectQr')}
+          onClick={showQr ? onNavigate : undefined}
         />
         <Text
           style={{
@@ -53,17 +60,19 @@ export const ProfileInfo = () => {
             : getIdentity()}
         </Text>
 
-        <View
-          style={{
-            width: '100%',
-            display: 'flex',
-            flexDirection: 'row-reverse',
-            position: 'relative',
-            top: -25,
-          }}
-        >
-          <QrIcon />
-        </View>
+        {showQr ? (
+          <View
+            style={{
+              width: '100%',
+              display: 'flex',
+              flexDirection: 'row-reverse',
+              position: 'relative',
+              top: -25,
+            }}
+          >
+            <QrIcon />
+          </View>
+        ) : null}
       </View>
     </TouchableOpacity>
   );
