@@ -168,6 +168,9 @@ const TabStack = memo(() => {
         component={FeedPage}
         options={{
           tabBarIcon: TabFeedIcon,
+          // Ios does not load webview until the window is focussed so keep it lazy until needed
+          // see: https://github.com/react-native-webview/react-native-webview/pull/813#issuecomment-526216535
+          lazy: Platform.OS === 'android' ? false : true,
         }}
       />
       <TabBottom.Screen
