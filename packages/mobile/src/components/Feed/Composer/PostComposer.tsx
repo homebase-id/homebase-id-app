@@ -322,7 +322,7 @@ const ChannelOrAclSelector = memo(
           key={'loading-select'}
           style={{ zIndex: 20, elevation: 20, position: 'relative' }}
         >
-          <Option>Public Posts</Option>
+          <Option>Main</Option>
         </Select>
       );
     }
