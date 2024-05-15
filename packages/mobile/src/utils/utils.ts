@@ -1,5 +1,5 @@
 import { Linking } from 'react-native';
-import { CachesDirectoryPath, copyFile, ExternalStorageDirectoryPath, TemporaryDirectoryPath } from 'react-native-fs';
+import { CachesDirectoryPath, copyFile } from 'react-native-fs';
 import InAppBrowser from 'react-native-inappbrowser-reborn';
 
 //https://stackoverflow.com/a/21294619/15538463
