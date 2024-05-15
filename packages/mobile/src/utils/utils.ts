@@ -63,3 +63,17 @@ export function getPayloadSize(size: number): string {
     }
 }
 
+// This is needed when some files has file:// already prefixed with it
+// Needs to be removed to avoid double file://
+// decode the URI component
+// see: https://github.com/react-native-documents/document-picker/issues/350#issuecomment-705437360
+export function fixDocumentURI(url: string): string {
+    const prefixFile = 'file://';
+    if (url.startsWith(prefixFile)) {
+        url = url.substring(prefixFile.length);
+        url = decodeURI(url);
+    }
+    return url;
+
+}
+

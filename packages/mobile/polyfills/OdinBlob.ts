@@ -67,15 +67,6 @@ class Blob {
     } else if (typeof parts === 'string') {
       const id = options?.id || getNewId();
 
-      // This is needed when some files has file:// already prefixed with it
-      // Needs to be removed to avoid double file://
-      // decode the URI component
-      // see: https://github.com/react-native-documents/document-picker/issues/350#issuecomment-705437360
-      const prefixFile = 'file://';
-      if (parts.startsWith(prefixFile)) {
-        parts = parts.substring(prefixFile.length);
-        parts = decodeURI(parts);
-      }
       this.data = {
         blobId: id,
         offset: 0,

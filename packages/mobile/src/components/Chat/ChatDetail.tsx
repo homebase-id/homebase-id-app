@@ -61,7 +61,7 @@ import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ChatDeletedArchivalStaus, ChatMessage } from '../../provider/chat/ChatProvider';
 import { useAudioRecorder } from '../../hooks/audio/useAudioRecorderPlayer';
 import { Text } from '../ui/Text/Text';
-import { millisToMinutesAndSeconds } from '../../utils/utils';
+import { fixDocumentURI, millisToMinutesAndSeconds } from '../../utils/utils';
 import { SafeAreaView } from '../ui/SafeAreaView/SafeAreaView';
 import { FileOverview } from '../Files/FileOverview';
 import Document from 'react-native-document-picker';
@@ -241,14 +241,15 @@ export const ChatDetail = memo(
           mode: 'open',
         });
         console.log(document);
+        document.fileCopyUri = fixDocumentURI(document.fileCopyUri || document.uri);
         const asset: Asset = {
-          uri: document.fileCopyUri || document.uri,
+          uri: document.fileCopyUri,
           type: document.type || 'application/pdf',
           fileName: document.name || 'file',
           fileSize: document.size || 0,
           height: 0,
           width: 0,
-          originalPath: document.fileCopyUri || document.uri,
+          originalPath: document.fileCopyUri,
           timestamp: new Date().toUTCString(),
           id: document.name || 'file',
         };
