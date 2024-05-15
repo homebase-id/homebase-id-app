@@ -6,26 +6,29 @@ import { useDarkMode } from '../../hooks/useDarkMode';
 import { OdinImage } from '../ui/OdinImage/OdinImage';
 import { Colors } from '../../app/Colors';
 import { Text } from '../ui/Text/Text';
-import { NavigationProp, useNavigation, useRoute } from '@react-navigation/native';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { ProfileStackParamList } from '../../app/ProfileStack';
 import { QrIcon } from '../ui/Icons/icons';
 import { useCallback } from 'react';
+import { TabStackParamList } from '../../app/App';
 
 export const ProfileInfo = () => {
   const { isDarkMode } = useDarkMode();
   const { getIdentity } = useAuth();
 
   const { data: profile } = useProfile();
+  const tabNavigation = useNavigation<NavigationProp<TabStackParamList>>();
   const navigation = useNavigation<NavigationProp<ProfileStackParamList>>();
-  const { name } = useRoute();
 
-  const showQr = !(name === 'Home');
-  const onNavigate = useCallback(() => {
-    return navigation.navigate('ConnectQr');
-  }, [navigation]);
+  const doNavigate = useCallback(() => {
+    tabNavigation.navigate('Profile');
+    setTimeout(() => {
+      navigation.navigate('ConnectQr');
+    }, 0);
+  }, [tabNavigation, navigation]);
 
   return (
-    <TouchableOpacity disabled={!showQr} onPress={onNavigate}>
+    <TouchableOpacity onPress={doNavigate}>
       <View
         style={{
           display: 'flex',
@@ -44,7 +47,7 @@ export const ProfileInfo = () => {
           fileKey={profile?.profileImageFileKey}
           imageSize={{ width: 160, height: 160 }}
           style={{ borderRadius: 160 / 2 }}
-          onClick={showQr ? onNavigate : undefined}
+          onClick={doNavigate}
         />
         <Text
           style={{
@@ -60,19 +63,17 @@ export const ProfileInfo = () => {
             : getIdentity()}
         </Text>
 
-        {showQr ? (
-          <View
-            style={{
-              width: '100%',
-              display: 'flex',
-              flexDirection: 'row-reverse',
-              position: 'relative',
-              top: -25,
-            }}
-          >
-            <QrIcon />
-          </View>
-        ) : null}
+        <View
+          style={{
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'row-reverse',
+            position: 'relative',
+            top: -25,
+          }}
+        >
+          <QrIcon />
+        </View>
       </View>
     </TouchableOpacity>
   );
