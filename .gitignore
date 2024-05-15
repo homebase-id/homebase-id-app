@@ -68,3 +68,4 @@ yarn-error.log
 # Codepush
 codepush/
 packages/mobile/ios/.xcode.env.local
+.npmrc
