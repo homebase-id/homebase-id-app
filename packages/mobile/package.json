@@ -53,6 +53,7 @@
     "react-native": "0.73.6",
     "react-native-audio-recorder-player": "^3.6.6",
     "react-native-blob-util": "^0.19.6",
+    "react-native-bootsplash": "^5.5.3",
     "react-native-code-push": "8.2.1",
     "react-native-compressor": "^1.8.24",
     "react-native-device-info": "^10.12.0",

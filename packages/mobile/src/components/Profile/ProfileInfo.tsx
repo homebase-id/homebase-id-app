@@ -9,16 +9,26 @@ import { Text } from '../ui/Text/Text';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { ProfileStackParamList } from '../../app/ProfileStack';
 import { QrIcon } from '../ui/Icons/icons';
+import { useCallback } from 'react';
+import { TabStackParamList } from '../../app/App';
 
 export const ProfileInfo = () => {
   const { isDarkMode } = useDarkMode();
   const { getIdentity } = useAuth();
 
   const { data: profile } = useProfile();
+  const tabNavigation = useNavigation<NavigationProp<TabStackParamList>>();
   const navigation = useNavigation<NavigationProp<ProfileStackParamList>>();
 
+  const doNavigate = useCallback(() => {
+    tabNavigation.navigate('Profile');
+    setTimeout(() => {
+      navigation.navigate('ConnectQr');
+    }, 0);
+  }, [tabNavigation, navigation]);
+
   return (
-    <TouchableOpacity onPress={() => navigation.navigate('ConnectQr')}>
+    <TouchableOpacity onPress={doNavigate}>
       <View
         style={{
           display: 'flex',
@@ -37,7 +47,7 @@ export const ProfileInfo = () => {
           fileKey={profile?.profileImageFileKey}
           imageSize={{ width: 160, height: 160 }}
           style={{ borderRadius: 160 / 2 }}
-          onClick={() => navigation.navigate('ConnectQr')}
+          onClick={doNavigate}
         />
         <Text
           style={{
