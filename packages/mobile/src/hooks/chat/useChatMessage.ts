@@ -26,6 +26,7 @@ import {
 import { ImageSource } from '../../provider/image/RNImageProvider';
 import {
   Conversation,
+  ConversationWithYourselfId,
   GroupConversation,
   SingleConversation,
 } from '../../provider/chat/ConversationProvider';
@@ -55,7 +56,9 @@ const sendMessage = async ({
         groupId: conversationId,
         content: {
           message: message,
-          deliveryStatus: ChatDeliveryStatus.Sent,
+          deliveryStatus: stringGuidsEqual(conversationId, ConversationWithYourselfId)
+            ? ChatDeliveryStatus.Read
+            : ChatDeliveryStatus.Sent,
           replyId: replyId,
         },
         userDate: new Date().getTime(),

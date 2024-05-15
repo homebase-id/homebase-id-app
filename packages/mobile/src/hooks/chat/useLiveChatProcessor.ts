@@ -36,19 +36,16 @@ import {
   dsrToConversation,
 } from '../../provider/chat/ConversationProvider';
 import { ChatReactionFileType } from '../../provider/chat/ChatReactionProvider';
-import { useNetInfo } from '@react-native-community/netinfo';
 
 const MINUTE_IN_MS = 60000;
 
 // We first process the inbox, then we connect for live updates;
 export const useLiveChatProcessor = () => {
-  const netinfo = useNetInfo();
-
   // Process the inbox on startup; As we want to cover the backlog of messages first
   const { status: inboxStatus } = useInboxProcessor(true);
 
   // Only after the inbox is processed, we connect for live updates; So we avoid clearing the cache on each fileAdded update
-  const isOnline = useChatWebsocket(inboxStatus === 'success' && netinfo.isConnected !== false);
+  const isOnline = useChatWebsocket(inboxStatus === 'success');
 
   // Only after the inbox is processed, we process commands as new ones might have been added via the inbox
   useChatCommandProcessor(inboxStatus === 'success');
