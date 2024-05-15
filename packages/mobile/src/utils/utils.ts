@@ -1,4 +1,5 @@
 import { Linking } from 'react-native';
+import { CachesDirectoryPath, copyFile, ExternalStorageDirectoryPath, TemporaryDirectoryPath } from 'react-native-fs';
 import InAppBrowser from 'react-native-inappbrowser-reborn';
 
 //https://stackoverflow.com/a/21294619/15538463
@@ -75,5 +76,17 @@ export function fixDocumentURI(url: string): string {
     }
     return url;
 
+}
+
+export async function fixContentURI(url: string): Promise<string> {
+    if (url.startsWith('content://')) {
+        const uriComponents = url.split('/');
+        const fileNameAndExtension = uriComponents[uriComponents.length - 1];
+        const destPath = `${CachesDirectoryPath}/${fileNameAndExtension}`;
+        await copyFile(url, destPath);
+        return `file://${destPath}`;
+
+    }
+    return url;
 }
 

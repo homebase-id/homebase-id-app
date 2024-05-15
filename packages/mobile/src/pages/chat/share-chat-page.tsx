@@ -5,7 +5,7 @@ import { useDarkMode } from '../../hooks/useDarkMode';
 import { useAllConnections } from 'feed-app-common';
 import { useConversation } from '../../hooks/chat/useConversation';
 import { useChatMessage } from '../../hooks/chat/useChatMessage';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { DotYouProfile } from '@youfoundation/js-lib/network';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { GroupConversation } from '../../provider/chat/ConversationProvider';
@@ -22,6 +22,8 @@ import { SendChat } from '../../components/ui/Icons/icons';
 import { ErrorNotification } from '../../components/ui/Alert/ErrorNotification';
 import { ImageSource } from '../../provider/image/RNImageProvider';
 import { Image } from 'react-native';
+import { readFile, stat } from 'react-native-fs';
+import { fixContentURI } from '../../utils/utils';
 
 export type ShareChatProp = NativeStackScreenProps<ChatStackParamList, 'ShareChat'>;
 export const ShareChatPage = (prop: ShareChatProp) => {
@@ -33,6 +35,7 @@ export const ShareChatPage = (prop: ShareChatProp) => {
   const [selectedContact, setselectedContact] = useState<DotYouProfile[]>([]);
   const [selectedGroup, setselectedGroup] = useState<HomebaseFile<GroupConversation>[]>([]);
   const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
+  // console.log('data', decodeURIComponent(data));
 
   const onShare = useCallback(async () => {
     if ((selectedContact.length === 0 && selectedGroup.length === 0) || !data) {
@@ -45,13 +48,14 @@ export const ShareChatPage = (prop: ShareChatProp) => {
       if (mimeType.startsWith('text')) {
         text = data;
       } else if (mimeType.startsWith('image')) {
+        const uri = await fixContentURI(data);
         let size = {
           width: 0,
           height: 0,
         };
         await Image.getSize(data, (width, height) => (size = { width, height }));
         imageSource.push({
-          uri: data,
+          uri: uri,
           width: size.width,
           height: size.height,
           type: mimeType,
