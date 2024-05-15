@@ -1,4 +1,5 @@
 import { Linking } from 'react-native';
+import { CachesDirectoryPath, copyFile } from 'react-native-fs';
 import InAppBrowser from 'react-native-inappbrowser-reborn';
 
 //https://stackoverflow.com/a/21294619/15538463
@@ -61,5 +62,31 @@ export function getPayloadSize(size: number): string {
     } else {
         return `${(size / (1024 * 1024 * 1024)).toFixed(0)} GB`;
     }
+}
+
+// This is needed when some files has file:// already prefixed with it
+// Needs to be removed to avoid double file://
+// decode the URI component
+// see: https://github.com/react-native-documents/document-picker/issues/350#issuecomment-705437360
+export function fixDocumentURI(url: string): string {
+    const prefixFile = 'file://';
+    if (url.startsWith(prefixFile)) {
+        url = url.substring(prefixFile.length);
+        url = decodeURI(url);
+    }
+    return url;
+
+}
+
+export async function fixContentURI(url: string): Promise<string> {
+    if (url.startsWith('content://')) {
+        const uriComponents = url.split('/');
+        const fileNameAndExtension = uriComponents[uriComponents.length - 1];
+        const destPath = `${CachesDirectoryPath}/${fileNameAndExtension}`;
+        await copyFile(url, destPath);
+        return `file://${destPath}`;
+
+    }
+    return url;
 }
 

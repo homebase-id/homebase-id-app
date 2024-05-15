@@ -66,6 +66,7 @@ class Blob {
       });
     } else if (typeof parts === 'string') {
       const id = options?.id || getNewId();
+
       this.data = {
         blobId: id,
         offset: 0,

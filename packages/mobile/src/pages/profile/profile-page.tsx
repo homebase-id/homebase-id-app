@@ -319,6 +319,10 @@ const DeleteCache = () => {
       queryKey: ['conversations'],
       exact: false,
     });
+    query.removeQueries({
+      queryKey: ['contacts'],
+      exact: false,
+    });
     setDone(true);
     setTimeout(() => {
       setDone(false);

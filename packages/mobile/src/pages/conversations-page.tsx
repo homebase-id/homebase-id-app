@@ -250,7 +250,7 @@ const SearchConversationResults = memo(
             !conversationResults.some((conversation) => {
               const content = conversation.fileMetadata.appData.content;
               return (
-                (content as SingleConversation).recipient.toLowerCase() ===
+                (content as SingleConversation).recipient?.toLowerCase() ===
                 contact.odinId?.toLowerCase()
               );
             })
@@ -262,7 +262,7 @@ const SearchConversationResults = memo(
     if (!isActive) return null;
 
     return (
-      <>
+      <SafeAreaView>
         {!conversationResults?.length && !contactsWithoutAConversation?.length ? (
           <Text
             style={{
@@ -312,7 +312,7 @@ const SearchConversationResults = memo(
             ))}
           </ScrollView>
         )}
-      </>
+      </SafeAreaView>
     );
   }
 );
