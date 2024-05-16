@@ -13,14 +13,8 @@ import { ProfileInfo } from '../../components/Profile/ProfileInfo';
 type HomeProps = NativeStackScreenProps<TabStackParamList, 'Home'>;
 
 export const HomePage = (_props: HomeProps) => {
-  const { isDarkMode } = useDarkMode();
-
   return (
     <SafeAreaView>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={isDarkMode ? Colors.gray[900] : Colors.slate[50]}
-      />
       <Container>
         <ScrollView style={{ minHeight: '100%', paddingVertical: 12 }}>
           <ProfileInfo />
