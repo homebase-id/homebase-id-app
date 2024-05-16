@@ -57,18 +57,19 @@ export const ChatInfoPage = memo((prop: ChatInfoProp) => {
   );
 
   const headerRight = useCallback(
-    () => (
-      <TextButton
-        title="Edit"
-        style={{ marginRight: 8 }}
-        onPress={() => {
-          prop.navigation.navigate('EditGroup', {
-            convoId: conversationId,
-          });
-        }}
-      />
-    ),
-    [conversationId, prop.navigation]
+    () =>
+      (conversationContent as any).version ? (
+        <TextButton
+          title="Edit"
+          style={{ marginRight: 8 }}
+          onPress={() => {
+            prop.navigation.navigate('EditGroup', {
+              convoId: conversationId,
+            });
+          }}
+        />
+      ) : null,
+    [conversationContent, conversationId, prop.navigation]
   );
 
   const recipientGroupStyle = useMemo(() => {

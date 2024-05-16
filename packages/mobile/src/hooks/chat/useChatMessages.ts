@@ -97,11 +97,6 @@ const fetchMessages = async (
   conversationId: string,
   cursorState: string | undefined
 ) => {
-  // console.log(
-  //   'fetch',
-  //   ['chat-messages', conversationId],
-  //   cursorState ? PAGE_SIZE : FIRST_PAGE_SIZE
-  // );
   return await getChatMessages(
     dotYouClient,
     conversationId,
