@@ -32,6 +32,7 @@ import {
 } from '../../provider/chat/ConversationProvider';
 import { OdinBlob } from '../../../polyfills/OdinBlob';
 import { getSynchronousDotYouClient } from './getSynchronousDotYouClient';
+import { useErrors } from '../errors/useErrors';
 
 const sendMessage = async ({
   conversationId,
@@ -281,6 +282,7 @@ export const getUpdateChatMessageMutationOptions: (queryClient: QueryClient) => 
 export const useChatMessage = (props?: { messageId: string | undefined }) => {
   const queryClient = useQueryClient();
   const dotYouClient = useDotYouClientContext();
+  const addError = useErrors().add;
 
   const getMessageByUniqueId = async (messageId: string) => {
     // TODO: Improve by fetching the message from the cache on conversations first
@@ -295,7 +297,16 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
       refetchOnMount: false,
       refetchOnWindowFocus: false,
     }),
-    send: useMutation(getSendChatMessageMutationOptions(queryClient)),
+    send: useMutation({
+      ...getSendChatMessageMutationOptions(queryClient),
+      onError: (err, messageParams, context) => {
+        addError(err);
+        queryClient.setQueryData(
+          ['chat-messages', messageParams.conversationId],
+          context?.existingData
+        );
+      },
+    }),
     update: useMutation(getUpdateChatMessageMutationOptions(queryClient)),
   };
 };
