@@ -27,7 +27,6 @@ export const useInitialPushNotification = () => {
           initialNotification.data.data
         );
         if (notification) {
-          console.log('Initial notification:', notification);
           await notifee.decrementBadgeCount();
           navigateOnNotification(notification, identity, chatNavigator, feedNavigator);
         }

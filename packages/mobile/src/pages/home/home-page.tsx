@@ -1,11 +1,11 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ScrollView, StatusBar } from 'react-native';
+import { ScrollView } from 'react-native';
 
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 import { Container } from '../../components/ui/Container/Container';
-import { Colors } from '../../app/Colors';
+
 import { TabStackParamList } from '../../app/App';
-import { useDarkMode } from '../../hooks/useDarkMode';
+
 import { NotificationsOverview } from '../../components/Dashboard/NotificationsOverview';
 import { Dashboard } from '../../components/Dashboard/Dashboard';
 import { ProfileInfo } from '../../components/Profile/ProfileInfo';
