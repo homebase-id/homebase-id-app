@@ -15,7 +15,7 @@ import {
   UnifiedConversation,
 } from '../../provider/chat/ConversationProvider';
 import { ImageSource } from '../../provider/image/RNImageProvider';
-import { getNewId } from '@youfoundation/js-lib/helpers';
+import { getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import useContact from '../../hooks/contact/useContact';
 import { useMarkMessagesAsRead } from '../../hooks/chat/useMarkMessagesAsRead';
 import ChatReaction from '../../components/Chat/Chat-Reaction';
@@ -171,7 +171,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
       if (
         messages?.filter((msg) => msg.fileId).length === 0 &&
         conversation &&
-        route.params.convoId !== ConversationWithYourselfId
+        !stringGuidsEqual(route.params.convoId, ConversationWithYourselfId)
       ) {
         inviteRecipient({
           conversation: conversation,
