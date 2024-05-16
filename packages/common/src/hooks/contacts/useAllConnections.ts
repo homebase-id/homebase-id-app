@@ -29,8 +29,7 @@ export const useAllConnections = (enabled: boolean) => {
     queryFn: fetchConnections,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
-    gcTime: Infinity,
-    staleTime: Infinity,
+    staleTime: 1000 * 60 * 5, // 5min before contacts from another device are fetched on this one
     enabled,
   });
 };
