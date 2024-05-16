@@ -1,16 +1,27 @@
 import { FlatList } from 'react-native-gesture-handler';
 
-import { ListRenderItemInfo, Platform, RefreshControl, StatusBar, View } from 'react-native';
+import {
+  ListRenderItemInfo,
+  Platform,
+  RefreshControl,
+  StatusBar,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { ChatStackParamList } from '../app/ChatStack';
 
-import { useAllConnections } from 'feed-app-common';
+import { t, useAllConnections } from 'feed-app-common';
 
 import { ContactTile, Tile } from '../components/Contact/Contact-Tile';
-import { Users } from '../components/ui/Icons/icons';
+import { People, Users } from '../components/ui/Icons/icons';
 import { memo, useCallback, useEffect, useState } from 'react';
 import { DotYouProfile } from '@youfoundation/js-lib/network';
 import { SafeAreaView } from '../components/ui/SafeAreaView/SafeAreaView';
+import { Colors } from '../app/Colors';
+import { Text } from '../components/ui/Text/Text';
+import { openURL } from '../utils/utils';
+import { useAuth } from '../hooks/auth/useAuth';
 
 const ListHeaderComponent = () => {
   const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
@@ -29,6 +40,7 @@ const ListHeaderComponent = () => {
 
 export const ContactPage = memo(
   ({ navigation }: { navigation: NavigationProp<ChatStackParamList, 'NewChat'> }) => {
+    const identity = useAuth().getIdentity();
     const { data: connections, refetch, status } = useAllConnections(true);
     const [refreshing, setRefreshing] = useState(false);
 
@@ -58,13 +70,32 @@ export const ContactPage = memo(
     return (
       <SafeAreaView>
         {Platform.OS === 'ios' && <StatusBar barStyle="light-content" />}
-        <FlatList
-          data={connections}
-          keyExtractor={(item) => item.odinId}
-          ListHeaderComponent={ListHeaderComponent}
-          renderItem={renderItem}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refetch} />}
-        />
+        {connections && connections?.length ? (
+          <FlatList
+            data={connections}
+            keyExtractor={(item) => item.odinId}
+            ListHeaderComponent={ListHeaderComponent}
+            renderItem={renderItem}
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refetch} />}
+          />
+        ) : (
+          <View style={{ padding: 16, flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+            <Text style={{ color: Colors.gray[400], fontStyle: 'italic' }}>
+              {t('To chat with someone on Homebase you need to be connected first.')}
+            </Text>
+            <TouchableOpacity
+              style={{
+                gap: 8,
+                flexDirection: 'row',
+                marginLeft: 'auto',
+              }}
+              onPress={() => openURL(`https://${identity}/owner/connections`)}
+            >
+              <Text>{t('Connect')}</Text>
+              <People />
+            </TouchableOpacity>
+          </View>
+        )}
       </SafeAreaView>
     );
   }
