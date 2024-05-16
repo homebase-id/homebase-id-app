@@ -305,7 +305,7 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
       onError: (err, messageParams, context) => {
         addError(err);
         queryClient.setQueryData(
-          ['chat-messages', messageParams.conversationId],
+          ['chat-messages', messageParams.conversation.fileMetadata.appData.uniqueId],
           context?.existingData
         );
       },
