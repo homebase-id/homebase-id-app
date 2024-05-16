@@ -158,7 +158,6 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
     mutate: sendMessage,
     status: sendMessageState,
     reset: resetState,
-    error: sendMessageError,
   } = useChatMessage().send;
 
   useMarkMessagesAsRead({ conversation: conversation || undefined, messages });
@@ -358,7 +357,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
 
   return (
     <BottomSheetModalProvider>
-      <ErrorNotification error={sendMessageError || deleteMessageError} />
+      <ErrorNotification error={deleteMessageError} />
       <View
         style={{
           paddingBottom:
