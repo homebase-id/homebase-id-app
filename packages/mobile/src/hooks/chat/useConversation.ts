@@ -33,6 +33,20 @@ export const getSingleConversation = async (
   return conversationId ? await getConversation(dotYouClient, conversationId) : null;
 };
 
+const formatGuid = (guid: string) => {
+  return (
+    guid.slice(0, 8) +
+    '-' +
+    guid.slice(8, 12) +
+    '-' +
+    guid.slice(12, 16) +
+    '-' +
+    guid.slice(16, 20) +
+    '-' +
+    guid.slice(20)
+  );
+};
+
 export const useConversation = (props?: { conversationId?: string | undefined }) => {
   const { conversationId } = props || {};
   const dotYouClient = useDotYouClientContext();
@@ -83,7 +97,9 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     }
 
     const newConversationId =
-      recipients.length === 1 ? await getNewXorId(identity as string, recipients[0]) : getNewId();
+      recipients.length === 1
+        ? await getNewXorId(identity as string, recipients[0])
+        : formatGuid(getNewId());
 
     const updatedRecipients = [...new Set([...recipients, identity as string])];
 
@@ -158,7 +174,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
   }) => {
     await updateConversation(dotYouClient, conversation);
     conversation.fileMetadata.appData.content.lastReadTime = 0;
-    if (isTitleUpdated && conversation.fileMetadata.appData.content.recipients > 2) {
+    if (isTitleUpdated && conversation.fileMetadata.appData.content.recipients?.length > 2) {
       conversation.fileMetadata.appData.content.lastReadTime = 0;
       await uploadConversation(dotYouClient, conversation, true);
     }
