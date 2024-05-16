@@ -2,7 +2,7 @@ import { memo, useMemo } from 'react';
 import { StyleProp, StyleSheet, Text, TextStyle, TouchableHighlight, View } from 'react-native';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { Colors } from '../../app/Colors';
-import { Conversation } from '../../provider/chat/ConversationProvider';
+import { Conversation, UnifiedConversation } from '../../provider/chat/ConversationProvider';
 import { useChatMessages } from '../../hooks/chat/useChatMessages';
 import { ChatDeletedArchivalStaus, ChatMessage } from '../../provider/chat/ChatProvider';
 import { useDarkMode } from '../../hooks/useDarkMode';
@@ -11,14 +11,14 @@ import useContact from '../../hooks/contact/useContact';
 import { ChatDeliveryIndicator } from './Chat-Delivery-Indicator';
 import { ChatMessageContent } from './Chat-Message-Content';
 import { OwnerAvatar, GroupAvatar, Avatar } from '../ui/Avatars/Avatar';
-import { useDraftMessage, useDraftMessageValue } from '../../hooks/chat/useDraftMessage';
+import { useDraftMessageValue } from '../../hooks/chat/useDraftMessage';
 import { ellipsisAtMaxChar } from 'feed-app-common';
 import { ConnectionName } from '../ui/Name';
 
 type ConversationTileProps = {
   onPress?: () => void;
   onLongPress?: () => void;
-  conversation: Conversation;
+  conversation: UnifiedConversation;
   odinId: string;
   conversationId?: string;
   isSelf?: boolean;
@@ -37,10 +37,10 @@ const ConversationTile = memo((props: ConversationTileProps) => {
   );
   const { data: draftMessage } = useDraftMessageValue(props.conversationId).get;
   const { isDarkMode } = useDarkMode();
-  const { data: connection } = useContact(props.odinId).fetch;
-
-  const connectionDetails = connection?.fileMetadata.appData.content;
-  const isGroup = 'recipients' in props.conversation && props.conversation.recipients !== undefined;
+  const { data: contact } = useContact(props.odinId).fetch;
+  console.log(props.conversation);
+  const connectionDetails = contact?.fileMetadata.appData.content;
+  const isGroup = props.conversation && props.conversation.recipients?.length > 2;
 
   const lastMessage = useMemo(() => flatMessages?.[0], [flatMessages]);
   const lastMessageContent = lastMessage?.fileMetadata.appData.content;

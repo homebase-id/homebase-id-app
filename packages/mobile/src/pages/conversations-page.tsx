@@ -190,7 +190,7 @@ const ConversationTileWithYourself = memo(() => {
       odinId={odinId || ''}
       conversation={{
         title: profile ? `${profile?.firstName} ${profile?.surName} ` : '',
-        recipient: '',
+        recipients: [],
       }}
       conversationId={ConversationWithYourselfId}
       isSelf
