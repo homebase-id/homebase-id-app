@@ -5,7 +5,7 @@ import { navigateOnNotification } from '../../components/Dashboard/Notifications
 import { TabStackParamList } from '../../app/App';
 import { PushNotification } from '@youfoundation/js-lib/core';
 import { useDotYouClientContext } from 'feed-app-common';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { ChatStackParamList } from '../../app/ChatStack';
 import notifee from '@notifee/react-native';
 
@@ -13,7 +13,7 @@ export const useInitialPushNotification = () => {
   const identity = useDotYouClientContext().getIdentity();
   const chatNavigator = useNavigation<NavigationProp<ChatStackParamList>>();
   const feedNavigator = useNavigation<NavigationProp<TabStackParamList>>();
-  const getInitialNotification = () => {
+  const getInitialNotification = useCallback(() => {
     (async () => {
       const initialNotification =
         (await messaging().getInitialNotification()) ||
@@ -27,13 +27,14 @@ export const useInitialPushNotification = () => {
           initialNotification.data.data
         );
         if (notification) {
+          console.log('Initial notification:', notification);
           await notifee.decrementBadgeCount();
           navigateOnNotification(notification, identity, chatNavigator, feedNavigator);
         }
       }
     })();
-  };
+  }, [chatNavigator, feedNavigator, identity]);
 
   useFocusEffect(getInitialNotification);
-  useEffect(getInitialNotification, [chatNavigator, feedNavigator, identity]);
+  useEffect(getInitialNotification, [chatNavigator, feedNavigator, identity, getInitialNotification]);
 };
