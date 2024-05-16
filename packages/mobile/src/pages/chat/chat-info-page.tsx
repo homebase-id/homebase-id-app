@@ -47,7 +47,7 @@ export const ChatInfoPage = memo((prop: ChatInfoProp) => {
     await openURL(`https://${withYourself ? identity : recipient}/`);
   }, [withYourself, identity, recipient]);
 
-  const isGroup = conversationContent && conversationContent?.recipients.length > 1;
+  const isGroup = recipients && recipients.length > 1;
 
   const headerLeft = useCallback(
     () => (
@@ -171,12 +171,19 @@ export const ChatInfoPage = memo((prop: ChatInfoProp) => {
               >
                 Recipients
               </Text>
-              {[recipients, identity as string].map((recipient, index) => (
+              {[...recipients, identity as string].map((recipient, index) => (
                 <View key={index} style={recipientGroupStyle}>
                   {index === recipients?.length ? (
-                    <OwnerAvatar style={styles.mediumAvatarSize} />
+                    <OwnerAvatar
+                      style={styles.mediumAvatarSize}
+                      imageSize={styles.mediumAvatarSize}
+                    />
                   ) : (
-                    <Avatar odinId={recipient as string} style={styles.mediumAvatarSize} />
+                    <Avatar
+                      odinId={recipient as string}
+                      style={styles.mediumAvatarSize}
+                      imageSize={styles.mediumAvatarSize}
+                    />
                   )}
                   <Text
                     style={[
@@ -221,6 +228,7 @@ const styles = StyleSheet.create({
   mediumAvatarSize: {
     width: 50,
     height: 50,
+    borderRadius: 25,
   },
   you: {
     fontSize: 16,

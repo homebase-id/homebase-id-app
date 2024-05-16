@@ -2,7 +2,7 @@ import { memo, useMemo } from 'react';
 import { StyleProp, StyleSheet, Text, TextStyle, TouchableHighlight, View } from 'react-native';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { Colors } from '../../app/Colors';
-import { Conversation, UnifiedConversation } from '../../provider/chat/ConversationProvider';
+import { UnifiedConversation } from '../../provider/chat/ConversationProvider';
 import { useChatMessages } from '../../hooks/chat/useChatMessages';
 import { ChatDeletedArchivalStaus, ChatMessage } from '../../provider/chat/ChatProvider';
 import { useDarkMode } from '../../hooks/useDarkMode';
@@ -38,7 +38,7 @@ const ConversationTile = memo((props: ConversationTileProps) => {
   const { data: draftMessage } = useDraftMessageValue(props.conversationId).get;
   const { isDarkMode } = useDarkMode();
   const { data: contact } = useContact(props.odinId).fetch;
-  console.log(props.conversation);
+
   const connectionDetails = contact?.fileMetadata.appData.content;
   const isGroup = props.conversation && props.conversation.recipients?.length > 2;
 
