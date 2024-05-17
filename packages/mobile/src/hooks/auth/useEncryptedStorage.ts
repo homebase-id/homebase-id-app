@@ -4,6 +4,7 @@ const APP_AUTH_TOKEN = 'bx0900';
 const APP_SHARED_SECRET = 'APSS';
 const PRIVATE_KEY = 'ecc-pk';
 const IDENTITY = 'identity';
+const LAST_LOGGED_OUT_IDENTITY = 'lastLoggedOutIdentity';
 
 const storage = new MMKVLoader().initialize();
 
@@ -25,6 +26,12 @@ export const useEncrtypedStorage = () => {
     '' //'samwisegamgee.me',
   );
 
+  const [lastLoggedOutIdentity, setLastLoggedOutIdentity] = useMMKVStorage(
+    LAST_LOGGED_OUT_IDENTITY,
+    storage,
+    ''
+  );
+
   return {
     privateKey: privateKey.length ? privateKey : null,
     setPrivateKey,
@@ -34,5 +41,7 @@ export const useEncrtypedStorage = () => {
     setSharedSecret,
     identity: identity.length ? identity : null,
     setIdentity,
+    lastLoggedOutIdentity: lastLoggedOutIdentity.length ? lastLoggedOutIdentity : null,
+    setLastLoggedOutIdentity,
   };
 };

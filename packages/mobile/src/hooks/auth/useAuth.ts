@@ -24,6 +24,7 @@ import {
 import { BlogConfig, HomePageConfig } from '@youfoundation/js-lib/public';
 import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
 import { useQueryClient } from '@tanstack/react-query';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const StandardProfileDrive = GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId);
 
@@ -137,6 +138,8 @@ export const useAuth = () => {
     setAuthToken,
     identity,
     setIdentity,
+    setLastLoggedOutIdentity,
+    lastLoggedOutIdentity,
   } = useEncrtypedStorage();
 
   const [authenticationState, setAuthenticationState] = useState<'anonymous' | 'authenticated'>(
@@ -172,6 +175,11 @@ export const useAuth = () => {
   const logout = useCallback(async (): Promise<void> => {
     await logoutYouauth(getDotYouClient());
 
+    // Store last logged out identity
+    if (identity) {
+      setLastLoggedOutIdentity(identity);
+    }
+
     setAuthenticationState('anonymous');
 
     setPrivateKey('');
@@ -180,7 +188,7 @@ export const useAuth = () => {
     setIdentity('');
 
     queryClient.removeQueries();
-  }, [getDotYouClient, queryClient, setAuthToken, setIdentity, setPrivateKey, setSharedSecret]);
+  }, [getDotYouClient, identity, queryClient, setAuthToken, setIdentity, setLastLoggedOutIdentity, setPrivateKey, setSharedSecret]);
 
   return {
     logout,
@@ -190,6 +198,7 @@ export const useAuth = () => {
       () => sharedSecret && base64ToUint8Array(sharedSecret),
       [sharedSecret]
     ),
+    getLastIdentity: useCallback(() => lastLoggedOutIdentity, [lastLoggedOutIdentity]),
     getIdentity: useCallback(() => identity, [identity]),
     isAuthenticated: useMemo(() => authenticationState !== 'anonymous', [authenticationState]),
   };
@@ -216,8 +225,7 @@ export const useYouAuthAuthorization = () => {
       [ALL_CONNECTIONS_CIRCLE_ID],
       uint8ArrayToBase64(stringToUint8Array(JSON.stringify(publicKeyJwk))),
       corsHost,
-      `${Platform.OS === 'ios' ? 'iOS' : Platform.OS === 'android' ? 'Android' : Platform.OS} | ${
-        Platform.Version
+      `${Platform.OS === 'ios' ? 'iOS' : Platform.OS === 'android' ? 'Android' : Platform.OS} | ${Platform.Version
       }`
     );
   }, [setPrivateKey]);
