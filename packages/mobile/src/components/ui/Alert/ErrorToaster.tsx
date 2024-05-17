@@ -15,22 +15,23 @@ export const ErrorToaster = () => {
     if (!errors?.length) return;
     errors?.map((error) =>
       Toast.show({
-        text1: 'Something went wrong',
-        text2: error.message,
+        text1: error.title || 'Something went wrong',
+        text2: error.details ? 'Click for details' : error.message,
         onHide: () => dismissError(error),
         type: 'error',
         position: 'bottom',
-        visibilityTime: 2000,
+        visibilityTime: 2500,
         swipeable: true,
         onPress: () => {
           Alert.alert(
-            error.correlationId || 'Error',
-            error.message,
+            error.message || 'Error',
+            `${error.details?.title} ${error.details?.stackTrace}`,
             [
               {
                 text: 'Copy',
                 onPress: () => {
-                  return Clipboard.setString(error.correlationId || error.message);
+                  return Clipboard.setString(`${error.message || 'Error'}
+                  ${error.details?.title} ${error.details?.stackTrace}`);
                 },
               },
               {

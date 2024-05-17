@@ -15,7 +15,7 @@ import {
 } from '@youfoundation/js-lib/core';
 import { getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 
-import { useDotYouClientContext } from 'feed-app-common';
+import { t, useDotYouClientContext } from 'feed-app-common';
 import {
   ChatDeliveryStatus,
   ChatMessage,
@@ -32,7 +32,7 @@ import {
 } from '../../provider/chat/ConversationProvider';
 import { OdinBlob } from '../../../polyfills/OdinBlob';
 import { getSynchronousDotYouClient } from './getSynchronousDotYouClient';
-import { useErrors } from '../errors/useErrors';
+import { addError } from '../errors/useErrors';
 
 const sendMessage = async ({
   conversationId,
@@ -171,7 +171,8 @@ export const getSendChatMessageMutationOptions: (queryClient: QueryClient) => Us
     return { existingData };
   },
   onError: (err, messageParams, context) => {
-    console.error('Failed to send the chat message', err);
+    addError(queryClient, err, t('Failed to send the chat message'));
+
     queryClient.setQueryData(
       ['chat-messages', messageParams.conversationId],
       context?.existingData
@@ -265,8 +266,10 @@ export const getUpdateChatMessageMutationOptions: (queryClient: QueryClient) => 
 
     return { extistingMessages, existingMessage };
   },
-  // eslint-disable-next-line handle-callback-err
+
   onError: (err, messageParams, context) => {
+    addError(queryClient, err, t('Failed to update the chat message'));
+
     queryClient.setQueryData(
       ['chat-messages', messageParams.conversation.fileMetadata.appData.uniqueId],
       context?.extistingMessages
@@ -282,7 +285,6 @@ export const getUpdateChatMessageMutationOptions: (queryClient: QueryClient) => 
 export const useChatMessage = (props?: { messageId: string | undefined }) => {
   const queryClient = useQueryClient();
   const dotYouClient = useDotYouClientContext();
-  const addError = useErrors().add;
 
   const getMessageByUniqueId = async (messageId: string) => {
     // TODO: Improve by fetching the message from the cache on conversations first
@@ -297,16 +299,7 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
       refetchOnMount: false,
       refetchOnWindowFocus: false,
     }),
-    send: useMutation({
-      ...getSendChatMessageMutationOptions(queryClient),
-      onError: (err, messageParams, context) => {
-        addError(err);
-        queryClient.setQueryData(
-          ['chat-messages', messageParams.conversationId],
-          context?.existingData
-        );
-      },
-    }),
+    send: useMutation(getSendChatMessageMutationOptions(queryClient)),
     update: useMutation(getUpdateChatMessageMutationOptions(queryClient)),
   };
 };

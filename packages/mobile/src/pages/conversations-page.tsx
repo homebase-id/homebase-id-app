@@ -43,7 +43,7 @@ type ConversationProp = NativeStackScreenProps<ChatStackParamList, 'Conversation
 export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
   const { data: conversations, isFetched: conversationsFetched } =
     useConversationsWithRecentMessage().all;
-  const { data: contacts } = useAllContacts(
+  const { data: contacts, refetch } = useAllContacts(
     conversationsFetched && (!conversations || !conversations?.length)
   );
   const identity = useAuth().getIdentity();
@@ -112,8 +112,12 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
     await queryClient.invalidateQueries({ queryKey: ['chat-messages'], exact: false });
     await queryClient.invalidateQueries({ queryKey: ['conversations'] });
 
+    if (noContacts) {
+      refetch();
+    }
+
     setRefreshing(false);
-  }, [queryClient]);
+  }, [noContacts, queryClient, refetch]);
 
   const isQueryActive = !!(query && query.length >= 1);
   if (isQueryActive) {
@@ -129,17 +133,21 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
       <SafeAreaView>
         <RemoveNotifications />
         <FloatingActionButton />
-        <ConversationTileWithYourself />
         {conversations && conversations?.length ? (
           <FlatList
             data={conversations}
             keyExtractor={keyExtractor}
             contentInsetAdjustmentBehavior="automatic"
+            ListHeaderComponent={<ConversationTileWithYourself />}
             renderItem={renderItem}
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={doRefresh} />}
           />
         ) : (
-          <>
+          <ScrollView
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={doRefresh} />}
+            style={{ flex: 1 }}
+          >
+            <ConversationTileWithYourself />
             {noContacts ? (
               <View style={{ padding: 16, flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
                 <Text style={{ color: Colors.gray[400], fontStyle: 'italic' }}>
@@ -164,7 +172,7 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
                 </Text>
               </View>
             )}
-          </>
+          </ScrollView>
         )}
       </SafeAreaView>
     </ErrorBoundary>
