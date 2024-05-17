@@ -42,6 +42,7 @@ import { OdinQueryClient } from './OdinQueryClient';
 import { ChatStack } from './ChatStack';
 import { ProfileStack } from './ProfileStack';
 import BootSplash from 'react-native-bootsplash';
+import { useDismissNotification } from '../hooks/push-notification/useDismissNotification';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -130,6 +131,7 @@ const AppStackScreen = memo(() => {
   useAuthenticatedPushNotification();
   useInitialPushNotification();
   useShareManager();
+  useDismissNotification();
 
   return <TabStack />;
 });

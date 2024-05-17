@@ -20,6 +20,7 @@ import { useNetInfo } from '@react-native-community/netinfo';
 
 import { Text, View } from 'react-native';
 import { t } from 'feed-app-common';
+import { useErrors } from '../../hooks/errors/useErrors';
 
 type FeedProps = NativeStackScreenProps<TabStackParamList, 'Feed'>;
 
@@ -69,6 +70,7 @@ export const FeedPage = memo((_props: FeedProps) => {
   const [refreshing, setRefreshing] = useState(false);
   const [refresherEnabled, setEnableRefresher] = useState(true);
   const webviewRef = useRef<WebView>(null);
+  const add = useErrors().add;
 
   //Code to get scroll position
   const handleScroll = (event: any) => {
@@ -88,6 +90,32 @@ export const FeedPage = memo((_props: FeedProps) => {
     setIsPostComposerOpen(false);
     webviewRef.current?.reload();
   }, []);
+
+  const renderError = useCallback(
+    (errorDomain: string | undefined, errorCode: number, errorDesc: string) => {
+      return (
+        <View
+          style={{
+            flex: 1,
+            alignItems: 'center',
+            flexDirection: 'column',
+            justifyContent: 'center',
+          }}
+        >
+          <Text style={{ textAlign: 'center', paddingHorizontal: 7 }}>
+            {t('An error occurred while loading the feed. Please try again later.')}
+            {'\n'}
+            {t('Error Domain')}: {errorDomain}
+            {'\n'}
+            {t('Error Code')}: {errorCode}
+            {'\n'}
+            {t('Error Description')}: {errorDesc}
+          </Text>
+        </View>
+      );
+    },
+    []
+  );
 
   return (
     <SafeAreaView>
@@ -128,6 +156,10 @@ export const FeedPage = memo((_props: FeedProps) => {
                 onScroll={handleScroll}
                 onLoadEnd={() => setRefreshing(false)}
                 forceDarkOn={isDarkMode}
+                onError={(error) => {
+                  add(error);
+                }}
+                renderError={renderError}
               />
               <TouchableOpacity
                 style={{

@@ -5,6 +5,7 @@ import com.facebook.react.ReactActivityDelegate;
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint;
 import com.facebook.react.defaults.DefaultReactActivityDelegate;
 import android.os.Bundle;
+import com.zoontek.rnbootsplash.RNBootSplash;
 
 public class MainActivity extends ReactActivity {
 
@@ -34,6 +35,7 @@ public class MainActivity extends ReactActivity {
 //https://github.com/software-mansion/react-native-screens/issues/17#issuecomment-424704067
   @Override
   protected void onCreate(Bundle savedInstanceState) {
+    RNBootSplash.init(this, R.style.BootTheme); // ⬅️ initialize the splash screen
       super.onCreate(null);
   }
 }
