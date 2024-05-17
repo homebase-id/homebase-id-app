@@ -15,10 +15,11 @@ import {
   NewHomebaseFile,
   UploadResult,
 } from '@youfoundation/js-lib/core';
-import { getRichTextFromString, useDotYouClientContext } from 'feed-app-common';
+import { getRichTextFromString, t, useDotYouClientContext } from 'feed-app-common';
 import { ImageSource } from '../../../provider/image/RNImageProvider';
 import { getSynchronousDotYouClient } from '../../chat/getSynchronousDotYouClient';
 import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
+import { addError } from '../../errors/useErrors';
 
 const savePost = async ({
   postFile,
@@ -186,7 +187,7 @@ export const getSavePostMutationOptions: (queryClient: QueryClient) => MutationO
     return { newPost, previousFeed };
   },
   onError: (err, _newCircle, context) => {
-    console.error(err);
+    addError(queryClient, err, t('Failed to save post'));
 
     // Revert local caches to what they were,
 
