@@ -3,6 +3,7 @@ import { useErrors } from '../../../hooks/errors/useErrors';
 import Toast from 'react-native-toast-message';
 import { useEffect } from 'react';
 import { Alert } from 'react-native';
+import { t } from 'feed-app-common';
 
 // TODO: Create a PositiveToaster component
 export const ErrorToaster = () => {
@@ -15,8 +16,8 @@ export const ErrorToaster = () => {
     if (!errors?.length) return;
     errors?.map((error) =>
       Toast.show({
-        text1: error.title || 'Something went wrong',
-        text2: error.details ? 'Click for details' : error.message,
+        text1: error.title || t('Something went wrong'),
+        text2: error.details ? t('Click for details') : error.message,
         onHide: () => dismissError(error),
         type: 'error',
         position: 'bottom',
