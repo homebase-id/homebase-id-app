@@ -27,6 +27,7 @@ import { YouAuthorizationParams } from '@youfoundation/js-lib/auth';
 import { AuthorName } from '../../components/ui/Name';
 import { PublicAvatar } from '../../components/ui/Avatars/Avatar';
 import { useDarkMode } from '../../hooks/useDarkMode';
+import { Divider } from '../../components/ui/Divider';
 
 type LoginProps = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 
@@ -269,18 +270,7 @@ const LoginComponent = () => {
           }}
         >
           {/* Render -----OR----- */}
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginVertical: 10,
-            }}
-          >
-            <View style={{ flex: 1, height: 1, backgroundColor: Colors.gray[300] }} />
-            <Text style={{ marginHorizontal: 10 }}>OR</Text>
-            <View style={{ flex: 1, height: 1, backgroundColor: Colors.gray[300] }} />
-          </View>
+          <Divider text="OR" />
           <TouchableOpacity
             onPress={onLogin}
             style={{
