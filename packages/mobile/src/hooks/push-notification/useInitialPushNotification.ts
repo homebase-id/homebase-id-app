@@ -8,11 +8,13 @@ import { useDotYouClientContext } from 'feed-app-common';
 import { useCallback, useEffect } from 'react';
 import { ChatStackParamList } from '../../app/ChatStack';
 import notifee from '@notifee/react-native';
+import { AppState } from 'react-native';
 
 export const useInitialPushNotification = () => {
   const identity = useDotYouClientContext().getIdentity();
   const chatNavigator = useNavigation<NavigationProp<ChatStackParamList>>();
   const feedNavigator = useNavigation<NavigationProp<TabStackParamList>>();
+
   const getInitialNotification = useCallback(() => {
     (async () => {
       const initialNotification =
@@ -36,4 +38,12 @@ export const useInitialPushNotification = () => {
 
   useFocusEffect(getInitialNotification);
   useEffect(getInitialNotification, [chatNavigator, feedNavigator, identity, getInitialNotification]);
+  useEffect(() => {
+    const listener = AppState.addEventListener('change', (state) => {
+      if (state === 'active') {
+        getInitialNotification();
+      }
+    });
+    return () => listener.remove();
+  }, [getInitialNotification]);
 };
