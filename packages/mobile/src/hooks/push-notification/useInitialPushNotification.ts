@@ -37,7 +37,7 @@ export const useInitialPushNotification = () => {
   }, [chatNavigator, feedNavigator, identity]);
 
   useFocusEffect(getInitialNotification);
-  // QUES: @stef-coenen maybe we don't need the useEffect below as the app state should handle this when the app opens from quite to active state? 
+  // QUES: @stef-coenen maybe we don't need the useEffect below as the app state should handle this when the app opens from quite to active state?
   useEffect(getInitialNotification, [chatNavigator, feedNavigator, identity, getInitialNotification]);
   useEffect(() => {
     const listener = AppState.addEventListener('change', (state) => {
