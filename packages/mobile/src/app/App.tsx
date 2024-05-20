@@ -104,6 +104,7 @@ const RootStack = () => {
           statusBarColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
           /// StatusBarStyle throws error when changin in Ios (even setting to Ui UIControllerbasedStatusBar to yes)
           statusBarStyle: Platform.OS === 'android' ? (isDarkMode ? 'light' : 'dark') : undefined,
+          animation: 'slide_from_right',
         }}
       >
         {isAuthenticated ? (
