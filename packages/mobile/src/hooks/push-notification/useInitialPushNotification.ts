@@ -43,6 +43,9 @@ export const useInitialPushNotification = () => {
     const listener = AppState.addEventListener('change', (state) => {
       if (state === 'active') {
         getInitialNotification();
+        // Dismisses all notifications when the app is opened
+        notifee.cancelAllNotifications();
+
       }
     });
     return () => listener.remove();
