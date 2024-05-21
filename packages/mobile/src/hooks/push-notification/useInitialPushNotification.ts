@@ -45,6 +45,7 @@ export const useInitialPushNotification = () => {
         getInitialNotification();
         // Dismisses all notifications when the app is opened
         notifee.cancelAllNotifications();
+        notifee.setBadgeCount(0);
 
       }
     });
