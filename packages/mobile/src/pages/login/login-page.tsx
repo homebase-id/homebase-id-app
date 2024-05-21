@@ -1,5 +1,5 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   Button,
   View,
@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { Text } from '../../components/ui/Text/Text';
 import { AuthStackParamList } from '../../app/App';
-import { useYouAuthAuthorization } from '../../hooks/auth/useAuth';
+import { useAuth, useYouAuthAuthorization } from '../../hooks/auth/useAuth';
 import { Container } from '../../components/ui/Container/Container';
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 import { Colors } from '../../app/Colors';
@@ -24,6 +24,10 @@ import { InAppBrowser } from 'react-native-inappbrowser-reborn';
 import logo from '../../assets/homebase.png';
 import { Input } from '../../components/ui/Form/Input';
 import { YouAuthorizationParams } from '@youfoundation/js-lib/auth';
+import { AuthorName } from '../../components/ui/Name';
+import { PublicAvatar } from '../../components/ui/Avatars/Avatar';
+import { useDarkMode } from '../../hooks/useDarkMode';
+import { Divider } from '../../components/ui/Divider';
 
 type LoginProps = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 
@@ -165,6 +169,8 @@ const LoginComponent = () => {
   const [invalid, setInvalid] = useState<boolean>(false);
   const [odinId, setOdinId] = useState<string>('');
   const { data: authParams, refetch } = useParams();
+  const lastIdentity = useAuth().getLastIdentity();
+  const { isDarkMode } = useDarkMode();
   useEffect(() => {
     if (finalizeState === 'error') {
       refetch();
@@ -174,18 +180,18 @@ const LoginComponent = () => {
   useEffect(() => setInvalid(false), [odinId]);
 
   const onLogin = useCallback(async () => {
-    if (!odinId) {
+    if (!odinId && !lastIdentity) {
       setInvalid(true);
       return;
     }
 
-    const identityReachable = await doCheckIdentity(odinId);
+    const identityReachable = await doCheckIdentity(odinId || (lastIdentity as string));
     if (!identityReachable) {
       setInvalid(true);
       return;
     }
 
-    const url = `https://${odinId}/api/owner/v1/youauth/authorize?${stringifyToQueryParams(
+    const url = `https://${odinId || lastIdentity}/api/owner/v1/youauth/authorize?${stringifyToQueryParams(
       authParams as any
     )}`;
     if (await InAppBrowser.isAvailable()) {
@@ -205,7 +211,7 @@ const LoginComponent = () => {
 
       if (result.type === 'success' && result.url) Linking.openURL(result.url);
     } else await Linking.openURL(url);
-  }, [authParams, odinId]);
+  }, [authParams, lastIdentity, odinId]);
 
   const showSignUpAlert = useCallback(() => {
     Alert.alert(
@@ -256,6 +262,47 @@ const LoginComponent = () => {
       ) : null}
 
       <Button title="Login" disabled={!odinId} onPress={onLogin} />
+
+      {lastIdentity && !odinId && (
+        <View
+          style={{
+            marginBottom: 10,
+          }}
+        >
+          {/* Render -----OR----- */}
+          <Divider text="OR" />
+          <TouchableOpacity
+            onPress={onLogin}
+            style={{
+              flexShrink: 1,
+              backgroundColor: isDarkMode ? Colors.indigo[700] : Colors.indigo[100],
+              marginLeft: 'auto',
+              marginRight: 'auto',
+              borderRadius: 15,
+            }}
+          >
+            <View
+              style={{
+                flexDirection: 'row',
+                flexShrink: 1,
+                alignItems: 'center',
+                padding: 8,
+              }}
+            >
+              <PublicAvatar odinId={lastIdentity} style={{ width: 30, height: 30 }} />
+              <Text
+                style={{
+                  textAlign: 'center',
+                  fontSize: 16,
+                  marginLeft: 8,
+                }}
+              >
+                Continue as {<AuthorName odinId={lastIdentity} />}
+              </Text>
+            </View>
+          </TouchableOpacity>
+        </View>
+      )}
 
       <View
         style={{

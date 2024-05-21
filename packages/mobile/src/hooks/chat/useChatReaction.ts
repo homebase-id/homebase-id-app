@@ -7,7 +7,7 @@ import {
 } from '@tanstack/react-query';
 import { HomebaseFile, NewHomebaseFile, SecurityGroupType } from '@youfoundation/js-lib/core';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import { useDotYouClientContext } from 'feed-app-common';
+import { t, useDotYouClientContext } from 'feed-app-common';
 import {
   ChatReaction,
   deleteReaction,
@@ -17,6 +17,7 @@ import {
 import { UnifiedConversation } from '../../provider/chat/ConversationProvider';
 import { ChatMessage } from '../../provider/chat/ChatProvider';
 import { getSynchronousDotYouClient } from './getSynchronousDotYouClient';
+import { addError } from '../errors/useErrors';
 
 const addReaction = async ({
   conversation,
@@ -97,6 +98,7 @@ export const getAddReactionMutationOptions: (queryClient: QueryClient) => UseMut
       queryKey: ['chat-reaction', variables.message.fileMetadata.appData.uniqueId],
     });
   },
+  onError: (err) => addError(queryClient, err, t('Failed to add reaction')),
 });
 
 const removeReaction = async ({
@@ -147,6 +149,8 @@ export const getRemoveReactionMutationOptions: (queryClient: QueryClient) => Use
       queryKey: ['chat-reaction', variables.message.fileMetadata.appData.uniqueId],
     });
   },
+
+  onError: (err) => addError(queryClient, err, t('Failed to remove reaction')),
 });
 
 export const useChatReaction = (props?: {

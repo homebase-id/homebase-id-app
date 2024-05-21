@@ -1,19 +1,21 @@
 import messaging from '@react-native-firebase/messaging';
-import { NavigationProp, useFocusEffect, useNavigation } from '@react-navigation/native';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { tryJsonParse } from '@youfoundation/js-lib/helpers';
 import { navigateOnNotification } from '../../components/Dashboard/NotificationsOverview';
 import { TabStackParamList } from '../../app/App';
 import { PushNotification } from '@youfoundation/js-lib/core';
 import { useDotYouClientContext } from 'feed-app-common';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { ChatStackParamList } from '../../app/ChatStack';
 import notifee from '@notifee/react-native';
+import { AppState } from 'react-native';
 
 export const useInitialPushNotification = () => {
   const identity = useDotYouClientContext().getIdentity();
   const chatNavigator = useNavigation<NavigationProp<ChatStackParamList>>();
   const feedNavigator = useNavigation<NavigationProp<TabStackParamList>>();
-  const getInitialNotification = () => {
+
+  const getInitialNotification = useCallback(() => {
     (async () => {
       const initialNotification =
         (await messaging().getInitialNotification()) ||
@@ -32,8 +34,20 @@ export const useInitialPushNotification = () => {
         }
       }
     })();
-  };
+  }, [chatNavigator, feedNavigator, identity]);
 
-  useFocusEffect(getInitialNotification);
-  useEffect(getInitialNotification, [chatNavigator, feedNavigator, identity]);
+  // useFocusEffect(getInitialNotification);
+  // QUES: @stef-coenen maybe we don't need the useEffect below as the app state should handle this when the app opens from quite to active state?
+  // useEffect(getInitialNotification, [chatNavigator, feedNavigator, identity, getInitialNotification]);
+  useEffect(() => {
+    const listener = AppState.addEventListener('change', (state) => {
+      if (state === 'active') {
+        getInitialNotification();
+        // Dismisses all notifications when the app is opened
+        notifee.cancelAllNotifications();
+
+      }
+    });
+    return () => listener.remove();
+  }, [getInitialNotification]);
 };

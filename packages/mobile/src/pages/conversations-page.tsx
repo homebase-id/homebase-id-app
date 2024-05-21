@@ -23,20 +23,27 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Text } from '../components/ui/Text/Text';
 import { ScrollView } from 'react-native-gesture-handler';
 import { ContactTile } from '../components/Contact/Contact-Tile';
-import { useAllContacts, useDotYouClientContext } from 'feed-app-common';
+import { t, useAllContacts, useDotYouClientContext } from 'feed-app-common';
 import { Colors } from '../app/Colors';
 import { useDarkMode } from '../hooks/useDarkMode';
 import { CHAT_APP_ID } from '../app/constants';
 import { ErrorBoundary } from '../components/ui/ErrorBoundary/ErrorBoundary';
 import { InfiniteData, useQueryClient } from '@tanstack/react-query';
-import { Pencil } from '../components/ui/Icons/icons';
+import { Pencil, People } from '../components/ui/Icons/icons';
 import { TouchableOpacity } from '@gorhom/bottom-sheet';
 import { SafeAreaView } from '../components/ui/SafeAreaView/SafeAreaView';
+import { openURL } from '../utils/utils';
 
 type ConversationProp = NativeStackScreenProps<ChatStackParamList, 'Conversation'>;
 
 export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
-  const { data: conversations } = useConversationsWithRecentMessage().all;
+  const { data: conversations, isFetched: conversationsFetched } =
+    useConversationsWithRecentMessage().all;
+  const { data: contacts, refetch } = useAllContacts(
+    conversationsFetched && (!conversations || !conversations?.length)
+  );
+  const noContacts = !contacts || contacts.length === 0;
+
   const [query, setQuery] = useState<string | undefined>(undefined);
   const { isDarkMode } = useDarkMode();
   const queryClient = useQueryClient();
@@ -105,8 +112,12 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
     await queryClient.invalidateQueries({ queryKey: ['chat-messages'], exact: false });
     await queryClient.invalidateQueries({ queryKey: ['conversations'] });
 
+    if (noContacts) {
+      refetch();
+    }
+
     setRefreshing(false);
-  }, [queryClient]);
+  }, [noContacts, queryClient, refetch]);
 
   const isQueryActive = !!(query && query.length >= 1);
   if (isQueryActive) {
@@ -122,14 +133,47 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
       <SafeAreaView>
         <RemoveNotifications />
         <FloatingActionButton />
-        <FlatList
-          data={conversations}
-          keyExtractor={keyExtractor}
-          ListHeaderComponent={ConversationTileWithYourself}
-          contentInsetAdjustmentBehavior="automatic"
-          renderItem={renderItem}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={doRefresh} />}
-        />
+        {conversations && conversations?.length ? (
+          <FlatList
+            data={conversations}
+            keyExtractor={keyExtractor}
+            contentInsetAdjustmentBehavior="automatic"
+            ListHeaderComponent={<ConversationTileWithYourself />}
+            renderItem={renderItem}
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={doRefresh} />}
+          />
+        ) : (
+          <ScrollView
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={doRefresh} />}
+            style={{ flex: 1 }}
+          >
+            <ConversationTileWithYourself />
+            {noContacts ? (
+              <View style={{ padding: 16, flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                <Text style={{ color: Colors.gray[400], fontStyle: 'italic' }}>
+                  {t('To chat with someone on Homebase you need to be connected first.')}
+                </Text>
+                <TouchableOpacity
+                  style={{
+                    gap: 8,
+                    flexDirection: 'row',
+                    marginLeft: 'auto',
+                  }}
+                  onPress={() => openURL(`https://${identity}/owner/connections`)}
+                >
+                  <Text>{t('Connect')}</Text>
+                  <People />
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <View style={{ padding: 16 }}>
+                <Text style={{ color: Colors.gray[400], fontStyle: 'italic' }}>
+                  {t('No conversations found')}
+                </Text>
+              </View>
+            )}
+          </ScrollView>
+        )}
       </SafeAreaView>
     </ErrorBoundary>
   );

@@ -1,13 +1,14 @@
 import { CONTACT_PROFILE_IMAGE_KEY, ContactConfig } from '@youfoundation/js-lib/network';
 import { GetTargetDriveFromProfileId, BuiltInProfiles } from '@youfoundation/js-lib/profile';
-import { memo, useMemo } from 'react';
-import { ImageStyle, StyleProp, ViewStyle, View, StyleSheet, Image } from 'react-native';
+import { memo, useMemo, useState } from 'react';
+import { ImageStyle, StyleProp, ViewStyle, View, StyleSheet, Image, Platform } from 'react-native';
 import useContact from '../../../hooks/contact/useContact';
 import { useProfile } from '../../../hooks/profile/useProfile';
 import { useDarkMode } from '../../../hooks/useDarkMode';
 import { Users } from '../Icons/icons';
 import { OdinImage } from '../OdinImage/OdinImage';
 import { Colors } from '../../../app/Colors';
+import { SvgUri } from 'react-native-svg';
 
 export const Avatar = memo(
   (props: {
@@ -32,12 +33,54 @@ export const Avatar = memo(
         </View>
       );
     } else {
-      return (
-        <Image style={styles.tinyLogo} source={{ uri: `https://${props.odinId}/pub/image` }} />
-      );
+      return <PublicAvatar odinId={props.odinId} style={props.style} imageSize={props.imageSize} />;
     }
   }
 );
+
+export const PublicAvatar = (props: {
+  odinId: string;
+  style?: ImageStyle;
+  imageSize?: { width: number; height: number };
+}) => {
+  const [isSvg, setIsSvg] = useState(false);
+  if (!isSvg) {
+    return (
+      <Image
+        style={{
+          ...styles.tinyLogo,
+          ...props.style,
+        }}
+        onError={(e) => {
+          console.error('Error loading image', e.nativeEvent.error);
+          setIsSvg(true);
+        }}
+        source={{ uri: `https://${props.odinId}/pub/image` }}
+      />
+    );
+  } else {
+    return (
+      <View
+        style={[
+          {
+            ...styles.tinyLogo,
+            ...props.imageSize,
+            ...props.style,
+          },
+          // SVGs styling are not supported on Android
+          Platform.OS === 'android' ? props.style : undefined,
+        ]}
+      >
+        <SvgUri
+          width={props.imageSize?.width}
+          height={props.imageSize?.height}
+          uri={`https://${props.odinId}/pub/image`}
+          style={{ overflow: 'hidden', ...props.style }}
+        />
+      </View>
+    );
+  }
+};
 
 export const OwnerAvatar = memo(
   (props: { style?: ImageStyle; imageSize?: { width: number; height: number } }) => {

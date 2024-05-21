@@ -378,6 +378,7 @@ export const navigateOnNotification = (
       type: 'error',
       text1: `Error Navigating to ${notification.options.appId}  `,
       text2: 'Blame the developer for not handling this case properly',
+      visibilityTime: 5000,
       onPress: () => {
         Clipboard.setString(notification.options.appId);
       },

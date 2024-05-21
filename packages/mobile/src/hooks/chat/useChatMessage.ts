@@ -15,7 +15,7 @@ import {
 } from '@youfoundation/js-lib/core';
 import { getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 
-import { useDotYouClientContext } from 'feed-app-common';
+import { t, useDotYouClientContext } from 'feed-app-common';
 import {
   ChatDeliveryStatus,
   ChatMessage,
@@ -30,7 +30,7 @@ import {
 } from '../../provider/chat/ConversationProvider';
 import { OdinBlob } from '../../../polyfills/OdinBlob';
 import { getSynchronousDotYouClient } from './getSynchronousDotYouClient';
-import { useErrors } from '../errors/useErrors';
+import { useErrors, addError } from '../errors/useErrors';
 
 const sendMessage = async ({
   conversation,
@@ -174,7 +174,8 @@ export const getSendChatMessageMutationOptions: (queryClient: QueryClient) => Us
     return { existingData };
   },
   onError: (err, messageParams, context) => {
-    console.error('Failed to send the chat message', err);
+    addError(queryClient, err, t('Failed to send the chat message'));
+
     queryClient.setQueryData(
       ['chat-messages', messageParams.conversation.fileMetadata.appData.uniqueId],
       context?.existingData
@@ -268,8 +269,10 @@ export const getUpdateChatMessageMutationOptions: (queryClient: QueryClient) => 
 
     return { extistingMessages, existingMessage };
   },
-  // eslint-disable-next-line handle-callback-err
+
   onError: (err, messageParams, context) => {
+    addError(queryClient, err, t('Failed to update the chat message'));
+
     queryClient.setQueryData(
       ['chat-messages', messageParams.conversation.fileMetadata.appData.uniqueId],
       context?.extistingMessages

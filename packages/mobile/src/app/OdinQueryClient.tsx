@@ -20,7 +20,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     mutations: {
       gcTime: Infinity,
-      retry: 0,
+      retry: 1,
     },
     queries: {
       retry: 2,

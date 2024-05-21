@@ -5,7 +5,7 @@ import { TabStackParamList } from '../../app/App';
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 import WebView from 'react-native-webview';
 import { uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
-import { RefreshControl, TouchableOpacity, StatusBar } from 'react-native';
+import { RefreshControl, TouchableOpacity } from 'react-native';
 import { useAuth } from '../../hooks/auth/useAuth';
 import { Colors } from '../../app/Colors';
 import { useDarkMode } from '../../hooks/useDarkMode';
@@ -20,6 +20,7 @@ import { useNetInfo } from '@react-native-community/netinfo';
 
 import { Text, View } from 'react-native';
 import { t } from 'feed-app-common';
+import { useErrors } from '../../hooks/errors/useErrors';
 
 type FeedProps = NativeStackScreenProps<TabStackParamList, 'Feed'>;
 
@@ -69,6 +70,7 @@ export const FeedPage = memo((_props: FeedProps) => {
   const [refreshing, setRefreshing] = useState(false);
   const [refresherEnabled, setEnableRefresher] = useState(true);
   const webviewRef = useRef<WebView>(null);
+  const add = useErrors().add;
 
   //Code to get scroll position
   const handleScroll = (event: any) => {
@@ -89,9 +91,34 @@ export const FeedPage = memo((_props: FeedProps) => {
     webviewRef.current?.reload();
   }, []);
 
+  const renderError = useCallback(
+    (errorDomain: string | undefined, errorCode: number, errorDesc: string) => {
+      return (
+        <View
+          style={{
+            flex: 1,
+            alignItems: 'center',
+            flexDirection: 'column',
+            justifyContent: 'center',
+          }}
+        >
+          <Text style={{ textAlign: 'center', paddingHorizontal: 7 }}>
+            {t('An error occurred while loading the feed. Please try again later.')}
+            {'\n'}
+            {t('Error Domain')}: {errorDomain}
+            {'\n'}
+            {t('Error Code')}: {errorCode}
+            {'\n'}
+            {t('Error Description')}: {errorDesc}
+          </Text>
+        </View>
+      );
+    },
+    []
+  );
+
   return (
     <SafeAreaView>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
       {netInfo.isConnected === false ? (
         <View
           style={{
@@ -128,6 +155,10 @@ export const FeedPage = memo((_props: FeedProps) => {
                 onScroll={handleScroll}
                 onLoadEnd={() => setRefreshing(false)}
                 forceDarkOn={isDarkMode}
+                onError={(error) => {
+                  add(error);
+                }}
+                renderError={renderError}
               />
               <TouchableOpacity
                 style={{
