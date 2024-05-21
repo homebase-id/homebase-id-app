@@ -25,9 +25,10 @@ export function EditGroupPage(props: EditGroupProp) {
   const save = useCallback(() => {
     if (conversationContent && conversation) {
       conversation.fileMetadata.appData.content.title = title as string;
+      console.log('new title', title);
       updateGroupConversation({
         conversation,
-        isTitleUpdated: true,
+        distribute: true,
       });
     }
   }, [conversation, conversationContent, title, updateGroupConversation]);
