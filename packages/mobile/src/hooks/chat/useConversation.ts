@@ -173,7 +173,6 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     isTitleUpdated?: boolean;
   }) => {
     await updateConversation(dotYouClient, conversation);
-    conversation.fileMetadata.appData.content.lastReadTime = 0;
     if (isTitleUpdated && conversation.fileMetadata.appData.content.recipients?.length > 2) {
       conversation.fileMetadata.appData.content.lastReadTime = 0;
       await uploadConversation(dotYouClient, conversation, true);
