@@ -10,6 +10,7 @@ import { useMemo } from 'react';
 import { Text } from '../ui/Text/Text';
 import { ConnectionName } from '../ui/Name';
 import { Avatar } from '../ui/Avatars/Avatar';
+import { ErrorNotification } from '../ui/Alert/ErrorNotification';
 
 export const ContactTile = ({
   item: profile,
@@ -28,7 +29,7 @@ export const ContactTile = ({
   const contact: ContactFile | undefined = contactData?.fileMetadata.appData.content;
   const { isDarkMode } = useDarkMode();
 
-  const { mutateAsync: createNew } = useConversation().create;
+  const { mutateAsync: createNew, error: createConversationError } = useConversation().create;
   const onClick = async () => {
     if (!contact) return;
     try {
@@ -46,18 +47,20 @@ export const ContactTile = ({
   }, [isDarkMode]);
 
   return (
-    <TouchableOpacity onPress={selectMode ? onPress : onClick}>
-      <View
-        style={[
-          styles.tile,
-          {
-            backgroundColor: backgroundColor,
-          },
-        ]}
-      >
-        {contact && contactData && (
-          <View style={{ marginRight: 16 }}>
-            {/* <OdinImage
+    <>
+      <ErrorNotification error={createConversationError} />
+      <TouchableOpacity onPress={selectMode ? onPress : onClick}>
+        <View
+          style={[
+            styles.tile,
+            {
+              backgroundColor: backgroundColor,
+            },
+          ]}
+        >
+          {contact && contactData && (
+            <View style={{ marginRight: 16 }}>
+              {/* <OdinImage
               targetDrive={ContactConfig.ContactTargetDrive}
               fit="cover"
               alt={contact.name?.displayName}
@@ -70,34 +73,35 @@ export const ContactTile = ({
               fileKey={'prfl_pic'}
               style={styles.tinyLogo}
             /> */}
-            <Avatar
-              odinId={profile.odinId}
-              style={styles.tinyLogo}
-              imageSize={{ width: 48, height: 48 }}
-            />
+              <Avatar
+                odinId={profile.odinId}
+                style={styles.tinyLogo}
+                imageSize={{ width: 48, height: 48 }}
+              />
+            </View>
+          )}
+          <View style={[styles.content]}>
+            <Text style={styles.title}>
+              {contact?.name?.displayName ??
+                contact?.name?.givenName ??
+                contact?.name?.additionalName ?? <ConnectionName odinId={profile.odinId} />}
+            </Text>
+            <Text style={styles.description}>{contact?.odinId}</Text>
           </View>
-        )}
-        <View style={[styles.content]}>
-          <Text style={styles.title}>
-            {contact?.name?.displayName ??
-              contact?.name?.givenName ??
-              contact?.name?.additionalName ?? <ConnectionName odinId={profile.odinId} />}
-          </Text>
-          <Text style={styles.description}>{contact?.odinId}</Text>
+          {selectMode && (
+            <View
+              style={{
+                position: 'absolute',
+                right: 8,
+                top: 8,
+              }}
+            >
+              {isSelected ? <CheckCircle size={'lg'} /> : <CircleOutlined size={'lg'} />}
+            </View>
+          )}
         </View>
-        {selectMode && (
-          <View
-            style={{
-              position: 'absolute',
-              right: 8,
-              top: 8,
-            }}
-          >
-            {isSelected ? <CheckCircle size={'lg'} /> : <CircleOutlined size={'lg'} />}
-          </View>
-        )}
-      </View>
-    </TouchableOpacity>
+      </TouchableOpacity>
+    </>
   );
 };
 

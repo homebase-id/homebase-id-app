@@ -56,9 +56,11 @@ export const ContactPage = memo(
           item={item}
           onOpen={(conversationId) => {
             navigation.goBack();
-            navigation.navigate('ChatScreen', {
-              convoId: conversationId,
-            });
+            setTimeout(() => {
+              navigation.navigate('ChatScreen', {
+                convoId: conversationId,
+              });
+            }, 100);
           }}
         />
       ),
