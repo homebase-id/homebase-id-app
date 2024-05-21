@@ -23,16 +23,13 @@ import { Text } from '../ui/Text/Text';
 import Toast from 'react-native-toast-message';
 import Clipboard from '@react-native-clipboard/clipboard';
 import { useLivePushNotifications } from '../../hooks/notifications/useLivePushNotifications';
-import notifee from '@notifee/react-native';
+
 import { TabStackParamList } from '../../app/App';
 import { ErrorNotification } from '../ui/Alert/ErrorNotification';
 
 export const NotificationsOverview = memo(() => {
   useLivePushNotifications();
   const { data: notifications } = usePushNotifications().fetch;
-  if (notifications?.results) {
-    notifee.setBadgeCount(notifications.results.length);
-  }
   const groupedNotificationsPerDay = useMemo(
     () =>
       notifications?.results.reduce(
