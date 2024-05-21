@@ -991,6 +991,8 @@ PODS:
     - React-Core
   - react-native-image-resizer (3.0.7):
     - React-Core
+  - react-native-menu (1.0.3):
+    - React
   - react-native-mmkv-storage (0.9.1):
     - MMKV (= 1.2.13)
     - React-Core
@@ -1225,6 +1227,8 @@ PODS:
     - React-Core
   - RNPermissions (4.1.5):
     - React-Core
+  - RNReactNativeHapticFeedback (2.2.0):
+    - React-Core
   - RNReanimated (3.8.1):
     - glog
     - RCT-Folly (= 2022.05.16.00)
@@ -1285,6 +1289,7 @@ DEPENDENCIES:
   - react-native-document-picker (from `../../../node_modules/react-native-document-picker`)
   - react-native-image-picker (from `../../../node_modules/react-native-image-picker`)
   - "react-native-image-resizer (from `../../../node_modules/@bam.tech/react-native-image-resizer`)"
+  - "react-native-menu (from `../../../node_modules/@react-native-menu/menu`)"
   - react-native-mmkv-storage (from `../../../node_modules/react-native-mmkv-storage`)
   - "react-native-netinfo (from `../../../node_modules/@react-native-community/netinfo`)"
   - "react-native-paste-input (from `../../../node_modules/@mattermost/react-native-paste-input`)"
@@ -1328,6 +1333,7 @@ DEPENDENCIES:
   - RNLocalize (from `../../../node_modules/react-native-localize`)
   - "RNNotifee (from `../../../node_modules/@notifee/react-native`)"
   - RNPermissions (from `../../../node_modules/react-native-permissions`)
+  - RNReactNativeHapticFeedback (from `../../../node_modules/react-native-haptic-feedback`)
   - RNReanimated (from `../../../node_modules/react-native-reanimated`)
   - RNScreens (from `../../../node_modules/react-native-screens`)
   - RNShare (from `../../../node_modules/react-native-share`)
@@ -1435,6 +1441,8 @@ EXTERNAL SOURCES:
     :path: "../../../node_modules/react-native-image-picker"
   react-native-image-resizer:
     :path: "../../../node_modules/@bam.tech/react-native-image-resizer"
+  react-native-menu:
+    :path: "../../../node_modules/@react-native-menu/menu"
   react-native-mmkv-storage:
     :path: "../../../node_modules/react-native-mmkv-storage"
   react-native-netinfo:
@@ -1521,6 +1529,8 @@ EXTERNAL SOURCES:
     :path: "../../../node_modules/@notifee/react-native"
   RNPermissions:
     :path: "../../../node_modules/react-native-permissions"
+  RNReactNativeHapticFeedback:
+    :path: "../../../node_modules/react-native-haptic-feedback"
   RNReanimated:
     :path: "../../../node_modules/react-native-reanimated"
   RNScreens:
@@ -1589,6 +1599,7 @@ SPEC CHECKSUMS:
   react-native-document-picker: 2b3efb60622b7be891b8d0e0e5424632150e0c94
   react-native-image-picker: 7c3a279e7a518628910f2ea02917bd3b90049465
   react-native-image-resizer: 681f7607418b97c084ba2d0999b153b103040d8a
+  react-native-menu: 2e368669c7375dd1049ef3c7b2cab190ebe45d9e
   react-native-mmkv-storage: cfb6854594cfdc5f7383a9e464bb025417d1721c
   react-native-netinfo: bdb108d340cdb41875c9ced535977cac6d2ff321
   react-native-paste-input: d2136a8269eb8ad57d81407ee2b8a646f738a694
@@ -1632,6 +1643,7 @@ SPEC CHECKSUMS:
   RNLocalize: e8694475db034bf601e17bd3dfa8986565e769eb
   RNNotifee: 8e2d3df3f0e9ce8f5d1fe4c967431138190b6175
   RNPermissions: 2ee1472892d0346d1db3f31abf2fbe5d399a4ba8
+  RNReactNativeHapticFeedback: ec56a5f81c3941206fd85625fa669ffc7b4545f9
   RNReanimated: 4b1bce37b188450e3a2d03c925edd5fb11d4bb2d
   RNScreens: 97a2a32820e632c5978d75250afa397ed9053910
   RNShare: b674d9f1cb0dc11116983bebd8712908a226a3ee

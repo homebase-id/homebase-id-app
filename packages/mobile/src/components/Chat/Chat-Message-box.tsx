@@ -5,6 +5,7 @@ import { ChatMessageIMessage } from './ChatDetail';
 import { Info, Reply } from '../ui/Icons/icons';
 import { ChatDeletedArchivalStaus } from '../../provider/chat/ChatProvider';
 import { memo, useCallback, useMemo } from 'react';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
 type ChatMessageBoxProps = {
   setReplyOnSwipeOpen: (message: ChatMessageIMessage) => void;
@@ -72,6 +73,7 @@ const ChatMessageBox = memo(({ setReplyOnSwipeOpen, ...props }: ChatMessageBoxPr
 
   const onSwipeOpenAction = useCallback(
     (direction: 'left' | 'right', swipeable: Swipeable) => {
+      ReactNativeHapticFeedback.trigger('impactLight');
       if (props.currentMessage && direction === 'left') {
         setReplyOnSwipeOpen({ ...props.currentMessage });
         swipeable.close();
