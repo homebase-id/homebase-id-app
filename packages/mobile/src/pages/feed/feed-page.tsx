@@ -5,7 +5,7 @@ import { TabStackParamList } from '../../app/App';
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 import WebView from 'react-native-webview';
 import { uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
-import { RefreshControl, TouchableOpacity, StatusBar } from 'react-native';
+import { RefreshControl, TouchableOpacity } from 'react-native';
 import { useAuth } from '../../hooks/auth/useAuth';
 import { Colors } from '../../app/Colors';
 import { useDarkMode } from '../../hooks/useDarkMode';
@@ -119,7 +119,6 @@ export const FeedPage = memo((_props: FeedProps) => {
 
   return (
     <SafeAreaView>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
       {netInfo.isConnected === false ? (
         <View
           style={{
