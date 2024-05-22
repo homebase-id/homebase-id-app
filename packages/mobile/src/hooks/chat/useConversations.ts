@@ -1,5 +1,4 @@
 import {
-  Conversation,
   UnifiedConversation,
   getConversations,
 } from '../../provider/chat/ConversationProvider';
@@ -50,14 +49,14 @@ export const useConversationsWithRecentMessage = () => {
     async (
       conversations:
         | InfiniteData<
-            {
-              searchResults: HomebaseFile<UnifiedConversation>[];
-              cursorState: string;
-              queryTime: number;
-              includeMetadataHeader: boolean;
-            } | null,
-            unknown
-          >
+          {
+            searchResults: HomebaseFile<UnifiedConversation>[];
+            cursorState: string;
+            queryTime: number;
+            includeMetadataHeader: boolean;
+          } | null,
+          unknown
+        >
         | undefined
     ) => {
       const flatConversations =
