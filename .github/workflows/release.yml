@@ -11,7 +11,7 @@ jobs:
     runs-on: macOS-14
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: get-npm-version
         id: package-version
@@ -84,7 +84,7 @@ jobs:
   build-android:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: get-npm-version
         id: package-version
@@ -93,7 +93,7 @@ jobs:
           path: packages/mobile
 
       - name: Set up Java 17
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
 
@@ -137,7 +137,7 @@ jobs:
       - name: Rename output
         run: mv packages/mobile/android/app/build/outputs/bundle/release/app-release.aab packages/mobile/android/app/build/outputs/bundle/release/homebase-feed.aab
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: homebase-feed-app-android
           path: packages/mobile/android/app/build/outputs/bundle/release/homebase-feed.aab
