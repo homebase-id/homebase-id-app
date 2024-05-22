@@ -59,7 +59,7 @@ const useInboxProcessor = (connected?: boolean) => {
   const queryClient = useQueryClient();
 
   const fetchData = async () => {
-    const lastProcessedTime = queryClient.getQueryState(['processInbox'])?.dataUpdatedAt;
+    const lastProcessedTime = queryClient.getQueryState(['process-inbox'])?.dataUpdatedAt;
 
     const preProcessCursor = lastProcessedTime
       ? getQueryModifiedCursorFromTime(lastProcessedTime - MINUTE_IN_MS * 5)
@@ -109,7 +109,7 @@ const useInboxProcessor = (connected?: boolean) => {
 
   // We refetch this one on mount as each mount the websocket would reconnect, and there might be a backlog of messages
   return useQuery({
-    queryKey: ['processInbox'],
+    queryKey: ['process-inbox'],
     queryFn: fetchData,
     enabled: connected,
   });
@@ -316,7 +316,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
     ['fileAdded', 'fileModified'],
     [ChatDrive],
     () => {
-      queryClient.invalidateQueries({ queryKey: ['processInbox'] });
+      queryClient.invalidateQueries({ queryKey: ['process-inbox'] });
     }
   );
 };
