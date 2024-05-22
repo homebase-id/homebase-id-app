@@ -19,20 +19,18 @@ export const Avatar = memo(
     const { data: contact } = useContact(props.odinId).fetch;
     if (contact?.fileMetadata.payloads.some((p) => p.key === CONTACT_PROFILE_IMAGE_KEY)) {
       return (
-        <OdinImage
-          fileId={contact?.fileId}
-          fileKey={CONTACT_PROFILE_IMAGE_KEY}
-          targetDrive={ContactConfig.ContactTargetDrive}
-          previewThumbnail={contact?.fileMetadata.appData.previewThumbnail}
-          imageSize={props.imageSize || { width: 48, height: 48 }}
-          fit="contain"
-          odinId={props.odinId}
-          style={{
-            ...styles.tinyLogo,
-            ...props.style,
-          }}
-          lastModified={contact?.fileMetadata.updated}
-        />
+        <View style={{ ...styles.tinyLogo, ...props.style }}>
+          <OdinImage
+            fileId={contact?.fileId}
+            fileKey={CONTACT_PROFILE_IMAGE_KEY}
+            targetDrive={ContactConfig.ContactTargetDrive}
+            previewThumbnail={contact?.fileMetadata.appData.previewThumbnail}
+            imageSize={props.imageSize || { width: 48, height: 48 }}
+            fit="contain"
+            odinId={props.odinId}
+            lastModified={contact?.fileMetadata.updated}
+          />
+        </View>
       );
     } else {
       return <PublicAvatar odinId={props.odinId} style={props.style} imageSize={props.imageSize} />;
@@ -89,19 +87,16 @@ export const OwnerAvatar = memo(
     const { data: profileData } = useProfile();
 
     return (
-      <OdinImage
-        fit="cover"
-        targetDrive={GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId)}
-        fileId={profileData?.profileImageFileId}
-        fileKey={profileData?.profileImageFileKey}
-        previewThumbnail={profileData?.profileImagePreviewThumbnail}
-        imageSize={props.imageSize || { width: 48, height: 48 }}
-        style={{
-          ...styles.tinyLogo,
-          ...(props.imageSize || {}),
-          ...props.style,
-        }}
-      />
+      <View style={{ ...styles.tinyLogo, ...(props.imageSize || {}), ...props.style }}>
+        <OdinImage
+          fit="cover"
+          targetDrive={GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId)}
+          fileId={profileData?.profileImageFileId}
+          fileKey={profileData?.profileImageFileKey}
+          previewThumbnail={profileData?.profileImagePreviewThumbnail}
+          imageSize={props.imageSize || { width: 48, height: 48 }}
+        />
+      </View>
     );
   }
 );

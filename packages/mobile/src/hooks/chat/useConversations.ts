@@ -1,4 +1,8 @@
-import { Conversation, getConversations } from '../../provider/chat/ConversationProvider';
+import {
+  Conversation,
+  UnifiedConversation,
+  getConversations,
+} from '../../provider/chat/ConversationProvider';
 import { InfiniteData, useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { useDotYouClientContext } from 'feed-app-common';
@@ -21,14 +25,14 @@ export const useConversations = () => {
       initialPageParam: undefined as string | undefined,
       queryFn: ({ pageParam }) => fetchConversations(pageParam),
       getNextPageParam: (lastPage) =>
-        lastPage.searchResults?.length >= PAGE_SIZE ? lastPage.cursorState : undefined,
+        lastPage && lastPage.searchResults?.length >= PAGE_SIZE ? lastPage.cursorState : undefined,
       refetchOnMount: false,
       staleTime: 1000 * 60 * 5, // 5min before conversations from another device are fetched on this one
     }),
   };
 };
 
-export type ConversationWithRecentMessage = HomebaseFile<Conversation> & {
+export type ConversationWithRecentMessage = HomebaseFile<UnifiedConversation> & {
   lastMessage: HomebaseFile<ChatMessage> | null;
 };
 
@@ -36,30 +40,29 @@ export const useConversationsWithRecentMessage = () => {
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
 
-  const useConversationsQuery = useConversations();
-  const { data: conversations, ...rest } = useConversationsQuery.all;
+  const { data: conversations, ...rest } = useConversations().all;
 
   const [conversationsWithRecent, setConversationsWithRecent] = useState<
     ConversationWithRecentMessage[]
   >([]);
 
-  const fetchConversations = useCallback(
+  const buildConversationsWithRecent = useCallback(
     async (
       conversations:
         | InfiniteData<
             {
-              searchResults: (HomebaseFile<Conversation> | null)[];
+              searchResults: HomebaseFile<UnifiedConversation>[];
               cursorState: string;
               queryTime: number;
               includeMetadataHeader: boolean;
-            },
+            } | null,
             unknown
           >
         | undefined
     ) => {
       const flatConversations =
         (conversations?.pages
-          ?.flatMap((page) => page.searchResults)
+          ?.flatMap((page) => page?.searchResults)
           .filter(
             (convo) => convo && [0, undefined].includes(convo.fileMetadata.appData.archivalStatus)
           ) as ConversationWithRecentMessage[]) || [];
@@ -69,16 +72,18 @@ export const useConversationsWithRecentMessage = () => {
       }
 
       const convoWithMessage: ConversationWithRecentMessage[] = await Promise.all(
-        (flatConversations.filter(Boolean) as HomebaseFile<Conversation>[]).map(async (convo) => {
-          const conversationId = convo.fileMetadata.appData.uniqueId;
-          const messagesA = await queryClient.fetchInfiniteQuery(
-            getChatMessageInfiniteQueryOptions(dotYouClient, conversationId)
-          );
-          return {
-            ...convo,
-            lastMessage: messagesA.pages[0].searchResults[0],
-          };
-        })
+        (flatConversations.filter(Boolean) as HomebaseFile<UnifiedConversation>[]).map(
+          async (convo) => {
+            const conversationId = convo.fileMetadata.appData.uniqueId;
+            const messagesA = await queryClient.fetchInfiniteQuery(
+              getChatMessageInfiniteQueryOptions(dotYouClient, conversationId)
+            );
+            return {
+              ...convo,
+              lastMessage: messagesA.pages[0].searchResults[0],
+            };
+          }
+        )
       );
 
       convoWithMessage.sort((a, b) => {
@@ -92,10 +97,10 @@ export const useConversationsWithRecentMessage = () => {
   );
 
   useEffect(() => {
-    fetchConversations(conversations).then((conversationsWithRecent) => {
+    buildConversationsWithRecent(conversations).then((conversationsWithRecent) => {
       setConversationsWithRecent(conversationsWithRecent);
     });
-  }, [conversations, fetchConversations]);
+  }, [conversations, buildConversationsWithRecent]);
 
   return {
     all: {

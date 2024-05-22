@@ -11,13 +11,10 @@ import {
   requestMarkAsRead,
   softDeleteChatMessage,
 } from '../../provider/chat/ChatProvider';
-import {
-  Conversation,
-  GroupConversation,
-  SingleConversation,
-} from '../../provider/chat/ConversationProvider';
+
 import { DotYouClient, HomebaseFile } from '@youfoundation/js-lib/core';
 import { useDotYouClientContext } from 'feed-app-common';
+import { UnifiedConversation } from '../../provider/chat/ConversationProvider';
 
 const FIRST_PAGE_SIZE = 15;
 const PAGE_SIZE = 100;
@@ -31,7 +28,7 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
     conversation,
     messages,
   }: {
-    conversation: HomebaseFile<Conversation>;
+    conversation: HomebaseFile<UnifiedConversation>;
     messages: HomebaseFile<ChatMessage>[];
   }) => {
     // => Much nicer solution: Handle with a last read time on the conversation file;
@@ -52,14 +49,13 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
     messages,
     deleteForEveryone,
   }: {
-    conversation: HomebaseFile<Conversation>;
+    conversation: HomebaseFile<UnifiedConversation>;
     messages: HomebaseFile<ChatMessage>[];
     deleteForEveryone?: boolean;
   }) => {
     const conversationContent = conversation.fileMetadata.appData.content;
-    const recipients = (conversationContent as GroupConversation).recipients || [
-      (conversationContent as SingleConversation).recipient,
-    ];
+    const identity = dotYouClient.getIdentity();
+    const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
 
     return await Promise.all(
       messages.map(async (msg) => {
@@ -101,11 +97,6 @@ const fetchMessages = async (
   conversationId: string,
   cursorState: string | undefined
 ) => {
-  // console.log(
-  //   'fetch',
-  //   ['chat-messages', conversationId],
-  //   cursorState ? PAGE_SIZE : FIRST_PAGE_SIZE
-  // );
   return await getChatMessages(
     dotYouClient,
     conversationId,
@@ -128,7 +119,8 @@ export const getChatMessageInfiniteQueryOptions: (
   queryFn: ({ pageParam }) =>
     fetchMessages(dotYouClient, conversationId as string, pageParam as string | undefined),
   getNextPageParam: (lastPage, pages) =>
-    lastPage && lastPage.searchResults?.length >= (lastPage === pages[0] ? FIRST_PAGE_SIZE : PAGE_SIZE)
+    lastPage &&
+    lastPage.searchResults?.length >= (lastPage === pages[0] ? FIRST_PAGE_SIZE : PAGE_SIZE)
       ? lastPage.cursorState
       : undefined,
   enabled: !!conversationId,

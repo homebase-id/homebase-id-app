@@ -26,12 +26,7 @@ import {
   uploadFile,
   uploadHeader,
 } from '@youfoundation/js-lib/core';
-import {
-  ChatDrive,
-  Conversation,
-  GroupConversation,
-  SingleConversation,
-} from './ConversationProvider';
+import { ChatDrive, UnifiedConversation } from './ConversationProvider';
 import { assertIfDefined, getNewId, jsonStringify64 } from '@youfoundation/js-lib/helpers';
 import { OdinBlob } from '../../../polyfills/OdinBlob';
 import { ImageSource } from '../image/RNImageProvider';
@@ -41,7 +36,7 @@ import { VideoContentType } from '@youfoundation/js-lib/media';
 
 const CHAT_APP_ID = '2d781401-3804-4b57-b4aa-d8e4e2ef39f4';
 
-export const ChatMessageFileType = 7878;
+export const CHAT_MESSAGE_FILE_TYPE = 7878;
 export const ChatDeletedArchivalStaus = 2;
 
 export enum ChatDeliveryStatus {
@@ -185,18 +180,18 @@ export const uploadChatMessage = async (
     },
     transitOptions: distribute
       ? {
-        recipients: [...recipients],
-        schedule: ScheduleOptions.SendNowAwaitResponse,
-        sendContents: SendContents.All,
-        useGlobalTransitId: true,
-        useAppNotification: true,
-        appNotificationOptions: {
-          appId: CHAT_APP_ID,
-          typeId: message.fileMetadata.appData.groupId as string,
-          tagId: getNewId(),
-          silent: false,
-        },
-      }
+          recipients: [...recipients],
+          schedule: ScheduleOptions.SendNowAwaitResponse,
+          sendContents: SendContents.All,
+          useGlobalTransitId: true,
+          useAppNotification: true,
+          appNotificationOptions: {
+            appId: CHAT_APP_ID,
+            typeId: message.fileMetadata.appData.groupId as string,
+            tagId: getNewId(),
+            silent: false,
+          },
+        }
       : undefined,
   };
 
@@ -208,7 +203,7 @@ export const uploadChatMessage = async (
       uniqueId: message.fileMetadata.appData.uniqueId,
       groupId: message.fileMetadata.appData.groupId,
       userDate: message.fileMetadata.appData.userDate,
-      fileType: ChatMessageFileType,
+      fileType: CHAT_MESSAGE_FILE_TYPE,
       content: jsonContent,
     },
     isEncrypted: true,
@@ -236,17 +231,17 @@ export const uploadChatMessage = async (
       const thumbnail = await grabThumbnail(newMediaFile);
       const thumbSource: ImageSource | null = thumbnail
         ? {
-          uri: thumbnail.uri,
-          width: processedMedia.width || 1920,
-          height: processedMedia.height || 1080,
-          type: thumbnail.type,
-        }
+            uri: thumbnail.uri,
+            width: processedMedia.width || 1920,
+            height: processedMedia.height || 1080,
+            type: thumbnail.type,
+          }
         : null;
       const { tinyThumb, additionalThumbnails } =
         thumbSource && thumbnail
           ? await createThumbnails(thumbSource, payloadKey, thumbnail.type as ImageContentType, [
-            { quality: 100, width: 250, height: 250 },
-          ])
+              { quality: 100, width: 250, height: 250 },
+            ])
           : { tinyThumb: undefined, additionalThumbnails: undefined };
       if (additionalThumbnails) {
         thumbnails.push(...additionalThumbnails);
@@ -292,7 +287,6 @@ export const uploadChatMessage = async (
         });
       }
     }
-
   }
 
   uploadMetadata.appData.previewThumbnail = previewThumbnails[0];
@@ -331,11 +325,11 @@ export const updateChatMessage = async (
     },
     transitOptions: distribute
       ? {
-        recipients: [...recipients],
-        schedule: ScheduleOptions.SendNowAwaitResponse,
-        sendContents: SendContents.All,
-        useGlobalTransitId: true,
-      }
+          recipients: [...recipients],
+          schedule: ScheduleOptions.SendNowAwaitResponse,
+          sendContents: SendContents.All,
+          useGlobalTransitId: true,
+        }
       : undefined,
   };
 
@@ -348,7 +342,7 @@ export const updateChatMessage = async (
       groupId: message.fileMetadata.appData.groupId,
       archivalStatus: (message.fileMetadata.appData as AppFileMetaData<ChatMessage>).archivalStatus,
       previewThumbnail: message.fileMetadata.appData.previewThumbnail,
-      fileType: ChatMessageFileType,
+      fileType: CHAT_MESSAGE_FILE_TYPE,
       content: payloadJson,
     },
     senderOdinId: (message.fileMetadata as FileMetadata<ChatMessage>).senderOdinId,
@@ -403,7 +397,7 @@ export interface MarkAsReadRequest {
 
 export const requestMarkAsRead = async (
   dotYouClient: DotYouClient,
-  conversation: HomebaseFile<Conversation>,
+  conversation: HomebaseFile<UnifiedConversation>,
   chatUniqueIds: string[]
 ) => {
   const request: MarkAsReadRequest = {
@@ -412,9 +406,8 @@ export const requestMarkAsRead = async (
   };
 
   const conversationContent = conversation.fileMetadata.appData.content;
-  const recipients = (conversationContent as GroupConversation).recipients || [
-    (conversationContent as SingleConversation).recipient,
-  ];
+  const identity = dotYouClient.getIdentity();
+  const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
   if (!recipients?.filter(Boolean)?.length) {
     throw new Error('No recipients found in the conversation');
   }

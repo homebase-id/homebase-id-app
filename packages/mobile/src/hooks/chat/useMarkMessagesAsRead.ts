@@ -3,7 +3,7 @@ import { HomebaseFile } from '@youfoundation/js-lib/core';
 
 import { useChatMessages } from './useChatMessages';
 import { useEffect, useState } from 'react';
-import { Conversation } from '../../provider/chat/ConversationProvider';
+import { UnifiedConversation } from '../../provider/chat/ConversationProvider';
 import { useConversation } from './useConversation';
 import { ChatMessage } from '../../provider/chat/ChatProvider';
 
@@ -11,7 +11,7 @@ export const useMarkMessagesAsRead = ({
   conversation,
   messages,
 }: {
-  conversation: HomebaseFile<Conversation> | undefined;
+  conversation: HomebaseFile<UnifiedConversation> | undefined;
   messages: HomebaseFile<ChatMessage>[] | undefined;
 }) => {
   const { mutateAsync: markAsRead } = useChatMessages({
@@ -30,7 +30,7 @@ export const useMarkMessagesAsRead = ({
       const unreadMessages = messages.filter(
         (msg) =>
           msg?.fileMetadata.created >
-          (conversation.fileMetadata.appData.content.lastReadTime || 0) &&
+            (conversation.fileMetadata.appData.content.lastReadTime || 0) &&
           msg.fileMetadata.senderOdinId
       );
 

@@ -27,16 +27,16 @@ export const NewGroupPage = memo(() => {
   const [groupTitle, setgroupTitle] = useState<string>();
 
   const createGroupCallback = useCallback(async () => {
-    const { newConversationId } = await createNew({
+    const conversation = await createNew({
       recipients: selectedContacts.map((contact) => contact.odinId as string),
       title: groupTitle,
     });
-    if (newConversationId) {
+    if (conversation) {
       setDialogVisible(false);
       navigation.goBack();
       navigation.goBack();
       navigation.navigate('ChatScreen', {
-        convoId: newConversationId,
+        convoId: conversation.fileMetadata.appData.uniqueId as string,
       });
     }
   }, [createNew, navigation, selectedContacts, groupTitle]);

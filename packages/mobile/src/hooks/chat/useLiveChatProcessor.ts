@@ -20,19 +20,18 @@ import { processCommand } from '../../provider/chat/ChatCommandProvider';
 import { useDotYouClientContext } from 'feed-app-common';
 import {
   ChatMessage,
-  ChatMessageFileType,
+  CHAT_MESSAGE_FILE_TYPE,
   MARK_CHAT_READ_COMMAND,
   dsrToMessage,
 } from '../../provider/chat/ChatProvider';
 import { useAuth } from '../auth/useAuth';
 import {
   ChatDrive,
-  Conversation,
-  ConversationFileType,
-  GroupConversationFileType,
+  UnifiedConversation,
+  CHAT_CONVERSATION_FILE_TYPE,
+  GROUP_CHAT_CONVERSATION_FILE_TYPE,
   JOIN_CONVERSATION_COMMAND,
   JOIN_GROUP_CONVERSATION_COMMAND,
-  UPDATE_GROUP_CONVERSATION_COMMAND,
   dsrToConversation,
 } from '../../provider/chat/ConversationProvider';
 import { ChatReactionFileType } from '../../provider/chat/ChatReactionProvider';
@@ -60,7 +59,7 @@ const useInboxProcessor = (connected?: boolean) => {
   const queryClient = useQueryClient();
 
   const fetchData = async () => {
-    const lastProcessedTime = queryClient.getQueryState(['processInbox'])?.dataUpdatedAt;
+    const lastProcessedTime = queryClient.getQueryState(['process-inbox'])?.dataUpdatedAt;
 
     const preProcessCursor = lastProcessedTime
       ? getQueryModifiedCursorFromTime(lastProcessedTime - MINUTE_IN_MS * 5)
@@ -83,7 +82,7 @@ const useInboxProcessor = (connected?: boolean) => {
         }
       );
       const newMessages = newData.searchResults.filter(
-        (dsr) => dsr.fileMetadata.appData.fileType === ChatMessageFileType
+        (dsr) => dsr.fileMetadata.appData.fileType === CHAT_MESSAGE_FILE_TYPE
       );
 
       new Set(newMessages.map((msg) => msg.fileMetadata.appData.groupId)).forEach(
@@ -110,7 +109,7 @@ const useInboxProcessor = (connected?: boolean) => {
 
   // We refetch this one on mount as each mount the websocket would reconnect, and there might be a backlog of messages
   return useQuery({
-    queryKey: ['processInbox'],
+    queryKey: ['process-inbox'],
     queryFn: fetchData,
     enabled: connected,
   });
@@ -138,7 +137,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
         stringGuidsEqual(notification.targetDrive?.alias, ChatDrive.alias) &&
         stringGuidsEqual(notification.targetDrive?.type, ChatDrive.type)
       ) {
-        if (notification.header.fileMetadata.appData.fileType === ChatMessageFileType) {
+        if (notification.header.fileMetadata.appData.fileType === CHAT_MESSAGE_FILE_TYPE) {
           const conversationId = notification.header.fileMetadata.appData.groupId;
           const isNewFile = notification.notificationType === 'fileAdded';
 
@@ -222,8 +221,8 @@ const useChatWebsocket = (isEnabled: boolean) => {
           const messageId = notification.header.fileMetadata.appData.groupId;
           queryClient.invalidateQueries({ queryKey: ['chat-reaction', messageId] });
         } else if (
-          notification.header.fileMetadata.appData.fileType === ConversationFileType ||
-          notification.header.fileMetadata.appData.fileType === GroupConversationFileType
+          notification.header.fileMetadata.appData.fileType === CHAT_CONVERSATION_FILE_TYPE ||
+          notification.header.fileMetadata.appData.fileType === GROUP_CHAT_CONVERSATION_FILE_TYPE
         ) {
           const isNewFile = notification.notificationType === 'fileAdded';
 
@@ -244,7 +243,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
 
           const extistingConversations = queryClient.getQueryData<
             InfiniteData<{
-              searchResults: HomebaseFile<Conversation>[];
+              searchResults: HomebaseFile<UnifiedConversation>[];
               cursorState: string;
               queryTime: number;
               includeMetadataHeader: boolean;
@@ -285,7 +284,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
             JOIN_CONVERSATION_COMMAND,
             JOIN_GROUP_CONVERSATION_COMMAND,
             MARK_CHAT_READ_COMMAND,
-            UPDATE_GROUP_CONVERSATION_COMMAND,
+            // UPDATE_GROUP_CONVERSATION_COMMAND,
           ].includes(notification.header.fileMetadata.appData.dataType) &&
           identity
         ) {
@@ -317,7 +316,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
     ['fileAdded', 'fileModified'],
     [ChatDrive],
     () => {
-      queryClient.invalidateQueries({ queryKey: ['processInbox'] });
+      queryClient.invalidateQueries({ queryKey: ['process-inbox'] });
     }
   );
 };
@@ -342,8 +341,8 @@ const useChatCommandProcessor = (isEnabled?: boolean) => {
         (command) =>
           command.clientCode === JOIN_CONVERSATION_COMMAND ||
           command.clientCode === MARK_CHAT_READ_COMMAND ||
-          command.clientCode === JOIN_GROUP_CONVERSATION_COMMAND ||
-          command.clientCode === UPDATE_GROUP_CONVERSATION_COMMAND
+          command.clientCode === JOIN_GROUP_CONVERSATION_COMMAND
+        // command.clientCode === UPDATE_GROUP_CONVERSATION_COMMAND
       );
 
       const completedCommands: string[] = [];

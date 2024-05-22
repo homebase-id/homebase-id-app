@@ -3,7 +3,6 @@ import { Text } from '../../components/ui/Text/Text';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useChatReaction } from '../../hooks/chat/useChatReaction';
 
-import { GroupConversation, SingleConversation } from '../../provider/chat/ConversationProvider';
 import { AuthorName, ConnectionName } from '../../components/ui/Name';
 import { InnerDeliveryIndicator } from '../../components/Chat/Chat-Delivery-Indicator';
 import { useDotYouClientContext } from 'feed-app-common';
@@ -25,10 +24,11 @@ export const MessageInfoPage = ({ route }: MessageInfoProp) => {
   const { message, conversation } = route.params;
   const messageContent = message.fileMetadata.appData.content;
 
+  const identity = useDotYouClientContext().getIdentity();
   const conversationContent = conversation.fileMetadata.appData.content;
-  const recipients =
-    (conversationContent as GroupConversation).recipients ||
-    [(conversationContent as SingleConversation).recipient].filter(Boolean);
+  const recipients = conversationContent.recipients.filter(
+    (recipient) => recipient && recipient !== identity
+  );
 
   const { data: reactions } = useChatReaction({
     conversationId: message.fileMetadata.appData.groupId,
