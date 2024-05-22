@@ -150,7 +150,12 @@ const getDetails = (error: unknown) => {
   };
 };
 
-export const addError = (queryClient: QueryClient, error: unknown, title?: string) => {
+export const addError = (
+  queryClient: QueryClient,
+  error: unknown,
+  title?: string,
+  message?: string
+) => {
   const currentErrors = queryClient.getQueryData<Error[]>(['errors']);
   const knownErrorMessage = getKnownErrorMessages(error);
   const details = getDetails(error);
@@ -159,6 +164,7 @@ export const addError = (queryClient: QueryClient, error: unknown, title?: strin
     type: knownErrorMessage ? 'warning' : 'critical',
     title,
     message:
+      message ||
       knownErrorMessage ||
       (error instanceof Error
         ? error.toString()
