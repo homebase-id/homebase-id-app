@@ -72,7 +72,6 @@ const ConversationTile = memo((props: ConversationTileProps) => {
         if (event === 'delete') {
           if (!convo) return;
           mutate({ conversation: convo });
-          console.log('delete');
         }
       }}
       actions={
