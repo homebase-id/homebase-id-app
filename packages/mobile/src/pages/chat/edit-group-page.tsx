@@ -27,7 +27,7 @@ export function EditGroupPage(props: EditGroupProp) {
       conversation.fileMetadata.appData.content.title = title as string;
       updateGroupConversation({
         conversation,
-        isTitleUpdated: true,
+        distribute: true,
       });
     }
   }, [conversation, conversationContent, title, updateGroupConversation]);

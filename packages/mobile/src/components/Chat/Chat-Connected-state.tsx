@@ -1,5 +1,4 @@
 import { HomebaseFile } from '@youfoundation/js-lib/core';
-import { Conversation, GroupConversation } from '../../provider/chat/ConversationProvider';
 import { useDotYouClientContext, useIsConnected } from 'feed-app-common';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Text } from '../ui/Text/Text';
@@ -7,15 +6,20 @@ import { useDarkMode } from '../../hooks/useDarkMode';
 import { Colors } from '../../app/Colors';
 import { ReactNode } from 'react';
 import { openURL } from '../../utils/utils';
+import { UnifiedConversation } from '../../provider/chat/ConversationProvider';
 
-export const ChatConnectedState = (conversation: HomebaseFile<Conversation> | undefined) => {
+export const ChatConnectedState = (conversation: HomebaseFile<UnifiedConversation> | undefined) => {
   const { isDarkMode } = useDarkMode();
+  const identity = useDotYouClientContext().getIdentity();
+
   if (!conversation) return null;
-  const recipients = (conversation.fileMetadata.appData.content as GroupConversation).recipients;
-  if (!recipients || recipients.length <= 1) return null;
-  const recipientConnectedState = recipients.map((recipient) => {
-    return <RecipientConnectedState recipient={recipient} key={recipient} />;
-  });
+  const recipients = conversation.fileMetadata.appData.content.recipients;
+  if (!recipients || recipients.length <= 2) return null;
+  const recipientConnectedState = recipients
+    .filter((recipient) => recipient !== identity)
+    .map((recipient) => {
+      return <RecipientConnectedState recipient={recipient} key={recipient} />;
+    });
   return (
     <View
       style={{

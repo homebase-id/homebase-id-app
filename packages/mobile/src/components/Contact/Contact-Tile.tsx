@@ -33,11 +33,11 @@ export const ContactTile = ({
   const onClick = async () => {
     if (!contact) return;
     try {
-      const results = await createNew({
+      const conversation = await createNew({
         recipients: [profile.odinId],
         title: contact.name?.displayName,
       });
-      if (onOpen) onOpen(results.newConversationId);
+      if (onOpen) onOpen(conversation.fileMetadata.appData.uniqueId as string);
     } catch (e) {
       console.error(e);
     }

@@ -66,10 +66,10 @@ const INCLUDED_QUERY_KEYS = [
   // Big data (base64 uri's)
   // 'tinyThumb',
 
-  'processInbox',
+  'process-inbox',
 ];
 const persistOptions: Omit<PersistQueryClientOptions, 'queryClient'> = {
-  buster: '202404_4',
+  buster: '202405',
   maxAge: Infinity,
   persister: asyncPersist,
   dehydrateOptions: {

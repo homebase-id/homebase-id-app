@@ -22,7 +22,7 @@ import { useDarkMode } from '../hooks/useDarkMode';
 import { HomebaseFile, EmbeddedThumb } from '@youfoundation/js-lib/core';
 import { ChatMessage } from '../provider/chat/ChatProvider';
 import { MessageInfoPage } from '../pages/chat/message-info-page';
-import { Conversation } from '../provider/chat/ConversationProvider';
+import { UnifiedConversation } from '../provider/chat/ConversationProvider';
 import { OwnerAvatar } from '../components/ui/Avatars/Avatar';
 import { NativeStackNavigationOptions } from '@react-navigation/native-stack';
 import { SharedItem } from '../hooks/platform/useShareManager';
@@ -38,7 +38,7 @@ export type ChatStackParamList = {
   ChatInfo: { convoId: string };
   MessageInfo: {
     message: HomebaseFile<ChatMessage>;
-    conversation: HomebaseFile<Conversation>;
+    conversation: HomebaseFile<UnifiedConversation>;
   };
   EditGroup: { convoId: string };
   ShareChat: SharedItem;

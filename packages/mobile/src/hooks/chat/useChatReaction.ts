@@ -14,11 +14,7 @@ import {
   getReactions,
   uploadReaction,
 } from '../../provider/chat/ChatReactionProvider';
-import {
-  Conversation,
-  GroupConversation,
-  SingleConversation,
-} from '../../provider/chat/ConversationProvider';
+import { UnifiedConversation } from '../../provider/chat/ConversationProvider';
 import { ChatMessage } from '../../provider/chat/ChatProvider';
 import { getSynchronousDotYouClient } from './getSynchronousDotYouClient';
 import { addError } from '../errors/useErrors';
@@ -28,7 +24,7 @@ const addReaction = async ({
   message,
   reaction,
 }: {
-  conversation: HomebaseFile<Conversation>;
+  conversation: HomebaseFile<UnifiedConversation>;
   message: HomebaseFile<ChatMessage>;
   reaction: string;
 }) => {
@@ -36,9 +32,8 @@ const addReaction = async ({
 
   const conversationId = conversation.fileMetadata.appData.uniqueId as string;
   const conversationContent = conversation.fileMetadata.appData.content;
-  const recipients =
-    (conversationContent as GroupConversation).recipients ||
-    [(conversationContent as SingleConversation).recipient].filter(Boolean);
+  const identity = dotYouClient.getIdentity();
+  const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
 
   const newReaction: NewHomebaseFile<ChatReaction> = {
     fileMetadata: {
@@ -64,7 +59,7 @@ export const getAddReactionMutationOptions: (queryClient: QueryClient) => UseMut
   unknown,
   unknown,
   {
-    conversation: HomebaseFile<Conversation>;
+    conversation: HomebaseFile<UnifiedConversation>;
     message: HomebaseFile<ChatMessage>;
     reaction: string;
   }
@@ -111,16 +106,15 @@ const removeReaction = async ({
 
   reaction,
 }: {
-  conversation: HomebaseFile<Conversation>;
+  conversation: HomebaseFile<UnifiedConversation>;
   message: HomebaseFile<ChatMessage>;
   reaction: HomebaseFile<ChatReaction>;
 }) => {
   const dotYouClient = await getSynchronousDotYouClient();
 
   const conversationContent = conversation.fileMetadata.appData.content;
-  const recipients =
-    (conversationContent as GroupConversation).recipients ||
-    [(conversationContent as SingleConversation).recipient].filter(Boolean);
+  const identity = dotYouClient.getIdentity();
+  const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
 
   return await deleteReaction(dotYouClient, reaction, recipients);
 };
@@ -129,7 +123,7 @@ export const getRemoveReactionMutationOptions: (queryClient: QueryClient) => Use
   unknown,
   unknown,
   {
-    conversation: HomebaseFile<Conversation>;
+    conversation: HomebaseFile<UnifiedConversation>;
     message: HomebaseFile<ChatMessage>;
     reaction: HomebaseFile<ChatReaction>;
   }
