@@ -8,11 +8,16 @@ export const Divider = ({
   color,
   style,
 }: {
-  text: string;
+  text?: string;
   width?: number;
   color?: string;
   style?: ViewStyle;
 }) => {
+  if (!text) {
+    return (
+      <View style={{ height: width || 1, backgroundColor: color || Colors.gray[300], ...style }} />
+    );
+  }
   return (
     <View style={style || styles.default}>
       <View style={{ flex: 1, height: width || 1, backgroundColor: color || Colors.gray[300] }} />

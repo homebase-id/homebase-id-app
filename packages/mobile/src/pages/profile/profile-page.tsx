@@ -22,6 +22,7 @@ import {
   People,
   Profile,
   RecycleBin,
+  Sun,
 } from '../../components/ui/Icons/icons';
 import codePush from 'react-native-code-push';
 import { useAuth } from '../../hooks/auth/useAuth';
@@ -128,6 +129,25 @@ export const ProfilePage = (_props: SettingsProps) => {
               }}
             >
               My connections
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => navigate('Appearance')}
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+              paddingVertical: 12,
+              width: '100%',
+            }}
+          >
+            <Sun size={'lg'} />
+            <Text
+              style={{
+                marginLeft: 16,
+              }}
+            >
+              {t('Appearance')}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity

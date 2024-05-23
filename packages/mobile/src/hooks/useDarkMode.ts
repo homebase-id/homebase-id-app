@@ -1,3 +1,4 @@
+
 import { useColorScheme } from 'react-native';
 
 // const LOCALSTORAGE_KEY = 'prefersDark';
