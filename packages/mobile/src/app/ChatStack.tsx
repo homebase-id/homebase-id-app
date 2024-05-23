@@ -31,8 +31,7 @@ import { ShareChatPage } from '../pages/chat/share-chat-page';
 
 export type ChatStackParamList = {
   Conversation: undefined;
-  NewChat: undefined;
-  NewGroup: undefined;
+  New: undefined;
 
   ChatScreen: { convoId: string };
   ChatInfo: { convoId: string };
@@ -50,6 +49,58 @@ export type ChatStackParamList = {
     type?: string;
     previewThumbnail?: EmbeddedThumb;
   };
+};
+
+export type NewChatStackParamList = {
+  NewChat: undefined;
+  NewGroup: undefined;
+};
+
+const NewChatStack = createNativeStackNavigator<NewChatStackParamList>();
+export const NewChatStackScreen = (_props: NativeStackScreenProps<ChatStackParamList, 'New'>) => {
+  const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
+  const { isDarkMode } = useDarkMode();
+
+  const headerBackButton = useCallback(
+    (props: HeaderBackButtonProps) => {
+      return BackButton({
+        onPress: () => navigation.navigate('Conversation'),
+        prop: props,
+      });
+    },
+    [navigation]
+  );
+  return (
+    <NewChatStack.Navigator
+      screenOptions={{
+        headerShown: false,
+        headerShadowVisible: false,
+        headerTransparent: Platform.OS === 'ios',
+        headerBlurEffect: 'regular',
+        headerStyle: {
+          backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
+        },
+      }}
+    >
+      <NewChatStack.Screen
+        name="NewChat"
+        component={ContactPage}
+        options={{
+          headerShown: true,
+          headerTitle: 'New Message',
+          headerLeft: Platform.OS === 'ios' ? headerBackButton : undefined,
+        }}
+      />
+      <NewChatStack.Screen
+        name="NewGroup"
+        component={NewGroupPage}
+        options={{
+          headerTitle: 'New Group',
+          headerShown: false,
+        }}
+      />
+    </NewChatStack.Navigator>
+  );
 };
 
 const StackChat = createNativeStackNavigator<ChatStackParamList>();
@@ -75,19 +126,9 @@ export const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Cha
   );
   const headerRight = useCallback(() => {
     return HeaderActions({
-      onPress: () => navigation.navigate('NewChat'),
+      onPress: () => navigation.navigate('New'),
     });
   }, [navigation]);
-
-  const headerBackButton = useCallback(
-    (props: HeaderBackButtonProps) => {
-      return BackButton({
-        onPress: () => navigation.navigate('Conversation'),
-        prop: props,
-      });
-    },
-    [navigation]
-  );
 
   return (
     <StackChat.Navigator screenOptions={screenOptions}>
@@ -115,23 +156,7 @@ export const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Cha
         }}
       >
         {/* TODO: Swiping effect like signal  */}
-        <StackChat.Screen
-          name="NewChat"
-          component={ContactPage}
-          options={{
-            headerShown: true,
-            headerTitle: 'New Message',
-            headerLeft: Platform.OS === 'ios' ? headerBackButton : undefined,
-          }}
-        />
-        <StackChat.Screen
-          name="NewGroup"
-          component={NewGroupPage}
-          options={{
-            headerTitle: 'New Group',
-            headerShown: false,
-          }}
-        />
+        <StackChat.Screen name="New" component={NewChatStackScreen} />
       </StackChat.Group>
 
       <StackChat.Screen
