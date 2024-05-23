@@ -371,28 +371,35 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
     label: string;
     onPress: () => void;
   }[] = useMemo(
-    () => [
-      {
-        label: 'Clear Chat',
-        onPress: () => {
-          if (!conversation) return;
-          clearChat({
-            conversation: conversation,
-          });
+    () =>
+      [
+        {
+          label: 'Clear Chat',
+          onPress: () => {
+            if (!conversation) return;
+            clearChat({
+              conversation: conversation,
+            });
+          },
         },
-      },
-      {
-        label: 'Delete',
-        onPress: () => {
-          if (!conversation) return;
-          deleteChat({
-            conversation: conversation,
-          });
-          navigation.navigate('Conversation');
-        },
-      },
-    ],
-    [clearChat, conversation, deleteChat, navigation]
+        route.params.convoId !== ConversationWithYourselfId
+          ? {
+              label: 'Delete',
+              onPress: () => {
+                if (!conversation) return;
+                deleteChat({
+                  conversation: conversation,
+                });
+                navigation.navigate('Conversation');
+              },
+            }
+          : undefined,
+      ].filter(Boolean) as {
+        label: string;
+        onPress: () => void;
+      }[],
+
+    [clearChat, conversation, deleteChat, navigation, route.params.convoId]
   );
 
   if (!conversation) {
@@ -434,7 +441,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
             <View
               style={{
                 position: 'absolute',
-                top: 100,
+                top: Platform.select({ ios: 90, android: 56 }),
                 minWidth: 180,
                 right: 4,
                 backgroundColor: isDarkMode ? Colors.black : Colors.white,
