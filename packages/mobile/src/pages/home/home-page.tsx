@@ -16,7 +16,7 @@ export const HomePage = (_props: HomeProps) => {
   return (
     <SafeAreaView>
       <Container>
-        <ScrollView style={{ minHeight: '100%', paddingVertical: 12 }}>
+        <ScrollView style={{ paddingVertical: 12 }}>
           <ProfileInfo />
           <Dashboard />
           <NotificationsOverview />
