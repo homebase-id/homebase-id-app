@@ -14,12 +14,10 @@ import { OwnerAvatar, GroupAvatar, Avatar } from '../ui/Avatars/Avatar';
 import { useDraftMessageValue } from '../../hooks/chat/useDraftMessage';
 import { ellipsisAtMaxChar } from 'feed-app-common';
 import { ConnectionName } from '../ui/Name';
-import { MenuView, NativeActionEvent } from '@react-native-menu/menu';
-import { useConversation } from '../../hooks/chat/useConversation';
-import { ErrorNotification } from '../ui/Alert/ErrorNotification';
 
 type ConversationTileProps = {
   onPress?: () => void;
+  onLongPress?: () => void;
   conversation: UnifiedConversation;
   odinId: string;
   conversationId?: string;
@@ -40,9 +38,6 @@ const ConversationTile = memo((props: ConversationTileProps) => {
   const { data: draftMessage } = useDraftMessageValue(props.conversationId).get;
   const { isDarkMode } = useDarkMode();
   const { data: contact } = useContact(props.odinId).fetch;
-  const { mutate, error } = useConversation().deleteChat;
-  const { data: convo } = useConversation({ conversationId: props.conversationId }).single;
-
   const connectionDetails = contact?.fileMetadata.appData.content;
   const isGroup = props.conversation && props.conversation.recipients?.length > 2;
 
@@ -66,107 +61,80 @@ const ConversationTile = memo((props: ConversationTileProps) => {
   );
 
   return (
-    <MenuView
-      onPressAction={({ nativeEvent }: NativeActionEvent) => {
-        const { event } = nativeEvent;
-        if (event === 'delete') {
-          if (!convo) return;
-          mutate({ conversation: convo });
-        }
+    <TouchableHighlight
+      onPress={props.onPress}
+      onLongPress={props.onLongPress}
+      underlayColor={underlayColor}
+      style={{
+        marginTop: 4,
       }}
-      actions={
-        props.isSelf
-          ? []
-          : [
-              {
-                id: 'delete',
-                title: 'Delete',
-                attributes: {
-                  destructive: true,
-                },
-              },
-              // {
-              //   id: 'archive',
-              //   title: 'Archive',
-              // },
-            ]
-      }
     >
-      <TouchableHighlight
-        onPress={props.onPress}
-        underlayColor={underlayColor}
-        style={{
-          marginTop: 4,
-        }}
-      >
-        <View style={{ ...styles.tile }}>
-          <View style={{ marginRight: 16 }}>
-            {!isGroup ? (
-              props.isSelf ? (
-                <OwnerAvatar />
-              ) : (
-                <Avatar odinId={props.odinId} />
-              )
+      <View style={{ ...styles.tile }}>
+        <View style={{ marginRight: 16 }}>
+          {!isGroup ? (
+            props.isSelf ? (
+              <OwnerAvatar />
             ) : (
-              <GroupAvatar />
-            )}
-          </View>
-          <ErrorNotification error={error} />
-          <View style={styles.content}>
-            <Text
-              numberOfLines={1}
-              style={{
-                ...styles.title,
-                color: isDarkMode ? Colors.white : Colors.slate[900],
-              }}
-            >
-              {isGroup || props.isSelf
-                ? props.conversation.title
-                : (connectionDetails?.name?.displayName || connectionDetails?.name?.givenName) ?? (
-                    <ConnectionName odinId={props.odinId} />
-                  )}
-              {props.isSelf ? <Text style={styles.you}>(you)</Text> : null}
-            </Text>
-
-            {draftMessage ? (
-              <DraftMessage message={draftMessage} />
-            ) : lastMessage && lastMessageContent ? (
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignContent: 'flex-start',
-                }}
-              >
-                <ChatDeliveryIndicator msg={lastMessage} />
-                <Text
-                  numberOfLines={1}
-                  style={[
-                    styles.description,
-                    {
-                      color: isDarkMode ? Colors.white : Colors.slate[900],
-                    },
-                    lastMessage.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus
-                      ? styles.deleted
-                      : undefined,
-                  ]}
-                >
-                  <ChatMessageContent {...lastMessage} />
-                </Text>
-              </View>
-            ) : null}
-          </View>
-          <View
+              <Avatar odinId={props.odinId} />
+            )
+          ) : (
+            <GroupAvatar />
+          )}
+        </View>
+        <View style={styles.content}>
+          <Text
+            numberOfLines={1}
             style={{
-              justifyContent: 'space-between',
-              display: 'flex',
+              ...styles.title,
+              color: isDarkMode ? Colors.white : Colors.slate[900],
             }}
           >
-            {lastMessage && <ChatSentTimeIndicator msg={lastMessage} keepDetail={false} />}
-            {unreadCount > 0 ? <UnreadCount count={unreadCount} /> : null}
-          </View>
+            {isGroup || props.isSelf
+              ? props.conversation.title
+              : (connectionDetails?.name?.displayName || connectionDetails?.name?.givenName) ?? (
+                  <ConnectionName odinId={props.odinId} />
+                )}
+            {props.isSelf ? <Text style={styles.you}>(you)</Text> : null}
+          </Text>
+
+          {draftMessage ? (
+            <DraftMessage message={draftMessage} />
+          ) : lastMessage && lastMessageContent ? (
+            <View
+              style={{
+                flexDirection: 'row',
+                alignContent: 'flex-start',
+              }}
+            >
+              <ChatDeliveryIndicator msg={lastMessage} />
+              <Text
+                numberOfLines={1}
+                style={[
+                  styles.description,
+                  {
+                    color: isDarkMode ? Colors.white : Colors.slate[900],
+                  },
+                  lastMessage.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus
+                    ? styles.deleted
+                    : undefined,
+                ]}
+              >
+                <ChatMessageContent {...lastMessage} />
+              </Text>
+            </View>
+          ) : null}
         </View>
-      </TouchableHighlight>
-    </MenuView>
+        <View
+          style={{
+            justifyContent: 'space-between',
+            display: 'flex',
+          }}
+        >
+          {lastMessage && <ChatSentTimeIndicator msg={lastMessage} keepDetail={false} />}
+          {unreadCount > 0 ? <UnreadCount count={unreadCount} /> : null}
+        </View>
+      </View>
+    </TouchableHighlight>
   );
 });
 
