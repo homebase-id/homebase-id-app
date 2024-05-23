@@ -385,14 +385,14 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
         label: 'Delete',
         onPress: () => {
           if (!conversation) return;
-
           deleteChat({
             conversation: conversation,
           });
+          navigation.navigate('Conversation');
         },
       },
     ],
-    [clearChat, conversation, deleteChat]
+    [clearChat, conversation, deleteChat, navigation]
   );
 
   if (!conversation) {
