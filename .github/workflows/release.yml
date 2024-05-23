@@ -95,6 +95,7 @@ jobs:
       - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
+          distribution: 'zulu'
           java-version: '17'
 
       - name: Bump version

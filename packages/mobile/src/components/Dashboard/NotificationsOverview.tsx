@@ -3,7 +3,7 @@ import { TouchableOpacity, View } from 'react-native';
 import { usePushNotifications } from '../../hooks/notifications/usePushNotifications';
 import { memo, useMemo, useState } from 'react';
 import { PushNotification } from '@youfoundation/js-lib/core';
-import { formatToTimeAgoWithRelativeDetail, useDotYouClientContext } from 'feed-app-common';
+import { formatToTimeAgoWithRelativeDetail, t, useDotYouClientContext } from 'feed-app-common';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import {
   CHAT_APP_ID,
@@ -60,8 +60,18 @@ export const NotificationsOverview = memo(() => {
           gap: 3,
           paddingHorizontal: 2,
           paddingRight: 15,
+          paddingBottom: 50,
         }}
       >
+        <View style={{ display: 'flex', flexDirection: 'row-reverse' }}>
+          <TouchableOpacity
+            onPress={doClearAll}
+            style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 5 }}
+          >
+            <Times size={'sm'} />
+            <Text>{t('Clear All')}</Text>
+          </TouchableOpacity>
+        </View>
         {Object.keys(groupedNotificationsPerDay).map((day) => (
           <NotificationDay
             day={new Date(day)}
@@ -70,9 +80,6 @@ export const NotificationsOverview = memo(() => {
           />
         ))}
         <ErrorNotification error={removeError} />
-        <TouchableOpacity onPress={doClearAll}>
-          <Text>Clear All</Text>
-        </TouchableOpacity>
       </View>
     </>
   ) : null;
