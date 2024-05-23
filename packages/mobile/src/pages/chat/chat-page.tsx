@@ -2,7 +2,16 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Dimensions, Image, Keyboard, Platform, Pressable, StyleSheet, View } from 'react-native';
+import {
+  Dimensions,
+  Image,
+  Keyboard,
+  Platform,
+  Pressable,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { ChatAppBar, SelectedMessageProp } from '../../components/Chat/Chat-app-bar';
 import { Asset } from 'react-native-image-picker';
 import { ChatDeletedArchivalStaus, ChatMessage } from '../../provider/chat/ChatProvider';
@@ -35,6 +44,9 @@ import { ChatForwardModal } from '../../components/Chat/Chat-Forward';
 import Dialog from 'react-native-dialog';
 import { BlurView } from '@react-native-community/blur';
 import { PastedFile } from '@mattermost/react-native-paste-input';
+import { Colors } from '../../app/Colors';
+import { useDarkMode } from '../../hooks/useDarkMode';
+import { Text } from '../../components/ui/Text/Text';
 
 export type SelectedMessageState = {
   messageCordinates: { x: number; y: number };
@@ -94,6 +106,9 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
   const { data: conversation, isLoading: isLoadingConversation } = useConversation({
     conversationId: route.params.convoId,
   }).single;
+
+  const { mutate: clearChat, error: clearChatError } = useConversation().clearChat;
+  const { mutate: deleteChat, error: deleteChatError } = useConversation().deleteChat;
 
   const filteredRecipients = conversation?.fileMetadata.appData.content.recipients.filter(
     (recipient) => recipient !== identity
@@ -349,6 +364,36 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
     );
     setAssets((old) => [...old, ...pastedItems]);
   }, []);
+  const [isOpen, setIsOpen] = useState(false);
+  const { isDarkMode } = useDarkMode();
+
+  const chatOptions: {
+    label: string;
+    onPress: () => void;
+  }[] = useMemo(
+    () => [
+      {
+        label: 'Clear Chat',
+        onPress: () => {
+          if (!conversation) return;
+          clearChat({
+            conversation: conversation,
+          });
+        },
+      },
+      {
+        label: 'Delete',
+        onPress: () => {
+          if (!conversation) return;
+
+          deleteChat({
+            conversation: conversation,
+          });
+        },
+      },
+    ],
+    [clearChat, conversation, deleteChat]
+  );
 
   if (!conversation) {
     if (isLoadingConversation) return null;
@@ -357,7 +402,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
 
   return (
     <BottomSheetModalProvider>
-      <ErrorNotification error={deleteMessageError} />
+      <ErrorNotification error={deleteMessageError || clearChatError || deleteChatError} />
       <View
         style={{
           paddingBottom:
@@ -380,10 +425,47 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
               selectedMessage.selectedMessage ? dismissSelectedMessage : doReturnToConversations
             }
             onPress={() => navigation.navigate('ChatInfo', { convoId: route.params.convoId })}
+            onMorePress={() => setIsOpen(!isOpen)}
             isSelf={route.params.convoId === ConversationWithYourselfId}
             selectedMessage={selectedMessage?.selectedMessage}
             selectedMessageActions={selectedMessageActions}
           />
+          {isOpen ? (
+            <View
+              style={{
+                position: 'absolute',
+                top: 100,
+                minWidth: 180,
+                right: 4,
+                backgroundColor: isDarkMode ? Colors.black : Colors.white,
+                zIndex: 20,
+                elevation: 20,
+                borderWidth: 1,
+                borderColor: isDarkMode ? Colors.slate[700] : Colors.gray[200],
+                borderRadius: 4,
+              }}
+            >
+              {chatOptions.map((child, index) => (
+                <TouchableOpacity
+                  key={index}
+                  onPress={() => {
+                    setIsOpen(false);
+                    child.onPress();
+                  }}
+                  style={{
+                    paddingHorizontal: 8,
+                    paddingVertical: 4,
+                    backgroundColor: isDarkMode ? Colors.black : Colors.white,
+                    flexDirection: 'row',
+                    gap: 6,
+                    alignItems: 'center',
+                  }}
+                >
+                  <Text>{child.label}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          ) : null}
           <ChatConnectedState {...conversation} />
           <Host>
             <Pressable

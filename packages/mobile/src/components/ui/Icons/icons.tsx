@@ -719,6 +719,25 @@ export const Ellipsis = (props: IconProps) => {
     </Center>
   );
 };
+
+export const EllipsisVertical = (props: IconProps) => {
+  const { isDarkMode } = useDarkMode();
+  return (
+    <Center>
+      <Svg
+        {...getSize(props.size || 'md')}
+        color={props.color || (isDarkMode ? 'white' : 'black')}
+        viewBox="0 0 128 512"
+      >
+        <Path
+          fill="currentColor"
+          d="M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"
+        />
+      </Svg>
+    </Center>
+  );
+};
+
 export const Sync = (props: IconProps) => {
   const { isDarkMode } = useDarkMode();
   return (
