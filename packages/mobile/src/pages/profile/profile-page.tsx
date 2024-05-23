@@ -29,6 +29,7 @@ import { openURL } from '../../utils/utils';
 import { useAuthenticatedPushNotification } from '../../hooks/push-notification/useAuthenticatedPushNotification';
 
 import { ProfileInfo } from '../../components/Profile/ProfileInfo';
+import { t } from 'feed-app-common';
 
 type SettingsProps = NativeStackScreenProps<ProfileStackParamList, 'Overview'>;
 
@@ -69,7 +70,7 @@ export const ProfilePage = (_props: SettingsProps) => {
                 marginLeft: 16,
               }}
             >
-              My followers
+              {t('Followers')}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -88,7 +89,7 @@ export const ProfilePage = (_props: SettingsProps) => {
                 marginLeft: 16,
               }}
             >
-              Who I&apos;m folowing
+              {t('Following')}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
