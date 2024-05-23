@@ -155,7 +155,6 @@ export const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Cha
           presentation: 'modal',
         }}
       >
-        {/* TODO: Swiping effect like signal  */}
         <StackChat.Screen name="New" component={NewChatStackScreen} />
       </StackChat.Group>
 
