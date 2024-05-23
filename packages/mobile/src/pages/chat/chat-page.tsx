@@ -3,6 +3,7 @@ import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  Alert,
   Dimensions,
   Image,
   Keyboard,
@@ -377,9 +378,18 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
           label: 'Clear Chat',
           onPress: () => {
             if (!conversation) return;
-            clearChat({
-              conversation: conversation,
-            });
+            Alert.alert('Clear Chat', 'Are you sure you want to clear this chat?', [
+              { text: 'Cancel', style: 'cancel' },
+              {
+                text: 'Clear',
+                style: 'destructive',
+                onPress: () => {
+                  clearChat({
+                    conversation: conversation,
+                  });
+                },
+              },
+            ]);
           },
         },
         route.params.convoId !== ConversationWithYourselfId
@@ -387,10 +397,19 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
               label: 'Delete',
               onPress: () => {
                 if (!conversation) return;
-                deleteChat({
-                  conversation: conversation,
-                });
-                navigation.navigate('Conversation');
+                Alert.alert('Delete Chat', 'Are you sure you want to delete this chat?', [
+                  { text: 'Cancel', style: 'cancel' },
+                  {
+                    text: 'Delete',
+                    style: 'destructive',
+                    onPress: () => {
+                      deleteChat({
+                        conversation: conversation,
+                      });
+                      navigation.navigate('Conversation');
+                    },
+                  },
+                ]);
               },
             }
           : undefined,
