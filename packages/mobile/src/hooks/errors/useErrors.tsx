@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { QueryClient, useQuery, useQueryClient } from '@tanstack/react-query';
 import { t } from 'feed-app-common';
 import {
   OdinErrorDetails,
@@ -13,6 +13,32 @@ export interface Error {
   details?: OdinErrorDetails;
 }
 
+export const addError = (
+  queryClient: QueryClient,
+  error: unknown,
+  title?: string,
+  message?: string
+) => {
+  const currentErrors = queryClient.getQueryData<Error[]>(['errors']);
+  const knownErrorMessage = getKnownOdinErrorMessages(error);
+  const details = getOdinErrorDetails(error);
+
+  const newError: Error = {
+    type: knownErrorMessage ? 'warning' : 'critical',
+    title,
+    message:
+      message ||
+      knownErrorMessage ||
+      (error instanceof Error
+        ? error.toString()
+        : t('Something went wrong, please try again later')),
+    details,
+  };
+
+  const updatedErrors = [...(currentErrors || []), newError];
+  queryClient.setQueryData(['errors'], updatedErrors);
+};
+
 export const useErrors = () => {
   const queryClient = useQueryClient();
 
@@ -24,26 +50,8 @@ export const useErrors = () => {
       gcTime: Infinity,
       staleTime: Infinity,
     }),
-    add: (error: unknown, title?: string, message?: string) => {
-      const currentErrors = queryClient.getQueryData<Error[]>(['errors']);
-      const knownErrorMessage = getKnownOdinErrorMessages(error);
-      const details = getOdinErrorDetails(error);
-
-      const newError: Error = {
-        type: knownErrorMessage ? 'warning' : 'critical',
-        title,
-        message:
-          message ||
-          knownErrorMessage ||
-          (error instanceof Error
-            ? error.toString()
-            : t('Something went wrong, please try again later')),
-        details,
-      };
-
-      const updatedErrors = [...(currentErrors || []), newError];
-      queryClient.setQueryData(['errors'], updatedErrors);
-    },
+    add: (error: unknown, title?: string, message?: string) =>
+      addError(queryClient, error, title, message),
     dismiss: (error: Error) => {
       const currentErrors = queryClient.getQueryData<Error[]>(['errors']);
       const updatedErrors = currentErrors?.filter((e) => e !== error);
