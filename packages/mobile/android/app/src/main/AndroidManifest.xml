@@ -21,6 +21,7 @@
         <category android:name="android.intent.category.DEFAULT" />
         <data android:mimeType="image/*" />
         <data android:mimeType="video/mp4" />
+        <data android:mimeType="application/pdf" />
         <data android:mimeType="text/plain" />
       </intent-filter>
     </activity>
