@@ -339,11 +339,9 @@ const bodyFormer = (
   const sender = senderName || payload.senderId;
 
   if (payload.options.unEncryptedMessage) {
-    if (payload.options.appId === CHAT_APP_ID) {
-      return `${sender} ${payload.options.unEncryptedMessage}`;
-    }
-    return payload.options.unEncryptedMessage;
+    return (payload.options.unEncryptedMessage || '').replaceAll(payload.senderId, sender);
   }
+
   if (payload.options.appId === OWNER_APP_ID) {
     // Based on type, we show different messages
     if (payload.options.typeId === OWNER_FOLLOWER_TYPE_ID) {
