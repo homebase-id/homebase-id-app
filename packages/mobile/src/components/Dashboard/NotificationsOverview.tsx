@@ -26,6 +26,7 @@ import { useLivePushNotifications } from '../../hooks/notifications/useLivePushN
 
 import { TabStackParamList } from '../../app/App';
 import { ErrorNotification } from '../ui/Alert/ErrorNotification';
+import { Avatar } from '../ui/Avatars/Avatar';
 
 export const NotificationsOverview = memo(() => {
   useLivePushNotifications();
@@ -279,30 +280,43 @@ const NotificationItem = ({
           overflow: 'hidden',
           paddingHorizontal: 8,
           paddingVertical: 8,
+          display: 'flex',
+          flexDirection: 'row',
+          gap: 9,
         }}
       >
-        <View style={{ display: 'flex', flexDirection: 'row' }}>
-          <Text style={{ fontWeight: '600', color: isDarkMode ? Colors.white : Colors.black }}>
-            {title}
-          </Text>
-          {isExpanded ? (
-            <TouchableOpacity onPress={onDismiss} style={{ marginLeft: 'auto' }}>
-              <Times size={'sm'} />
-            </TouchableOpacity>
+        {notification.senderId ? (
+          <Avatar
+            odinId={notification.senderId}
+            imageSize={{ width: 32, height: 32 }}
+            style={{ width: 32, height: 32 }}
+          />
+        ) : null}
+
+        <View style={{ display: 'flex', flexGrow: 1 }}>
+          <View style={{ display: 'flex', flexDirection: 'row' }}>
+            <Text style={{ fontWeight: '600', color: isDarkMode ? Colors.white : Colors.black }}>
+              {title}
+            </Text>
+            {isExpanded ? (
+              <TouchableOpacity onPress={onDismiss} style={{ marginLeft: 'auto' }}>
+                <Times size={'sm'} />
+              </TouchableOpacity>
+            ) : null}
+          </View>
+          <Text style={{ color: isDarkMode ? Colors.white : Colors.black }}>{body}</Text>
+
+          {notification.created ? (
+            <Text style={{ color: Colors.slate[500] }}>
+              {formatToTimeAgoWithRelativeDetail(new Date(notification.created))}
+            </Text>
+          ) : null}
+          {groupCount ? (
+            <Text style={{ color: Colors.indigo[500] }}>
+              {groupCount} {'more'}
+            </Text>
           ) : null}
         </View>
-        <Text style={{ color: isDarkMode ? Colors.white : Colors.black }}>{body}</Text>
-
-        {notification.created ? (
-          <Text style={{ color: Colors.slate[500] }}>
-            {formatToTimeAgoWithRelativeDetail(new Date(notification.created))}
-          </Text>
-        ) : null}
-        {groupCount ? (
-          <Text style={{ color: Colors.indigo[500] }}>
-            {groupCount} {'more'}
-          </Text>
-        ) : null}
       </View>
     </TouchableOpacity>
   );
@@ -324,8 +338,12 @@ const bodyFormer = (
 ) => {
   const sender = senderName || payload.senderId;
 
-  if (payload.options.unEncryptedMessage) return payload.options.unEncryptedMessage;
-
+  if (payload.options.unEncryptedMessage) {
+    if (payload.options.appId === CHAT_APP_ID) {
+      return `${sender} ${payload.options.unEncryptedMessage}`;
+    }
+    return payload.options.unEncryptedMessage;
+  }
   if (payload.options.appId === OWNER_APP_ID) {
     // Based on type, we show different messages
     if (payload.options.typeId === OWNER_FOLLOWER_TYPE_ID) {
