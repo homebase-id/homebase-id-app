@@ -12,22 +12,25 @@ import { Text } from '../../../components/ui/Text/Text';
 import { Container } from '../../../components/ui/Container/Container';
 import { Colors } from '../../../app/Colors';
 import { Divider } from '../../../components/ui/Divider';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Dialog from 'react-native-dialog';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { useDarkMode } from '../../../hooks/useDarkMode';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ProfileStackParamList } from '../../../app/ProfileStack';
+import { ChevronRight } from '../../../components/ui/Icons/icons';
 
 type TileProp = {
   title: string;
   subtitle?: string;
+  trailing?: React.FC;
+  showTrailingIcon?: boolean;
   onPress: () => void;
 };
 
 type AppearanceProp = NativeStackScreenProps<ProfileStackParamList, 'Appearance'>;
 
-export const AppearancePage = (_: AppearanceProp) => {
+export const AppearancePage = ({ navigation }: AppearanceProp) => {
   const [theme, setTheme] = useState(Appearance.getColorScheme());
   useEffect(() => {
     const subscription = Appearance.addChangeListener(({ colorScheme }) => {
@@ -39,7 +42,6 @@ export const AppearancePage = (_: AppearanceProp) => {
 
   const [dialogVisible, setDialogVisible] = useState(false);
 
-  const isIos = Platform.OS === 'ios';
   const isDarkMode = theme === 'dark';
   let currTheme = theme === null && !theme ? 'System' : (theme as string);
   currTheme = currTheme?.charAt(0).toUpperCase() + currTheme?.slice(1);
@@ -52,9 +54,10 @@ export const AppearancePage = (_: AppearanceProp) => {
       },
     },
     {
-      title: 'Chat Color & Wallpaper',
+      title: 'Chat Color',
+      showTrailingIcon: true,
       onPress: () => {
-        //TODO:
+        navigation.navigate('ChatColorSettings');
       },
     },
   ];
@@ -100,7 +103,16 @@ export const AppearancePage = (_: AppearanceProp) => {
                     }}
                   >
                     <Text style={styles.title}>{item.title}</Text>
-                    <Text style={styles.subtitle}>{item.subtitle}</Text>
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <Text style={styles.subtitle}>{item.subtitle}</Text>
+                      {item.trailing && <item.trailing />}
+                      {item.showTrailingIcon && <ChevronRight />}
+                    </View>
                   </View>
                   {index !== tiles.length - 1 && (
                     <>
@@ -113,7 +125,6 @@ export const AppearancePage = (_: AppearanceProp) => {
                         style={{
                           width: '95%',
                           alignSelf: 'flex-end',
-
                           borderBottomWidth: 1,
                           borderBottomColor: isDarkMode ? Colors.gray[500] : Colors.gray[300],
 
@@ -132,6 +143,7 @@ export const AppearancePage = (_: AppearanceProp) => {
           <RadioButtonTile
             isSelected={theme === null || !theme}
             onPress={() => {
+              console.log('System');
               setDialogVisible(false);
               Appearance.setColorScheme(null);
             }}

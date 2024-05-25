@@ -2,6 +2,8 @@ PODS:
   - Base64 (1.1.2)
   - BEMCheckBox (1.4.1)
   - boost (1.83.0)
+  - BVLinearGradient (2.8.3):
+    - React-Core
   - CodePush (8.2.1):
     - Base64 (~> 1.1)
     - JWT (~> 3.0.0-beta.12)
@@ -1248,6 +1250,7 @@ PODS:
 
 DEPENDENCIES:
   - boost (from `../../../node_modules/react-native/third-party-podspecs/boost.podspec`)
+  - BVLinearGradient (from `../../../node_modules/react-native-linear-gradient`)
   - CodePush (from `../../../node_modules/react-native-code-push`)
   - DoubleConversion (from `../../../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec`)
   - FBLazyVector (from `../../../node_modules/react-native/Libraries/FBLazyVector`)
@@ -1367,6 +1370,8 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   boost:
     :podspec: "../../../node_modules/react-native/third-party-podspecs/boost.podspec"
+  BVLinearGradient:
+    :path: "../../../node_modules/react-native-linear-gradient"
   CodePush:
     :path: "../../../node_modules/react-native-code-push"
   DoubleConversion:
@@ -1541,6 +1546,7 @@ SPEC CHECKSUMS:
   Base64: cecfb41a004124895a7bcee567a89bae5a89d49b
   BEMCheckBox: 5ba6e37ade3d3657b36caecc35c8b75c6c2b1a4e
   boost: d3f49c53809116a5d38da093a8aa78bf551aed09
+  BVLinearGradient: 880f91a7854faff2df62518f0281afb1c60d49a3
   CodePush: 84c9a5792cb3c8e311197d595610c803f0b01739
   DoubleConversion: fea03f2699887d960129cc54bba7e52542b6f953
   FBLazyVector: f64d1e2ea739b4d8f7e4740cde18089cd97fe864
