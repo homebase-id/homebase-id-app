@@ -32,6 +32,14 @@ export function calculateScaledDimensions(
     const maxWidth = maxSize.width;
     const maxHeight = maxSize.height;
 
+    // Add a default value for pixelWidth and pixelHeight if the values are zero
+    if (pixelHeight === 0) {
+        pixelHeight = 300;
+    }
+    if (pixelWidth === 0) {
+        pixelWidth = 300;
+    }
+
     let newWidth, newHeight;
 
     // Check if the width needs to be scaled down
