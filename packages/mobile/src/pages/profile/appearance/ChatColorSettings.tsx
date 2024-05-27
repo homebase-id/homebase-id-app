@@ -58,7 +58,7 @@ export const ChatColorSettings = () => {
     },
     [bubbleColor?.id, isDarkMode, setBubbleColor]
   );
-  const messaageProps = useMemo(() => {
+  const messageProps = useMemo(() => {
     const receiverMessageProp: MessageProps<IMessage> = {
       position: 'left',
       key: '0',
@@ -165,8 +165,8 @@ export const ChatColorSettings = () => {
               },
             ]}
           >
-            <Message {...messaageProps.receiver} />
-            <Message {...messaageProps.sender} />
+            <Message {...messageProps.receiver} />
+            <Message {...messageProps.sender} />
           </View>
 
           {/* Render Colors */}

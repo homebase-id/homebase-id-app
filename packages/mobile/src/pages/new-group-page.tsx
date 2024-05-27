@@ -36,9 +36,11 @@ export const NewGroupPage = memo(
         setDialogVisible(false);
         navigation.goBack();
         navigation.goBack();
-        nav.navigate('ChatScreen', {
-          convoId: conversation.fileMetadata.appData.uniqueId as string,
-        });
+        setTimeout(() => {
+          nav.navigate('ChatScreen', {
+            convoId: conversation.fileMetadata.appData.uniqueId as string,
+          });
+        }, 100);
       }
     }, [createNew, selectedContacts, groupTitle, navigation, nav]);
 
