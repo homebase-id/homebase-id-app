@@ -121,8 +121,9 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
     () =>
       contact?.fileMetadata.appData.content.name?.displayName ||
       contact?.fileMetadata.appData.content.name?.surname ||
+      (filteredRecipients?.length === 1 ? filteredRecipients[0] : undefined) ||
       conversation?.fileMetadata.appData.content.title,
-    [contact, conversation]
+    [filteredRecipients, contact, conversation]
   );
 
   const isGroupChat =
@@ -443,7 +444,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
             title={title || ''}
             group={!!isGroupChat}
             odinId={
-              route.params.convoId === ConversationWithYourselfId
+              stringGuidsEqual(route.params.convoId, ConversationWithYourselfId)
                 ? identity || ''
                 : (filteredRecipients?.length === 1 && filteredRecipients[0]) || ''
             }
@@ -452,7 +453,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
             }
             onPress={() => navigation.navigate('ChatInfo', { convoId: route.params.convoId })}
             onMorePress={() => setIsOpen(!isOpen)}
-            isSelf={route.params.convoId === ConversationWithYourselfId}
+            isSelf={stringGuidsEqual(route.params.convoId, ConversationWithYourselfId)}
             selectedMessage={selectedMessage?.selectedMessage}
             selectedMessageActions={selectedMessageActions}
           />

@@ -13,7 +13,7 @@ import { ChatStackParamList } from '../app/ChatStack';
 import {
   ConversationWithRecentMessage,
   useConversationsWithRecentMessage,
-} from '../hooks/chat/useConversations';
+} from '../hooks/chat/useConversationsWithRecentMessage';
 import { ConversationWithYourselfId } from '../provider/chat/ConversationProvider';
 import { useAuth } from '../hooks/auth/useAuth';
 import { useProfile } from '../hooks/profile/useProfile';
