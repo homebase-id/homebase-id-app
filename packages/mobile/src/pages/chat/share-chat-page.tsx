@@ -9,7 +9,7 @@ import { useCallback, useState } from 'react';
 import { DotYouProfile } from '@youfoundation/js-lib/network';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { UnifiedConversation } from '../../provider/chat/ConversationProvider';
-import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { NavigationProp, StackActions, useNavigation } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 import { ContactTile } from '../../components/Contact/Contact-Tile';
 import { Text } from '../../components/ui/Text/Text';
@@ -113,15 +113,22 @@ export const ShareChatPage = (prop: ShareChatProp) => {
         const conversation = await createConversation({
           recipients: [contact.odinId],
         });
-        navigation.navigate('ChatScreen', {
-          convoId: conversation.fileMetadata.appData.uniqueId as string,
-        });
+        navigation.dispatch(
+          StackActions.replace('ChatScreen', {
+            convoId: conversation.fileMetadata.appData.uniqueId as string,
+          })
+        );
+        // navigation.navigate('ChatScreen', {
+        //   convoId: conversation.fileMetadata.appData.uniqueId as string,
+        // });
       }
       if (selectedGroup.length === 1) {
         const group = selectedGroup[0];
-        navigation.navigate('ChatScreen', {
-          convoId: group.fileMetadata.appData.uniqueId as string,
-        });
+        navigation.dispatch(
+          StackActions.replace('ChatScreen', {
+            convoId: group.fileMetadata.appData.uniqueId as string,
+          })
+        );
       }
     } else {
       Toast.show({
