@@ -424,7 +424,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
 
   if (!conversation) {
     if (isLoadingConversation) return null;
-    return <NoConversationHeader title="No conversation found" goBack={navigation.goBack} />;
+    return <NoConversationHeader title="No conversation found" goBack={doReturnToConversations} />;
   }
 
   return (
