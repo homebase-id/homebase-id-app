@@ -18,7 +18,6 @@ import {
 import { getRichTextFromString, t, useDotYouClientContext } from 'feed-app-common';
 import { ImageSource } from '../../../provider/image/RNImageProvider';
 import { getSynchronousDotYouClient } from '../../chat/getSynchronousDotYouClient';
-import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
 import { addError } from '../../errors/useErrors';
 
 const savePost = async ({
@@ -34,44 +33,34 @@ const savePost = async ({
 }) => {
   const dotYouClient = await getSynchronousDotYouClient();
 
-  return new Promise<UploadResult>((resolve, reject) => {
-    const onVersionConflict = async () => {
-      const serverPost = await getPost<PostContent>(
-        dotYouClient,
-        channelId,
-        postFile.fileMetadata.appData.content.id
-      );
-      if (!serverPost) return;
+  const onVersionConflict = async (): Promise<UploadResult | void> => {
+    const serverPost = await getPost<PostContent>(
+      dotYouClient,
+      channelId,
+      postFile.fileMetadata.appData.content.id
+    );
+    if (!serverPost) return;
 
-      const newPost: HomebaseFile<PostContent> = {
-        ...serverPost,
-        fileMetadata: {
-          ...serverPost.fileMetadata,
-          appData: {
-            ...serverPost.fileMetadata.appData,
-            content: {
-              ...serverPost.fileMetadata.appData.content,
-              ...postFile.fileMetadata.appData.content,
-            },
+    const newPost: HomebaseFile<PostContent> = {
+      ...serverPost,
+      fileMetadata: {
+        ...serverPost.fileMetadata,
+        appData: {
+          ...serverPost.fileMetadata.appData,
+          content: {
+            ...serverPost.fileMetadata.appData.content,
+            ...postFile.fileMetadata.appData.content,
           },
         },
-      };
-      savePostFile(dotYouClient, newPost, channelId, mediaFiles, onVersionConflict).then(
-        (result) => {
-          if (result) resolve(result);
-        }
-      );
+      },
     };
+    return savePostFile(dotYouClient, newPost, channelId, mediaFiles, onVersionConflict);
+  };
 
-    postFile.fileMetadata.appData.content.captionAsRichText = getRichTextFromString(
-      postFile.fileMetadata.appData.content.caption.trim()
-    );
-    savePostFile(dotYouClient, postFile, channelId, mediaFiles, onVersionConflict, onUpdate)
-      .then((result) => {
-        if (result) resolve(result);
-      })
-      .catch((err) => reject(err));
-  });
+  postFile.fileMetadata.appData.content.captionAsRichText = getRichTextFromString(
+    postFile.fileMetadata.appData.content.caption.trim()
+  );
+  return savePostFile(dotYouClient, postFile, channelId, mediaFiles, onVersionConflict, onUpdate);
 };
 
 export const getSavePostMutationOptions: (queryClient: QueryClient) => MutationOptions<
