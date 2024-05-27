@@ -69,6 +69,7 @@ import { getLocales, uses24HourClock } from 'react-native-localize';
 import { type PastedFile } from '@mattermost/react-native-paste-input';
 import { useDraftMessage } from '../../hooks/chat/useDraftMessage';
 import { useChatBubbleColor } from '../../hooks/chat/useChatBubbleColor';
+import LinearGradient from 'react-native-linear-gradient';
 
 export type ChatMessageIMessage = IMessage & HomebaseFile<ChatMessage>;
 
@@ -841,6 +842,13 @@ const RenderBubble = memo(
                   //   : `${Colors.indigo[500]}1A`,
                   minWidth: hasReactions ? 90 : undefined,
                 },
+              }
+        }
+        gradientWrapperStyle={
+          !showBackground
+            ? undefined
+            : {
+                right: bubbleColor?.gradient,
               }
         }
         bottomContainerStyle={

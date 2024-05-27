@@ -121,6 +121,9 @@ export const ChatColorSettings = () => {
                 color: Colors.white,
               },
             }}
+            gradientWrapperStyle={{
+              right: bubbleColor?.gradient,
+            }}
             wrapperStyle={{
               right: {
                 backgroundColor: isDarkMode ? `${bubbleColor?.color}` : `${bubbleColor?.color}`,
