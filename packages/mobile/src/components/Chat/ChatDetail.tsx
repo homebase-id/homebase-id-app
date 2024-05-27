@@ -68,7 +68,6 @@ import Document from 'react-native-document-picker';
 import { getLocales, uses24HourClock } from 'react-native-localize';
 import { type PastedFile } from '@mattermost/react-native-paste-input';
 import { useDraftMessage } from '../../hooks/chat/useDraftMessage';
-import { useChatBubbleColor } from '../../hooks/chat/useChatBubbleColor';
 import { useBubbleContext } from '../BubbleContext/useBubbleContext';
 
 export type ChatMessageIMessage = IMessage & HomebaseFile<ChatMessage>;
@@ -660,7 +659,7 @@ const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
           : deleted
             ? {
                 textDecorationLine: 'line-through',
-                color: Colors.gray[500],
+                color: Colors.gray[300],
               }
             : undefined
       }
