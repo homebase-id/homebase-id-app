@@ -118,7 +118,7 @@ export const OdinImage = memo(
       size:
         payloadContentType && thumblessContentTypes.includes(payloadContentType)
           ? undefined
-          : loadSize,
+          : loadSize, // This is done to load full size images in case for gifs and svgs
       naturalSize,
       lastModified,
     });
