@@ -69,7 +69,7 @@ const INCLUDED_QUERY_KEYS = [
   'process-inbox',
 ];
 const persistOptions: Omit<PersistQueryClientOptions, 'queryClient'> = {
-  buster: '20240527',
+  buster: '20240524',
   maxAge: Infinity,
   persister: asyncPersist,
   dehydrateOptions: {
