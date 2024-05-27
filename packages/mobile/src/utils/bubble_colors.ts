@@ -3,6 +3,7 @@ export type Gradient = {
     colors: string[];
     start: { x: number; y: number };
     end: { x: number; y: number };
+    angle?: number;
 };
 
 export type ChatColor = {
@@ -13,13 +14,17 @@ export type ChatColor = {
     creationTimestamp: number;
 };
 
+
+//TODO: Fix the gradient angles
 const createGradient = (colors: string[], angle: number): Gradient => {
     const start = { x: 0.5 - 0.5 * Math.cos(angle), y: 0.5 - 0.5 * Math.sin(angle) };
     const end = { x: 0.5 + 0.5 * Math.cos(angle), y: 0.5 + 0.5 * Math.sin(angle) };
+    // const angleRadians = parseAngleDegreesFromSpec(angle);
     return {
         colors: colors,
         start,
         end,
+        angle,
     };
 };
 
