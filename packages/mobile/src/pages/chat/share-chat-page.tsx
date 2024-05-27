@@ -59,6 +59,22 @@ export const ShareChatPage = (prop: ShareChatProp) => {
           height: size.height,
           type: mimeType,
         });
+      } else if (mimeType.startsWith('video')) {
+        const uri = await fixContentURI(data);
+        imageSource.push({
+          uri: uri,
+          width: 1920,
+          height: 1080,
+          type: mimeType,
+        });
+      } else if (mimeType.startsWith('application/pdf')) {
+        const uri = await fixContentURI(data);
+        imageSource.push({
+          uri: uri,
+          type: mimeType,
+          width: 0,
+          height: 0,
+        });
       }
       //TODO: Handle a case where if a conversation doesn't exist and a command needs to be sent
       return sendMessage({

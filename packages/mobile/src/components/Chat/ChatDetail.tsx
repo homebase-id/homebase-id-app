@@ -237,7 +237,7 @@ export const ChatDetail = memo(
       requestAnimationFrame(async () => {
         const document = await Document.pickSingle({
           copyTo: 'cachesDirectory',
-          type: [Document.types.allFiles],
+          type: [Document.types.pdf, Document.types.doc, Document.types.docx], // Don't add support for all files. Keeping it pdf and docs for now
           mode: 'open',
         });
         console.log(document);
@@ -247,8 +247,6 @@ export const ChatDetail = memo(
           type: document.type || 'application/pdf',
           fileName: document.name || 'file',
           fileSize: document.size || 0,
-          height: 0,
-          width: 0,
           originalPath: document.fileCopyUri,
           timestamp: new Date().toUTCString(),
           id: document.name || 'file',

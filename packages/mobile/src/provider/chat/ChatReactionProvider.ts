@@ -18,6 +18,7 @@ import {
 import { ChatDrive } from './ConversationProvider';
 import { assertIfDefined, getNewId, jsonStringify64 } from '@youfoundation/js-lib/helpers';
 import { CHAT_APP_ID } from '../../app/constants';
+import { t } from 'feed-app-common';
 
 export const ChatReactionFileType = 7979;
 const PAGE_SIZE = 100;
@@ -86,6 +87,7 @@ export const uploadReaction = async (
             typeId: conversationId,
             tagId: getNewId(),
             silent: false,
+            unEncryptedMessage: t('{0} reacted to a message', dotYouClient.getIdentity()),
           },
         }
       : undefined,
