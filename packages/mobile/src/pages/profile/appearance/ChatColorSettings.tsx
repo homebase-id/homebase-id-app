@@ -7,36 +7,57 @@ import LinearGradient from 'react-native-linear-gradient';
 import { useDarkMode } from '../../../hooks/useDarkMode';
 import { Colors } from '../../../app/Colors';
 import { ScrollView } from 'react-native-gesture-handler';
-import { IMessage, Message, MessageProps } from 'react-native-gifted-chat';
+import { Bubble, IMessage, Message, MessageProps } from 'react-native-gifted-chat';
+import { useChatBubbleColor } from '../../../hooks/chat/useChatBubbleColor';
+import { TouchableOpacity } from '@gorhom/bottom-sheet';
 
 export const ChatColorSettings = () => {
-  const renderItem = useCallback(({ item }: ListRenderItemInfo<ChatColor>) => {
-    const radius = 62;
-    if (item.color) {
-      return (
-        <View
-          style={{
-            width: radius,
-            height: radius,
-            borderRadius: radius,
-            backgroundColor: item.color,
-          }}
-        />
-      );
-    } else if (item.gradient) {
-      const gradient = item.gradient;
+  const { bubbleColor, setColor } = useChatBubbleColor();
+  const { isDarkMode } = useDarkMode();
 
-      return (
-        <LinearGradient
-          colors={gradient.colors}
-          useAngle={true}
-          angle={gradient.angle}
-          style={{ width: radius, height: radius, borderRadius: radius }}
-        />
-      );
-    }
-    return <></>;
-  }, []);
+  const renderItem = useCallback(
+    ({ item }: ListRenderItemInfo<ChatColor>) => {
+      const radius = 62;
+      const isSelected = bubbleColor?.id === item.id;
+      if (item.color) {
+        return (
+          <TouchableOpacity onPress={() => setColor(item)}>
+            <View
+              style={{
+                width: radius,
+                height: radius,
+                borderRadius: radius,
+                backgroundColor: item.color,
+                borderWidth: isSelected ? 3 : 0,
+                borderColor: isDarkMode ? Colors.white : Colors.black,
+              }}
+            />
+          </TouchableOpacity>
+        );
+      } else if (item.gradient) {
+        const gradient = item.gradient;
+
+        return (
+          <TouchableOpacity onPress={() => setColor(item)}>
+            <LinearGradient
+              colors={gradient.colors}
+              useAngle={true}
+              angle={gradient.angle}
+              style={{
+                width: radius,
+                height: radius,
+                borderRadius: radius,
+                borderWidth: isSelected ? 3 : 0,
+                borderColor: isDarkMode ? Colors.white : Colors.black,
+              }}
+            />
+          </TouchableOpacity>
+        );
+      }
+      return <></>;
+    },
+    [bubbleColor?.id, isDarkMode, setColor]
+  );
   const messaageProps = useMemo(() => {
     const receiverMessageProp: MessageProps<IMessage> = {
       position: 'left',
@@ -54,7 +75,23 @@ export const ChatColorSettings = () => {
           name: 'Receiver',
         },
       },
-
+      renderBubble: (props) => {
+        return (
+          <Bubble
+            {...props}
+            textStyle={{
+              left: {
+                color: isDarkMode ? Colors.white : Colors.black,
+              },
+            }}
+            wrapperStyle={{
+              left: {
+                backgroundColor: isDarkMode ? `${Colors.gray[300]}4D` : `${Colors.gray[500]}1A`,
+              },
+            }}
+          />
+        );
+      },
       showUserAvatar: false,
     };
     const senderMessageProp: MessageProps<IMessage> = {
@@ -74,6 +111,24 @@ export const ChatColorSettings = () => {
         },
       },
       previousMessage: receiverMessageProp.currentMessage,
+      renderBubble: (props) => {
+        return (
+          <Bubble
+            {...props}
+            textStyle={{
+              right: {
+                // color: isDarkMode ? Colors.white : Colors.black,
+                color: Colors.white,
+              },
+            }}
+            wrapperStyle={{
+              right: {
+                backgroundColor: isDarkMode ? `${bubbleColor?.color}` : `${bubbleColor?.color}`,
+              },
+            }}
+          />
+        );
+      },
 
       showUserAvatar: false,
     };
@@ -81,9 +136,8 @@ export const ChatColorSettings = () => {
       receiver: receiverMessageProp,
       sender: senderMessageProp,
     };
-  }, []);
+  }, [bubbleColor, isDarkMode]);
 
-  const { isDarkMode } = useDarkMode();
   const containerStyle = useMemo(() => {
     return {
       backgroundColor: isDarkMode ? Colors.slate[800] : Colors.slate[200],

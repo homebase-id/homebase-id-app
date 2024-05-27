@@ -1,3 +1,4 @@
+import { Colors } from '../app/Colors';
 
 export type Gradient = {
     colors: string[];
@@ -29,6 +30,12 @@ const createGradient = (colors: string[], angle: number): Gradient => {
 };
 
 const ChatColorValues = {
+    default: {
+        id: 'Default',
+        isBuiltIn: true,
+        creationTimestamp: 0,
+        color: Colors.indigo[500],
+    },
     ultramarine: {
         id: 'Ultramarine',
         gradient: createGradient(['#0553F0', '#2C6CED'], 0),
@@ -164,6 +171,7 @@ const ChatColorValues = {
 };
 
 export const BUBBLE_COLORS: ChatColor[] = [
+    ChatColorValues.default,
     ChatColorValues.ultramarine,
     ChatColorValues.crimson,
     ChatColorValues.vermilion,

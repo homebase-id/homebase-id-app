@@ -106,7 +106,7 @@ const ConversationTile = memo((props: ConversationTileProps) => {
                 alignContent: 'flex-start',
               }}
             >
-              <ChatDeliveryIndicator msg={lastMessage} />
+              <ChatDeliveryIndicator msg={lastMessage} showDefaultColor />
               <Text
                 numberOfLines={1}
                 style={[
