@@ -42,6 +42,7 @@ import { OdinQueryClient } from './OdinQueryClient';
 import { ChatStack } from './ChatStack';
 import { ProfileStack } from './ProfileStack';
 import BootSplash from 'react-native-bootsplash';
+import BubbleColorProvider from '../components/BubbleContext/BubbleContext';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -122,9 +123,11 @@ const AuthenticatedRoot = memo(() => {
   return (
     <DotYouClientProvider>
       <AudioContextProvider>
-        <ErrorBoundary>
-          <AppStackScreen />
-        </ErrorBoundary>
+        <BubbleColorProvider>
+          <ErrorBoundary>
+            <AppStackScreen />
+          </ErrorBoundary>
+        </BubbleColorProvider>
       </AudioContextProvider>
     </DotYouClientProvider>
   );

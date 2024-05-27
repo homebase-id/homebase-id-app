@@ -8,11 +8,11 @@ import { useDarkMode } from '../../../hooks/useDarkMode';
 import { Colors } from '../../../app/Colors';
 import { ScrollView } from 'react-native-gesture-handler';
 import { Bubble, IMessage, Message, MessageProps } from 'react-native-gifted-chat';
-import { useChatBubbleColor } from '../../../hooks/chat/useChatBubbleColor';
 import { TouchableOpacity } from '@gorhom/bottom-sheet';
+import { useBubbleContext } from '../../../components/BubbleContext/useBubbleContext';
 
 export const ChatColorSettings = () => {
-  const { bubbleColor, setColor } = useChatBubbleColor();
+  const { bubbleColor, setBubbleColor } = useBubbleContext();
   const { isDarkMode } = useDarkMode();
 
   const renderItem = useCallback(
@@ -21,7 +21,7 @@ export const ChatColorSettings = () => {
       const isSelected = bubbleColor?.id === item.id;
       if (item.color) {
         return (
-          <TouchableOpacity onPress={() => setColor(item)}>
+          <TouchableOpacity onPress={() => setBubbleColor(item)}>
             <View
               style={{
                 width: radius,
@@ -38,7 +38,7 @@ export const ChatColorSettings = () => {
         const gradient = item.gradient;
 
         return (
-          <TouchableOpacity onPress={() => setColor(item)}>
+          <TouchableOpacity onPress={() => setBubbleColor(item)}>
             <LinearGradient
               colors={gradient.colors}
               useAngle={true}
@@ -56,7 +56,7 @@ export const ChatColorSettings = () => {
       }
       return <></>;
     },
-    [bubbleColor?.id, isDarkMode, setColor]
+    [bubbleColor?.id, isDarkMode, setBubbleColor]
   );
   const messaageProps = useMemo(() => {
     const receiverMessageProp: MessageProps<IMessage> = {

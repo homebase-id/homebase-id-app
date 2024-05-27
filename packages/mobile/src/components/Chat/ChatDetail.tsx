@@ -69,7 +69,7 @@ import { getLocales, uses24HourClock } from 'react-native-localize';
 import { type PastedFile } from '@mattermost/react-native-paste-input';
 import { useDraftMessage } from '../../hooks/chat/useDraftMessage';
 import { useChatBubbleColor } from '../../hooks/chat/useChatBubbleColor';
-import LinearGradient from 'react-native-linear-gradient';
+import { useBubbleContext } from '../BubbleContext/useBubbleContext';
 
 export type ChatMessageIMessage = IMessage & HomebaseFile<ChatMessage>;
 
@@ -676,7 +676,7 @@ const RenderBubble = memo(
   ) => {
     const message = props.currentMessage as ChatMessageIMessage;
     const content = message?.fileMetadata.appData.content;
-    const { bubbleColor } = useChatBubbleColor();
+    const { bubbleColor } = useBubbleContext();
     const { isDarkMode } = useDarkMode();
     const isEmojiOnly =
       (content?.message?.match(/^\p{Extended_Pictographic}/u) &&
