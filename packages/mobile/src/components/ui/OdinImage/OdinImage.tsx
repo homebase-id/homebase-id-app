@@ -30,7 +30,6 @@ export interface OdinImageProps {
   alt?: string;
   title?: string;
   previewThumbnail?: EmbeddedThumb;
-  payloadContentType?: ImageContentType;
   avoidPayload?: boolean;
   enableZoom?: boolean;
   style?: ImageStyle;
@@ -56,7 +55,6 @@ export const OdinImage = memo(
     style,
     onClick,
     onLongPress,
-    payloadContentType,
   }: OdinImageProps) => {
     // Don't set load size if it's a thumbnessLessContentType; As they don't have a thumb
     const loadSize = useMemo(
@@ -115,10 +113,7 @@ export const OdinImage = memo(
       imageFileId: fileId,
       imageFileKey: fileKey,
       imageDrive: targetDrive,
-      size:
-        payloadContentType && thumblessContentTypes.includes(payloadContentType)
-          ? undefined
-          : loadSize, // This is done to load full size images in case for gifs and svgs
+      size: loadSize,
       naturalSize,
       lastModified,
     });

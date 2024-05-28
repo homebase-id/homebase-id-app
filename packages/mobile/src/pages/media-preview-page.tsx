@@ -6,7 +6,7 @@ import { memo, useCallback, useLayoutEffect, useRef, useState } from 'react';
 import Carousel from 'react-native-reanimated-carousel';
 import { OdinImage } from '../components/ui/OdinImage/OdinImage';
 import { ChatStackParamList } from '../app/ChatStack';
-import { ImageContentType, PayloadDescriptor } from '@youfoundation/js-lib/core';
+import { PayloadDescriptor } from '@youfoundation/js-lib/core';
 import {
   CarouselRenderItemInfo,
   ICarouselInstance,
@@ -92,7 +92,6 @@ export const PreviewMedia = memo((prop: MediaProp) => {
             width: width,
             height: height,
           }}
-          payloadContentType={item.contentType as ImageContentType}
           targetDrive={ChatDrive}
           previewThumbnail={msg.fileMetadata.appData.previewThumbnail}
         />
