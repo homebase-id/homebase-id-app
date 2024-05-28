@@ -23,7 +23,9 @@ import {
 } from 'react-native-gifted-chat';
 import { useCallback, memo, useMemo, useRef, useEffect, useState } from 'react';
 import {
+  Dimensions,
   GestureResponderEvent,
+  Image,
   Platform,
   Pressable,
   StatusBar,
@@ -61,7 +63,12 @@ import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ChatDeletedArchivalStaus, ChatMessage } from '../../provider/chat/ChatProvider';
 import { useAudioRecorder } from '../../hooks/audio/useAudioRecorderPlayer';
 import { Text } from '../ui/Text/Text';
-import { fixDocumentURI, millisToMinutesAndSeconds } from '../../utils/utils';
+import {
+  calculateScaledDimensions,
+  extractUrls,
+  fixDocumentURI,
+  millisToMinutesAndSeconds,
+} from '../../utils/utils';
 import { SafeAreaView } from '../ui/SafeAreaView/SafeAreaView';
 import { FileOverview } from '../Files/FileOverview';
 import Document from 'react-native-document-picker';
@@ -69,6 +76,7 @@ import { getLocales, uses24HourClock } from 'react-native-localize';
 import { type PastedFile } from '@mattermost/react-native-paste-input';
 import { useDraftMessage } from '../../hooks/chat/useDraftMessage';
 import { useBubbleContext } from '../BubbleContext/useBubbleContext';
+import { useLinkPreview } from '../../hooks/links/useLinkPreview';
 
 export type ChatMessageIMessage = IMessage & HomebaseFile<ChatMessage>;
 
@@ -633,7 +641,62 @@ const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
   const { isDarkMode } = useDarkMode();
   const message = props.currentMessage as ChatMessageIMessage;
   const deleted = message?.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus;
+  const urls = extractUrls(message?.fileMetadata.appData.content.message);
+  const shouldShowUrlPreview = urls.length === 1;
+  const { width, height } = Dimensions.get('screen');
+  const { data: linkData } = useLinkPreview(shouldShowUrlPreview ? urls[0] : undefined).get;
+  const renderLinkPreview = useCallback(() => {
+    if (!linkData) return null;
+    const { height: newHeight } = calculateScaledDimensions(
+      linkData.image?.width || 0,
+      linkData.image?.height || 0,
+      { height: height * 0.8, width: width * 0.8 }
+    );
+    return (
+      <View
+        style={{
+          backgroundColor: isDarkMode ? Colors.slate[800] : Colors.slate[100],
 
+          overflow: 'hidden',
+        }}
+      >
+        <Image
+          source={{ uri: linkData.image?.url }}
+          style={{
+            height: newHeight,
+            objectFit: 'cover',
+            borderTopLeftRadius: 5,
+            borderTopRightRadius: 5,
+          }}
+        />
+        <Text
+          style={{
+            marginLeft: 10,
+            marginRight: 10,
+            marginTop: 5,
+            fontWeight: '500',
+            fontSize: 16,
+            color: isDarkMode ? Colors.white : Colors.black,
+          }}
+        >
+          {linkData.title}
+        </Text>
+        <Text
+          style={{
+            marginLeft: 10,
+            marginRight: 10,
+            marginTop: 10,
+            fontWeight: '400',
+            fontSize: 15,
+            marginBottom: 10,
+            color: isDarkMode ? Colors.white : Colors.black,
+          }}
+        >
+          {linkData.description}
+        </Text>
+      </View>
+    );
+  }, [height, isDarkMode, linkData, width]);
   const content = message?.fileMetadata.appData.content;
   const isEmojiOnly =
     (content?.message?.match(/^\p{Extended_Pictographic}/u) &&
@@ -647,9 +710,10 @@ const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
           color: isDarkMode ? Colors.indigo[300] : Colors.indigo[500],
         },
         right: {
-          color: isDarkMode ? Colors.indigo[300] : Colors.indigo[500],
+          color: Colors.purple[300],
         },
       }}
+      renderLinkPreview={shouldShowUrlPreview ? renderLinkPreview : undefined}
       customTextStyle={
         isEmojiOnly
           ? {
