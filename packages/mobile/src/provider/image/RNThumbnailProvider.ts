@@ -142,6 +142,7 @@ const createImageThumbnail = async (
   format: 'webp' | 'png' | 'jpeg' = Platform.OS === 'android' ? 'webp' : 'jpeg'
 ): Promise<{ naturalSize: ImageSize; thumb: ThumbnailFile }> => {
   if (!photo.filepath && !photo.uri) throw new Error('No filepath found in image source');
+  const type = instruction.type;
 
   return createResizedImage(photo, instruction, format).then(async (resizedData) => {
     return {
@@ -155,6 +156,7 @@ const createImageThumbnail = async (
         payload: new OdinBlob(resizedData.path, {
           type: `image/${instruction.type || format}`,
         }) as any as Blob,
+        contentType: type ? `image/${type}` : undefined,
         key,
       },
     };
