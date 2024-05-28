@@ -105,3 +105,8 @@ target 'HomebaseFeed' do
 end
 
 pod 'lame'
+
+target 'ImageNotification' do
+  use_frameworks! :linkage => :static
+  pod 'Firebase/Messaging'
+end
