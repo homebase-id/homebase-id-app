@@ -38,7 +38,6 @@ const ConversationTile = memo((props: ConversationTileProps) => {
   const { data: draftMessage } = useDraftMessageValue(props.conversationId).get;
   const { isDarkMode } = useDarkMode();
   const { data: contact } = useContact(props.odinId).fetch;
-
   const connectionDetails = contact?.fileMetadata.appData.content;
   const isGroup = props.conversation && props.conversation.recipients?.length > 2;
 
@@ -82,7 +81,6 @@ const ConversationTile = memo((props: ConversationTileProps) => {
             <GroupAvatar />
           )}
         </View>
-
         <View style={styles.content}>
           <Text
             numberOfLines={1}
@@ -108,7 +106,7 @@ const ConversationTile = memo((props: ConversationTileProps) => {
                 alignContent: 'flex-start',
               }}
             >
-              <ChatDeliveryIndicator msg={lastMessage} />
+              <ChatDeliveryIndicator msg={lastMessage} showDefaultColor />
               <Text
                 numberOfLines={1}
                 style={[

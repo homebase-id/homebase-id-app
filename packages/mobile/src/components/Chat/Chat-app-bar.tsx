@@ -12,7 +12,7 @@ import { Colors } from '../../app/Colors';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { ChatMessageIMessage } from './ChatDetail';
 import { memo, ReactNode, useCallback, useMemo } from 'react';
-import { Copy, Forward, Info, Pencil, Reply, Trash } from '../ui/Icons/icons';
+import { Copy, EllipsisVertical, Forward, Info, Pencil, Reply, Trash } from '../ui/Icons/icons';
 import Toast from 'react-native-toast-message';
 import { Avatar, GroupAvatar, OwnerAvatar } from '../ui/Avatars/Avatar';
 
@@ -34,6 +34,7 @@ export const ChatAppBar = ({
   onPress,
   selectedMessage,
   selectedMessageActions,
+  onMorePress,
 }: {
   odinId: string;
   group?: boolean;
@@ -41,11 +42,13 @@ export const ChatAppBar = ({
   goBack: () => void;
   isSelf?: boolean;
   onPress: () => void;
+  onMorePress: () => void;
   selectedMessage?: ChatMessageIMessage;
   selectedMessageActions?: SelectedMessageProp;
 }) => {
   const user = useProfile().data;
   const { isDarkMode } = useDarkMode();
+
   const headerStyle = useMemo(
     () => ({
       backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
@@ -92,7 +95,18 @@ export const ChatAppBar = ({
 
   const headerRight = useCallback(() => {
     if (!selectedMessage) {
-      return null;
+      return (
+        <TouchableOpacity
+          hitSlop={{
+            right: 10,
+            left: 10,
+            bottom: 4,
+          }}
+          onPress={onMorePress}
+        >
+          <EllipsisVertical />
+        </TouchableOpacity>
+      );
     }
     return (
       <View
@@ -124,6 +138,7 @@ export const ChatAppBar = ({
     );
   }, [
     defaultActions,
+    onMorePress,
     selectedMessage,
     selectedMessageActions?.onCopy,
     selectedMessageActions?.onDelete,

@@ -8,8 +8,10 @@ import { ChatMessageIMessage } from './ChatDetail';
 
 export const ChatDeliveryIndicator = ({
   msg,
+  showDefaultColor,
 }: {
   msg: ChatMessageIMessage | HomebaseFile<ChatMessage>;
+  showDefaultColor?: boolean;
 }) => {
   const identity = useDotYouClientContext().getIdentity();
   const content = msg.fileMetadata.appData.content;
@@ -17,10 +19,16 @@ export const ChatDeliveryIndicator = ({
   const messageFromMe = !authorOdinId || authorOdinId === identity;
 
   if (!messageFromMe) return null;
-  return <InnerDeliveryIndicator state={content.deliveryStatus} />;
+  return <InnerDeliveryIndicator state={content.deliveryStatus} showDefault={showDefaultColor} />;
 };
 
-export const InnerDeliveryIndicator = ({ state }: { state?: ChatDeliveryStatus }) => {
+export const InnerDeliveryIndicator = ({
+  state,
+  showDefault,
+}: {
+  state?: ChatDeliveryStatus;
+  showDefault?: boolean;
+}) => {
   const isSent = state && state >= ChatDeliveryStatus.Sent;
   const isDelivered = state && state >= ChatDeliveryStatus.Delivered;
   const isRead = state === ChatDeliveryStatus.Read;
@@ -35,7 +43,10 @@ export const InnerDeliveryIndicator = ({ state }: { state?: ChatDeliveryStatus }
       }}
     >
       {isDelivered ? (
-        <SubtleCheck size={'sm'} color={isRead ? Colors.blue[600] : undefined} />
+        <SubtleCheck
+          size={'sm'}
+          color={isRead ? (showDefault ? Colors.indigo[400] : Colors.white) : Colors.gray[400]}
+        />
       ) : null}
       <View
         style={{
@@ -45,7 +56,10 @@ export const InnerDeliveryIndicator = ({ state }: { state?: ChatDeliveryStatus }
         }}
       >
         {isSent ? (
-          <SubtleCheck size={'sm'} color={isRead ? Colors.blue[600] : undefined} />
+          <SubtleCheck
+            size={'sm'}
+            color={isRead ? (showDefault ? Colors.indigo[400] : Colors.white) : Colors.gray[400]}
+          />
         ) : (
           <Clock size={'sm'} />
         )}

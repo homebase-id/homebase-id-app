@@ -88,6 +88,7 @@ export const MessageInfoPage = ({ route }: MessageInfoProp) => {
               </Text>
               <InnerDeliveryIndicator
                 state={messageContent.deliveryDetails?.[recipient] || messageContent.deliveryStatus}
+                showDefault
               />
             </View>
           );

@@ -9,7 +9,7 @@ import {
   View,
 } from 'react-native';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { ChatStackParamList } from '../app/ChatStack';
+import { ChatStackParamList, NewChatStackParamList } from '../app/ChatStack';
 
 import { t, useAllConnections } from 'feed-app-common';
 
@@ -24,7 +24,7 @@ import { openURL } from '../utils/utils';
 import { useAuth } from '../hooks/auth/useAuth';
 
 const ListHeaderComponent = () => {
-  const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
+  const navigation = useNavigation<NavigationProp<NewChatStackParamList>>();
   return (
     <View style={{ marginTop: 3 }}>
       <Tile
@@ -39,10 +39,11 @@ const ListHeaderComponent = () => {
 };
 
 export const ContactPage = memo(
-  ({ navigation }: { navigation: NavigationProp<ChatStackParamList, 'NewChat'> }) => {
+  ({ navigation }: { navigation: NavigationProp<NewChatStackParamList, 'NewChat'> }) => {
     const identity = useAuth().getIdentity();
     const { data: connections, refetch, status } = useAllConnections(true);
     const [refreshing, setRefreshing] = useState(false);
+    const nav = useNavigation<NavigationProp<ChatStackParamList>>();
 
     useEffect(() => {
       if (status === 'success') {
@@ -57,14 +58,14 @@ export const ContactPage = memo(
           onOpen={(conversationId) => {
             navigation.goBack();
             setTimeout(() => {
-              navigation.navigate('ChatScreen', {
+              nav.navigate('ChatScreen', {
                 convoId: conversationId,
               });
             }, 100);
           }}
         />
       ),
-      [navigation]
+      [nav, navigation]
     );
 
     if (!connections) return null;

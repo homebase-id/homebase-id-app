@@ -68,6 +68,7 @@ import Document from 'react-native-document-picker';
 import { getLocales, uses24HourClock } from 'react-native-localize';
 import { type PastedFile } from '@mattermost/react-native-paste-input';
 import { useDraftMessage } from '../../hooks/chat/useDraftMessage';
+import { useBubbleContext } from '../BubbleContext/useBubbleContext';
 
 export type ChatMessageIMessage = IMessage & HomebaseFile<ChatMessage>;
 
@@ -658,7 +659,7 @@ const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
           : deleted
             ? {
                 textDecorationLine: 'line-through',
-                color: Colors.gray[500],
+                color: Colors.gray[300],
               }
             : undefined
       }
@@ -674,6 +675,7 @@ const RenderBubble = memo(
   ) => {
     const message = props.currentMessage as ChatMessageIMessage;
     const content = message?.fileMetadata.appData.content;
+    const { bubbleColor } = useBubbleContext();
     const { isDarkMode } = useDarkMode();
     const isEmojiOnly =
       (content?.message?.match(/^\p{Extended_Pictographic}/u) &&
@@ -732,7 +734,7 @@ const RenderBubble = memo(
                   : {
                       right: {
                         fontSize: 12,
-                        color: !isDarkMode ? Colors.slate[600] : Colors.slate[200],
+                        color: !isDarkMode ? Colors.slate[300] : Colors.slate[200],
                       },
                       left: {
                         fontSize: 12,
@@ -808,7 +810,8 @@ const RenderBubble = memo(
           showBackground
             ? {
                 left: { color: isDarkMode ? Colors.white : Colors.black },
-                right: { color: isDarkMode ? Colors.white : Colors.black },
+                // right: { color: isDarkMode ? Colors.white : Colors.black },
+                right: { color: Colors.white },
               }
             : undefined
         }
@@ -829,11 +832,22 @@ const RenderBubble = memo(
                   justifyContent: 'flex-start',
                 },
                 right: {
-                  backgroundColor: isDarkMode
-                    ? `${Colors.indigo[500]}33`
-                    : `${Colors.indigo[500]}1A`,
+                  backgroundColor: bubbleColor?.color,
+                  // backgroundColor: isDarkMode
+                  //   ? `${bubbleColor?.color}33`
+                  //   : `${bubbleColor?.color}1A`,
+                  // backgroundColor: isDarkMode
+                  //   ? `${Colors.indigo[500]}33`
+                  //   : `${Colors.indigo[500]}1A`,
                   minWidth: hasReactions ? 90 : undefined,
                 },
+              }
+        }
+        gradientWrapperStyle={
+          !showBackground
+            ? undefined
+            : {
+                right: bubbleColor?.gradient,
               }
         }
         bottomContainerStyle={

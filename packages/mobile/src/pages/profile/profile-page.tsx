@@ -22,6 +22,7 @@ import {
   People,
   Profile,
   RecycleBin,
+  Sun,
 } from '../../components/ui/Icons/icons';
 import codePush from 'react-native-code-push';
 import { useAuth } from '../../hooks/auth/useAuth';
@@ -29,6 +30,7 @@ import { openURL } from '../../utils/utils';
 import { useAuthenticatedPushNotification } from '../../hooks/push-notification/useAuthenticatedPushNotification';
 
 import { ProfileInfo } from '../../components/Profile/ProfileInfo';
+import { t } from 'feed-app-common';
 
 type SettingsProps = NativeStackScreenProps<ProfileStackParamList, 'Overview'>;
 
@@ -69,7 +71,7 @@ export const ProfilePage = (_props: SettingsProps) => {
                 marginLeft: 16,
               }}
             >
-              My followers
+              {t('Followers')}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -88,7 +90,7 @@ export const ProfilePage = (_props: SettingsProps) => {
                 marginLeft: 16,
               }}
             >
-              Who I&apos;m folowing
+              {t('Following')}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -127,6 +129,25 @@ export const ProfilePage = (_props: SettingsProps) => {
               }}
             >
               My connections
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => navigate('Appearance')}
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+              paddingVertical: 12,
+              width: '100%',
+            }}
+          >
+            <Sun size={'lg'} />
+            <Text
+              style={{
+                marginLeft: 16,
+              }}
+            >
+              {t('Appearance')}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity

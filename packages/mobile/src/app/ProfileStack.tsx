@@ -14,11 +14,15 @@ import { useDarkMode } from '../hooks/useDarkMode';
 import { NativeStackNavigationOptions } from '@react-navigation/native-stack';
 import { DriveStatusPage } from '../pages/profile/drive-status-page';
 import { ConnectQrPage } from '../pages/profile/connect-qr-page';
+import { AppearancePage } from '../pages/profile/appearance/Appearance-Page';
+import { ChatColorSettings } from '../pages/profile/appearance/ChatColorSettings';
 
 export type ProfileStackParamList = {
   Overview: undefined;
   Followers: undefined;
   ConnectionRequests: undefined;
+  Appearance: undefined;
+  ChatColorSettings: undefined;
   Connections: undefined;
   Following: undefined;
   DriveStatus: undefined;
@@ -59,6 +63,14 @@ export const ProfileStack = () => {
       <StackProfile.Screen name="Followers" component={FollowersPage} />
       <StackProfile.Screen name="ConnectionRequests" component={ConnectionRequestsPage} />
       <StackProfile.Screen name="Connections" component={ConnectionsPage} />
+      <StackProfile.Screen name="Appearance" component={AppearancePage} />
+      <StackProfile.Screen
+        name="ChatColorSettings"
+        options={{
+          title: 'Chat Color',
+        }}
+        component={ChatColorSettings}
+      />
       <StackProfile.Screen name="Following" component={FollowingPage} />
       <StackProfile.Screen name="DriveStatus" component={DriveStatusPage} />
     </StackProfile.Navigator>

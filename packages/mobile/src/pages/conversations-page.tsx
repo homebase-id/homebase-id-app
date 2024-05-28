@@ -187,7 +187,7 @@ const FloatingActionButton = memo(() => {
   );
   const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
   const onPress = useCallback(() => {
-    navigation.navigate('NewChat');
+    navigation.navigate('New');
   }, [navigation]);
   if (Platform.OS === 'ios') return;
 

@@ -11,6 +11,7 @@ import {
   TextStyle,
   GestureResponderEvent,
 } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
 
 import { GiftedChatContext } from './GiftedChatContext';
 import { QuickReplies, QuickRepliesProps } from './QuickReplies';
@@ -147,6 +148,13 @@ export type RenderMessageTextProps<TMessage extends IMessage> = Omit<
 > &
   MessageTextProps<TMessage>;
 
+export type BubbleGradient = {
+  colors: string[];
+  start: { x: number; y: number };
+  end: { x: number; y: number };
+  angle?: number;
+};
+
 export interface BubbleProps<TMessage extends IMessage> {
   user?: User;
   touchableProps?: object;
@@ -168,6 +176,7 @@ export interface BubbleProps<TMessage extends IMessage> {
   usernameStyle?: TextStyle;
   quickReplyStyle?: StyleProp<ViewStyle>;
   quickReplyTextStyle?: StyleProp<TextStyle>;
+  gradientWrapperStyle?: LeftRightStyle<BubbleGradient>;
   onPress?(context?: any, message?: any): void;
   onLongPress?(
     event: GestureResponderEvent,
@@ -561,6 +570,7 @@ export default class Bubble<
       containerStyle,
       wrapperStyle,
       bottomContainerStyle,
+      gradientWrapperStyle,
     } = this.props;
     const renderedReactions = this.renderReactions();
     return (
@@ -571,37 +581,74 @@ export default class Bubble<
           renderedReactions && { paddingBottom: 20 },
         ]}
       >
-        <View
-          style={[
-            styles[position].wrapper,
-            this.styledBubbleToNext(),
-            this.styledBubbleToPrevious(),
-            wrapperStyle && wrapperStyle[position],
-          ]}
-        >
-          <TouchableWithoutFeedback
-            onPress={this.onPress}
-            onLongPress={this.onLongPress}
-            accessibilityRole='text'
-            {...this.props.touchableProps}
+        {gradientWrapperStyle && gradientWrapperStyle[position] ? (
+          <LinearGradient
+            colors={(gradientWrapperStyle[position] as BubbleGradient).colors}
+            useAngle={true}
+            angle={(gradientWrapperStyle[position] as BubbleGradient).angle}
+            style={[
+              styles[position].wrapper,
+              this.styledBubbleToNext(),
+              this.styledBubbleToPrevious(),
+              wrapperStyle && wrapperStyle[position],
+            ]}
           >
-            <View>
-              {this.renderUsername()}
-              {this.renderBubbleContent()}
-              <View
-                style={[
-                  styles[position].bottom,
-                  bottomContainerStyle && bottomContainerStyle[position],
-                  renderedReactions && { paddingBottom: 8 },
-                ]}
-              >
-                {this.renderTime()}
-                {this.renderTicks()}
+            <TouchableWithoutFeedback
+              onPress={this.onPress}
+              onLongPress={this.onLongPress}
+              accessibilityRole='text'
+              {...this.props.touchableProps}
+            >
+              <View>
+                {this.renderUsername()}
+                {this.renderBubbleContent()}
+                <View
+                  style={[
+                    styles[position].bottom,
+                    bottomContainerStyle && bottomContainerStyle[position],
+                    renderedReactions && { paddingBottom: 8 },
+                  ]}
+                >
+                  {this.renderTime()}
+                  {this.renderTicks()}
+                </View>
+                {renderedReactions}
               </View>
-              {renderedReactions}
-            </View>
-          </TouchableWithoutFeedback>
-        </View>
+            </TouchableWithoutFeedback>
+          </LinearGradient>
+        ) : (
+          <View
+            style={[
+              styles[position].wrapper,
+              this.styledBubbleToNext(),
+              this.styledBubbleToPrevious(),
+              wrapperStyle && wrapperStyle[position],
+            ]}
+          >
+            <TouchableWithoutFeedback
+              onPress={this.onPress}
+              onLongPress={this.onLongPress}
+              accessibilityRole='text'
+              {...this.props.touchableProps}
+            >
+              <View>
+                {this.renderUsername()}
+                {this.renderBubbleContent()}
+                <View
+                  style={[
+                    styles[position].bottom,
+                    bottomContainerStyle && bottomContainerStyle[position],
+                    renderedReactions && { paddingBottom: 8 },
+                  ]}
+                >
+                  {this.renderTime()}
+                  {this.renderTicks()}
+                </View>
+                {renderedReactions}
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        )}
 
         {this.renderQuickReplies()}
       </View>
