@@ -105,9 +105,9 @@ const onMessageReceived = async (message: FirebaseMessagingTypes.RemoteMessage):
 
   await notifee.incrementBadgeCount();
 
-  // if (message.notification) {
-  //   return;
-  // }
+  if (message.notification) {
+    return;
+  }
 
   // If there's no "notification" object directly in the FCM message, it's a data message, and we handle it ourselve
   await notifee.displayNotification({

@@ -22,7 +22,6 @@ export const useInitialPushNotification = () => {
         (await messaging().getInitialNotification()) ||
         (await new Promise((resolve) => messaging().onNotificationOpenedApp(resolve)));
 
-      console.log('initialNotification', initialNotification);
       if (
         initialNotification &&
         initialNotification.data?.data &&
