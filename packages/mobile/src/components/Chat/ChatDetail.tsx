@@ -647,7 +647,8 @@ const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
           color: isDarkMode ? Colors.indigo[300] : Colors.indigo[500],
         },
         right: {
-          color: isDarkMode ? Colors.indigo[300] : Colors.indigo[500],
+          color: isDarkMode ? Colors.violet[100] : Colors.violet[100],
+          fontWeight: '500',
         },
       }}
       customTextStyle={
