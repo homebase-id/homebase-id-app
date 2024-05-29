@@ -1,4 +1,12 @@
-import { FlatList, Platform, StyleSheet, TextStyle, TouchableHighlight, View } from 'react-native';
+import {
+  FlatList,
+  Platform,
+  StyleSheet,
+  TextStyle,
+  TouchableHighlight,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { SafeAreaView } from '../../../components/ui/SafeAreaView/SafeAreaView';
 import { Text } from '../../../components/ui/Text/Text';
 import { Container } from '../../../components/ui/Container/Container';
@@ -6,7 +14,6 @@ import { Colors } from '../../../app/Colors';
 import { Divider } from '../../../components/ui/Divider';
 import React, { useCallback, useState } from 'react';
 import Dialog from 'react-native-dialog';
-import { TouchableOpacity } from 'react-native-gesture-handler';
 import { useDarkMode, useThemeMode } from '../../../hooks/useDarkMode';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ProfileStackParamList } from '../../../app/ProfileStack';
@@ -154,7 +161,7 @@ export const AppearancePage = ({ navigation }: AppearanceProp) => {
   );
 };
 
-function RadioButtonTile({
+const RadioButtonTile = ({
   isSelected,
   onPress,
   title,
@@ -162,33 +169,36 @@ function RadioButtonTile({
   isSelected: boolean;
   onPress: () => void;
   title: string;
-}) {
+}) => {
   const { isDarkMode } = useDarkMode();
-  const radioButton = () => (
-    <View
-      style={[
-        {
-          height: 24,
-          width: 24,
-          borderRadius: 12,
-          borderWidth: 2,
-          borderColor: isDarkMode ? Colors.indigo[700] : Colors.indigo[500],
-          alignItems: 'center',
-          justifyContent: 'center',
-        },
-      ]}
-    >
-      {isSelected ? (
-        <View
-          style={{
-            height: 12,
-            width: 12,
-            borderRadius: 6,
-            backgroundColor: isDarkMode ? Colors.indigo[700] : Colors.indigo[500],
-          }}
-        />
-      ) : null}
-    </View>
+  const radioButton = useCallback(
+    () => (
+      <View
+        style={[
+          {
+            height: 24,
+            width: 24,
+            borderRadius: 12,
+            borderWidth: 2,
+            borderColor: isDarkMode ? Colors.indigo[700] : Colors.indigo[500],
+            alignItems: 'center',
+            justifyContent: 'center',
+          },
+        ]}
+      >
+        {isSelected ? (
+          <View
+            style={{
+              height: 12,
+              width: 12,
+              borderRadius: 6,
+              backgroundColor: isDarkMode ? Colors.indigo[700] : Colors.indigo[500],
+            }}
+          />
+        ) : null}
+      </View>
+    ),
+    [isDarkMode, isSelected]
   );
   return (
     <TouchableOpacity
@@ -205,7 +215,7 @@ function RadioButtonTile({
       <Text>{title}</Text>
     </TouchableOpacity>
   );
-}
+};
 
 const styles = StyleSheet.create({
   tile: {
