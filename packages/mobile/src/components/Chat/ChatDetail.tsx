@@ -388,6 +388,7 @@ export const ChatDetail = memo(
         microphoneIcon,
       ]
     );
+
     useEffect(() => {
       if (replyMessage !== null && textRef.current) {
         textRef.current?.focus();
@@ -660,7 +661,7 @@ const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
           : deleted
             ? {
                 textDecorationLine: 'line-through',
-                color: Colors.gray[300],
+                color: props.position === 'left' ? Colors.gray[500] : Colors.gray[300],
               }
             : undefined
       }
@@ -903,7 +904,7 @@ const RenderReplyMessageView = memo((props: BubbleProps<ChatMessageIMessage>) =>
                 style={{
                   fontWeight: '600',
                   fontSize: 15,
-                  color: color.color(isDarkMode),
+                  color: color.color(props.position === 'right' ? true : isDarkMode),
                 }}
               >
                 {replyMessage?.fileMetadata.senderOdinId?.length > 0 ? (
@@ -917,7 +918,12 @@ const RenderReplyMessageView = memo((props: BubbleProps<ChatMessageIMessage>) =>
                 style={{
                   fontSize: 14,
                   marginTop: 4,
-                  color: isDarkMode ? Colors.slate[300] : Colors.slate[900],
+                  color:
+                    props.position === 'right'
+                      ? Colors.slate[300]
+                      : isDarkMode
+                        ? Colors.slate[300]
+                        : Colors.slate[900],
                 }}
               >
                 {replyMessage?.fileMetadata.appData.content.message || 'Media 📸'}
