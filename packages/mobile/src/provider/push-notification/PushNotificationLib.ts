@@ -46,8 +46,7 @@ export interface PushNotificationMessage {
 //
 
 export const initializePushNotificationSupport = async () => {
-  // console.debug('initializePushNotificationSupport');
-  messaging().onMessage(onMessageReceived);
+  messaging().onMessage(onForegroundMessageReceived);
   messaging().setBackgroundMessageHandler(onMessageReceived);
 
   // Android channels
@@ -61,20 +60,16 @@ export const initializePushNotificationSupport = async () => {
   await notifee.setNotificationCategories([
     {
       id: 'communications',
-      // actions: [
-      //   {
-      //     id: 'communication',
-      //     title: 'test',
-      //     input: true,
-      //   },
-      // ],
+      allowAnnouncement: true,
+      allowInCarPlay: true,
     },
   ]);
 };
 
 //
-
-const onMessageReceived = async (message: FirebaseMessagingTypes.RemoteMessage): Promise<void> => {
+const baseMessageParsing = async (
+  message: FirebaseMessagingTypes.RemoteMessage
+): Promise<PushNotificationMessage | undefined> => {
   console.log('FCM Message:', message);
 
   // Sanity #1 (yes, this can happen...)
@@ -83,48 +78,64 @@ const onMessageReceived = async (message: FirebaseMessagingTypes.RemoteMessage):
   }
 
   // Sanity #2
-  let notification: PushNotificationMessage;
   try {
-    notification = parseNotificationMessage(message);
+    const notification = parseNotificationMessage(message);
+    console.log('NOTIFICATION:', notification);
+
+    return notification;
   } catch (error) {
     console.error('Failed to parse notification message:', error);
     return;
   }
+};
+
+const onForegroundMessageReceived = async (
+  message: FirebaseMessagingTypes.RemoteMessage
+): Promise<void> => {
+  const notification = await baseMessageParsing(message);
+  if (!notification) return;
+
+  // TODO: Check if this one is needed
+  await notifee.incrementBadgeCount();
+};
+
+const onMessageReceived = async (message: FirebaseMessagingTypes.RemoteMessage): Promise<void> => {
+  const notification = await baseMessageParsing(message);
+  if (!notification) return;
 
   await notifee.incrementBadgeCount();
-  console.log('NOTIFICATION:', notification);
 
-  return await notifee
-    .displayNotification({
-      title: notification.data.appDisplayName,
-      body:
-        notification.data.options.unEncryptedMessage ||
-        `Received from ${notification.data.senderId}`,
-      android: {
-        channelId: 'default',
-        largeIcon: `https://${notification.data.senderId}/pub/image`,
-        smallIcon: 'ic_notification',
-        pressAction: {
-          id: 'default',
+  if (message.notification) {
+    return;
+  }
+
+  // If there's no "notification" object directly in the FCM message, it's a data message, and we handle it ourselve
+  await notifee.displayNotification({
+    title: notification.data.appDisplayName,
+    body:
+      notification.data.options.unEncryptedMessage || `Received from ${notification.data.senderId}`,
+    android: {
+      channelId: 'default',
+      largeIcon: `https://${notification.data.senderId}/pub/image`,
+      smallIcon: 'ic_notification',
+      pressAction: {
+        id: 'default',
+      },
+    },
+    ios: {
+      categoryId: 'communications',
+      communicationInfo: {
+        conversationId: notification.data.options.typeId,
+        sender: {
+          id: notification.data.senderId,
+          avatar: `https://${notification.data.senderId}/pub/image`,
+          displayName: notification.data.senderId,
         },
       },
-      ios: {
-        categoryId: 'communications',
-        communicationInfo: {
-          conversationId: notification.data.options.typeId,
-          sender: {
-            id: notification.data.senderId, // unique identifier to identify user i.e. userId, email address, social username, phone number
-            avatar: `https://${notification.data.senderId}/pub/image`,
-            displayName: 'Stef Coenen',
-          },
-        },
-      },
-    })
-    .then(() => {
-      return;
-    });
+    },
+  });
 
-  // return await Promise.resolve();
+  return;
 };
 
 export const parseNotificationMessage = (
