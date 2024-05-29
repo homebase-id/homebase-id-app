@@ -1,6 +1,6 @@
 import messaging, { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
 import { PushNotificationOptions } from '@youfoundation/js-lib/core';
-import notifee from '@notifee/react-native';
+import notifee, { AndroidVisibility } from '@notifee/react-native';
 
 //
 // CAVEATS GALORE!
@@ -49,6 +49,27 @@ export const initializePushNotificationSupport = async () => {
   // console.debug('initializePushNotificationSupport');
   messaging().onMessage(onMessageReceived);
   messaging().setBackgroundMessageHandler(onMessageReceived);
+
+  // Android channels
+  await notifee.createChannel({
+    id: 'default',
+    name: 'Primary Notifications',
+    visibility: AndroidVisibility.PRIVATE,
+  });
+
+  // iOS categories
+  await notifee.setNotificationCategories([
+    {
+      id: 'communications',
+      // actions: [
+      //   {
+      //     id: 'communication',
+      //     title: 'test',
+      //     input: true,
+      //   },
+      // ],
+    },
+  ]);
 };
 
 //
@@ -65,18 +86,46 @@ const onMessageReceived = async (message: FirebaseMessagingTypes.RemoteMessage):
   let notification: PushNotificationMessage;
   try {
     notification = parseNotificationMessage(message);
-    await notifee.incrementBadgeCount();
   } catch (error) {
     console.error('Failed to parse notification message:', error);
     return;
   }
 
+  await notifee.incrementBadgeCount();
   console.log('NOTIFICATION:', notification);
 
-  await Promise.resolve();
-};
+  return await notifee
+    .displayNotification({
+      title: notification.data.appDisplayName,
+      body:
+        notification.data.options.unEncryptedMessage ||
+        `Received from ${notification.data.senderId}`,
+      android: {
+        channelId: 'default',
+        largeIcon: `https://${notification.data.senderId}/pub/image`,
+        smallIcon: 'ic_notification',
+        pressAction: {
+          id: 'default',
+        },
+      },
+      ios: {
+        categoryId: 'communications',
+        communicationInfo: {
+          conversationId: notification.data.options.typeId,
+          sender: {
+            id: notification.data.senderId, // unique identifier to identify user i.e. userId, email address, social username, phone number
+            avatar: `https://${notification.data.senderId}/pub/image`,
+            displayName: 'Stef Coenen',
+          },
+        },
+      },
+    })
+    .then(() => {
+      return;
+    });
 
-//
+  // return await Promise.resolve();
+};
 
 export const parseNotificationMessage = (
   message: FirebaseMessagingTypes.RemoteMessage
