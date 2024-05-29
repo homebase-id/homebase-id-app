@@ -149,7 +149,26 @@ const TabBottom = createBottomTabNavigator<TabStackParamList>();
 const TabStack = memo(() => {
   const { isDarkMode } = useDarkMode();
 
-  const rootRoutes = ['Home', 'Feed', 'Chat', 'Profile', 'Conversation', 'NewChat', 'NewGroup'];
+  const rootRoutes = [
+    'Home',
+    'Feed',
+    'Chat',
+    'Profile',
+    // ChatStack
+    'Conversation',
+    'NewChat',
+    'NewGroup',
+    // ProfileStack
+    'Overview',
+    'Followers',
+    'ConnectionRequests',
+    'Appearance',
+    'ChatColorSettings',
+    'Connections',
+    'Following',
+    'DriveStatus',
+    'ConnectQr',
+  ];
   const { routeName } = useRouteContext();
   const hide = !routeName || !rootRoutes.includes(routeName);
   // TODO: Hide seems slow for the chat-page.. While actually it's the ChatScreen being slow in detecting it's correct size
