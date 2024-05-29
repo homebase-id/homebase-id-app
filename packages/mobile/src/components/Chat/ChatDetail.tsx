@@ -69,6 +69,7 @@ import { getLocales, uses24HourClock } from 'react-native-localize';
 import { type PastedFile } from '@mattermost/react-native-paste-input';
 import { useDraftMessage } from '../../hooks/chat/useDraftMessage';
 import { useBubbleContext } from '../BubbleContext/useBubbleContext';
+import { ChatMessageContent } from './Chat-Message-Content';
 
 export type ChatMessageIMessage = IMessage & HomebaseFile<ChatMessage>;
 
@@ -926,7 +927,7 @@ const RenderReplyMessageView = memo((props: BubbleProps<ChatMessageIMessage>) =>
                         : Colors.slate[900],
                 }}
               >
-                {replyMessage?.fileMetadata.appData.content.message || 'Media 📸'}
+                <ChatMessageContent {...replyMessage} />
               </Text>
             </>
           ) : (
