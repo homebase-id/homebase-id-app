@@ -293,6 +293,7 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
       // So for calculate the messages container height ignore keyboard height.
       return 0;
     }
+    // Keyboard Height - 336
 
     return keyboardHeightRef.current;
   };

@@ -1,6 +1,6 @@
 import { NewPayloadDescriptor, PayloadDescriptor, TargetDrive } from '@youfoundation/js-lib/core';
 import { memo, useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Platform, Pressable, StyleProp, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Platform, Pressable, StyleSheet, View } from 'react-native';
 import { Download, Pdf } from '../Icons/icons';
 import { Text } from '../Text/Text';
 import { getPayloadSize } from '../../../utils/utils';
@@ -9,7 +9,6 @@ import ReactNativeBlobUtil from 'react-native-blob-util';
 import { OdinBlob } from '../../../../polyfills/OdinBlob';
 import { Colors } from '../../../app/Colors';
 
-//TODO: Fix theme on Boring file
 export const BoringFile = memo(
   ({
     odinId,

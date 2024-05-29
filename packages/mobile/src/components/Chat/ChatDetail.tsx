@@ -942,23 +942,25 @@ const RenderReplyMessageView = memo((props: BubbleProps<ChatMessageIMessage>) =>
             </Text>
           )}
         </View>
-        {replyMessage && replyMessage.fileMetadata.payloads?.length > 0 && (
-          <OdinImage
-            fileId={replyMessage.fileId}
-            targetDrive={ChatDrive}
-            fileKey={replyMessage.fileMetadata.payloads[0].key}
-            previewThumbnail={replyMessage.fileMetadata.appData.previewThumbnail}
-            avoidPayload={true}
-            enableZoom={false}
-            style={{
-              flex: 1,
-            }}
-            imageSize={{
-              width: 60,
-              height: 60,
-            }}
-          />
-        )}
+        {replyMessage &&
+          replyMessage.fileMetadata.payloads?.length > 0 &&
+          replyMessage.fileMetadata.payloads[0].contentType.startsWith('image') && (
+            <OdinImage
+              fileId={replyMessage.fileId}
+              targetDrive={ChatDrive}
+              fileKey={replyMessage.fileMetadata.payloads[0].key}
+              previewThumbnail={replyMessage.fileMetadata.appData.previewThumbnail}
+              avoidPayload={true}
+              enableZoom={false}
+              style={{
+                flex: 1,
+              }}
+              imageSize={{
+                width: 60,
+                height: 60,
+              }}
+            />
+          )}
       </View>
     )
   );
