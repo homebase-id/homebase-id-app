@@ -80,7 +80,6 @@ export const OdinImage = memo(
       () => (fileId && fileKey ? getFromCache(odinId, fileId, fileKey, targetDrive) : undefined),
       [fileId, getFromCache, odinId, targetDrive, fileKey]
     );
-    console.log(fileId, cachedImage?.type);
 
     const embeddedThumbUrl = useMemo(() => {
       if (!previewThumbnail) return;
