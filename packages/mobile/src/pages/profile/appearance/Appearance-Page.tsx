@@ -1,21 +1,13 @@
-import {
-  Appearance,
-  FlatList,
-  Platform,
-  StyleSheet,
-  TextStyle,
-  TouchableHighlight,
-  View,
-} from 'react-native';
+import { FlatList, Platform, StyleSheet, TextStyle, TouchableHighlight, View } from 'react-native';
 import { SafeAreaView } from '../../../components/ui/SafeAreaView/SafeAreaView';
 import { Text } from '../../../components/ui/Text/Text';
 import { Container } from '../../../components/ui/Container/Container';
 import { Colors } from '../../../app/Colors';
 import { Divider } from '../../../components/ui/Divider';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import Dialog from 'react-native-dialog';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import { useDarkMode } from '../../../hooks/useDarkMode';
+import { useDarkMode, useThemeMode } from '../../../hooks/useDarkMode';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ProfileStackParamList } from '../../../app/ProfileStack';
 import { ChevronRight } from '../../../components/ui/Icons/icons';
@@ -31,24 +23,14 @@ type TileProp = {
 type AppearanceProp = NativeStackScreenProps<ProfileStackParamList, 'Appearance'>;
 
 export const AppearancePage = ({ navigation }: AppearanceProp) => {
-  const [theme, setTheme] = useState(Appearance.getColorScheme());
-  useEffect(() => {
-    const subscription = Appearance.addChangeListener(({ colorScheme }) => {
-      setTheme(colorScheme);
-    });
-
-    return subscription.remove;
-  }, []);
-
+  const { themeMode, setTheme } = useThemeMode();
   const [dialogVisible, setDialogVisible] = useState(false);
 
   const { isDarkMode } = useDarkMode();
-  let currTheme = theme === null && !theme ? 'System' : (theme as string);
-  currTheme = currTheme?.charAt(0).toUpperCase() + currTheme?.slice(1);
   const tiles: TileProp[] = [
     {
       title: 'Theme',
-      subtitle: `${currTheme}`,
+      subtitle: `${themeMode}`,
       onPress: () => {
         setDialogVisible(true);
       },
@@ -143,27 +125,26 @@ export const AppearancePage = ({ navigation }: AppearanceProp) => {
         <Dialog.Container visible={dialogVisible} onBackdropPress={() => setDialogVisible(false)}>
           <Dialog.Title>Theme</Dialog.Title>
           <RadioButtonTile
-            isSelected={theme === null || !theme}
+            isSelected={themeMode === 'System'}
             onPress={() => {
-              console.log('System');
               setDialogVisible(false);
-              Appearance.setColorScheme(null);
+              setTheme('System');
             }}
             title="System"
           />
           <RadioButtonTile
-            isSelected={theme === 'light'}
+            isSelected={themeMode === 'Light'}
             onPress={() => {
               setDialogVisible(false);
-              Appearance.setColorScheme('light');
+              setTheme('Light');
             }}
             title="Light"
           />
           <RadioButtonTile
-            isSelected={theme === 'dark'}
+            isSelected={themeMode === 'Dark'}
             onPress={() => {
               setDialogVisible(false);
-              Appearance.setColorScheme('dark');
+              setTheme('Dark');
             }}
             title="Dark"
           />
