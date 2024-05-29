@@ -36,7 +36,6 @@ export const ChatColorSettings = () => {
         );
       } else if (item.gradient) {
         const gradient = item.gradient;
-
         return (
           <TouchableOpacity onPress={() => setBubbleColor(item)}>
             <LinearGradient
