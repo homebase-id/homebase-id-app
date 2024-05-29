@@ -18,8 +18,11 @@ export const useInitialPushNotification = () => {
   const getInitialNotification = useCallback(() => {
     (async () => {
       const initialNotification =
+        (await notifee.getInitialNotification())?.notification ||
         (await messaging().getInitialNotification()) ||
         (await new Promise((resolve) => messaging().onNotificationOpenedApp(resolve)));
+
+      console.log('initialNotification', initialNotification);
       if (
         initialNotification &&
         initialNotification.data?.data &&
@@ -43,7 +46,6 @@ export const useInitialPushNotification = () => {
         // Dismisses all notifications when the app is opened
         notifee.cancelAllNotifications();
         notifee.setBadgeCount(0);
-
       }
     });
     return () => listener.remove();

@@ -105,15 +105,17 @@ const onMessageReceived = async (message: FirebaseMessagingTypes.RemoteMessage):
 
   await notifee.incrementBadgeCount();
 
-  if (message.notification) {
-    return;
-  }
+  // if (message.notification) {
+  //   return;
+  // }
 
   // If there's no "notification" object directly in the FCM message, it's a data message, and we handle it ourselve
   await notifee.displayNotification({
     title: notification.data.appDisplayName,
     body:
       notification.data.options.unEncryptedMessage || `Received from ${notification.data.senderId}`,
+    // Keeps them backwards compatible with the OOTB push notifications within FCM
+    data: { data: JSON.stringify(notification.data) },
     android: {
       channelId: 'default',
       largeIcon: `https://${notification.data.senderId}/pub/image`,
