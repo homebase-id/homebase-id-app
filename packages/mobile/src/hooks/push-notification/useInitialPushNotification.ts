@@ -7,34 +7,41 @@ import { PushNotification } from '@youfoundation/js-lib/core';
 import { useDotYouClientContext } from 'feed-app-common';
 import { useCallback, useEffect } from 'react';
 import { ChatStackParamList } from '../../app/ChatStack';
-import notifee from '@notifee/react-native';
-import { AppState } from 'react-native';
+import notifee, { Event, EventType } from '@notifee/react-native';
+import { AppState, Platform } from 'react-native';
 
 export const useInitialPushNotification = () => {
   const identity = useDotYouClientContext().getIdentity();
   const chatNavigator = useNavigation<NavigationProp<ChatStackParamList>>();
   const feedNavigator = useNavigation<NavigationProp<TabStackParamList>>();
 
+  const handleInitialNotification = useCallback(
+    async (stringifiedData: string) => {
+      const notification: PushNotification = tryJsonParse<PushNotification>(stringifiedData);
+      if (notification) {
+        await notifee.decrementBadgeCount();
+        navigateOnNotification(notification, identity, chatNavigator, feedNavigator);
+      }
+    },
+    [chatNavigator, feedNavigator, identity]
+  );
+
   const getInitialNotification = useCallback(() => {
     (async () => {
       const initialNotification =
+        (await notifee.getInitialNotification())?.notification ||
         (await messaging().getInitialNotification()) ||
         (await new Promise((resolve) => messaging().onNotificationOpenedApp(resolve)));
+
       if (
         initialNotification &&
         initialNotification.data?.data &&
         typeof initialNotification.data.data === 'string'
       ) {
-        const notification: PushNotification = tryJsonParse<PushNotification>(
-          initialNotification.data.data
-        );
-        if (notification) {
-          await notifee.decrementBadgeCount();
-          navigateOnNotification(notification, identity, chatNavigator, feedNavigator);
-        }
+        handleInitialNotification(initialNotification.data.data);
       }
     })();
-  }, [chatNavigator, feedNavigator, identity]);
+  }, [handleInitialNotification]);
 
   useEffect(() => {
     const listener = AppState.addEventListener('change', (state) => {
@@ -43,9 +50,26 @@ export const useInitialPushNotification = () => {
         // Dismisses all notifications when the app is opened
         notifee.cancelAllNotifications();
         notifee.setBadgeCount(0);
-
       }
     });
     return () => listener.remove();
   }, [getInitialNotification]);
+
+  useEffect(() => {
+    if (Platform.OS === 'ios') {
+      notifee.onForegroundEvent(async (event: Event) => {
+        if (event.type === EventType.PRESS) {
+          console.log('onForegroundEvent', event.detail.notification?.data?.data);
+          if (
+            event.detail &&
+            event.detail.notification &&
+            event.detail.notification.data?.data &&
+            typeof event.detail.notification.data?.data === 'string'
+          ) {
+            await handleInitialNotification(event.detail.notification.data.data);
+          }
+        }
+      });
+    }
+  }, [handleInitialNotification]);
 };

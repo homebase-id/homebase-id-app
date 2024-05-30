@@ -39,12 +39,30 @@
 	<true/>
 	<key>NSAppTransportSecurity</key>
 	<dict>
+		<key>CFBundleURLTypes</key>
+		<array>
+			<dict>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<string>homebase-fchat</string>
+				</array>
+			</dict>
+		</array>
+		<key>CodePushDeploymentKey</key>
+		<string>kYy4LXVHAvCCB4y_S548eV-7elorkgGinETxN</string>
 		<key>NSAllowsArbitraryLoads</key>
 		<false/>
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
+		<key>NSCameraUsageDescription</key>
+		<string>$(PRODUCT_NAME) would like access to your camera to take secure photos and
+		video.</string>
 		<key>NSLocationWhenInUseUsageDescription</key>
 		<string></string>
+		<key>NSMicrophoneUsageDescription</key>
+		<string>$(PRODUCT_NAME) would like access to microphone to record audio</string>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>${PRODUCT_NAME} would like to access gallery</string>
 		<key>UILaunchStoryboardName</key>
 		<string>LaunchScreen</string>
 		<key>UIRequiredDeviceCapabilities</key>
@@ -59,33 +77,19 @@
 		</array>
 		<key>UIViewControllerBasedStatusBarAppearance</key>
 		<true/>
-		<key>CFBundleURLTypes</key>
-		<array>
-			<dict>
-				<key>CFBundleURLSchemes</key>
-				<array>
-					<string>homebase-fchat</string>
-				</array>
-			</dict>
-		</array>
-		<key>NSMicrophoneUsageDescription</key>
-		<string>$(PRODUCT_NAME) would like access to microphone to record audio</string>
-		<key>NSCameraUsageDescription</key>
-		<string>$(PRODUCT_NAME) would like access to your camera to take secure photos and
-		video.</string>
-		<key>NSPhotoLibraryUsageDescription</key>
-		<string>${PRODUCT_NAME} would like to access gallery</string>
-		<key>CodePushDeploymentKey</key>
-		<string>kYy4LXVHAvCCB4y_S548eV-7elorkgGinETxN</string>
 	</dict>
+	<key>NSUserActivityTypes</key>
+	<array>
+		<string>INSendMessageIntent</string>
+	</array>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>${PRODUCT_NAME} would like to access audio to share it into the app</string>
 	<key>NSCameraUsageDescription</key>
 	<string>$(PRODUCT_NAME) would like access to your camera to take secure photos and video.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string></string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>$(PRODUCT_NAME) would like access to microphone to record audio</string>
-	<key>NSAppleMusicUsageDescription</key>
-	<string>${PRODUCT_NAME} would like to access audio to share it into the app</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>${PRODUCT_NAME} would like to access gallery</string>
 	<key>UIBackgroundModes</key>
