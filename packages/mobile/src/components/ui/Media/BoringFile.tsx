@@ -42,7 +42,7 @@ export const BoringFile = memo(
         } else if (Platform.OS === 'android') {
           try {
             await ReactNativeBlobUtil.android.actionViewIntent(
-              uri,
+              uri.replace('file://', ''), // Android requires the file path without the file:// prefix
               blob?.type || payload?.type || 'application/pdf'
             );
           } catch (error) {
