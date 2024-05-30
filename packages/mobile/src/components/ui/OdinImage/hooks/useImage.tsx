@@ -28,7 +28,7 @@ const useImage = (props?: {
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
 
-  const checkIfWeHaveLargerCachedImage = async (
+  const checkIfWeHaveLargerCachedImage = (
     odinId: string | undefined,
     imageFileId: string,
     imageFileKey: string,
@@ -71,10 +71,7 @@ const useImage = (props?: {
         }
       });
 
-    // We only return it, if the file still exists on disk
-    const cachedData =
-      cachedEntry && queryClient.getQueryData<ImageData | undefined>(cachedEntry.queryKey);
-    if (cachedData && (await exists(cachedData.url))) return cachedEntry;
+    if (cachedEntry) return cachedEntry;
 
     return null;
   };
@@ -98,7 +95,7 @@ const useImage = (props?: {
       return null;
     }
 
-    const cachedEntry = await checkIfWeHaveLargerCachedImage(
+    const cachedEntry = checkIfWeHaveLargerCachedImage(
       odinId,
       imageFileId,
       imageFileKey,
@@ -167,6 +164,20 @@ const useImage = (props?: {
       imageDrive: TargetDrive,
       size?: ImageSize
     ) => {
+      const largerCache = checkIfWeHaveLargerCachedImage(
+        odinId,
+        imageFileId,
+        imageFileKey,
+        imageDrive,
+        size
+      );
+      if (largerCache) {
+        return {
+          size: largerCache?.size,
+          imageData: queryClient.getQueryData<ImageData | undefined>(largerCache?.queryKey),
+        };
+      }
+
       const cachedEntries = queryClient
         .getQueryCache()
         .findAll({
@@ -176,45 +187,41 @@ const useImage = (props?: {
         .filter((query) => query.state.status === 'success');
 
       if (cachedEntries?.length) {
-        const cachedEntriesWithSize = cachedEntries.map((entry) => {
-          const sizeParts = (entry.queryKey[5] as string)?.split('x');
-          const size = sizeParts
-            ? {
-                pixelHeight: parseInt(sizeParts[0]),
-                pixelWidth: parseInt(sizeParts[1]),
-              }
-            : undefined;
-
-          return {
-            ...entry,
-            size,
-          };
-        });
-        if (size) {
-          const cachedEntry = cachedEntriesWithSize
-            .filter((entry) => !!entry.size)
-            .find((entry) => {
-              if (
-                entry.size &&
-                (entry.size.pixelHeight >= size.pixelHeight ||
-                  entry.size.pixelWidth >= size.pixelWidth)
-              ) {
-                return true;
-              }
-            });
-          if (cachedEntry) {
-            return {
-              size: cachedEntry.size,
-              imageData: queryClient.getQueryData<ImageData | undefined>(cachedEntry.queryKey),
-            };
-          }
-        }
-
         return {
           size: undefined,
           imageData: queryClient.getQueryData<ImageData | undefined>(cachedEntries[0].queryKey),
         };
       }
+    },
+    invalidateCache: (
+      odinId: string | undefined,
+      imageFileId: string | undefined,
+      imageFileKey: string | undefined,
+      imageDrive: TargetDrive,
+      size?: ImageSize
+    ) => {
+      if (
+        imageFileId === undefined ||
+        imageFileId === '' ||
+        !imageDrive ||
+        !imageFileKey ||
+        !authToken
+      ) {
+        return null;
+      }
+      const queryKey = [
+        'image',
+        odinId || '',
+        imageDrive?.alias,
+        imageFileId,
+        imageFileKey,
+        // Rounding the cache key of the size so close enough sizes will be cached together
+        size
+          ? `${Math.round(size.pixelHeight / 25) * 25}x${Math.round(size?.pixelWidth / 25) * 25}`
+          : undefined,
+        lastModified,
+      ];
+      queryClient.invalidateQueries({ queryKey, exact: true });
     },
   };
 };
