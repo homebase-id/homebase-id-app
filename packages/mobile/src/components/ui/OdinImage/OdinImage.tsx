@@ -77,8 +77,11 @@ export const OdinImage = memo(
 
     const { getFromCache } = useImage();
     const cachedImage = useMemo(
-      () => (fileId && fileKey ? getFromCache(odinId, fileId, fileKey, targetDrive) : undefined),
-      [fileId, getFromCache, odinId, targetDrive, fileKey]
+      () =>
+        fileId && fileKey
+          ? getFromCache(odinId, fileId, fileKey, targetDrive, loadSize)
+          : undefined,
+      [fileId, fileKey, getFromCache, odinId, targetDrive, loadSize]
     );
 
     const embeddedThumbUrl = useMemo(() => {
@@ -95,22 +98,32 @@ export const OdinImage = memo(
       imageDrive: targetDrive,
     });
 
-    const previewUrl = cachedImage?.url || embeddedThumbUrl || tinyThumb?.url;
+    const previewUrl = cachedImage?.imageData?.url || embeddedThumbUrl || tinyThumb?.url;
     const previewContentType =
-      cachedImage?.type || previewThumbnail?.contentType || tinyThumb?.contentType;
+      cachedImage?.imageData?.type || previewThumbnail?.contentType || tinyThumb?.contentType;
 
     const naturalSize: ImageSize | undefined = tinyThumb
       ? {
           pixelHeight: tinyThumb.naturalSize.height,
           pixelWidth: tinyThumb.naturalSize.width,
         }
-      : cachedImage?.naturalSize || previewThumbnail;
+      : cachedImage?.imageData?.naturalSize || previewThumbnail;
+
+    const cachedImageSizeSameorGreater = useMemo(
+      () =>
+        (cachedImage?.size &&
+          loadSize &&
+          (cachedImage.size.pixelHeight >= loadSize.pixelHeight ||
+            cachedImage.size.pixelWidth >= loadSize.pixelWidth)) ||
+        false,
+      [cachedImage?.size, loadSize]
+    );
 
     const {
       fetch: { data: imageData },
     } = useImage({
       odinId,
-      imageFileId: fileId,
+      imageFileId: cachedImageSizeSameorGreater ? undefined : fileId,
       imageFileKey: fileKey,
       imageDrive: targetDrive,
       size: loadSize,
@@ -118,7 +131,8 @@ export const OdinImage = memo(
       lastModified,
     });
 
-    const hasCachedImage = !!cachedImage?.url;
+    const hasCachedImage = !!cachedImage?.imageData?.url;
+
     return (
       <>
         <View

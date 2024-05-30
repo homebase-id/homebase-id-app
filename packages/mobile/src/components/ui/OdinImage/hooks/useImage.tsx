@@ -65,8 +65,7 @@ const useImage = (props?: {
       .find((entry) => {
         if (
           entry.size &&
-          entry.size.pixelHeight >= size.pixelHeight &&
-          entry.size.pixelWidth >= size.pixelWidth
+          (entry.size.pixelHeight >= size.pixelHeight || entry.size.pixelWidth >= size.pixelWidth)
         ) {
           return true;
         }
@@ -165,7 +164,8 @@ const useImage = (props?: {
       odinId: string | undefined,
       imageFileId: string,
       imageFileKey: string,
-      imageDrive: TargetDrive
+      imageDrive: TargetDrive,
+      size?: ImageSize
     ) => {
       const cachedEntries = queryClient
         .getQueryCache()
@@ -176,7 +176,44 @@ const useImage = (props?: {
         .filter((query) => query.state.status === 'success');
 
       if (cachedEntries?.length) {
-        return queryClient.getQueryData<ImageData | undefined>(cachedEntries[0].queryKey);
+        const cachedEntriesWithSize = cachedEntries.map((entry) => {
+          const sizeParts = (entry.queryKey[5] as string)?.split('x');
+          const size = sizeParts
+            ? {
+                pixelHeight: parseInt(sizeParts[0]),
+                pixelWidth: parseInt(sizeParts[1]),
+              }
+            : undefined;
+
+          return {
+            ...entry,
+            size,
+          };
+        });
+        if (size) {
+          const cachedEntry = cachedEntriesWithSize
+            .filter((entry) => !!entry.size)
+            .find((entry) => {
+              if (
+                entry.size &&
+                (entry.size.pixelHeight >= size.pixelHeight ||
+                  entry.size.pixelWidth >= size.pixelWidth)
+              ) {
+                return true;
+              }
+            });
+          if (cachedEntry) {
+            return {
+              size: cachedEntry.size,
+              imageData: queryClient.getQueryData<ImageData | undefined>(cachedEntry.queryKey),
+            };
+          }
+        }
+
+        return {
+          size: undefined,
+          imageData: queryClient.getQueryData<ImageData | undefined>(cachedEntries[0].queryKey),
+        };
       }
     },
   };
