@@ -111,6 +111,7 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
     });
     await queryClient.invalidateQueries({ queryKey: ['chat-messages'], exact: false });
     await queryClient.invalidateQueries({ queryKey: ['conversations'] });
+    await queryClient.invalidateQueries({ queryKey: ['connections'] });
 
     if (noContacts) {
       refetch();
