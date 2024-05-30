@@ -41,6 +41,7 @@ const MediaMessage = memo(
     if (!props.currentMessage || !props.currentMessage.fileMetadata.payloads?.length) return null;
     const { currentMessage } = props;
     const payloads = currentMessage.fileMetadata.payloads;
+    const isMe = currentMessage.fileMetadata.senderOdinId === '';
 
     if (payloads.length === 1) {
       const previewThumbnail = currentMessage.fileMetadata.appData.previewThumbnail;
@@ -62,6 +63,7 @@ const MediaMessage = memo(
             width: newWidth,
             height: newHeight,
           }}
+          position={isMe ? 'right' : 'left'}
           fit={'contain'}
           containerStyle={props.containerStyle}
           onLongPress={(e) => onLongPress(e, currentMessage)}
@@ -182,12 +184,14 @@ const InnerMediaItem = ({
   onLongPress,
   fit,
   onClick,
+  position,
 }: {
   payload: PayloadDescriptor | NewPayloadDescriptor;
   msg: ChatMessageIMessage;
   containerStyle?: StyleProp<ViewStyle>;
   style?: ImageStyle;
   fit?: 'cover' | 'contain';
+  position?: 'left' | 'right';
   imageSize:
     | {
         width: number;
@@ -265,7 +269,13 @@ const InnerMediaItem = ({
   }
   if (payload.contentType.startsWith('application/')) {
     return (
-      <BoringFile file={payload} fileId={msg.fileId} targetDrive={ChatDrive} odinId={undefined} />
+      <BoringFile
+        file={payload}
+        fileId={msg.fileId}
+        targetDrive={ChatDrive}
+        odinId={undefined}
+        overwriteTextColor={position && position === 'right'}
+      />
     );
   } else {
     return (

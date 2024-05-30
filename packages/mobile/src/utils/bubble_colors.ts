@@ -16,16 +16,14 @@ export type ChatColor = {
 };
 
 
-//TODO: Fix the gradient angles
 const createGradient = (colors: string[], angle: number): Gradient => {
     const start = { x: 0.5 - 0.5 * Math.cos(angle), y: 0.5 - 0.5 * Math.sin(angle) };
     const end = { x: 0.5 + 0.5 * Math.cos(angle), y: 0.5 + 0.5 * Math.sin(angle) };
-    // const angleRadians = parseAngleDegreesFromSpec(angle);
     return {
         colors: colors,
         start,
         end,
-        angle,
+        angle: angle,
     };
 };
 
@@ -116,55 +114,55 @@ const ChatColorValues = {
     },
     ember: {
         id: 'Ember',
-        gradient: createGradient(['#E57C00', '#5e0000'], ((162 - 180) / 180) * Math.PI),
+        gradient: createGradient(['#E57C00', '#5e0000'], 168),
         isBuiltIn: true,
         creationTimestamp: 13,
     },
     midnight: {
         id: 'Midnight',
-        gradient: createGradient(['#2C2C3A', '#787891'], ((180 - 180) / 180) * Math.PI),
+        gradient: createGradient(['#2C2C3A', '#787891'], 180),
         isBuiltIn: true,
         creationTimestamp: 14,
     },
     infrared: {
         id: 'Infrared',
-        gradient: createGradient(['#F65560', '#442CED'], ((192 - 180) / 180) * Math.PI),
+        gradient: createGradient(['#F65560', '#442CED'], 192),
         isBuiltIn: true,
         creationTimestamp: 15,
     },
     lagoon: {
         id: 'Lagoon',
-        gradient: createGradient(['#004066', '#32867D'], ((180 - 180) / 180) * Math.PI),
+        gradient: createGradient(['#004066', '#32867D'], 180),
         isBuiltIn: true,
         creationTimestamp: 16,
     },
     fluorescent: {
         id: 'Fluorescent',
-        gradient: createGradient(['#EC13DD', '#1B36C6'], ((192 - 180) / 180) * Math.PI),
+        gradient: createGradient(['#EC13DD', '#1B36C6'], 192),
         isBuiltIn: true,
         creationTimestamp: 17,
     },
     basil: {
         id: 'Basil',
-        gradient: createGradient(['#2F9373', '#077343'], ((180 - 180) / 180) * Math.PI),
+        gradient: createGradient(['#2F9373', '#077343'], 180),
         isBuiltIn: true,
         creationTimestamp: 18,
     },
     sublime: {
         id: 'Sublime',
-        gradient: createGradient(['#6281D5', '#974460'], ((180 - 180) / 180) * Math.PI),
+        gradient: createGradient(['#6281D5', '#974460'], 180),
         isBuiltIn: true,
         creationTimestamp: 19,
     },
     sea: {
         id: 'Sea',
-        gradient: createGradient(['#498FD4', '#2C66A0'], ((180 - 180) / 180) * Math.PI),
+        gradient: createGradient(['#498FD4', '#2C66A0'], 180),
         isBuiltIn: true,
         creationTimestamp: 20,
     },
     tangerine: {
         id: 'Tangerine',
-        gradient: createGradient(['#DB7133', '#911231'], ((192 - 180) / 180) * Math.PI),
+        gradient: createGradient(['#DB7133', '#911231'], 192),
         isBuiltIn: true,
         creationTimestamp: 21,
     },

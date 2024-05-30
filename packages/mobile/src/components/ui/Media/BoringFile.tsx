@@ -1,12 +1,13 @@
 import { NewPayloadDescriptor, PayloadDescriptor, TargetDrive } from '@youfoundation/js-lib/core';
 import { memo, useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Platform, Pressable, View } from 'react-native';
+import { ActivityIndicator, Platform, Pressable, StyleSheet, View } from 'react-native';
 import { Download, Pdf } from '../Icons/icons';
 import { Text } from '../Text/Text';
 import { getPayloadSize } from '../../../utils/utils';
 import { useFile } from '../../../hooks/file/useFile';
 import ReactNativeBlobUtil from 'react-native-blob-util';
 import { OdinBlob } from '../../../../polyfills/OdinBlob';
+import { Colors } from '../../../app/Colors';
 
 export const BoringFile = memo(
   ({
@@ -14,10 +15,12 @@ export const BoringFile = memo(
     targetDrive,
     fileId,
     file,
+    overwriteTextColor,
   }: {
     odinId: string | undefined;
     targetDrive: TargetDrive;
     fileId: string;
+    overwriteTextColor?: boolean;
     file: PayloadDescriptor | NewPayloadDescriptor;
   }) => {
     const { fetchFile, downloadFile } = useFile({ targetDrive });
@@ -74,6 +77,7 @@ export const BoringFile = memo(
       if (!blob) {
         prefetchFile();
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [blob, file.contentType, fileId]);
 
     return (
@@ -85,7 +89,7 @@ export const BoringFile = memo(
             padding: 12,
           }}
         >
-          <Pdf />
+          <Pdf color={overwriteTextColor ? Colors.white : undefined} />
           <View
             style={{
               marginLeft: 12,
@@ -95,14 +99,19 @@ export const BoringFile = memo(
             }}
           >
             <Text
-              style={{
-                fontSize: 16,
-              }}
+              style={StyleSheet.flatten([
+                {
+                  fontSize: 16,
+                },
+                overwriteTextColor ? { color: Colors.white } : {},
+              ])}
             >
               {getPayloadSize(file.bytesWritten || 0)}
             </Text>
-            {!blob && !loading && <Download />}
-            {loading && <ActivityIndicator />}
+            {!blob && !loading && (
+              <Download color={overwriteTextColor ? Colors.white : undefined} />
+            )}
+            {loading && <ActivityIndicator color={overwriteTextColor ? Colors.white : undefined} />}
           </View>
         </View>
       </Pressable>

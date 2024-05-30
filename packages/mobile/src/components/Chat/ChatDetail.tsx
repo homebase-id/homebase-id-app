@@ -69,6 +69,7 @@ import { getLocales, uses24HourClock } from 'react-native-localize';
 import { type PastedFile } from '@mattermost/react-native-paste-input';
 import { useDraftMessage } from '../../hooks/chat/useDraftMessage';
 import { useBubbleContext } from '../BubbleContext/useBubbleContext';
+import { ChatMessageContent } from './Chat-Message-Content';
 
 export type ChatMessageIMessage = IMessage & HomebaseFile<ChatMessage>;
 
@@ -388,6 +389,7 @@ export const ChatDetail = memo(
         microphoneIcon,
       ]
     );
+
     useEffect(() => {
       if (replyMessage !== null && textRef.current) {
         textRef.current?.focus();
@@ -647,7 +649,8 @@ const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
           color: isDarkMode ? Colors.indigo[300] : Colors.indigo[500],
         },
         right: {
-          color: isDarkMode ? Colors.indigo[300] : Colors.indigo[500],
+          color: isDarkMode ? Colors.violet[100] : Colors.violet[100],
+          fontWeight: '500',
         },
       }}
       customTextStyle={
@@ -659,7 +662,7 @@ const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
           : deleted
             ? {
                 textDecorationLine: 'line-through',
-                color: Colors.gray[300],
+                color: props.position === 'left' ? Colors.gray[500] : Colors.gray[300],
               }
             : undefined
       }
@@ -902,7 +905,7 @@ const RenderReplyMessageView = memo((props: BubbleProps<ChatMessageIMessage>) =>
                 style={{
                   fontWeight: '600',
                   fontSize: 15,
-                  color: color.color(isDarkMode),
+                  color: color.color(props.position === 'right' ? true : isDarkMode),
                 }}
               >
                 {replyMessage?.fileMetadata.senderOdinId?.length > 0 ? (
@@ -916,10 +919,15 @@ const RenderReplyMessageView = memo((props: BubbleProps<ChatMessageIMessage>) =>
                 style={{
                   fontSize: 14,
                   marginTop: 4,
-                  color: isDarkMode ? Colors.slate[300] : Colors.slate[900],
+                  color:
+                    props.position === 'right'
+                      ? Colors.slate[300]
+                      : isDarkMode
+                        ? Colors.slate[300]
+                        : Colors.slate[900],
                 }}
               >
-                {replyMessage?.fileMetadata.appData.content.message || 'Media 📸'}
+                <ChatMessageContent {...replyMessage} />
               </Text>
             </>
           ) : (
@@ -934,23 +942,25 @@ const RenderReplyMessageView = memo((props: BubbleProps<ChatMessageIMessage>) =>
             </Text>
           )}
         </View>
-        {replyMessage && replyMessage.fileMetadata.payloads?.length > 0 && (
-          <OdinImage
-            fileId={replyMessage.fileId}
-            targetDrive={ChatDrive}
-            fileKey={replyMessage.fileMetadata.payloads[0].key}
-            previewThumbnail={replyMessage.fileMetadata.appData.previewThumbnail}
-            avoidPayload={true}
-            enableZoom={false}
-            style={{
-              flex: 1,
-            }}
-            imageSize={{
-              width: 60,
-              height: 60,
-            }}
-          />
-        )}
+        {replyMessage &&
+          replyMessage.fileMetadata.payloads?.length > 0 &&
+          replyMessage.fileMetadata.payloads[0].contentType.startsWith('image') && (
+            <OdinImage
+              fileId={replyMessage.fileId}
+              targetDrive={ChatDrive}
+              fileKey={replyMessage.fileMetadata.payloads[0].key}
+              previewThumbnail={replyMessage.fileMetadata.appData.previewThumbnail}
+              avoidPayload={true}
+              enableZoom={false}
+              style={{
+                flex: 1,
+              }}
+              imageSize={{
+                width: 60,
+                height: 60,
+              }}
+            />
+          )}
       </View>
     )
   );

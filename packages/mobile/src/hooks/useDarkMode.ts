@@ -1,38 +1,44 @@
 
-import { useColorScheme } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useEffect, useState } from 'react';
+import { Appearance, ColorSchemeName, useColorScheme } from 'react-native';
 
-// const LOCALSTORAGE_KEY = 'prefersDark';
-export const IS_DARK_CLASSNAME = 'dark';
+export type ThemeMode = 'System' | 'Light' | 'Dark';
+const THEME = 'theme';
 
 export const useDarkMode = () => {
   const prefersDarkMode = useColorScheme() === 'dark';
 
-  // const localPreference = localStorage.getItem(LOCALSTORAGE_KEY);
-
-  const finalChoice =
-    // localPreference !== undefined ? localPreference === '1' :
-    prefersDarkMode;
-
-  // const setDocumentClass = (isDarkMode: boolean) => {
-  //   if (isDarkMode) {
-  //     document.documentElement.classList.add(IS_DARK_CLASSNAME);
-  //   } else {
-  //     document.documentElement.classList.remove(IS_DARK_CLASSNAME);
-  //   }
-  // };
-
-  // setDocumentClass(finalChoice);
-
-  // const toggleDarkMode = () => {
-  //   const wasDarkMode =
-  //     document.documentElement.classList.contains(IS_DARK_CLASSNAME);
-
-  //   localStorage.setItem(LOCALSTORAGE_KEY, wasDarkMode ? '0' : '1');
-  //   setDocumentClass(!wasDarkMode);
-  // };
+  const finalChoice = prefersDarkMode;
 
   return {
-    // toggleDarkMode,
     isDarkMode: finalChoice,
+  };
+};
+
+export const useThemeMode = () => {
+
+  // const localPreference = localStorage.getItem(LOCALSTORAGE_KEY);
+  const [themeMode, setThemeMode] = useState<ThemeMode>('System');
+
+  const setTheme = (theme: ThemeMode) => {
+    setThemeMode(theme);
+    AsyncStorage.setItem(THEME, theme);
+    const newTheme = (theme === 'System' ? null : theme.toLowerCase()) as ColorSchemeName | null | undefined;
+    Appearance.setColorScheme(newTheme);
+  };
+
+  useEffect(() => {
+    AsyncStorage.getItem(THEME).then((theme) => {
+      if (theme) {
+        setThemeMode(theme as ThemeMode);
+      }
+    });
+
+  }, []);
+
+  return {
+    themeMode,
+    setTheme,
   };
 };
