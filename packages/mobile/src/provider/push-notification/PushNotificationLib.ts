@@ -47,7 +47,7 @@ export interface PushNotificationMessage {
 
 export const initializePushNotificationSupport = async () => {
   messaging().onMessage(onForegroundMessageReceived);
-  messaging().setBackgroundMessageHandler(onMessageReceived);
+  messaging().setBackgroundMessageHandler(onBackgroundMessageReceived);
 
   // Android channels
   await notifee.createChannel({
@@ -99,7 +99,9 @@ const onForegroundMessageReceived = async (
   await notifee.incrementBadgeCount();
 };
 
-const onMessageReceived = async (message: FirebaseMessagingTypes.RemoteMessage): Promise<void> => {
+const onBackgroundMessageReceived = async (
+  message: FirebaseMessagingTypes.RemoteMessage
+): Promise<void> => {
   const notification = await baseMessageParsing(message);
   if (!notification) return;
 
