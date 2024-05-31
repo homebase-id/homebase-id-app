@@ -28,6 +28,28 @@ const useImage = (props?: {
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
 
+  function queryKeyBuilder(
+    odinId: string | undefined,
+    imageFileId: string | undefined,
+    imageFileKey: string | undefined,
+    imageDrive: TargetDrive | undefined,
+    size?: ImageSize,
+    lastModified?: number
+  ) {
+    return [
+      'image',
+      odinId || '',
+      imageDrive?.alias,
+      imageFileId,
+      imageFileKey,
+      // Rounding the cache key of the size so close enough sizes will be cached together
+      size
+        ? `${Math.round(size.pixelHeight / 25) * 25}x${Math.round(size?.pixelWidth / 25) * 25}`
+        : undefined,
+      lastModified,
+    ];
+  }
+
   const checkIfWeHaveLargerCachedImage = (
     odinId: string | undefined,
     imageFileId: string,
@@ -38,7 +60,7 @@ const useImage = (props?: {
     const cachedEntries = queryClient
       .getQueryCache()
       .findAll({
-        queryKey: ['image', odinId || '', imageDrive?.alias, imageFileId, imageFileKey],
+        queryKey: queryKeyBuilder(odinId, imageFileId, imageFileKey, imageDrive),
         exact: false,
       })
       .filter((query) => query.state.status !== 'error');
@@ -130,18 +152,7 @@ const useImage = (props?: {
 
   return {
     fetch: useQuery({
-      queryKey: [
-        'image',
-        odinId || '',
-        imageDrive?.alias,
-        imageFileId,
-        imageFileKey,
-        // Rounding the cache key of the size so close enough sizes will be cached together
-        size
-          ? `${Math.round(size.pixelHeight / 25) * 25}x${Math.round(size?.pixelWidth / 25) * 25}`
-          : undefined,
-        lastModified,
-      ],
+      queryKey: queryKeyBuilder(odinId, imageFileId, imageFileKey, imageDrive, size, lastModified),
       queryFn: () =>
         fetchImageData(
           odinId,
@@ -181,7 +192,7 @@ const useImage = (props?: {
       const cachedEntries = queryClient
         .getQueryCache()
         .findAll({
-          queryKey: ['image', odinId || '', imageDrive?.alias, imageFileId, imageFileKey],
+          queryKey: queryKeyBuilder(odinId, imageFileId, imageFileKey, imageDrive),
           exact: false,
         })
         .filter((query) => query.state.status === 'success');
@@ -209,18 +220,7 @@ const useImage = (props?: {
       ) {
         return null;
       }
-      const queryKey = [
-        'image',
-        odinId || '',
-        imageDrive?.alias,
-        imageFileId,
-        imageFileKey,
-        // Rounding the cache key of the size so close enough sizes will be cached together
-        size
-          ? `${Math.round(size.pixelHeight / 25) * 25}x${Math.round(size?.pixelWidth / 25) * 25}`
-          : undefined,
-        lastModified,
-      ];
+      const queryKey = queryKeyBuilder(odinId, imageFileId, imageFileKey, imageDrive, size);
       queryClient.invalidateQueries({ queryKey, exact: true });
     },
   };
