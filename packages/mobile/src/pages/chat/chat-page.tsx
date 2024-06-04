@@ -212,6 +212,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
             fileSize: value.fileSize,
           };
         }),
+        chatId: getNewId(),
       });
       setAssets([]);
       setReplyMessage(null);

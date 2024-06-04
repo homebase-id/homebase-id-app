@@ -262,9 +262,13 @@ export const ChatDetail = memo(
       const medias = await launchImageLibrary({
         mediaType: 'mixed',
         selectionLimit: 10,
+        formatAsMp4: true,
+        includeExtra: true,
       });
       if (medias.didCancel) return;
-      setAssets(medias.assets ?? []);
+
+      // Keep assets without a type out of it.. We're never sure what it is...
+      setAssets(medias.assets?.filter((asset) => asset.type) ?? []);
     }, [setAssets]);
 
     const inputStyle = useMemo(
