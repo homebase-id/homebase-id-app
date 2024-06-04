@@ -1,4 +1,4 @@
-import { TouchableOpacity, View } from 'react-native';
+import { Dimensions, TouchableOpacity, View } from 'react-native';
 
 import { usePushNotifications } from '../../hooks/notifications/usePushNotifications';
 import { memo, useMemo, useState } from 'react';
@@ -270,6 +270,8 @@ const NotificationItem = ({
     [notification, senderName, appName]
   );
 
+  const screenWidth = Dimensions.get('screen').width;
+
   return (
     <TouchableOpacity onPress={onOpen}>
       <View
@@ -297,16 +299,25 @@ const NotificationItem = ({
 
         <View style={{ display: 'flex', flexGrow: 1 }}>
           <View style={{ display: 'flex', flexDirection: 'row' }}>
-            <Text style={{ fontWeight: '600', color: isDarkMode ? Colors.white : Colors.black }}>
-              {title}
-            </Text>
+            <View style={{ width: screenWidth - 120 }}>
+              <Text style={{ fontWeight: '600', color: isDarkMode ? Colors.white : Colors.black }}>
+                {title}
+              </Text>
+              <Text style={{ color: isDarkMode ? Colors.white : Colors.black }}>{body}</Text>
+            </View>
             {isExpanded ? (
-              <TouchableOpacity onPress={onDismiss} style={{ marginLeft: 'auto' }}>
+              <TouchableOpacity
+                onPress={onDismiss}
+                style={{
+                  marginLeft: 'auto',
+                  padding: 10,
+                  paddingRight: 0,
+                }}
+              >
                 <Times size={'sm'} />
               </TouchableOpacity>
             ) : null}
           </View>
-          <Text style={{ color: isDarkMode ? Colors.white : Colors.black }}>{body}</Text>
 
           {notification.created ? (
             <Text style={{ color: Colors.slate[500] }}>

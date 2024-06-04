@@ -71,8 +71,8 @@ export const PreviewMedia = memo((prop: MediaProp) => {
       return;
     }
     Share.open({
-      type: imageData.type,
-      url: imageData.url,
+      type: imageData?.imageData?.type,
+      url: imageData?.imageData?.url,
     });
   }, [currIndex, fileId, getImage, payloads]);
 

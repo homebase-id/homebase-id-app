@@ -169,7 +169,8 @@ export const uploadChatMessage = async (
   message: NewHomebaseFile<ChatMessage>,
   recipients: string[],
   files: ImageSource[] | undefined,
-  onVersionConflict?: () => void
+  onVersionConflict?: () => void,
+  onUpdate?: (phase: string, progress: number) => void
 ) => {
   const messageContent = message.fileMetadata.appData.content;
   const distribute = recipients?.length > 0;
@@ -222,8 +223,13 @@ export const uploadChatMessage = async (
     const newMediaFile = files[i];
 
     if (newMediaFile.type?.startsWith('video/')) {
-      const { video: processedMedia, metadata } = await processVideo(newMediaFile, true);
+      const { video: processedMedia, metadata } = await processVideo(
+        newMediaFile,
+        true,
+        (progress) => onUpdate?.('Compressing', progress)
+      );
 
+      onUpdate?.('Generating thumbnails', 0);
       // Custom blob to avoid reading and writing the file to disk again
       const payloadBlob = new OdinBlob((processedMedia.filepath || processedMedia.uri) as string, {
         type: 'video/mp4' as VideoContentType,
@@ -292,6 +298,14 @@ export const uploadChatMessage = async (
 
   uploadMetadata.appData.previewThumbnail = previewThumbnails[0];
 
+  onUpdate?.('Uploading', 0);
+
+  await new Promise<void>((resolve) =>
+    setTimeout(() => {
+      resolve();
+    }, 1000 * 5)
+  );
+
   const uploadResult = await uploadFile(
     dotYouClient,
     uploadInstructions,
@@ -299,7 +313,10 @@ export const uploadChatMessage = async (
     payloads,
     thumbnails,
     undefined,
-    onVersionConflict
+    onVersionConflict,
+    {
+      onUploadProgress: (progress) => onUpdate?.('Uploading', progress.progress || 0),
+    }
   );
 
   if (!uploadResult) return null;

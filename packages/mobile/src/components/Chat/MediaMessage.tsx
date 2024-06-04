@@ -27,6 +27,7 @@ import { Colors } from '../../app/Colors';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { calculateScaledDimensions } from '../../utils/utils';
 import { BoringFile } from '../ui/Media/BoringFile';
+import { t } from 'feed-app-common';
 
 const MediaMessage = memo(
   ({
@@ -215,14 +216,19 @@ const InnerMediaItem = ({
         />
       );
     }
+    const progressPercentage = Math.round(
+      ((payload as NewPayloadDescriptor).uploadProgress?.progress || 0) * 100
+    );
+
     return (
       <View
         style={{
           backgroundColor: isDarkMode ? Colors.slate[700] : Colors.slate[300],
           display: 'flex',
-          flexDirection: 'row',
+          flexDirection: 'column',
           justifyContent: 'center',
           alignItems: 'center',
+          gap: 10,
           ...imageSize,
           ...(style || { borderRadius: 10 }),
         }}
@@ -236,6 +242,12 @@ const InnerMediaItem = ({
                 ? '📹'
                 : '📋'}
         </Text>
+        {(payload as NewPayloadDescriptor).uploadProgress ? (
+          <Text style={{ fontSize: 14 }}>
+            {t((payload as NewPayloadDescriptor).uploadProgress?.phase)}{' '}
+            {progressPercentage !== 0 ? `${progressPercentage}%` : ''}
+          </Text>
+        ) : null}
       </View>
     );
   }

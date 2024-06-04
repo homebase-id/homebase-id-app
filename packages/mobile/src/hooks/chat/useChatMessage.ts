@@ -10,6 +10,7 @@ import {
 import {
   HomebaseFile,
   NewHomebaseFile,
+  NewPayloadDescriptor,
   SecurityGroupType,
   TransferStatus,
 } from '@youfoundation/js-lib/core';
@@ -37,11 +38,15 @@ const sendMessage = async ({
   replyId,
   files,
   message,
+  chatId,
+  queryClient,
 }: {
   conversation: HomebaseFile<UnifiedConversation>;
   replyId?: string;
   files?: ImageSource[];
   message: string;
+  chatId?: string;
+  queryClient: QueryClient;
 }): Promise<NewHomebaseFile<ChatMessage> | null> => {
   const dotYouClient = await getSynchronousDotYouClient();
 
@@ -50,7 +55,7 @@ const sendMessage = async ({
   const identity = dotYouClient.getIdentity();
   const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
 
-  const newChatId = getNewId();
+  const newChatId = chatId || getNewId();
   const newChat: NewHomebaseFile<ChatMessage> = {
     fileMetadata: {
       appData: {
@@ -73,7 +78,54 @@ const sendMessage = async ({
     },
   };
 
-  const uploadResult = await uploadChatMessage(dotYouClient, newChat, recipients, files);
+  const onUpdate = (phase: string, progress: number) => {
+    const extistingMessage = queryClient.getQueryData<
+      InfiniteData<{
+        searchResults: (HomebaseFile<ChatMessage> | null)[];
+        cursorState: string;
+        queryTime: number;
+        includeMetadataHeader: boolean;
+      }>
+    >(['chat-messages', conversation.fileMetadata.appData.uniqueId]);
+
+    const updatedData = {
+      ...extistingMessage,
+      pages: extistingMessage?.pages?.map((page) => ({
+        ...page,
+        searchResults: page.searchResults.map((msg) =>
+          stringGuidsEqual(
+            msg?.fileMetadata.appData.uniqueId,
+            newChat.fileMetadata.appData.uniqueId
+          )
+            ? ({
+                ...msg,
+                fileMetadata: {
+                  ...msg?.fileMetadata,
+                  payloads: (msg?.fileMetadata.payloads?.map((payload) => ({
+                    ...payload,
+                    uploadProgress: { phase, progress },
+                  })) || []) as NewPayloadDescriptor,
+                },
+              } as HomebaseFile<ChatMessage>)
+            : msg
+        ),
+      })),
+    };
+
+    queryClient.setQueryData(
+      ['chat-messages', conversation.fileMetadata.appData.uniqueId],
+      updatedData
+    );
+  };
+
+  const uploadResult = await uploadChatMessage(
+    dotYouClient,
+    newChat,
+    recipients,
+    files,
+    undefined,
+    onUpdate
+  );
   if (!uploadResult) throw new Error('Failed to send the chat message');
 
   newChat.fileId = uploadResult.file.fileId;
@@ -100,6 +152,7 @@ export const getSendChatMessageMutationOptions: (queryClient: QueryClient) => Us
     replyId?: string;
     files?: ImageSource[];
     message: string;
+    chatId?: string;
   },
   {
     existingData: InfiniteData<{
@@ -111,8 +164,8 @@ export const getSendChatMessageMutationOptions: (queryClient: QueryClient) => Us
   }
 > = (queryClient) => ({
   mutationKey: ['send-chat-message'],
-  mutationFn: sendMessage,
-  onMutate: async ({ conversation, replyId, files, message }) => {
+  mutationFn: async (params) => sendMessage({ ...params, queryClient }),
+  onMutate: async ({ conversation, replyId, files, message, chatId }) => {
     const existingData = queryClient.getQueryData<
       InfiniteData<{
         searchResults: (HomebaseFile<ChatMessage> | null)[];
@@ -127,6 +180,7 @@ export const getSendChatMessageMutationOptions: (queryClient: QueryClient) => Us
     const newMessageDsr: NewHomebaseFile<ChatMessage> = {
       fileMetadata: {
         appData: {
+          uniqueId: chatId,
           groupId: conversation.fileMetadata.appData.uniqueId,
           content: {
             message: message,
