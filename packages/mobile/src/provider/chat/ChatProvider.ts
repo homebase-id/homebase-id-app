@@ -184,7 +184,6 @@ export const uploadChatMessage = async (
           recipients: [...recipients],
           schedule: ScheduleOptions.SendNowAwaitResponse,
           sendContents: SendContents.All,
-          useGlobalTransitId: true,
           useAppNotification: true,
           appNotificationOptions: {
             appId: CHAT_APP_ID,
@@ -329,7 +328,6 @@ export const updateChatMessage = async (
           recipients: [...recipients],
           schedule: ScheduleOptions.SendNowAwaitResponse,
           sendContents: SendContents.All,
-          useGlobalTransitId: true,
         }
       : undefined,
   };
