@@ -218,6 +218,7 @@ const uploadPost = async <T extends PostContent>(
       useGlobalTransitId: true,
       recipients: [],
       schedule: ScheduleOptions.SendLater,
+      priority: PriorityOptions.Medium,
       sendContents: SendContents.All, // TODO: Should this be header only?
     },
   };
@@ -306,6 +307,7 @@ const uploadPostHeader = async <T extends PostContent>(
       useGlobalTransitId: true,
       recipients: [],
       schedule: ScheduleOptions.SendLater,
+      priority: PriorityOptions.Medium,
       sendContents: SendContents.All, // TODO: Should this be header only?
     },
   };

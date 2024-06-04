@@ -78,7 +78,8 @@ export const uploadReaction = async (
     transitOptions: distribute
       ? {
           recipients: [...recipients],
-          schedule: ScheduleOptions.SendNowAwaitResponse,
+          schedule: ScheduleOptions.SendLater,
+          priority: PriorityOptions.Medium,
           sendContents: SendContents.All,
           useGlobalTransitId: true,
           useAppNotification: true,

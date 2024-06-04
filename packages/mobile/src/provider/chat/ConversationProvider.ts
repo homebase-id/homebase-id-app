@@ -207,7 +207,8 @@ export const uploadConversation = async (
           recipients: conversation.fileMetadata.appData.content.recipients.filter(
             (recipient) => recipient !== identity
           ),
-          schedule: ScheduleOptions.SendNowAwaitResponse,
+          schedule: ScheduleOptions.SendLater,
+          priority: PriorityOptions.Medium,
           sendContents: SendContents.All,
           useGlobalTransitId: true,
         }
@@ -258,7 +259,8 @@ export const updateConversation = async (
           recipients: conversation.fileMetadata.appData.content.recipients.filter(
             (recipient) => recipient !== identity
           ),
-          schedule: ScheduleOptions.SendNowAwaitResponse,
+          schedule: ScheduleOptions.SendLater,
+          priority: PriorityOptions.Medium,
           sendContents: SendContents.All,
           useGlobalTransitId: true,
         }
