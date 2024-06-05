@@ -26,6 +26,8 @@ import {
   uploadFile,
   uploadHeader,
   UploadResult,
+  TransferStatus,
+  TransferUploadStatus,
 } from '@youfoundation/js-lib/core';
 import { ChatDrive, UnifiedConversation } from './ConversationProvider';
 import { assertIfDefined, getNewId, jsonStringify64 } from '@youfoundation/js-lib/helpers';
@@ -103,6 +105,7 @@ export const getChatMessages = async (
     maxRecords: pageSize,
     cursorState: cursorState,
     includeMetadataHeader: true,
+    includeTransferHistory: true,
   };
 
   const response = await queryBatch(dotYouClient, params, ro);
@@ -138,13 +141,54 @@ export const dsrToMessage = async (
   includeMetadataHeader: boolean
 ): Promise<HomebaseFile<ChatMessage> | null> => {
   try {
-    const attrContent = await getContentFromHeaderOrPayload<ChatMessage>(
+    const msgContent = await getContentFromHeaderOrPayload<ChatMessage>(
       dotYouClient,
       targetDrive,
       dsr,
       includeMetadataHeader
     );
-    if (!attrContent) return null;
+    if (!msgContent) return null;
+
+    if (
+      msgContent.deliveryStatus === ChatDeliveryStatus.Sent &&
+      dsr.serverMetadata?.transferHistory?.recipients
+    ) {
+      const allDelivered = !Object.keys(dsr.serverMetadata.transferHistory.recipients).some(
+        (recipient) =>
+          !dsr.serverMetadata?.transferHistory?.recipients[recipient]
+            .latestSuccessfullyDeliveredVersionTag
+      );
+      if (allDelivered) msgContent.deliveryStatus = ChatDeliveryStatus.Delivered;
+      else {
+        let someFailed = false;
+        msgContent.deliveryDetails = {};
+        for (const recipient of Object.keys(dsr.serverMetadata.transferHistory.recipients)) {
+          if (
+            dsr.serverMetadata.transferHistory.recipients[recipient]
+              .latestSuccessfullyDeliveredVersionTag
+          ) {
+            msgContent.deliveryDetails[recipient] = ChatDeliveryStatus.Delivered;
+          } else {
+            if (
+              FailedTransferStatuses.includes(
+                dsr.serverMetadata.transferHistory.recipients[
+                  recipient
+                ].latestTransferStatus.toLocaleLowerCase() as TransferStatus
+              )
+            ) {
+              msgContent.deliveryDetails[recipient] = ChatDeliveryStatus.Failed;
+              someFailed = true;
+            } else {
+              msgContent.deliveryDetails[recipient] = ChatDeliveryStatus.Sent;
+            }
+          }
+        }
+
+        msgContent.deliveryStatus = someFailed
+          ? ChatDeliveryStatus.Failed
+          : ChatDeliveryStatus.Sent;
+      }
+    }
 
     const chatMessage: HomebaseFile<ChatMessage> = {
       ...dsr,
@@ -152,7 +196,7 @@ export const dsrToMessage = async (
         ...dsr.fileMetadata,
         appData: {
           ...dsr.fileMetadata.appData,
-          content: attrContent,
+          content: msgContent,
         },
       },
     };
@@ -321,6 +365,29 @@ export const uploadChatMessage = async (
   );
 
   if (!uploadResult) return null;
+
+  if (
+    recipients.some(
+      (recipient) =>
+        uploadResult.recipientStatus?.[recipient].toLowerCase() ===
+        TransferUploadStatus.EnqueuedFailed
+    )
+  ) {
+    message.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Failed;
+    message.fileMetadata.appData.content.deliveryDetails = {};
+    for (const recipient of recipients) {
+      message.fileMetadata.appData.content.deliveryDetails[recipient] =
+        uploadResult.recipientStatus?.[recipient].toLowerCase() ===
+        TransferUploadStatus.EnqueuedFailed
+          ? ChatDeliveryStatus.Failed
+          : ChatDeliveryStatus.Delivered;
+    }
+
+    await updateChatMessage(dotYouClient, message, recipients, uploadResult.keyHeader);
+
+    console.error('Not all recipients received the message: ', uploadResult);
+    throw new Error(`Not all recipients received the message: ${recipients.join(', ')}`);
+  }
 
   return {
     ...uploadResult,
