@@ -2,7 +2,7 @@ import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ChatDeliveryStatus, ChatMessage } from '../../provider/chat/ChatProvider';
 import { useDotYouClientContext } from 'feed-app-common';
 import { View } from 'react-native';
-import { Clock, SubtleCheck } from '../ui/Icons/icons';
+import { Clock, SubtleCheck, Times } from '../ui/Icons/icons';
 import { Colors } from '../../app/Colors';
 import { ChatMessageIMessage } from './ChatDetail';
 
@@ -31,6 +31,7 @@ export const InnerDeliveryIndicator = ({
 }) => {
   const isSent = state && state >= ChatDeliveryStatus.Sent;
   const isDelivered = state && state >= ChatDeliveryStatus.Delivered;
+  const isFailed = state === ChatDeliveryStatus.Failed;
   const isRead = state === ChatDeliveryStatus.Read;
 
   return (
@@ -42,28 +43,43 @@ export const InnerDeliveryIndicator = ({
         alignItems: 'center',
       }}
     >
-      {isDelivered ? (
-        <SubtleCheck
-          size={'sm'}
-          color={isRead ? (showDefault ? Colors.indigo[400] : Colors.white) : Colors.gray[400]}
-        />
-      ) : null}
-      <View
-        style={{
-          right: isSent ? 8 : 0,
-          marginRight: !isSent ? 8 : 0,
-          zIndex: 10,
-        }}
-      >
-        {isSent ? (
-          <SubtleCheck
-            size={'sm'}
-            color={isRead ? (showDefault ? Colors.indigo[400] : Colors.white) : Colors.gray[400]}
-          />
-        ) : (
-          <Clock size={'sm'} />
-        )}
-      </View>
+      {isFailed ? (
+        <View
+          style={{
+            marginRight: 8,
+            zIndex: 10,
+          }}
+        >
+          <Times size={'sm'} color={Colors.red[500]} />
+        </View>
+      ) : (
+        <>
+          {isDelivered ? (
+            <SubtleCheck
+              size={'sm'}
+              color={isRead ? (showDefault ? Colors.indigo[400] : Colors.white) : Colors.gray[400]}
+            />
+          ) : null}
+          <View
+            style={{
+              right: isSent ? 8 : 0,
+              marginRight: !isSent ? 8 : 0,
+              zIndex: 10,
+            }}
+          >
+            {isSent ? (
+              <SubtleCheck
+                size={'sm'}
+                color={
+                  isRead ? (showDefault ? Colors.indigo[400] : Colors.white) : Colors.gray[400]
+                }
+              />
+            ) : (
+              <Clock size={'sm'} />
+            )}
+          </View>
+        </>
+      )}
     </View>
   );
 };

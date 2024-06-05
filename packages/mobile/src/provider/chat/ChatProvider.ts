@@ -28,6 +28,8 @@ import {
   UploadResult,
   TransferStatus,
   TransferUploadStatus,
+  FailedTransferStatuses,
+  PriorityOptions,
 } from '@youfoundation/js-lib/core';
 import { ChatDrive, UnifiedConversation } from './ConversationProvider';
 import { assertIfDefined, getNewId, jsonStringify64 } from '@youfoundation/js-lib/helpers';
@@ -519,39 +521,3 @@ export const requestMarkAsRead = async (
     ChatDrive
   );
 };
-
-// export const DELETE_CHAT_COMMAND = 180;
-// export interface DeleteRequest {
-//   conversationId: string;
-//   messageIds: string[];
-// }
-
-// Probably not needed, as the file is "updated" for a soft delete, which just is sent over transit to the recipients
-// export const requestDelete = async (
-//   dotYouClient: DotYouClient,
-//   conversation: HomebaseFile<Conversation>,
-//   chatGlobalTransitIds: string[]
-// ) => {
-//   const request: DeleteRequest = {
-//     conversationId: conversation.fileMetadata.appData.uniqueId as string,
-//     messageIds: chatGlobalTransitIds,
-//   };
-
-//   const conversationContent = conversation.fileMetadata.appData.content;
-//   const recipients = (conversationContent as GroupConversation).recipients || [
-//     (conversationContent as SingleConversation).recipient,
-//   ];
-//   if (!recipients?.filter(Boolean)?.length)
-//     throw new Error('No recipients found in the conversation');
-
-//   return await sendCommand(
-//     dotYouClient,
-//     {
-//       code: DELETE_CHAT_COMMAND,
-//       globalTransitIdList: [],
-//       jsonMessage: jsonStringify64(request),
-//       recipients: recipients,
-//     },
-//     ChatDrive
-//   );
-// };

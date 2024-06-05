@@ -127,7 +127,7 @@ export const getChatMessageInfiniteQueryOptions: (
       ? lastPage.cursorState
       : undefined,
   enabled: !!conversationId,
-  staleTime: 1000 * 60 * 60 * 24, // 24 hour
+  // staleTime: 1000 * 60 * 60 * 24, // 24 hour
 });
 
 export const insertNewMessage = (
