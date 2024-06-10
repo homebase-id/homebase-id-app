@@ -40,7 +40,7 @@ export const useNotificationSubscriber = (
         Notify({
           command: 'processInbox',
           data: JSON.stringify({
-            targetDrive: notification.externalFileIdentifier.targetDrive,
+            targetDrive: notification.targetDrive,
             batchSize: 100,
           }),
         });

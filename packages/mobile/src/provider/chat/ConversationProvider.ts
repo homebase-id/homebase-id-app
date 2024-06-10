@@ -17,6 +17,7 @@ import {
   ScheduleOptions,
   SendContents,
   UploadResult,
+  PriorityOptions,
 } from '@youfoundation/js-lib/core';
 import { jsonStringify64 } from '@youfoundation/js-lib/helpers';
 
@@ -210,7 +211,6 @@ export const uploadConversation = async (
           schedule: ScheduleOptions.SendLater,
           priority: PriorityOptions.Medium,
           sendContents: SendContents.All,
-          useGlobalTransitId: true,
         }
       : undefined,
   };
@@ -262,7 +262,6 @@ export const updateConversation = async (
           schedule: ScheduleOptions.SendLater,
           priority: PriorityOptions.Medium,
           sendContents: SendContents.All,
-          useGlobalTransitId: true,
         }
       : undefined,
   };

@@ -216,7 +216,6 @@ const uploadPost = async <T extends PostContent>(
       drive: targetDrive,
     },
     transitOptions: {
-      useGlobalTransitId: true,
       recipients: [],
       schedule: ScheduleOptions.SendLater,
       priority: PriorityOptions.Medium,
@@ -305,7 +304,6 @@ const uploadPostHeader = async <T extends PostContent>(
       drive: targetDrive,
     },
     transitOptions: {
-      useGlobalTransitId: true,
       recipients: [],
       schedule: ScheduleOptions.SendLater,
       priority: PriorityOptions.Medium,

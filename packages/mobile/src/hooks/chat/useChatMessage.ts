@@ -12,7 +12,6 @@ import {
   NewHomebaseFile,
   NewPayloadDescriptor,
   SecurityGroupType,
-  TransferStatus,
 } from '@youfoundation/js-lib/core';
 import { getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 
@@ -225,11 +224,6 @@ export const getSendChatMessageMutationOptions: (queryClient: QueryClient) => Us
       ['chat-messages', messageParams.conversation.fileMetadata.appData.uniqueId],
       context?.existingData
     );
-  },
-  onSettled: async (_data, _error, variables) => {
-    queryClient.invalidateQueries({
-      queryKey: ['chat-messages', variables.conversation.fileMetadata.appData.uniqueId],
-    });
   },
 });
 
