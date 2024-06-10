@@ -322,7 +322,7 @@ const ChannelOrAclSelector = memo(
           key={'loading-select'}
           style={{ zIndex: 20, elevation: 20, position: 'relative' }}
         >
-          <Option>Main</Option>
+          <Option>{BlogConfig.PublicChannel.name}</Option>
         </Select>
       );
     }
@@ -355,7 +355,7 @@ const ChannelOrAclSelector = memo(
 
           {!excludeCustom ? (
             <Option value={'custom'} key={'custom'}>
-              Custom...
+              {t('Custom')}...
             </Option>
           ) : null}
         </Select>

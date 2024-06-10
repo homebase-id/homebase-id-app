@@ -1,11 +1,11 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { memo, useCallback, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { TabStackParamList } from '../../app/App';
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 import WebView from 'react-native-webview';
 import { uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
-import { RefreshControl, TouchableOpacity } from 'react-native';
+import { Keyboard, RefreshControl, TouchableOpacity } from 'react-native';
 import { useAuth } from '../../hooks/auth/useAuth';
 import { Colors } from '../../app/Colors';
 import { useDarkMode } from '../../hooks/useDarkMode';
@@ -34,7 +34,7 @@ export const FeedPage = memo((_props: FeedProps) => {
   const [isPostComposerOpen, setIsPostComposerOpen] = useState<boolean>();
 
   const isFocused = useIsFocused();
-  useRemoveNotifications({ enabled: isFocused, appId: FEED_APP_ID });
+  useRemoveNotifications({ disabled: !isFocused, appId: FEED_APP_ID });
 
   const sharedSecret = getSharedSecret();
   const base64SharedSecret = sharedSecret ? uint8ArrayToBase64(sharedSecret) : '';
@@ -117,6 +117,22 @@ export const FeedPage = memo((_props: FeedProps) => {
     []
   );
 
+  const [keyboardVisible, setKeyboardVisible] = useState<boolean>(false);
+
+  useEffect(() => {
+    const showSubscription = Keyboard.addListener('keyboardDidShow', () => {
+      setKeyboardVisible(true);
+    });
+    const hideSubscription = Keyboard.addListener('keyboardDidHide', () => {
+      setKeyboardVisible(false);
+    });
+
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+  }, []);
+
   return (
     <SafeAreaView>
       {netInfo.isConnected === false ? (
@@ -160,23 +176,25 @@ export const FeedPage = memo((_props: FeedProps) => {
                 }}
                 renderError={renderError}
               />
-              <TouchableOpacity
-                style={{
-                  width: 50,
-                  height: 50,
-                  borderRadius: 25,
-                  backgroundColor: Colors.indigo[500],
-                  flexDirection: 'row',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  position: 'absolute',
-                  bottom: 20,
-                  right: 20,
-                }}
-                onPress={() => setIsPostComposerOpen(true)}
-              >
-                <Plus color={Colors.white} size="lg" />
-              </TouchableOpacity>
+              {!keyboardVisible ? (
+                <TouchableOpacity
+                  style={{
+                    width: 50,
+                    height: 50,
+                    borderRadius: 25,
+                    backgroundColor: Colors.indigo[500],
+                    flexDirection: 'row',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    position: 'absolute',
+                    bottom: 20,
+                    right: 20,
+                  }}
+                  onPress={() => setIsPostComposerOpen(true)}
+                >
+                  <Plus color={Colors.white} size="lg" />
+                </TouchableOpacity>
+              ) : null}
             </ScrollView>
           ) : null}
 
