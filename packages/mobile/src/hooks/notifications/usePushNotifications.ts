@@ -63,7 +63,7 @@ export const useUnreadPushNotificationsCount = (props?: { appId?: string }) => {
   return notifications?.results.filter((n) => n.unread).length ?? 0;
 };
 
-export const useRemoveNotifications = (props?: { appId?: string }) => {
+export const useRemoveNotifications = (props?: { disabled: boolean; appId?: string }) => {
   const {
     fetch: { data: notifcationsData },
     markAsRead: { mutateAsync: markListOfNotificationsAsRead },
@@ -72,10 +72,10 @@ export const useRemoveNotifications = (props?: { appId?: string }) => {
   useEffect(() => {
     (async () => {
       const notifications = notifcationsData?.results;
-      if (notifications && notifications?.length > 0) {
+      if (!props?.disabled && notifications && notifications?.length > 0) {
         isDebug && console.debug('Removing all notifications', props?.appId);
         await markListOfNotificationsAsRead(notifications.map((n) => n.id));
       }
     })();
-  }, [markListOfNotificationsAsRead, notifcationsData, props?.appId]);
+  }, [markListOfNotificationsAsRead, notifcationsData, props?.disabled, props?.appId]);
 };

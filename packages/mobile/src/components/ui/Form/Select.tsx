@@ -1,4 +1,4 @@
-import { ReactElement, useState, useMemo, memo } from 'react';
+import { ReactElement, useState, useMemo, memo, ReactNode } from 'react';
 import { StyleProp, ViewStyle, View, TouchableOpacity, Text, Pressable } from 'react-native';
 
 import { ArrowDown } from '../Icons/icons';
@@ -109,7 +109,7 @@ export const Select = memo(({ defaultValue, children, style, onChange }: SelectP
 
 interface OptionProps {
   value?: string;
-  children: string;
+  children: string | ReactNode;
 }
 export const Option = ({ children }: OptionProps) => {
   const { isDarkMode } = useDarkMode();

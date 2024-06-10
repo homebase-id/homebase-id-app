@@ -3,7 +3,6 @@ import {
   HomebaseFile,
   NewHomebaseFile,
   SecurityGroupType,
-  NewMediaFile,
 } from '@youfoundation/js-lib/core';
 import {
   Tweet,
