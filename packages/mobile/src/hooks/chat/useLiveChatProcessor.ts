@@ -114,9 +114,7 @@ const useInboxProcessor = (connected?: boolean) => {
 const isDebug = false;
 
 const useChatWebsocket = (isEnabled: boolean) => {
-  // const identity = useDotYouClientContext().getIdentity();
   const dotYouClient = useDotYouClientContext();
-  const identity = dotYouClient.getIdentity();
 
   // Added to ensure we have the conversation query available
   const {
