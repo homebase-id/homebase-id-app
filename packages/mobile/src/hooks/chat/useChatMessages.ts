@@ -17,6 +17,7 @@ import { DotYouClient, HomebaseFile } from '@youfoundation/js-lib/core';
 import { useDotYouClientContext } from 'feed-app-common';
 import { UnifiedConversation } from '../../provider/chat/ConversationProvider';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { SendReadReceiptResponseRecipientStatus } from '@youfoundation/js-lib/peer';
 
 const FIRST_PAGE_SIZE = 15;
 const PAGE_SIZE = 100;

@@ -1,7 +1,7 @@
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ChatDeliveryStatus, ChatMessage } from '../../provider/chat/ChatProvider';
-import { useDotYouClientContext } from 'feed-app-common';
-import { View } from 'react-native';
+import { t, useDotYouClientContext } from 'feed-app-common';
+import { StyleProp, Text, TextStyle, View, ViewStyle } from 'react-native';
 import { Clock, SubtleCheck, Times } from '../ui/Icons/icons';
 import { Colors } from '../../app/Colors';
 import { ChatMessageIMessage } from './ChatDetail';
@@ -22,12 +22,41 @@ export const ChatDeliveryIndicator = ({
   return <InnerDeliveryIndicator state={content.deliveryStatus} showDefault={showDefaultColor} />;
 };
 
+export const FailedDeliveryDetails = ({
+  msg,
+  recipient,
+  style,
+}: {
+  msg: HomebaseFile<ChatMessage>;
+  recipient: string;
+  style?: StyleProp<TextStyle>;
+}) => {
+  const deliveryDetails = msg.serverMetadata?.transferHistory?.recipients[recipient];
+  if (!deliveryDetails) return null;
+  if (deliveryDetails.latestSuccessfullyDeliveredVersionTag) return null;
+
+  return (
+    <Text
+      style={[
+        {
+          color: Colors.red[500],
+        },
+        style,
+      ]}
+    >
+      {t(deliveryDetails.latestTransferStatus)}
+    </Text>
+  );
+};
+
 export const InnerDeliveryIndicator = ({
   state,
   showDefault,
+  style,
 }: {
   state?: ChatDeliveryStatus;
   showDefault?: boolean;
+  style?: StyleProp<ViewStyle>;
 }) => {
   const isSent = state && state >= ChatDeliveryStatus.Sent;
   const isDelivered = state && state >= ChatDeliveryStatus.Delivered;
@@ -36,12 +65,15 @@ export const InnerDeliveryIndicator = ({
 
   return (
     <View
-      style={{
-        flexDirection: 'row',
+      style={[
+        {
+          flexDirection: 'row',
 
-        alignContent: 'flex-start',
-        alignItems: 'center',
-      }}
+          alignContent: 'flex-start',
+          alignItems: 'center',
+        },
+        style,
+      ]}
     >
       {isFailed ? (
         <View
