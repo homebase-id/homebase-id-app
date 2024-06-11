@@ -63,13 +63,13 @@ import { useAudioRecorder } from '../../hooks/audio/useAudioRecorderPlayer';
 import { Text } from '../ui/Text/Text';
 import { fixDocumentURI, millisToMinutesAndSeconds } from '../../utils/utils';
 import { SafeAreaView } from '../ui/SafeAreaView/SafeAreaView';
-import { FileOverview } from '../Files/FileOverview';
 import Document from 'react-native-document-picker';
 import { getLocales, uses24HourClock } from 'react-native-localize';
 import { type PastedFile } from '@mattermost/react-native-paste-input';
 import { useDraftMessage } from '../../hooks/chat/useDraftMessage';
 import { useBubbleContext } from '../BubbleContext/useBubbleContext';
 import { ChatMessageContent } from './Chat-Message-Content';
+import { FileOverview } from '../Files/FileOverview';
 
 export type ChatMessageIMessage = IMessage & HomebaseFile<ChatMessage>;
 
@@ -439,7 +439,7 @@ export const ChatDetail = memo(
                     ? handleImageIconPress
                     : props.onSend
               }
-              containerStyle={styles.send}
+              containerStyle={chatStyles.send}
             >
               <View
                 style={{
@@ -894,7 +894,7 @@ const RenderReplyMessageView = memo((props: BubbleProps<ChatMessageIMessage>) =>
     props.currentMessage.fileMetadata.appData.content.replyId && (
       <View
         style={[
-          styles.replyMessageContainer,
+          chatStyles.replyMessageContainer,
           {
             borderLeftColor:
               props.position === 'left' ? color.color(isDarkMode) : Colors.purple[500],
@@ -902,7 +902,7 @@ const RenderReplyMessageView = memo((props: BubbleProps<ChatMessageIMessage>) =>
           },
         ]}
       >
-        <View style={styles.replyText}>
+        <View style={chatStyles.replyText}>
           {replyMessage ? (
             <>
               <Text
@@ -970,7 +970,7 @@ const RenderReplyMessageView = memo((props: BubbleProps<ChatMessageIMessage>) =>
   );
 });
 
-const styles = StyleSheet.create({
+export const chatStyles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,

@@ -24,6 +24,7 @@ export const BackButton = (props: {
   prop?: HeaderBackButtonProps;
   label?: string;
   style?: StyleProp<ViewStyle>;
+  showArrow?: boolean;
 }) => {
   const { isDarkMode } = useDarkMode();
   return (
@@ -31,7 +32,7 @@ export const BackButton = (props: {
       {...props.prop}
       onPress={props.onPress}
       label={props.label ?? 'Cancel'}
-      backImage={Platform.OS === 'ios' ? Empty : undefined}
+      backImage={props.showArrow ? undefined : Platform.OS === 'ios' ? Empty : undefined}
       labelStyle={[
         {
           color: isDarkMode ? Colors.white : Colors.black,
