@@ -443,6 +443,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
           flex: 1,
           // Force the height on iOS to better support the keyboard handling
           minHeight: Platform.OS === 'ios' ? Dimensions.get('window').height : undefined,
+          backgroundColor: isDarkMode ? Colors.slate[900] : Colors.slate[50],
         }}
       >
         <ErrorBoundary>
