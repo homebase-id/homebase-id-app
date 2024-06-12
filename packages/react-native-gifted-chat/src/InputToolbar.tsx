@@ -19,6 +19,7 @@ const styles = StyleSheet.create({
   primary: {
     flexDirection: 'row',
     alignItems: 'flex-end',
+    gap: 7,
   },
   accessory: {
     height: 44,

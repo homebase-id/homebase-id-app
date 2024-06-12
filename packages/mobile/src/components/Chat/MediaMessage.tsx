@@ -121,10 +121,15 @@ const MediaGallery = ({
               isGallery
                 ? {
                     borderTopLeftRadius: index === 0 ? 10 : 0,
-                    borderBottomLeftRadius: index === 2 ? 10 : 0,
+                    borderBottomLeftRadius:
+                      index === 2 || (index === 0 && payloads.length === 2) ? 10 : 0,
                     borderTopRightRadius: index === 1 ? 10 : 0,
                     borderBottomRightRadius:
-                      index === 3 || (payloads.length === 3 && index === 2) ? 10 : 0,
+                      index === 3 ||
+                      (payloads.length === 3 && index === 2) ||
+                      (index === 1 && payloads.length === 2)
+                        ? 10
+                        : 0,
                     width: payloads.length === 3 && index === 2 ? '100%' : 150,
                   }
                 : undefined
