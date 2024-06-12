@@ -31,7 +31,7 @@ export const useNotificationSubscriber = (
 
   const wrappedSubscriber = useCallback(
     (notification: TypedConnectionNotification) => {
-      if (notification.notificationType === 'transitFileReceived') {
+      if ((notification.notificationType as any) === 'transitFileReceived') {
         isDebug &&
           console.debug(
             '[NotificationSubscriber] Replying to TransitFileReceived by sending processInbox'
@@ -40,7 +40,20 @@ export const useNotificationSubscriber = (
         Notify({
           command: 'processInbox',
           data: JSON.stringify({
-            targetDrive: notification.externalFileIdentifier.targetDrive,
+            targetDrive: (notification as any)?.externalFileIdentifier?.targetDrive,
+            batchSize: 100,
+          }),
+        });
+      } else if ((notification.notificationType as any) === 'inboxItemReceived') {
+        isDebug &&
+          console.debug(
+            '[NotificationSubscriber] Replying to TransitFileReceived by sending processInbox'
+          );
+
+        Notify({
+          command: 'processInbox',
+          data: JSON.stringify({
+            targetDrive: (notification as any).targetDrive,
             batchSize: 100,
           }),
         });
