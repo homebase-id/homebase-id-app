@@ -19,6 +19,7 @@ const styles = StyleSheet.create({
   primary: {
     flexDirection: 'row',
     alignItems: 'flex-end',
+    gap: 7,
   },
   accessory: {
     height: 44,
@@ -73,7 +74,7 @@ export const InputToolbar = memo(
     const hasText = useMemo(() => !!text, [text]);
     return (
       <View
-        style={[styles.container, { position }, containerStyle] as ViewStyle}
+        style={[styles.container, { position }, containerStyle, ,] as ViewStyle}
       >
         <View style={[styles.primary, props.primaryStyle]}>
           {renderActions?.(rest) ||

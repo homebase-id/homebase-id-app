@@ -275,7 +275,9 @@ export const ChatDetail = memo(
       () =>
         ({
           color: isDarkMode ? 'white' : 'black',
-          flex: 1,
+          maxHeight: 80,
+          paddingVertical: Platform.OS === 'ios' ? 8 : 4,
+          flexGrow: 1,
         }) as TextStyle,
       [isDarkMode]
     );
@@ -284,6 +286,8 @@ export const ChatDetail = memo(
       () =>
         ({
           borderRadius: 20,
+          paddingVertical: 3,
+          paddingHorizontal: 15,
           backgroundColor: isDarkMode ? Colors.slate[800] : Colors.indigo[50],
           flex: 1,
           flexDirection: 'row',
@@ -334,17 +338,18 @@ export const ChatDetail = memo(
               <View
                 style={{
                   flexDirection: 'row',
-                  gap: 4,
+                  alignItems: 'center',
+                  gap: 5,
                 }}
               >
                 <Actions
                   icon={cameraIcon}
                   containerStyle={[
                     {
-                      padding: 10,
-                      alignContent: 'center',
-                      alignItems: 'center',
-                      alignSelf: 'center',
+                      padding: 6, // Max padding that doesn't break the composer height
+                      marginLeft: 0, // Done with flex gap
+                      width: 'auto',
+                      height: 'auto',
                     },
                   ]}
                   onPressActionButton={handleCameraButtonAction}
@@ -353,10 +358,10 @@ export const ChatDetail = memo(
                   icon={microphoneIcon}
                   containerStyle={[
                     {
-                      padding: 10,
-                      alignContent: 'center',
-                      alignItems: 'center',
-                      alignSelf: 'center',
+                      padding: 6, // Max padding that doesn't break the composer height
+                      marginLeft: 0, // Done with flex gap
+                      width: 'auto',
+                      height: 'auto',
                     },
                   ]}
                   onPressActionButton={handleRecordButtonAction}
@@ -365,11 +370,10 @@ export const ChatDetail = memo(
                   icon={attachmentIcon}
                   containerStyle={[
                     {
-                      padding: 10,
-                      marginRight: 10,
-                      alignContent: 'center',
-                      alignItems: 'center',
-                      alignSelf: 'center',
+                      padding: 6, // Max padding that doesn't break the composer height
+                      marginLeft: 0, // Done with flex gap
+                      width: 'auto',
+                      height: 'auto',
                     },
                   ]}
                   onPressActionButton={handleAttachmentButtonAction}
@@ -410,6 +414,9 @@ export const ChatDetail = memo(
               alignItems: 'center',
               marginBottom: 'auto',
               marginTop: 'auto',
+              flexShrink: 0,
+              flexGrow: 0,
+              gap: 6,
             }}
           >
             {isRecording && (
@@ -417,14 +424,14 @@ export const ChatDetail = memo(
                 icon={crossIcon}
                 containerStyle={[
                   {
-                    paddingHorizontal: 20,
+                    padding: 10,
                     justifyContent: 'center',
+                    marginBottom: 0,
                   },
                 ]}
                 onPressActionButton={handleRecordButtonAction}
               />
             )}
-            <View style={{ width: 6 }} />
 
             <Send
               {...props}
@@ -502,6 +509,7 @@ export const ChatDetail = memo(
         borderTopWidth: 0,
         borderRadius: 10,
         marginTop: Platform.OS === 'android' ? 'auto' : undefined,
+        paddingHorizontal: 7,
       };
     }, [isDarkMode]);
 
@@ -996,7 +1004,6 @@ export const chatStyles = StyleSheet.create({
 
   send: {
     alignContent: 'center',
-    marginRight: 8,
     height: 40,
     width: 40,
     justifyContent: 'center',
