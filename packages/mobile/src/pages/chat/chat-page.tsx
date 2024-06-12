@@ -429,7 +429,8 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
     return <NoConversationHeader title="No conversation found" goBack={doReturnToConversations} />;
   }
 
-  if (assets?.length) {
+  // If there are assets, show the file overview; Not when it's audio only, as we send that directly
+  if (assets?.length && !(assets.length === 1 && assets[0].type?.startsWith('audio/'))) {
     return <ChatFileOverview title={title} assets={assets} setAssets={setAssets} doSend={doSend} />;
   }
 
