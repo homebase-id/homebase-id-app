@@ -1,6 +1,5 @@
 import React, { memo, useCallback, useRef } from 'react';
 import {
-  Platform,
   StyleSheet,
   NativeSyntheticEvent,
   TextInputContentSizeChangeEventData,
@@ -14,26 +13,8 @@ import PasteInput, {
 } from '@mattermost/react-native-paste-input';
 
 const styles = StyleSheet.create({
-  textInput: {
-    flex: 1,
-    marginLeft: 10,
-    fontSize: 16,
-    lineHeight: 20,
-  },
-  container: {
-    flex: 1,
-    marginTop: Platform.select({
-      ios: 6,
-      android: 4,
-      web: 6,
-    }),
-    marginLeft: 10,
-    marginBottom: Platform.select({
-      ios: 5,
-      android: 4,
-      web: 4,
-    }),
-  },
+  textInput: {},
+  container: {},
 });
 
 export interface ComposerProps {
@@ -104,7 +85,7 @@ export const Composer = memo(
         style={[
           styles.container,
           {
-            height: composerHeight,
+            minHeight: composerHeight,
           },
           props.containerStyle,
         ]}

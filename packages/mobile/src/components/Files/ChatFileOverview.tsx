@@ -13,8 +13,8 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { Asset } from 'react-native-image-picker';
-import { Close, Pdf, Play, SendChat, SubtleCheck } from '../ui/Icons/icons';
+import { Asset, launchImageLibrary } from 'react-native-image-picker';
+import { Close, Pdf, Play, Plus, SendChat, SubtleCheck } from '../ui/Icons/icons';
 import { memo, useCallback, useState } from 'react';
 import { Colors } from '../../app/Colors';
 import { Header, HeaderBackButtonProps } from '@react-navigation/elements';
@@ -112,7 +112,7 @@ export const ChatFileOverview = memo(
   }: {
     title?: string;
     assets: Asset[];
-    setAssets: (newAssets: Asset[]) => void;
+    setAssets: React.Dispatch<React.SetStateAction<Asset[]>>;
     doSend: (message: { text: string }[]) => void;
   }) => {
     const [messageInput, setIsMessageInput] = useState(false);
@@ -132,6 +132,19 @@ export const ChatFileOverview = memo(
       },
       [setAssets]
     );
+
+    const doAppendAssets = useCallback(async () => {
+      const medias = await launchImageLibrary({
+        mediaType: 'mixed',
+        selectionLimit: 10,
+        formatAsMp4: true,
+        includeExtra: true,
+      });
+      if (medias.didCancel) return;
+
+      // Keep assets without a type out of it.. We're never sure what it is...
+      setAssets((assets) => [...assets, ...(medias.assets?.filter((asset) => asset.type) ?? [])]);
+    }, [setAssets]);
 
     return (
       <>
@@ -206,11 +219,32 @@ export const ChatFileOverview = memo(
                 </FilePreview>
               );
             })}
+            <View
+              style={{
+                borderWidth: 3,
+                borderColor: 'transparent',
+              }}
+            >
+              <TouchableOpacity
+                onPress={doAppendAssets}
+                style={{
+                  width: 70,
+                  height: 70,
+                  borderRadius: 15,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: isDarkMode ? Colors.slate[800] : Colors.slate[200],
+                }}
+              >
+                <Plus size={'md'} color={Colors.indigo[400]} />
+              </TouchableOpacity>
+            </View>
           </ScrollView>
 
           <View
             style={{
-              paddingVertical: 10,
+              paddingTop: 10,
+              paddingBottom: 7,
               flexDirection: 'column',
               paddingHorizontal: 0,
               marginTop: 10,
@@ -243,7 +277,9 @@ export const ChatFileOverview = memo(
               </Text>
             </TouchableOpacity>
 
-            <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
+            <View
+              style={{ flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 7 }}
+            >
               <TouchableOpacity onPress={() => doSend([{ text: message }])} style={chatStyles.send}>
                 <SendChat size={'md'} color={Colors.white} />
               </TouchableOpacity>
@@ -275,27 +311,38 @@ export const ChatFileOverview = memo(
                     justifyContent: 'center',
                     alignItems: 'center',
                     gap: 6,
-                    paddingVertical: 3,
+                    paddingHorizontal: 7,
+                    paddingTop: 10,
+                    paddingBottom: 7,
                   }}
                 >
-                  <TextInput
-                    value={message}
-                    onChangeText={setMessage}
-                    placeholder={t('Type a message...')}
+                  <View
                     style={{
-                      flex: 1,
                       borderRadius: 20,
                       borderWidth: 0,
                       paddingHorizontal: 10,
-                      paddingVertical: 8,
-                      backgroundColor: isDarkMode ? Colors.slate[800] : Colors.indigo[50],
+                      paddingVertical: 5,
+                      backgroundColor: isDarkMode ? Colors.black : Colors.indigo[50],
+                      flex: 1,
+                      alignItems: 'center',
                       flexDirection: 'row',
-                      color: isDarkMode ? Colors.white : Colors.black,
                     }}
-                    autoFocus={messageInput}
-                    multiline
-                    textAlignVertical="center" // Android only
-                  />
+                  >
+                    <TextInput
+                      value={message}
+                      onChangeText={setMessage}
+                      placeholder={t('Type a message...')}
+                      style={{
+                        flex: 1,
+                        maxHeight: 80,
+                        color: isDarkMode ? Colors.white : Colors.black,
+                        paddingVertical: 8,
+                      }}
+                      autoFocus={messageInput}
+                      multiline
+                      textAlignVertical="center" // Android only
+                    />
+                  </View>
                   <TouchableOpacity
                     onPress={() => setIsMessageInput(false)}
                     style={chatStyles.send}
