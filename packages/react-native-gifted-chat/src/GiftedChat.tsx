@@ -6,6 +6,7 @@ import {
 import dayjs from 'dayjs';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
 import PropTypes from 'prop-types';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import React, {
   createRef,
   useCallback,
@@ -266,6 +267,7 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
     onPaste = null,
   } = props;
 
+  const insets = useSafeAreaInsets();
   const keyboardHeightRef = useRef(0);
   const bottomOffsetRef = useRef(0);
   const maxHeightRef = useRef<number | undefined>(undefined);
@@ -382,7 +384,10 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
         ? e.endCoordinates.height
         : e.end.height;
 
-      bottomOffsetRef.current = bottomOffset != null ? bottomOffset : 1;
+      // This will offset the difference between the screen bottom postition and the keyboard bottom position
+      // Eg: Offset for Home indicator bar on iPhone X and newer
+      bottomOffsetRef.current =
+        bottomOffset != null ? bottomOffset : insets.bottom;
 
       const newMessagesContainerHeight = getMessagesContainerHeightWithKeyboard();
       setMessagesContainerHeight(newMessagesContainerHeight);
