@@ -48,6 +48,7 @@ import { PastedFile } from '@mattermost/react-native-paste-input';
 import { Colors } from '../../app/Colors';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { Text } from '../../components/ui/Text/Text';
+import { ChatFileOverview } from '../../components/Files/ChatFileOverview';
 
 export type SelectedMessageState = {
   messageCordinates: { x: number; y: number };
@@ -181,7 +182,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
 
   const { mutateAsync: inviteRecipient } = useConversation().inviteRecipient;
   const doSend = useCallback(
-    (message: ChatMessageIMessage[]) => {
+    (message: { text: string }[]) => {
       if (!conversation) return;
       // If the chat was empty, invite the recipient
       if (
@@ -428,6 +429,10 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
     return <NoConversationHeader title="No conversation found" goBack={doReturnToConversations} />;
   }
 
+  if (assets?.length) {
+    return <ChatFileOverview title={title} assets={assets} setAssets={setAssets} doSend={doSend} />;
+  }
+
   return (
     <BottomSheetModalProvider>
       <ErrorNotification error={deleteMessageError || clearChatError || deleteChatError} />
@@ -438,6 +443,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
           flex: 1,
           // Force the height on iOS to better support the keyboard handling
           minHeight: Platform.OS === 'ios' ? Dimensions.get('window').height : undefined,
+          backgroundColor: isDarkMode ? Colors.slate[900] : Colors.slate[50],
         }}
       >
         <ErrorBoundary>
