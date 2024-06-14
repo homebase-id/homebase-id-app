@@ -14,6 +14,7 @@ import {
   getContentFromHeaderOrPayload,
   queryBatch,
   uploadFile,
+  PriorityOptions,
 } from '@youfoundation/js-lib/core';
 import { ChatDrive } from './ConversationProvider';
 import { assertIfDefined, getNewId, jsonStringify64 } from '@youfoundation/js-lib/helpers';
@@ -78,7 +79,8 @@ export const uploadReaction = async (
     transitOptions: distribute
       ? {
           recipients: [...recipients],
-          schedule: ScheduleOptions.SendNowAwaitResponse,
+          schedule: ScheduleOptions.SendLater,
+          priority: PriorityOptions.Medium,
           sendContents: SendContents.All,
           useAppNotification: true,
           appNotificationOptions: {

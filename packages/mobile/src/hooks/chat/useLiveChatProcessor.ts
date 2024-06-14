@@ -1,12 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  ReceivedCommand,
-  TypedConnectionNotification,
-  getCommands,
-  markCommandComplete,
-  queryBatch,
-  queryModified,
-} from '@youfoundation/js-lib/core';
+import { TypedConnectionNotification, queryBatch, queryModified } from '@youfoundation/js-lib/core';
 import {
   getQueryBatchCursorFromTime,
   getQueryModifiedCursorFromTime,
@@ -15,22 +8,15 @@ import {
 import { processInbox } from '@youfoundation/js-lib/peer';
 
 import { useNotificationSubscriber } from '../useNotificationSubscriber';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback } from 'react';
 
-import { stringGuidsEqual, tryJsonParse } from '@youfoundation/js-lib/helpers';
+import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { getConversationQueryOptions, useConversation } from './useConversation';
-import { processCommand } from '../../provider/chat/ChatCommandProvider';
 import { useDotYouClientContext } from 'feed-app-common';
-import {
-  CHAT_MESSAGE_FILE_TYPE,
-  MARK_CHAT_READ_COMMAND,
-  dsrToMessage,
-} from '../../provider/chat/ChatProvider';
+import { CHAT_MESSAGE_FILE_TYPE, dsrToMessage } from '../../provider/chat/ChatProvider';
 import {
   ChatDrive,
   CHAT_CONVERSATION_FILE_TYPE,
-  JOIN_CONVERSATION_COMMAND,
-  JOIN_GROUP_CONVERSATION_COMMAND,
   GROUP_CHAT_CONVERSATION_FILE_TYPE,
   dsrToConversation,
 } from '../../provider/chat/ConversationProvider';
@@ -47,9 +33,6 @@ export const useLiveChatProcessor = () => {
 
   // Only after the inbox is processed, we connect for live updates; So we avoid clearing the cache on each fileAdded update
   const isOnline = useChatWebsocket(inboxStatus === 'success');
-
-  // Only after the inbox is processed, we process commands as new ones might have been added via the inbox
-  useChatCommandProcessor(inboxStatus === 'success');
 
   return isOnline;
 };
@@ -95,6 +78,7 @@ const useInboxProcessor = (connected?: boolean) => {
           cursor: modifiedCursor,
           excludePreviewThumbnail: false,
           includeHeaderContent: true,
+          includeTransferHistory: true,
         }
       );
 
@@ -130,9 +114,7 @@ const useInboxProcessor = (connected?: boolean) => {
 const isDebug = false;
 
 const useChatWebsocket = (isEnabled: boolean) => {
-  // const identity = useDotYouClientContext().getIdentity();
   const dotYouClient = useDotYouClientContext();
-  const identity = dotYouClient.getIdentity();
 
   // Added to ensure we have the conversation query available
   const {
@@ -208,25 +190,6 @@ const useChatWebsocket = (isEnabled: boolean) => {
         }
 
         insertNewConversation(queryClient, updatedConversation, !isNewFile);
-      } else if (
-        [
-          JOIN_CONVERSATION_COMMAND,
-          JOIN_GROUP_CONVERSATION_COMMAND,
-          MARK_CHAT_READ_COMMAND,
-        ].includes(notification.header.fileMetadata.appData.dataType) &&
-        identity
-      ) {
-        const command: ReceivedCommand = tryJsonParse<ReceivedCommand>(
-          notification.header.fileMetadata.appData.content
-        );
-        command.sender = notification.header.fileMetadata.senderOdinId;
-        command.clientCode = notification.header.fileMetadata.appData.dataType;
-        command.id = notification.header.fileId;
-
-        const processedCommand = await processCommand(dotYouClient, queryClient, command, identity);
-        if (processedCommand) {
-          await markCommandComplete(dotYouClient, ChatDrive, [processedCommand]);
-        }
       }
     }
   }, []);
@@ -239,48 +202,4 @@ const useChatWebsocket = (isEnabled: boolean) => {
       queryClient.invalidateQueries({ queryKey: ['process-inbox'] });
     }
   );
-};
-
-const useChatCommandProcessor = (isEnabled?: boolean) => {
-  const dotYouClient = useDotYouClientContext();
-  const identity = dotYouClient.getIdentity();
-  const queryClient = useQueryClient();
-
-  const isProcessing = useRef(false);
-
-  useEffect(() => {
-    if (!isEnabled) return;
-
-    (async () => {
-      if (!identity) return;
-      if (isProcessing.current) return;
-      isProcessing.current = true;
-      const commands = await getCommands(dotYouClient, ChatDrive);
-      const filteredCommands = commands.receivedCommands.filter(
-        (command) =>
-          command.clientCode === JOIN_CONVERSATION_COMMAND ||
-          command.clientCode === MARK_CHAT_READ_COMMAND ||
-          command.clientCode === JOIN_GROUP_CONVERSATION_COMMAND
-      );
-
-      const completedCommands: string[] = [];
-      // Can't use Promise.all, as we need to wait for the previous command to complete as commands can target the same conversation
-      for (let i = 0; i < filteredCommands.length; i++) {
-        const command = filteredCommands[i];
-
-        const completedCommand = await processCommand(dotYouClient, queryClient, command, identity);
-        if (completedCommand) completedCommands.push(completedCommand);
-      }
-
-      if (completedCommands.length > 0) {
-        await markCommandComplete(
-          dotYouClient,
-          ChatDrive,
-          completedCommands.filter(Boolean) as string[]
-        );
-      }
-
-      isProcessing.current = false;
-    })();
-  }, [dotYouClient, identity, isEnabled, queryClient]);
 };

@@ -21,6 +21,7 @@ import {
   AppendInstructionSet,
   UploadResult,
   ImageContentType,
+  PriorityOptions,
 } from '@youfoundation/js-lib/core';
 import {
   toGuidId,
@@ -217,6 +218,7 @@ const uploadPost = async <T extends PostContent>(
     transitOptions: {
       recipients: [],
       schedule: ScheduleOptions.SendLater,
+      priority: PriorityOptions.Medium,
       sendContents: SendContents.All, // TODO: Should this be header only?
     },
   };
@@ -304,6 +306,7 @@ const uploadPostHeader = async <T extends PostContent>(
     transitOptions: {
       recipients: [],
       schedule: ScheduleOptions.SendLater,
+      priority: PriorityOptions.Medium,
       sendContents: SendContents.All, // TODO: Should this be header only?
     },
   };
@@ -381,7 +384,7 @@ const uploadPostHeader = async <T extends PostContent>(
         ],
         undefined
       )
-    ).newVersionTag;
+    )?.newVersionTag;
   } else if (file.fileMetadata.payloads?.some((p) => p.key === DEFAULT_PAYLOAD_KEY)) {
     // Remove default payload if it was there before
     runningVersionTag = (
@@ -518,7 +521,7 @@ const updatePost = async <T extends PostContent>(
         payloads,
         thumbnails
       )
-    ).newVersionTag;
+    )?.newVersionTag;
   }
 
   if (file.fileMetadata.appData.content.type !== 'Article') {

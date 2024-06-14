@@ -12,7 +12,6 @@ import {
   NewHomebaseFile,
   NewPayloadDescriptor,
   SecurityGroupType,
-  TransferStatus,
 } from '@youfoundation/js-lib/core';
 import { getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 
@@ -132,15 +131,6 @@ const sendMessage = async ({
   newChat.fileMetadata.versionTag = uploadResult.newVersionTag;
   newChat.fileMetadata.appData.previewThumbnail = uploadResult.previewThumbnail;
 
-  const deliveredToInboxes = recipients.map(
-    (recipient) =>
-      uploadResult.recipientStatus[recipient].toLowerCase() === TransferStatus.DeliveredToInbox
-  );
-
-  if (recipients.length && deliveredToInboxes.every((delivered) => delivered)) {
-    newChat.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Delivered;
-    await updateChatMessage(dotYouClient, newChat, recipients, uploadResult.keyHeader);
-  }
   return newChat;
 };
 
@@ -234,11 +224,6 @@ export const getSendChatMessageMutationOptions: (queryClient: QueryClient) => Us
       ['chat-messages', messageParams.conversation.fileMetadata.appData.uniqueId],
       context?.existingData
     );
-  },
-  onSettled: async (_data, _error, variables) => {
-    queryClient.invalidateQueries({
-      queryKey: ['chat-messages', variables.conversation.fileMetadata.appData.uniqueId],
-    });
   },
 });
 
