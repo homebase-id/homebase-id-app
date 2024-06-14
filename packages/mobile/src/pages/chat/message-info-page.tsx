@@ -33,6 +33,9 @@ export const MessageInfoPage = ({ route }: MessageInfoProp) => {
     (recipient) => recipient && recipient !== identity
   );
 
+  const isAuthor =
+    message.fileMetadata.senderOdinId === identity || !message.fileMetadata.senderOdinId;
+
   const { data: reactions } = useChatReaction({
     conversationId: message.fileMetadata.appData.groupId,
     messageId: message.fileMetadata.appData.uniqueId,
@@ -91,18 +94,24 @@ export const MessageInfoPage = ({ route }: MessageInfoProp) => {
                   <ConnectionName odinId={recipient} />
                 </Text>
 
-                <FailedDeliveryDetails
-                  msg={message}
-                  recipient={recipient}
-                  style={{ maxWidth: '80%' }}
-                />
+                {isAuthor ? (
+                  <FailedDeliveryDetails
+                    msg={message}
+                    recipient={recipient}
+                    style={{ maxWidth: '80%' }}
+                  />
+                ) : null}
               </View>
 
-              <InnerDeliveryIndicator
-                state={messageContent.deliveryDetails?.[recipient] || messageContent.deliveryStatus}
-                showDefault
-                style={{ marginLeft: 'auto' }}
-              />
+              {isAuthor ? (
+                <InnerDeliveryIndicator
+                  state={
+                    messageContent.deliveryDetails?.[recipient] || messageContent.deliveryStatus
+                  }
+                  showDefault
+                  style={{ marginLeft: 'auto' }}
+                />
+              ) : null}
             </View>
           );
         })}
