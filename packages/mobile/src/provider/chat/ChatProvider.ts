@@ -364,12 +364,6 @@ export const uploadChatMessage = async (
 
   onUpdate?.('Uploading', 0);
 
-  await new Promise<void>((resolve) =>
-    setTimeout(() => {
-      resolve();
-    }, 1000 * 5)
-  );
-
   const uploadResult = await uploadFile(
     dotYouClient,
     uploadInstructions,
