@@ -343,6 +343,7 @@ export const uploadChatMessage = async (
       payloads.push({
         key: payloadKey,
         payload: blob,
+        descriptorContent: newMediaFile?.filename || newMediaFile?.type || undefined,
       });
 
       if (tinyThumb) previewThumbnails.push(tinyThumb);
@@ -355,6 +356,7 @@ export const uploadChatMessage = async (
         payloads.push({
           key: payloadKey,
           payload: payloadBlob,
+          descriptorContent: newMediaFile?.filename || newMediaFile?.type || undefined,
         });
       }
     }
