@@ -349,7 +349,7 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
     send: useMutation({
       ...getSendChatMessageMutationOptions(queryClient),
       onError: (err, messageParams, context) => {
-        addError(err);
+        addError(err, t('Failed to send the chat message'));
         queryClient.setQueryData(
           ['chat-messages', messageParams.conversation.fileMetadata.appData.uniqueId],
           context?.existingData
