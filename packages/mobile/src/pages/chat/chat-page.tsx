@@ -49,6 +49,7 @@ import { Colors } from '../../app/Colors';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { Text } from '../../components/ui/Text/Text';
 import { ChatFileOverview } from '../../components/Files/ChatFileOverview';
+import { OfflineState } from '../../components/Platform/OfflineState';
 
 export type SelectedMessageState = {
   messageCordinates: { x: number; y: number };
@@ -503,6 +504,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
             </View>
           ) : null}
           <ChatConnectedState {...conversation} />
+          <OfflineState />
           <Host>
             <Pressable
               onPress={dismissSelectedMessage}
