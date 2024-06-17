@@ -214,6 +214,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
           };
         }),
         chatId: getNewId(),
+        userDate: new Date().getTime(),
       });
       setAssets([]);
       setReplyMessage(null);

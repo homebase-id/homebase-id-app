@@ -38,6 +38,7 @@ const sendMessage = async ({
   files,
   message,
   chatId,
+  userDate,
   queryClient,
 }: {
   conversation: HomebaseFile<UnifiedConversation>;
@@ -45,6 +46,7 @@ const sendMessage = async ({
   files?: ImageSource[];
   message: string;
   chatId?: string;
+  userDate?: number;
   queryClient: QueryClient;
 }): Promise<NewHomebaseFile<ChatMessage> | null> => {
   const dotYouClient = await getSynchronousDotYouClient();
@@ -55,6 +57,7 @@ const sendMessage = async ({
   const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
 
   const newChatId = chatId || getNewId();
+  const newUserDate = userDate || new Date().getTime();
   const newChat: NewHomebaseFile<ChatMessage> = {
     fileMetadata: {
       appData: {
@@ -67,7 +70,7 @@ const sendMessage = async ({
             : ChatDeliveryStatus.Sent,
           replyId: replyId,
         },
-        userDate: new Date().getTime(),
+        userDate: newUserDate,
       },
     },
     serverMetadata: {
@@ -142,6 +145,7 @@ export const getSendChatMessageMutationOptions: (queryClient: QueryClient) => Us
     replyId?: string;
     files?: ImageSource[];
     message: string;
+    userDate?: number;
     chatId?: string;
   },
   {
