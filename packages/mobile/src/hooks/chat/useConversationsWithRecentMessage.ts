@@ -59,7 +59,6 @@ export const useConversationsWithRecentMessage = () => {
   }, [flatConversations, dotYouClient, queryClient]);
 
   const { lastUpdate } = useLastUpdatedChatMessages();
-
   useEffect(() => {
     if (!lastUpdate) return;
     buildConversationsWithRecent();
