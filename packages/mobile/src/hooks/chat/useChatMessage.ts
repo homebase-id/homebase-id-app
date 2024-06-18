@@ -159,7 +159,7 @@ export const getSendChatMessageMutationOptions: (queryClient: QueryClient) => Us
 > = (queryClient) => ({
   mutationKey: ['send-chat-message'],
   mutationFn: async (params) => sendMessage({ ...params, queryClient }),
-  onMutate: async ({ conversation, replyId, files, message, chatId }) => {
+  onMutate: async ({ conversation, replyId, files, message, chatId, userDate }) => {
     const existingData = queryClient.getQueryData<
       InfiniteData<{
         searchResults: (HomebaseFile<ChatMessage> | null)[];
@@ -181,6 +181,7 @@ export const getSendChatMessageMutationOptions: (queryClient: QueryClient) => Us
             deliveryStatus: ChatDeliveryStatus.Sending,
             replyId: replyId,
           },
+          userDate,
           previewThumbnail:
             files && files.length === 1
               ? {
