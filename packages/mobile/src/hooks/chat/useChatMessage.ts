@@ -60,6 +60,7 @@ const sendMessage = async ({
   const newUserDate = userDate || new Date().getTime();
   const newChat: NewHomebaseFile<ChatMessage> = {
     fileMetadata: {
+      created: newUserDate,
       appData: {
         uniqueId: newChatId,
         groupId: conversationId,
@@ -174,6 +175,7 @@ export const getSendChatMessageMutationOptions: (queryClient: QueryClient) => Us
 
     const newMessageDsr: NewHomebaseFile<ChatMessage> = {
       fileMetadata: {
+        created: userDate,
         appData: {
           uniqueId: chatId,
           groupId: conversation.fileMetadata.appData.uniqueId,

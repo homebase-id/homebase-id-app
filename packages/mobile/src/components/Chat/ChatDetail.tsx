@@ -510,6 +510,7 @@ export const ChatDetail = memo(
         borderRadius: 10,
         marginTop: Platform.OS === 'android' ? 'auto' : undefined,
         paddingHorizontal: 7,
+        paddingBottom: 7,
       };
     }, [isDarkMode]);
 
