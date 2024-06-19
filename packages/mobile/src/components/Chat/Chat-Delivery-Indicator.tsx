@@ -68,50 +68,45 @@ export const InnerDeliveryIndicator = ({
       style={[
         {
           flexDirection: 'row',
-
-          alignContent: 'flex-start',
           alignItems: 'center',
         },
         style,
       ]}
     >
-      {isFailed ? (
-        <View
-          style={{
-            marginRight: 8,
-            zIndex: 10,
-          }}
-        >
+      <View
+        style={{
+          paddingBottom: 4,
+          marginRight: 8,
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'center',
+          width: 20,
+          height: 20,
+          overflow: 'hidden',
+        }}
+      >
+        {isFailed ? (
           <Times size={'sm'} color={Colors.red[500]} />
-        </View>
-      ) : (
-        <>
-          {isDelivered ? (
+        ) : isDelivered ? (
+          <View style={{ position: 'relative', display: 'flex', flexDirection: 'row', gap: -9 }}>
             <SubtleCheck
               size={'sm'}
               color={isRead ? (showDefault ? Colors.indigo[400] : Colors.white) : Colors.gray[400]}
             />
-          ) : null}
-          <View
-            style={{
-              right: isSent ? 8 : 0,
-              marginRight: !isSent ? 8 : 0,
-              zIndex: 10,
-            }}
-          >
-            {isSent ? (
-              <SubtleCheck
-                size={'sm'}
-                color={
-                  isRead ? (showDefault ? Colors.indigo[400] : Colors.white) : Colors.gray[400]
-                }
-              />
-            ) : (
-              <Clock size={'sm'} />
-            )}
+            <SubtleCheck
+              size={'sm'}
+              color={isRead ? (showDefault ? Colors.indigo[400] : Colors.white) : Colors.gray[400]}
+            />
           </View>
-        </>
-      )}
+        ) : isSent ? (
+          <SubtleCheck
+            size={'sm'}
+            color={isRead ? (showDefault ? Colors.indigo[400] : Colors.white) : Colors.gray[400]}
+          />
+        ) : (
+          <Clock size={'xs'} color={Colors.gray[200]} />
+        )}
+      </View>
     </View>
   );
 };
