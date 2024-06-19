@@ -133,12 +133,13 @@ const sendMessage = async ({
   newChat.fileId = uploadResult.file.fileId;
   newChat.fileMetadata.versionTag = uploadResult.newVersionTag;
   newChat.fileMetadata.appData.previewThumbnail = uploadResult.previewThumbnail;
+  newChat.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Sent;
 
   return newChat;
 };
 
 export const getSendChatMessageMutationOptions: (queryClient: QueryClient) => UseMutationOptions<
-  unknown,
+  NewHomebaseFile<ChatMessage> | null,
   unknown,
   {
     conversation: HomebaseFile<UnifiedConversation>;
@@ -221,6 +222,41 @@ export const getSendChatMessageMutationOptions: (queryClient: QueryClient) => Us
       newData
     );
     return { existingData };
+  },
+  onSuccess: async (newMessage, params) => {
+    if (!newMessage) return;
+    const extistingMessages = queryClient.getQueryData<
+      InfiniteData<{
+        searchResults: (HomebaseFile<ChatMessage> | null)[];
+        cursorState: string;
+        queryTime: number;
+        includeMetadataHeader: boolean;
+      }>
+    >(['chat-messages', params.conversation.fileMetadata.appData.uniqueId]);
+
+    if (extistingMessages) {
+      const newData = {
+        ...extistingMessages,
+        pages: extistingMessages?.pages?.map((page) => ({
+          ...page,
+          searchResults: page.searchResults.map((msg) =>
+            stringGuidsEqual(
+              msg?.fileMetadata.appData.uniqueId,
+              newMessage.fileMetadata.appData.uniqueId
+            ) &&
+            (!msg?.fileMetadata.appData.content.deliveryStatus ||
+              msg?.fileMetadata.appData.content.deliveryStatus <= ChatDeliveryStatus.Sent)
+              ? newMessage
+              : msg
+          ),
+        })),
+      };
+
+      queryClient.setQueryData(
+        ['chat-messages', params.conversation.fileMetadata.appData.uniqueId],
+        newData
+      );
+    }
   },
   onError: (err, messageParams, context) => {
     addError(queryClient, err, t('Failed to send the chat message'));

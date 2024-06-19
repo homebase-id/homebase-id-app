@@ -156,6 +156,14 @@ const useChatWebsocket = (isEnabled: boolean) => {
           ChatDrive,
           true
         );
+        if (updatedChatMessage) {
+          console.log(
+            'WS file ',
+            updatedChatMessage.fileMetadata.appData.uniqueId,
+            updatedChatMessage.fileMetadata.appData.content
+          );
+        }
+
         if (
           !updatedChatMessage ||
           Object.keys(updatedChatMessage.fileMetadata.appData.content).length === 0
