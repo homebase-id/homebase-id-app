@@ -85,7 +85,7 @@ const ReactionTile = (prop: HomebaseFile<ChatReaction>) => {
       style={{
         display: 'flex',
         flexDirection: 'row',
-        alignItems: 'flex-start',
+        alignItems: 'center',
 
         marginTop: 10,
       }}
@@ -93,18 +93,20 @@ const ReactionTile = (prop: HomebaseFile<ChatReaction>) => {
       {senderOdinId ? (
         <Avatar
           odinId={senderOdinId}
+          imageSize={{ width: 42, height: 42 }}
           style={{
-            width: 30,
-            height: 30,
             marginRight: 16,
+            width: 42,
+            height: 42,
           }}
         />
       ) : (
         <OwnerAvatar
+          imageSize={{ width: 42, height: 42 }}
           style={{
-            width: 36,
-            height: 36,
             marginRight: 16,
+            width: 42,
+            height: 42,
           }}
         />
       )}
