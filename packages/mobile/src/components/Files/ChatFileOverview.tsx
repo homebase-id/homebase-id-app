@@ -22,6 +22,8 @@ import { BackButton } from '../ui/convo-app-bar';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { chatStyles } from '../Chat/ChatDetail';
 import { t } from 'feed-app-common';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTheme } from '@react-navigation/native';
 
 const FilePreview = ({
   asset,
@@ -121,6 +123,8 @@ export const ChatFileOverview = memo(
     const { isDarkMode } = useDarkMode();
     const [currentIndex, setCurrentIndex] = useState(0);
     const currentAsset = assets[currentIndex];
+    const { bottom: bottomInsets } = useSafeAreaInsets();
+    const { colors } = useTheme();
 
     const headerLeft = useCallback(
       (props: HeaderBackButtonProps) => {
@@ -256,22 +260,25 @@ export const ChatFileOverview = memo(
           <View
             style={{
               paddingTop: 10,
-              paddingBottom: 7,
+              paddingBottom: Platform.select({
+                android: 7,
+                ios: bottomInsets,
+              }),
               flexDirection: 'column',
               paddingHorizontal: 0,
               marginTop: 10,
               gap: 10,
-              backgroundColor: isDarkMode ? Colors.slate[800] : Colors.slate[50],
             }}
           >
             <TouchableOpacity
               onPress={() => setIsMessageInput(true)}
-              style={{ flexDirection: 'row', justifyContent: 'center' }}
+              style={{ flexDirection: 'row', justifyContent: 'center', paddingHorizontal: 8 }}
             >
               <Text
                 style={[
                   {
                     color: isDarkMode ? Colors.white : Colors.black,
+                    fontSize: 16,
                   },
                   message
                     ? {
@@ -281,7 +288,10 @@ export const ChatFileOverview = memo(
                         flex: 1,
                         padding: 10,
                       }
-                    : {},
+                    : {
+                        fontWeight: '500',
+                        paddingTop: 6,
+                      },
                   messageInput ? { opacity: 0 } : {},
                 ]}
               >
@@ -324,7 +334,7 @@ export const ChatFileOverview = memo(
               <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={{
-                  backgroundColor: isDarkMode ? Colors.slate[800] : Colors.slate[50],
+                  backgroundColor: isDarkMode ? colors.card : Colors.slate[50],
                 }}
               >
                 <View
@@ -335,7 +345,11 @@ export const ChatFileOverview = memo(
                     gap: 6,
                     paddingHorizontal: 7,
                     paddingTop: 10,
-                    paddingBottom: 7,
+                    // height: 120,
+                    paddingBottom: Platform.select({
+                      ios: 7,
+                      android: 12,
+                    }),
                   }}
                 >
                   <View
@@ -344,7 +358,7 @@ export const ChatFileOverview = memo(
                       borderWidth: 0,
                       paddingHorizontal: 10,
                       paddingVertical: 5,
-                      backgroundColor: isDarkMode ? Colors.black : Colors.indigo[50],
+                      backgroundColor: isDarkMode ? Colors.slate[800] : Colors.indigo[50],
                       flex: 1,
                       alignItems: 'center',
                       flexDirection: 'row',
@@ -363,6 +377,7 @@ export const ChatFileOverview = memo(
                       autoFocus={messageInput}
                       multiline
                       textAlignVertical="center" // Android only
+                      autoCapitalize="sentences"
                     />
                   </View>
                   <TouchableOpacity
