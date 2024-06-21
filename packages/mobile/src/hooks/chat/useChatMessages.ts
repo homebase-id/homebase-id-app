@@ -163,9 +163,21 @@ export const insertNewMessage = (
       pages: extistingMessages?.pages?.map((page, index) => {
         if (isNewFile) {
           const filteredSearchResults = page.searchResults.filter(
-            // Remove messages without a fileId, as the optimistic mutations should be removed when there's actual data coming over the websocket;
-            //   And There shouldn't be any duplicates, but just in case
-            (msg) => msg && msg?.fileId && !stringGuidsEqual(msg?.fileId, newMessage.fileId)
+            // Remove messages with the same fileId but more importantly uniqueId so we avoid duplicates with the optimistic update
+            (msg) => {
+              if (!msg) return false;
+
+              if (newMessage.fileMetadata.appData.uniqueId) {
+                return !stringGuidsEqual(
+                  msg?.fileMetadata.appData.uniqueId,
+                  newMessage.fileMetadata.appData.uniqueId
+                );
+              } else if (newMessage.fileId) {
+                return !stringGuidsEqual(msg?.fileId, newMessage.fileId);
+              }
+
+              return true;
+            }
           ) as HomebaseFile<ChatMessage>[];
 
           return {
@@ -181,9 +193,30 @@ export const insertNewMessage = (
 
         return {
           ...page,
-          searchResults: page.searchResults.map((msg) =>
-            msg?.fileId && stringGuidsEqual(msg?.fileId, newMessage.fileId) ? newMessage : msg
-          ),
+          searchResults: (
+            page.searchResults
+              .map((msg) =>
+                msg?.fileId && stringGuidsEqual(msg?.fileId, newMessage.fileId) ? newMessage : msg
+              )
+              .filter((msg) => {
+                if (!msg) return false;
+                // (Sanity for fileModified) Remove messages without a fileId and the same uniqueId so we avoid duplicates with the optimistic update
+                if (!msg.fileId && newMessage.fileMetadata.appData.uniqueId) {
+                  return !stringGuidsEqual(
+                    msg?.fileMetadata.appData.uniqueId,
+                    newMessage.fileMetadata.appData.uniqueId
+                  );
+                }
+
+                return true;
+              }) as HomebaseFile<ChatMessage>[]
+          ).reduce((acc, msg) => {
+            if (!acc.some((m) => stringGuidsEqual(m?.fileId, msg?.fileId))) {
+              acc.push(msg);
+            }
+
+            return acc;
+          }, [] as HomebaseFile<ChatMessage>[]),
         };
       }),
     };

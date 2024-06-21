@@ -33,6 +33,7 @@ import { Pencil, People } from '../components/ui/Icons/icons';
 import { TouchableOpacity } from '@gorhom/bottom-sheet';
 import { SafeAreaView } from '../components/ui/SafeAreaView/SafeAreaView';
 import { openURL } from '../utils/utils';
+import { OfflineState } from '../components/Platform/OfflineState';
 
 type ConversationProp = NativeStackScreenProps<ChatStackParamList, 'Conversation'>;
 
@@ -134,6 +135,7 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
       <SafeAreaView>
         <RemoveNotifications />
         <FloatingActionButton />
+        <OfflineState />
         {conversations && conversations?.length ? (
           <FlatList
             data={conversations}

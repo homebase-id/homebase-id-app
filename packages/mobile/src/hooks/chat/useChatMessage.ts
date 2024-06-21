@@ -38,6 +38,7 @@ const sendMessage = async ({
   files,
   message,
   chatId,
+  userDate,
   queryClient,
 }: {
   conversation: HomebaseFile<UnifiedConversation>;
@@ -45,6 +46,7 @@ const sendMessage = async ({
   files?: ImageSource[];
   message: string;
   chatId?: string;
+  userDate?: number;
   queryClient: QueryClient;
 }): Promise<NewHomebaseFile<ChatMessage> | null> => {
   const dotYouClient = await getSynchronousDotYouClient();
@@ -55,8 +57,10 @@ const sendMessage = async ({
   const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
 
   const newChatId = chatId || getNewId();
+  const newUserDate = userDate || new Date().getTime();
   const newChat: NewHomebaseFile<ChatMessage> = {
     fileMetadata: {
+      created: newUserDate,
       appData: {
         uniqueId: newChatId,
         groupId: conversationId,
@@ -67,7 +71,7 @@ const sendMessage = async ({
             : ChatDeliveryStatus.Sent,
           replyId: replyId,
         },
-        userDate: new Date().getTime(),
+        userDate: newUserDate,
       },
     },
     serverMetadata: {
@@ -130,18 +134,20 @@ const sendMessage = async ({
   newChat.fileId = uploadResult.file.fileId;
   newChat.fileMetadata.versionTag = uploadResult.newVersionTag;
   newChat.fileMetadata.appData.previewThumbnail = uploadResult.previewThumbnail;
+  newChat.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Sent;
 
   return newChat;
 };
 
 export const getSendChatMessageMutationOptions: (queryClient: QueryClient) => UseMutationOptions<
-  unknown,
+  NewHomebaseFile<ChatMessage> | null,
   unknown,
   {
     conversation: HomebaseFile<UnifiedConversation>;
     replyId?: string;
     files?: ImageSource[];
     message: string;
+    userDate?: number;
     chatId?: string;
   },
   {
@@ -155,7 +161,7 @@ export const getSendChatMessageMutationOptions: (queryClient: QueryClient) => Us
 > = (queryClient) => ({
   mutationKey: ['send-chat-message'],
   mutationFn: async (params) => sendMessage({ ...params, queryClient }),
-  onMutate: async ({ conversation, replyId, files, message, chatId }) => {
+  onMutate: async ({ conversation, replyId, files, message, chatId, userDate }) => {
     const existingData = queryClient.getQueryData<
       InfiniteData<{
         searchResults: (HomebaseFile<ChatMessage> | null)[];
@@ -169,6 +175,7 @@ export const getSendChatMessageMutationOptions: (queryClient: QueryClient) => Us
 
     const newMessageDsr: NewHomebaseFile<ChatMessage> = {
       fileMetadata: {
+        created: userDate,
         appData: {
           uniqueId: chatId,
           groupId: conversation.fileMetadata.appData.uniqueId,
@@ -177,6 +184,7 @@ export const getSendChatMessageMutationOptions: (queryClient: QueryClient) => Us
             deliveryStatus: ChatDeliveryStatus.Sending,
             replyId: replyId,
           },
+          userDate,
           previewThumbnail:
             files && files.length === 1
               ? {
@@ -216,6 +224,41 @@ export const getSendChatMessageMutationOptions: (queryClient: QueryClient) => Us
       newData
     );
     return { existingData };
+  },
+  onSuccess: async (newMessage, params) => {
+    if (!newMessage) return;
+    const extistingMessages = queryClient.getQueryData<
+      InfiniteData<{
+        searchResults: (HomebaseFile<ChatMessage> | null)[];
+        cursorState: string;
+        queryTime: number;
+        includeMetadataHeader: boolean;
+      }>
+    >(['chat-messages', params.conversation.fileMetadata.appData.uniqueId]);
+
+    if (extistingMessages) {
+      const newData = {
+        ...extistingMessages,
+        pages: extistingMessages?.pages?.map((page) => ({
+          ...page,
+          searchResults: page.searchResults.map((msg) =>
+            stringGuidsEqual(
+              msg?.fileMetadata.appData.uniqueId,
+              newMessage.fileMetadata.appData.uniqueId
+            ) &&
+            (!msg?.fileMetadata.appData.content.deliveryStatus ||
+              msg?.fileMetadata.appData.content.deliveryStatus <= ChatDeliveryStatus.Sent)
+              ? newMessage
+              : msg
+          ),
+        })),
+      };
+
+      queryClient.setQueryData(
+        ['chat-messages', params.conversation.fileMetadata.appData.uniqueId],
+        newData
+      );
+    }
   },
   onError: (err, messageParams, context) => {
     addError(queryClient, err, t('Failed to send the chat message'));
@@ -345,7 +388,7 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
     send: useMutation({
       ...getSendChatMessageMutationOptions(queryClient),
       onError: (err, messageParams, context) => {
-        addError(err);
+        addError(err, t('Failed to send the chat message'));
         queryClient.setQueryData(
           ['chat-messages', messageParams.conversation.fileMetadata.appData.uniqueId],
           context?.existingData
