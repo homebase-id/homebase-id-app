@@ -14,7 +14,7 @@ import {
   Platform,
 } from 'react-native';
 import { Asset, launchImageLibrary } from 'react-native-image-picker';
-import { Close, Pdf, Play, Plus, SendChat, SubtleCheck } from '../ui/Icons/icons';
+import { Pdf, Play, Plus, SendChat, SubtleCheck, Trash } from '../ui/Icons/icons';
 import { memo, useCallback, useState } from 'react';
 import { Colors } from '../../app/Colors';
 import { Header, HeaderBackButtonProps } from '@react-navigation/elements';
@@ -103,6 +103,7 @@ const FilePreview = ({
   );
 };
 
+// Perhaps convert this to a route
 export const ChatFileOverview = memo(
   ({
     title,
@@ -177,7 +178,7 @@ export const ChatFileOverview = memo(
             showsHorizontalScrollIndicator={false}
             style={{
               marginTop: -38,
-              height: 76, // 70 + 3 * 2 (border width)
+              height: 54, // 48 + 3 * 2 (border width)
               flexShrink: 0,
               paddingHorizontal: 3,
               // backgroundColor: isDarkMode ? Colors.black : Colors.white,
@@ -189,8 +190,8 @@ export const ChatFileOverview = memo(
                   key={index}
                   asset={value}
                   size={{
-                    width: 70,
-                    height: 70,
+                    width: 48,
+                    height: 48,
                   }}
                   style={{
                     borderWidth: 3,
@@ -206,9 +207,20 @@ export const ChatFileOverview = memo(
                   {index === currentIndex ? (
                     <TouchableOpacity
                       onPress={() => setAssets(assets.filter((_, i) => i !== index))}
-                      style={{ position: 'absolute', top: 4, right: 4 }}
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        right: 0,
+                        left: 0,
+                        bottom: 0,
+                        width: 48,
+                        height: 48,
+                        borderRadius: 12,
+                        justifyContent: 'center',
+                        backgroundColor: `${Colors.slate[900]}4A`,
+                      }}
                     >
-                      <Close size={'sm'} color="white" />
+                      <Trash size={'sm'} color={Colors.white} />
                     </TouchableOpacity>
                   ) : (
                     <TouchableOpacity
@@ -228,9 +240,9 @@ export const ChatFileOverview = memo(
               <TouchableOpacity
                 onPress={doAppendAssets}
                 style={{
-                  width: 70,
-                  height: 70,
-                  borderRadius: 15,
+                  width: 48,
+                  height: 48,
+                  borderRadius: 12,
                   alignItems: 'center',
                   justifyContent: 'center',
                   backgroundColor: isDarkMode ? Colors.slate[800] : Colors.slate[200],
@@ -281,7 +293,17 @@ export const ChatFileOverview = memo(
               style={{ flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 7 }}
             >
               <TouchableOpacity onPress={() => doSend([{ text: message }])} style={chatStyles.send}>
-                <SendChat size={'md'} color={Colors.white} />
+                <View
+                  style={{
+                    transform: [
+                      {
+                        rotate: '50deg',
+                      },
+                    ],
+                  }}
+                >
+                  <SendChat size={'md'} color={Colors.white} />
+                </View>
               </TouchableOpacity>
             </View>
           </View>

@@ -86,7 +86,6 @@ const ReactionTile = (prop: HomebaseFile<ChatReaction>) => {
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
-
         marginTop: 10,
       }}
     >

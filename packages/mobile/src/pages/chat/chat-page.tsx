@@ -135,8 +135,6 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
       ) || []
     )?.length > 1;
 
-  // const [messageCordinates, setMessageCordinates] = useState({ x: 0, y: 0 });
-
   const initalSelectedMessageState: SelectedMessageState = useMemo(
     () => ({
       messageCordinates: { x: 0, y: 0 },
