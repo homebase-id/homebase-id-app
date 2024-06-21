@@ -998,9 +998,10 @@ PODS:
     - React-Core
   - react-native-netinfo (11.3.1):
     - React-Core
-  - react-native-paste-input (0.7.1):
+  - react-native-paste-input (0.8.0):
+    - glog
+    - RCT-Folly (= 2022.05.16.00)
     - React-Core
-    - Swime (= 3.0.6)
   - react-native-quick-crypto (0.6.1):
     - OpenSSL-Universal
     - React
@@ -1244,7 +1245,6 @@ PODS:
     - React-Core
   - SocketRocket (0.6.1)
   - SSZipArchive (2.2.3)
-  - Swime (3.0.6)
   - Yoga (1.14.0)
   - ZIPFoundation (0.9.19)
 
@@ -1292,7 +1292,7 @@ DEPENDENCIES:
   - "react-native-image-resizer (from `../../../node_modules/@bam.tech/react-native-image-resizer`)"
   - react-native-mmkv-storage (from `../../../node_modules/react-native-mmkv-storage`)
   - "react-native-netinfo (from `../../../node_modules/@react-native-community/netinfo`)"
-  - "react-native-paste-input (from `../../../node_modules/@mattermost/react-native-paste-input`)"
+  - "react-native-paste-input (from `../node_modules/@mattermost/react-native-paste-input`)"
   - react-native-quick-crypto (from `../../../node_modules/react-native-quick-crypto`)
   - react-native-safe-area-context (from `../../../node_modules/react-native-safe-area-context`)
   - "react-native-slider (from `../../../node_modules/@react-native-community/slider`)"
@@ -1364,7 +1364,6 @@ SPEC REPOS:
     - PromisesObjC
     - SocketRocket
     - SSZipArchive
-    - Swime
     - ZIPFoundation
 
 EXTERNAL SOURCES:
@@ -1448,7 +1447,7 @@ EXTERNAL SOURCES:
   react-native-netinfo:
     :path: "../../../node_modules/@react-native-community/netinfo"
   react-native-paste-input:
-    :path: "../../../node_modules/@mattermost/react-native-paste-input"
+    :path: "../node_modules/@mattermost/react-native-paste-input"
   react-native-quick-crypto:
     :path: "../../../node_modules/react-native-quick-crypto"
   react-native-safe-area-context:
@@ -1602,7 +1601,7 @@ SPEC CHECKSUMS:
   react-native-image-resizer: 681f7607418b97c084ba2d0999b153b103040d8a
   react-native-mmkv-storage: cfb6854594cfdc5f7383a9e464bb025417d1721c
   react-native-netinfo: bdb108d340cdb41875c9ced535977cac6d2ff321
-  react-native-paste-input: d2136a8269eb8ad57d81407ee2b8a646f738a694
+  react-native-paste-input: cd9084eefa66562c3dacef71a400d43ee0b28f21
   react-native-quick-crypto: 82eedfdbd352c8fa861512f80f07d069c411c9b8
   react-native-safe-area-context: b97eb6f9e3b7f437806c2ce5983f479f8eb5de4b
   react-native-slider: 6a65aa2e1f1816ee80b9684ff9a07118dfab1bf6
@@ -1650,7 +1649,6 @@ SPEC CHECKSUMS:
   RNSVG: 50cf2c7018e57cf5d3522d98d0a3a4dd6bf9d093
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
   SSZipArchive: 62d4947b08730e4cda640473b0066d209ff033c9
-  Swime: d7b2c277503b6cea317774aedc2dce05613f8b0b
   Yoga: 805bf71192903b20fc14babe48080582fee65a80
   ZIPFoundation: b8c29ea7ae353b309bc810586181fd073cb3312c
 

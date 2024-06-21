@@ -81,6 +81,7 @@ export const ChatDetail = memo(
     doSelectMessage,
     doOpenMessageInfo,
     doOpenReactionModal,
+    doOpenRetryModal,
     replyMessage,
     setReplyMessage,
     assets,
@@ -102,6 +103,7 @@ export const ChatDetail = memo(
     }) => void;
     doOpenMessageInfo: (message: ChatMessageIMessage) => void;
     doOpenReactionModal: (message: ChatMessageIMessage) => void;
+    doOpenRetryModal: (message: ChatMessageIMessage) => void;
     onPaste: (error: string | null | undefined, files: PastedFile[]) => void;
     conversationId: string;
     replyMessage: ChatMessageIMessage | null;
@@ -616,7 +618,13 @@ export const ChatDetail = memo(
           renderCustomView={(prop: BubbleProps<ChatMessageIMessage>) => (
             <RenderReplyMessageView {...prop} />
           )}
-          renderBubble={(prop) => <RenderBubble {...prop} onReactionClick={doOpenReactionModal} />}
+          renderBubble={(prop) => (
+            <RenderBubble
+              {...prop}
+              onReactionClick={doOpenReactionModal}
+              onRetryClick={doOpenRetryModal}
+            />
+          )}
           renderMessageText={(prop) => <RenderMessageText {...prop} />}
           renderMessage={renderMessageBox}
           // renderChatFooter instead of renderFooter as the renderFooter renders within the scrollView
@@ -687,6 +695,7 @@ const RenderBubble = memo(
   (
     props: {
       onReactionClick: (message: ChatMessageIMessage) => void;
+      onRetryClick: (message: ChatMessageIMessage) => void;
     } & Readonly<BubbleProps<IMessage>>
   ) => {
     const message = props.currentMessage as ChatMessageIMessage;
@@ -703,6 +712,10 @@ const RenderBubble = memo(
       conversationId: message?.fileMetadata.appData.groupId,
       messageId: message?.fileMetadata.appData.uniqueId,
     }).get;
+
+    const onRetryOpen = () => {
+      props.onRetryClick(message);
+    };
 
     const hasReactions = (reactions && reactions?.length > 0) || false;
     const flatReactions = useMemo(
@@ -766,7 +779,9 @@ const RenderBubble = memo(
     return (
       <Bubble
         {...props}
-        renderTicks={(message: ChatMessageIMessage) => <ChatDeliveryIndicator msg={message} />}
+        renderTicks={(message: ChatMessageIMessage) => (
+          <ChatDeliveryIndicator msg={message} onPress={onRetryOpen} />
+        )}
         renderReactions={
           !hasReactions
             ? undefined
