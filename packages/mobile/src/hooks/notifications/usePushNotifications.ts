@@ -48,7 +48,7 @@ export const usePushNotifications = (props?: { appId?: string }) => {
     remove: useMutation({
       mutationFn: removeNotifications,
       onMutate: async () => {
-        // TODO
+        // TODO: Fast update the UI
       },
       onSettled: () => {
         queryClient.invalidateQueries({ queryKey: ['push-notifications'] });
