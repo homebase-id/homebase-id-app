@@ -50,6 +50,7 @@ import { useDarkMode } from '../../hooks/useDarkMode';
 import { Text } from '../../components/ui/Text/Text';
 import { ChatFileOverview } from '../../components/Files/ChatFileOverview';
 import { OfflineState } from '../../components/Platform/OfflineState';
+import { RetryModal } from '../../components/Chat/Reactions/Modal/RetryModal';
 
 export type SelectedMessageState = {
   messageCordinates: { x: number; y: number };
@@ -134,8 +135,6 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
         (recipient) => recipient !== identity
       ) || []
     )?.length > 1;
-
-  // const [messageCordinates, setMessageCordinates] = useState({ x: 0, y: 0 });
 
   const initalSelectedMessageState: SelectedMessageState = useMemo(
     () => ({
@@ -252,6 +251,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
   const emojiPickerSheetModalRef = useRef<BottomSheetModal>(null);
   const reactionModalRef = useRef<BottomSheetModal>(null);
   const forwardModalRef = useRef<BottomSheetModal>(null);
+  const retryModelRef = useRef<BottomSheetModal>(null);
 
   const openEmojiModal = useCallback(() => {
     emojiPickerSheetModalRef.current?.present();
@@ -259,16 +259,23 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
   }, [selectedMessage]);
 
   const [selectedReactionMessage, setSelectedReactionMessage] = useState<ChatMessageIMessage>();
+  const [selectedRetryMessage, setSelectedRetryMessage] = useState<ChatMessageIMessage>();
 
   const openReactionModal = useCallback((message: ChatMessageIMessage) => {
     setSelectedReactionMessage(message);
     reactionModalRef.current?.present();
   }, []);
 
+  const openRetryModal = useCallback((message: ChatMessageIMessage) => {
+    setSelectedRetryMessage(message);
+    retryModelRef.current?.present();
+  }, []);
+
   const dismissSelectedMessage = useCallback(() => {
     emojiPickerSheetModalRef.current?.dismiss();
     reactionModalRef.current?.dismiss();
     forwardModalRef.current?.dismiss();
+    retryModelRef.current?.dismiss();
     if (selectedMessage !== initalSelectedMessageState) {
       setSelectedMessage(initalSelectedMessageState);
     }
@@ -519,6 +526,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
                   doSelectMessage={doSelectMessage}
                   doOpenMessageInfo={doOpenMessageInfo}
                   doOpenReactionModal={openReactionModal}
+                  doOpenRetryModal={openRetryModal}
                   replyMessage={replyMessage}
                   setReplyMessage={setReplyMessage}
                   assets={assets}
@@ -541,7 +549,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
       </View>
       <EmojiPickerModal
         ref={emojiPickerSheetModalRef}
-        selectedMessage={selectedMessage.selectedMessage as ChatMessageIMessage}
+        selectedMessage={selectedMessage.selectedMessage}
         onDismiss={dismissSelectedMessage}
       />
       <ReactionsModal
@@ -555,6 +563,15 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
         ref={forwardModalRef}
         onClose={dismissSelectedMessage}
         selectedMessage={selectedMessage.selectedMessage}
+      />
+      <RetryModal
+        ref={retryModelRef}
+        message={selectedRetryMessage}
+        conversation={conversation}
+        onClose={() => {
+          retryModelRef.current?.dismiss();
+          setSelectedRetryMessage(undefined);
+        }}
       />
 
       <EditDialogBox

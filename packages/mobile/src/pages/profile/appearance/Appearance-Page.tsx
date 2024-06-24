@@ -1,12 +1,4 @@
-import {
-  FlatList,
-  Platform,
-  StyleSheet,
-  TextStyle,
-  TouchableHighlight,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { FlatList, StyleSheet, TouchableHighlight, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from '../../../components/ui/SafeAreaView/SafeAreaView';
 import { Text } from '../../../components/ui/Text/Text';
 import { Container } from '../../../components/ui/Container/Container';
@@ -225,17 +217,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     flexDirection: 'column',
   },
-  title: Platform.select({
-    ios: {
-      fontSize: 18,
-      fontWeight: 400,
-    },
-    android: {
-      fontSize: 20,
-      fontWeight: 400,
-    },
-  }) as unknown as TextStyle,
+  title: {
+    fontSize: 17,
+    fontWeight: '400',
+  },
   subtitle: {
-    fontSize: 16,
+    fontSize: 15,
   },
 });
