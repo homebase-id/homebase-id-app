@@ -6,7 +6,6 @@ import { Colors } from '../../app/Colors';
 
 import { useDarkMode } from '../../hooks/useDarkMode';
 import useContact from '../../hooks/contact/useContact';
-import { useMemo } from 'react';
 import { Text } from '../ui/Text/Text';
 import { ConnectionName } from '../ui/Name';
 import { Avatar } from '../ui/Avatars/Avatar';
@@ -42,9 +41,6 @@ export const ContactTile = ({
       console.error(e);
     }
   };
-  const backgroundColor = useMemo(() => {
-    return isDarkMode ? Colors.slate[900] : Colors.slate[50];
-  }, [isDarkMode]);
 
   return (
     <>
@@ -54,25 +50,12 @@ export const ContactTile = ({
           style={[
             styles.tile,
             {
-              backgroundColor: backgroundColor,
+              backgroundColor: isDarkMode ? Colors.slate[900] : Colors.slate[50],
             },
           ]}
         >
           {contact && contactData && (
             <View style={{ marginRight: 16 }}>
-              {/* <OdinImage
-              targetDrive={ContactConfig.ContactTargetDrive}
-              fit="cover"
-              alt={contact.name?.displayName}
-              odinId={profile.odinId}
-              fileId={contactData?.fileId}
-              enableZoom={false}
-              avoidPayload={true}
-              previewThumbnail={contactData.fileMetadata.appData.previewThumbnail}
-              imageSize={{ width: 48, height: 48 }}
-              fileKey={'prfl_pic'}
-              style={styles.tinyLogo}
-            /> */}
               <Avatar
                 odinId={profile.odinId}
                 style={styles.tinyLogo}

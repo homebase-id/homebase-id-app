@@ -105,7 +105,7 @@ const FilePreview = ({
   );
 };
 
-// Perhaps convert this to a route
+// TODO: Perhaps convert this to a route
 export const ChatFileOverview = memo(
   ({
     title,
@@ -208,7 +208,7 @@ export const ChatFileOverview = memo(
                     borderRadius: 11,
                   }}
                 >
-                  {index === currentIndex ? (
+                  {assets.length > 1 && index === currentIndex ? (
                     <TouchableOpacity
                       onPress={() => setAssets(assets.filter((_, i) => i !== index))}
                       style={{
