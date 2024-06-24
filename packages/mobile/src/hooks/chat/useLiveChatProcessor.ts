@@ -75,6 +75,7 @@ const useInboxProcessor = (connected?: boolean) => {
           maxRecords: BATCH_SIZE,
           cursorState: batchCursor,
           includeMetadataHeader: true,
+          includeTransferHistory: true,
         }
       );
 
@@ -90,14 +91,11 @@ const useInboxProcessor = (connected?: boolean) => {
           excludePreviewThumbnail: false,
           includeHeaderContent: true,
           includeTransferHistory: true,
-        },
-        { decrypt: true }
+        }
       );
 
       const newMessages = modifieData.searchResults.concat(newData.searchResults);
-      console.log('new messages', newMessages.length);
-
-      const latestMessagesPerConversation = newMessages.reduce(
+      const uniqueMessagesPerConversation = newMessages.reduce(
         (acc, dsr) => {
           if (!dsr.fileMetadata?.appData?.groupId || dsr.fileState === 'deleted') {
             return acc;
@@ -107,21 +105,9 @@ const useInboxProcessor = (connected?: boolean) => {
           if (!acc[conversationId]) {
             acc[conversationId] = [];
           }
-          const existingFileUpdateIndex = acc[conversationId].findIndex((m) =>
-            stringGuidsEqual(m.fileId, dsr.fileId)
-          );
-          if (existingFileUpdateIndex !== -1) {
-            if (
-              acc[conversationId][existingFileUpdateIndex]?.fileMetadata?.updated >
-              dsr?.fileMetadata?.updated
-            ) {
-              return acc;
-            } else {
-              acc[conversationId] = acc[conversationId].map((_, index) =>
-                index === existingFileUpdateIndex ? dsr : _
-              );
-              return acc;
-            }
+
+          if (acc[conversationId].some((m) => stringGuidsEqual(m.fileId, dsr.fileId))) {
+            return acc;
           }
 
           acc[conversationId].push(dsr);
@@ -130,13 +116,11 @@ const useInboxProcessor = (connected?: boolean) => {
         {} as Record<string, HomebaseFile<string>[]>
       );
 
-      console.log('new conversations', Object.keys(latestMessagesPerConversation).length);
-
       await Promise.all(
-        Object.keys(latestMessagesPerConversation).map(async (updatedConversation) => {
+        Object.keys(uniqueMessagesPerConversation).map(async (updatedConversation) => {
           const updatedChatMessages = (
             await Promise.all(
-              latestMessagesPerConversation[updatedConversation].map(
+              uniqueMessagesPerConversation[updatedConversation].map(
                 async (newMessage) => await dsrToMessage(dotYouClient, newMessage, ChatDrive, true)
               )
             )
@@ -144,9 +128,7 @@ const useInboxProcessor = (connected?: boolean) => {
           insertNewMessagesForConversation(queryClient, updatedConversation, updatedChatMessages);
         })
       );
-      console.log('processed new messages');
     } else {
-      console.log('invalidate all');
       // We have no reference to the last time we processed the inbox, so we can only invalidate all chat messages
       queryClient.invalidateQueries({ queryKey: ['chat-messages'], exact: false });
     }
@@ -184,8 +166,6 @@ const useChatWebsocket = (isEnabled: boolean) => {
       stringGuidsEqual(notification.targetDrive?.type, ChatDrive.type)
     ) {
       if (notification.header.fileMetadata.appData.fileType === CHAT_MESSAGE_FILE_TYPE) {
-        console.log('WS: event fileAdded/fileModified', notification.header.fileId);
-
         const conversationId = notification.header.fileMetadata.appData.groupId;
         const isNewFile = notification.notificationType === 'fileAdded';
 
@@ -219,7 +199,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
           return;
         }
 
-        insertNewMessage(queryClient, updatedChatMessage, !isNewFile);
+        insertNewMessage(queryClient, updatedChatMessage);
       } else if (notification.header.fileMetadata.appData.fileType === ChatReactionFileType) {
         const messageId = notification.header.fileMetadata.appData.groupId;
         queryClient.invalidateQueries({ queryKey: ['chat-reaction', messageId] });

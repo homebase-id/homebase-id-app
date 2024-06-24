@@ -139,8 +139,6 @@ export const insertNewMessagesForConversation = (
   conversationId: string,
   newMessages: HomebaseFile<ChatMessage>[]
 ) => {
-  console.log('insertNewMessagesForConversation', conversationId, newMessages.length);
-
   const extistingMessages = queryClient.getQueryData<
     InfiniteData<{
       searchResults: (HomebaseFile<ChatMessage> | null)[];
@@ -174,8 +172,7 @@ export const insertNewMessagesForConversation = (
 
 export const insertNewMessage = (
   queryClient: QueryClient,
-  newMessage: HomebaseFile<ChatMessage>,
-  isUpdate?: boolean
+  newMessage: HomebaseFile<ChatMessage>
 ) => {
   const conversationId = newMessage.fileMetadata.appData.groupId;
 
@@ -191,7 +188,7 @@ export const insertNewMessage = (
   if (extistingMessages) {
     queryClient.setQueryData(
       ['chat-messages', conversationId],
-      internalInsertNewMessage(extistingMessages, newMessage, isUpdate)
+      internalInsertNewMessage(extistingMessages, newMessage)
     );
   } else {
     queryClient.invalidateQueries({ queryKey: ['chat-messages', conversationId] });
@@ -210,16 +207,19 @@ export const internalInsertNewMessage = (
     },
     unknown
   >,
-  newMessage: HomebaseFile<ChatMessage>,
-
-  isUpdate?: boolean
+  newMessage: HomebaseFile<ChatMessage>
 ) => {
-  const isNewFile =
-    isUpdate === undefined
-      ? !extistingMessages.pages.some((page) =>
-          page.searchResults.some((msg) => stringGuidsEqual(msg?.fileId, newMessage.fileId))
-        )
-      : !isUpdate;
+  const isNewFile = !extistingMessages.pages.some((page) =>
+    page.searchResults.some(
+      (msg) =>
+        (newMessage.fileId && stringGuidsEqual(msg?.fileId, newMessage?.fileId)) ||
+        (newMessage.fileMetadata.appData.uniqueId &&
+          stringGuidsEqual(
+            msg?.fileMetadata.appData.uniqueId,
+            newMessage.fileMetadata.appData.uniqueId
+          ))
+    )
+  );
 
   const newData = {
     ...extistingMessages,
