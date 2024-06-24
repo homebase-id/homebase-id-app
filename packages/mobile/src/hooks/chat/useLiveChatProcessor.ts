@@ -1,5 +1,12 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { TypedConnectionNotification, queryBatch, queryModified } from '@youfoundation/js-lib/core';
+import {
+  AppNotification,
+  HomebaseFile,
+  PushNotification,
+  TypedConnectionNotification,
+  queryBatch,
+  queryModified,
+} from '@youfoundation/js-lib/core';
 import {
   getQueryBatchCursorFromTime,
   getQueryModifiedCursorFromTime,
@@ -13,7 +20,11 @@ import { useCallback } from 'react';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { getConversationQueryOptions, useConversation } from './useConversation';
 import { useDotYouClientContext } from 'feed-app-common';
-import { CHAT_MESSAGE_FILE_TYPE, dsrToMessage } from '../../provider/chat/ChatProvider';
+import {
+  CHAT_MESSAGE_FILE_TYPE,
+  ChatMessage,
+  dsrToMessage,
+} from '../../provider/chat/ChatProvider';
 import {
   ChatDrive,
   CHAT_CONVERSATION_FILE_TYPE,
@@ -21,7 +32,7 @@ import {
   dsrToConversation,
 } from '../../provider/chat/ConversationProvider';
 import { ChatReactionFileType } from '../../provider/chat/ChatReactionProvider';
-import { insertNewMessage } from './useChatMessages';
+import { insertNewMessage, insertNewMessagesForConversation } from './useChatMessages';
 import { insertNewConversation } from './useConversations';
 
 const MINUTE_IN_MS = 60000;
@@ -45,7 +56,7 @@ const useInboxProcessor = (connected?: boolean) => {
 
   const fetchData = async () => {
     const lastProcessedTime = queryClient.getQueryState(['process-inbox'])?.dataUpdatedAt;
-    const lastProcessedWithBuffer = lastProcessedTime && lastProcessedTime - MINUTE_IN_MS * 5;
+    const lastProcessedWithBuffer = lastProcessedTime && lastProcessedTime - MINUTE_IN_MS * 2;
 
     const processedresult = await processInbox(dotYouClient, ChatDrive, BATCH_SIZE);
 
@@ -60,11 +71,13 @@ const useInboxProcessor = (connected?: boolean) => {
         dotYouClient,
         {
           targetDrive: ChatDrive,
+          fileType: [CHAT_MESSAGE_FILE_TYPE],
         },
         {
           maxRecords: BATCH_SIZE,
           cursorState: batchCursor,
           includeMetadataHeader: true,
+          includeTransferHistory: true,
         }
       );
 
@@ -72,6 +85,7 @@ const useInboxProcessor = (connected?: boolean) => {
         dotYouClient,
         {
           targetDrive: ChatDrive,
+          fileType: [CHAT_MESSAGE_FILE_TYPE],
         },
         {
           maxRecords: BATCH_SIZE,
@@ -82,17 +96,38 @@ const useInboxProcessor = (connected?: boolean) => {
         }
       );
 
-      const newMessages = [...newData.searchResults, ...modifieData.searchResults].filter(
-        (dsr) => dsr.fileMetadata.appData.fileType === CHAT_MESSAGE_FILE_TYPE
+      const newMessages = modifieData.searchResults.concat(newData.searchResults);
+      const uniqueMessagesPerConversation = newMessages.reduce(
+        (acc, dsr) => {
+          if (!dsr.fileMetadata?.appData?.groupId || dsr.fileState === 'deleted') {
+            return acc;
+          }
+
+          const conversationId = dsr.fileMetadata?.appData.groupId as string;
+          if (!acc[conversationId]) {
+            acc[conversationId] = [];
+          }
+
+          if (acc[conversationId].some((m) => stringGuidsEqual(m.fileId, dsr.fileId))) {
+            return acc;
+          }
+
+          acc[conversationId].push(dsr);
+          return acc;
+        },
+        {} as Record<string, HomebaseFile<string>[]>
       );
 
       await Promise.all(
-        newMessages.map(async (newMessage) => {
-          if (newMessage.fileState === 'deleted') return;
-
-          const newChatMessage = await dsrToMessage(dotYouClient, newMessage, ChatDrive, true);
-          if (!newChatMessage) return;
-          insertNewMessage(queryClient, newChatMessage);
+        Object.keys(uniqueMessagesPerConversation).map(async (updatedConversation) => {
+          const updatedChatMessages = (
+            await Promise.all(
+              uniqueMessagesPerConversation[updatedConversation].map(
+                async (newMessage) => await dsrToMessage(dotYouClient, newMessage, ChatDrive, true)
+              )
+            )
+          ).filter(Boolean) as HomebaseFile<ChatMessage>[];
+          insertNewMessagesForConversation(queryClient, updatedConversation, updatedChatMessages);
         })
       );
     } else {
@@ -108,6 +143,7 @@ const useInboxProcessor = (connected?: boolean) => {
     queryKey: ['process-inbox'],
     queryFn: fetchData,
     enabled: connected,
+    throwOnError: true,
   });
 };
 
@@ -165,7 +201,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
           return;
         }
 
-        insertNewMessage(queryClient, updatedChatMessage, !isNewFile);
+        insertNewMessage(queryClient, updatedChatMessage);
       } else if (notification.header.fileMetadata.appData.fileType === ChatReactionFileType) {
         const messageId = notification.header.fileMetadata.appData.groupId;
         queryClient.invalidateQueries({ queryKey: ['chat-reaction', messageId] });
@@ -192,6 +228,29 @@ const useChatWebsocket = (isEnabled: boolean) => {
 
         insertNewConversation(queryClient, updatedConversation, !isNewFile);
       }
+    }
+
+    if (notification.notificationType === 'appNotificationAdded') {
+      const clientNotification = notification as AppNotification;
+
+      const existingNotificationData = queryClient.getQueryData<{
+        results: PushNotification[];
+        cursor: number;
+      }>(['push-notifications']);
+
+      if (!existingNotificationData) return;
+      const newNotificationData = {
+        ...existingNotificationData,
+        results: [
+          clientNotification,
+          ...existingNotificationData.results.filter(
+            (notification) =>
+              !stringGuidsEqual(notification.options.tagId, clientNotification.options.tagId)
+          ),
+        ],
+      };
+
+      queryClient.setQueryData(['push-notifications'], newNotificationData);
     }
   }, []);
 
