@@ -127,18 +127,7 @@ const ConversationTile = memo((props: ConversationTileProps) => {
             </View>
           ) : null}
         </View>
-        {!props.selectMode && (
-          <View
-            style={{
-              justifyContent: 'space-between',
-              display: 'flex',
-            }}
-          >
-            {lastMessage && <ChatSentTimeIndicator msg={lastMessage} keepDetail={false} />}
-            {unreadCount > 0 ? <UnreadCount count={unreadCount} /> : null}
-          </View>
-        )}
-        {props.selectMode && (
+        {props.selectMode ? (
           <View
             style={{
               position: 'absolute',
@@ -147,6 +136,16 @@ const ConversationTile = memo((props: ConversationTileProps) => {
             }}
           >
             {props.isSelected ? <CheckCircle size={'lg'} /> : <CircleOutlined size={'lg'} />}
+          </View>
+        ) : (
+          <View
+            style={{
+              justifyContent: 'space-between',
+              display: 'flex',
+            }}
+          >
+            {lastMessage && <ChatSentTimeIndicator msg={lastMessage} keepDetail={false} />}
+            {unreadCount > 0 ? <UnreadCount count={unreadCount} /> : null}
           </View>
         )}
       </View>
