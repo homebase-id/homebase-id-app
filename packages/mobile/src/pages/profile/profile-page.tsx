@@ -18,7 +18,6 @@ import { Container } from '../../components/ui/Container/Container';
 import {
   AddressBook,
   Download,
-  HardDisk,
   People,
   Profile,
   RecycleBin,
@@ -214,7 +213,7 @@ export const ProfilePage = (_props: SettingsProps) => {
               width: '100%',
             }}
           />
-          <TouchableOpacity
+          {/* <TouchableOpacity
             onPress={() => navigate('DriveStatus')}
             style={{
               display: 'flex',
@@ -231,7 +230,7 @@ export const ProfilePage = (_props: SettingsProps) => {
             >
               Drive Status
             </Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           <VersionInfo />
         </ScrollView>
       </Container>
