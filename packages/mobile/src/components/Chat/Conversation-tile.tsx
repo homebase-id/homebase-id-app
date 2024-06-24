@@ -14,6 +14,7 @@ import { OwnerAvatar, GroupAvatar, Avatar } from '../ui/Avatars/Avatar';
 import { useDraftMessageValue } from '../../hooks/chat/useDraftMessage';
 import { ellipsisAtMaxChar } from 'feed-app-common';
 import { ConnectionName } from '../ui/Name';
+import { CheckCircle, CircleOutlined } from '../ui/Icons/icons';
 
 type ConversationTileProps = {
   onPress?: () => void;
@@ -21,6 +22,8 @@ type ConversationTileProps = {
   conversation: UnifiedConversation;
   odinId: string;
   conversationId?: string;
+  selectMode?: boolean;
+  isSelected?: boolean;
   isSelf?: boolean;
 };
 
@@ -37,9 +40,9 @@ const ConversationTile = memo((props: ConversationTileProps) => {
   );
   const { data: draftMessage } = useDraftMessageValue(props.conversationId).get;
   const { isDarkMode } = useDarkMode();
-  const { data: contact } = useContact(props.odinId).fetch;
-  const connectionDetails = contact?.fileMetadata.appData.content;
   const isGroup = props.conversation && props.conversation.recipients?.length > 2;
+  const { data: contact } = useContact(!isGroup ? props.odinId : undefined).fetch;
+  const connectionDetails = contact?.fileMetadata.appData.content;
 
   const lastMessage = useMemo(() => flatMessages?.[0], [flatMessages]);
   const lastMessageContent = lastMessage?.fileMetadata.appData.content;
@@ -97,7 +100,7 @@ const ConversationTile = memo((props: ConversationTileProps) => {
             {props.isSelf ? <Text style={styles.you}>(you)</Text> : null}
           </Text>
 
-          {draftMessage ? (
+          {props.selectMode ? null : draftMessage ? (
             <DraftMessage message={draftMessage} />
           ) : lastMessage && lastMessageContent ? (
             <View
@@ -124,15 +127,28 @@ const ConversationTile = memo((props: ConversationTileProps) => {
             </View>
           ) : null}
         </View>
-        <View
-          style={{
-            justifyContent: 'space-between',
-            display: 'flex',
-          }}
-        >
-          {lastMessage && <ChatSentTimeIndicator msg={lastMessage} keepDetail={false} />}
-          {unreadCount > 0 ? <UnreadCount count={unreadCount} /> : null}
-        </View>
+        {!props.selectMode && (
+          <View
+            style={{
+              justifyContent: 'space-between',
+              display: 'flex',
+            }}
+          >
+            {lastMessage && <ChatSentTimeIndicator msg={lastMessage} keepDetail={false} />}
+            {unreadCount > 0 ? <UnreadCount count={unreadCount} /> : null}
+          </View>
+        )}
+        {props.selectMode && (
+          <View
+            style={{
+              position: 'absolute',
+              right: 12,
+              top: 16,
+            }}
+          >
+            {props.isSelected ? <CheckCircle size={'lg'} /> : <CircleOutlined size={'lg'} />}
+          </View>
+        )}
       </View>
     </TouchableHighlight>
   );
