@@ -713,9 +713,9 @@ const RenderBubble = memo(
       messageId: message?.fileMetadata.appData.uniqueId,
     }).get;
 
-    const onRetryOpen = () => {
+    const onRetryOpen = useCallback(() => {
       props.onRetryClick(message);
-    };
+    }, [message, props]);
 
     const hasReactions = (reactions && reactions?.length > 0) || false;
     const flatReactions = useMemo(
