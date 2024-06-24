@@ -43,12 +43,35 @@ export const ShareChatPage = (prop: ShareChatProp) => {
   const { mutateAsync: createConversation } = useConversation().create;
   const { mutate: sendMessage, error } = useChatMessage().send;
   const [selectedContact, setselectedContact] = useState<DotYouProfile[]>([]);
-  const [selectedGroup, setselectedGroup] = useState<HomebaseFile<UnifiedConversation>[]>([]);
+  const [selectedConversation, setSelectedConversation] = useState<
+    HomebaseFile<UnifiedConversation>[]
+  >([]);
   const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
   const { data: recentConversations } = useConversationsWithRecentMessage().all;
 
+  const onSelectConversation = useCallback(
+    (conversation: HomebaseFile<UnifiedConversation>) => {
+      if (selectedConversation.includes(conversation)) {
+        setSelectedConversation(selectedConversation.filter((c) => c !== conversation));
+      } else {
+        if (selectedContact.length + selectedConversation.length === maxConnectionsForward) {
+          Toast.show({
+            type: 'info',
+            text1: `You can only forward to ${maxConnectionsForward} contacts at a time`,
+            position: 'bottom',
+            visibilityTime: 2000,
+          });
+
+          return;
+        }
+        setSelectedConversation([...selectedConversation, conversation]);
+      }
+    },
+    [selectedContact.length, selectedConversation]
+  );
+
   const onShare = useCallback(async () => {
-    if ((selectedContact.length === 0 && selectedGroup.length === 0) || !data) {
+    if ((selectedContact.length === 0 && selectedConversation.length === 0) || !data) {
       navigation.goBack();
     }
 
@@ -107,9 +130,9 @@ export const ShareChatPage = (prop: ShareChatProp) => {
       );
     }
 
-    if (selectedGroup.length > 0) {
+    if (selectedConversation.length > 0) {
       promises.push(
-        ...selectedGroup.flatMap((conversation) => {
+        ...selectedConversation.flatMap((conversation) => {
           return forwardMessages(conversation);
         })
       );
@@ -130,8 +153,8 @@ export const ShareChatPage = (prop: ShareChatProp) => {
           })
         );
       }
-      if (selectedGroup.length === 1) {
-        const group = selectedGroup[0];
+      if (selectedConversation.length === 1) {
+        const group = selectedConversation[0];
         navigation.dispatch(
           StackActions.replace('ChatScreen', {
             convoId: group.fileMetadata.appData.uniqueId as string,
@@ -146,7 +169,15 @@ export const ShareChatPage = (prop: ShareChatProp) => {
       });
       navigation.goBack();
     }
-  }, [data, createConversation, mimeType, navigation, selectedContact, selectedGroup, sendMessage]);
+  }, [
+    data,
+    createConversation,
+    mimeType,
+    navigation,
+    selectedContact,
+    selectedConversation,
+    sendMessage,
+  ]);
 
   const renderItem = useCallback(
     ({
@@ -176,6 +207,8 @@ export const ShareChatPage = (prop: ShareChatProp) => {
             conversation={conversation.fileMetadata.appData.content}
             conversationId={conversation.fileMetadata.appData.uniqueId}
             selectMode
+            isSelected={selectedConversation.includes(conversation)}
+            onPress={() => onSelectConversation(conversation)}
             odinId={conversation.fileMetadata.appData.content.recipients[0]}
           />
         );
@@ -190,7 +223,10 @@ export const ShareChatPage = (prop: ShareChatProp) => {
               if (selectedContact.includes(contact)) {
                 setselectedContact(selectedContact.filter((c) => c !== contact));
               } else {
-                if (selectedContact.length === maxConnectionsForward) {
+                if (
+                  selectedContact.length + selectedConversation.length ===
+                  maxConnectionsForward
+                ) {
                   Toast.show({
                     type: 'info',
                     text1: `You can only forward to ${maxConnectionsForward} contacts at a time`,
@@ -210,7 +246,7 @@ export const ShareChatPage = (prop: ShareChatProp) => {
       }
       return null;
     },
-    [selectedContact]
+    [onSelectConversation, selectedContact, selectedConversation]
   );
 
   const renderFooter = useCallback(
@@ -218,7 +254,7 @@ export const ShareChatPage = (prop: ShareChatProp) => {
       <View
         style={{
           position: 'absolute',
-          bottom: 12,
+          bottom: 0,
           zIndex: 100,
           backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
           flexDirection: 'row',
@@ -227,7 +263,7 @@ export const ShareChatPage = (prop: ShareChatProp) => {
         }}
       >
         <View style={styles.namesContainer}>
-          {selectedGroup.map((group) => {
+          {selectedConversation.map((group) => {
             return (
               <Text
                 key={group.fileId}
@@ -287,7 +323,7 @@ export const ShareChatPage = (prop: ShareChatProp) => {
         </TouchableHighlight>
       </View>
     ),
-    [isDarkMode, onShare, selectedContact, selectedGroup]
+    [isDarkMode, onShare, selectedContact, selectedConversation]
   );
 
   const sectionData = useMemo((): ReadonlyArray<
@@ -367,18 +403,16 @@ export const ShareChatPage = (prop: ShareChatProp) => {
         renderItem={renderItem}
         ListFooterComponent={
           //Actually a Group Component
-          <ListHeaderComponent selectedGroup={selectedGroup} setselectedGroup={setselectedGroup} />
+          <ListHeaderComponent
+            selectedGroup={selectedConversation}
+            setselectedGroup={setSelectedConversation}
+          />
         }
+        ListFooterComponentStyle={{
+          paddingBottom: selectedConversation.length > 0 ? 100 : 20,
+        }}
       />
-      {/* <FlatList
-        data={connections}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.odinId}
-        ListHeaderComponent={
-          <ListHeaderComponent selectedGroup={selectedGroup} setselectedGroup={setselectedGroup} />
-        }
-      /> */}
-      {selectedContact.length > 0 || selectedGroup.length > 0 ? renderFooter() : undefined}
+      {selectedContact.length > 0 || selectedConversation.length > 0 ? renderFooter() : undefined}
     </SafeAreaView>
   );
 };

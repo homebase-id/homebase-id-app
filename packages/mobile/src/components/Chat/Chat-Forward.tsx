@@ -84,12 +84,12 @@ export const ChatForwardModal = forwardRef(
               // We don't support sending videos and audio files for now
               if (!payload.contentType.startsWith('image')) return;
               const image = getFromCache(undefined, message.fileId, payload.key, ChatDrive);
-              if (!image) return;
+              if (!image?.imageData) return;
               return {
-                uri: image.url,
-                width: image.naturalSize?.pixelWidth,
-                height: image.naturalSize?.pixelHeight,
-                type: image.type,
+                uri: image.imageData.url,
+                width: image.imageData?.naturalSize?.pixelWidth,
+                height: image.imageData?.naturalSize?.pixelHeight,
+                type: image.imageData?.type,
               } as ImageSource;
             })
             .filter(Boolean) as ImageSource[];
