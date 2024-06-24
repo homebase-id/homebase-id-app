@@ -27,6 +27,8 @@ import { ShareNode } from '../components/ui/Icons/icons';
 import useImage from '../components/ui/OdinImage/hooks/useImage';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { SafeAreaView } from '../components/ui/SafeAreaView/SafeAreaView';
+import Toast from 'react-native-toast-message';
+import Clipboard from '@react-native-clipboard/clipboard';
 
 export type MediaProp = NativeStackScreenProps<ChatStackParamList, 'PreviewMedia'>;
 
@@ -66,15 +68,27 @@ export const PreviewMedia = memo((prop: MediaProp) => {
   }, [headerTitle, prop.navigation]);
 
   const onShare = useCallback(() => {
-    const imageData = getImage(undefined, fileId, payloads[currIndex].key, ChatDrive);
+    const imageData = getImage(undefined, fileId, payloads[currIndex].key, ChatDrive, {
+      pixelWidth: width,
+      pixelHeight: height,
+    });
     if (!imageData) {
+      Toast.show({
+        type: 'error',
+        text1: 'Something went wrong while sharing image',
+        position: 'bottom',
+        text2: 'Click to copy the error details',
+        onPress: () => {
+          Clipboard.setString('No image present in the cache');
+        },
+      });
       return;
     }
     Share.open({
       type: imageData?.imageData?.type,
       url: imageData?.imageData?.url,
     });
-  }, [currIndex, fileId, getImage, payloads]);
+  }, [currIndex, fileId, getImage, height, payloads, width]);
 
   const renderItem = useCallback(
     ({ item }: CarouselRenderItemInfo<PayloadDescriptor>) => {

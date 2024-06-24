@@ -62,7 +62,7 @@
   },
   "dependencies": {
     "@expo/react-native-action-sheet": "4.0.1",
-    "@mattermost/react-native-paste-input": "0.7.1",
+    "@mattermost/react-native-paste-input": "0.8.0",
     "dayjs": "1.8.26",
     "prop-types": "15.7.2",
     "react-native-communications": "2.2.1",

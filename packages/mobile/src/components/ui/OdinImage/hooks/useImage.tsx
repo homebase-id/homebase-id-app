@@ -36,18 +36,25 @@ const useImage = (props?: {
     size?: ImageSize,
     lastModified?: number
   ) {
-    return [
+    const queryKey = [
       'image',
       odinId || '',
       imageDrive?.alias,
-      imageFileId,
+      imageFileId?.replaceAll('-', ''),
       imageFileKey,
-      // Rounding the cache key of the size so close enough sizes will be cached together
-      size
-        ? `${Math.round(size.pixelHeight / 25) * 25}x${Math.round(size?.pixelWidth / 25) * 25}`
-        : undefined,
-      lastModified,
     ];
+
+    if (size) {
+      queryKey.push(
+        `${Math.round(size.pixelHeight / 25) * 25}x${Math.round(size?.pixelWidth / 25) * 25}`
+      );
+    }
+
+    if (lastModified) {
+      queryKey.push(lastModified + '');
+    }
+
+    return queryKey;
   }
 
   const checkIfWeHaveLargerCachedImage = (
@@ -182,6 +189,7 @@ const useImage = (props?: {
         imageDrive,
         size
       );
+
       if (largerCache) {
         return {
           size: largerCache?.size,

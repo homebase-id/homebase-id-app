@@ -1,7 +1,7 @@
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ChatDeliveryStatus, ChatMessage } from '../../provider/chat/ChatProvider';
 import { t, useDotYouClientContext } from 'feed-app-common';
-import { StyleProp, Text, TextStyle, View, ViewStyle } from 'react-native';
+import { Pressable, StyleProp, Text, TextStyle, View, ViewStyle } from 'react-native';
 import { Clock, SubtleCheck, Times } from '../ui/Icons/icons';
 import { Colors } from '../../app/Colors';
 import { ChatMessageIMessage } from './ChatDetail';
@@ -9,9 +9,11 @@ import { ChatMessageIMessage } from './ChatDetail';
 export const ChatDeliveryIndicator = ({
   msg,
   showDefaultColor,
+  onPress,
 }: {
   msg: ChatMessageIMessage | HomebaseFile<ChatMessage>;
   showDefaultColor?: boolean;
+  onPress?: () => void;
 }) => {
   const identity = useDotYouClientContext().getIdentity();
   const content = msg.fileMetadata.appData.content;
@@ -19,7 +21,13 @@ export const ChatDeliveryIndicator = ({
   const messageFromMe = !authorOdinId || authorOdinId === identity;
 
   if (!messageFromMe) return null;
-  return <InnerDeliveryIndicator state={content.deliveryStatus} showDefault={showDefaultColor} />;
+  return (
+    <InnerDeliveryIndicator
+      state={content.deliveryStatus}
+      showDefault={showDefaultColor}
+      onPress={onPress}
+    />
+  );
 };
 
 export const FailedDeliveryDetails = ({
@@ -53,9 +61,11 @@ export const InnerDeliveryIndicator = ({
   state,
   showDefault,
   style,
+  onPress,
 }: {
   state?: ChatDeliveryStatus;
   showDefault?: boolean;
+  onPress?: () => void;
   style?: StyleProp<ViewStyle>;
 }) => {
   const isSent = state && state >= ChatDeliveryStatus.Sent;
@@ -64,7 +74,8 @@ export const InnerDeliveryIndicator = ({
   const isRead = state === ChatDeliveryStatus.Read;
 
   return (
-    <View
+    <Pressable
+      onPress={onPress}
       style={[
         {
           flexDirection: 'row',
@@ -107,6 +118,6 @@ export const InnerDeliveryIndicator = ({
           <Clock size={'xs'} color={Colors.gray[200]} />
         )}
       </View>
-    </View>
+    </Pressable>
   );
 };

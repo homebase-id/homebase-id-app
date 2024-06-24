@@ -18,7 +18,7 @@
     "@bam.tech/react-native-image-resizer": "^3.0.7",
     "@gorhom/bottom-sheet": "^4.6.0",
     "@likashefqet/react-native-image-zoom": "^3.0.0",
-    "@mattermost/react-native-paste-input": "0.7.1",
+    "@mattermost/react-native-paste-input": "0.8.0",
     "@notifee/react-native": "^7.8.2",
     "@peculiar/asn1-schema": "^2.3.6",
     "@peculiar/json-schema": "^1.1.12",
