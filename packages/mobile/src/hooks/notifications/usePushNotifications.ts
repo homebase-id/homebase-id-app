@@ -71,9 +71,9 @@ export const useRemoveNotifications = (props?: { disabled: boolean; appId?: stri
 
   useEffect(() => {
     (async () => {
-      const notifications = notifcationsData?.results;
+      const notifications = notifcationsData?.results.filter((notification) => notification.unread);
       if (!props?.disabled && notifications && notifications?.length > 0) {
-        isDebug && console.debug('Removing all notifications', props?.appId);
+        isDebug && console.debug('Marking all notifications as read', props?.appId);
         await markListOfNotificationsAsRead(notifications.map((n) => n.id));
       }
     })();

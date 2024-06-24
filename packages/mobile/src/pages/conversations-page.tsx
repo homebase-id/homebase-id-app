@@ -215,7 +215,7 @@ const FloatingActionButton = memo(() => {
 
 const RemoveNotifications = memo(() => {
   const isFocused = useIsFocused();
-  useRemoveNotifications({ appId: CHAT_APP_ID, enabled: isFocused });
+  useRemoveNotifications({ appId: CHAT_APP_ID, disabled: !isFocused });
   return null;
 });
 
