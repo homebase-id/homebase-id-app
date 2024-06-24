@@ -1,6 +1,8 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  AppNotification,
   HomebaseFile,
+  PushNotification,
   TypedConnectionNotification,
   queryBatch,
   queryModified,
@@ -226,6 +228,29 @@ const useChatWebsocket = (isEnabled: boolean) => {
 
         insertNewConversation(queryClient, updatedConversation, !isNewFile);
       }
+    }
+
+    if (notification.notificationType === 'appNotificationAdded') {
+      const clientNotification = notification as AppNotification;
+
+      const existingNotificationData = queryClient.getQueryData<{
+        results: PushNotification[];
+        cursor: number;
+      }>(['push-notifications']);
+
+      if (!existingNotificationData) return;
+      const newNotificationData = {
+        ...existingNotificationData,
+        results: [
+          clientNotification,
+          ...existingNotificationData.results.filter(
+            (notification) =>
+              !stringGuidsEqual(notification.options.tagId, clientNotification.options.tagId)
+          ),
+        ],
+      };
+
+      queryClient.setQueryData(['push-notifications'], newNotificationData);
     }
   }, []);
 
