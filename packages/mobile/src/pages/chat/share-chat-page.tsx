@@ -34,6 +34,7 @@ import {
   useConversationsWithRecentMessage,
 } from '../../hooks/chat/useConversationsWithRecentMessage';
 import ConversationTile from '../../components/Chat/Conversation-tile';
+import { getNewId } from '@youfoundation/js-lib/helpers';
 
 export type ShareChatProp = NativeStackScreenProps<ChatStackParamList, 'ShareChat'>;
 export const ShareChatPage = (prop: ShareChatProp) => {
@@ -115,6 +116,8 @@ export const ShareChatPage = (prop: ShareChatProp) => {
         conversation,
         message: text,
         files: imageSource,
+        chatId: getNewId(),
+        userDate: new Date().getTime(),
       });
     }
     const promises: Promise<void>[] = [];
