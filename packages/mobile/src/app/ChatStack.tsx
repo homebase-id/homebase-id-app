@@ -2,7 +2,7 @@ import { NavigationProp, useNavigation } from '@react-navigation/native';
 
 import { onlineManager } from '@tanstack/react-query';
 import { NativeStackScreenProps, createNativeStackNavigator } from '@react-navigation/native-stack';
-import { BackButton, HeaderActions } from '../components/ui/buttons';
+import { BackButton, HeaderActions } from '../components/ui/Buttons';
 import { useLiveChatProcessor } from '../hooks/chat/useLiveChatProcessor';
 import { HeaderBackButtonProps } from '@react-navigation/elements';
 import { Platform, StyleProp, View, ViewStyle } from 'react-native';
