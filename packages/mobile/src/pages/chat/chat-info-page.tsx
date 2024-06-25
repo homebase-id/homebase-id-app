@@ -156,45 +156,46 @@ export const ChatInfoPage = memo((prop: ChatInfoProp) => {
                 Recipients
               </Text>
               {[...recipients, identity as string].map((recipient, index) => (
-                <View
-                  key={index}
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    alignContent: 'center',
-                    width: '100%',
-                    padding: 8,
-                    paddingLeft: 0,
-                    marginTop: 8,
-                  }}
-                >
-                  {index === recipients?.length ? (
-                    <OwnerAvatar
-                      style={styles.mediumAvatarSize}
-                      imageSize={styles.mediumAvatarSize}
-                    />
-                  ) : (
-                    <Avatar
-                      odinId={recipient as string}
-                      style={styles.mediumAvatarSize}
-                      imageSize={styles.mediumAvatarSize}
-                    />
-                  )}
-                  <Text
-                    style={[
-                      {
-                        fontWeight: '400',
-                        fontSize: 18,
-                        marginLeft: 12,
-                        ...colorStyle,
-                      },
-                    ]}
+                <TouchableOpacity key={index} onPress={() => openURL(`https://${recipient}/`)}>
+                  <View
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      alignContent: 'center',
+                      width: '100%',
+                      padding: 8,
+                      paddingLeft: 0,
+                      marginTop: 8,
+                    }}
                   >
-                    <ConnectionName odinId={recipient as string} />
-                    {index === recipients?.length && <Text style={styles.you}> (you) </Text>}
-                  </Text>
-                </View>
+                    {index === recipients?.length ? (
+                      <OwnerAvatar
+                        style={styles.mediumAvatarSize}
+                        imageSize={styles.mediumAvatarSize}
+                      />
+                    ) : (
+                      <Avatar
+                        odinId={recipient as string}
+                        style={styles.mediumAvatarSize}
+                        imageSize={styles.mediumAvatarSize}
+                      />
+                    )}
+                    <Text
+                      style={[
+                        {
+                          fontWeight: '400',
+                          fontSize: 18,
+                          marginLeft: 12,
+                          ...colorStyle,
+                        },
+                      ]}
+                    >
+                      <ConnectionName odinId={recipient as string} />
+                      {index === recipients?.length && <Text style={styles.you}> (you) </Text>}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
               ))}
             </View>
           )}
