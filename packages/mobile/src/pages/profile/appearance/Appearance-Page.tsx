@@ -46,27 +46,25 @@ export const AppearancePage = ({ navigation }: AppearanceProp) => {
   const renderItem = useCallback(
     ({ item, index }: { item: TileProp; index: number }) => {
       return (
-        <TouchableHighlight
-          underlayColor={isDarkMode ? Colors.gray[700] : Colors.gray[300]}
-          onPress={item.onPress}
-          style={{
-            backgroundColor: isDarkMode ? Colors.indigo[900] : Colors.indigo[100],
-            marginBottom: index === tiles.length - 1 ? 8 : 0,
-            borderTopEndRadius: index === 0 ? 16 : 0,
-            borderTopStartRadius: index === 0 ? 16 : 0,
-            borderEndEndRadius: index === tiles.length - 1 ? 16 : 0,
-            borderEndStartRadius: index === tiles.length - 1 ? 16 : 0,
-            marginTop: index === 0 ? 8 : 0,
-            marginHorizontal: 6,
-          }}
+        <View
+          style={[
+            styles.tile,
+            {
+              paddingBottom: index === tiles.length - 1 ? 16 : 0,
+              backgroundColor: isDarkMode ? Colors.indigo[900] : Colors.indigo[100],
+              marginBottom: index === tiles.length - 1 ? 8 : 0,
+              borderTopStartRadius: index === 0 ? 16 : 0,
+              borderTopEndRadius: index === 0 ? 16 : 0,
+              borderBottomStartRadius: index === tiles.length - 1 ? 16 : 0,
+              borderBottomEndRadius: index === tiles.length - 1 ? 16 : 0,
+              marginTop: index === 0 ? 8 : 0,
+              marginHorizontal: 6,
+            },
+          ]}
         >
-          <View
-            style={[
-              styles.tile,
-              {
-                paddingBottom: index === tiles.length - 1 ? 16 : 0,
-              },
-            ]}
+          <TouchableOpacity
+            // underlayColor={isDarkMode ? Colors.indigo[950] : Colors.slate[200]}
+            onPress={item.onPress}
           >
             <View
               style={{
@@ -106,8 +104,8 @@ export const AppearancePage = ({ navigation }: AppearanceProp) => {
                 />
               </>
             )}
-          </View>
-        </TouchableHighlight>
+          </TouchableOpacity>
+        </View>
       );
     },
     [isDarkMode, tiles.length]
