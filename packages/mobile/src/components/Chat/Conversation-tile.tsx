@@ -59,7 +59,7 @@ const ConversationTile = memo((props: ConversationTileProps) => {
   );
 
   const underlayColor = useMemo(
-    () => (isDarkMode ? Colors.slate[900] : Colors.slate[100]),
+    () => (isDarkMode ? Colors.slate[800] : Colors.slate[100]),
     [isDarkMode]
   );
 
