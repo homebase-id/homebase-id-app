@@ -18,7 +18,7 @@ import { Pdf, Play, Plus, SendChat, SubtleCheck, Trash } from '../ui/Icons/icons
 import { memo, useCallback, useState } from 'react';
 import { Colors } from '../../app/Colors';
 import { Header, HeaderBackButtonProps } from '@react-navigation/elements';
-import { BackButton } from '../ui/convo-app-bar';
+import { BackButton } from '../ui/buttons';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { chatStyles } from '../Chat/ChatDetail';
 import { t } from 'feed-app-common';

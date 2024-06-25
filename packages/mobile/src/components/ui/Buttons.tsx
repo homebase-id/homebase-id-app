@@ -18,7 +18,6 @@ export const HeaderActions = (props: {
   );
 };
 
-/// Back Button for Contact Screen
 export const BackButton = (props: {
   onPress: () => void;
   prop?: HeaderBackButtonProps;
