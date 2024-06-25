@@ -18,6 +18,7 @@ import { Container } from '../../components/ui/Container/Container';
 import {
   AddressBook,
   Download,
+  Logout,
   People,
   Profile,
   RecycleBin,
@@ -158,7 +159,7 @@ export const ProfilePage = (_props: SettingsProps) => {
               paddingVertical: 12,
             }}
           >
-            <Profile size={'lg'} />
+            <Logout size={'lg'} />
             <Text
               style={{
                 marginLeft: 16,
