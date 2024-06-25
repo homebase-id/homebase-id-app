@@ -1,11 +1,8 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { StyleSheet, Text, View, ViewStyle } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { useConversation } from '../../hooks/chat/useConversation';
 
-import {
-  ConversationWithYourselfId,
-  UnifiedConversation,
-} from '../../provider/chat/ConversationProvider';
+import { ConversationWithYourselfId } from '../../provider/chat/ConversationProvider';
 import { Home } from '../../components/ui/Icons/icons';
 
 import { memo, useCallback, useMemo } from 'react';
@@ -71,20 +68,6 @@ export const ChatInfoPage = memo((prop: ChatInfoProp) => {
       ) : null,
     [conversationContent, conversationId, prop.navigation]
   );
-
-  const recipientGroupStyle = useMemo(() => {
-    return {
-      display: 'flex',
-      flexDirection: 'row',
-      alignItems: 'center',
-      alignContent: 'center',
-      backgroundColor: isDarkMode ? Colors.slate[900] : Colors.white,
-      width: '100%',
-      padding: 8,
-      paddingLeft: 0,
-      marginTop: 8,
-    } as ViewStyle;
-  }, [isDarkMode]);
 
   const colorStyle = useMemo(() => {
     return {
@@ -173,7 +156,19 @@ export const ChatInfoPage = memo((prop: ChatInfoProp) => {
                 Recipients
               </Text>
               {[...recipients, identity as string].map((recipient, index) => (
-                <View key={index} style={recipientGroupStyle}>
+                <View
+                  key={index}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    alignContent: 'center',
+                    width: '100%',
+                    padding: 8,
+                    paddingLeft: 0,
+                    marginTop: 8,
+                  }}
+                >
                   {index === recipients?.length ? (
                     <OwnerAvatar
                       style={styles.mediumAvatarSize}
@@ -197,7 +192,7 @@ export const ChatInfoPage = memo((prop: ChatInfoProp) => {
                     ]}
                   >
                     <ConnectionName odinId={recipient as string} />
-                    <Text style={styles.you}>{index === recipients?.length ? ' (you)' : null}</Text>
+                    {index === recipients?.length && <Text style={styles.you}> (you) </Text>}
                   </Text>
                 </View>
               ))}

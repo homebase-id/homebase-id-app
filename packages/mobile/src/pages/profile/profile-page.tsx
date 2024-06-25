@@ -20,7 +20,6 @@ import {
   Download,
   Logout,
   People,
-  Profile,
   RecycleBin,
   Sun,
 } from '../../components/ui/Icons/icons';
