@@ -169,6 +169,7 @@ export const ChatInfoPage = memo((prop: ChatInfoProp) => {
                       marginTop: 8,
                     }}
                   >
+                    {/* NOTE : Last one's your identity so show the owner avatar */}
                     {index === recipients?.length ? (
                       <OwnerAvatar
                         style={styles.mediumAvatarSize}
