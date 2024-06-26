@@ -11,12 +11,12 @@ export const ChatMessageContent = memo(
     if (message.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus) {
       return 'This message was deleted';
     }
-    if (textMessage && textMessage?.length > 0) {
+    if (textMessage?.length > 0) {
       return ellipsisAtMaxChar(textMessage, 30);
-    } else if (payloads && payloads?.length > 1) {
+    } else if (payloads?.length > 1) {
       return '📸 Medias';
     } else {
-      const payload = payloads && payloads[0];
+      const payload = payloads?.[0];
       if (!payload) return null;
       if (payload.contentType.includes('image')) {
         return '📷 Image';
