@@ -210,7 +210,12 @@ export const ChatFileOverview = memo(
                 >
                   {assets.length > 1 && index === currentIndex ? (
                     <TouchableOpacity
-                      onPress={() => setAssets(assets.filter((_, i) => i !== index))}
+                      onPress={() => {
+                        setAssets(assets.filter((_, i) => i !== index));
+                        if (currentIndex === assets.length - 1) {
+                          setCurrentIndex(currentIndex - 1);
+                        }
+                      }}
                       style={{
                         position: 'absolute',
                         top: 0,

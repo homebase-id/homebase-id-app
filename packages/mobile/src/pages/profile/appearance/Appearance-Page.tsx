@@ -1,4 +1,4 @@
-import { FlatList, StyleSheet, TouchableHighlight, TouchableOpacity, View } from 'react-native';
+import { FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from '../../../components/ui/SafeAreaView/SafeAreaView';
 import { Text } from '../../../components/ui/Text/Text';
 import { Container } from '../../../components/ui/Container/Container';
@@ -62,10 +62,7 @@ export const AppearancePage = ({ navigation }: AppearanceProp) => {
             },
           ]}
         >
-          <TouchableOpacity
-            // underlayColor={isDarkMode ? Colors.indigo[950] : Colors.slate[200]}
-            onPress={item.onPress}
-          >
+          <TouchableOpacity onPress={item.onPress}>
             <View
               style={{
                 flexDirection: 'row',
