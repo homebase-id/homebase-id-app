@@ -18,7 +18,7 @@ import { Pdf, Play, Plus, SendChat, SubtleCheck, Trash } from '../ui/Icons/icons
 import { memo, useCallback, useState } from 'react';
 import { Colors } from '../../app/Colors';
 import { Header, HeaderBackButtonProps } from '@react-navigation/elements';
-import { BackButton } from '../ui/convo-app-bar';
+import { BackButton } from '../ui/Buttons';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { chatStyles } from '../Chat/ChatDetail';
 import { t } from 'feed-app-common';
@@ -210,7 +210,12 @@ export const ChatFileOverview = memo(
                 >
                   {assets.length > 1 && index === currentIndex ? (
                     <TouchableOpacity
-                      onPress={() => setAssets(assets.filter((_, i) => i !== index))}
+                      onPress={() => {
+                        setAssets(assets.filter((_, i) => i !== index));
+                        if (currentIndex === assets.length - 1) {
+                          setCurrentIndex(currentIndex - 1);
+                        }
+                      }}
                       style={{
                         position: 'absolute',
                         top: 0,
