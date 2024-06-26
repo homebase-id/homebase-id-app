@@ -16,7 +16,7 @@ export const ChatMessageContent = memo(
     } else if (payloads && payloads?.length > 1) {
       return '📸 Medias';
     } else {
-      const payload = payloads[0];
+      const payload = payloads && payloads[0];
       if (!payload) return null;
       if (payload.contentType.includes('image')) {
         return '📷 Image';
