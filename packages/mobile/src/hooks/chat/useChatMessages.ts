@@ -256,28 +256,43 @@ export const internalInsertNewMessage = (
 
       return {
         ...page,
-        searchResults: (
-          page.searchResults
-            .map((msg) =>
-              msg?.fileId && stringGuidsEqual(msg?.fileId, newMessage.fileId) ? newMessage : msg
-            )
-            .filter((msg) => {
-              if (!msg) return false;
-              // (Sanity for fileModified) Remove messages without a fileId and the same uniqueId so we avoid duplicates with the optimistic update
-              if (!msg.fileId && newMessage.fileMetadata.appData.uniqueId) {
-                return !stringGuidsEqual(
-                  msg?.fileMetadata.appData.uniqueId,
-                  newMessage.fileMetadata.appData.uniqueId
-                );
-              }
+        searchResults: page.searchResults.reduce((acc, msg) => {
+          if (!msg) return acc;
 
-              return true;
-            }) as HomebaseFile<ChatMessage>[]
-        ).reduce((acc, msg) => {
-          if (!acc.some((m) => stringGuidsEqual(m?.fileId, msg?.fileId))) {
-            acc.push(msg);
+          // FileId Duplicates: Message with same fileId is already in searchResults
+          if (msg.fileId && acc.some((m) => stringGuidsEqual(m?.fileId, msg.fileId))) {
+            return acc;
           }
 
+          // UniqueId Duplicates: Message with same uniqueId is already in searchResults
+          if (
+            msg.fileMetadata.appData.uniqueId &&
+            acc.some((m) =>
+              stringGuidsEqual(m?.fileMetadata.appData.uniqueId, msg.fileMetadata.appData.uniqueId)
+            )
+          ) {
+            return acc;
+          }
+
+          // Message in cache was from the server, then updating with fileId is enough
+          if (msg.fileId && stringGuidsEqual(msg.fileId, newMessage.fileId)) {
+            acc.push(newMessage);
+            return acc;
+          }
+
+          // Message in cache is from unknown, then ensure if we need to update the message based on uniqueId
+          if (
+            msg.fileMetadata.appData.uniqueId &&
+            stringGuidsEqual(
+              msg.fileMetadata.appData.uniqueId,
+              newMessage.fileMetadata.appData.uniqueId
+            )
+          ) {
+            acc.push(newMessage);
+            return acc;
+          }
+
+          acc.push(msg);
           return acc;
         }, [] as HomebaseFile<ChatMessage>[]),
       };
