@@ -679,6 +679,7 @@ const RenderBottomContainer = memo(
       };
     }, [isVisible]);
 
+    //TODO: Animations Post alpha
     return (
       <Animated.View
         style={[
