@@ -200,6 +200,8 @@ export interface GiftedChatProps<TMessage extends IMessage = IMessage> {
   renderChatEmpty?(): React.ReactNode;
   /* Custom component to render below the MessageContainer (separate from the ListView) */
   renderChatFooter?(): React.ReactNode;
+  /* Custom composer container that render belows */
+  renderBottomFooter?: React.ReactNode;
   /* Custom message composer container */
   renderInputToolbar?(props: InputToolbarProps<TMessage>): React.ReactNode;
   /*  Custom text input message composer */
@@ -265,6 +267,7 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
     messageContainerRef = createRef<FlatList<IMessage>>(),
     textInputRef = createRef<PasteInputRef>(),
     onPaste = null,
+    renderBottomFooter = null,
   } = props;
 
   const insets = useSafeAreaInsets();
@@ -666,6 +669,7 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
               ) : (
                 <InputToolbar {...inputToolbarProps} text={text} />
               )}
+              {renderBottomFooter}
             </View>
           </ActionSheetProvider>
         </View>

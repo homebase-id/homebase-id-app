@@ -21,9 +21,10 @@ import {
   TimeProps,
   User,
 } from 'react-native-gifted-chat';
-import { useCallback, memo, useMemo, useRef, useEffect, useState } from 'react';
+import React, { useCallback, memo, useMemo, useRef, useEffect, useState } from 'react';
 import {
   GestureResponderEvent,
+  Keyboard,
   Platform,
   Pressable,
   StatusBar,
@@ -37,6 +38,7 @@ import {
 import {
   ArrowDown,
   Camera,
+  ImageLibrary,
   Microphone,
   PaperClip,
   Plus,
@@ -70,6 +72,8 @@ import { useDraftMessage } from '../../hooks/chat/useDraftMessage';
 import { useBubbleContext } from '../BubbleContext/useBubbleContext';
 import { ChatMessageContent } from './Chat-Message-Content';
 import { FileOverview } from '../Files/FileOverview';
+import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
+import { TouchableHighlight } from 'react-native-gesture-handler';
 
 export type ChatMessageIMessage = IMessage & HomebaseFile<ChatMessage>;
 
@@ -192,7 +196,6 @@ export const ChatDetail = memo(
     const microphoneIcon = useCallback(() => <Microphone />, []);
     const cameraIcon = useCallback(() => <Camera />, []);
     const crossIcon = useCallback(() => <Times />, []);
-    const attachmentIcon = useCallback(() => <PaperClip />, []);
 
     const onStopRecording = useCallback(() => {
       requestAnimationFrame(async () => {
@@ -255,11 +258,17 @@ export const ChatDetail = memo(
           timestamp: new Date().toUTCString(),
           id: document.name || 'file',
         };
-        // if (media.didCancel) return;
+
         setAssets([asset]);
+        setBottomContainerVisible(false);
       });
     }, [setAssets]);
 
+    const [bottomContainerVisible, setBottomContainerVisible] = useState(false);
+    const handlePlusIconPress = useCallback(async () => {
+      if (Keyboard.isVisible()) Keyboard.dismiss();
+      setBottomContainerVisible(!bottomContainerVisible);
+    }, [bottomContainerVisible]);
     const handleImageIconPress = useCallback(async () => {
       const medias = await launchImageLibrary({
         mediaType: 'mixed',
@@ -271,6 +280,7 @@ export const ChatDetail = memo(
 
       // Keep assets without a type out of it.. We're never sure what it is...
       setAssets(medias.assets?.filter((asset) => asset.type) ?? []);
+      setBottomContainerVisible(false);
     }, [setAssets]);
 
     const inputStyle = useMemo(
@@ -368,30 +378,16 @@ export const ChatDetail = memo(
                   ]}
                   onPressActionButton={handleRecordButtonAction}
                 />
-                <Actions
-                  icon={attachmentIcon}
-                  containerStyle={[
-                    {
-                      padding: 6, // Max padding that doesn't break the composer height
-                      marginLeft: 0, // Done with flex gap
-                      width: 'auto',
-                      height: 'auto',
-                    },
-                  ]}
-                  onPressActionButton={handleAttachmentButtonAction}
-                />
               </View>
             )}
           </Composer>
         );
       },
       [
-        attachmentIcon,
         cameraIcon,
         composerContainerStyle,
         draftMessage,
         duration,
-        handleAttachmentButtonAction,
         handleCameraButtonAction,
         handleRecordButtonAction,
         inputStyle,
@@ -445,7 +441,7 @@ export const ChatDetail = memo(
                 isRecording
                   ? async (_) => onStopRecording()
                   : !hasText && assets?.length === 0
-                    ? handleImageIconPress
+                    ? handlePlusIconPress
                     : props.onSend
               }
               containerStyle={chatStyles.send}
@@ -473,7 +469,7 @@ export const ChatDetail = memo(
         assets.length,
         crossIcon,
         draftMessage,
-        handleImageIconPress,
+        handlePlusIconPress,
         handleRecordButtonAction,
         isRecording,
         onStopRecording,
@@ -597,6 +593,12 @@ export const ChatDetail = memo(
 
     const locale = getLocales()[0].languageTag;
 
+    useEffect(() => {
+      Keyboard.addListener('keyboardDidShow', () => {
+        if (bottomContainerVisible) setBottomContainerVisible(false);
+      });
+    }, [bottomContainerVisible]);
+
     return (
       <SafeAreaView>
         <GiftedChat<ChatMessageIMessage>
@@ -640,6 +642,13 @@ export const ChatDetail = memo(
           loadEarlier={hasMoreMessages}
           onLoadEarlier={fetchMoreMessages}
           scrollToBottomStyle={scrollToBottomStyle}
+          renderBottomFooter={
+            <RenderBottomContainer
+              isVisible={bottomContainerVisible}
+              onAttachmentPressed={handleAttachmentButtonAction}
+              onGalleryPressed={handleImageIconPress}
+            />
+          }
           scrollToBottomComponent={scrollToBottomComponent}
           renderLoadEarlier={(prop) => <LoadEarlier {...prop} wrapperStyle={wrapperStyle} />}
           listViewProps={{
@@ -651,6 +660,80 @@ export const ChatDetail = memo(
     );
   }
 );
+
+const RenderBottomContainer = memo(
+  ({
+    isVisible,
+    onGalleryPressed,
+    onAttachmentPressed,
+  }: {
+    isVisible?: boolean;
+    onGalleryPressed: () => void;
+    onAttachmentPressed: () => void;
+  }) => {
+    const { isDarkMode } = useDarkMode();
+
+    const style = useAnimatedStyle(() => {
+      return {
+        height: isVisible ? 250 : 0,
+      };
+    }, [isVisible]);
+
+    return (
+      <Animated.View
+        style={[
+          style,
+          {
+            display: 'flex',
+            flexDirection: 'row',
+            backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
+          },
+        ]}
+      >
+        <MediaPickerComponent icon={<ImageLibrary />} onPress={onGalleryPressed} title="Gallery" />
+        <MediaPickerComponent
+          icon={<PaperClip />}
+          onPress={onAttachmentPressed}
+          title="Attachment"
+        />
+      </Animated.View>
+    );
+  }
+);
+
+const MediaPickerComponent = ({
+  icon,
+  onPress,
+  title,
+}: {
+  icon: React.ReactNode;
+  onPress: () => void;
+  title: string;
+}) => {
+  const { isDarkMode } = useDarkMode();
+  return (
+    <View
+      style={{
+        flex: 1,
+        alignItems: 'center',
+      }}
+    >
+      <TouchableHighlight
+        onPress={onPress}
+        underlayColor={isDarkMode ? Colors.indigo[900] : Colors.indigo[300]}
+        style={{
+          padding: 18,
+          borderRadius: 10,
+          backgroundColor: isDarkMode ? Colors.indigo[800] : Colors.indigo[200],
+          margin: 10,
+        }}
+      >
+        {icon}
+      </TouchableHighlight>
+      <Text>{title}</Text>
+    </View>
+  );
+};
 
 const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
   const { isDarkMode } = useDarkMode();
