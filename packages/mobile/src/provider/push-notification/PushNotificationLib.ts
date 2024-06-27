@@ -125,6 +125,7 @@ const onBackgroundMessageReceived = async (
       pressAction: {
         id: 'default',
       },
+      sound: 'default',
     },
     ios: {
       categoryId: 'communications',
@@ -136,6 +137,7 @@ const onBackgroundMessageReceived = async (
           displayName: notification.data.senderId,
         },
       },
+      sound: 'default',
     },
   });
 
