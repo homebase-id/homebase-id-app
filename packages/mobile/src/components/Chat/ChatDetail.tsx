@@ -295,6 +295,7 @@ export const ChatDetail = memo(
           maxHeight: 80,
           paddingVertical: Platform.OS === 'ios' ? 8 : 4,
           flexGrow: 1,
+          fontSize: 16,
         }) as TextStyle,
       [isDarkMode]
     );
