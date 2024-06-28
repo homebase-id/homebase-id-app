@@ -605,9 +605,10 @@ export const ChatDetail = memo(
     const locale = getLocales()[0].languageTag;
 
     useEffect(() => {
-      Keyboard.addListener('keyboardDidShow', () => {
+      const listener = Keyboard.addListener('keyboardDidShow', () => {
         if (bottomContainerVisible) setBottomContainerVisible(false);
       });
+      return () => listener.remove();
     }, [bottomContainerVisible]);
 
     return (
@@ -695,6 +696,7 @@ const RenderBottomContainer = memo(
     const animatedStyle = useAnimatedStyle(() => {
       return {
         height: withTiming(height.value, { duration: 150, easing: Easing.inOut(Easing.ease) }),
+        opacity: withTiming(height.value > 0 ? 1 : 0, { duration: 300 }),
       };
     });
 
