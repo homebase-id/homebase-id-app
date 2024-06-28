@@ -10,7 +10,7 @@ import { hasDebugFlag, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useDotYouClientContext } from 'feed-app-common';
 
 const isDebug = hasDebugFlag();
-const PAGE_SIZE = 50;
+const PAGE_SIZE = 700;
 export const usePushNotifications = (props?: { appId?: string }) => {
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
