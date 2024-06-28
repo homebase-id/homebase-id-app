@@ -655,11 +655,15 @@ export const ChatDetail = memo(
           onLoadEarlier={fetchMoreMessages}
           scrollToBottomStyle={scrollToBottomStyle}
           renderBottomFooter={
-            <RenderBottomContainer
-              isVisible={bottomContainerVisible}
-              onAttachmentPressed={handleAttachmentButtonAction}
-              onGalleryPressed={handleImageIconPress}
-            />
+            bottomContainerVisible
+              ? () => (
+                  <RenderBottomContainer
+                    isVisible={bottomContainerVisible}
+                    onAttachmentPressed={handleAttachmentButtonAction}
+                    onGalleryPressed={handleImageIconPress}
+                  />
+                )
+              : undefined
           }
           scrollToBottomComponent={scrollToBottomComponent}
           renderLoadEarlier={(prop) => <LoadEarlier {...prop} wrapperStyle={wrapperStyle} />}
@@ -705,6 +709,7 @@ const RenderBottomContainer = memo(
         style={[
           animatedStyle,
           {
+            height: 250,
             display: 'flex',
             flexDirection: 'row',
             backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
