@@ -709,6 +709,9 @@ const RenderBottomContainer = memo(
         style={[
           animatedStyle,
           {
+            height: Platform.select({
+              ios: 250,
+            }),
             display: 'flex',
             flexDirection: 'row',
             backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],

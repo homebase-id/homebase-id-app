@@ -238,7 +238,7 @@ export interface GiftedChatProps<TMessage extends IMessage = IMessage> {
   onPaste: PasteInputProps['onPaste'];
 }
 
-const isDebug = true;
+const isDebug = false;
 
 function GiftedChat<TMessage extends IMessage = IMessage>(
   props: GiftedChatProps,
@@ -447,7 +447,7 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
   const animatedStyleRenderMessage = useAnimatedStyle(() => {
     return {
       height:
-        messagesContainerHeight.value != 0
+        messagesContainerHeight.value > 0
           ? withTiming(messagesContainerHeight.value, {
               duration: 150,
             })
