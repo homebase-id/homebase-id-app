@@ -72,7 +72,12 @@ import { useDraftMessage } from '../../hooks/chat/useDraftMessage';
 import { useBubbleContext } from '../BubbleContext/useBubbleContext';
 import { ChatMessageContent } from './Chat-Message-Content';
 import { FileOverview } from '../Files/FileOverview';
-import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import { TouchableHighlight } from 'react-native-gesture-handler';
 
 export type ChatMessageIMessage = IMessage & HomebaseFile<ChatMessage>;
@@ -450,7 +455,12 @@ export const ChatDetail = memo(
                 style={{
                   transform: [
                     {
-                      rotate: hasText || assets.length !== 0 || isRecording ? '50deg' : '0deg',
+                      rotate:
+                        hasText || assets.length !== 0 || isRecording
+                          ? '50deg'
+                          : bottomContainerVisible
+                            ? '45deg'
+                            : '0deg',
                     },
                   ],
                 }}
@@ -467,6 +477,7 @@ export const ChatDetail = memo(
       },
       [
         assets.length,
+        bottomContainerVisible,
         crossIcon,
         draftMessage,
         handlePlusIconPress,
@@ -672,18 +683,25 @@ const RenderBottomContainer = memo(
     onAttachmentPressed: () => void;
   }) => {
     const { isDarkMode } = useDarkMode();
+    const height = useSharedValue(0);
+    useEffect(() => {
+      if (isVisible) {
+        height.value = 250;
+      } else {
+        height.value = 0;
+      }
+    }, [height, isVisible]);
 
-    const style = useAnimatedStyle(() => {
+    const animatedStyle = useAnimatedStyle(() => {
       return {
-        height: isVisible ? 250 : 0,
+        height: withTiming(height.value, { duration: 150, easing: Easing.inOut(Easing.ease) }),
       };
-    }, [isVisible]);
+    });
 
-    //TODO: Animations Post alpha
     return (
       <Animated.View
         style={[
-          style,
+          animatedStyle,
           {
             display: 'flex',
             flexDirection: 'row',
