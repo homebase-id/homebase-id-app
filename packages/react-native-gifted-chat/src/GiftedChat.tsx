@@ -701,7 +701,7 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
               ) : (
                 <InputToolbar {...inputToolbarProps} text={text} />
               )}
-              {renderBottomFooter && renderBottomFooter}
+              {renderBottomFooter}
             </View>
           </ActionSheetProvider>
         </View>
