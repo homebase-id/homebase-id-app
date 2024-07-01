@@ -13,7 +13,7 @@ import { ChatMessageContent } from './Chat-Message-Content';
 import { OwnerAvatar, GroupAvatar, Avatar } from '../ui/Avatars/Avatar';
 import { useDraftMessageValue } from '../../hooks/chat/useDraftMessage';
 import { ellipsisAtMaxChar } from 'feed-app-common';
-import { ConnectionName } from '../ui/Name';
+import { AuthorName, ConnectionName } from '../ui/Name';
 import { CheckCircle, CircleOutlined } from '../ui/Icons/icons';
 
 type ConversationTileProps = {
@@ -46,6 +46,7 @@ const ConversationTile = memo((props: ConversationTileProps) => {
 
   const lastMessage = useMemo(() => flatMessages?.[0], [flatMessages]);
   const lastMessageContent = lastMessage?.fileMetadata.appData.content;
+  const lastMessageAuthor = lastMessage?.fileMetadata.senderOdinId;
 
   const lastReadTime = props.conversation.lastReadTime;
   const unreadCount = useMemo(
@@ -122,6 +123,24 @@ const ConversationTile = memo((props: ConversationTileProps) => {
                     : undefined,
                 ]}
               >
+                {isGroup ? (
+                  <Text
+                    style={{
+                      fontWeight: '500',
+                      color: isDarkMode ? Colors.indigo[400] : Colors.indigo[700],
+                    }}
+                  >
+                    {lastMessageAuthor.length > 0 ? (
+                      <>
+                        <AuthorName odinId={lastMessageAuthor} />
+                        {''}
+                      </>
+                    ) : (
+                      'You '
+                    )}
+                    {': '}
+                  </Text>
+                ) : null}
                 <ChatMessageContent {...lastMessage} />
               </Text>
             </View>

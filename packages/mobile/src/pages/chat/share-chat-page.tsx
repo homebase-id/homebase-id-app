@@ -15,7 +15,10 @@ import { useChatMessage } from '../../hooks/chat/useChatMessage';
 import { useCallback, useMemo, useState } from 'react';
 import { DotYouProfile } from '@youfoundation/js-lib/network';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
-import { UnifiedConversation } from '../../provider/chat/ConversationProvider';
+import {
+  ConversationWithYourself,
+  UnifiedConversation,
+} from '../../provider/chat/ConversationProvider';
 import { NavigationProp, StackActions, useNavigation } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 import { ContactTile } from '../../components/Contact/Contact-Tile';
@@ -35,6 +38,7 @@ import {
 } from '../../hooks/chat/useConversationsWithRecentMessage';
 import ConversationTile from '../../components/Chat/Conversation-tile';
 import { getNewId } from '@youfoundation/js-lib/helpers';
+import { ConversationTileWithYourself } from '../conversations-page';
 
 export type ShareChatProp = NativeStackScreenProps<ChatStackParamList, 'ShareChat'>;
 export const ShareChatPage = (prop: ShareChatProp) => {
@@ -404,6 +408,13 @@ export const ShareChatPage = (prop: ShareChatProp) => {
         sections={sectionData}
         renderSectionHeader={renderSectionHeader}
         renderItem={renderItem}
+        ListHeaderComponent={
+          <ConversationTileWithYourself
+            selecMode
+            isSelected={selectedConversation.includes(ConversationWithYourself)}
+            onPress={() => onSelectConversation(ConversationWithYourself)}
+          />
+        }
         ListFooterComponent={
           //Actually a Group Component
           <ListHeaderComponent

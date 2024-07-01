@@ -46,6 +46,7 @@ const FilePreview = ({
       {isVideo ? (
         <View
           style={[
+            style,
             {
               backgroundColor: Colors.slate[200],
 
@@ -200,7 +201,7 @@ export const ChatFileOverview = memo(
                   style={{
                     borderWidth: 3,
                     borderRadius: 15,
-                    borderColor: currentIndex === index ? Colors.indigo[400] : 'transparent',
+                    borderColor: currentIndex === index ? Colors.indigo[400] : '',
                   }}
                   imageStyle={{
                     objectFit: 'cover',

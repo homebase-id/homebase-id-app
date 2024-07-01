@@ -10,14 +10,15 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import React, {
   createRef,
   useCallback,
+  useEffect,
   useMemo,
   useRef,
   useState,
 } from 'react';
 import {
-  Animated,
   FlatList,
   GestureResponderEvent,
+  Keyboard,
   KeyboardAvoidingView,
   LayoutChangeEvent,
   Platform,
@@ -61,6 +62,11 @@ import {
   PasteInputProps,
   PasteInputRef,
 } from '@mattermost/react-native-paste-input';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 
 dayjs.extend(localizedFormat);
 
@@ -282,9 +288,12 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
   const [isInitialized, setIsInitialized] = useState(false);
   const [text, setText] = useState<string | undefined>(undefined);
 
-  const [messagesContainerHeight, setMessagesContainerHeight] = useState<
-    number | Animated.Value | undefined
-  >(undefined);
+  // const [messagesContainerHeight, setMessagesContainerHeight] = useState<
+  //   number | undefined
+  // >(undefined);
+
+  const messagesContainerHeight = useSharedValue(0);
+
   const [_composerHeight, setComposerHeight] = useState<number | undefined>(
     minComposerHeight,
   );
@@ -393,7 +402,8 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
         bottomOffset != null ? bottomOffset : insets.bottom;
 
       const newMessagesContainerHeight = getMessagesContainerHeightWithKeyboard();
-      setMessagesContainerHeight(newMessagesContainerHeight);
+      // setMessagesContainerHeight(newMessagesContainerHeight);
+      messagesContainerHeight.value = newMessagesContainerHeight;
       setTypingDisabled(true);
     }
   };
@@ -407,7 +417,9 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
       bottomOffsetRef.current = 0;
 
       const newMessagesContainerHeight = getBasicMessagesContainerHeight();
-      setMessagesContainerHeight(newMessagesContainerHeight);
+      // setMessagesContainerHeight(newMessagesContainerHeight);
+      messagesContainerHeight.value = newMessagesContainerHeight;
+
       setTypingDisabled(true);
     }
   };
@@ -426,22 +438,40 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
     if (Platform.OS === 'android') {
       onKeyboardWillHide(e);
     }
-
+    if (renderBottomFooter) {
+      messagesContainerHeight.value = messagesContainerHeight.value - 250;
+    }
     setTypingDisabled(false);
   };
+
+  const animatedStyleRenderMessage = useAnimatedStyle(() => {
+    return {
+      height:
+        messagesContainerHeight.value > 0
+          ? withTiming(messagesContainerHeight.value, {
+              duration: 150,
+            })
+          : undefined,
+    };
+  }, [messagesContainerHeight]);
+
+  useEffect(() => {
+    if (renderBottomFooter) {
+      messagesContainerHeight.value = messagesContainerHeight.value - 250; // height of the bottomContainer
+    } else if (!renderBottomFooter && !Keyboard.isVisible()) {
+      messagesContainerHeight.value = getBasicMessagesContainerHeight();
+    }
+  }, [renderBottomFooter]);
 
   const RenderedMessages = useMemo(() => {
     isDebug && console.log('renderMessages', messagesContainerHeight);
     const { messagesContainerStyle, ...messagesContainerProps } = props;
-
     const fragment = (
-      <View
+      <Animated.View
         style={[
           Platform.OS === 'android'
             ? { height: 'auto', flexGrow: 1 }
-            : typeof messagesContainerHeight === 'number' && {
-                height: messagesContainerHeight,
-              },
+            : animatedStyleRenderMessage,
           messagesContainerStyle,
         ]}
       >
@@ -460,7 +490,7 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
           isTyping={isTyping}
         />
         {renderChatFooter && renderChatFooter()}
-      </View>
+      </Animated.View>
     );
 
     return isKeyboardInternallyHandled ? (
@@ -518,7 +548,8 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
     const newMessagesContainerHeight = getMessagesContainerHeightWithKeyboard(
       minComposerHeight,
     );
-    setMessagesContainerHeight(newMessagesContainerHeight);
+    // setMessagesContainerHeight(newMessagesContainerHeight);
+    messagesContainerHeight.value = newMessagesContainerHeight;
 
     setText(initialText);
     setComposerHeight(minComposerHeight);
@@ -537,7 +568,9 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
       const newMessagesContainerHeight = getMessagesContainerHeightWithKeyboard(
         newComposerHeight!,
       );
-      setMessagesContainerHeight(newMessagesContainerHeight);
+      // setMessagesContainerHeight(newMessagesContainerHeight);
+      messagesContainerHeight.value = newMessagesContainerHeight;
+
       setComposerHeight(newComposerHeight);
     },
     [
@@ -582,7 +615,8 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
       const newMessagesContainerHeight = getMessagesContainerHeightWithKeyboard(
         minComposerHeight,
       );
-      setMessagesContainerHeight(newMessagesContainerHeight);
+      // setMessagesContainerHeight(newMessagesContainerHeight);
+      messagesContainerHeight.value = newMessagesContainerHeight;
 
       setIsInitialized(true);
       setText(text || initialText);
@@ -592,7 +626,7 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
       initialText,
       notifyInputTextReset,
       getMessagesContainerHeightWithKeyboard,
-      setMessagesContainerHeight,
+      // setMessagesContainerHeight,
       setIsInitialized,
       setText,
       text,
@@ -612,12 +646,10 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
         isFirstLayoutRef.current === true
       ) {
         maxHeightRef.current = layout.height;
-
-        setMessagesContainerHeight(
+        messagesContainerHeight.value =
           keyboardHeightRef.current > 0
             ? getMessagesContainerHeightWithKeyboard()
-            : getBasicMessagesContainerHeight(),
-        );
+            : getBasicMessagesContainerHeight();
       }
 
       if (isFirstLayoutRef.current === true) {
@@ -625,7 +657,7 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
       }
     },
     [
-      setMessagesContainerHeight,
+      // setMessagesContainerHeight,
       getMessagesContainerHeightWithKeyboard,
       getBasicMessagesContainerHeight,
     ],
