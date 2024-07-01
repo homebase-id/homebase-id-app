@@ -117,6 +117,7 @@ const useInboxProcessor = (connected?: boolean) => {
     queryFn: fetchData,
     enabled: connected,
     throwOnError: true,
+    staleTime: MINUTE_IN_MS * 2,
   });
 };
 
@@ -232,6 +233,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
   }, []);
 
   const processQueue = useCallback(async (queuedMessages: HomebaseFile<ChatMessage>[]) => {
+    isDebug && console.debug('[ChatWebsocket] Processing queue', queuedMessages.length);
     setChatMessagesQueue([]);
 
     // Filter out duplicate messages and selec the one with the latest updated property
@@ -255,7 +257,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
         // Start timeout to always process the queue after a certain time
         interval.current = setInterval(
           async () => await processQueue([...chatMessagesQueue]),
-          5000
+          3000
         );
       }
     }
@@ -279,6 +281,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
     ['fileAdded', 'fileModified'],
     [ChatDrive],
     () => {
+      console.log('ChatWebsocket connected');
       queryClient.invalidateQueries({ queryKey: ['process-inbox'] });
     }
   );
