@@ -58,12 +58,12 @@ import { useDarkMode } from '../../hooks/useDarkMode';
 import { ChatDeliveryIndicator } from '../../components/Chat/Chat-Delivery-Indicator';
 import { useChatReaction } from '../../hooks/chat/useChatReaction';
 import { Avatar as AppAvatar, OwnerAvatar } from '../../components/ui/Avatars/Avatar';
-import { ConnectionName } from '../../components/ui/Name';
+import { AuthorName, ConnectionName } from '../../components/ui/Name';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ChatDeletedArchivalStaus, ChatMessage } from '../../provider/chat/ChatProvider';
 import { useAudioRecorder } from '../../hooks/audio/useAudioRecorderPlayer';
 import { Text } from '../ui/Text/Text';
-import { fixDocumentURI, millisToMinutesAndSeconds } from '../../utils/utils';
+import { fixDocumentURI, millisToMinutesAndSeconds, openURL } from '../../utils/utils';
 import { SafeAreaView } from '../ui/SafeAreaView/SafeAreaView';
 import Document from 'react-native-document-picker';
 import { getLocales, uses24HourClock } from 'react-native-localize';
@@ -79,6 +79,8 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { TouchableHighlight } from 'react-native-gesture-handler';
+import { text } from 'stream/consumers';
+import { ParseShape } from 'react-native-gifted-chat/src/MessageText';
 
 export type ChatMessageIMessage = IMessage & HomebaseFile<ChatMessage>;
 
@@ -774,9 +776,37 @@ const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
     (content?.message?.match(/^\p{Extended_Pictographic}/u) &&
       !content.message?.match(/[0-9a-zA-Z]/)) ??
     false;
+
+  /**
+   * An array of parse patterns used for parsing text in the chat detail component.
+   * Each pattern consists of a regular expression pattern, a style to apply to the matched text,
+   * an onPress function to handle the press event, and a renderText function to customize the rendered text.
+   * @param linkStyle The style to apply to the matched text.
+   * @returns An array of parse patterns.
+   */
+  const parsePatterns = useCallback((linkStyle: StyleProp<TextStyle>): ParseShape[] => {
+    const pattern = /@[a-zA-Z0-9._-]+/;
+    return [
+      {
+        pattern: pattern,
+        style: [
+          linkStyle,
+          {
+            textDecorationLine: 'none',
+          },
+        ],
+        onPress: (text: string) => openURL(`https://${text}`),
+        renderText: (text: string) => {
+          return (<AuthorName odinId={text.slice(1)} showYou={false} />) as unknown as string;
+        },
+      },
+    ];
+  }, []);
+
   return (
     <MessageText
       {...props}
+      parsePatterns={parsePatterns}
       linkStyle={{
         left: {
           color: isDarkMode ? Colors.indigo[300] : Colors.indigo[500],
