@@ -1,6 +1,8 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { QueryClient, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   AppNotification,
+  DeletedHomebaseFile,
+  DotYouClient,
   HomebaseFile,
   PushNotification,
   TypedConnectionNotification,
@@ -15,7 +17,7 @@ import {
 import { processInbox } from '@youfoundation/js-lib/peer';
 
 import { useNotificationSubscriber } from '../useNotificationSubscriber';
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { getConversationQueryOptions, useConversation } from './useConversation';
@@ -99,45 +101,8 @@ const useInboxProcessor = (connected?: boolean) => {
       );
 
       const newMessages = modifieData.searchResults.concat(newData.searchResults);
-      isDebug && console.log('[InboxProcessor] new messages', newMessages.length);
-      const uniqueMessagesPerConversation = newMessages.reduce(
-        (acc, dsr) => {
-          if (!dsr.fileMetadata?.appData?.groupId || dsr.fileState === 'deleted') {
-            return acc;
-          }
-
-          const conversationId = dsr.fileMetadata?.appData.groupId as string;
-          if (!acc[conversationId]) {
-            acc[conversationId] = [];
-          }
-
-          if (acc[conversationId].some((m) => stringGuidsEqual(m.fileId, dsr.fileId))) {
-            return acc;
-          }
-
-          acc[conversationId].push(dsr);
-          return acc;
-        },
-        {} as Record<string, HomebaseFile<string>[]>
-      );
-      isDebug &&
-        console.log(
-          '[InboxProcessor] new conversation updates',
-          Object.keys(uniqueMessagesPerConversation).length
-        );
-
-      await Promise.all(
-        Object.keys(uniqueMessagesPerConversation).map(async (updatedConversation) => {
-          const updatedChatMessages = (
-            await Promise.all(
-              uniqueMessagesPerConversation[updatedConversation].map(
-                async (newMessage) => await dsrToMessage(dotYouClient, newMessage, ChatDrive, true)
-              )
-            )
-          ).filter(Boolean) as HomebaseFile<ChatMessage>[];
-          insertNewMessagesForConversation(queryClient, updatedConversation, updatedChatMessages);
-        })
-      );
+      isDebug && console.debug('[InboxProcessor] new messages', newMessages.length);
+      await processChatMessagesBatch(dotYouClient, queryClient, newMessages);
     } else {
       // We have no reference to the last time we processed the inbox, so we can only invalidate all chat messages
       queryClient.invalidateQueries({ queryKey: ['chat-messages'], exact: false });
@@ -152,6 +117,7 @@ const useInboxProcessor = (connected?: boolean) => {
     queryFn: fetchData,
     enabled: connected,
     throwOnError: true,
+    staleTime: MINUTE_IN_MS * 2,
   });
 };
 
@@ -163,6 +129,8 @@ const useChatWebsocket = (isEnabled: boolean) => {
     restoreChat: { mutate: restoreChat },
   } = useConversation();
   const queryClient = useQueryClient();
+
+  const [chatMessagesQueue, setChatMessagesQueue] = useState<HomebaseFile<ChatMessage>[]>([]);
 
   const handler = useCallback(async (notification: TypedConnectionNotification) => {
     isDebug && console.debug('[ChatWebsocket] Got notification', notification);
@@ -198,7 +166,6 @@ const useChatWebsocket = (isEnabled: boolean) => {
           ChatDrive,
           true
         );
-
         if (
           !updatedChatMessage ||
           Object.keys(updatedChatMessage.fileMetadata.appData.content).length === 0
@@ -207,7 +174,12 @@ const useChatWebsocket = (isEnabled: boolean) => {
           return;
         }
 
-        insertNewMessage(queryClient, updatedChatMessage);
+        if (updatedChatMessage.fileMetadata.senderOdinId !== '') {
+          // Messages from others are processed immediately
+          insertNewMessage(queryClient, updatedChatMessage);
+        } else {
+          setChatMessagesQueue((prev) => [...prev, updatedChatMessage]);
+        }
       } else if (notification.header.fileMetadata.appData.fileType === ChatReactionFileType) {
         const messageId = notification.header.fileMetadata.appData.groupId;
         queryClient.invalidateQueries({ queryKey: ['chat-reaction', messageId] });
@@ -260,12 +232,109 @@ const useChatWebsocket = (isEnabled: boolean) => {
     }
   }, []);
 
+  const processQueue = useCallback(async (queuedMessages: HomebaseFile<ChatMessage>[]) => {
+    isDebug && console.debug('[ChatWebsocket] Processing queue', queuedMessages.length);
+    setChatMessagesQueue([]);
+
+    // Filter out duplicate messages and selec the one with the latest updated property
+    const filteredMessages = queuedMessages.reduce((acc, message) => {
+      const existingMessage = acc.find((m) => stringGuidsEqual(m.fileId, message.fileId));
+      if (!existingMessage) {
+        acc.push(message);
+      } else if (existingMessage.fileMetadata.updated < message.fileMetadata.updated) {
+        acc[acc.indexOf(existingMessage)] = message;
+      }
+      return acc;
+    }, [] as HomebaseFile<ChatMessage>[]);
+
+    await processChatMessagesBatch(dotYouClient, queryClient, filteredMessages);
+  }, []);
+
+  const interval = useRef<NodeJS.Timeout | null>(null);
+  useEffect(() => {
+    if (chatMessagesQueue.length >= 1) {
+      if (!interval.current) {
+        // Start timeout to always process the queue after a certain time
+        interval.current = setInterval(
+          async () => await processQueue([...chatMessagesQueue]),
+          3000
+        );
+      }
+    }
+
+    if (chatMessagesQueue.length > 25) {
+      (async () => {
+        await processQueue([...chatMessagesQueue]);
+      })();
+    }
+
+    return () => {
+      if (interval.current) {
+        clearInterval(interval.current);
+        interval.current = null;
+      }
+    };
+  }, [processQueue, chatMessagesQueue]);
+
   return useNotificationSubscriber(
     isEnabled ? handler : undefined,
     ['fileAdded', 'fileModified'],
     [ChatDrive],
     () => {
+      console.log('ChatWebsocket connected');
       queryClient.invalidateQueries({ queryKey: ['process-inbox'] });
     }
+  );
+};
+
+const processChatMessagesBatch = async (
+  dotYouClient: DotYouClient,
+  queryClient: QueryClient,
+  chatMessages: (HomebaseFile<string | ChatMessage> | DeletedHomebaseFile<string>)[]
+) => {
+  const uniqueMessagesPerConversation = chatMessages.reduce(
+    (acc, dsr) => {
+      if (!dsr.fileMetadata?.appData?.groupId || dsr.fileState === 'deleted') {
+        return acc;
+      }
+
+      const conversationId = dsr.fileMetadata?.appData.groupId as string;
+      if (!acc[conversationId]) {
+        acc[conversationId] = [];
+      }
+
+      if (acc[conversationId].some((m) => stringGuidsEqual(m.fileId, dsr.fileId))) {
+        return acc;
+      }
+
+      acc[conversationId].push(dsr);
+      return acc;
+    },
+    {} as Record<string, HomebaseFile<string | ChatMessage>[]>
+  );
+  isDebug &&
+    console.debug(
+      '[InboxProcessor] new conversation updates',
+      Object.keys(uniqueMessagesPerConversation).length
+    );
+
+  await Promise.all(
+    Object.keys(uniqueMessagesPerConversation).map(async (updatedConversation) => {
+      const updatedChatMessages = (
+        await Promise.all(
+          uniqueMessagesPerConversation[updatedConversation].map(async (newMessage) =>
+            typeof newMessage.fileMetadata.appData.content === 'string'
+              ? await dsrToMessage(
+                  dotYouClient,
+                  newMessage as HomebaseFile<string>,
+                  ChatDrive,
+                  true
+                )
+              : (newMessage as HomebaseFile<ChatMessage>)
+          )
+        )
+      ).filter(Boolean) as HomebaseFile<ChatMessage>[];
+      insertNewMessagesForConversation(queryClient, updatedConversation, updatedChatMessages);
+    })
   );
 };
