@@ -207,7 +207,7 @@ export interface GiftedChatProps<TMessage extends IMessage = IMessage> {
   /* Custom component to render below the MessageContainer (separate from the ListView) */
   renderChatFooter?(): React.ReactNode;
   /* Custom composer container that render belows */
-  renderBottomFooter?(): React.ReactNode;
+  renderBottomFooter?: React.ReactNode;
   /* Custom message composer container */
   renderInputToolbar?(props: InputToolbarProps<TMessage>): React.ReactNode;
   /*  Custom text input message composer */
@@ -701,7 +701,7 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
               ) : (
                 <InputToolbar {...inputToolbarProps} text={text} />
               )}
-              {renderBottomFooter && renderBottomFooter()}
+              {renderBottomFooter && renderBottomFooter}
             </View>
           </ActionSheetProvider>
         </View>

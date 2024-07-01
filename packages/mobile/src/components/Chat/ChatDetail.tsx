@@ -79,7 +79,6 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { TouchableHighlight } from 'react-native-gesture-handler';
-import { text } from 'stream/consumers';
 import { ParseShape } from 'react-native-gifted-chat/src/MessageText';
 
 export type ChatMessageIMessage = IMessage & HomebaseFile<ChatMessage>;
@@ -192,11 +191,9 @@ export const ChatDetail = memo(
           {replyMessage ? (
             <ReplyMessageBar message={replyMessage} clearReply={() => setReplyMessage(null)} />
           ) : null}
-
-          <FileOverview assets={assets} setAssets={setAssets} />
         </View>
       );
-    }, [assets, isDarkMode, replyMessage, setAssets, setReplyMessage]);
+    }, [isDarkMode, replyMessage, setReplyMessage]);
 
     const { record, stop, duration, isRecording } = useAudioRecorder();
 
@@ -272,10 +269,12 @@ export const ChatDetail = memo(
     }, [setAssets]);
 
     const [bottomContainerVisible, setBottomContainerVisible] = useState(false);
+
     const handlePlusIconPress = useCallback(async () => {
       if (Keyboard.isVisible()) Keyboard.dismiss();
       setBottomContainerVisible(!bottomContainerVisible);
     }, [bottomContainerVisible]);
+
     const handleImageIconPress = useCallback(async () => {
       const medias = await launchImageLibrary({
         mediaType: 'mixed',
@@ -594,6 +593,7 @@ export const ChatDetail = memo(
         opacity: 1,
       };
     }, [isDarkMode]);
+
     const wrapperStyle: StyleProp<ViewStyle> = useMemo(() => {
       return {
         backgroundColor: isDarkMode ? Colors.indigo[900] : Colors.slate[50],
@@ -613,6 +613,17 @@ export const ChatDetail = memo(
       });
       return () => listener.remove();
     }, [bottomContainerVisible]);
+
+    const renderBottomContainer = useMemo(
+      () => (
+        <RenderBottomContainer
+          isVisible={bottomContainerVisible}
+          onAttachmentPressed={handleAttachmentButtonAction}
+          onGalleryPressed={handleImageIconPress}
+        />
+      ),
+      [bottomContainerVisible, handleAttachmentButtonAction, handleImageIconPress]
+    );
 
     return (
       <SafeAreaView>
@@ -657,17 +668,7 @@ export const ChatDetail = memo(
           loadEarlier={hasMoreMessages}
           onLoadEarlier={fetchMoreMessages}
           scrollToBottomStyle={scrollToBottomStyle}
-          renderBottomFooter={
-            bottomContainerVisible
-              ? () => (
-                  <RenderBottomContainer
-                    isVisible={bottomContainerVisible}
-                    onAttachmentPressed={handleAttachmentButtonAction}
-                    onGalleryPressed={handleImageIconPress}
-                  />
-                )
-              : undefined
-          }
+          renderBottomFooter={bottomContainerVisible ? renderBottomContainer : undefined}
           scrollToBottomComponent={scrollToBottomComponent}
           renderLoadEarlier={(prop) => <LoadEarlier {...prop} wrapperStyle={wrapperStyle} />}
           listViewProps={{
