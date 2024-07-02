@@ -1,4 +1,4 @@
-import { QueryClient, useQuery, useQueryClient } from '@tanstack/react-query';
+import { InfiniteData, QueryClient, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   AppNotification,
   DeletedHomebaseFile,
@@ -115,7 +115,20 @@ const useInboxProcessor = (connected?: boolean) => {
     }
 
     // We have no reference to the last time we processed the inbox, so we can only invalidate all chat messages
+    // Start by removing all but the first pages to avoid refetching all pages
+    const queries = queryClient.getQueriesData({ queryKey: ['chat-messages'], exact: false });
+    queries.forEach(([key]) => {
+      if (Object.values(key) && Object.values(key) !== null) {
+        queryClient.setQueryData(key, (data: InfiniteData<unknown, unknown>) => {
+          return {
+            pages: data?.pages?.slice(0, 1) ?? [],
+            pageParams: data?.pageParams?.slice(0, 1) || [undefined],
+          };
+        });
+      }
+    });
     queryClient.invalidateQueries({ queryKey: ['chat-messages'], exact: false });
+
     return processedresult;
   };
 
