@@ -13,8 +13,9 @@ export const ConnectionName = memo(
     if (!odinId) return null;
 
     const fullName = connectionDetails?.name;
-    if (showFirstNameOnly && fullName) {
-      return <>{fullName?.split(' ')[0]}</>;
+    if (fullName && showFirstNameOnly) {
+      const [firstName] = fullName.split(' ');
+      return <>{firstName}</>;
     }
 
     return <>{fullName ?? odinId}</>;
@@ -54,7 +55,7 @@ export const OwnerName = memo(
     if (showYou) return <>{'You'}</>;
     return (
       <>
-        {firstName} {!showFirstNameOnly && surName}
+        {firstName} {!showFirstNameOnly ? null : surName}
       </>
     );
   }
