@@ -154,7 +154,11 @@ const useChatWebsocket = (isEnabled: boolean) => {
   const [chatMessagesQueue, setChatMessagesQueue] = useState<HomebaseFile<ChatMessage>[]>([]);
 
   const handler = useCallback(async (notification: TypedConnectionNotification) => {
-    isDebug && console.debug('[ChatWebsocket] Got notification', notification);
+    isDebug &&
+      console.debug(
+        `[ChatWebsocket] Got ${notification.notificationType}`,
+        (notification as any).header?.fileId
+      );
 
     if (
       (notification.notificationType === 'fileAdded' ||
