@@ -188,9 +188,7 @@ export const ChatDetail = memo(
             backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
           }}
         >
-          {replyMessage ? (
-            <ReplyMessageBar message={replyMessage} clearReply={() => setReplyMessage(null)} />
-          ) : null}
+          <ReplyMessageBar message={replyMessage} clearReply={() => setReplyMessage(null)} />
         </View>
       );
     }, [isDarkMode, replyMessage, setReplyMessage]);
