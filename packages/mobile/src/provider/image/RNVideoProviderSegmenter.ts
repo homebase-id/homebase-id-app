@@ -143,11 +143,19 @@ export const grabThumbnail = async (video: ImageSource) => {
     }
 
     const thumbBlob = new OdinBlob(destinationUri, { type: 'image/png' });
-    await new Promise<void>((resolve) => {
+    await new Promise<void>((resolve, reject) => {
+      let intervalCount = 0;
       const interval = setInterval(async () => {
+        intervalCount++;
         if (thumbBlob.written) {
           clearInterval(interval);
           resolve();
+        }
+        if (intervalCount > 200) {
+          clearInterval(interval);
+          reject(
+            '[RNVideoProviderSegmenter] grabThumbnail: Timeout while waiting for thumbnail to be written.'
+          );
         }
       }, 100);
     });
