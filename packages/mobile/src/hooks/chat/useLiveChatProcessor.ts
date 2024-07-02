@@ -1,4 +1,4 @@
-import { QueryClient, useQuery, useQueryClient } from '@tanstack/react-query';
+import { InfiniteData, QueryClient, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   AppNotification,
   DeletedHomebaseFile,
@@ -64,49 +64,70 @@ const useInboxProcessor = (connected?: boolean) => {
     const processedresult = await processInbox(dotYouClient, ChatDrive, BATCH_SIZE);
 
     isDebug && console.log('[InboxProcessor] fetching updates since', lastProcessedWithBuffer);
-    if (lastProcessedWithBuffer) {
-      const modifiedCursor = getQueryModifiedCursorFromTime(lastProcessedWithBuffer); // Friday, 31 May 2024 09:38:54.678
-      const batchCursor = getQueryBatchCursorFromTime(
-        new Date().getTime(),
-        lastProcessedWithBuffer
-      );
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
 
-      const newData = await queryBatch(
-        dotYouClient,
-        {
-          targetDrive: ChatDrive,
-          fileType: [CHAT_MESSAGE_FILE_TYPE],
-        },
-        {
-          maxRecords: BATCH_SIZE,
-          cursorState: batchCursor,
-          includeMetadataHeader: true,
-          includeTransferHistory: true,
-        }
-      );
+    // If it's been processed last more than 24h ago it's better to trust on the cache invalidation
+    try {
+      if (lastProcessedWithBuffer && lastProcessedWithBuffer > yesterday.getTime()) {
+        const modifiedCursor = getQueryModifiedCursorFromTime(lastProcessedWithBuffer); // Friday, 31 May 2024 09:38:54.678
+        const batchCursor = getQueryBatchCursorFromTime(
+          new Date().getTime(),
+          lastProcessedWithBuffer
+        );
 
-      const modifieData = await queryModified(
-        dotYouClient,
-        {
-          targetDrive: ChatDrive,
-          fileType: [CHAT_MESSAGE_FILE_TYPE],
-        },
-        {
-          maxRecords: BATCH_SIZE,
-          cursor: modifiedCursor,
-          excludePreviewThumbnail: false,
-          includeHeaderContent: true,
-          includeTransferHistory: true,
-        }
-      );
+        const newData = await queryBatch(
+          dotYouClient,
+          {
+            targetDrive: ChatDrive,
+            fileType: [CHAT_MESSAGE_FILE_TYPE],
+          },
+          {
+            maxRecords: BATCH_SIZE,
+            cursorState: batchCursor,
+            includeMetadataHeader: true,
+            includeTransferHistory: true,
+          }
+        );
 
-      const newMessages = modifieData.searchResults.concat(newData.searchResults);
-      isDebug && console.debug('[InboxProcessor] new messages', newMessages.length);
-      await processChatMessagesBatch(dotYouClient, queryClient, newMessages);
-    } else {
-      // We have no reference to the last time we processed the inbox, so we can only invalidate all chat messages
-      queryClient.invalidateQueries({ queryKey: ['chat-messages'], exact: false });
+        const modifieData = await queryModified(
+          dotYouClient,
+          {
+            targetDrive: ChatDrive,
+            fileType: [CHAT_MESSAGE_FILE_TYPE],
+          },
+          {
+            maxRecords: BATCH_SIZE,
+            cursor: modifiedCursor,
+            excludePreviewThumbnail: false,
+            includeHeaderContent: true,
+            includeTransferHistory: true,
+          }
+        );
+
+        const newMessages = modifieData.searchResults.concat(newData.searchResults);
+        isDebug && console.debug('[InboxProcessor] new messages', newMessages.length);
+        await processChatMessagesBatch(dotYouClient, queryClient, newMessages);
+        return processedresult;
+      }
+    } catch (e) {
+      console.error(e);
     }
+
+    // We have no reference to the last time we processed the inbox, so we can only invalidate all chat messages
+    // Start by removing all but the first pages to avoid refetching all pages
+    const queries = queryClient.getQueriesData({ queryKey: ['chat-messages'], exact: false });
+    queries.forEach(([key]) => {
+      if (Object.values(key) && Object.values(key) !== null) {
+        queryClient.setQueryData(key, (data: InfiniteData<unknown, unknown>) => {
+          return {
+            pages: data?.pages?.slice(0, 1) ?? [],
+            pageParams: data?.pageParams?.slice(0, 1) || [undefined],
+          };
+        });
+      }
+    });
+    queryClient.invalidateQueries({ queryKey: ['chat-messages'], exact: false });
 
     return processedresult;
   };
@@ -133,7 +154,11 @@ const useChatWebsocket = (isEnabled: boolean) => {
   const [chatMessagesQueue, setChatMessagesQueue] = useState<HomebaseFile<ChatMessage>[]>([]);
 
   const handler = useCallback(async (notification: TypedConnectionNotification) => {
-    isDebug && console.debug('[ChatWebsocket] Got notification', notification);
+    isDebug &&
+      console.debug(
+        `[ChatWebsocket] Got ${notification.notificationType}`,
+        (notification as any).header?.fileId
+      );
 
     if (
       (notification.notificationType === 'fileAdded' ||

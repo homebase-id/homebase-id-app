@@ -5,6 +5,7 @@ import { Pressable, StyleProp, Text, TextStyle, View, ViewStyle } from 'react-na
 import { Clock, SubtleCheck, Times } from '../ui/Icons/icons';
 import { Colors } from '../../app/Colors';
 import { ChatMessageIMessage } from './ChatDetail';
+import { useCallback } from 'react';
 
 export const ChatDeliveryIndicator = ({
   msg,
@@ -73,17 +74,22 @@ export const InnerDeliveryIndicator = ({
   const isFailed = state === ChatDeliveryStatus.Failed;
   const isRead = state === ChatDeliveryStatus.Read;
 
+  const Wrapper = useCallback(
+    ({ children }: { children: React.ReactNode }) => {
+      if (onPress) {
+        return (
+          <Pressable onPress={onPress} style={{ flexDirection: 'row', alignItems: 'center' }}>
+            {children}
+          </Pressable>
+        );
+      }
+      return <View style={{ flexDirection: 'row', alignItems: 'center' }}>{children}</View>;
+    },
+    [onPress]
+  );
+
   return (
-    <Pressable
-      onPress={onPress}
-      style={[
-        {
-          flexDirection: 'row',
-          alignItems: 'center',
-        },
-        style,
-      ]}
-    >
+    <Wrapper>
       <View
         style={{
           paddingBottom: 4,
@@ -118,6 +124,6 @@ export const InnerDeliveryIndicator = ({
           <Clock size={'xs'} color={Colors.gray[200]} />
         )}
       </View>
-    </Pressable>
+    </Wrapper>
   );
 };
