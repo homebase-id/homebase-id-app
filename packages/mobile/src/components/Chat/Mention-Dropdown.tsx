@@ -11,7 +11,7 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 
 export type MentionDropDownProps = {
   isVisible: boolean;
-  currentText: string;
+  query: string;
   conversationId: string;
   onMention?: (mention: string) => void;
 };
