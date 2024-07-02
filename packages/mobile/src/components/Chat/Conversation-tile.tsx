@@ -132,14 +132,7 @@ const ConversationTile = memo((props: ConversationTileProps) => {
                         color: isDarkMode ? Colors.indigo[400] : Colors.indigo[700],
                       }}
                     >
-                      {lastMessageAuthor?.length > 0 ? (
-                        <>
-                          <AuthorName odinId={lastMessageAuthor} />
-                          {''}
-                        </>
-                      ) : (
-                        'You '
-                      )}
+                      <AuthorName odinId={lastMessageAuthor} showYou showFirstNameOnly />
                       {': '}
                     </Text>
                   ) : null}
