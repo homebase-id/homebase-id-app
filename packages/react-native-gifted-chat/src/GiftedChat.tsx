@@ -722,7 +722,6 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
 GiftedChat.propTypes = {
   messages: PropTypes.arrayOf(PropTypes.object),
   messagesContainerStyle: utils.StylePropType,
-  text: PropTypes.string,
   initialText: PropTypes.string,
   placeholder: PropTypes.string,
   disableComposer: PropTypes.bool,
