@@ -71,7 +71,6 @@ import { type PastedFile } from '@mattermost/react-native-paste-input';
 import { useDraftMessage } from '../../hooks/chat/useDraftMessage';
 import { useBubbleContext } from '../BubbleContext/useBubbleContext';
 import { ChatMessageContent } from './Chat-Message-Content';
-import { FileOverview } from '../Files/FileOverview';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -80,6 +79,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { TouchableHighlight } from 'react-native-gesture-handler';
 import { ParseShape } from 'react-native-gifted-chat/src/MessageText';
+import { MentionDropDown } from './Mention-Dropdown';
 
 export type ChatMessageIMessage = IMessage & HomebaseFile<ChatMessage>;
 
@@ -118,39 +118,40 @@ export const ChatDetail = memo(
     conversationId: string;
     replyMessage: ChatMessageIMessage | null;
     setReplyMessage: (message: ChatMessageIMessage | null) => void;
-
     assets: Asset[];
     setAssets: (assets: Asset[]) => void;
-
     hasMoreMessages: boolean;
     fetchMoreMessages: () => void;
   }) => {
     const { isDarkMode } = useDarkMode();
     const identity = useAuth().getIdentity();
-    const textRef = useRef<TextInput>(null);
 
     // We will fetch the draft message from the cache only once
     const { mutate: onInputTextChanged } = useDraftMessage(conversationId).set;
-    const [draftMessage, setdraftMessage] = useState<string | undefined>();
+    const textRef = useRef<TextInput>(null);
+    // We will handle the textInput manually now
+    const [inputText, setText] = useState('');
 
     const { getDraftMessage } = useDraftMessage(conversationId);
+
+    // Fetch draftmessage only once when the component mounts
     useEffect(() => {
       (async () => {
         const draft = await getDraftMessage();
         if (!draft) return;
-        setdraftMessage(draft);
+        setText(draft);
       })();
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
-
     const debounceInputText = useCallback(
       (text: string) => {
-        if (text === '' && draftMessage) {
-          setdraftMessage(undefined);
+        setText(text);
+        if (text === '' && inputText !== '') {
+          setText('');
         }
         return onInputTextChanged(text);
       },
-      [draftMessage, onInputTextChanged]
+      [inputText, onInputTextChanged]
     );
 
     const onLongPress = useCallback(
@@ -182,16 +183,28 @@ export const ChatDetail = memo(
     );
 
     const renderChatFooter = useCallback(() => {
+      const onMention = (mention: string) => {
+        setText((prev) => `${prev}${mention} `);
+      };
       return (
-        <View
+        <Animated.View
           style={{
             backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
           }}
         >
-          <ReplyMessageBar message={replyMessage} clearReply={() => setReplyMessage(null)} />
-        </View>
+          {isGroup && (
+            <MentionDropDown
+              conversationId={conversationId}
+              query={inputText}
+              onMention={onMention}
+            />
+          )}
+          {replyMessage ? (
+            <ReplyMessageBar message={replyMessage} clearReply={() => setReplyMessage(null)} />
+          ) : null}
+        </Animated.View>
       );
-    }, [isDarkMode, replyMessage, setReplyMessage]);
+    }, [conversationId, isDarkMode, isGroup, replyMessage, setReplyMessage, inputText]);
 
     const { record, stop, duration, isRecording } = useAudioRecorder();
 
@@ -349,9 +362,12 @@ export const ChatDetail = memo(
             {...props}
             textInputStyle={inputStyle}
             containerStyle={composerContainerStyle}
-            defaultValue={draftMessage}
+            defaultValue={inputText}
+            textInputProps={{
+              value: inputText,
+            }}
           >
-            {!props.hasText && !draftMessage && (
+            {!props.hasText && !inputText && (
               <View
                 style={{
                   flexDirection: 'row',
@@ -391,13 +407,13 @@ export const ChatDetail = memo(
       [
         cameraIcon,
         composerContainerStyle,
-        draftMessage,
         duration,
         handleCameraButtonAction,
         handleRecordButtonAction,
         inputStyle,
         isRecording,
         microphoneIcon,
+        inputText,
       ]
     );
 
@@ -409,7 +425,7 @@ export const ChatDetail = memo(
 
     const renderSend = useCallback(
       (props: SendProps<IMessage>) => {
-        const hasText = props.text || draftMessage;
+        const hasText = props.text || inputText;
         return (
           <View
             style={{
@@ -440,7 +456,7 @@ export const ChatDetail = memo(
               {...props}
               // disabled={isRecording ? false : !props.text && assets?.length === 0}
               disabled={false}
-              text={props.text || draftMessage || ' '}
+              text={props.text || inputText || ' '}
               // onSend={isRecording ? async (_) => onStopRecording() : props.onSend}
               onSend={
                 isRecording
@@ -479,9 +495,9 @@ export const ChatDetail = memo(
         assets.length,
         bottomContainerVisible,
         crossIcon,
-        draftMessage,
         handlePlusIconPress,
         handleRecordButtonAction,
+        inputText,
         isRecording,
         onStopRecording,
       ]
