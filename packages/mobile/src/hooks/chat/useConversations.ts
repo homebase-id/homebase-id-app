@@ -29,7 +29,7 @@ export const useConversations = () => {
       getNextPageParam: (lastPage) =>
         lastPage && lastPage.searchResults?.length >= PAGE_SIZE ? lastPage.cursorState : undefined,
       refetchOnMount: false,
-      staleTime: 1000 * 60 * 5, // 5min before conversations from another device are fetched on this one
+      staleTime: 1000 * 60 * 5, // 5min before new conversations from another device are fetched on this one
     }),
   };
 };
@@ -85,5 +85,20 @@ export const insertNewConversation = (
     queryClient.setQueryData(['conversations'], newData);
   } else {
     queryClient.invalidateQueries({ queryKey: ['conversations'] });
+  }
+
+  const extistingConversation = queryClient.getQueryData<HomebaseFile<UnifiedConversation>>([
+    'conversation',
+    newConversation.fileMetadata.appData.uniqueId,
+  ]);
+  if (extistingConversation) {
+    queryClient.setQueryData(
+      ['conversation', newConversation.fileMetadata.appData.uniqueId],
+      newConversation
+    );
+  } else {
+    queryClient.invalidateQueries({
+      queryKey: ['conversation', newConversation.fileMetadata.appData.uniqueId],
+    });
   }
 };
