@@ -38,7 +38,7 @@ export const PostComposer = memo(
 
     const identity = useDotYouClientContext().getIdentity();
 
-    const { savePost, postState, processingProgress, error } = usePostComposer();
+    const { savePost, processingProgress, error } = usePostComposer();
 
     const [caption, setCaption] = useState<string>('');
     const [channel, setChannel] = useState<
@@ -49,10 +49,7 @@ export const PostComposer = memo(
 
     const [reactAccess, setReactAccess] = useState<ReactAccess | undefined>(undefined);
 
-    const isPosting = useMemo(
-      () => postState === 'uploading' || postState === 'encrypting',
-      [postState]
-    );
+    const isPosting = useMemo(() => !!processingProgress?.phase, [processingProgress]);
 
     const resetUi = useCallback(() => {
       setCaption('');
@@ -194,11 +191,7 @@ export const PostComposer = memo(
             />
 
             <FileOverview assets={assets} setAssets={setAssets} />
-            <ProgressIndicator
-              postState={postState}
-              processingProgress={processingProgress}
-              files={assets?.length || 0}
-            />
+            <ProgressIndicator processingProgress={processingProgress} />
 
             <View
               style={{
@@ -386,31 +379,19 @@ const ChannelOrAclSelector = memo(
 
 export const ProgressIndicator = memo(
   ({
-    postState,
     processingProgress,
-    files,
   }: {
-    postState: 'uploading' | 'encrypting' | 'error' | undefined;
-    processingProgress: number;
-    files: number;
+    processingProgress: { phase: string; progress: number } | undefined;
   }) => {
-    if (!postState) return null;
+    if (!processingProgress) return null;
 
-    let progressText = '';
-    if (postState === 'uploading') {
-      if (processingProgress < 1) {
-        if (files > 1) progressText = t('Generating thumbnails');
-        else progressText = t('Generating thumbnail');
-      } else progressText = t(postState);
-    }
+    const progressPercentage = Math.round((processingProgress.progress || 0) * 100);
 
     return (
       <View style={{ marginTop: 4, display: 'flex', flexDirection: 'row-reverse' }}>
-        {postState === 'error' ? (
-          <Text>{t('Error')}</Text>
-        ) : (
-          <Text style={{ fontSize: 12, opacity: 0.4 }}>{progressText}</Text>
-        )}
+        <Text style={{ fontSize: 12, opacity: 0.4 }}>
+          {t(processingProgress.phase)} {progressPercentage !== 0 ? `${progressPercentage}%` : ''}
+        </Text>
       </View>
     );
   }

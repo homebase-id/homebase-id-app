@@ -325,6 +325,8 @@ export const uploadChatMessage = async (
 
       if (tinyThumb) previewThumbnails.push(tinyThumb);
     } else if (newMediaFile.type?.startsWith('image/')) {
+      onUpdate?.('Generating thumbnails', 0);
+
       const blob = new OdinBlob(newMediaFile.filepath || newMediaFile.uri, {
         type: newMediaFile?.type || undefined,
       }) as any as Blob;
