@@ -8,6 +8,7 @@ import Animated, {
 import { useConversation } from '../../hooks/chat/useConversation';
 import IdentityItem from '../list/identityItem';
 import { TouchableOpacity } from 'react-native-gesture-handler';
+import { useAuth } from '../../hooks/auth/useAuth';
 
 export type MentionDropDownProps = {
   query: string;
@@ -18,9 +19,12 @@ export type MentionDropDownProps = {
 export const MentionDropDown = memo(
   ({ conversationId, onMention, query }: MentionDropDownProps) => {
     const { data: conversation } = useConversation({ conversationId }).single;
-    const recipients: string[] = conversation?.fileMetadata?.appData?.content?.recipients ?? [];
+    const identity = useAuth().getIdentity();
+    const recipients: string[] =
+      conversation?.fileMetadata?.appData?.content?.recipients?.filter((v) => v !== identity) ?? [];
     const height = useSharedValue(0);
     const [isVisible, setIsVisible] = useState(false);
+    // We only query with identities for now. Todo: add support for names
     const [mentionQuery, setMentionQuery] = useState('');
 
     useEffect(() => {
@@ -61,7 +65,7 @@ export const MentionDropDown = memo(
     return (
       <Animated.FlatList
         style={style}
-        data={recipients}
+        data={recipients.filter((v) => v?.toLowerCase()?.includes(mentionQuery?.toLowerCase()))}
         renderItem={({ item }) => (
           <TouchableOpacity onPress={() => onMention?.(item)}>
             <IdentityItem odinId={item} />

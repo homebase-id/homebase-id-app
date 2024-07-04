@@ -182,10 +182,16 @@ export const ChatDetail = memo(
       [onLeftSwipe, setReplyMessage]
     );
 
+    const onMention = useCallback(
+      (mention: string) => {
+        const words = inputText.split(' ');
+        words[words.length - 1] = `@${mention}`;
+        setText(words.join(' ') + ' ');
+      },
+      [inputText]
+    );
+
     const renderChatFooter = useCallback(() => {
-      const onMention = (mention: string) => {
-        setText((prev) => `${prev}${mention} `);
-      };
       return (
         <Animated.View
           style={{
@@ -204,7 +210,7 @@ export const ChatDetail = memo(
           ) : null}
         </Animated.View>
       );
-    }, [conversationId, isDarkMode, isGroup, replyMessage, setReplyMessage, inputText]);
+    }, [isDarkMode, isGroup, conversationId, inputText, onMention, replyMessage, setReplyMessage]);
 
     const { record, stop, duration, isRecording } = useAudioRecorder();
 
@@ -362,7 +368,6 @@ export const ChatDetail = memo(
             {...props}
             textInputStyle={inputStyle}
             containerStyle={composerContainerStyle}
-            defaultValue={inputText}
             textInputProps={{
               value: inputText,
             }}
@@ -456,7 +461,7 @@ export const ChatDetail = memo(
               {...props}
               // disabled={isRecording ? false : !props.text && assets?.length === 0}
               disabled={false}
-              text={props.text || inputText || ' '}
+              text={inputText || ' '}
               // onSend={isRecording ? async (_) => onStopRecording() : props.onSend}
               onSend={
                 isRecording
