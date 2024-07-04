@@ -29,7 +29,7 @@ const savePost = async ({
   postFile: NewHomebaseFile<PostContent> | HomebaseFile<PostContent>;
   channelId: string;
   mediaFiles?: (ImageSource | MediaFile)[];
-  onUpdate?: (progress: number) => void;
+  onUpdate?: (phase: string, progress: number) => void;
 }) => {
   const dotYouClient = await getSynchronousDotYouClient();
 
@@ -70,14 +70,14 @@ export const getSavePostMutationOptions: (queryClient: QueryClient) => MutationO
     postFile: NewHomebaseFile<PostContent> | HomebaseFile<PostContent>;
     channelId: string;
     mediaFiles?: (ImageSource | MediaFile)[];
-    onUpdate?: (progress: number) => void;
+    onUpdate?: (phase: string, progress: number) => void;
   },
   {
     newPost: {
       postFile: NewHomebaseFile<PostContent> | HomebaseFile<PostContent>;
       channelId: string;
       mediaFiles?: (ImageSource | MediaFile)[] | undefined;
-      onUpdate?: ((progress: number) => void) | undefined;
+      onUpdate?: ((phase: string, progress: number) => void) | undefined;
     };
     previousFeed:
       | InfiniteData<MultiRequestCursoredResult<HomebaseFile<PostContent>[]>, unknown>
