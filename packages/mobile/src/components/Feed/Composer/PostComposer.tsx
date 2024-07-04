@@ -122,7 +122,7 @@ export const PostComposer = memo(
             right: 0,
             bottom: 0,
             paddingTop: insets.top + 8,
-            paddingBottom: 8,
+            paddingBottom: 16,
             paddingHorizontal: 8,
             backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
             zIndex: 0,
@@ -182,7 +182,7 @@ export const PostComposer = memo(
                 paddingVertical: 5,
                 lineHeight: 20,
                 fontSize: 16,
-                minHeight: 45,
+                minHeight: 124,
                 color: isDarkMode ? Colors.white : Colors.black,
               }}
               multiline={true}
@@ -191,7 +191,6 @@ export const PostComposer = memo(
             />
 
             <FileOverview assets={assets} setAssets={setAssets} />
-            <ProgressIndicator processingProgress={processingProgress} />
 
             <View
               style={{
@@ -258,6 +257,8 @@ export const PostComposer = memo(
             </View>
           </View>
         </View>
+
+        {!error ? <ProgressIndicator processingProgress={processingProgress} /> : null}
       </React.Fragment>
     );
   }
@@ -388,8 +389,23 @@ export const ProgressIndicator = memo(
     const progressPercentage = Math.round((processingProgress.progress || 0) * 100);
 
     return (
-      <View style={{ marginTop: 4, display: 'flex', flexDirection: 'row-reverse' }}>
-        <Text style={{ fontSize: 12, opacity: 0.4 }}>
+      <View
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          flex: 1,
+          marginTop: 4,
+          display: 'flex',
+          flexDirection: 'row-reverse',
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: 'rgba(255,255,255,0.5)',
+        }}
+      >
+        <Text style={{ fontSize: 12, opacity: 0.5 }}>
           {t(processingProgress.phase)} {progressPercentage !== 0 ? `${progressPercentage}%` : ''}
         </Text>
       </View>
