@@ -1,4 +1,4 @@
-import { memo, useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useState } from 'react';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -45,13 +45,13 @@ export const MentionDropDown = memo(
       }
     }, [isVisible, query]);
 
-    useEffect(() => {
-      const newHeight = isVisible ? 200 : 0;
-      height.value = withTiming(newHeight, {
-        duration: 150,
-        easing: Easing.inOut(Easing.sin),
-      });
-    }, [height, isVisible]);
+    // useEffect(() => {
+    //   const newHeight = isVisible ? 200 : 0;
+    //   height.value = withTiming(newHeight, {
+    //     duration: 150,
+    //     easing: Easing.inOut(Easing.sin),
+    //   });
+    // }, [height, isVisible]);
 
     const style = useAnimatedStyle(() => {
       return {
@@ -60,11 +60,24 @@ export const MentionDropDown = memo(
       };
     });
 
+    const onContentSizeChange = useCallback(
+      (_: number, h: number) => {
+        console.log('layout', h);
+        const newHeight = isVisible ? Math.min(200, Math.round(h)) : 0;
+        height.value = withTiming(newHeight, {
+          duration: 150,
+          easing: Easing.inOut(Easing.sin),
+        });
+      },
+      [height, isVisible]
+    );
+
     if (!recipients) return null;
 
     return (
       <Animated.FlatList
         style={style}
+        onContentSizeChange={onContentSizeChange}
         data={recipients.filter((v) => v?.toLowerCase()?.includes(mentionQuery?.toLowerCase()))}
         renderItem={({ item }) => (
           <TouchableOpacity onPress={() => onMention?.(item)}>
