@@ -48,9 +48,14 @@ export const ChatInfoPage = memo((prop: ChatInfoProp) => {
 
   const headerLeft = useCallback(
     () => (
-      <HeaderBackButton canGoBack={true} labelVisible={false} onPress={prop.navigation.goBack} />
+      <HeaderBackButton
+        canGoBack={true}
+        labelVisible={false}
+        onPress={prop.navigation.goBack}
+        tintColor={isDarkMode ? Colors.white : Colors.black}
+      />
     ),
-    [prop.navigation.goBack]
+    [isDarkMode, prop.navigation.goBack]
   );
 
   const headerRight = useCallback(

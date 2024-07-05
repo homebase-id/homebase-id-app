@@ -77,6 +77,7 @@ export const NewChatStackScreen = (_props: NativeStackScreenProps<ChatStackParam
         headerShadowVisible: false,
         headerTransparent: Platform.OS === 'ios',
         headerBlurEffect: 'regular',
+        headerTintColor: isDarkMode ? Colors.white : Colors.black,
         headerStyle: {
           backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
         },
@@ -118,9 +119,11 @@ export const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Cha
         headerShadowVisible: false,
         headerTransparent: Platform.OS === 'ios',
         headerBlurEffect: 'regular',
+        headerTintColor: isDarkMode ? Colors.white : Colors.black,
         headerStyle: {
           backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
         },
+        headerBackButtonMenuEnabled: false,
       }) as NativeStackNavigationOptions,
     [isDarkMode]
   );
@@ -186,6 +189,7 @@ export const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Cha
           headerShadowVisible: false,
           headerTransparent: true,
           animation: 'fade_from_bottom',
+          headerTintColor: Colors.white,
         }}
       />
       <StackChat.Screen
@@ -193,8 +197,7 @@ export const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Cha
         component={ChatInfoPage}
         options={{
           gestureEnabled: true,
-          headerTitle: 'Chat Info',
-          headerBackTitleVisible: false,
+          headerTitle: '',
           headerShown: false,
         }}
       />
@@ -204,7 +207,6 @@ export const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Cha
         options={{
           gestureEnabled: true,
           headerTitle: 'Message Info',
-          headerBackTitleVisible: false,
           headerShown: true,
         }}
       />
@@ -214,7 +216,6 @@ export const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Cha
         options={{
           gestureEnabled: true,
           headerTitle: 'Edit Group',
-          headerBackTitleVisible: false,
           headerShown: false,
         }}
       />
