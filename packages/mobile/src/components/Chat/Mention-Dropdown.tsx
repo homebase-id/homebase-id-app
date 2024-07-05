@@ -24,6 +24,7 @@ export const MentionDropDown = memo(
       conversation?.fileMetadata?.appData?.content?.recipients?.filter((v) => v !== identity) ?? [];
     const height = useSharedValue(0);
     const [isVisible, setIsVisible] = useState(false);
+    const [contentHeight, setHeight] = useState(0);
     // We only query with identities for now. Todo: add support for names
     const [mentionQuery, setMentionQuery] = useState('');
 
@@ -45,13 +46,13 @@ export const MentionDropDown = memo(
       }
     }, [isVisible, query]);
 
-    // useEffect(() => {
-    //   const newHeight = isVisible ? 200 : 0;
-    //   height.value = withTiming(newHeight, {
-    //     duration: 150,
-    //     easing: Easing.inOut(Easing.sin),
-    //   });
-    // }, [height, isVisible]);
+    useEffect(() => {
+      const newHeight = isVisible ? contentHeight : 0;
+      height.value = withTiming(newHeight, {
+        duration: 150,
+        easing: Easing.inOut(Easing.sin),
+      });
+    }, [contentHeight, height, isVisible]);
 
     const style = useAnimatedStyle(() => {
       return {
@@ -60,17 +61,9 @@ export const MentionDropDown = memo(
       };
     });
 
-    const onContentSizeChange = useCallback(
-      (_: number, h: number) => {
-        console.log('layout', h);
-        const newHeight = isVisible ? Math.min(200, Math.round(h)) : 0;
-        height.value = withTiming(newHeight, {
-          duration: 150,
-          easing: Easing.inOut(Easing.sin),
-        });
-      },
-      [height, isVisible]
-    );
+    const onContentSizeChange = useCallback((_: number, h: number) => {
+      setHeight(Math.min(200, Math.round(h)));
+    }, []);
 
     if (!recipients) return null;
 
