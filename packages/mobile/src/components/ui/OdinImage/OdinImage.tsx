@@ -17,7 +17,7 @@ import {
 import useImage from './hooks/useImage';
 import useTinyThumb from './hooks/useTinyThumb';
 import { SvgUri } from 'react-native-svg';
-import { ImageZoom } from '@likashefqet/react-native-image-zoom';
+import { ImageZoom, ImageZoomProps } from '@likashefqet/react-native-image-zoom';
 
 export interface OdinImageProps {
   odinId?: string;
@@ -35,6 +35,7 @@ export interface OdinImageProps {
   style?: ImageStyle;
   onClick?: () => void;
   onLongPress?: (e: GestureResponderEvent) => void;
+  imageZoomProps?: ImageZoomProps;
 }
 
 const thumblessContentTypes = ['image/svg+xml', 'image/gif'];
@@ -55,6 +56,7 @@ export const OdinImage = memo(
     style,
     onClick,
     onLongPress,
+    imageZoomProps,
   }: OdinImageProps) => {
     // Don't set load size if it's a thumbnessLessContentType; As they don't have a thumb
     const loadSize = useMemo(
@@ -196,6 +198,7 @@ export const OdinImage = memo(
                 imageDrive: targetDrive,
                 size: loadSize,
               }}
+              imageZoomProps={imageZoomProps}
             />
           ) : null}
 
@@ -321,6 +324,7 @@ const ZoomableImage = memo(
     onLongPress,
     contentType,
     imageMeta,
+    imageZoomProps,
   }: {
     uri: string;
     imageSize?: { width: number; height: number };
@@ -337,6 +341,7 @@ const ZoomableImage = memo(
       imageDrive: TargetDrive;
       size?: ImageSize;
     };
+    imageZoomProps?: ImageZoomProps;
 
     contentType?: ImageContentType;
   }) => {
@@ -373,6 +378,7 @@ const ZoomableImage = memo(
             style={{
               ...imageSize,
             }}
+            {...imageZoomProps}
           />
         </View>
       </TouchableWithoutFeedback>
