@@ -20,6 +20,7 @@ const styles = StyleSheet.create({
 export interface ComposerProps {
   composerHeight?: number;
   defaultValue?: string;
+  value?: string;
   placeholder?: string;
   placeholderTextColor?: string;
   textInputProps?: Partial<PasteInputProps>;
@@ -48,6 +49,7 @@ export const Composer = memo(
       placeholder = DEFAULT_PLACEHOLDER,
       placeholderTextColor = Color.defaultColor,
       defaultValue = '',
+      value,
       textInputAutoFocus = false,
       textInputProps = {},
       textInputStyle,
@@ -79,7 +81,7 @@ export const Composer = memo(
       nativeEvent: { contentSize },
     }: NativeSyntheticEvent<TextInputContentSizeChangeEventData>) =>
       determineInputSizeChange(contentSize);
-
+    console.log('ComposerProps:', value, defaultValue);
     return (
       <View
         style={[
@@ -103,10 +105,10 @@ export const Composer = memo(
           onChangeText={onTextChanged}
           style={[styles.textInput, textInputStyle]}
           autoFocus={textInputAutoFocus}
-          defaultValue={defaultValue}
           enablesReturnKeyAutomatically
           underlineColorAndroid='transparent'
           keyboardAppearance={keyboardAppearance}
+          value={value || defaultValue}
           {...textInputProps}
         />
         {props.children}

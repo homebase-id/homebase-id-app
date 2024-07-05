@@ -130,8 +130,7 @@ export const ChatDetail = memo(
     const { mutate: onInputTextChanged } = useDraftMessage(conversationId).set;
     const textRef = useRef<TextInput>(null);
 
-    // We will handle the textInput manually now
-    const [inputText, setText] = useState('');
+    const [draftMessage, setdraftMessage] = useState<string | undefined>();
 
     const { getDraftMessage } = useDraftMessage(conversationId);
 
@@ -140,20 +139,19 @@ export const ChatDetail = memo(
       (async () => {
         const draft = await getDraftMessage();
         if (!draft) return;
-        setText(draft);
+        setdraftMessage(draft);
       })();
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const onTextInputChanged = useCallback(
       (text: string) => {
-        setText(text);
-        if (text === '' && inputText !== '') {
-          setText('');
+        if (text === '' && draftMessage) {
+          setdraftMessage(undefined);
         }
         return onInputTextChanged(text);
       },
-      [inputText, onInputTextChanged]
+      [draftMessage, onInputTextChanged]
     );
 
     const onLongPress = useCallback(
@@ -183,35 +181,39 @@ export const ChatDetail = memo(
       },
       [onLeftSwipe, setReplyMessage]
     );
-    const onMention = useCallback(
-      (mention: string) => {
-        const words = inputText.split(' ');
-        words[words.length - 1] = `@${mention}`;
-        setText(words.join(' ') + ' ');
-      },
-      [inputText]
-    );
 
-    const renderChatFooter = useCallback(() => {
-      return (
-        <Animated.View
-          style={{
-            backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
-          }}
-        >
-          {isGroup && (
-            <MentionDropDown
-              conversationId={conversationId}
-              query={inputText}
-              onMention={onMention}
-            />
-          )}
-          {replyMessage ? (
-            <ReplyMessageBar message={replyMessage} clearReply={() => setReplyMessage(null)} />
-          ) : null}
-        </Animated.View>
-      );
-    }, [isDarkMode, isGroup, conversationId, inputText, onMention, replyMessage, setReplyMessage]);
+    const renderChatFooter = useCallback(
+      (
+        text: string | undefined,
+        updateText: React.Dispatch<React.SetStateAction<string | undefined>>
+      ) => {
+        const onMention = (mention: string) => {
+          if (!text) return;
+          const words = text.split(' ');
+          words[words.length - 1] = `@${mention}`;
+          updateText(words.join(' ') + ' ');
+        };
+        return (
+          <Animated.View
+            style={{
+              backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
+            }}
+          >
+            {isGroup && (
+              <MentionDropDown
+                conversationId={conversationId}
+                query={text || ''}
+                onMention={onMention}
+              />
+            )}
+            {replyMessage ? (
+              <ReplyMessageBar message={replyMessage} clearReply={() => setReplyMessage(null)} />
+            ) : null}
+          </Animated.View>
+        );
+      },
+      [isDarkMode, isGroup, conversationId, replyMessage, setReplyMessage]
+    );
 
     const { record, stop, duration, isRecording } = useAudioRecorder();
 
@@ -369,11 +371,9 @@ export const ChatDetail = memo(
             {...props}
             textInputStyle={inputStyle}
             containerStyle={composerContainerStyle}
-            textInputProps={{
-              value: inputText,
-            }}
+            defaultValue={draftMessage}
           >
-            {!props.hasText && !inputText && (
+            {!props.hasText && !draftMessage && (
               <View
                 style={{
                   flexDirection: 'row',
@@ -411,15 +411,15 @@ export const ChatDetail = memo(
         );
       },
       [
-        cameraIcon,
-        composerContainerStyle,
-        duration,
-        handleCameraButtonAction,
-        handleRecordButtonAction,
-        inputStyle,
         isRecording,
+        inputStyle,
+        composerContainerStyle,
+        draftMessage,
+        cameraIcon,
+        handleCameraButtonAction,
         microphoneIcon,
-        inputText,
+        handleRecordButtonAction,
+        duration,
       ]
     );
 
@@ -431,7 +431,7 @@ export const ChatDetail = memo(
 
     const renderSend = useCallback(
       (props: SendProps<IMessage>) => {
-        const hasText = props.text || inputText;
+        const hasText = props.text || draftMessage;
         return (
           <View
             style={{
@@ -462,7 +462,7 @@ export const ChatDetail = memo(
               {...props}
               // disabled={isRecording ? false : !props.text && assets?.length === 0}
               disabled={false}
-              text={inputText || ' '}
+              text={props.text || draftMessage || ' '}
               // onSend={isRecording ? async (_) => onStopRecording() : props.onSend}
               onSend={
                 isRecording
@@ -501,9 +501,9 @@ export const ChatDetail = memo(
         assets.length,
         bottomContainerVisible,
         crossIcon,
+        draftMessage,
         handlePlusIconPress,
         handleRecordButtonAction,
-        inputText,
         isRecording,
         onStopRecording,
       ]
