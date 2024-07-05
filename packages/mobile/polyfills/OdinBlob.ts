@@ -117,11 +117,17 @@ class Blob {
   }
 
   arrayBuffer(): Promise<ArrayBuffer> {
-    const writePromise = new Promise<void>((resolve) => {
+    const writePromise = new Promise<void>((resolve, reject) => {
+      let intervalCount = 0;
       const interval = setInterval(async () => {
+        intervalCount++;
         if (this.written) {
           clearInterval(interval);
           resolve();
+        }
+        if (intervalCount > 200) {
+          clearInterval(interval);
+          reject('[OdinBlob] Failed to write file to disk');
         }
       }, 100);
     });
@@ -140,18 +146,24 @@ class Blob {
   }
 
   async encrypt(key: Uint8Array, iv: Uint8Array) {
-    await new Promise<void>((resolve) => {
+    await new Promise<void>((resolve, reject) => {
+      let intervalCount = 0;
       const interval = setInterval(async () => {
+        intervalCount++;
         if (this.written) {
           clearInterval(interval);
           resolve();
         }
+        if (intervalCount > 200) {
+          clearInterval(interval);
+          reject('[OdinBlob] Failed to encrypt file to disk');
+        }
       }, 100);
     });
 
-    const destinationUri = `file://${CachesDirectoryPath}/${this.data.blobId}-encrypted.${this.data.type.split('/')[1]
-      }`;
-
+    const destinationUri = `file://${CachesDirectoryPath}/${this.data.blobId}-encrypted.${
+      this.data.type.split('/')[1]
+    }`;
 
     const encryptStatus = await OdinBlobModule.encryptFileWithAesCbc16(
       this.uri,
@@ -171,16 +183,25 @@ class Blob {
   }
 
   async decrypt(key: Uint8Array, iv: Uint8Array) {
-    await new Promise<void>((resolve) => {
+    await new Promise<void>((resolve, reject) => {
+      let intervalCount = 0;
+
       const interval = setInterval(async () => {
+        intervalCount++;
         if (this.written) {
           clearInterval(interval);
           resolve();
         }
+        if (intervalCount > 200) {
+          clearInterval(interval);
+          reject('[OdinBlob] Failed to decrypt file to disk');
+        }
       }, 100);
     });
 
-    const destinationUri = `file://${CachesDirectoryPath}/${this.data.blobId}.${getExtensionForMimeType(this.data.type)}`;
+    const destinationUri = `file://${CachesDirectoryPath}/${
+      this.data.blobId
+    }.${getExtensionForMimeType(this.data.type)}`;
 
     const decryptStatus = await OdinBlobModule.decryptFileWithAesCbc16(
       this.uri,
@@ -200,7 +221,9 @@ class Blob {
   }
 
   async fixExtension() {
-    const destinationUri = `file://${CachesDirectoryPath}/${this.data.blobId}.${getExtensionForMimeType(this.data.type)}`;
+    const destinationUri = `file://${CachesDirectoryPath}/${
+      this.data.blobId
+    }.${getExtensionForMimeType(this.data.type)}`;
     await copyFile(this.uri, destinationUri);
 
     await unlink(this.uri);
