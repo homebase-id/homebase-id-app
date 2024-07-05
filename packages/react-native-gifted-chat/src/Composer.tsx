@@ -81,7 +81,6 @@ export const Composer = memo(
       nativeEvent: { contentSize },
     }: NativeSyntheticEvent<TextInputContentSizeChangeEventData>) =>
       determineInputSizeChange(contentSize);
-    console.log('ComposerProps:', value, defaultValue);
     return (
       <View
         style={[
