@@ -129,6 +129,7 @@ export const ChatDetail = memo(
     // We will fetch the draft message from the cache only once
     const { mutate: onInputTextChanged } = useDraftMessage(conversationId).set;
     const textRef = useRef<TextInput>(null);
+
     // We will handle the textInput manually now
     const [inputText, setText] = useState('');
 
@@ -143,7 +144,8 @@ export const ChatDetail = memo(
       })();
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
-    const debounceInputText = useCallback(
+
+    const onTextInputChanged = useCallback(
       (text: string) => {
         setText(text);
         if (text === '' && inputText !== '') {
@@ -181,7 +183,6 @@ export const ChatDetail = memo(
       },
       [onLeftSwipe, setReplyMessage]
     );
-
     const onMention = useCallback(
       (mention: string) => {
         const words = inputText.split(' ');
@@ -651,7 +652,7 @@ export const ChatDetail = memo(
           onSend={doSend}
           locale={locale}
           textInputRef={textRef}
-          onInputTextChanged={debounceInputText}
+          onInputTextChanged={onTextInputChanged}
           infiniteScroll
           scrollToBottom
           alwaysShowSend
