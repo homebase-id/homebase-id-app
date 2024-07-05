@@ -124,6 +124,7 @@ export const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Cha
           backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
         },
         headerBackButtonMenuEnabled: false,
+        headerBackTitleVisible: false,
       }) as NativeStackNavigationOptions,
     [isDarkMode]
   );
