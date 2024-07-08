@@ -38,6 +38,9 @@ export const ProfileStack = () => {
         headerBackTitle: 'Profile',
         statusBarColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
         statusBarStyle: Platform.OS === 'android' ? (isDarkMode ? 'light' : 'dark') : undefined,
+        headerBackButtonMenuEnabled: false,
+        headerBackTitleVisible: false,
+        headerTintColor: isDarkMode ? Colors.white : Colors.black,
         headerStyle: {
           backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
         },

@@ -205,7 +205,10 @@ export interface GiftedChatProps<TMessage extends IMessage = IMessage> {
   /* Custom component to render in the ListView when messages are empty */
   renderChatEmpty?(): React.ReactNode;
   /* Custom component to render below the MessageContainer (separate from the ListView) */
-  renderChatFooter?(): React.ReactNode;
+  renderChatFooter?(
+    currText: string | undefined,
+    updateText: React.Dispatch<React.SetStateAction<string | undefined>>,
+  ): React.ReactNode;
   /* Custom composer container that render belows */
   renderBottomFooter?: React.ReactNode;
   /* Custom message composer container */
@@ -489,7 +492,7 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
           forwardRef={messageContainerRef}
           isTyping={isTyping}
         />
-        {renderChatFooter && renderChatFooter()}
+        {renderChatFooter && renderChatFooter(text, setText)}
       </Animated.View>
     );
 
@@ -507,7 +510,7 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
     ) : (
       fragment
     );
-  }, [messages, props, messagesContainerHeight]);
+  }, [messages, props, messagesContainerHeight, text]);
 
   const _onSend = (
     messages: TMessage[] = [],
@@ -722,7 +725,6 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
 GiftedChat.propTypes = {
   messages: PropTypes.arrayOf(PropTypes.object),
   messagesContainerStyle: utils.StylePropType,
-  text: PropTypes.string,
   initialText: PropTypes.string,
   placeholder: PropTypes.string,
   disableComposer: PropTypes.bool,
