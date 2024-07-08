@@ -1,6 +1,7 @@
 import messaging, { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
-import { PushNotificationOptions } from '@youfoundation/js-lib/core';
+import { PushNotification } from '@youfoundation/js-lib/core';
 import notifee, { AndroidVisibility } from '@notifee/react-native';
+import { bodyFormer } from '../../components/Dashboard/NotificationsOverview';
 
 //
 // CAVEATS GALORE!
@@ -27,11 +28,9 @@ import notifee, { AndroidVisibility } from '@notifee/react-native';
 //
 
 // backend: src/services/Odin.Services/AppNotifications/Push/PushNotificationContent.cs
-interface PushNotificationPayload {
-  senderId: string;
-  timestamp: string;
+// backend: src/services/Odin.Services/AppNotifications/Push/PushNotificationContent.cs
+interface PushNotificationPayload extends PushNotification {
   appDisplayName: string;
-  options: PushNotificationOptions;
 }
 
 // backend: src/core/Odin.Core/Dto/DevicePushNotificationRequest.cs
@@ -115,7 +114,12 @@ const onBackgroundMessageReceived = async (
   await notifee.displayNotification({
     title: notification.data.appDisplayName,
     body:
-      notification.data.options.unEncryptedMessage || `Received from ${notification.data.senderId}`,
+      bodyFormer(
+        notification.data,
+        false,
+        notification.data.appDisplayName,
+        notification.data.senderId
+      ) || `Received from ${notification.data.senderId}`,
     // Keeps them backwards compatible with the OOTB push notifications within FCM
     data: { data: JSON.stringify(notification.data) },
     android: {
