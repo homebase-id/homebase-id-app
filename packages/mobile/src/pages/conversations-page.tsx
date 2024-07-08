@@ -219,32 +219,44 @@ const RemoveNotifications = memo(() => {
   return null;
 });
 
-const ConversationTileWithYourself = memo(() => {
-  const { data: profile } = useProfile();
-  const odinId = useAuth().getIdentity();
-  const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
+export const ConversationTileWithYourself = memo(
+  ({
+    selecMode: selectMode,
+    isSelected,
+    onPress,
+  }: {
+    selecMode?: boolean;
+    isSelected?: boolean;
+    onPress?: () => void;
+  }) => {
+    const { data: profile } = useProfile();
+    const odinId = useAuth().getIdentity();
+    const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
 
-  const doOpen = useCallback(
-    () =>
-      navigation.navigate('ChatScreen', {
-        convoId: ConversationWithYourselfId,
-      }),
-    [navigation]
-  );
+    const doOpen = useCallback(
+      () =>
+        navigation.navigate('ChatScreen', {
+          convoId: ConversationWithYourselfId,
+        }),
+      [navigation]
+    );
 
-  return (
-    <ConversationTile
-      odinId={odinId || ''}
-      conversation={{
-        title: profile ? `${profile?.firstName} ${profile?.surName} ` : '',
-        recipients: [],
-      }}
-      conversationId={ConversationWithYourselfId}
-      isSelf
-      onPress={doOpen}
-    />
-  );
-});
+    return (
+      <ConversationTile
+        odinId={odinId || ''}
+        conversation={{
+          title: profile ? `${profile?.firstName} ${profile?.surName} ` : '',
+          recipients: [],
+        }}
+        conversationId={ConversationWithYourselfId}
+        isSelf
+        isSelected={isSelected}
+        selectMode={selectMode}
+        onPress={selectMode ? onPress : doOpen}
+      />
+    );
+  }
+);
 
 const SearchConversationResults = memo(
   ({

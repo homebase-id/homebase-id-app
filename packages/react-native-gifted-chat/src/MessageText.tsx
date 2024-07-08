@@ -1,5 +1,5 @@
-import PropTypes from 'prop-types'
-import React from 'react'
+import PropTypes from 'prop-types';
+import React from 'react';
 import {
   Linking,
   StyleSheet,
@@ -8,16 +8,17 @@ import {
   StyleProp,
   ViewStyle,
   TextStyle,
-} from 'react-native'
+} from 'react-native';
 
 // @ts-ignore
-import ParsedText from 'react-native-parsed-text'
-import { LeftRightStyle, IMessage } from './Models'
-import { StylePropType } from './utils'
-import { useChatContext } from './GiftedChatContext'
-import { error } from './logging'
+import ParsedText, { ParseShape } from 'react-native-parsed-text';
+import { LeftRightStyle, IMessage } from './Models';
+import { StylePropType } from './utils';
+import { useChatContext } from './GiftedChatContext';
+import { error } from './logging';
+export { ParseShape };
 
-const WWW_URL_PATTERN = /^www\./i
+const WWW_URL_PATTERN = /^www\./i;
 
 const { textStyle } = StyleSheet.create({
   textStyle: {
@@ -28,7 +29,7 @@ const { textStyle } = StyleSheet.create({
     marginLeft: 10,
     marginRight: 10,
   },
-})
+});
 
 const styles = {
   left: StyleSheet.create({
@@ -53,20 +54,20 @@ const styles = {
       textDecorationLine: 'underline',
     },
   }),
-}
+};
 
-const DEFAULT_OPTION_TITLES = ['Call', 'Text', 'Cancel']
+const DEFAULT_OPTION_TITLES = ['Call', 'Text', 'Cancel'];
 
 export interface MessageTextProps<TMessage extends IMessage> {
-  position?: 'left' | 'right'
-  optionTitles?: string[]
-  currentMessage?: TMessage
-  containerStyle?: LeftRightStyle<ViewStyle>
-  textStyle?: LeftRightStyle<TextStyle>
-  linkStyle?: LeftRightStyle<TextStyle>
-  textProps?: TextProps
-  customTextStyle?: StyleProp<TextStyle>
-  parsePatterns?(linkStyle: TextStyle): any
+  position?: 'left' | 'right';
+  optionTitles?: string[];
+  currentMessage?: TMessage;
+  containerStyle?: LeftRightStyle<ViewStyle>;
+  textStyle?: LeftRightStyle<TextStyle>;
+  linkStyle?: LeftRightStyle<TextStyle>;
+  textProps?: TextProps;
+  customTextStyle?: StyleProp<TextStyle>;
+  parsePatterns?(linkStyle: StyleProp<TextStyle>): ParseShape[];
 }
 
 export function MessageText<TMessage extends IMessage = IMessage>({
@@ -77,10 +78,10 @@ export function MessageText<TMessage extends IMessage = IMessage>({
   textStyle,
   linkStyle: linkStyleProp,
   customTextStyle,
-  parsePatterns = () => [],
+  parsePatterns = _ => [],
   textProps,
 }: MessageTextProps<TMessage>) {
-  const { actionSheet } = useChatContext()
+  const { actionSheet } = useChatContext();
 
   // TODO: React.memo
   // const shouldComponentUpdate = (nextProps: MessageTextProps<TMessage>) => {
@@ -95,20 +96,20 @@ export function MessageText<TMessage extends IMessage = IMessage>({
     // When someone sends a message that includes a website address beginning with "www." (omitting the scheme),
     // react-native-parsed-text recognizes it as a valid url, but Linking fails to open due to the missing scheme.
     if (WWW_URL_PATTERN.test(url)) {
-      onUrlPress(`https://${url}`)
+      onUrlPress(`https://${url}`);
     } else {
       Linking.openURL(url).catch(e => {
-        error(e, 'No handler for URL:', url)
-      })
+        error(e, 'No handler for URL:', url);
+      });
     }
-  }
+  };
 
   const onPhonePress = (phone: string) => {
     const options =
       optionTitles && optionTitles.length > 0
         ? optionTitles.slice(0, 3)
-        : DEFAULT_OPTION_TITLES
-    const cancelButtonIndex = options.length - 1
+        : DEFAULT_OPTION_TITLES;
+    const cancelButtonIndex = options.length - 1;
     actionSheet().showActionSheetWithOptions(
       {
         options,
@@ -118,30 +119,30 @@ export function MessageText<TMessage extends IMessage = IMessage>({
         switch (buttonIndex) {
           case 0:
             Linking.openURL(`tel:${phone}`).catch(e => {
-              error(e, 'No handler for telephone')
-            })
-            break
+              error(e, 'No handler for telephone');
+            });
+            break;
           case 1:
             Linking.openURL(`sms:${phone}`).catch(e => {
-              error(e, 'No handler for text')
-            })
-            break
+              error(e, 'No handler for text');
+            });
+            break;
           default:
-            break
+            break;
         }
       },
-    )
-  }
+    );
+  };
 
   const onEmailPress = (email: string) =>
     Linking.openURL(`mailto:${email}`).catch(e =>
       error(e, 'No handler for mailto'),
-    )
+    );
 
   const linkStyle = [
     styles[position].link,
     linkStyleProp && linkStyleProp[position],
-  ]
+  ] as StyleProp<TextStyle>;
   return (
     <View
       style={[
@@ -156,7 +157,7 @@ export function MessageText<TMessage extends IMessage = IMessage>({
           customTextStyle,
         ]}
         parse={[
-          ...parsePatterns!(linkStyle as TextStyle),
+          ...parsePatterns!(linkStyle),
           { type: 'url', style: linkStyle, onPress: onUrlPress },
           { type: 'phone', style: linkStyle, onPress: onPhonePress },
           { type: 'email', style: linkStyle, onPress: onEmailPress },
@@ -166,7 +167,7 @@ export function MessageText<TMessage extends IMessage = IMessage>({
         {currentMessage!.text}
       </ParsedText>
     </View>
-  )
+  );
 }
 
 MessageText.propTypes = {
@@ -188,4 +189,4 @@ MessageText.propTypes = {
   parsePatterns: PropTypes.func,
   textProps: PropTypes.object,
   customTextStyle: StylePropType,
-}
+};

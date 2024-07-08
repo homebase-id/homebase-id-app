@@ -4,7 +4,7 @@ import {
   ImageSize,
   TargetDrive,
 } from '@youfoundation/js-lib/core';
-import { memo, useMemo } from 'react';
+import { ReactNode, memo, useCallback, useMemo } from 'react';
 import {
   ActivityIndicator,
   GestureResponderEvent,
@@ -248,9 +248,21 @@ const InnerImage = memo(
 
     contentType?: ImageContentType;
   }) => {
+    const ClickableWrapper = useCallback(
+      ({ children }: { children: ReactNode }) =>
+        onClick || onLongPress ? (
+          <TouchableWithoutFeedback onPress={onClick} onLongPress={onLongPress}>
+            {children}
+          </TouchableWithoutFeedback>
+        ) : (
+          <>{children}</>
+        ),
+      [onClick, onLongPress]
+    );
+
     const { invalidateCache } = useImage();
     return contentType === 'image/svg+xml' ? (
-      <TouchableWithoutFeedback onPress={onClick} onLongPress={onLongPress}>
+      <ClickableWrapper>
         <View
           style={[
             {
@@ -268,9 +280,9 @@ const InnerImage = memo(
             style={{ overflow: 'hidden', ...style }}
           />
         </View>
-      </TouchableWithoutFeedback>
+      </ClickableWrapper>
     ) : (
-      <TouchableWithoutFeedback onPress={onClick} onLongPress={onLongPress}>
+      <ClickableWrapper>
         <Image
           onError={() => {
             if (imageMeta) {
@@ -292,7 +304,7 @@ const InnerImage = memo(
           }}
           blurRadius={blurRadius}
         />
-      </TouchableWithoutFeedback>
+      </ClickableWrapper>
     );
   }
 );

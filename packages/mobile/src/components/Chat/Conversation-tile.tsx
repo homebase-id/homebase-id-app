@@ -13,8 +13,9 @@ import { ChatMessageContent } from './Chat-Message-Content';
 import { OwnerAvatar, GroupAvatar, Avatar } from '../ui/Avatars/Avatar';
 import { useDraftMessageValue } from '../../hooks/chat/useDraftMessage';
 import { ellipsisAtMaxChar } from 'feed-app-common';
-import { ConnectionName } from '../ui/Name';
+import { AuthorName, ConnectionName } from '../ui/Name';
 import { CheckCircle, CircleOutlined } from '../ui/Icons/icons';
+import { ErrorBoundary } from '../ui/ErrorBoundary/ErrorBoundary';
 
 type ConversationTileProps = {
   onPress?: () => void;
@@ -46,6 +47,7 @@ const ConversationTile = memo((props: ConversationTileProps) => {
 
   const lastMessage = useMemo(() => flatMessages?.[0], [flatMessages]);
   const lastMessageContent = lastMessage?.fileMetadata.appData.content;
+  const lastMessageAuthor = lastMessage?.fileMetadata.senderOdinId;
 
   const lastReadTime = props.conversation.lastReadTime;
   const unreadCount = useMemo(
@@ -66,92 +68,105 @@ const ConversationTile = memo((props: ConversationTileProps) => {
   );
 
   return (
-    <TouchableHighlight
-      onPress={props.onPress}
-      onLongPress={props.onLongPress}
-      underlayColor={underlayColor}
-      style={{
-        marginTop: 4,
-      }}
-    >
-      <View style={{ ...styles.tile }}>
-        <View style={{ marginRight: 16 }}>
-          {!isGroup ? (
-            props.isSelf ? (
-              <OwnerAvatar />
+    <ErrorBoundary>
+      <TouchableHighlight
+        onPress={props.onPress}
+        onLongPress={props.onLongPress}
+        underlayColor={underlayColor}
+        style={{
+          marginTop: 4,
+        }}
+      >
+        <View style={{ ...styles.tile }}>
+          <View style={{ marginRight: 16 }}>
+            {!isGroup ? (
+              props.isSelf ? (
+                <OwnerAvatar />
+              ) : (
+                <Avatar odinId={props.odinId} />
+              )
             ) : (
-              <Avatar odinId={props.odinId} />
-            )
-          ) : (
-            <GroupAvatar />
-          )}
-        </View>
-        <View style={styles.content}>
-          <Text
-            numberOfLines={1}
-            style={{
-              ...styles.title,
-              color: isDarkMode ? Colors.white : Colors.slate[900],
-            }}
-          >
-            {isGroup || props.isSelf
-              ? props.conversation.title
-              : (connectionDetails?.name?.displayName || connectionDetails?.name?.givenName) ?? (
-                  <ConnectionName odinId={props.odinId} />
-                )}
-            {props.isSelf ? <Text style={styles.you}>(you)</Text> : null}
-          </Text>
-
-          {props.selectMode ? null : draftMessage ? (
-            <DraftMessage message={draftMessage} />
-          ) : lastMessage && lastMessageContent ? (
-            <View
+              <GroupAvatar />
+            )}
+          </View>
+          <View style={styles.content}>
+            <Text
+              numberOfLines={1}
               style={{
-                flexDirection: 'row',
-                alignContent: 'flex-start',
+                ...styles.title,
+                color: isDarkMode ? Colors.white : Colors.slate[900],
               }}
             >
-              <ChatDeliveryIndicator msg={lastMessage} showDefaultColor />
-              <Text
-                numberOfLines={1}
-                style={[
-                  styles.description,
-                  {
-                    color: isDarkMode ? Colors.white : Colors.slate[900],
-                  },
-                  lastMessage.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus
-                    ? styles.deleted
-                    : undefined,
-                ]}
+              {isGroup || props.isSelf
+                ? props.conversation.title
+                : (connectionDetails?.name?.displayName || connectionDetails?.name?.givenName) ?? (
+                    <ConnectionName odinId={props.odinId} />
+                  )}
+              {props.isSelf ? <Text style={styles.you}>(you)</Text> : null}
+            </Text>
+
+            {props.selectMode ? null : draftMessage ? (
+              <DraftMessage message={draftMessage} />
+            ) : lastMessage && lastMessageContent ? (
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignContent: 'flex-start',
+                }}
               >
-                <ChatMessageContent {...lastMessage} />
-              </Text>
+                <ChatDeliveryIndicator msg={lastMessage} showDefaultColor />
+                <Text
+                  numberOfLines={1}
+                  style={[
+                    styles.description,
+                    {
+                      color: isDarkMode ? Colors.white : Colors.slate[900],
+                    },
+                    lastMessage.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus
+                      ? styles.deleted
+                      : undefined,
+                  ]}
+                >
+                  {isGroup ? (
+                    <Text
+                      style={{
+                        fontWeight: '500',
+                        color: isDarkMode ? Colors.indigo[400] : Colors.indigo[700],
+                      }}
+                    >
+                      <AuthorName odinId={lastMessageAuthor} showYou showFirstNameOnly />
+                      {': '}
+                    </Text>
+                  ) : null}
+                  <ChatMessageContent {...lastMessage} />
+                </Text>
+              </View>
+            ) : null}
+          </View>
+          {props.selectMode ? (
+            <View
+              style={{
+                position: 'absolute',
+                right: 12,
+                top: 16,
+              }}
+            >
+              {props.isSelected ? <CheckCircle size={'lg'} /> : <CircleOutlined size={'lg'} />}
             </View>
-          ) : null}
+          ) : (
+            <View
+              style={{
+                justifyContent: 'space-between',
+                display: 'flex',
+              }}
+            >
+              {lastMessage && <ChatSentTimeIndicator msg={lastMessage} keepDetail={false} />}
+              {unreadCount > 0 ? <UnreadCount count={unreadCount} /> : null}
+            </View>
+          )}
         </View>
-        {props.selectMode ? (
-          <View
-            style={{
-              position: 'absolute',
-              right: 12,
-              top: 16,
-            }}
-          >
-            {props.isSelected ? <CheckCircle size={'lg'} /> : <CircleOutlined size={'lg'} />}
-          </View>
-        ) : (
-          <View
-            style={{
-              justifyContent: 'space-between',
-              display: 'flex',
-            }}
-          >
-            {lastMessage && <ChatSentTimeIndicator msg={lastMessage} keepDetail={false} />}
-            {unreadCount > 0 ? <UnreadCount count={unreadCount} /> : null}
-          </View>
-        )}
-      </View>
-    </TouchableHighlight>
+      </TouchableHighlight>
+    </ErrorBoundary>
   );
 });
 

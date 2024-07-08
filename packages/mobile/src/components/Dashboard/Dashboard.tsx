@@ -34,7 +34,7 @@ const AppLink = (props: {
 }) => {
   const { isDarkMode } = useDarkMode();
   const identity = useDotYouClientContext().getIdentity();
-  const unread = !!useUnreadPushNotificationsCount({ appId: props.appId });
+  const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: props.appId });
 
   return (
     <TouchableOpacity
@@ -58,7 +58,7 @@ const AppLink = (props: {
     >
       <View style={{ position: 'relative' }}>
         <props.icon size={'4xl'} />
-        {unread ? <UnreadDot /> : null}
+        {unreadCount ? <UnreadDot /> : null}
       </View>
       <Text>{props.label}</Text>
     </TouchableOpacity>
