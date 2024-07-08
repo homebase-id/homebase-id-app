@@ -1,14 +1,24 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import { View, StyleSheet, ViewStyle, LayoutChangeEvent } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  ViewStyle,
+  LayoutChangeEvent,
+  Animated,
+} from 'react-native';
 
 import { Avatar, AvatarProps } from './Avatar';
 import Bubble from './Bubble';
 import { SystemMessage, SystemMessageProps } from './SystemMessage';
 import { Day, DayProps } from './Day';
 
-import { StylePropType, isSameUser } from './utils';
+import { StylePropType, isSameDay, isSameUser } from './utils';
 import { IMessage, User, LeftRightStyle } from './Models';
+import ReactNativeHapticFeedback, {
+  HapticFeedbackTypes,
+} from 'react-native-haptic-feedback';
+import { Swipeable, SwipeableProps } from 'react-native-gesture-handler';
 
 const styles = {
   left: StyleSheet.create({
@@ -29,6 +39,27 @@ const styles = {
       marginRight: 8,
     },
   }),
+  container: {
+    width: 40,
+  },
+  iconWrapper: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  replyImage: {
+    width: 20,
+    height: 20,
+  },
+  defaultBottomOffset: {
+    marginBottom: 2,
+  },
+  bottomOffsetNext: {
+    marginBottom: 10,
+  },
+  leftOffsetValue: {
+    marginLeft: 16,
+  },
 };
 
 export interface MessageProps<TMessage extends IMessage> {
@@ -50,6 +81,11 @@ export interface MessageProps<TMessage extends IMessage> {
     nextProps: MessageProps<IMessage>,
   ): boolean;
   onMessageLayout?(event: LayoutChangeEvent): void;
+  onRightSwipeOpen?(message: TMessage): void;
+  onLeftSwipeOpen?(message: TMessage): void;
+  renderLeftIcon?: React.ReactNode;
+  renderRightIcon?: React.ReactNode;
+  swipeableProps?: SwipeableProps;
 }
 
 export default class Message<
@@ -70,6 +106,11 @@ export default class Message<
     inverted: true,
     shouldUpdateMessage: undefined,
     onMessageLayout: undefined,
+    onRightSwipeOpen: () => {},
+    onLeftSwipeOpen: () => {},
+    renderLeftIcon: undefined,
+    renderRightIcon: undefined,
+    swipeEnabled: true,
   };
 
   static propTypes = {
@@ -174,6 +215,102 @@ export default class Message<
     return <Avatar {...props} />;
   }
 
+  isNextMyMessage =
+    this.props.currentMessage &&
+    this.props.nextMessage &&
+    isSameUser(this.props.currentMessage, this.props.nextMessage) &&
+    isSameDay(this.props.currentMessage, this.props.nextMessage);
+
+  renderRightAction = (
+    progressAnimatedValue: Animated.AnimatedInterpolation<number>,
+  ) => {
+    const size = progressAnimatedValue.interpolate({
+      inputRange: [0, 1, 100],
+      outputRange: [0, 1, 1],
+    });
+    const trans = progressAnimatedValue.interpolate({
+      inputRange: [0, 1, 2],
+      outputRange: [0, -12, -20],
+    });
+    const { renderLeftIcon } = this.props;
+
+    return (
+      <Animated.View
+        style={[
+          styles.container,
+          {
+            transform: [{ scale: size }, { translateX: trans }],
+          },
+          this.isNextMyMessage
+            ? styles.defaultBottomOffset
+            : styles.bottomOffsetNext,
+          this.props.position === 'right' && styles.leftOffsetValue,
+        ]}
+      >
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          {renderLeftIcon}
+        </View>
+      </Animated.View>
+    );
+  };
+  renderLeftAction = (
+    progressAnimatedValue: Animated.AnimatedInterpolation<number>,
+  ): React.ReactNode => {
+    const size = progressAnimatedValue.interpolate({
+      inputRange: [0, 1, 100],
+      outputRange: [0, 1, 1],
+    });
+    const trans = progressAnimatedValue.interpolate({
+      inputRange: [0, 1, 2],
+      outputRange: [0, -12, -20],
+    });
+
+    return (
+      <Animated.View
+        style={[
+          styles.container,
+          {
+            transform: [{ scale: size }, { translateX: trans }],
+          },
+          this.isNextMyMessage
+            ? styles.defaultBottomOffset
+            : styles.bottomOffsetNext,
+          this.props.position === 'right' && styles.leftOffsetValue,
+        ]}
+      >
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          {this.props.renderRightIcon}
+        </View>
+      </Animated.View>
+    );
+  };
+
+  onSwipeOpenAction = (direction: 'left' | 'right', swipeable: Swipeable) => {
+    ReactNativeHapticFeedback.trigger(HapticFeedbackTypes.impactMedium, {
+      enableVibrateFallback: true,
+    });
+    if (this.props.currentMessage && direction === 'left') {
+      this.props.onRightSwipeOpen?.({ ...this.props.currentMessage });
+      swipeable.close();
+    } else {
+      this.props.currentMessage &&
+        this.props.onLeftSwipeOpen?.({ ...this.props.currentMessage });
+      swipeable.close();
+    }
+  };
+
   render() {
     const {
       currentMessage,
@@ -181,6 +318,7 @@ export default class Message<
       nextMessage,
       position,
       containerStyle,
+      swipeableProps,
     } = this.props;
     if (currentMessage) {
       const sameUser = isSameUser(currentMessage, nextMessage!);
@@ -199,7 +337,14 @@ export default class Message<
               ]}
             >
               {this.props.position === 'left' ? this.renderAvatar() : null}
-              {this.renderBubble()}
+              <Swipeable
+                renderRightActions={this.renderRightAction}
+                renderLeftActions={this.renderLeftAction}
+                onSwipeableOpen={this.onSwipeOpenAction}
+                {...swipeableProps}
+              >
+                {this.renderBubble()}
+              </Swipeable>
               {this.props.position === 'right' ? this.renderAvatar() : null}
             </View>
           )}

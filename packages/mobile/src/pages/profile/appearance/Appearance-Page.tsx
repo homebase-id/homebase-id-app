@@ -116,7 +116,15 @@ export const AppearancePage = ({ navigation }: AppearanceProp) => {
         }}
       >
         <FlatList data={tiles} renderItem={renderItem} />
-        <Dialog.Container visible={dialogVisible} onBackdropPress={() => setDialogVisible(false)}>
+        <Dialog.Container
+          useNativeDriver
+          visible={dialogVisible}
+          onBackdropPress={() => setDialogVisible(false)}
+          contentStyle={{
+            borderRadius: 15,
+            backgroundColor: isDarkMode ? Colors.indigo[900] : Colors.indigo[100],
+          }}
+        >
           <Dialog.Title>Theme</Dialog.Title>
           <RadioButtonTile
             isSelected={themeMode === 'System'}

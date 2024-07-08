@@ -16,7 +16,6 @@ import Share from 'react-native-share';
 import { useSafeAreaFrame } from 'react-native-safe-area-context';
 import { Platform, View } from 'react-native';
 import { Colors } from '../app/Colors';
-import { useDarkMode } from '../hooks/useDarkMode';
 import { AuthorName } from '../components/ui/Name';
 import { HeaderTitle } from '@react-navigation/elements';
 import { Text } from '../components/ui/Text/Text';
@@ -29,6 +28,8 @@ import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { SafeAreaView } from '../components/ui/SafeAreaView/SafeAreaView';
 import Toast from 'react-native-toast-message';
 import Clipboard from '@react-native-clipboard/clipboard';
+import Animated from 'react-native-reanimated';
+import { ZOOM_TYPE } from '@likashefqet/react-native-image-zoom';
 
 export type MediaProp = NativeStackScreenProps<ChatStackParamList, 'PreviewMedia'>;
 
@@ -41,22 +42,32 @@ export const PreviewMedia = memo((prop: MediaProp) => {
   const [currIndex, setCurrIndex] = useState(initialIndex);
   const ref = useRef<ICarouselInstance>(null);
   const { height, width } = useSafeAreaFrame();
-  const { isDarkMode } = useDarkMode();
   const getImage = useImage().getFromCache;
+  const [isVisible, setIsVisible] = useState(true);
 
   const headerTitle = useCallback(() => {
     return (
-      <View
+      <Animated.View
         style={{
           display: 'flex',
           alignItems: Platform.OS === 'ios' ? 'center' : 'flex-start',
         }}
       >
-        <HeaderTitle>
+        <HeaderTitle
+          style={{
+            color: Colors.white,
+          }}
+        >
           <AuthorName odinId={msg.fileMetadata.senderOdinId} showYou />
         </HeaderTitle>
-        <Text>{formatToTimeAgoWithRelativeDetail(new Date(msg.fileMetadata.created), true)}</Text>
-      </View>
+        <Text
+          style={{
+            color: Colors.white,
+          }}
+        >
+          {formatToTimeAgoWithRelativeDetail(new Date(msg.fileMetadata.created), true)}
+        </Text>
+      </Animated.View>
     );
   }, [msg.fileMetadata.created, msg.fileMetadata.senderOdinId]);
 
@@ -64,8 +75,12 @@ export const PreviewMedia = memo((prop: MediaProp) => {
     const navigation = prop.navigation;
     navigation.setOptions({
       headerTitle: headerTitle,
+      headerShown: isVisible,
+      headerStyle: {
+        backgroundColor: 'transparent',
+      },
     });
-  }, [headerTitle, prop.navigation]);
+  }, [headerTitle, isVisible, prop.navigation]);
 
   const onShare = useCallback(() => {
     const imageData = getImage(undefined, fileId, payloads[currIndex].key, ChatDrive, {
@@ -108,6 +123,23 @@ export const PreviewMedia = memo((prop: MediaProp) => {
           }}
           targetDrive={ChatDrive}
           previewThumbnail={msg.fileMetadata.appData.previewThumbnail}
+          imageZoomProps={{
+            isSingleTapEnabled: true,
+            onSingleTap: () => {
+              setIsVisible(!isVisible);
+            },
+            onDoubleTap: (type) => {
+              if (type === ZOOM_TYPE.ZOOM_IN) {
+                setIsVisible(false);
+              }
+            },
+            onPinchStart: () => {
+              setIsVisible(false);
+            },
+            onResetAnimationEnd: (finished) => {
+              if (finished) setIsVisible(true);
+            },
+          }}
         />
       ) : (
         <VideoWithLoader
@@ -123,7 +155,7 @@ export const PreviewMedia = memo((prop: MediaProp) => {
         />
       );
     },
-    [fileId, height, msg.fileMetadata.appData.previewThumbnail, width]
+    [fileId, height, isVisible, msg.fileMetadata.appData.previewThumbnail, width]
   );
 
   const hasVideoPayload = payloads.some((item) => item.contentType?.startsWith('video'));
@@ -136,6 +168,7 @@ export const PreviewMedia = memo((prop: MediaProp) => {
         height={height}
         autoPlay={false}
         data={payloads}
+        enabled={payloads?.length > 1}
         scrollAnimationDuration={1000}
         onSnapToItem={(index) => {
           setCurrIndex(index);
@@ -146,107 +179,111 @@ export const PreviewMedia = memo((prop: MediaProp) => {
         defaultIndex={initialIndex}
         renderItem={renderItem}
         style={{
-          backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
+          backgroundColor: Colors.black,
         }}
       />
 
-      <SafeAreaView
-        style={{
-          position: 'absolute',
-          bottom: 0,
-          padding: 5,
-          right: 0,
-          left: 0,
-          flex: 1,
-          display: 'flex',
-          zIndex: 20,
-          backgroundColor: isDarkMode ? '#00000060' : '#AFAFAF44',
-          borderTopLeftRadius: 10,
-          borderTopRightRadius: 10,
-          flexDirection: 'column',
-        }}
-      >
-        {payloads.length > 1 && (
-          <View
-            style={{
-              flexDirection: 'row',
-              alignSelf: 'center',
-              gap: 2,
-            }}
-          >
-            {payloads.map((item, index) => {
-              if (item.contentType.startsWith('video')) {
+      {isVisible && (
+        <SafeAreaView
+          style={{
+            position: 'absolute',
+            bottom: 0,
+            padding: 5,
+            right: 0,
+            left: 0,
+            flex: 1,
+            display: 'flex',
+            zIndex: 20,
+            backgroundColor: '#00000060',
+            borderTopLeftRadius: 10,
+            borderTopRightRadius: 10,
+            flexDirection: 'column',
+          }}
+        >
+          {payloads.length > 1 && (
+            <View
+              style={{
+                flexDirection: 'row',
+                alignSelf: 'center',
+                gap: 2,
+              }}
+            >
+              {payloads.map((item, index) => {
+                if (item.contentType.startsWith('video')) {
+                  return (
+                    <VideoWithLoader
+                      key={index}
+                      fileId={msg.fileId}
+                      fileKey={item.key}
+                      targetDrive={ChatDrive}
+                      previewThumbnail={
+                        payloads.length === 1
+                          ? msg.fileMetadata.appData.previewThumbnail
+                          : undefined
+                      }
+                      fit="cover"
+                      imageSize={{
+                        width: 200,
+                        height: 200,
+                      }}
+                      preview={false}
+                      onClick={() => {
+                        ref.current?.scrollTo({
+                          index,
+                          animated: true,
+                        });
+                      }}
+                    />
+                  );
+                }
                 return (
-                  <VideoWithLoader
-                    key={index}
+                  <OdinImage
                     fileId={msg.fileId}
                     fileKey={item.key}
+                    key={item.key}
                     targetDrive={ChatDrive}
-                    previewThumbnail={
-                      payloads.length === 1 ? msg.fileMetadata.appData.previewThumbnail : undefined
-                    }
                     fit="cover"
                     imageSize={{
-                      width: 200,
-                      height: 200,
+                      width: 50,
+                      height: 50,
                     }}
-                    preview={false}
+                    avoidPayload={true}
                     onClick={() => {
                       ref.current?.scrollTo({
                         index,
                         animated: true,
                       });
                     }}
+                    style={{
+                      borderRadius: 10,
+                      opacity: index === currIndex ? 0.2 : 1,
+                    }}
                   />
                 );
-              }
-              return (
-                <OdinImage
-                  fileId={msg.fileId}
-                  fileKey={item.key}
-                  key={item.key}
-                  targetDrive={ChatDrive}
-                  fit="cover"
-                  imageSize={{
-                    width: 50,
-                    height: 50,
-                  }}
-                  avoidPayload={true}
-                  onClick={() => {
-                    ref.current?.scrollTo({
-                      index,
-                      animated: true,
-                    });
-                  }}
-                  style={{
-                    borderRadius: 10,
-                    opacity: index === currIndex ? 0.2 : 1,
-                  }}
-                />
-              );
-            })}
-          </View>
-        )}
+              })}
+            </View>
+          )}
 
-        {!hasVideoPayload && (
-          <View
-            style={{
-              display: 'flex',
-              flex: 1,
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-            }}
-          >
-            <IconButton
-              icon={<ShareNode />}
-              touchableProps={{
-                'aria-label': 'Share',
+          {!hasVideoPayload && (
+            <View
+              style={{
+                display: 'flex',
+                flex: 1,
+                flexDirection: 'row',
+                justifyContent: 'space-between',
               }}
-              onPress={onShare}
-            />
-          </View>
-        )}
-      </SafeAreaView>
+            >
+              <IconButton
+                icon={<ShareNode color={Colors.white} />}
+                touchableProps={{
+                  'aria-label': 'Share',
+                }}
+                onPress={onShare}
+              />
+            </View>
+          )}
+        </SafeAreaView>
+      )}
     </BottomSheetModalProvider>
   );
 });

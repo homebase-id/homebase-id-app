@@ -71,7 +71,6 @@ import { type PastedFile } from '@mattermost/react-native-paste-input';
 import { useDraftMessage } from '../../hooks/chat/useDraftMessage';
 import { useBubbleContext } from '../BubbleContext/useBubbleContext';
 import { ChatMessageContent } from './Chat-Message-Content';
-import { FileOverview } from '../Files/FileOverview';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -80,6 +79,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { TouchableHighlight } from 'react-native-gesture-handler';
 import { ParseShape } from 'react-native-gifted-chat/src/MessageText';
+import { MentionDropDown } from './Mention-Dropdown';
 
 export type ChatMessageIMessage = IMessage & HomebaseFile<ChatMessage>;
 
@@ -118,22 +118,23 @@ export const ChatDetail = memo(
     conversationId: string;
     replyMessage: ChatMessageIMessage | null;
     setReplyMessage: (message: ChatMessageIMessage | null) => void;
-
     assets: Asset[];
     setAssets: (assets: Asset[]) => void;
-
     hasMoreMessages: boolean;
     fetchMoreMessages: () => void;
   }) => {
     const { isDarkMode } = useDarkMode();
     const identity = useAuth().getIdentity();
-    const textRef = useRef<TextInput>(null);
 
     // We will fetch the draft message from the cache only once
     const { mutate: onInputTextChanged } = useDraftMessage(conversationId).set;
+    const textRef = useRef<TextInput>(null);
+
     const [draftMessage, setdraftMessage] = useState<string | undefined>();
 
     const { getDraftMessage } = useDraftMessage(conversationId);
+
+    // Fetch draftmessage only once when the component mounts
     useEffect(() => {
       (async () => {
         const draft = await getDraftMessage();
@@ -143,7 +144,7 @@ export const ChatDetail = memo(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const debounceInputText = useCallback(
+    const onTextInputChanged = useCallback(
       (text: string) => {
         if (text === '' && draftMessage) {
           setdraftMessage(undefined);
@@ -181,19 +182,38 @@ export const ChatDetail = memo(
       [onLeftSwipe, setReplyMessage]
     );
 
-    const renderChatFooter = useCallback(() => {
-      return (
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
-          }}
-        >
-          {replyMessage ? (
-            <ReplyMessageBar message={replyMessage} clearReply={() => setReplyMessage(null)} />
-          ) : null}
-        </View>
-      );
-    }, [isDarkMode, replyMessage, setReplyMessage]);
+    const renderChatFooter = useCallback(
+      (
+        text: string | undefined,
+        updateText: React.Dispatch<React.SetStateAction<string | undefined>>
+      ) => {
+        const onMention = (mention: string) => {
+          if (!text) return;
+          const words = text.split(' ');
+          words[words.length - 1] = `@${mention}`;
+          updateText(words.join(' ') + ' ');
+        };
+        return (
+          <Animated.View
+            style={{
+              backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
+            }}
+          >
+            {isGroup && (
+              <MentionDropDown
+                conversationId={conversationId}
+                query={text || ''}
+                onMention={onMention}
+              />
+            )}
+            {replyMessage ? (
+              <ReplyMessageBar message={replyMessage} clearReply={() => setReplyMessage(null)} />
+            ) : null}
+          </Animated.View>
+        );
+      },
+      [isDarkMode, isGroup, conversationId, replyMessage, setReplyMessage]
+    );
 
     const { record, stop, duration, isRecording } = useAudioRecorder();
 
@@ -391,15 +411,15 @@ export const ChatDetail = memo(
         );
       },
       [
-        cameraIcon,
+        isRecording,
+        inputStyle,
         composerContainerStyle,
         draftMessage,
-        duration,
+        cameraIcon,
         handleCameraButtonAction,
-        handleRecordButtonAction,
-        inputStyle,
-        isRecording,
         microphoneIcon,
+        handleRecordButtonAction,
+        duration,
       ]
     );
 
@@ -632,7 +652,7 @@ export const ChatDetail = memo(
           onSend={doSend}
           locale={locale}
           textInputRef={textRef}
-          onInputTextChanged={debounceInputText}
+          onInputTextChanged={onTextInputChanged}
           infiniteScroll
           scrollToBottom
           alwaysShowSend
