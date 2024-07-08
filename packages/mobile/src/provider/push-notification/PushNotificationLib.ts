@@ -112,6 +112,7 @@ const onBackgroundMessageReceived = async (
     return;
   }
   const displayName = await axios.get(`https://${notification.data.senderId}/pub/profile`).then((response) => response.data.name as string | undefined);
+
   // If there's no "notification" object directly in the FCM message, it's a data message, and we handle it ourselve
   await notifee.displayNotification({
     title: notification.data.appDisplayName,
