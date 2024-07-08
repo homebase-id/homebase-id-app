@@ -122,6 +122,7 @@ const onBackgroundMessageReceived = async (
       channelId: 'default',
       largeIcon: `https://${notification.data.senderId}/pub/image`,
       smallIcon: 'ic_notification',
+      circularLargeIcon: true,
       pressAction: {
         id: 'default',
       },
