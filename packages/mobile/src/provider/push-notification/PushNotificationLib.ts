@@ -1,6 +1,7 @@
 import messaging, { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
 import { PushNotificationOptions } from '@youfoundation/js-lib/core';
 import notifee, { AndroidVisibility } from '@notifee/react-native';
+import axios from 'axios';
 
 //
 // CAVEATS GALORE!
@@ -110,12 +111,12 @@ const onBackgroundMessageReceived = async (
   if (message.notification) {
     return;
   }
-
+  const displayName = await axios.get(`https://${notification.data.senderId}/pub/profile`).then((response) => response.data.name as string | undefined);
   // If there's no "notification" object directly in the FCM message, it's a data message, and we handle it ourselve
   await notifee.displayNotification({
     title: notification.data.appDisplayName,
     body:
-      notification.data.options.unEncryptedMessage || `Received from ${notification.data.senderId}`,
+      notification.data.options.unEncryptedMessage || `Received from ${displayName || notification.data.senderId}`,
     // Keeps them backwards compatible with the OOTB push notifications within FCM
     data: { data: JSON.stringify(notification.data) },
     android: {
@@ -135,7 +136,7 @@ const onBackgroundMessageReceived = async (
         sender: {
           id: notification.data.senderId,
           avatar: `https://${notification.data.senderId}/pub/image`,
-          displayName: notification.data.senderId,
+          displayName: displayName || notification.data.senderId,
         },
       },
       sound: 'default',
