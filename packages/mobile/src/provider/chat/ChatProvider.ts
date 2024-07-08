@@ -30,6 +30,7 @@ import {
   PriorityOptions,
   RecipientTransferHistory,
   TransferStatus,
+  deleteFile,
 } from '@youfoundation/js-lib/core';
 import { ChatDrive, UnifiedConversation } from './ConversationProvider';
 import { assertIfDefined, getNewId, jsonStringify64 } from '@youfoundation/js-lib/helpers';
@@ -465,10 +466,24 @@ export const updateChatMessage = async (
         dotYouClient,
         message.fileMetadata.appData.uniqueId as string
       );
-      if (!existingChatMessage) return null;
+      if (!existingChatMessage) return;
       message.fileMetadata.versionTag = existingChatMessage.fileMetadata.versionTag;
       return await updateChatMessage(dotYouClient, message, recipients, keyHeader);
     }
+  );
+};
+
+export const hardDeleteChatMessage = async (
+  dotYouClient: DotYouClient,
+  message: HomebaseFile<ChatMessage>,
+  recipients: string[],
+  deleteForEveryone?: boolean
+) => {
+  return await deleteFile(
+    dotYouClient,
+    ChatDrive,
+    message.fileId,
+    deleteForEveryone ? recipients : []
   );
 };
 

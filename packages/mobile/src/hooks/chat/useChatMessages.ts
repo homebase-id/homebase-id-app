@@ -9,13 +9,17 @@ import {
 import {
   ChatMessage,
   getChatMessages,
+  hardDeleteChatMessage,
   requestMarkAsRead,
   softDeleteChatMessage,
 } from '../../provider/chat/ChatProvider';
 
 import { DotYouClient, HomebaseFile } from '@youfoundation/js-lib/core';
 import { useDotYouClientContext } from 'feed-app-common';
-import { UnifiedConversation } from '../../provider/chat/ConversationProvider';
+import {
+  ConversationWithYourselfId,
+  UnifiedConversation,
+} from '../../provider/chat/ConversationProvider';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { SendReadReceiptResponseRecipientStatus } from '@youfoundation/js-lib/peer';
 
@@ -64,14 +68,22 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
     const identity = dotYouClient.getIdentity();
     const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
 
+    // ATM we only hard delete messages to yourself
+    const hardDelete = stringGuidsEqual(
+      conversation.fileMetadata.appData.uniqueId,
+      ConversationWithYourselfId
+    );
+
     return await Promise.all(
       messages.map(async (msg) => {
-        await softDeleteChatMessage(
-          dotYouClient,
-          msg,
-          recipients.filter(Boolean),
-          deleteForEveryone
-        );
+        hardDelete
+          ? await hardDeleteChatMessage(dotYouClient, msg, recipients.filter(Boolean))
+          : await softDeleteChatMessage(
+              dotYouClient,
+              msg,
+              recipients.filter(Boolean),
+              deleteForEveryone
+            );
       })
     );
   };
