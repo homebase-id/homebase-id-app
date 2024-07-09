@@ -51,6 +51,7 @@ import { Text } from '../../components/ui/Text/Text';
 import { ChatFileOverview } from '../../components/Files/ChatFileOverview';
 import { OfflineState } from '../../components/Platform/OfflineState';
 import { RetryModal } from '../../components/Chat/Reactions/Modal/RetryModal';
+import { t } from 'feed-app-common';
 
 export type SelectedMessageState = {
   messageCordinates: { x: number; y: number };
@@ -69,7 +70,6 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
   // Messages
   const {
     all: { data: chatMessages, hasNextPage: hasMoreMessages, fetchNextPage: fetchMoreMessages },
-    delete: { mutate: deleteMessage, error: deleteMessageError },
   } = useChatMessages({
     conversationId: route.params.convoId,
   });
@@ -290,7 +290,8 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
     [navigation]
   );
 
-  const [dialogVisible, setDialogVisible] = useState<boolean>(false);
+  const [editDialogVisible, setEditDialogVisible] = useState<boolean>(false);
+  const [deleteDialogVisible, setDeleteDialogVisible] = useState<boolean>(false);
 
   const selectedMessageActions: SelectedMessageProp = useMemo(() => {
     return {
@@ -315,12 +316,8 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
           //   'Delete Message',
           //   selectedMessage.selectedMessage?.fileMetadata.appData.archivalStatus
           // );
-          deleteMessage({
-            conversation: conversation,
-            messages: [selectedMessage.selectedMessage],
-            deleteForEveryone: true,
-          });
-          setSelectedMessage(initalSelectedMessageState);
+          setDeleteDialogVisible(true);
+          setSelectedMessage({ ...selectedMessage, showChatReactionPopup: false });
         }
       },
       onReply: () => {
@@ -340,14 +337,15 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
         forwardModalRef.current?.present();
       },
       onEdit: () => {
-        setDialogVisible(true);
+        setEditDialogVisible(true);
         setSelectedMessage({ ...selectedMessage, showChatReactionPopup: false });
       },
     };
-  }, [conversation, deleteMessage, doOpenMessageInfo, initalSelectedMessageState, selectedMessage]);
+  }, [conversation, doOpenMessageInfo, initalSelectedMessageState, selectedMessage]);
 
   const handleDialogClose = useCallback(() => {
-    setDialogVisible(false);
+    setEditDialogVisible(false);
+    setDeleteDialogVisible(false);
     setSelectedMessage(initalSelectedMessageState);
   }, [initalSelectedMessageState]);
 
@@ -445,7 +443,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
 
   return (
     <BottomSheetModalProvider>
-      <ErrorNotification error={deleteMessageError || clearChatError || deleteChatError} />
+      <ErrorNotification error={clearChatError || deleteChatError} />
       <View
         style={{
           paddingBottom:
@@ -575,7 +573,12 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
       />
 
       <EditDialogBox
-        visible={dialogVisible}
+        visible={editDialogVisible}
+        handleDialogClose={handleDialogClose}
+        selectedMessage={selectedMessage.selectedMessage}
+      />
+      <DeleteDialogBox
+        visible={deleteDialogVisible}
         handleDialogClose={handleDialogClose}
         selectedMessage={selectedMessage.selectedMessage}
       />
@@ -583,14 +586,22 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
   );
 });
 
-type DialogBoxProp = {
+type EditDialogBoxProp = {
   visible: boolean;
   selectedMessage?: ChatMessageIMessage;
   handleDialogClose: () => void;
 };
 
-const EditDialogBox = memo(({ visible, handleDialogClose, selectedMessage }: DialogBoxProp) => {
+type DeleteDialogBoxProp = {
+  visible: boolean;
+  selectedMessage?: ChatMessageIMessage;
+  handleDialogClose: () => void;
+};
+
+const EditDialogBox = memo(({ visible, handleDialogClose, selectedMessage }: EditDialogBoxProp) => {
   const { mutate: updateMessage, error } = useChatMessage().update;
+  const { isDarkMode } = useDarkMode();
+
   const { data: conversation } = useConversation({
     conversationId: selectedMessage?.fileMetadata.appData.groupId,
   }).single;
@@ -626,15 +637,24 @@ const EditDialogBox = memo(({ visible, handleDialogClose, selectedMessage }: Dia
     handleDialogClose();
   }, [conversation, handleDialogClose, selectedMessage, updateMessage, value]);
   const blurComponentIOS = (
-    <BlurView style={StyleSheet.absoluteFill} blurType="xlight" blurAmount={50} />
+    <BlurView
+      style={StyleSheet.absoluteFill}
+      blurType={isDarkMode ? 'dark' : 'light'}
+      blurAmount={50}
+    />
   );
   return (
     <>
       <ErrorNotification error={error} />
       <Dialog.Container
+        useNativeDriver
         visible={visible}
         blurComponentIOS={blurComponentIOS}
         onBackdropPress={handleDialogClose}
+        contentStyle={{
+          borderRadius: 15,
+          backgroundColor: isDarkMode ? Colors.slate[900] : Colors.slate[200],
+        }}
       >
         <Dialog.Title>Edit Message</Dialog.Title>
         <Dialog.Input
@@ -650,5 +670,80 @@ const EditDialogBox = memo(({ visible, handleDialogClose, selectedMessage }: Dia
     </>
   );
 });
+
+const DeleteDialogBox = memo(
+  ({ visible, handleDialogClose, selectedMessage }: DeleteDialogBoxProp) => {
+    const { isDarkMode } = useDarkMode();
+    const [deleteMessageError, setDeleteMessageError] = useState<unknown | undefined>();
+
+    const { data: conversation } = useConversation({
+      conversationId: selectedMessage?.fileMetadata.appData.groupId,
+    }).single;
+
+    const {
+      delete: { mutateAsync: deleteMessage },
+    } = useChatMessages({ conversationId: conversation?.fileMetadata.appData.uniqueId });
+
+    const onDelete = async (deleteForEveryone: boolean) => {
+      if (!selectedMessage || !conversation) {
+        return;
+      }
+      try {
+        await deleteMessage({
+          conversation: conversation,
+          messages: [selectedMessage],
+          deleteForEveryone: deleteForEveryone,
+        });
+
+        handleDialogClose();
+      } catch (ex) {
+        setDeleteMessageError(ex);
+      }
+    };
+
+    const blurComponentIOS = (
+      <BlurView
+        style={StyleSheet.absoluteFill}
+        blurType={isDarkMode ? 'dark' : 'light'}
+        blurAmount={50}
+      />
+    );
+    return (
+      <>
+        <ErrorNotification error={deleteMessageError} />
+        <Dialog.Container
+          useNativeDriver
+          visible={visible}
+          blurComponentIOS={blurComponentIOS}
+          onBackdropPress={handleDialogClose}
+          verticalButtons
+          contentStyle={{
+            borderRadius: 15,
+            backgroundColor: isDarkMode ? Colors.slate[900] : Colors.slate[200],
+          }}
+        >
+          <Dialog.Title>{t('Delete Message')}?</Dialog.Title>
+          <Dialog.Description>
+            {t('Are you sure you want to delete this message')}?
+          </Dialog.Description>
+          <Dialog.Button
+            label={t('Delete for Me')}
+            color={Colors.red[500]}
+            onPress={() => onDelete(false)}
+          />
+          {deleteForEveryone && (
+            <Dialog.Button
+              label={t('Delete for Everyone')}
+              color={Colors.red[500]}
+              onPress={() => onDelete(true)}
+            />
+          )}
+
+          <Dialog.Button label="Cancel" onPress={handleDialogClose} />
+        </Dialog.Container>
+      </>
+    );
+  }
+);
 
 export default ChatPage;
