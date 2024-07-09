@@ -247,18 +247,18 @@ export const uploadChatMessage = async (
     },
     transitOptions: distribute
       ? {
-          recipients: [...recipients],
-          schedule: ScheduleOptions.SendLater,
-          priority: PriorityOptions.High,
-          sendContents: SendContents.All,
-          useAppNotification: true,
-          appNotificationOptions: {
-            appId: CHAT_APP_ID,
-            typeId: message.fileMetadata.appData.groupId as string,
-            tagId: getNewId(),
-            silent: false,
-          },
-        }
+        recipients: [...recipients],
+        schedule: ScheduleOptions.SendLater,
+        priority: PriorityOptions.High,
+        sendContents: SendContents.All,
+        useAppNotification: true,
+        appNotificationOptions: {
+          appId: CHAT_APP_ID,
+          typeId: message.fileMetadata.appData.groupId as string,
+          tagId: getNewId(),
+          silent: false,
+        },
+      }
       : undefined,
   };
 
@@ -303,17 +303,17 @@ export const uploadChatMessage = async (
       const thumbnail = await grabThumbnail(newMediaFile);
       const thumbSource: ImageSource | null = thumbnail
         ? {
-            uri: thumbnail.uri,
-            width: processedMedia.width || 1920,
-            height: processedMedia.height || 1080,
-            type: thumbnail.type,
-          }
+          uri: thumbnail.uri,
+          width: processedMedia.width || 1920,
+          height: processedMedia.height || 1080,
+          type: thumbnail.type,
+        }
         : null;
       const { tinyThumb, additionalThumbnails } =
         thumbSource && thumbnail
           ? await createThumbnails(thumbSource, payloadKey, thumbnail.type as ImageContentType, [
-              { quality: 100, width: 250, height: 250 },
-            ])
+            { quality: 100, width: 250, height: 250 },
+          ])
           : { tinyThumb: undefined, additionalThumbnails: undefined };
       if (additionalThumbnails) {
         thumbnails.push(...additionalThumbnails);
@@ -396,7 +396,7 @@ export const uploadChatMessage = async (
     for (const recipient of recipients) {
       message.fileMetadata.appData.content.deliveryDetails[recipient] =
         uploadResult.recipientStatus?.[recipient].toLowerCase() ===
-        TransferUploadStatus.EnqueuedFailed
+          TransferUploadStatus.EnqueuedFailed
           ? ChatDeliveryStatus.Failed
           : ChatDeliveryStatus.Delivered;
     }
@@ -429,11 +429,11 @@ export const updateChatMessage = async (
     },
     transitOptions: distribute
       ? {
-          recipients: [...recipients],
-          schedule: ScheduleOptions.SendLater,
-          priority: PriorityOptions.High,
-          sendContents: SendContents.All,
-        }
+        recipients: [...recipients],
+        schedule: ScheduleOptions.SendLater,
+        priority: PriorityOptions.High,
+        sendContents: SendContents.All,
+      }
       : undefined,
   };
 
@@ -476,14 +476,12 @@ export const updateChatMessage = async (
 export const hardDeleteChatMessage = async (
   dotYouClient: DotYouClient,
   message: HomebaseFile<ChatMessage>,
-  recipients: string[],
-  deleteForEveryone?: boolean
 ) => {
   return await deleteFile(
     dotYouClient,
     ChatDrive,
     message.fileId,
-    deleteForEveryone ? recipients : []
+    []
   );
 };
 
@@ -491,7 +489,6 @@ export const softDeleteChatMessage = async (
   dotYouClient: DotYouClient,
   message: HomebaseFile<ChatMessage>,
   recipients: string[],
-  deleteForEveryone?: boolean
 ) => {
   message.fileMetadata.appData.archivalStatus = ChatDeletedArchivalStaus;
   let runningVersionTag = message.fileMetadata.versionTag;
@@ -513,7 +510,7 @@ export const softDeleteChatMessage = async (
 
   message.fileMetadata.versionTag = runningVersionTag;
   message.fileMetadata.appData.content.message = '';
-  return await updateChatMessage(dotYouClient, message, deleteForEveryone ? recipients : []);
+  return await updateChatMessage(dotYouClient, message, recipients);
 };
 
 export const requestMarkAsRead = async (

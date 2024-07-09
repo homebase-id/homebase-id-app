@@ -17,7 +17,6 @@ import {
 import { DotYouClient, HomebaseFile } from '@youfoundation/js-lib/core';
 import { useDotYouClientContext } from 'feed-app-common';
 import {
-  ConversationWithYourselfId,
   UnifiedConversation,
 } from '../../provider/chat/ConversationProvider';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
@@ -68,22 +67,17 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
     const identity = dotYouClient.getIdentity();
     const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
 
-    // ATM we only hard delete messages to yourself
-    const hardDelete = stringGuidsEqual(
-      conversation.fileMetadata.appData.uniqueId,
-      ConversationWithYourselfId
-    );
 
     return await Promise.all(
       messages.map(async (msg) => {
-        hardDelete
-          ? await hardDeleteChatMessage(dotYouClient, msg, recipients.filter(Boolean))
+        !deleteForEveryone
+          ?
+          await hardDeleteChatMessage(dotYouClient, msg) // Delete for me
           : await softDeleteChatMessage(
-              dotYouClient,
-              msg,
-              recipients.filter(Boolean),
-              deleteForEveryone
-            );
+            dotYouClient,
+            msg,
+            recipients.filter(Boolean),
+          ); // Delete for everyone
       })
     );
   };
@@ -139,7 +133,7 @@ export const getChatMessageInfiniteQueryOptions: (
     fetchMessages(dotYouClient, conversationId as string, pageParam as string | undefined),
   getNextPageParam: (lastPage, pages) =>
     lastPage &&
-    lastPage.searchResults?.length >= (lastPage === pages[0] ? FIRST_PAGE_SIZE : PAGE_SIZE)
+      lastPage.searchResults?.length >= (lastPage === pages[0] ? FIRST_PAGE_SIZE : PAGE_SIZE)
       ? lastPage.cursorState
       : undefined,
   enabled: !!conversationId,
@@ -260,8 +254,8 @@ export const internalInsertNewMessage = (
           searchResults:
             index === 0
               ? [newMessage, ...filteredSearchResults].sort(
-                  (a, b) => b.fileMetadata.created - a.fileMetadata.created
-                ) // Re-sort the first page, as the new message might be older than the first message in the page;
+                (a, b) => b.fileMetadata.created - a.fileMetadata.created
+              ) // Re-sort the first page, as the new message might be older than the first message in the page;
               : filteredSearchResults,
         };
       }
