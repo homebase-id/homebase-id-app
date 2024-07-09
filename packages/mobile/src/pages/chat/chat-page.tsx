@@ -684,6 +684,11 @@ const DeleteDialogBox = memo(
       delete: { mutateAsync: deleteMessage },
     } = useChatMessages({ conversationId: conversation?.fileMetadata.appData.uniqueId });
 
+    const conversationWithYourself = stringGuidsEqual(
+      conversation?.fileMetadata.appData.uniqueId,
+      ConversationWithYourselfId
+    );
+
     const onDelete = async (deleteForEveryone: boolean) => {
       if (!selectedMessage || !conversation) {
         return;
@@ -731,7 +736,7 @@ const DeleteDialogBox = memo(
             color={Colors.red[500]}
             onPress={() => onDelete(false)}
           />
-          {deleteForEveryone && (
+          {!conversationWithYourself && (
             <Dialog.Button
               label={t('Delete for Everyone')}
               color={Colors.red[500]}
