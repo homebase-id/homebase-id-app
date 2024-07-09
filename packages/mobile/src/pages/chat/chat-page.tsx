@@ -684,6 +684,11 @@ const DeleteDialogBox = memo(
       delete: { mutateAsync: deleteMessage },
     } = useChatMessages({ conversationId: conversation?.fileMetadata.appData.uniqueId });
 
+    // Show this option when the message is sent by you and the conversation is not with yourself
+    const showDeleteForEveryone =
+      selectedMessage?.fileMetadata.senderOdinId === '' &&
+      !stringGuidsEqual(conversation?.fileMetadata.appData.uniqueId, ConversationWithYourselfId);
+
     const onDelete = async (deleteForEveryone: boolean) => {
       if (!selectedMessage || !conversation) {
         return;
@@ -731,7 +736,7 @@ const DeleteDialogBox = memo(
             color={Colors.red[500]}
             onPress={() => onDelete(false)}
           />
-          {deleteForEveryone && (
+          {showDeleteForEveryone && (
             <Dialog.Button
               label={t('Delete for Everyone')}
               color={Colors.red[500]}
