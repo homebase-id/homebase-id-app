@@ -51,6 +51,7 @@ import { Text } from '../../components/ui/Text/Text';
 import { ChatFileOverview } from '../../components/Files/ChatFileOverview';
 import { OfflineState } from '../../components/Platform/OfflineState';
 import { RetryModal } from '../../components/Chat/Reactions/Modal/RetryModal';
+import { t } from 'feed-app-common';
 
 export type SelectedMessageState = {
   messageCordinates: { x: number; y: number };
@@ -673,29 +674,31 @@ const EditDialogBox = memo(({ visible, handleDialogClose, selectedMessage }: Edi
 const DeleteDialogBox = memo(
   ({ visible, handleDialogClose, selectedMessage }: DeleteDialogBoxProp) => {
     const { isDarkMode } = useDarkMode();
+    const [deleteMessageError, setDeleteMessageError] = useState<unknown | undefined>();
 
     const { data: conversation } = useConversation({
       conversationId: selectedMessage?.fileMetadata.appData.groupId,
     }).single;
 
     const {
-      delete: { mutate: deleteMessage, error: deleteMessageError },
+      delete: { mutateAsync: deleteMessage },
     } = useChatMessages({ conversationId: conversation?.fileMetadata.appData.uniqueId });
 
-    const deleteForEveryone =
-      selectedMessage?.fileMetadata.senderOdinId === '' &&
-      !stringGuidsEqual(conversation?.fileMetadata.appData.uniqueId, ConversationWithYourselfId);
-
-    const onDelete = (hardDelete: boolean) => {
+    const onDelete = async (deleteForEveryone: boolean) => {
       if (!selectedMessage || !conversation) {
         return;
       }
-      deleteMessage({
-        conversation: conversation,
-        messages: [selectedMessage],
-        deleteForEveryone: !hardDelete,
-      });
-      handleDialogClose();
+      try {
+        await deleteMessage({
+          conversation: conversation,
+          messages: [selectedMessage],
+          deleteForEveryone: deleteForEveryone,
+        });
+
+        handleDialogClose();
+      } catch (ex) {
+        setDeleteMessageError(ex);
+      }
     };
 
     const blurComponentIOS = (
@@ -719,18 +722,20 @@ const DeleteDialogBox = memo(
             backgroundColor: isDarkMode ? Colors.slate[900] : Colors.slate[200],
           }}
         >
-          <Dialog.Title>Delete Message ?</Dialog.Title>
-          <Dialog.Description>Are you sure you want to delete this message?</Dialog.Description>
+          <Dialog.Title>{t('Delete Message')}?</Dialog.Title>
+          <Dialog.Description>
+            {t('Are you sure you want to delete this message')}?
+          </Dialog.Description>
           <Dialog.Button
-            label="Delete for Me"
+            label={t('Delete for Me')}
             color={Colors.red[500]}
-            onPress={() => onDelete(true)}
+            onPress={() => onDelete(false)}
           />
           {deleteForEveryone && (
             <Dialog.Button
-              label="Delete for Everyone"
+              label={t('Delete for Everyone')}
               color={Colors.red[500]}
-              onPress={() => onDelete(false)}
+              onPress={() => onDelete(true)}
             />
           )}
 
