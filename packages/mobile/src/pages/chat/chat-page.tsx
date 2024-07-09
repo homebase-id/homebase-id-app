@@ -736,7 +736,7 @@ const DeleteDialogBox = memo(
             color={Colors.red[500]}
             onPress={() => onDelete(false)}
           />
-          {!showDeleteForEveryone && (
+          {showDeleteForEveryone && (
             <Dialog.Button
               label={t('Delete for Everyone')}
               color={Colors.red[500]}
