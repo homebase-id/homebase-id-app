@@ -38,7 +38,7 @@ export const PostComposer = memo(
 
     const identity = useDotYouClientContext().getIdentity();
 
-    const { savePost, postState, processingProgress, error } = usePostComposer();
+    const { savePost, processingProgress, error } = usePostComposer();
 
     const [caption, setCaption] = useState<string>('');
     const [channel, setChannel] = useState<
@@ -49,10 +49,7 @@ export const PostComposer = memo(
 
     const [reactAccess, setReactAccess] = useState<ReactAccess | undefined>(undefined);
 
-    const isPosting = useMemo(
-      () => postState === 'uploading' || postState === 'encrypting',
-      [postState]
-    );
+    const isPosting = useMemo(() => !!processingProgress?.phase, [processingProgress]);
 
     const resetUi = useCallback(() => {
       setCaption('');
@@ -125,7 +122,7 @@ export const PostComposer = memo(
             right: 0,
             bottom: 0,
             paddingTop: insets.top + 8,
-            paddingBottom: 8,
+            paddingBottom: 16,
             paddingHorizontal: 8,
             backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
             zIndex: 0,
@@ -185,7 +182,7 @@ export const PostComposer = memo(
                 paddingVertical: 5,
                 lineHeight: 20,
                 fontSize: 16,
-                minHeight: 45,
+                minHeight: 124,
                 color: isDarkMode ? Colors.white : Colors.black,
               }}
               multiline={true}
@@ -194,11 +191,6 @@ export const PostComposer = memo(
             />
 
             <FileOverview assets={assets} setAssets={setAssets} />
-            <ProgressIndicator
-              postState={postState}
-              processingProgress={processingProgress}
-              files={assets?.length || 0}
-            />
 
             <View
               style={{
@@ -265,6 +257,8 @@ export const PostComposer = memo(
             </View>
           </View>
         </View>
+
+        {!error ? <ProgressIndicator processingProgress={processingProgress} /> : null}
       </React.Fragment>
     );
   }
@@ -322,7 +316,7 @@ const ChannelOrAclSelector = memo(
           key={'loading-select'}
           style={{ zIndex: 20, elevation: 20, position: 'relative' }}
         >
-          <Option>Main</Option>
+          <Option>{BlogConfig.PublicChannel.name}</Option>
         </Select>
       );
     }
@@ -355,7 +349,7 @@ const ChannelOrAclSelector = memo(
 
           {!excludeCustom ? (
             <Option value={'custom'} key={'custom'}>
-              Custom...
+              {t('Custom')}...
             </Option>
           ) : null}
         </Select>
@@ -386,31 +380,34 @@ const ChannelOrAclSelector = memo(
 
 export const ProgressIndicator = memo(
   ({
-    postState,
     processingProgress,
-    files,
   }: {
-    postState: 'uploading' | 'encrypting' | 'error' | undefined;
-    processingProgress: number;
-    files: number;
+    processingProgress: { phase: string; progress: number } | undefined;
   }) => {
-    if (!postState) return null;
+    if (!processingProgress) return null;
 
-    let progressText = '';
-    if (postState === 'uploading') {
-      if (processingProgress < 1) {
-        if (files > 1) progressText = t('Generating thumbnails');
-        else progressText = t('Generating thumbnail');
-      } else progressText = t(postState);
-    }
+    const progressPercentage = Math.round((processingProgress.progress || 0) * 100);
 
     return (
-      <View style={{ marginTop: 4, display: 'flex', flexDirection: 'row-reverse' }}>
-        {postState === 'error' ? (
-          <Text>{t('Error')}</Text>
-        ) : (
-          <Text style={{ fontSize: 12, opacity: 0.4 }}>{progressText}</Text>
-        )}
+      <View
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          flex: 1,
+          marginTop: 4,
+          display: 'flex',
+          flexDirection: 'row-reverse',
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: 'rgba(255,255,255,0.5)',
+        }}
+      >
+        <Text style={{ fontSize: 12, opacity: 0.5 }}>
+          {t(processingProgress.phase)} {progressPercentage !== 0 ? `${progressPercentage}%` : ''}
+        </Text>
       </View>
     );
   }

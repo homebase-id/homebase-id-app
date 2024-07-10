@@ -18,9 +18,8 @@ import { Container } from '../../components/ui/Container/Container';
 import {
   AddressBook,
   Download,
-  HardDisk,
+  Logout,
   People,
-  Profile,
   RecycleBin,
   Sun,
 } from '../../components/ui/Icons/icons';
@@ -159,7 +158,7 @@ export const ProfilePage = (_props: SettingsProps) => {
               paddingVertical: 12,
             }}
           >
-            <Profile size={'lg'} />
+            <Logout size={'lg'} />
             <Text
               style={{
                 marginLeft: 16,
@@ -214,7 +213,7 @@ export const ProfilePage = (_props: SettingsProps) => {
               width: '100%',
             }}
           />
-          <TouchableOpacity
+          {/* <TouchableOpacity
             onPress={() => navigate('DriveStatus')}
             style={{
               display: 'flex',
@@ -231,7 +230,7 @@ export const ProfilePage = (_props: SettingsProps) => {
             >
               Drive Status
             </Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           <VersionInfo />
         </ScrollView>
       </Container>

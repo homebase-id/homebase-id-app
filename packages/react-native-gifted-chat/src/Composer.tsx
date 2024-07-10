@@ -1,6 +1,5 @@
 import React, { memo, useCallback, useRef } from 'react';
 import {
-  Platform,
   StyleSheet,
   NativeSyntheticEvent,
   TextInputContentSizeChangeEventData,
@@ -14,31 +13,14 @@ import PasteInput, {
 } from '@mattermost/react-native-paste-input';
 
 const styles = StyleSheet.create({
-  textInput: {
-    flex: 1,
-    marginLeft: 10,
-    fontSize: 16,
-    lineHeight: 20,
-  },
-  container: {
-    flex: 1,
-    marginTop: Platform.select({
-      ios: 6,
-      android: 4,
-      web: 6,
-    }),
-    marginLeft: 10,
-    marginBottom: Platform.select({
-      ios: 5,
-      android: 4,
-      web: 4,
-    }),
-  },
+  textInput: {},
+  container: {},
 });
 
 export interface ComposerProps {
   composerHeight?: number;
   defaultValue?: string;
+  value?: string;
   placeholder?: string;
   placeholderTextColor?: string;
   textInputProps?: Partial<PasteInputProps>;
@@ -67,6 +49,7 @@ export const Composer = memo(
       placeholder = DEFAULT_PLACEHOLDER,
       placeholderTextColor = Color.defaultColor,
       defaultValue = '',
+      value,
       textInputAutoFocus = false,
       textInputProps = {},
       textInputStyle,
@@ -98,13 +81,12 @@ export const Composer = memo(
       nativeEvent: { contentSize },
     }: NativeSyntheticEvent<TextInputContentSizeChangeEventData>) =>
       determineInputSizeChange(contentSize);
-
     return (
       <View
         style={[
           styles.container,
           {
-            height: composerHeight,
+            minHeight: composerHeight,
           },
           props.containerStyle,
         ]}
@@ -122,10 +104,10 @@ export const Composer = memo(
           onChangeText={onTextChanged}
           style={[styles.textInput, textInputStyle]}
           autoFocus={textInputAutoFocus}
-          defaultValue={defaultValue}
           enablesReturnKeyAutomatically
           underlineColorAndroid='transparent'
           keyboardAppearance={keyboardAppearance}
+          value={value || defaultValue}
           {...textInputProps}
         />
         {props.children}

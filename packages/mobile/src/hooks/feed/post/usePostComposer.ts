@@ -3,7 +3,6 @@ import {
   HomebaseFile,
   NewHomebaseFile,
   SecurityGroupType,
-  NewMediaFile,
 } from '@youfoundation/js-lib/core';
 import {
   Tweet,
@@ -22,11 +21,13 @@ import { ImageSource } from '../../../provider/image/RNImageProvider';
 type CollaborativeChannelDefinition = ChannelDefinition & { acl: AccessControlList };
 
 export const usePostComposer = () => {
-  const [postState, setPostState] = useState<'uploading' | 'encrypting' | 'error' | undefined>();
-  const [processingProgress, setProcessingProgress] = useState<number>(0);
+  const [processingProgress, setProcessingProgress] = useState<
+    { phase: string; progress: number } | undefined
+  >(undefined);
   const dotYouClient = useDotYouClientContext();
   const loggedInIdentity = dotYouClient.getIdentity();
-  const { mutateAsync: savePostFile, error: savePostError } = usePost().save;
+  const { mutateAsync: savePostFile } = usePost().save;
+  const [postError, setPostError] = useState<unknown>();
 
   const savePost = async (
     caption: string | undefined,
@@ -45,8 +46,6 @@ export const usePostComposer = () => {
       throw new Error('Custom ACLs are only allowed for public channels');
     }
     try {
-      setPostState('uploading');
-
       // Upload post
       const postId = getNewId();
       const postFile: NewHomebaseFile<Tweet | Media> = {
@@ -86,20 +85,18 @@ export const usePostComposer = () => {
         postFile: postFile,
         channelId: channel.fileMetadata.appData.uniqueId as string,
         mediaFiles: mediaFiles,
-        onUpdate: (progress) => setProcessingProgress(progress),
+        onUpdate: (phase, progress) => setProcessingProgress({ phase, progress }),
       });
     } catch (ex) {
-      setPostState('error');
+      setPostError('error');
     }
 
-    setPostState(undefined);
-    setProcessingProgress(0);
+    setProcessingProgress(undefined);
   };
 
   return {
     savePost,
-    postState,
     processingProgress,
-    error: postState === 'error' ? savePostError : undefined,
+    error: postError || undefined,
   };
 };

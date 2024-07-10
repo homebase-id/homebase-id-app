@@ -21,11 +21,10 @@ import {
   TimeProps,
   User,
 } from 'react-native-gifted-chat';
-import { useCallback, memo, useMemo, useRef, useEffect, useState } from 'react';
+import React, { useCallback, memo, useMemo, useRef, useEffect, useState } from 'react';
 import {
-  Dimensions,
   GestureResponderEvent,
-  Image,
+  Keyboard,
   Platform,
   Pressable,
   StatusBar,
@@ -39,6 +38,7 @@ import {
 import {
   ArrowDown,
   Camera,
+  ImageLibrary,
   Microphone,
   PaperClip,
   Plus,
@@ -58,25 +58,28 @@ import { useDarkMode } from '../../hooks/useDarkMode';
 import { ChatDeliveryIndicator } from '../../components/Chat/Chat-Delivery-Indicator';
 import { useChatReaction } from '../../hooks/chat/useChatReaction';
 import { Avatar as AppAvatar, OwnerAvatar } from '../../components/ui/Avatars/Avatar';
-import { ConnectionName } from '../../components/ui/Name';
+import { AuthorName, ConnectionName } from '../../components/ui/Name';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ChatDeletedArchivalStaus, ChatMessage } from '../../provider/chat/ChatProvider';
 import { useAudioRecorder } from '../../hooks/audio/useAudioRecorderPlayer';
 import { Text } from '../ui/Text/Text';
-import {
-  calculateScaledDimensions,
-  extractUrls,
-  fixDocumentURI,
-  millisToMinutesAndSeconds,
-} from '../../utils/utils';
+import { fixDocumentURI, millisToMinutesAndSeconds, openURL } from '../../utils/utils';
 import { SafeAreaView } from '../ui/SafeAreaView/SafeAreaView';
-import { FileOverview } from '../Files/FileOverview';
 import Document from 'react-native-document-picker';
 import { getLocales, uses24HourClock } from 'react-native-localize';
 import { type PastedFile } from '@mattermost/react-native-paste-input';
 import { useDraftMessage } from '../../hooks/chat/useDraftMessage';
 import { useBubbleContext } from '../BubbleContext/useBubbleContext';
-import { useLinkPreview } from '../../hooks/links/useLinkPreview';
+import { ChatMessageContent } from './Chat-Message-Content';
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
+import { TouchableHighlight } from 'react-native-gesture-handler';
+import { ParseShape } from 'react-native-gifted-chat/src/MessageText';
+import { MentionDropDown } from './Mention-Dropdown';
 
 export type ChatMessageIMessage = IMessage & HomebaseFile<ChatMessage>;
 
@@ -88,6 +91,7 @@ export const ChatDetail = memo(
     doSelectMessage,
     doOpenMessageInfo,
     doOpenReactionModal,
+    doOpenRetryModal,
     replyMessage,
     setReplyMessage,
     assets,
@@ -109,26 +113,28 @@ export const ChatDetail = memo(
     }) => void;
     doOpenMessageInfo: (message: ChatMessageIMessage) => void;
     doOpenReactionModal: (message: ChatMessageIMessage) => void;
+    doOpenRetryModal: (message: ChatMessageIMessage) => void;
     onPaste: (error: string | null | undefined, files: PastedFile[]) => void;
     conversationId: string;
     replyMessage: ChatMessageIMessage | null;
     setReplyMessage: (message: ChatMessageIMessage | null) => void;
-
     assets: Asset[];
     setAssets: (assets: Asset[]) => void;
-
     hasMoreMessages: boolean;
     fetchMoreMessages: () => void;
   }) => {
     const { isDarkMode } = useDarkMode();
     const identity = useAuth().getIdentity();
-    const textRef = useRef<TextInput>(null);
 
     // We will fetch the draft message from the cache only once
     const { mutate: onInputTextChanged } = useDraftMessage(conversationId).set;
+    const textRef = useRef<TextInput>(null);
+
     const [draftMessage, setdraftMessage] = useState<string | undefined>();
 
     const { getDraftMessage } = useDraftMessage(conversationId);
+
+    // Fetch draftmessage only once when the component mounts
     useEffect(() => {
       (async () => {
         const draft = await getDraftMessage();
@@ -138,7 +144,7 @@ export const ChatDetail = memo(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const debounceInputText = useCallback(
+    const onTextInputChanged = useCallback(
       (text: string) => {
         if (text === '' && draftMessage) {
           setdraftMessage(undefined);
@@ -176,28 +182,44 @@ export const ChatDetail = memo(
       [onLeftSwipe, setReplyMessage]
     );
 
-    const renderChatFooter = useCallback(() => {
-      return (
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
-          }}
-        >
-          {replyMessage ? (
-            <ReplyMessageBar message={replyMessage} clearReply={() => setReplyMessage(null)} />
-          ) : null}
-
-          <FileOverview assets={assets} setAssets={setAssets} />
-        </View>
-      );
-    }, [assets, isDarkMode, replyMessage, setAssets, setReplyMessage]);
+    const renderChatFooter = useCallback(
+      (
+        text: string | undefined,
+        updateText: React.Dispatch<React.SetStateAction<string | undefined>>
+      ) => {
+        const onMention = (mention: string) => {
+          if (!text) return;
+          const words = text.split(' ');
+          words[words.length - 1] = `@${mention}`;
+          updateText(words.join(' ') + ' ');
+        };
+        return (
+          <Animated.View
+            style={{
+              backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
+            }}
+          >
+            {isGroup && (
+              <MentionDropDown
+                conversationId={conversationId}
+                query={text || ''}
+                onMention={onMention}
+              />
+            )}
+            {replyMessage ? (
+              <ReplyMessageBar message={replyMessage} clearReply={() => setReplyMessage(null)} />
+            ) : null}
+          </Animated.View>
+        );
+      },
+      [isDarkMode, isGroup, conversationId, replyMessage, setReplyMessage]
+    );
 
     const { record, stop, duration, isRecording } = useAudioRecorder();
 
     const microphoneIcon = useCallback(() => <Microphone />, []);
     const cameraIcon = useCallback(() => <Camera />, []);
     const crossIcon = useCallback(() => <Times />, []);
-    const attachmentIcon = useCallback(() => <PaperClip />, []);
 
     const onStopRecording = useCallback(() => {
       requestAnimationFrame(async () => {
@@ -260,25 +282,41 @@ export const ChatDetail = memo(
           timestamp: new Date().toUTCString(),
           id: document.name || 'file',
         };
-        // if (media.didCancel) return;
+
         setAssets([asset]);
+        setBottomContainerVisible(false);
       });
     }, [setAssets]);
+
+    const [bottomContainerVisible, setBottomContainerVisible] = useState(false);
+
+    const handlePlusIconPress = useCallback(async () => {
+      if (Keyboard.isVisible()) Keyboard.dismiss();
+      setBottomContainerVisible(!bottomContainerVisible);
+    }, [bottomContainerVisible]);
 
     const handleImageIconPress = useCallback(async () => {
       const medias = await launchImageLibrary({
         mediaType: 'mixed',
         selectionLimit: 10,
+        formatAsMp4: true,
+        includeExtra: true,
       });
       if (medias.didCancel) return;
-      setAssets(medias.assets ?? []);
+
+      // Keep assets without a type out of it.. We're never sure what it is...
+      setAssets(medias.assets?.filter((asset) => asset.type) ?? []);
+      setBottomContainerVisible(false);
     }, [setAssets]);
 
     const inputStyle = useMemo(
       () =>
         ({
           color: isDarkMode ? 'white' : 'black',
-          flex: 1,
+          maxHeight: 80,
+          paddingVertical: Platform.OS === 'ios' ? 8 : 4,
+          flexGrow: 1,
+          fontSize: 16,
         }) as TextStyle,
       [isDarkMode]
     );
@@ -287,6 +325,8 @@ export const ChatDetail = memo(
       () =>
         ({
           borderRadius: 20,
+          paddingVertical: 3,
+          paddingHorizontal: 15,
           backgroundColor: isDarkMode ? Colors.slate[800] : Colors.indigo[50],
           flex: 1,
           flexDirection: 'row',
@@ -337,17 +377,18 @@ export const ChatDetail = memo(
               <View
                 style={{
                   flexDirection: 'row',
-                  gap: 4,
+                  alignItems: 'center',
+                  gap: 5,
                 }}
               >
                 <Actions
                   icon={cameraIcon}
                   containerStyle={[
                     {
-                      padding: 10,
-                      alignContent: 'center',
-                      alignItems: 'center',
-                      alignSelf: 'center',
+                      padding: 6, // Max padding that doesn't break the composer height
+                      marginLeft: 0, // Done with flex gap
+                      width: 'auto',
+                      height: 'auto',
                     },
                   ]}
                   onPressActionButton={handleCameraButtonAction}
@@ -356,26 +397,13 @@ export const ChatDetail = memo(
                   icon={microphoneIcon}
                   containerStyle={[
                     {
-                      padding: 10,
-                      alignContent: 'center',
-                      alignItems: 'center',
-                      alignSelf: 'center',
+                      padding: 6, // Max padding that doesn't break the composer height
+                      marginLeft: 0, // Done with flex gap
+                      width: 'auto',
+                      height: 'auto',
                     },
                   ]}
                   onPressActionButton={handleRecordButtonAction}
-                />
-                <Actions
-                  icon={attachmentIcon}
-                  containerStyle={[
-                    {
-                      padding: 10,
-                      marginRight: 10,
-                      alignContent: 'center',
-                      alignItems: 'center',
-                      alignSelf: 'center',
-                    },
-                  ]}
-                  onPressActionButton={handleAttachmentButtonAction}
                 />
               </View>
             )}
@@ -383,19 +411,18 @@ export const ChatDetail = memo(
         );
       },
       [
-        attachmentIcon,
-        cameraIcon,
+        isRecording,
+        inputStyle,
         composerContainerStyle,
         draftMessage,
-        duration,
-        handleAttachmentButtonAction,
+        cameraIcon,
         handleCameraButtonAction,
-        handleRecordButtonAction,
-        inputStyle,
-        isRecording,
         microphoneIcon,
+        handleRecordButtonAction,
+        duration,
       ]
     );
+
     useEffect(() => {
       if (replyMessage !== null && textRef.current) {
         textRef.current?.focus();
@@ -412,6 +439,9 @@ export const ChatDetail = memo(
               alignItems: 'center',
               marginBottom: 'auto',
               marginTop: 'auto',
+              flexShrink: 0,
+              flexGrow: 0,
+              gap: 6,
             }}
           >
             {isRecording && (
@@ -419,14 +449,14 @@ export const ChatDetail = memo(
                 icon={crossIcon}
                 containerStyle={[
                   {
-                    paddingHorizontal: 20,
+                    padding: 10,
                     justifyContent: 'center',
+                    marginBottom: 0,
                   },
                 ]}
                 onPressActionButton={handleRecordButtonAction}
               />
             )}
-            <View style={{ width: 6 }} />
 
             <Send
               {...props}
@@ -438,16 +468,21 @@ export const ChatDetail = memo(
                 isRecording
                   ? async (_) => onStopRecording()
                   : !hasText && assets?.length === 0
-                    ? handleImageIconPress
+                    ? handlePlusIconPress
                     : props.onSend
               }
-              containerStyle={styles.send}
+              containerStyle={chatStyles.send}
             >
               <View
                 style={{
                   transform: [
                     {
-                      rotate: hasText || assets.length !== 0 || isRecording ? '50deg' : '0deg',
+                      rotate:
+                        hasText || assets.length !== 0 || isRecording
+                          ? '50deg'
+                          : bottomContainerVisible
+                            ? '45deg'
+                            : '0deg',
                     },
                   ],
                 }}
@@ -464,9 +499,10 @@ export const ChatDetail = memo(
       },
       [
         assets.length,
+        bottomContainerVisible,
         crossIcon,
         draftMessage,
-        handleImageIconPress,
+        handlePlusIconPress,
         handleRecordButtonAction,
         isRecording,
         onStopRecording,
@@ -504,6 +540,8 @@ export const ChatDetail = memo(
         borderTopWidth: 0,
         borderRadius: 10,
         marginTop: Platform.OS === 'android' ? 'auto' : undefined,
+        paddingHorizontal: 7,
+        paddingBottom: 7,
       };
     }, [isDarkMode]);
 
@@ -575,6 +613,7 @@ export const ChatDetail = memo(
         opacity: 1,
       };
     }, [isDarkMode]);
+
     const wrapperStyle: StyleProp<ViewStyle> = useMemo(() => {
       return {
         backgroundColor: isDarkMode ? Colors.indigo[900] : Colors.slate[50],
@@ -588,6 +627,24 @@ export const ChatDetail = memo(
 
     const locale = getLocales()[0].languageTag;
 
+    useEffect(() => {
+      const listener = Keyboard.addListener('keyboardDidShow', () => {
+        if (bottomContainerVisible) setBottomContainerVisible(false);
+      });
+      return () => listener.remove();
+    }, [bottomContainerVisible]);
+
+    const renderBottomContainer = useMemo(
+      () => (
+        <RenderBottomContainer
+          isVisible={bottomContainerVisible}
+          onAttachmentPressed={handleAttachmentButtonAction}
+          onGalleryPressed={handleImageIconPress}
+        />
+      ),
+      [bottomContainerVisible, handleAttachmentButtonAction, handleImageIconPress]
+    );
+
     return (
       <SafeAreaView>
         <GiftedChat<ChatMessageIMessage>
@@ -595,7 +652,7 @@ export const ChatDetail = memo(
           onSend={doSend}
           locale={locale}
           textInputRef={textRef}
-          onInputTextChanged={debounceInputText}
+          onInputTextChanged={onTextInputChanged}
           infiniteScroll
           scrollToBottom
           alwaysShowSend
@@ -609,7 +666,13 @@ export const ChatDetail = memo(
           renderCustomView={(prop: BubbleProps<ChatMessageIMessage>) => (
             <RenderReplyMessageView {...prop} />
           )}
-          renderBubble={(prop) => <RenderBubble {...prop} onReactionClick={doOpenReactionModal} />}
+          renderBubble={(prop) => (
+            <RenderBubble
+              {...prop}
+              onReactionClick={doOpenReactionModal}
+              onRetryClick={doOpenRetryModal}
+            />
+          )}
           renderMessageText={(prop) => <RenderMessageText {...prop} />}
           renderMessage={renderMessageBox}
           // renderChatFooter instead of renderFooter as the renderFooter renders within the scrollView
@@ -625,6 +688,7 @@ export const ChatDetail = memo(
           loadEarlier={hasMoreMessages}
           onLoadEarlier={fetchMoreMessages}
           scrollToBottomStyle={scrollToBottomStyle}
+          renderBottomFooter={bottomContainerVisible ? renderBottomContainer : undefined}
           scrollToBottomComponent={scrollToBottomComponent}
           renderLoadEarlier={(prop) => <LoadEarlier {...prop} wrapperStyle={wrapperStyle} />}
           listViewProps={{
@@ -637,83 +701,142 @@ export const ChatDetail = memo(
   }
 );
 
+const RenderBottomContainer = memo(
+  ({
+    isVisible,
+    onGalleryPressed,
+    onAttachmentPressed,
+  }: {
+    isVisible?: boolean;
+    onGalleryPressed: () => void;
+    onAttachmentPressed: () => void;
+  }) => {
+    const { isDarkMode } = useDarkMode();
+    const height = useSharedValue(0);
+    useEffect(() => {
+      if (isVisible) {
+        height.value = 250;
+      } else {
+        height.value = 0;
+      }
+    }, [height, isVisible]);
+
+    const animatedStyle = useAnimatedStyle(() => {
+      return {
+        height: withTiming(height.value, { duration: 150, easing: Easing.inOut(Easing.ease) }),
+        opacity: withTiming(height.value > 0 ? 1 : 0, { duration: 300 }),
+      };
+    });
+
+    return (
+      <Animated.View
+        style={[
+          animatedStyle,
+          {
+            height: Platform.select({
+              ios: 250,
+            }),
+            display: 'flex',
+            flexDirection: 'row',
+            backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
+          },
+        ]}
+      >
+        <MediaPickerComponent icon={<ImageLibrary />} onPress={onGalleryPressed} title="Gallery" />
+        <MediaPickerComponent
+          icon={<PaperClip />}
+          onPress={onAttachmentPressed}
+          title="Attachment"
+        />
+      </Animated.View>
+    );
+  }
+);
+
+const MediaPickerComponent = ({
+  icon,
+  onPress,
+  title,
+}: {
+  icon: React.ReactNode;
+  onPress: () => void;
+  title: string;
+}) => {
+  const { isDarkMode } = useDarkMode();
+  return (
+    <View
+      style={{
+        flex: 1,
+        alignItems: 'center',
+      }}
+    >
+      <TouchableHighlight
+        onPress={onPress}
+        underlayColor={isDarkMode ? Colors.indigo[900] : Colors.indigo[300]}
+        style={{
+          padding: 18,
+          borderRadius: 10,
+          backgroundColor: isDarkMode ? Colors.indigo[800] : Colors.indigo[200],
+          margin: 10,
+        }}
+      >
+        {icon}
+      </TouchableHighlight>
+      <Text>{title}</Text>
+    </View>
+  );
+};
+
 const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
   const { isDarkMode } = useDarkMode();
   const message = props.currentMessage as ChatMessageIMessage;
   const deleted = message?.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus;
-  const urls = extractUrls(message?.fileMetadata.appData.content.message);
-  const shouldShowUrlPreview = urls.length === 1;
-  const { width, height } = Dimensions.get('screen');
-  const { data: linkData } = useLinkPreview(shouldShowUrlPreview ? urls[0] : undefined).get;
-  const renderLinkPreview = useCallback(() => {
-    if (!linkData) return null;
-    const { height: newHeight } = calculateScaledDimensions(
-      linkData.image?.width || 0,
-      linkData.image?.height || 0,
-      { height: height * 0.8, width: width * 0.8 }
-    );
-    return (
-      <View
-        style={{
-          backgroundColor: isDarkMode ? Colors.slate[800] : Colors.slate[100],
 
-          overflow: 'hidden',
-        }}
-      >
-        <Image
-          source={{ uri: linkData.image?.url }}
-          style={{
-            height: newHeight,
-            objectFit: 'cover',
-            borderTopLeftRadius: 5,
-            borderTopRightRadius: 5,
-          }}
-        />
-        <Text
-          style={{
-            marginLeft: 10,
-            marginRight: 10,
-            marginTop: 5,
-            fontWeight: '500',
-            fontSize: 16,
-            color: isDarkMode ? Colors.white : Colors.black,
-          }}
-        >
-          {linkData.title}
-        </Text>
-        <Text
-          style={{
-            marginLeft: 10,
-            marginRight: 10,
-            marginTop: 10,
-            fontWeight: '400',
-            fontSize: 15,
-            marginBottom: 10,
-            color: isDarkMode ? Colors.white : Colors.black,
-          }}
-        >
-          {linkData.description}
-        </Text>
-      </View>
-    );
-  }, [height, isDarkMode, linkData, width]);
   const content = message?.fileMetadata.appData.content;
   const isEmojiOnly =
     (content?.message?.match(/^\p{Extended_Pictographic}/u) &&
       !content.message?.match(/[0-9a-zA-Z]/)) ??
     false;
+
+  /**
+   * An array of parse patterns used for parsing text in the chat detail component.
+   * Each pattern consists of a regular expression pattern, a style to apply to the matched text,
+   * an onPress function to handle the press event, and a renderText function to customize the rendered text.
+   * @param linkStyle The style to apply to the matched text.
+   * @returns An array of parse patterns.
+   */
+  const parsePatterns = useCallback((linkStyle: StyleProp<TextStyle>): ParseShape[] => {
+    const pattern = /@[a-zA-Z0-9._-]+/;
+    return [
+      {
+        pattern: pattern,
+        style: [
+          linkStyle,
+          {
+            textDecorationLine: 'none',
+          },
+        ],
+        onPress: (text: string) => openURL(`https://${text}`),
+        renderText: (text: string) => {
+          return (<AuthorName odinId={text.slice(1)} showYou={false} />) as unknown as string;
+        },
+      },
+    ];
+  }, []);
+
   return (
     <MessageText
       {...props}
+      parsePatterns={parsePatterns}
       linkStyle={{
         left: {
           color: isDarkMode ? Colors.indigo[300] : Colors.indigo[500],
         },
         right: {
-          color: Colors.purple[300],
+          color: isDarkMode ? Colors.violet[100] : Colors.violet[100],
+          fontWeight: '500',
         },
       }}
-      renderLinkPreview={shouldShowUrlPreview ? renderLinkPreview : undefined}
       customTextStyle={
         isEmojiOnly
           ? {
@@ -723,7 +846,7 @@ const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
           : deleted
             ? {
                 textDecorationLine: 'line-through',
-                color: Colors.gray[300],
+                color: props.position === 'left' ? Colors.gray[500] : Colors.gray[300],
               }
             : undefined
       }
@@ -735,6 +858,7 @@ const RenderBubble = memo(
   (
     props: {
       onReactionClick: (message: ChatMessageIMessage) => void;
+      onRetryClick: (message: ChatMessageIMessage) => void;
     } & Readonly<BubbleProps<IMessage>>
   ) => {
     const message = props.currentMessage as ChatMessageIMessage;
@@ -751,6 +875,10 @@ const RenderBubble = memo(
       conversationId: message?.fileMetadata.appData.groupId,
       messageId: message?.fileMetadata.appData.uniqueId,
     }).get;
+
+    const onRetryOpen = useCallback(() => {
+      props.onRetryClick(message);
+    }, [message, props]);
 
     const hasReactions = (reactions && reactions?.length > 0) || false;
     const flatReactions = useMemo(
@@ -814,7 +942,9 @@ const RenderBubble = memo(
     return (
       <Bubble
         {...props}
-        renderTicks={(message: ChatMessageIMessage) => <ChatDeliveryIndicator msg={message} />}
+        renderTicks={(message: ChatMessageIMessage) => (
+          <ChatDeliveryIndicator msg={message} onPress={onRetryOpen} />
+        )}
         renderReactions={
           !hasReactions
             ? undefined
@@ -951,7 +1081,7 @@ const RenderReplyMessageView = memo((props: BubbleProps<ChatMessageIMessage>) =>
     props.currentMessage.fileMetadata.appData.content.replyId && (
       <View
         style={[
-          styles.replyMessageContainer,
+          chatStyles.replyMessageContainer,
           {
             borderLeftColor:
               props.position === 'left' ? color.color(isDarkMode) : Colors.purple[500],
@@ -959,14 +1089,14 @@ const RenderReplyMessageView = memo((props: BubbleProps<ChatMessageIMessage>) =>
           },
         ]}
       >
-        <View style={styles.replyText}>
+        <View style={chatStyles.replyText}>
           {replyMessage ? (
             <>
               <Text
                 style={{
                   fontWeight: '600',
                   fontSize: 15,
-                  color: color.color(isDarkMode),
+                  color: color.color(props.position === 'right' ? true : isDarkMode),
                 }}
               >
                 {replyMessage?.fileMetadata.senderOdinId?.length > 0 ? (
@@ -980,10 +1110,15 @@ const RenderReplyMessageView = memo((props: BubbleProps<ChatMessageIMessage>) =>
                 style={{
                   fontSize: 14,
                   marginTop: 4,
-                  color: isDarkMode ? Colors.slate[300] : Colors.slate[900],
+                  color:
+                    props.position === 'right'
+                      ? Colors.slate[300]
+                      : isDarkMode
+                        ? Colors.slate[300]
+                        : Colors.slate[900],
                 }}
               >
-                {replyMessage?.fileMetadata.appData.content.message || 'Media 📸'}
+                <ChatMessageContent {...replyMessage} />
               </Text>
             </>
           ) : (
@@ -998,29 +1133,31 @@ const RenderReplyMessageView = memo((props: BubbleProps<ChatMessageIMessage>) =>
             </Text>
           )}
         </View>
-        {replyMessage && replyMessage.fileMetadata.payloads?.length > 0 && (
-          <OdinImage
-            fileId={replyMessage.fileId}
-            targetDrive={ChatDrive}
-            fileKey={replyMessage.fileMetadata.payloads[0].key}
-            previewThumbnail={replyMessage.fileMetadata.appData.previewThumbnail}
-            avoidPayload={true}
-            enableZoom={false}
-            style={{
-              flex: 1,
-            }}
-            imageSize={{
-              width: 60,
-              height: 60,
-            }}
-          />
-        )}
+        {replyMessage &&
+          replyMessage.fileMetadata.payloads?.length > 0 &&
+          replyMessage.fileMetadata.payloads[0].contentType.startsWith('image') && (
+            <OdinImage
+              fileId={replyMessage.fileId}
+              targetDrive={ChatDrive}
+              fileKey={replyMessage.fileMetadata.payloads[0].key}
+              previewThumbnail={replyMessage.fileMetadata.appData.previewThumbnail}
+              avoidPayload={true}
+              enableZoom={false}
+              style={{
+                flex: 1,
+              }}
+              imageSize={{
+                width: 60,
+                height: 60,
+              }}
+            />
+          )}
       </View>
     )
   );
 });
 
-const styles = StyleSheet.create({
+export const chatStyles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
@@ -1046,7 +1183,6 @@ const styles = StyleSheet.create({
 
   send: {
     alignContent: 'center',
-    marginRight: 8,
     height: 40,
     width: 40,
     justifyContent: 'center',

@@ -27,8 +27,6 @@ export const useAllConnections = (enabled: boolean) => {
   return useQuery({
     queryKey: ['connections'],
     queryFn: fetchConnections,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
     staleTime: 1000 * 60 * 5, // 5min before contacts from another device are fetched on this one
     enabled,
   });

@@ -21,7 +21,7 @@ import {
   SecurityGroupType,
 } from '@youfoundation/js-lib/core';
 import { getNewId, getNewXorId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import { useConversations } from './useConversations';
+import { ChatConversationsReturn, useConversations } from './useConversations';
 
 import { useDotYouClientContext } from 'feed-app-common';
 import { deleteAllChatMessages } from '../../provider/chat/ChatProvider';
@@ -257,6 +257,26 @@ export const useConversation = (props?: { conversationId?: string | undefined })
           ['conversation', variables.conversation.fileMetadata.appData.uniqueId],
           variables.conversation
         );
+        const existingData = queryClient.getQueryData<InfiniteData<ChatConversationsReturn>>([
+          'conversations',
+        ]);
+        if (existingData) {
+          const newConversations = {
+            ...existingData,
+            pages: existingData.pages.map((page) => ({
+              ...page,
+              searchResults: page.searchResults.map((conversation) =>
+                stringGuidsEqual(
+                  conversation.fileMetadata.appData.uniqueId,
+                  variables.conversation.fileMetadata.appData.uniqueId
+                )
+                  ? variables.conversation
+                  : conversation
+              ),
+            })),
+          };
+          queryClient.setQueryData(['conversations'], newConversations);
+        }
       },
       onSettled: async (_data, _error, variables) => {
         queryClient.invalidateQueries({ queryKey: ['conversations'] });
@@ -331,7 +351,11 @@ const fetchSingleConversation = async (
     );
   if (conversationFromCache) return conversationFromCache;
 
-  return await getSingleConversation(dotYouClient, conversationId);
+  const conversationFromServer = await getSingleConversation(dotYouClient, conversationId);
+  // Don't cache if the conversation is not found
+  if (!conversationFromServer) throw new Error('Conversation not found');
+
+  return conversationFromServer;
 };
 
 export const getConversationQueryOptions: (
@@ -346,6 +370,7 @@ export const getConversationQueryOptions: (
   queryKey: ['conversation', conversationId],
   queryFn: () => fetchSingleConversation(dotYouClient, queryClient, conversationId as string),
   refetchOnMount: false,
-  staleTime: 1000 * 60 * 60, // 1 hour
+  staleTime: 1000 * 60 * 5, // 5 minutes before updates to a conversation on another device are fetched on this one (when you were offline)
   enabled: !!conversationId,
+  networkMode: 'offlineFirst', // We want to try the useConversations cache first
 });

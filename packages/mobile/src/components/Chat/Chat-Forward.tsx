@@ -31,6 +31,7 @@ import { ChatDrive, UnifiedConversation } from '../../provider/chat/Conversation
 import { useConversations } from '../../hooks/chat/useConversations';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { GroupAvatar } from '../ui/Avatars/Avatar';
+import { getNewId } from '@youfoundation/js-lib/helpers';
 
 export type ChatForwardModalProps = {
   onClose: () => void;
@@ -84,12 +85,12 @@ export const ChatForwardModal = forwardRef(
               // We don't support sending videos and audio files for now
               if (!payload.contentType.startsWith('image')) return;
               const image = getFromCache(undefined, message.fileId, payload.key, ChatDrive);
-              if (!image) return;
+              if (!image?.imageData) return;
               return {
-                uri: image.url,
-                width: image.naturalSize?.pixelWidth,
-                height: image.naturalSize?.pixelHeight,
-                type: image.type,
+                uri: image.imageData.url,
+                width: image.imageData?.naturalSize?.pixelWidth,
+                height: image.imageData?.naturalSize?.pixelHeight,
+                type: image.imageData?.type,
               } as ImageSource;
             })
             .filter(Boolean) as ImageSource[];
@@ -98,6 +99,8 @@ export const ChatForwardModal = forwardRef(
           conversation,
           message: message.fileMetadata.appData.content.message,
           files: imageSource,
+          chatId: getNewId(),
+          userDate: new Date().getTime(),
         });
       }
 

@@ -19,6 +19,7 @@ const styles = StyleSheet.create({
   primary: {
     flexDirection: 'row',
     alignItems: 'flex-end',
+    gap: 7,
   },
   accessory: {
     height: 44,
@@ -78,9 +79,11 @@ export const InputToolbar = memo(
         <View style={[styles.primary, props.primaryStyle]}>
           {renderActions?.(rest) ||
             (onPressActionButton && <Actions {...rest} />)}
-          {renderComposer?.({ ...(rest as ComposerProps), hasText }) || (
-            <Composer {...(rest as ComposerProps)} />
-          )}
+          {renderComposer?.({
+            ...(rest as ComposerProps),
+            hasText,
+            value: text,
+          }) || <Composer {...(rest as ComposerProps)} value={text} />}
           {renderSend?.({ ...props, text }) || <Send {...props} text={text} />}
         </View>
         {renderAccessory && (

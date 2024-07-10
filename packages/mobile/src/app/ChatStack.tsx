@@ -2,7 +2,7 @@ import { NavigationProp, useNavigation } from '@react-navigation/native';
 
 import { onlineManager } from '@tanstack/react-query';
 import { NativeStackScreenProps, createNativeStackNavigator } from '@react-navigation/native-stack';
-import { BackButton, HeaderActions } from '../components/ui/convo-app-bar';
+import { BackButton, HeaderActions } from '../components/ui/Buttons';
 import { useLiveChatProcessor } from '../hooks/chat/useLiveChatProcessor';
 import { HeaderBackButtonProps } from '@react-navigation/elements';
 import { Platform, StyleProp, View, ViewStyle } from 'react-native';
@@ -77,6 +77,7 @@ export const NewChatStackScreen = (_props: NativeStackScreenProps<ChatStackParam
         headerShadowVisible: false,
         headerTransparent: Platform.OS === 'ios',
         headerBlurEffect: 'regular',
+        headerTintColor: isDarkMode ? Colors.white : Colors.black,
         headerStyle: {
           backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
         },
@@ -118,9 +119,12 @@ export const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Cha
         headerShadowVisible: false,
         headerTransparent: Platform.OS === 'ios',
         headerBlurEffect: 'regular',
+        headerTintColor: isDarkMode ? Colors.white : Colors.black,
         headerStyle: {
           backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
         },
+        headerBackButtonMenuEnabled: false,
+        headerBackTitleVisible: false,
       }) as NativeStackNavigationOptions,
     [isDarkMode]
   );
@@ -186,6 +190,7 @@ export const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Cha
           headerShadowVisible: false,
           headerTransparent: true,
           animation: 'fade_from_bottom',
+          headerTintColor: Colors.white,
         }}
       />
       <StackChat.Screen
@@ -193,8 +198,7 @@ export const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Cha
         component={ChatInfoPage}
         options={{
           gestureEnabled: true,
-          headerTitle: 'Chat Info',
-          headerBackTitleVisible: false,
+          headerTitle: '',
           headerShown: false,
         }}
       />
@@ -204,7 +208,6 @@ export const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Cha
         options={{
           gestureEnabled: true,
           headerTitle: 'Message Info',
-          headerBackTitleVisible: false,
           headerShown: true,
         }}
       />
@@ -214,7 +217,6 @@ export const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Cha
         options={{
           gestureEnabled: true,
           headerTitle: 'Edit Group',
-          headerBackTitleVisible: false,
           headerShown: false,
         }}
       />

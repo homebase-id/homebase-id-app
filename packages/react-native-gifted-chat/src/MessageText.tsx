@@ -11,11 +11,12 @@ import {
 } from 'react-native';
 
 // @ts-ignore
-import ParsedText from 'react-native-parsed-text';
+import ParsedText, { ParseShape } from 'react-native-parsed-text';
 import { LeftRightStyle, IMessage } from './Models';
 import { StylePropType } from './utils';
 import { useChatContext } from './GiftedChatContext';
 import { error } from './logging';
+export { ParseShape };
 
 const WWW_URL_PATTERN = /^www\./i;
 
@@ -66,8 +67,8 @@ export interface MessageTextProps<TMessage extends IMessage> {
   linkStyle?: LeftRightStyle<TextStyle>;
   textProps?: TextProps;
   customTextStyle?: StyleProp<TextStyle>;
-  parsePatterns?(linkStyle: TextStyle): any;
   renderLinkPreview?(): ReactNode;
+  parsePatterns?(linkStyle: StyleProp<TextStyle>): ParseShape[];
 }
 
 export function MessageText<TMessage extends IMessage = IMessage>({
@@ -78,7 +79,7 @@ export function MessageText<TMessage extends IMessage = IMessage>({
   textStyle,
   linkStyle: linkStyleProp,
   customTextStyle,
-  parsePatterns = () => [],
+  parsePatterns = _ => [],
   textProps,
   renderLinkPreview,
 }: MessageTextProps<TMessage>) {
@@ -143,7 +144,7 @@ export function MessageText<TMessage extends IMessage = IMessage>({
   const linkStyle = [
     styles[position].link,
     linkStyleProp && linkStyleProp[position],
-  ];
+  ] as StyleProp<TextStyle>;
   return (
     <View
       style={[
@@ -159,7 +160,7 @@ export function MessageText<TMessage extends IMessage = IMessage>({
           customTextStyle,
         ]}
         parse={[
-          ...parsePatterns!(linkStyle as TextStyle),
+          ...parsePatterns!(linkStyle),
           { type: 'url', style: linkStyle, onPress: onUrlPress },
           { type: 'phone', style: linkStyle, onPress: onPhonePress },
           { type: 'email', style: linkStyle, onPress: onEmailPress },

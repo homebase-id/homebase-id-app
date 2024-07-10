@@ -5,6 +5,7 @@ module.exports = function (api) {
     plugins: [
       '@babel/plugin-transform-flow-strip-types',
       '@babel/plugin-proposal-unicode-property-regex',
+      'react-native-reanimated/plugin',
     ],
   }
 }

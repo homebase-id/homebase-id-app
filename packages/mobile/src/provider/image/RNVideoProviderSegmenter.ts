@@ -10,7 +10,10 @@ import { FFmpegKit, SessionState } from 'ffmpeg-kit-react-native';
 import { SegmentedVideoMetadata } from '@youfoundation/js-lib/media';
 import { OdinBlob } from '../../../polyfills/OdinBlob';
 
-const CompressVideo = async (video: ImageSource): Promise<ImageSource> => {
+const CompressVideo = async (
+  video: ImageSource,
+  onUpdate?: (progress: number) => void
+): Promise<ImageSource> => {
   try {
     const source = video.filepath || video.uri;
 
@@ -18,6 +21,7 @@ const CompressVideo = async (video: ImageSource): Promise<ImageSource> => {
       throw new Error(`File not found: ${source}`);
     }
 
+    let runningProgress = 0;
     const resultUri = await Video.compress(
       source,
       {
@@ -26,8 +30,10 @@ const CompressVideo = async (video: ImageSource): Promise<ImageSource> => {
         bitrate: 3000000,
       },
       (progress) => {
-        if (Math.round(progress * 100) % 10 === 0) {
-          console.log(`Compression Progress: ${progress}`);
+        const newProgress = Math.round(progress * 100) / 100;
+        if (newProgress > runningProgress) {
+          runningProgress = newProgress;
+          onUpdate?.(runningProgress);
         }
       }
     );
@@ -137,11 +143,19 @@ export const grabThumbnail = async (video: ImageSource) => {
     }
 
     const thumbBlob = new OdinBlob(destinationUri, { type: 'image/png' });
-    await new Promise<void>((resolve) => {
+    await new Promise<void>((resolve, reject) => {
+      let intervalCount = 0;
       const interval = setInterval(async () => {
+        intervalCount++;
         if (thumbBlob.written) {
           clearInterval(interval);
           resolve();
+        }
+        if (intervalCount > 200) {
+          clearInterval(interval);
+          reject(
+            '[RNVideoProviderSegmenter] grabThumbnail: Timeout while waiting for thumbnail to be written.'
+          );
         }
       }, 100);
     });
@@ -226,10 +240,14 @@ const getCodecFromMp4Info = (info: Mp4Info): string => {
 
 export const processVideo = async (
   video: ImageSource,
-  compress?: boolean
+  compress?: boolean,
+  onUpdate?: (progress: number) => void
 ): Promise<{ video: ImageSource; metadata: SegmentedVideoMetadata }> => {
-  const compressedVideo = compress ? await CompressVideo(video) : undefined;
+  const compressedVideo = compress
+    ? await CompressVideo(video, (progress) => onUpdate?.(progress / 1.5))
+    : undefined;
   const fragmentedVideo = await FragmentVideo(compressedVideo || video);
+  onUpdate?.(1);
 
   const mp4Info = await getMp4Info(video);
   const metadata: SegmentedVideoMetadata = {

@@ -33,6 +33,7 @@ import { Pencil, People } from '../components/ui/Icons/icons';
 import { TouchableOpacity } from '@gorhom/bottom-sheet';
 import { SafeAreaView } from '../components/ui/SafeAreaView/SafeAreaView';
 import { openURL } from '../utils/utils';
+import { OfflineState } from '../components/Platform/OfflineState';
 
 type ConversationProp = NativeStackScreenProps<ChatStackParamList, 'Conversation'>;
 
@@ -111,6 +112,7 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
     });
     await queryClient.invalidateQueries({ queryKey: ['chat-messages'], exact: false });
     await queryClient.invalidateQueries({ queryKey: ['conversations'] });
+    await queryClient.invalidateQueries({ queryKey: ['connections'] });
 
     if (noContacts) {
       refetch();
@@ -133,6 +135,7 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
       <SafeAreaView>
         <RemoveNotifications />
         <FloatingActionButton />
+        <OfflineState />
         {conversations && conversations?.length ? (
           <FlatList
             data={conversations}
@@ -212,36 +215,48 @@ const FloatingActionButton = memo(() => {
 
 const RemoveNotifications = memo(() => {
   const isFocused = useIsFocused();
-  useRemoveNotifications({ appId: CHAT_APP_ID, enabled: isFocused });
+  useRemoveNotifications({ appId: CHAT_APP_ID, disabled: !isFocused });
   return null;
 });
 
-const ConversationTileWithYourself = memo(() => {
-  const { data: profile } = useProfile();
-  const odinId = useAuth().getIdentity();
-  const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
+export const ConversationTileWithYourself = memo(
+  ({
+    selecMode: selectMode,
+    isSelected,
+    onPress,
+  }: {
+    selecMode?: boolean;
+    isSelected?: boolean;
+    onPress?: () => void;
+  }) => {
+    const { data: profile } = useProfile();
+    const odinId = useAuth().getIdentity();
+    const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
 
-  const doOpen = useCallback(
-    () =>
-      navigation.navigate('ChatScreen', {
-        convoId: ConversationWithYourselfId,
-      }),
-    [navigation]
-  );
+    const doOpen = useCallback(
+      () =>
+        navigation.navigate('ChatScreen', {
+          convoId: ConversationWithYourselfId,
+        }),
+      [navigation]
+    );
 
-  return (
-    <ConversationTile
-      odinId={odinId || ''}
-      conversation={{
-        title: profile ? `${profile?.firstName} ${profile?.surName} ` : '',
-        recipients: [],
-      }}
-      conversationId={ConversationWithYourselfId}
-      isSelf
-      onPress={doOpen}
-    />
-  );
-});
+    return (
+      <ConversationTile
+        odinId={odinId || ''}
+        conversation={{
+          title: profile ? `${profile?.firstName} ${profile?.surName} ` : '',
+          recipients: [],
+        }}
+        conversationId={ConversationWithYourselfId}
+        isSelf
+        isSelected={isSelected}
+        selectMode={selectMode}
+        onPress={selectMode ? onPress : doOpen}
+      />
+    );
+  }
+);
 
 const SearchConversationResults = memo(
   ({

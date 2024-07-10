@@ -1,6 +1,8 @@
 import messaging, { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
-import { PushNotificationOptions } from '@youfoundation/js-lib/core';
-import notifee from '@notifee/react-native';
+import { PushNotification } from '@youfoundation/js-lib/core';
+import notifee, { AndroidVisibility } from '@notifee/react-native';
+import { bodyFormer } from '../../components/Dashboard/NotificationsOverview';
+import axios from 'axios';
 
 //
 // CAVEATS GALORE!
@@ -27,11 +29,9 @@ import notifee from '@notifee/react-native';
 //
 
 // backend: src/services/Odin.Services/AppNotifications/Push/PushNotificationContent.cs
-interface PushNotificationPayload {
-  senderId: string;
-  timestamp: string;
+// backend: src/services/Odin.Services/AppNotifications/Push/PushNotificationContent.cs
+interface PushNotificationPayload extends PushNotification {
   appDisplayName: string;
-  options: PushNotificationOptions;
 }
 
 // backend: src/core/Odin.Core/Dto/DevicePushNotificationRequest.cs
@@ -46,14 +46,30 @@ export interface PushNotificationMessage {
 //
 
 export const initializePushNotificationSupport = async () => {
-  // console.debug('initializePushNotificationSupport');
-  messaging().onMessage(onMessageReceived);
-  messaging().setBackgroundMessageHandler(onMessageReceived);
+  messaging().onMessage(onForegroundMessageReceived);
+  messaging().setBackgroundMessageHandler(onBackgroundMessageReceived);
+
+  // Android channels
+  await notifee.createChannel({
+    id: 'default',
+    name: 'Primary Notifications',
+    visibility: AndroidVisibility.PRIVATE,
+  });
+
+  // iOS categories
+  await notifee.setNotificationCategories([
+    {
+      id: 'communications',
+      allowAnnouncement: true,
+      allowInCarPlay: true,
+    },
+  ]);
 };
 
 //
-
-const onMessageReceived = async (message: FirebaseMessagingTypes.RemoteMessage): Promise<void> => {
+const baseMessageParsing = async (
+  message: FirebaseMessagingTypes.RemoteMessage
+): Promise<PushNotificationMessage | undefined> => {
   console.log('FCM Message:', message);
 
   // Sanity #1 (yes, this can happen...)
@@ -62,21 +78,78 @@ const onMessageReceived = async (message: FirebaseMessagingTypes.RemoteMessage):
   }
 
   // Sanity #2
-  let notification: PushNotificationMessage;
   try {
-    notification = parseNotificationMessage(message);
-    await notifee.incrementBadgeCount();
+    const notification = parseNotificationMessage(message);
+    console.log('NOTIFICATION:', notification);
+
+    return notification;
   } catch (error) {
     console.error('Failed to parse notification message:', error);
     return;
   }
-
-  console.log('NOTIFICATION:', notification);
-
-  await Promise.resolve();
 };
 
-//
+const onForegroundMessageReceived = async (
+  message: FirebaseMessagingTypes.RemoteMessage
+): Promise<void> => {
+  const notification = await baseMessageParsing(message);
+  if (!notification) return;
+
+  // TODO: Check if this one is needed
+  await notifee.incrementBadgeCount();
+};
+
+const onBackgroundMessageReceived = async (
+  message: FirebaseMessagingTypes.RemoteMessage
+): Promise<void> => {
+  const notification = await baseMessageParsing(message);
+  if (!notification) return;
+
+  await notifee.incrementBadgeCount();
+
+  if (message.notification) {
+    return;
+  }
+  const displayName =
+    (await axios
+      .get(`https://${notification.data.senderId}/pub/profile`)
+      .then((response) => response.data?.name as string | undefined)
+      .catch(() => undefined)) || notification.data.senderId;
+
+  // If there's no "notification" object directly in the FCM message, it's a data message, and we handle it ourselve
+  await notifee.displayNotification({
+    title: notification.data.appDisplayName,
+    body:
+      bodyFormer(notification.data, false, notification.data.appDisplayName, displayName) ||
+      `Received from ${notification.data.senderId}`,
+    // Keeps them backwards compatible with the OOTB push notifications within FCM
+    data: { data: JSON.stringify(notification.data) },
+    android: {
+      channelId: 'default',
+      largeIcon: `https://${notification.data.senderId}/pub/image`,
+      smallIcon: 'ic_notification',
+      circularLargeIcon: true,
+      pressAction: {
+        id: 'default',
+      },
+      sound: 'default',
+    },
+    ios: {
+      categoryId: 'communications',
+      communicationInfo: {
+        conversationId: notification.data.options.typeId,
+        sender: {
+          id: notification.data.senderId,
+          avatar: `https://${notification.data.senderId}/pub/image`,
+          displayName: displayName || notification.data.senderId,
+        },
+      },
+      sound: 'default',
+    },
+  });
+
+  return;
+};
 
 export const parseNotificationMessage = (
   message: FirebaseMessagingTypes.RemoteMessage

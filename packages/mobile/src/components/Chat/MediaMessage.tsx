@@ -27,6 +27,7 @@ import { Colors } from '../../app/Colors';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { calculateScaledDimensions } from '../../utils/utils';
 import { BoringFile } from '../ui/Media/BoringFile';
+import { t } from 'feed-app-common';
 
 const MediaMessage = memo(
   ({
@@ -41,6 +42,7 @@ const MediaMessage = memo(
     if (!props.currentMessage || !props.currentMessage.fileMetadata.payloads?.length) return null;
     const { currentMessage } = props;
     const payloads = currentMessage.fileMetadata.payloads;
+    const isMe = currentMessage.fileMetadata.senderOdinId === '';
 
     if (payloads.length === 1) {
       const previewThumbnail = currentMessage.fileMetadata.appData.previewThumbnail;
@@ -62,6 +64,7 @@ const MediaMessage = memo(
             width: newWidth,
             height: newHeight,
           }}
+          position={isMe ? 'right' : 'left'}
           fit={'contain'}
           containerStyle={props.containerStyle}
           onLongPress={(e) => onLongPress(e, currentMessage)}
@@ -118,10 +121,15 @@ const MediaGallery = ({
               isGallery
                 ? {
                     borderTopLeftRadius: index === 0 ? 10 : 0,
-                    borderBottomLeftRadius: index === 2 ? 10 : 0,
+                    borderBottomLeftRadius:
+                      index === 2 || (index === 0 && payloads.length === 2) ? 10 : 0,
                     borderTopRightRadius: index === 1 ? 10 : 0,
                     borderBottomRightRadius:
-                      index === 3 || (payloads.length === 3 && index === 2) ? 10 : 0,
+                      index === 3 ||
+                      (payloads.length === 3 && index === 2) ||
+                      (index === 1 && payloads.length === 2)
+                        ? 10
+                        : 0,
                     width: payloads.length === 3 && index === 2 ? '100%' : 150,
                   }
                 : undefined
@@ -182,12 +190,14 @@ const InnerMediaItem = ({
   onLongPress,
   fit,
   onClick,
+  position,
 }: {
   payload: PayloadDescriptor | NewPayloadDescriptor;
   msg: ChatMessageIMessage;
   containerStyle?: StyleProp<ViewStyle>;
   style?: ImageStyle;
   fit?: 'cover' | 'contain';
+  position?: 'left' | 'right';
   imageSize:
     | {
         width: number;
@@ -211,14 +221,19 @@ const InnerMediaItem = ({
         />
       );
     }
+    const progressPercentage = Math.round(
+      ((payload as NewPayloadDescriptor).uploadProgress?.progress || 0) * 100
+    );
+
     return (
       <View
         style={{
           backgroundColor: isDarkMode ? Colors.slate[700] : Colors.slate[300],
           display: 'flex',
-          flexDirection: 'row',
+          flexDirection: 'column',
           justifyContent: 'center',
           alignItems: 'center',
+          gap: 10,
           ...imageSize,
           ...(style || { borderRadius: 10 }),
         }}
@@ -232,6 +247,12 @@ const InnerMediaItem = ({
                 ? '📹'
                 : '📋'}
         </Text>
+        {(payload as NewPayloadDescriptor).uploadProgress ? (
+          <Text style={{ fontSize: 14 }}>
+            {t((payload as NewPayloadDescriptor).uploadProgress?.phase)}{' '}
+            {progressPercentage !== 0 ? `${progressPercentage}%` : ''}
+          </Text>
+        ) : null}
       </View>
     );
   }
@@ -265,7 +286,13 @@ const InnerMediaItem = ({
   }
   if (payload.contentType.startsWith('application/')) {
     return (
-      <BoringFile file={payload} fileId={msg.fileId} targetDrive={ChatDrive} odinId={undefined} />
+      <BoringFile
+        file={payload}
+        fileId={msg.fileId}
+        targetDrive={ChatDrive}
+        odinId={undefined}
+        overwriteTextColor={position && position === 'right'}
+      />
     );
   } else {
     return (

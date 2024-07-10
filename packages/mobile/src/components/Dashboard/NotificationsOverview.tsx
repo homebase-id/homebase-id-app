@@ -1,4 +1,4 @@
-import { TouchableOpacity, View } from 'react-native';
+import { Dimensions, TouchableOpacity, View } from 'react-native';
 
 import { usePushNotifications } from '../../hooks/notifications/usePushNotifications';
 import { memo, useMemo, useState } from 'react';
@@ -270,6 +270,8 @@ const NotificationItem = ({
     [notification, senderName, appName]
   );
 
+  const screenWidth = Dimensions.get('screen').width;
+
   return (
     <TouchableOpacity onPress={onOpen}>
       <View
@@ -297,16 +299,25 @@ const NotificationItem = ({
 
         <View style={{ display: 'flex', flexGrow: 1 }}>
           <View style={{ display: 'flex', flexDirection: 'row' }}>
-            <Text style={{ fontWeight: '600', color: isDarkMode ? Colors.white : Colors.black }}>
-              {title}
-            </Text>
+            <View style={{ width: screenWidth - 120 }}>
+              <Text style={{ fontWeight: '600', color: isDarkMode ? Colors.white : Colors.black }}>
+                {title}
+              </Text>
+              <Text style={{ color: isDarkMode ? Colors.white : Colors.black }}>{body}</Text>
+            </View>
             {isExpanded ? (
-              <TouchableOpacity onPress={onDismiss} style={{ marginLeft: 'auto' }}>
+              <TouchableOpacity
+                onPress={onDismiss}
+                style={{
+                  marginLeft: 'auto',
+                  padding: 10,
+                  paddingRight: 0,
+                }}
+              >
                 <Times size={'sm'} />
               </TouchableOpacity>
             ) : null}
           </View>
-          <Text style={{ color: isDarkMode ? Colors.white : Colors.black }}>{body}</Text>
 
           {notification.created ? (
             <Text style={{ color: Colors.slate[500] }}>
@@ -332,7 +343,7 @@ const FEED_NEW_CONTENT_TYPE_ID = 'ad695388-c2df-47a0-ad5b-fc9f9e1fffc9';
 const FEED_NEW_REACTION_TYPE_ID = '37dae95d-e137-4bd4-b782-8512aaa2c96a';
 const FEED_NEW_COMMENT_TYPE_ID = '1e08b70a-3826-4840-8372-18410bfc02c7';
 
-const bodyFormer = (
+export const bodyFormer = (
   payload: PushNotification,
   hasMultiple: boolean,
   appName: string,

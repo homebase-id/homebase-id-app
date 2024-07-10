@@ -4,7 +4,7 @@ import { ContactTile } from '../components/Contact/Contact-Tile';
 
 import { memo, useCallback, useMemo, useState } from 'react';
 import { Header, HeaderBackButtonProps } from '@react-navigation/elements';
-import { BackButton } from '../components/ui/convo-app-bar';
+import { BackButton } from '../components/ui/Buttons';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { ChatStackParamList, NewChatStackParamList } from '../app/ChatStack';

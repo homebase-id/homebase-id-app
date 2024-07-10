@@ -21,6 +21,7 @@ import {
   AppendInstructionSet,
   UploadResult,
   ImageContentType,
+  PriorityOptions,
 } from '@youfoundation/js-lib/core';
 import {
   toGuidId,
@@ -44,6 +45,7 @@ import { ImageSource } from '../image/RNImageProvider';
 import { createThumbnails } from '../image/RNThumbnailProvider';
 import { grabThumbnail, processVideo } from '../image/RNVideoProviderSegmenter';
 import { VideoContentType } from '@youfoundation/js-lib/media';
+import { AxiosRequestConfig } from 'axios';
 
 const POST_MEDIA_PAYLOAD_KEY = 'pst_mdi';
 
@@ -53,7 +55,7 @@ export const savePost = async <T extends PostContent>(
   channelId: string,
   toSaveFiles?: (ImageSource | MediaFile)[] | ImageSource[],
   onVersionConflict?: () => void,
-  onUpdate?: (progress: number) => void
+  onUpdate?: (phase: string, progress: number) => void
 ): Promise<UploadResult> => {
   if (!file.fileMetadata.appData.content.id) {
     // The content id is set once, and then never updated to keep the permalinks correct at all times; Even when the slug changes
@@ -102,7 +104,13 @@ export const savePost = async <T extends PostContent>(
     console.log('newMediaFile', newMediaFile);
     if (newMediaFile.type?.startsWith('video/')) {
       console.log('video - newMediaFile', newMediaFile);
-      const { video: processedMedia, metadata } = await processVideo(newMediaFile, true);
+      const { video: processedMedia, metadata } = await processVideo(
+        newMediaFile,
+        true,
+        (progress) => onUpdate?.('Compressing', progress)
+      );
+
+      onUpdate?.('Generating thumbnails', 0);
       // Custom blob to avoid reading and writing the file to disk again
       const payloadBlob = new OdinBlob((processedMedia.filepath || processedMedia.uri) as string, {
         type: 'video/mp4' as VideoContentType,
@@ -134,8 +142,9 @@ export const savePost = async <T extends PostContent>(
       });
 
       if (tinyThumb) previewThumbnails.push(tinyThumb);
-      onUpdate?.((i + 1) / newMediaFiles.length);
     } else if (newMediaFile.type?.startsWith('image/')) {
+      onUpdate?.('Generating thumbnails', 0);
+
       const { additionalThumbnails, tinyThumb } = await createThumbnails(newMediaFile, payloadKey);
 
       // Custom blob to avoid reading and writing the file to disk again
@@ -163,7 +172,6 @@ export const savePost = async <T extends PostContent>(
         descriptorContent: newMediaFile.filename || newMediaFile.type || undefined,
       });
     }
-    onUpdate?.((i + 1) / newMediaFiles.length);
   }
 
   // Don't force the primaryMediaFile on articles
@@ -180,6 +188,8 @@ export const savePost = async <T extends PostContent>(
   const previewThumbnail: EmbeddedThumb | undefined =
     previewThumbnails?.length >= 2 ? await makeGrid(previewThumbnails) : previewThumbnails[0];
 
+  onUpdate?.('Uploading', 0);
+
   return await uploadPost(
     dotYouClient,
     file,
@@ -188,7 +198,10 @@ export const savePost = async <T extends PostContent>(
     previewThumbnail,
     channelId,
     targetDrive,
-    onVersionConflict
+    onVersionConflict,
+    {
+      onUploadProgress: (progress) => onUpdate?.('Uploading', progress.progress || 0),
+    }
   );
 };
 
@@ -200,7 +213,8 @@ const uploadPost = async <T extends PostContent>(
   previewThumbnail: EmbeddedThumb | undefined,
   channelId: string,
   targetDrive: TargetDrive,
-  onVersionConflict?: () => void
+  onVersionConflict?: () => void,
+  axiosConfig?: AxiosRequestConfig<any> | undefined
 ) => {
   const encrypt = !(
     file.serverMetadata?.accessControlList?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
@@ -215,9 +229,9 @@ const uploadPost = async <T extends PostContent>(
       drive: targetDrive,
     },
     transitOptions: {
-      useGlobalTransitId: true,
       recipients: [],
       schedule: ScheduleOptions.SendLater,
+      priority: PriorityOptions.Medium,
       sendContents: SendContents.All, // TODO: Should this be header only?
     },
   };
@@ -283,7 +297,8 @@ const uploadPost = async <T extends PostContent>(
     payloads,
     thumbnails,
     encrypt,
-    onVersionConflict
+    onVersionConflict,
+    axiosConfig
   );
   if (!result) throw new Error('Upload failed');
 
@@ -303,9 +318,9 @@ const uploadPostHeader = async <T extends PostContent>(
       drive: targetDrive,
     },
     transitOptions: {
-      useGlobalTransitId: true,
       recipients: [],
       schedule: ScheduleOptions.SendLater,
+      priority: PriorityOptions.Medium,
       sendContents: SendContents.All, // TODO: Should this be header only?
     },
   };
@@ -383,7 +398,7 @@ const uploadPostHeader = async <T extends PostContent>(
         ],
         undefined
       )
-    ).newVersionTag;
+    )?.newVersionTag;
   } else if (file.fileMetadata.payloads?.some((p) => p.key === DEFAULT_PAYLOAD_KEY)) {
     // Remove default payload if it was there before
     runningVersionTag = (
@@ -512,15 +527,16 @@ const updatePost = async <T extends PostContent>(
       versionTag: runningVersionTag,
     };
 
-    runningVersionTag = (
-      await appendDataToFile(
-        dotYouClient,
-        header?.fileMetadata.isEncrypted ? header.sharedSecretEncryptedKeyHeader : undefined,
-        appendInstructionSet,
-        payloads,
-        thumbnails
-      )
-    ).newVersionTag;
+    runningVersionTag =
+      (
+        await appendDataToFile(
+          dotYouClient,
+          header?.fileMetadata.isEncrypted ? header.sharedSecretEncryptedKeyHeader : undefined,
+          appendInstructionSet,
+          payloads,
+          thumbnails
+        )
+      )?.newVersionTag || runningVersionTag;
   }
 
   if (file.fileMetadata.appData.content.type !== 'Article') {

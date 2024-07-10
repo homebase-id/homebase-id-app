@@ -4,7 +4,10 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useChatReaction } from '../../hooks/chat/useChatReaction';
 
 import { AuthorName, ConnectionName } from '../../components/ui/Name';
-import { InnerDeliveryIndicator } from '../../components/Chat/Chat-Delivery-Indicator';
+import {
+  FailedDeliveryDetails,
+  InnerDeliveryIndicator,
+} from '../../components/Chat/Chat-Delivery-Indicator';
 import { useDotYouClientContext } from 'feed-app-common';
 import { ChatStackParamList } from '../../app/ChatStack';
 import { Avatar, OwnerAvatar } from '../../components/ui/Avatars/Avatar';
@@ -30,6 +33,9 @@ export const MessageInfoPage = ({ route }: MessageInfoProp) => {
     (recipient) => recipient && recipient !== identity
   );
 
+  const isAuthor =
+    message.fileMetadata.senderOdinId === identity || !message.fileMetadata.senderOdinId;
+
   const { data: reactions } = useChatReaction({
     conversationId: message.fileMetadata.appData.groupId,
     messageId: message.fileMetadata.appData.uniqueId,
@@ -37,7 +43,7 @@ export const MessageInfoPage = ({ route }: MessageInfoProp) => {
 
   function renderDetails() {
     return (
-      <View>
+      <View style={styles.container}>
         <Header title="Details" />
         <Text style={styles.title}>
           Sent:{' '}
@@ -68,7 +74,7 @@ export const MessageInfoPage = ({ route }: MessageInfoProp) => {
   function renderRecipients() {
     if (!recipients.length) return null;
     return (
-      <View>
+      <View style={styles.container}>
         <Header title="Recipients" />
         {recipients.map((recipient) => {
           return (
@@ -77,19 +83,35 @@ export const MessageInfoPage = ({ route }: MessageInfoProp) => {
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
-                justifyContent: 'center',
-                margin: 10,
                 alignContent: 'center',
+                gap: 15,
+                marginBottom: 10,
               }}
             >
               <Avatar odinId={recipient} />
-              <Text style={{ ...styles.title, fontSize: 20, marginTop: 0 }}>
-                <ConnectionName odinId={recipient} />
-              </Text>
-              <InnerDeliveryIndicator
-                state={messageContent.deliveryDetails?.[recipient] || messageContent.deliveryStatus}
-                showDefault
-              />
+              <View style={{ display: 'flex', flexDirection: 'column' }}>
+                <Text style={{ ...styles.title, fontSize: 20, flexShrink: 0 }}>
+                  <ConnectionName odinId={recipient} />
+                </Text>
+
+                {isAuthor ? (
+                  <FailedDeliveryDetails
+                    msg={message}
+                    recipient={recipient}
+                    style={{ maxWidth: '80%' }}
+                  />
+                ) : null}
+              </View>
+
+              {isAuthor ? (
+                <InnerDeliveryIndicator
+                  state={
+                    messageContent.deliveryDetails?.[recipient] || messageContent.deliveryStatus
+                  }
+                  showDefault
+                  style={{ marginLeft: 'auto' }}
+                />
+              ) : null}
             </View>
           );
         })}
@@ -137,15 +159,16 @@ export const MessageInfoPage = ({ route }: MessageInfoProp) => {
 };
 
 const styles = StyleSheet.create({
+  container: {
+    paddingHorizontal: 10,
+  },
   header: {
     fontSize: 22,
     fontWeight: '600',
-    margin: 10,
+    marginVertical: 10,
   },
   title: {
     fontSize: 18,
-    marginTop: 2,
-    marginLeft: 10,
     flex: 1,
     alignContent: 'center',
   },

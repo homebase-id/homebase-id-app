@@ -3,13 +3,15 @@ import {
   DeleteNotifications,
   GetNotifications,
   MarkNotificationsAsRead,
+  PushNotification,
+  getNotificationCountsByAppId,
+  markAllNotificationsOfAppAsRead,
 } from '@youfoundation/js-lib/core';
 import { useEffect } from 'react';
-import { hasDebugFlag, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useDotYouClientContext } from 'feed-app-common';
 
-const isDebug = hasDebugFlag();
-const PAGE_SIZE = 50;
+const PAGE_SIZE = 700;
 export const usePushNotifications = (props?: { appId?: string }) => {
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
@@ -38,19 +40,46 @@ export const usePushNotifications = (props?: { appId?: string }) => {
     }),
     markAsRead: useMutation({
       mutationFn: markAsRead,
-      onMutate: async () => {
-        // TODO
+      onMutate: async (notificationIds) => {
+        const existingData = queryClient.getQueryData<{
+          results: PushNotification[];
+          cursor: number;
+        }>(['push-notifications']);
+
+        if (!existingData) return;
+        const newData = {
+          ...existingData,
+          results: existingData.results.map((n) => ({
+            ...n,
+            unread: notificationIds.some((id) => id === n.id) ? false : n.unread,
+          })),
+        };
+        queryClient.setQueryData(['push-notifications'], newData);
+
+        return existingData;
       },
-      onSettled: () => {
+      onError: () => {
         queryClient.invalidateQueries({ queryKey: ['push-notifications'] });
       },
     }),
     remove: useMutation({
       mutationFn: removeNotifications,
-      onMutate: async () => {
-        // TODO
+      onMutate: async (notificationIds) => {
+        const existingData = queryClient.getQueryData<{
+          results: PushNotification[];
+          cursor: number;
+        }>(['push-notifications']);
+
+        if (!existingData) return;
+        const newData = {
+          ...existingData,
+          results: existingData.results.filter((n) => !notificationIds.some((id) => id === n.id)),
+        };
+        queryClient.setQueryData(['push-notifications'], newData);
+
+        return existingData;
       },
-      onSettled: () => {
+      onError: () => {
         queryClient.invalidateQueries({ queryKey: ['push-notifications'] });
       },
     }),
@@ -58,24 +87,43 @@ export const usePushNotifications = (props?: { appId?: string }) => {
 };
 
 export const useUnreadPushNotificationsCount = (props?: { appId?: string }) => {
-  const { data: notifications } = usePushNotifications(props).fetch;
+  const dotYouClient = useDotYouClientContext();
+  const getNotificationCounts = async () => getNotificationCountsByAppId(dotYouClient);
 
-  return notifications?.results.filter((n) => n.unread).length ?? 0;
+  const getCounts = async () => await getNotificationCounts();
+
+  return useQuery({
+    queryKey: ['push-notifications-count'],
+    select: (counts) => {
+      if (!props?.appId) {
+        return Object.values(counts.unreadCounts).reduce((acc, count) => acc + count, 0);
+      }
+
+      return counts.unreadCounts[props.appId] || 0;
+    },
+    queryFn: getCounts,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
 };
 
-export const useRemoveNotifications = (props?: { appId?: string }) => {
-  const {
-    fetch: { data: notifcationsData },
-    markAsRead: { mutateAsync: markListOfNotificationsAsRead },
-  } = usePushNotifications(props);
+export const useRemoveNotifications = (props: { disabled: boolean; appId: string }) => {
+  const dotYouClient = useDotYouClientContext();
+  const queryClient = useQueryClient();
+
+  const markAsRead = (appId: string) => markAllNotificationsOfAppAsRead(dotYouClient, appId);
+
+  const mutation = useMutation({
+    mutationFn: markAsRead,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['push-notifications'] });
+      queryClient.invalidateQueries({ queryKey: ['push-notifications-count'] });
+    },
+  });
 
   useEffect(() => {
     (async () => {
-      const notifications = notifcationsData?.results;
-      if (notifications && notifications?.length > 0) {
-        isDebug && console.debug('Removing all notifications', props?.appId);
-        await markListOfNotificationsAsRead(notifications.map((n) => n.id));
-      }
+      if ((!props?.disabled && !props.appId) || !mutation.isIdle) return;
+      mutation.mutate(props.appId);
     })();
-  }, [markListOfNotificationsAsRead, notifcationsData, props?.appId]);
+  }, [mutation, props?.disabled, props?.appId]);
 };

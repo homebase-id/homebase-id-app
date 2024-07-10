@@ -1,7 +1,8 @@
 import React, { ReactNode } from 'react';
-import { View, Text, Button, ScrollView } from 'react-native';
+import { View, Button, ScrollView } from 'react-native';
 import Toast from 'react-native-toast-message';
 import Clipboard from '@react-native-clipboard/clipboard';
+import { Text } from '../Text/Text';
 
 type ErrorBoundaryProps = {
   children: ReactNode;
@@ -42,8 +43,8 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
             this.state.details.componentStack
               ? this.state.details?.componentStack.toString()
               : this.state.details
-              ? (this.state.details as object).toString()
-              : '',
+                ? (this.state.details as object).toString()
+                : '',
           ].join();
         } catch (e) {
           return 'Unknown error';
