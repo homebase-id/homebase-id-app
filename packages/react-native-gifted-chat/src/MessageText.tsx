@@ -152,7 +152,7 @@ export function MessageText<TMessage extends IMessage = IMessage>({
         containerStyle && containerStyle[position],
       ]}
     >
-      {renderLinkPreview && renderLinkPreview()}
+      {renderLinkPreview?.()}
       <ParsedText
         style={[
           styles[position].text,
@@ -160,10 +160,9 @@ export function MessageText<TMessage extends IMessage = IMessage>({
           customTextStyle,
         ]}
         parse={[
-          ...parsePatterns!(linkStyle),
-          { type: 'url', style: linkStyle, onPress: onUrlPress },
           { type: 'phone', style: linkStyle, onPress: onPhonePress },
           { type: 'email', style: linkStyle, onPress: onEmailPress },
+          ...parsePatterns!(linkStyle),
         ]}
         childrenProps={{ ...textProps }}
       >

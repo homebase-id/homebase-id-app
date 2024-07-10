@@ -23,7 +23,9 @@ import {
 } from 'react-native-gifted-chat';
 import React, { useCallback, memo, useMemo, useRef, useEffect, useState } from 'react';
 import {
+  Dimensions,
   GestureResponderEvent,
+  Image,
   Keyboard,
   Platform,
   Pressable,
@@ -63,7 +65,12 @@ import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ChatDeletedArchivalStaus, ChatMessage } from '../../provider/chat/ChatProvider';
 import { useAudioRecorder } from '../../hooks/audio/useAudioRecorderPlayer';
 import { Text } from '../ui/Text/Text';
-import { fixDocumentURI, millisToMinutesAndSeconds, openURL } from '../../utils/utils';
+import {
+  calculateScaledDimensions,
+  fixDocumentURI,
+  millisToMinutesAndSeconds,
+  openURL,
+} from '../../utils/utils';
 import { SafeAreaView } from '../ui/SafeAreaView/SafeAreaView';
 import Document from 'react-native-document-picker';
 import { getLocales, uses24HourClock } from 'react-native-localize';
@@ -80,6 +87,8 @@ import Animated, {
 import { TouchableHighlight } from 'react-native-gesture-handler';
 import { ParseShape } from 'react-native-gifted-chat/src/MessageText';
 import { MentionDropDown } from './Mention-Dropdown';
+import { useLinkPreview } from '../../hooks/links/useLinkPreview';
+import { err } from 'react-native-svg';
 
 export type ChatMessageIMessage = IMessage & HomebaseFile<ChatMessage>;
 
@@ -798,6 +807,68 @@ const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
       !content.message?.match(/[0-9a-zA-Z]/)) ??
     false;
 
+  const url = content?.message?.match(/https?:\/\/[^\s]+/g)?.[0];
+
+  const { data } = useLinkPreview(url).get;
+
+  const renderLinkPreview = useCallback(() => {
+    if (!data) return null;
+    const { title, description, imageUrl, imageHeight, imageWidth, url } = data;
+    const { width, height } = Dimensions.get('window');
+    const { height: scaledHeight, width: scaledWidth } = calculateScaledDimensions(
+      imageWidth || 300,
+      imageHeight || 300,
+      {
+        width: width * 0.8,
+        height: height * 0.68,
+      }
+    );
+    return (
+      <Pressable onPress={() => openURL(url)}>
+        <Image
+          source={{ uri: imageUrl }}
+          style={{
+            width: scaledWidth,
+            height: scaledHeight,
+            borderTopLeftRadius: 15,
+            borderTopRightRadius: 15,
+          }}
+        />
+        <Text
+          style={{
+            fontSize: 16,
+            fontWeight: '500',
+            marginHorizontal: 10,
+            marginTop: 8,
+            color:
+              props.position === 'left' ? (isDarkMode ? Colors.white : Colors.black) : Colors.white,
+          }}
+        >
+          {title}
+        </Text>
+        {description && (
+          <Text
+            style={{
+              fontSize: 14,
+              fontWeight: '400',
+              marginHorizontal: 10,
+              marginTop: 4,
+              marginBottom: 10,
+              color:
+                props.position === 'left'
+                  ? isDarkMode
+                    ? Colors.white
+                    : Colors.black
+                  : Colors.white,
+            }}
+          >
+            {description}
+          </Text>
+        )}
+      </Pressable>
+    );
+  }, [data, isDarkMode, props.position]);
+
   /**
    * An array of parse patterns used for parsing text in the chat detail component.
    * Each pattern consists of a regular expression pattern, a style to apply to the matched text,
@@ -821,6 +892,7 @@ const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
           return (<AuthorName odinId={text.slice(1)} showYou={false} />) as unknown as string;
         },
       },
+      { type: 'url', style: linkStyle, onPress: (text: string) => openURL(text) },
     ];
   }, []);
 
@@ -828,6 +900,7 @@ const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
     <MessageText
       {...props}
       parsePatterns={parsePatterns}
+      renderLinkPreview={renderLinkPreview}
       linkStyle={{
         left: {
           color: isDarkMode ? Colors.indigo[300] : Colors.indigo[500],
