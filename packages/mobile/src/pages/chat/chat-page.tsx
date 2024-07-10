@@ -689,6 +689,10 @@ const DeleteDialogBox = memo(
       selectedMessage?.fileMetadata.senderOdinId === '' &&
       !stringGuidsEqual(conversation?.fileMetadata.appData.uniqueId, ConversationWithYourselfId);
 
+    const showDeleteForMe =
+      selectedMessage?.fileMetadata.senderOdinId !== '' ||
+      stringGuidsEqual(conversation?.fileMetadata.appData.uniqueId, ConversationWithYourselfId);
+
     const onDelete = async (deleteForEveryone: boolean) => {
       if (!selectedMessage || !conversation) {
         return;
@@ -731,11 +735,13 @@ const DeleteDialogBox = memo(
           <Dialog.Description>
             {t('Are you sure you want to delete this message')}?
           </Dialog.Description>
-          <Dialog.Button
-            label={t('Delete for Me')}
-            color={Colors.red[500]}
-            onPress={() => onDelete(false)}
-          />
+          {showDeleteForMe && (
+            <Dialog.Button
+              label={t('Delete for Me')}
+              color={Colors.red[500]}
+              onPress={() => onDelete(false)}
+            />
+          )}
           {showDeleteForEveryone && (
             <Dialog.Button
               label={t('Delete for Everyone')}
