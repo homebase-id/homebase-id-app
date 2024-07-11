@@ -90,8 +90,16 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
               ? 'This message was deleted.'
               : value.fileMetadata.appData.content.message,
           user: {
-            _id: value.fileMetadata.senderOdinId || identity || '',
-            name: value.fileMetadata.senderOdinId || identity || '',
+            _id:
+              value.fileMetadata.senderOdinId ||
+              value.fileMetadata.appData.content.authorOdinId ||
+              identity ||
+              '',
+            name:
+              value.fileMetadata.senderOdinId ||
+              value.fileMetadata.appData.content.authorOdinId ||
+              identity ||
+              '',
           },
           sent: value.fileMetadata.appData.content.deliveryStatus === 20,
           received: value.fileMetadata.appData.content.deliveryStatus === 40,
