@@ -52,8 +52,8 @@ import { ChatFileOverview } from '../../components/Files/ChatFileOverview';
 import { OfflineState } from '../../components/Platform/OfflineState';
 import { RetryModal } from '../../components/Chat/Reactions/Modal/RetryModal';
 import { t } from 'feed-app-common';
-import { LinkPreview } from '../../provider/chat/LinkProvider';
 import { useWebSocketContext } from '../../components/WebSocketContext/useWebSocketContext';
+import { LinkPreview } from '@youfoundation/js-lib/media';
 
 export type SelectedMessageState = {
   messageCordinates: { x: number; y: number };

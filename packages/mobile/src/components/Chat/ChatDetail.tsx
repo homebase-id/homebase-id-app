@@ -23,9 +23,7 @@ import {
 } from 'react-native-gifted-chat';
 import React, { useCallback, memo, useMemo, useRef, useEffect, useState } from 'react';
 import {
-  Dimensions,
   GestureResponderEvent,
-  Image,
   Keyboard,
   Platform,
   Pressable,
@@ -65,12 +63,7 @@ import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ChatDeletedArchivalStaus, ChatMessage } from '../../provider/chat/ChatProvider';
 import { useAudioRecorder } from '../../hooks/audio/useAudioRecorderPlayer';
 import { Text } from '../ui/Text/Text';
-import {
-  calculateScaledDimensions,
-  fixDocumentURI,
-  millisToMinutesAndSeconds,
-  openURL,
-} from '../../utils/utils';
+import { fixDocumentURI, millisToMinutesAndSeconds, openURL } from '../../utils/utils';
 import { SafeAreaView } from '../ui/SafeAreaView/SafeAreaView';
 import Document from 'react-native-document-picker';
 import { getLocales, uses24HourClock } from 'react-native-localize';
@@ -87,9 +80,8 @@ import Animated, {
 import { TouchableHighlight } from 'react-native-gesture-handler';
 import { ParseShape } from 'react-native-gifted-chat/src/MessageText';
 import { MentionDropDown } from './Mention-Dropdown';
-import { useLinkPreview } from '../../hooks/links/useLinkPreview';
 import { LinkPreviewBar } from './Link-Preview-Bar';
-import { LinkPreview } from '../../provider/chat/LinkProvider';
+import { LinkPreview } from '@youfoundation/js-lib/media';
 
 export type ChatMessageIMessage = IMessage & HomebaseFile<ChatMessage>;
 

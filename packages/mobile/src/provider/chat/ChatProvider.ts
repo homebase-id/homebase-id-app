@@ -38,9 +38,8 @@ import { OdinBlob } from '../../../polyfills/OdinBlob';
 import { ImageSource } from '../image/RNImageProvider';
 import { createThumbnails } from '../image/RNThumbnailProvider';
 import { grabThumbnail, processVideo } from '../image/RNVideoProviderSegmenter';
-import { VideoContentType } from '@youfoundation/js-lib/media';
+import { LinkPreview, LinkPreviewDescriptor, VideoContentType } from '@youfoundation/js-lib/media';
 import { sendReadReceipt } from '@youfoundation/js-lib/peer';
-import { LinkPreview, LinkPreviewDescriptor } from './LinkProvider';
 
 const CHAT_APP_ID = '2d781401-3804-4b57-b4aa-d8e4e2ef39f4';
 
@@ -243,18 +242,18 @@ export const uploadChatMessage = async (
     },
     transitOptions: distribute
       ? {
-          recipients: [...recipients],
-          schedule: ScheduleOptions.SendLater,
-          priority: PriorityOptions.High,
-          sendContents: SendContents.All,
-          useAppNotification: true,
-          appNotificationOptions: {
-            appId: CHAT_APP_ID,
-            typeId: message.fileMetadata.appData.groupId || getNewId(),
-            tagId: message.fileMetadata.appData.uniqueId || getNewId(),
-            silent: false,
-          },
-        }
+        recipients: [...recipients],
+        schedule: ScheduleOptions.SendLater,
+        priority: PriorityOptions.High,
+        sendContents: SendContents.All,
+        useAppNotification: true,
+        appNotificationOptions: {
+          appId: CHAT_APP_ID,
+          typeId: message.fileMetadata.appData.groupId || getNewId(),
+          tagId: message.fileMetadata.appData.uniqueId || getNewId(),
+          silent: false,
+        },
+      }
       : undefined,
   };
 
@@ -321,17 +320,17 @@ export const uploadChatMessage = async (
       const thumbnail = await grabThumbnail(newMediaFile);
       const thumbSource: ImageSource | null = thumbnail
         ? {
-            uri: thumbnail.uri,
-            width: processedMedia.width || 1920,
-            height: processedMedia.height || 1080,
-            type: thumbnail.type,
-          }
+          uri: thumbnail.uri,
+          width: processedMedia.width || 1920,
+          height: processedMedia.height || 1080,
+          type: thumbnail.type,
+        }
         : null;
       const { tinyThumb, additionalThumbnails } =
         thumbSource && thumbnail
           ? await createThumbnails(thumbSource, payloadKey, thumbnail.type as ImageContentType, [
-              { quality: 100, width: 250, height: 250 },
-            ])
+            { quality: 100, width: 250, height: 250 },
+          ])
           : { tinyThumb: undefined, additionalThumbnails: undefined };
       if (additionalThumbnails) {
         thumbnails.push(...additionalThumbnails);
@@ -414,7 +413,7 @@ export const uploadChatMessage = async (
     for (const recipient of recipients) {
       message.fileMetadata.appData.content.deliveryDetails[recipient] =
         uploadResult.recipientStatus?.[recipient].toLowerCase() ===
-        TransferUploadStatus.EnqueuedFailed
+          TransferUploadStatus.EnqueuedFailed
           ? ChatDeliveryStatus.Failed
           : ChatDeliveryStatus.Delivered;
     }
@@ -447,11 +446,11 @@ export const updateChatMessage = async (
     },
     transitOptions: distribute
       ? {
-          recipients: [...recipients],
-          schedule: ScheduleOptions.SendLater,
-          priority: PriorityOptions.High,
-          sendContents: SendContents.All,
-        }
+        recipients: [...recipients],
+        schedule: ScheduleOptions.SendLater,
+        priority: PriorityOptions.High,
+        sendContents: SendContents.All,
+      }
       : undefined,
   };
 

@@ -31,7 +31,7 @@ import {
 import { OdinBlob } from '../../../polyfills/OdinBlob';
 import { getSynchronousDotYouClient } from './getSynchronousDotYouClient';
 import { useErrors, addError } from '../errors/useErrors';
-import { LinkPreview } from '../../provider/chat/LinkProvider';
+import { LinkPreview } from '@youfoundation/js-lib/media';
 
 const sendMessage = async ({
   conversation,

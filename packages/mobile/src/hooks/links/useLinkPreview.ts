@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
-import { getLinkPreview, LinkPreview } from '../../provider/chat/LinkProvider';
 import { useDotYouClientContext } from 'feed-app-common';
 import { Image } from 'react-native';
 import { getPayloadAsJson, TargetDrive } from '@youfoundation/js-lib/core';
+import { getLinkPreview, LinkPreview } from '@youfoundation/js-lib/media';
 
 
 
