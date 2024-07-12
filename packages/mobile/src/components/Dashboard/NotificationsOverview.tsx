@@ -402,7 +402,7 @@ export const navigateOnNotification = (
     chatNavigator.navigate('ChatScreen', { convoId: notification.options.typeId });
   } else if (notification.options.appId === MAIL_APP_ID) {
     // Navigate to owner console:
-    openURL(`https://${identity}/apps/mail/${notification.options.typeId}`);
+    openURL(`https://${identity}/apps/mail/inbox/${notification.options.typeId}`);
   } else if (notification.options.appId === FEED_APP_ID) {
     feedNavigator.navigate('Feed');
   } else {

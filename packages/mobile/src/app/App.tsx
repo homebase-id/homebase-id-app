@@ -34,6 +34,7 @@ import {
   TabMenuIcon,
 } from '../components/Nav/TabStackIcons';
 import { AudioContextProvider } from '../components/AudioContext/AudioContext';
+import { WebSocketContextProvider } from '../components/WebSocketContext/WebSocketContext';
 import { useInitialPushNotification } from '../hooks/push-notification/useInitialPushNotification';
 import { ErrorBoundary } from '../components/ui/ErrorBoundary/ErrorBoundary';
 import { RouteContextProvider, useRouteContext } from '../components/RouteContext/RouteContext';
@@ -123,11 +124,13 @@ const AuthenticatedRoot = memo(() => {
   return (
     <DotYouClientProvider>
       <AudioContextProvider>
-        <BubbleColorProvider>
-          <ErrorBoundary>
-            <AppStackScreen />
-          </ErrorBoundary>
-        </BubbleColorProvider>
+        <WebSocketContextProvider>
+          <BubbleColorProvider>
+            <ErrorBoundary>
+              <AppStackScreen />
+            </ErrorBoundary>
+          </BubbleColorProvider>
+        </WebSocketContextProvider>
       </AudioContextProvider>
     </DotYouClientProvider>
   );

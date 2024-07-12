@@ -53,6 +53,7 @@ import { OfflineState } from '../../components/Platform/OfflineState';
 import { RetryModal } from '../../components/Chat/Reactions/Modal/RetryModal';
 import { t } from 'feed-app-common';
 import { LinkPreview } from '../../provider/chat/LinkProvider';
+import { useWebSocketContext } from '../../components/WebSocketContext/useWebSocketContext';
 
 export type SelectedMessageState = {
   messageCordinates: { x: number; y: number };
@@ -66,6 +67,8 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
 
   const [replyMessage, setReplyMessage] = useState<ChatMessageIMessage | null>(null);
   const identity = useAuth().getIdentity();
+
+  const { isOnline } = useWebSocketContext();
 
   const [assets, setAssets] = useState<Asset[]>([]);
   // Messages
@@ -91,8 +94,16 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
               ? 'This message was deleted.'
               : value.fileMetadata.appData.content.message,
           user: {
-            _id: value.fileMetadata.senderOdinId || identity || '',
-            name: value.fileMetadata.senderOdinId || identity || '',
+            _id:
+              value.fileMetadata.senderOdinId ||
+              value.fileMetadata.appData.content.authorOdinId ||
+              identity ||
+              '',
+            name:
+              value.fileMetadata.senderOdinId ||
+              value.fileMetadata.appData.content.authorOdinId ||
+              identity ||
+              '',
           },
           sent: value.fileMetadata.appData.content.deliveryStatus === 20,
           received: value.fileMetadata.appData.content.deliveryStatus === 40,
@@ -521,7 +532,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
             </View>
           ) : null}
           <ChatConnectedState {...conversation} />
-          <OfflineState />
+          <OfflineState isConnected={isOnline} />
           <Host>
             <Pressable
               onPress={dismissSelectedMessage}
