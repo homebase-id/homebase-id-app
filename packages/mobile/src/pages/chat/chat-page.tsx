@@ -52,6 +52,7 @@ import { ChatFileOverview } from '../../components/Files/ChatFileOverview';
 import { OfflineState } from '../../components/Platform/OfflineState';
 import { RetryModal } from '../../components/Chat/Reactions/Modal/RetryModal';
 import { t } from 'feed-app-common';
+import { LinkPreview } from '../../provider/chat/LinkProvider';
 
 export type SelectedMessageState = {
   messageCordinates: { x: number; y: number };
@@ -181,6 +182,15 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
   useMarkMessagesAsRead({ conversation: conversation || undefined, messages });
 
   const { mutateAsync: inviteRecipient } = useConversation().inviteRecipient;
+
+  const [linkPreviews, setLinkPreviews] = useState<LinkPreview | null>(null);
+  const onDismissLinkPreview = () => {
+    setLinkPreviews(null);
+  };
+  const onLinkData = (link: LinkPreview) => {
+    setLinkPreviews(link);
+  };
+
   const doSend = useCallback(
     (message: { text: string }[]) => {
       if (!conversation) return;
@@ -213,6 +223,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
             fileSize: value.fileSize,
           };
         }),
+        linkPreviews: linkPreviews ? [linkPreviews] : [],
         chatId: getNewId(),
         userDate: new Date().getTime(),
       });
@@ -220,12 +231,13 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
       setReplyMessage(null);
     },
     [
-      messages,
       conversation,
+      messages,
       route.params.convoId,
       sendMessage,
       replyMessage?.fileMetadata.appData.uniqueId,
       assets,
+      linkPreviews,
       inviteRecipient,
     ]
   );
@@ -533,6 +545,8 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
                   hasMoreMessages={hasMoreMessages}
                   fetchMoreMessages={fetchMoreMessages}
                   conversationId={route.params.convoId}
+                  onDismissLinkPreview={onDismissLinkPreview}
+                  onLinkData={onLinkData}
                 />
               </ErrorBoundary>
             </Pressable>

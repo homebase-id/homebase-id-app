@@ -1,32 +1,52 @@
 import { DotYouClient } from '@youfoundation/js-lib/core';
-import { stringifyToQueryParams } from '@youfoundation/js-lib/helpers';
 
-export interface LinkMeta {
+interface LinkPreviewFromServer {
     title: string;
+    description: string;
+    imageUrl: string;
+    imageWidth: number;
+    imageHeight: number;
+    url: string;
+}
+
+export interface LinkPreview {
+    title?: string;
     description?: string;
     imageUrl?: string;
     imageWidth?: number;
     imageHeight?: number;
     url: string;
-    type?: string;
-
 }
 
-export async function getUrlMetaData({ url, dotyouclient }: {
+export interface LinkPreviewDescriptor {
     url: string;
-    dotyouclient: DotYouClient;
-}): Promise<LinkMeta | undefined> {
-    if (!url) {
-        return;
-    }
-    const axiosclient = dotyouclient.createAxiosClient();
-    const standardizedUrl = url.startsWith('http') ? url : `https://${url}`;
-    try {
-        const response = await axiosclient.get<LinkMeta>(`utils/links/extract?url=${standardizedUrl}`);
-        return response.data;
-    } catch (error) {
-        console.log('error', error);
-        throw error;
-
-    }
+    hasImage?: boolean;
+    imageWidth?: number;
+    imageHeight?: number;
 }
+
+export const getLinkPreview = async (
+    dotYouClient: DotYouClient,
+    url: string
+): Promise<LinkPreview | null> => {
+    const axiosClient = dotYouClient.createAxiosClient();
+    const standardizedUrl = url.startsWith('http') ? url : `https://${url}`;
+
+    return axiosClient
+        .get<LinkPreviewFromServer>(`/utils/links/extract?url=${standardizedUrl}`)
+        .then((response) => {
+            return {
+                title: response.data.title || '',
+                description: response.data.description || '',
+                imageUrl: response.data.imageUrl || undefined,
+                imageWidth: response.data.imageWidth || undefined,
+                imageHeight: response.data.imageHeight || undefined,
+                url: response.data.url,
+            };
+        })
+        .catch((e) => {
+            console.error(e);
+            return null;
+        });
+};
+

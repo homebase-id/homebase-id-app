@@ -67,7 +67,6 @@ export interface MessageTextProps<TMessage extends IMessage> {
   linkStyle?: LeftRightStyle<TextStyle>;
   textProps?: TextProps;
   customTextStyle?: StyleProp<TextStyle>;
-  renderLinkPreview?(): ReactNode;
   parsePatterns?(linkStyle: StyleProp<TextStyle>): ParseShape[];
 }
 
@@ -81,7 +80,6 @@ export function MessageText<TMessage extends IMessage = IMessage>({
   customTextStyle,
   parsePatterns = _ => [],
   textProps,
-  renderLinkPreview,
 }: MessageTextProps<TMessage>) {
   const { actionSheet } = useChatContext();
 
@@ -152,7 +150,6 @@ export function MessageText<TMessage extends IMessage = IMessage>({
         containerStyle && containerStyle[position],
       ]}
     >
-      {renderLinkPreview?.()}
       <ParsedText
         style={[
           styles[position].text,

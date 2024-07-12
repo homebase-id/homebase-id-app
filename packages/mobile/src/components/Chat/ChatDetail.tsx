@@ -88,7 +88,8 @@ import { TouchableHighlight } from 'react-native-gesture-handler';
 import { ParseShape } from 'react-native-gifted-chat/src/MessageText';
 import { MentionDropDown } from './Mention-Dropdown';
 import { useLinkPreview } from '../../hooks/links/useLinkPreview';
-import { err } from 'react-native-svg';
+import { LinkPreviewBar } from './Link-Preview-Bar';
+import { LinkPreview } from '../../provider/chat/LinkProvider';
 
 export type ChatMessageIMessage = IMessage & HomebaseFile<ChatMessage>;
 
@@ -109,6 +110,8 @@ export const ChatDetail = memo(
     hasMoreMessages,
     fetchMoreMessages,
     conversationId,
+    onLinkData,
+    onDismissLinkPreview,
   }: {
     isGroup: boolean;
     messages: ChatMessageIMessage[];
@@ -131,6 +134,8 @@ export const ChatDetail = memo(
     setAssets: (assets: Asset[]) => void;
     hasMoreMessages: boolean;
     fetchMoreMessages: () => void;
+    onLinkData: (linkPreview: LinkPreview) => void;
+    onDismissLinkPreview: () => void;
   }) => {
     const { isDarkMode } = useDarkMode();
     const identity = useAuth().getIdentity();
@@ -202,6 +207,7 @@ export const ChatDetail = memo(
           words[words.length - 1] = `@${mention}`;
           updateText(words.join(' ') + ' ');
         };
+
         return (
           <Animated.View
             style={{
@@ -215,13 +221,26 @@ export const ChatDetail = memo(
                 onMention={onMention}
               />
             )}
+            <LinkPreviewBar
+              textToSearchIn={text || ''}
+              onDismiss={onDismissLinkPreview}
+              onLinkData={onLinkData}
+            />
             {replyMessage ? (
               <ReplyMessageBar message={replyMessage} clearReply={() => setReplyMessage(null)} />
             ) : null}
           </Animated.View>
         );
       },
-      [isDarkMode, isGroup, conversationId, replyMessage, setReplyMessage]
+      [
+        isDarkMode,
+        isGroup,
+        conversationId,
+        onDismissLinkPreview,
+        onLinkData,
+        replyMessage,
+        setReplyMessage,
+      ]
     );
 
     const { record, stop, duration, isRecording } = useAudioRecorder();
@@ -807,68 +826,6 @@ const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
       !content.message?.match(/[0-9a-zA-Z]/)) ??
     false;
 
-  const url = content?.message?.match(/https?:\/\/[^\s]+/g)?.[0];
-
-  const { data } = useLinkPreview(url).get;
-
-  const renderLinkPreview = useCallback(() => {
-    if (!data) return null;
-    const { title, description, imageUrl, imageHeight, imageWidth, url } = data;
-    const { width, height } = Dimensions.get('window');
-    const { height: scaledHeight, width: scaledWidth } = calculateScaledDimensions(
-      imageWidth || 300,
-      imageHeight || 300,
-      {
-        width: width * 0.8,
-        height: height * 0.68,
-      }
-    );
-    return (
-      <Pressable onPress={() => openURL(url)}>
-        <Image
-          source={{ uri: imageUrl }}
-          style={{
-            width: scaledWidth,
-            height: scaledHeight,
-            borderTopLeftRadius: 15,
-            borderTopRightRadius: 15,
-          }}
-        />
-        <Text
-          style={{
-            fontSize: 16,
-            fontWeight: '500',
-            marginHorizontal: 10,
-            marginTop: 8,
-            color:
-              props.position === 'left' ? (isDarkMode ? Colors.white : Colors.black) : Colors.white,
-          }}
-        >
-          {title}
-        </Text>
-        {description && (
-          <Text
-            style={{
-              fontSize: 14,
-              fontWeight: '400',
-              marginHorizontal: 10,
-              marginTop: 4,
-              marginBottom: 10,
-              color:
-                props.position === 'left'
-                  ? isDarkMode
-                    ? Colors.white
-                    : Colors.black
-                  : Colors.white,
-            }}
-          >
-            {description}
-          </Text>
-        )}
-      </Pressable>
-    );
-  }, [data, isDarkMode, props.position]);
-
   /**
    * An array of parse patterns used for parsing text in the chat detail component.
    * Each pattern consists of a regular expression pattern, a style to apply to the matched text,
@@ -900,7 +857,6 @@ const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
     <MessageText
       {...props}
       parsePatterns={parsePatterns}
-      renderLinkPreview={renderLinkPreview}
       linkStyle={{
         left: {
           color: isDarkMode ? Colors.indigo[300] : Colors.indigo[500],
