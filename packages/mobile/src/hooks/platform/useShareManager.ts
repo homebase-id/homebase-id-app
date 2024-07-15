@@ -2,6 +2,7 @@ import { NavigationProp, useFocusEffect, useNavigation } from '@react-navigation
 import { useCallback, useEffect } from 'react';
 import { NativeEventEmitter, NativeModules, Platform } from 'react-native';
 import { ChatStackParamList } from '../../app/ChatStack';
+import ShareMenu from 'react-native-share-menu';
 
 const { RNShareIntent } = NativeModules;
 
@@ -19,6 +20,7 @@ export const useShareManager = () => {
   const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
   const handleShare = useCallback(
     (item?: SharedItem) => {
+      console.log('Shared item:', item);
       if (!item) {
         return;
       }
@@ -30,6 +32,7 @@ export const useShareManager = () => {
   const handleInitialShare = useCallback(() => {
     if (Platform.OS === 'ios') {
       // Ios not supported yet
+      ShareMenu.getInitialShare((s: any) => handleShare(s?.data));
       return;
     }
     RNShareIntent.getSharedText(handleShare);

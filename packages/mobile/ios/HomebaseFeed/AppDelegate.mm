@@ -5,6 +5,7 @@
 // iOS 9.x or newer
 #import <React/RCTLinkingManager.h>
 #import <CodePush/CodePush.h>
+#import <ShareMenuManager.h>
 
 @implementation AppDelegate
 
@@ -34,6 +35,16 @@
    openURL:(NSURL *)url
    options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options
 {
+  //  Check if the passed url is a <YOUR_URL_SCHEME_NAME>://- or a Spotify-url
+    NSString *urlString = url.absoluteString;
+    
+    
+  // Check if its "homebase-share"
+    if ([urlString hasPrefix:@"homebase-share://"]) {
+      NSLog(@"Entered with the following string: %@s", urlString);
+      return [ShareMenuManager application:application openURL:url options:options];
+    }
+  
   return [RCTLinkingManager application:application openURL:url options:options];
 }
 
