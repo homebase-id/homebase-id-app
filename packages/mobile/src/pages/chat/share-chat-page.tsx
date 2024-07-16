@@ -12,7 +12,7 @@ import { useDarkMode } from '../../hooks/useDarkMode';
 import { useAllConnections } from 'feed-app-common';
 import { useConversation } from '../../hooks/chat/useConversation';
 import { useChatMessage } from '../../hooks/chat/useChatMessage';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { DotYouProfile } from '@youfoundation/js-lib/network';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import {
@@ -31,7 +31,7 @@ import { SendChat } from '../../components/ui/Icons/icons';
 import { ErrorNotification } from '../../components/ui/Alert/ErrorNotification';
 import { ImageSource } from '../../provider/image/RNImageProvider';
 import { Image } from 'react-native';
-import { fixContentURI } from '../../utils/utils';
+import { fixContentURI, getImageSize } from '../../utils/utils';
 import {
   ConversationWithRecentMessage,
   useConversationsWithRecentMessage,
@@ -92,14 +92,14 @@ export const ShareChatPage = (prop: ShareChatProp) => {
           width: 0,
           height: 0,
         };
-        await Image.getSize(
-          data,
-          (width, height) => (size = { width, height }),
-          (error) => {
-            console.error('Failed to get image size', error);
+        await getImageSize(uri).then((res) => {
+          if (res instanceof Error) {
+            console.error('Error getting image size', res);
             size = { width: 500, height: 500 };
+            return;
           }
-        );
+          size = res;
+        });
         imageSource.push({
           uri: uri,
           width: size.width,

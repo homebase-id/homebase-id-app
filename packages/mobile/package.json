@@ -15,7 +15,7 @@
     "release:ios-codepush": "appcenter codepush release -a odinops/Homebase-Feed-ios -d Staging -c ./codepush -t 0.0.1 && rm -rf codepush"
   },
   "dependencies": {
-    "@bam.tech/react-native-image-resizer": "^3.0.7",
+    "@bam.tech/react-native-image-resizer": "^3.0.10",
     "@gorhom/bottom-sheet": "^4.6.0",
     "@likashefqet/react-native-image-zoom": "^3.0.0",
     "@mattermost/react-native-paste-input": "0.8.0",

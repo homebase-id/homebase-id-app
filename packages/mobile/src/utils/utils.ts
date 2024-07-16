@@ -1,4 +1,4 @@
-import { Linking } from 'react-native';
+import { Image, Linking } from 'react-native';
 import { CachesDirectoryPath, copyFile } from 'react-native-fs';
 import InAppBrowser from 'react-native-inappbrowser-reborn';
 
@@ -101,8 +101,21 @@ export async function fixContentURI(url: string): Promise<string> {
 
     }
     if (url.startsWith('file://')) {
-        return decodeURI(url);
+        url = decodeURI(url);
     }
+
     return url;
 }
+
+// Utility function to convert Image.getSize to a promise
+export const getImageSize = (uri: string): Promise<{ width: number, height: number } | Error> => {
+    return new Promise((resolve, reject) => {
+        Image.getSize(
+            uri,
+            (width, height) => resolve({ width, height }),
+            (error) => reject(error)
+        );
+    });
+};
+
 
