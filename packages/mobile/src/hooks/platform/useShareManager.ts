@@ -20,7 +20,6 @@ export const useShareManager = () => {
   const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
   const handleShare = useCallback(
     (item?: SharedItem) => {
-      console.log('handleShare', item);
       if (!item) {
         return;
       }
@@ -30,20 +29,14 @@ export const useShareManager = () => {
   );
 
   const handleInitialShare = useCallback(() => {
-    ShareMenu.getSharedText((data: any) => {
-      console.log('ShareItemData', data);
-      return handleShare(data);
-    });
+    ShareMenu.getSharedText(handleShare);
   }, [handleShare]);
 
   useFocusEffect(handleInitialShare);
 
   useEffect(() => {
 
-    EventEmitter?.addListener(NEW_SHARE_EVENT_NAME, (s) => {
-      console.log('NEW_SHARE_EVENT_NAME', s);
-      return handleShare(s);
-    });
+    EventEmitter?.addListener(NEW_SHARE_EVENT_NAME, handleShare);
     return () => {
       EventEmitter?.removeAllListeners(NEW_SHARE_EVENT_NAME);
     };

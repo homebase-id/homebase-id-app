@@ -94,7 +94,6 @@ export const ShareChatPage = (prop: ShareChatProp) => {
         };
         await getImageSize(uri).then((res) => {
           if (res instanceof Error) {
-            console.error('Error getting image size', res);
             size = { width: 500, height: 500 };
             return;
           }
