@@ -33,12 +33,17 @@ import {
   deleteFile,
 } from '@youfoundation/js-lib/core';
 import { ChatDrive, UnifiedConversation } from './ConversationProvider';
-import { assertIfDefined, getNewId, jsonStringify64 } from '@youfoundation/js-lib/helpers';
+import {
+  assertIfDefined,
+  getNewId,
+  jsonStringify64,
+  stringToUint8Array,
+} from '@youfoundation/js-lib/helpers';
 import { OdinBlob } from '../../../polyfills/OdinBlob';
 import { ImageSource } from '../image/RNImageProvider';
 import { createThumbnails } from '../image/RNThumbnailProvider';
 import { grabThumbnail, processVideo } from '../image/RNVideoProviderSegmenter';
-import { VideoContentType } from '@youfoundation/js-lib/media';
+import { LinkPreview, LinkPreviewDescriptor, VideoContentType } from '@youfoundation/js-lib/media';
 import { sendReadReceipt } from '@youfoundation/js-lib/peer';
 
 const CHAT_APP_ID = '2d781401-3804-4b57-b4aa-d8e4e2ef39f4';
@@ -83,6 +88,7 @@ export interface ChatMessage {
 }
 
 const CHAT_MESSAGE_PAYLOAD_KEY = 'chat_mbl';
+export const CHAT_LINKS_PAYLOAD_KEY = 'chat_links';
 
 export const getChatMessages = async (
   dotYouClient: DotYouClient,
@@ -227,6 +233,7 @@ export const uploadChatMessage = async (
   message: NewHomebaseFile<ChatMessage>,
   recipients: string[],
   files: ImageSource[] | undefined,
+  linkPreviews: LinkPreview[] | undefined,
   onVersionConflict?: () => void,
   onUpdate?: (phase: string, progress: number) => void
 ) => {
@@ -275,6 +282,28 @@ export const uploadChatMessage = async (
   const payloads: PayloadFile[] = [];
   const thumbnails: ThumbnailFile[] = [];
   const previewThumbnails: EmbeddedThumb[] = [];
+
+  if (!files?.length && linkPreviews?.length) {
+    // We only support link previews when there is no media
+    const descriptorContent = JSON.stringify(
+      linkPreviews.map((preview) => {
+        return {
+          url: preview.url,
+          hasImage: !!preview.imageUrl,
+          imageWidth: preview.imageWidth,
+          imageHeight: preview.imageHeight,
+        } as LinkPreviewDescriptor;
+      })
+    );
+
+    payloads.push({
+      key: CHAT_LINKS_PAYLOAD_KEY,
+      payload: new OdinBlob([stringToUint8Array(JSON.stringify(linkPreviews))], {
+        type: 'application/json',
+      }) as any as Blob,
+      descriptorContent,
+    });
+  }
 
   for (let i = 0; files && i < files?.length; i++) {
     const payloadKey = `${CHAT_MESSAGE_PAYLOAD_KEY}${i}`;
