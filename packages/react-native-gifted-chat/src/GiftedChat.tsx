@@ -510,7 +510,7 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
     ) : (
       fragment
     );
-  }, [messages, props, messagesContainerHeight]);
+  }, [messages, props, messagesContainerHeight, text]);
 
   const _onSend = (
     messages: TMessage[] = [],

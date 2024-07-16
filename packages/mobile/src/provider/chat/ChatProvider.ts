@@ -30,14 +30,20 @@ import {
   PriorityOptions,
   RecipientTransferHistory,
   TransferStatus,
+  deleteFile,
 } from '@youfoundation/js-lib/core';
 import { ChatDrive, UnifiedConversation } from './ConversationProvider';
-import { assertIfDefined, getNewId, jsonStringify64 } from '@youfoundation/js-lib/helpers';
+import {
+  assertIfDefined,
+  getNewId,
+  jsonStringify64,
+  stringToUint8Array,
+} from '@youfoundation/js-lib/helpers';
 import { OdinBlob } from '../../../polyfills/OdinBlob';
 import { ImageSource } from '../image/RNImageProvider';
 import { createThumbnails } from '../image/RNThumbnailProvider';
 import { grabThumbnail, processVideo } from '../image/RNVideoProviderSegmenter';
-import { VideoContentType } from '@youfoundation/js-lib/media';
+import { LinkPreview, LinkPreviewDescriptor, VideoContentType } from '@youfoundation/js-lib/media';
 import { sendReadReceipt } from '@youfoundation/js-lib/peer';
 
 const CHAT_APP_ID = '2d781401-3804-4b57-b4aa-d8e4e2ef39f4';
@@ -68,20 +74,13 @@ export enum MessageType {
 }
 
 export interface ChatMessage {
-  replyId?: string; //=> Better to use the groupId (unless that would break finding the messages of a conversation)...
-
-  /// Type of the message
-  // messageType: MessageType;
-
-  /// FileState of the Message
-  /// [FileState.active] shows the message is active
-  /// [FileState.deleted] shows the message is deleted. It's soft deleted
-  // fileState: FileState => archivalStatus
+  replyId?: string;
 
   /// Content of the message
   message: string;
 
-  // reactions: string;
+  // After an update to a message on the receiving end, the senderOdinId is emptied; So we have an authorOdinId to keep track of the original sender
+  authorOdinId?: string;
 
   /// DeliveryStatus of the message. Indicates if the message is sent, delivered or read
   deliveryStatus: ChatDeliveryStatus;
@@ -89,6 +88,7 @@ export interface ChatMessage {
 }
 
 const CHAT_MESSAGE_PAYLOAD_KEY = 'chat_mbl';
+export const CHAT_LINKS_PAYLOAD_KEY = 'chat_links';
 
 export const getChatMessages = async (
   dotYouClient: DotYouClient,
@@ -233,6 +233,7 @@ export const uploadChatMessage = async (
   message: NewHomebaseFile<ChatMessage>,
   recipients: string[],
   files: ImageSource[] | undefined,
+  linkPreviews: LinkPreview[] | undefined,
   onVersionConflict?: () => void,
   onUpdate?: (phase: string, progress: number) => void
 ) => {
@@ -253,8 +254,8 @@ export const uploadChatMessage = async (
           useAppNotification: true,
           appNotificationOptions: {
             appId: CHAT_APP_ID,
-            typeId: message.fileMetadata.appData.groupId as string,
-            tagId: getNewId(),
+            typeId: message.fileMetadata.appData.groupId || getNewId(),
+            tagId: message.fileMetadata.appData.uniqueId || getNewId(),
             silent: false,
           },
         }
@@ -281,6 +282,28 @@ export const uploadChatMessage = async (
   const payloads: PayloadFile[] = [];
   const thumbnails: ThumbnailFile[] = [];
   const previewThumbnails: EmbeddedThumb[] = [];
+
+  if (!files?.length && linkPreviews?.length) {
+    // We only support link previews when there is no media
+    const descriptorContent = JSON.stringify(
+      linkPreviews.map((preview) => {
+        return {
+          url: preview.url,
+          hasImage: !!preview.imageUrl,
+          imageWidth: preview.imageWidth,
+          imageHeight: preview.imageHeight,
+        } as LinkPreviewDescriptor;
+      })
+    );
+
+    payloads.push({
+      key: CHAT_LINKS_PAYLOAD_KEY,
+      payload: new OdinBlob([stringToUint8Array(JSON.stringify(linkPreviews))], {
+        type: 'application/json',
+      }) as any as Blob,
+      descriptorContent,
+    });
+  }
 
   for (let i = 0; files && i < files?.length; i++) {
     const payloadKey = `${CHAT_MESSAGE_PAYLOAD_KEY}${i}`;
@@ -465,11 +488,18 @@ export const updateChatMessage = async (
         dotYouClient,
         message.fileMetadata.appData.uniqueId as string
       );
-      if (!existingChatMessage) return null;
+      if (!existingChatMessage) return;
       message.fileMetadata.versionTag = existingChatMessage.fileMetadata.versionTag;
       return await updateChatMessage(dotYouClient, message, recipients, keyHeader);
     }
   );
+};
+
+export const hardDeleteChatMessage = async (
+  dotYouClient: DotYouClient,
+  message: HomebaseFile<ChatMessage>
+) => {
+  return await deleteFile(dotYouClient, ChatDrive, message.fileId, []);
 };
 
 export const softDeleteChatMessage = async (
@@ -498,6 +528,7 @@ export const softDeleteChatMessage = async (
 
   message.fileMetadata.versionTag = runningVersionTag;
   message.fileMetadata.appData.content.message = '';
+  message.fileMetadata.appData.content.authorOdinId = message.fileMetadata.senderOdinId;
   return await updateChatMessage(dotYouClient, message, deleteForEveryone ? recipients : []);
 };
 

@@ -1,6 +1,8 @@
 import messaging, { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
-import { PushNotificationOptions } from '@youfoundation/js-lib/core';
+import { PushNotification } from '@youfoundation/js-lib/core';
 import notifee, { AndroidVisibility } from '@notifee/react-native';
+import { bodyFormer } from '../../components/Dashboard/NotificationsOverview';
+import axios from 'axios';
 
 //
 // CAVEATS GALORE!
@@ -27,11 +29,9 @@ import notifee, { AndroidVisibility } from '@notifee/react-native';
 //
 
 // backend: src/services/Odin.Services/AppNotifications/Push/PushNotificationContent.cs
-interface PushNotificationPayload {
-  senderId: string;
-  timestamp: string;
+// backend: src/services/Odin.Services/AppNotifications/Push/PushNotificationContent.cs
+interface PushNotificationPayload extends PushNotification {
   appDisplayName: string;
-  options: PushNotificationOptions;
 }
 
 // backend: src/core/Odin.Core/Dto/DevicePushNotificationRequest.cs
@@ -110,18 +110,25 @@ const onBackgroundMessageReceived = async (
   if (message.notification) {
     return;
   }
+  const displayName =
+    (await axios
+      .get(`https://${notification.data.senderId}/pub/profile`)
+      .then((response) => response.data?.name as string | undefined)
+      .catch(() => undefined)) || notification.data.senderId;
 
   // If there's no "notification" object directly in the FCM message, it's a data message, and we handle it ourselve
   await notifee.displayNotification({
     title: notification.data.appDisplayName,
     body:
-      notification.data.options.unEncryptedMessage || `Received from ${notification.data.senderId}`,
+      bodyFormer(notification.data, false, notification.data.appDisplayName, displayName) ||
+      `Received from ${notification.data.senderId}`,
     // Keeps them backwards compatible with the OOTB push notifications within FCM
     data: { data: JSON.stringify(notification.data) },
     android: {
       channelId: 'default',
       largeIcon: `https://${notification.data.senderId}/pub/image`,
       smallIcon: 'ic_notification',
+      circularLargeIcon: true,
       pressAction: {
         id: 'default',
       },
@@ -134,7 +141,7 @@ const onBackgroundMessageReceived = async (
         sender: {
           id: notification.data.senderId,
           avatar: `https://${notification.data.senderId}/pub/image`,
-          displayName: notification.data.senderId,
+          displayName: displayName || notification.data.senderId,
         },
       },
       sound: 'default',

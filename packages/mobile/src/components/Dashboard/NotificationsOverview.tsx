@@ -343,7 +343,7 @@ const FEED_NEW_CONTENT_TYPE_ID = 'ad695388-c2df-47a0-ad5b-fc9f9e1fffc9';
 const FEED_NEW_REACTION_TYPE_ID = '37dae95d-e137-4bd4-b782-8512aaa2c96a';
 const FEED_NEW_COMMENT_TYPE_ID = '1e08b70a-3826-4840-8372-18410bfc02c7';
 
-const bodyFormer = (
+export const bodyFormer = (
   payload: PushNotification,
   hasMultiple: boolean,
   appName: string,
@@ -402,7 +402,7 @@ export const navigateOnNotification = (
     chatNavigator.navigate('ChatScreen', { convoId: notification.options.typeId });
   } else if (notification.options.appId === MAIL_APP_ID) {
     // Navigate to owner console:
-    openURL(`https://${identity}/apps/mail/${notification.options.typeId}`);
+    openURL(`https://${identity}/apps/mail/inbox/${notification.options.typeId}`);
   } else if (notification.options.appId === FEED_APP_ID) {
     feedNavigator.navigate('Feed');
   } else {

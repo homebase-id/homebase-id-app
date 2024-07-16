@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { ReactNode } from 'react';
 import {
   Linking,
   StyleSheet,
@@ -157,10 +157,9 @@ export function MessageText<TMessage extends IMessage = IMessage>({
           customTextStyle,
         ]}
         parse={[
-          ...parsePatterns!(linkStyle),
-          { type: 'url', style: linkStyle, onPress: onUrlPress },
           { type: 'phone', style: linkStyle, onPress: onPhonePress },
           { type: 'email', style: linkStyle, onPress: onEmailPress },
+          ...parsePatterns!(linkStyle),
         ]}
         childrenProps={{ ...textProps }}
       >
