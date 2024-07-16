@@ -35,13 +35,13 @@
    openURL:(NSURL *)url
    options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options
 {
-  //  Check if the passed url is a <YOUR_URL_SCHEME_NAME>://- or a Spotify-url
+  //  Check if the passed url is a <YOUR_URL_SCHEME_NAME>://
     NSString *urlString = url.absoluteString;
-    
+  NSLog(@"Entered with the following string: %@s", urlString);
     
   // Check if its "homebase-share"
     if ([urlString hasPrefix:@"homebase-share://"]) {
-      NSLog(@"Entered with the following string: %@s", urlString);
+     
       return [ShareMenuManager application:application openURL:url options:options];
     }
   

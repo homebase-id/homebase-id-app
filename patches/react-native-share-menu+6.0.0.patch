@@ -244,6 +244,62 @@ index 3884e25..0000000
 -    return Collections.emptyList();
 -  }
 -}
+diff --git a/node_modules/react-native-share-menu/ios/Modules/ShareMenu.swift b/node_modules/react-native-share-menu/ios/Modules/ShareMenu.swift
+index 74badda..7e844c8 100644
+--- a/node_modules/react-native-share-menu/ios/Modules/ShareMenu.swift
++++ b/node_modules/react-native-share-menu/ios/Modules/ShareMenu.swift
+@@ -100,25 +100,44 @@ class ShareMenu: RCTEventEmitter {
+ 
+     @objc(getSharedText:)
+     func getSharedText(callback: RCTResponseSenderBlock) {
+-        var data = [DATA_KEY: sharedData] as [String: Any]
++        var data: [String: Any] = [DATA_KEY: sharedData ?? NSNull()]
+ 
+         if let bundleId = Bundle.main.bundleIdentifier, let userDefaults = UserDefaults(suiteName: "group.\(bundleId)") {
+-            data[EXTRA_DATA_KEY] = userDefaults.object(forKey: USER_DEFAULTS_EXTRA_DATA_KEY) as? [String: Any]
++            if let extraData = userDefaults.object(forKey: USER_DEFAULTS_EXTRA_DATA_KEY) as? [String: Any] {
++                        data[EXTRA_DATA_KEY] = extraData
++                    } else {
++                        data[EXTRA_DATA_KEY] = NSNull()
++                    }
+         } else {
+             print("Error: \(NO_APP_GROUP_ERROR)")
+         }
++        // Remove keys with NSNull values
++        data = data.filter { !($0.value is NSNull) }
+         
+-        callback([data as Any])
++            // Check if data is empty
++            if data.isEmpty {
++                print("No valid data to share.")
++                return
++            }
++        
++        callback([data])
+         sharedData = []
+     }
+     
+     func dispatchEvent(with data: [[String:String]], and extraData: [String:Any]?) {
+         guard hasListeners else { return }
+ 
+-        var finalData = [DATA_KEY: data] as [String: Any]
+-        if (extraData != nil) {
+-            finalData[EXTRA_DATA_KEY] = extraData
+-        }
++        // Flatten the array of dictionaries into a single dictionary
++            var finalData = data.reduce(into: [String: Any]()) { (result, dict) in
++                for (key, value) in dict {
++                    result[key] = value
++                }
++            }
++            
++        // Add extraData to finalData if extraData is not nil
++            if let extraData = extraData {
++                finalData[EXTRA_DATA_KEY] = extraData
++            }
+         
+         sendEvent(withName: NEW_SHARE_EVENT, body: finalData)
+     }
 diff --git a/node_modules/react-native-share-menu/ios/ReactShareViewController.swift b/node_modules/react-native-share-menu/ios/ReactShareViewController.swift
 index f42bce6..ee36062 100644
 --- a/node_modules/react-native-share-menu/ios/ReactShareViewController.swift

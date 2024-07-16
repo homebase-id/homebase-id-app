@@ -30,7 +30,7 @@ public class RNShareIntent extends ReactContextBaseJavaModule implements Activit
     @NotNull
     @Override
     public String getName() {
-        return "RNShareIntent";
+        return "ShareMenu";
     }
 
     @Nullable

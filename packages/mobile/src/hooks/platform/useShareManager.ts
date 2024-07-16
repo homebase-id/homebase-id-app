@@ -1,14 +1,14 @@
 import { NavigationProp, useFocusEffect, useNavigation } from '@react-navigation/native';
 import { useCallback, useEffect } from 'react';
-import { NativeEventEmitter, NativeModules, Platform } from 'react-native';
+import { NativeEventEmitter, NativeModules } from 'react-native';
 import { ChatStackParamList } from '../../app/ChatStack';
-import ShareMenu from 'react-native-share-menu';
 
-const { RNShareIntent } = NativeModules;
+
+const { ShareMenu } = NativeModules;
 
 const NEW_SHARE_EVENT_NAME = 'NewShareEvent';
 
-const EventEmitter = Platform.OS === 'android' ? new NativeEventEmitter(RNShareIntent) : undefined;
+const EventEmitter = new NativeEventEmitter(ShareMenu);
 
 export type SharedItem = {
   mimeType: string;
@@ -20,7 +20,7 @@ export const useShareManager = () => {
   const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
   const handleShare = useCallback(
     (item?: SharedItem) => {
-      console.log('Shared item:', item);
+      console.log('handleShare', item);
       if (!item) {
         return;
       }
@@ -30,26 +30,23 @@ export const useShareManager = () => {
   );
 
   const handleInitialShare = useCallback(() => {
-    if (Platform.OS === 'ios') {
-      // Ios not supported yet
-      ShareMenu.getInitialShare((s: any) => handleShare(s?.data));
-      return;
-    }
-    RNShareIntent.getSharedText(handleShare);
+    ShareMenu.getSharedText((data: any) => {
+      console.log('ShareItemData', data);
+      return handleShare(data);
+    });
   }, [handleShare]);
 
   useFocusEffect(handleInitialShare);
 
   useEffect(() => {
-    if (Platform.OS === 'ios') {
-      // Ios not supported yet
-      return;
-    } else {
-      EventEmitter?.addListener(NEW_SHARE_EVENT_NAME, handleShare);
 
-      return () => {
-        EventEmitter?.removeAllListeners(NEW_SHARE_EVENT_NAME);
-      };
-    }
+    EventEmitter?.addListener(NEW_SHARE_EVENT_NAME, (s) => {
+      console.log('NEW_SHARE_EVENT_NAME', s);
+      return handleShare(s);
+    });
+    return () => {
+      EventEmitter?.removeAllListeners(NEW_SHARE_EVENT_NAME);
+    };
+
   }, [handleShare]);
 };

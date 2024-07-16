@@ -411,6 +411,7 @@ export const ShareChatPage = (prop: ShareChatProp) => {
         sections={sectionData}
         renderSectionHeader={renderSectionHeader}
         renderItem={renderItem}
+        stickySectionHeadersEnabled={false}
         ListHeaderComponent={
           <ConversationTileWithYourself
             selecMode

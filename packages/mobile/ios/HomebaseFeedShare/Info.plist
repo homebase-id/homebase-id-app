@@ -1,17 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-	
 	<dict>
-    <!-- This url scheme CONTAINS :// at the end - E.G. "mycustomscheme://"-->
-    <key>HostAppBundleIdentifier</key>
-    <string>id.homebase.feed</string>
-    <key>HostAppURLScheme</key>
-    <string>homebase-share</string>
+		<key>HostAppBundleIdentifier</key>
+		<string>id.homebase.feed</string>
+		<key>HostAppURLScheme</key>
+		<string>homebase-share://</string>
 		<key>NSExtension</key>
 		<dict>
 			<key>NSExtensionAttributes</key>
 			<dict>
+				<key>NSExtensionActivationRule</key>
+				<string>TRUEPREDICATE</string>
+				<key>NSExtensionActivationSupportsFileWithMaxCount</key>
+				<integer>1</integer>
+				<key>NSExtensionActivationSupportsMovieWithMaxCount</key>
+				<integer>1</integer>
 				<key>NSExtensionActivationSupportsImageWithMaxCount</key>
 				<integer>1</integer>
 				<key>NSExtensionActivationSupportsText</key>

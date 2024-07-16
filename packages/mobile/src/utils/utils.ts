@@ -95,6 +95,9 @@ export async function fixContentURI(url: string): Promise<string> {
         return `file://${destPath}`;
 
     }
+    if (url.startsWith('file://')) {
+        return decodeURI(url);
+    }
     return url;
 }
 
