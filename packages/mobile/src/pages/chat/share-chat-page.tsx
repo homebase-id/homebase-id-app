@@ -39,6 +39,7 @@ import {
 import ConversationTile from '../../components/Chat/Conversation-tile';
 import { getNewId } from '@youfoundation/js-lib/helpers';
 import { ConversationTileWithYourself } from '../conversations-page';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export type ShareChatProp = NativeStackScreenProps<ChatStackParamList, 'ShareChat'>;
 export const ShareChatPage = (prop: ShareChatProp) => {
@@ -256,12 +257,14 @@ export const ShareChatPage = (prop: ShareChatProp) => {
     [onSelectConversation, selectedContact, selectedConversation]
   );
 
+  const { bottom } = useSafeAreaInsets();
+
   const renderFooter = useCallback(
     () => (
       <View
         style={{
           position: 'absolute',
-          bottom: 0,
+          bottom: bottom,
           zIndex: 100,
           backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
           flexDirection: 'row',
@@ -330,7 +333,7 @@ export const ShareChatPage = (prop: ShareChatProp) => {
         </TouchableHighlight>
       </View>
     ),
-    [isDarkMode, onShare, selectedContact, selectedConversation]
+    [bottom, isDarkMode, onShare, selectedContact, selectedConversation]
   );
 
   const sectionData = useMemo((): ReadonlyArray<
