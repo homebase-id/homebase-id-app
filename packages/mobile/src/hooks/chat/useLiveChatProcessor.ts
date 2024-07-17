@@ -36,17 +36,24 @@ import {
 import { ChatReactionFileType } from '../../provider/chat/ChatReactionProvider';
 import { insertNewMessage, insertNewMessagesForConversation } from './useChatMessages';
 import { insertNewConversation } from './useConversations';
+import { useWebSocketContext } from '../../components/WebSocketContext/useWebSocketContext';
 
 const MINUTE_IN_MS = 60000;
 const isDebug = false; // The babel plugin to remove console logs would remove any if they get to production
 
 // We first process the inbox, then we connect for live updates;
 export const useLiveChatProcessor = () => {
+  const { setIsOnline } = useWebSocketContext();
+
   // Process the inbox on startup; As we want to cover the backlog of messages first
   const { status: inboxStatus } = useInboxProcessor(true);
 
   // Only after the inbox is processed, we connect for live updates; So we avoid clearing the cache on each fileAdded update
   const isOnline = useChatWebsocket(inboxStatus === 'success');
+
+  useEffect(() => {
+    setIsOnline(isOnline);
+  }, [isOnline, setIsOnline]);
 
   return isOnline;
 };
@@ -348,11 +355,11 @@ const processChatMessagesBatch = async (
           uniqueMessagesPerConversation[updatedConversation].map(async (newMessage) =>
             typeof newMessage.fileMetadata.appData.content === 'string'
               ? await dsrToMessage(
-                dotYouClient,
-                newMessage as HomebaseFile<string>,
-                ChatDrive,
-                true
-              )
+                  dotYouClient,
+                  newMessage as HomebaseFile<string>,
+                  ChatDrive,
+                  true
+                )
               : (newMessage as HomebaseFile<ChatMessage>)
           )
         )

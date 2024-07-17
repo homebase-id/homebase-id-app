@@ -28,6 +28,8 @@ import { useDarkMode } from '../../hooks/useDarkMode';
 import { calculateScaledDimensions } from '../../utils/utils';
 import { BoringFile } from '../ui/Media/BoringFile';
 import { t } from 'feed-app-common';
+import { LinkPreviewFile } from '../ui/Media/LinkPreviewFile';
+import { CHAT_LINKS_PAYLOAD_KEY } from '../../provider/chat/ChatProvider';
 
 const MediaMessage = memo(
   ({
@@ -209,11 +211,13 @@ const InnerMediaItem = ({
 }) => {
   const { isDarkMode } = useDarkMode();
 
+  const isVideo = payload.contentType?.startsWith('video');
+  const isAudio = payload.contentType?.startsWith('audio');
+  const isImage = payload.contentType?.startsWith('image');
+  const isLink = payload.key === CHAT_LINKS_PAYLOAD_KEY;
+
   if (!payload.contentType || !payload.key || !msg.fileId) {
-    if (
-      payload.contentType?.startsWith('image/') &&
-      (payload as NewPayloadDescriptor).pendingFile
-    ) {
+    if (isImage && (payload as NewPayloadDescriptor).pendingFile) {
       return (
         <Image
           src={((payload as NewPayloadDescriptor).pendingFile as any as OdinBlob)?.uri}
@@ -239,13 +243,7 @@ const InnerMediaItem = ({
         }}
       >
         <Text style={{ fontSize: 48 }}>
-          {payload.contentType?.startsWith('image/')
-            ? '📷'
-            : payload.contentType?.startsWith('audio/')
-              ? '🎵'
-              : payload.contentType?.startsWith('video/')
-                ? '📹'
-                : '📋'}
+          {isImage ? '📷' : isAudio ? '🎵' : isVideo ? '📹' : '📋'}
         </Text>
         {(payload as NewPayloadDescriptor).uploadProgress ? (
           <Text style={{ fontSize: 14 }}>
@@ -257,7 +255,7 @@ const InnerMediaItem = ({
     );
   }
 
-  if (payload.contentType.startsWith('video')) {
+  if (isVideo) {
     return (
       <View style={containerStyle}>
         <VideoWithLoader
@@ -279,9 +277,19 @@ const InnerMediaItem = ({
       </View>
     );
   }
-  if (payload.contentType.startsWith('audio/')) {
+  if (isAudio) {
     return (
       <OdinAudio key={payload.key} fileId={msg.fileId} payload={payload as PayloadDescriptor} />
+    );
+  }
+  if (isLink) {
+    return (
+      <LinkPreviewFile
+        targetDrive={ChatDrive}
+        fileId={msg.fileId}
+        payloadKey={payload.key}
+        position={position as string}
+      />
     );
   }
   if (payload.contentType.startsWith('application/')) {

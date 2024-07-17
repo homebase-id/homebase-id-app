@@ -1,6 +1,7 @@
 import messaging, { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
-import { PushNotificationOptions } from '@youfoundation/js-lib/core';
+import { PushNotification } from '@youfoundation/js-lib/core';
 import notifee, { AndroidVisibility } from '@notifee/react-native';
+import { bodyFormer } from '../../components/Dashboard/NotificationsOverview';
 import axios from 'axios';
 
 //
@@ -28,11 +29,9 @@ import axios from 'axios';
 //
 
 // backend: src/services/Odin.Services/AppNotifications/Push/PushNotificationContent.cs
-interface PushNotificationPayload {
-  senderId: string;
-  timestamp: string;
+// backend: src/services/Odin.Services/AppNotifications/Push/PushNotificationContent.cs
+interface PushNotificationPayload extends PushNotification {
   appDisplayName: string;
-  options: PushNotificationOptions;
 }
 
 // backend: src/core/Odin.Core/Dto/DevicePushNotificationRequest.cs
@@ -111,13 +110,18 @@ const onBackgroundMessageReceived = async (
   if (message.notification) {
     return;
   }
-  const displayName = await axios.get(`https://${notification.data.senderId}/pub/profile`).then((response) => response.data.name as string | undefined);
+  const displayName =
+    (await axios
+      .get(`https://${notification.data.senderId}/pub/profile`)
+      .then((response) => response.data?.name as string | undefined)
+      .catch(() => undefined)) || notification.data.senderId;
 
   // If there's no "notification" object directly in the FCM message, it's a data message, and we handle it ourselve
   await notifee.displayNotification({
     title: notification.data.appDisplayName,
     body:
-      notification.data.options.unEncryptedMessage || `Received from ${displayName || notification.data.senderId}`,
+      bodyFormer(notification.data, false, notification.data.appDisplayName, displayName) ||
+      `Received from ${notification.data.senderId}`,
     // Keeps them backwards compatible with the OOTB push notifications within FCM
     data: { data: JSON.stringify(notification.data) },
     android: {

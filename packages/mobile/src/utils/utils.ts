@@ -23,6 +23,11 @@ export async function openURL(url: string): Promise<void> {
     } else Linking.openURL(url);
 }
 
+export function extractUrls(text: string): string[] {
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    return text.match(urlRegex) || [];
+}
+
 // Calculate the scaled dimensions of an image
 export function calculateScaledDimensions(
     pixelWidth: number,

@@ -80,6 +80,8 @@ import Animated, {
 import { TouchableHighlight } from 'react-native-gesture-handler';
 import { ParseShape } from 'react-native-gifted-chat/src/MessageText';
 import { MentionDropDown } from './Mention-Dropdown';
+import { LinkPreviewBar } from './Link-Preview-Bar';
+import { LinkPreview } from '@youfoundation/js-lib/media';
 
 export type ChatMessageIMessage = IMessage & HomebaseFile<ChatMessage>;
 
@@ -100,6 +102,8 @@ export const ChatDetail = memo(
     hasMoreMessages,
     fetchMoreMessages,
     conversationId,
+    onLinkData,
+    onDismissLinkPreview,
   }: {
     isGroup: boolean;
     messages: ChatMessageIMessage[];
@@ -122,6 +126,8 @@ export const ChatDetail = memo(
     setAssets: (assets: Asset[]) => void;
     hasMoreMessages: boolean;
     fetchMoreMessages: () => void;
+    onLinkData: (linkPreview: LinkPreview) => void;
+    onDismissLinkPreview: () => void;
   }) => {
     const { isDarkMode } = useDarkMode();
     const identity = useAuth().getIdentity();
@@ -193,6 +199,7 @@ export const ChatDetail = memo(
           words[words.length - 1] = `@${mention}`;
           updateText(words.join(' ') + ' ');
         };
+
         return (
           <Animated.View
             style={{
@@ -206,13 +213,26 @@ export const ChatDetail = memo(
                 onMention={onMention}
               />
             )}
+            <LinkPreviewBar
+              textToSearchIn={text || ''}
+              onDismiss={onDismissLinkPreview}
+              onLinkData={onLinkData}
+            />
             {replyMessage ? (
               <ReplyMessageBar message={replyMessage} clearReply={() => setReplyMessage(null)} />
             ) : null}
           </Animated.View>
         );
       },
-      [isDarkMode, isGroup, conversationId, replyMessage, setReplyMessage]
+      [
+        isDarkMode,
+        isGroup,
+        conversationId,
+        onDismissLinkPreview,
+        onLinkData,
+        replyMessage,
+        setReplyMessage,
+      ]
     );
 
     const { record, stop, duration, isRecording } = useAudioRecorder();
@@ -821,6 +841,7 @@ const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
           return (<AuthorName odinId={text.slice(1)} showYou={false} />) as unknown as string;
         },
       },
+      { type: 'url', style: linkStyle, onPress: (text: string) => openURL(text) },
     ];
   }, []);
 

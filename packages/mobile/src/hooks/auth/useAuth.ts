@@ -120,6 +120,7 @@ export const useValidTokenCheck = () => {
   const dotYouClient = getDotYouClient();
   const { data: hasValidToken, isFetchedAfterMount } = useVerifyToken(dotYouClient);
 
+
   useEffect(() => {
     if (isFetchedAfterMount && hasValidToken === false) {
       console.log('Token is invalid, logging out..');

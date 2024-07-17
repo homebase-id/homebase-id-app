@@ -47,7 +47,9 @@ const ConversationTile = memo((props: ConversationTileProps) => {
 
   const lastMessage = useMemo(() => flatMessages?.[0], [flatMessages]);
   const lastMessageContent = lastMessage?.fileMetadata.appData.content;
-  const lastMessageAuthor = lastMessage?.fileMetadata.senderOdinId;
+  const lastMessageAuthor =
+    lastMessage?.fileMetadata.senderOdinId ||
+    lastMessage?.fileMetadata.appData.content.authorOdinId;
 
   const lastReadTime = props.conversation.lastReadTime;
   const unreadCount = useMemo(
