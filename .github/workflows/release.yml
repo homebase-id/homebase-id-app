@@ -57,12 +57,15 @@ jobs:
         with:
           project-path: packages/mobile/ios/HomebaseFeed.xcodeproj
           p12-base64: ${{ secrets.IOS_P12_BASE64 }}
-          mobileprovision-base64: ${{ secrets.FEED_IOS_MOBILE_PROVISION_BASE64 }}
+          mobileprovision-base64: |
+            ${{ secrets.FEED_IOS_MOBILE_PROVISION_BASE64 }}
+            ${{ secrets.FEED_APP_GROUP_IOS_MOBILE_PROVISION_BASE64 }}
           code-signing-identity: 'iPhone Distribution'
           team-id: ${{ secrets.IOS_TEAM_ID }}
           certificate-password: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
           workspace-path: packages/mobile/ios/HomebaseFeed.xcworkspace
           scheme: HomebaseFeed
+          export-options: packages/mobile/ios/options.plist
 
       - name: Rename output
         run: mv output.ipa homebase-feed.ipa
