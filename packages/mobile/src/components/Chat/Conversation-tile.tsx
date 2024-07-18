@@ -54,10 +54,12 @@ const ConversationTile = memo((props: ConversationTileProps) => {
   const lastReadTime = props.conversation.lastReadTime;
   const unreadCount = useMemo(
     () =>
-      flatMessages && lastReadTime
+      lastReadTime && flatMessages
         ? flatMessages.filter(
-            (msg) => msg.fileMetadata.senderOdinId && msg.fileMetadata.created >= lastReadTime
-          ).length
+            (msg) =>
+              msg.fileMetadata.senderOdinId &&
+              (msg.fileMetadata.transitCreated || msg.fileMetadata.created) > lastReadTime
+          )?.length
         : 0,
     [flatMessages, lastReadTime]
   );
