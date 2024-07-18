@@ -12,7 +12,7 @@ import { useDarkMode } from '../../hooks/useDarkMode';
 import { useAllConnections } from 'feed-app-common';
 import { useConversation } from '../../hooks/chat/useConversation';
 import { useChatMessage } from '../../hooks/chat/useChatMessage';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { DotYouProfile } from '@youfoundation/js-lib/network';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import {
@@ -31,7 +31,7 @@ import { SendChat } from '../../components/ui/Icons/icons';
 import { ErrorNotification } from '../../components/ui/Alert/ErrorNotification';
 import { ImageSource } from '../../provider/image/RNImageProvider';
 import { Image } from 'react-native';
-import { fixContentURI } from '../../utils/utils';
+import { fixContentURI, getImageSize } from '../../utils/utils';
 import {
   ConversationWithRecentMessage,
   useConversationsWithRecentMessage,
@@ -39,6 +39,7 @@ import {
 import ConversationTile from '../../components/Chat/Conversation-tile';
 import { getNewId } from '@youfoundation/js-lib/helpers';
 import { ConversationTileWithYourself } from '../conversations-page';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export type ShareChatProp = NativeStackScreenProps<ChatStackParamList, 'ShareChat'>;
 export const ShareChatPage = (prop: ShareChatProp) => {
@@ -91,7 +92,13 @@ export const ShareChatPage = (prop: ShareChatProp) => {
           width: 0,
           height: 0,
         };
-        await Image.getSize(data, (width, height) => (size = { width, height }));
+        await getImageSize(uri).then((res) => {
+          if (res instanceof Error) {
+            size = { width: 500, height: 500 };
+            return;
+          }
+          size = res;
+        });
         imageSource.push({
           uri: uri,
           width: size.width,
@@ -256,12 +263,14 @@ export const ShareChatPage = (prop: ShareChatProp) => {
     [onSelectConversation, selectedContact, selectedConversation]
   );
 
+  const { bottom } = useSafeAreaInsets();
+
   const renderFooter = useCallback(
     () => (
       <View
         style={{
           position: 'absolute',
-          bottom: 0,
+          bottom: bottom,
           zIndex: 100,
           backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
           flexDirection: 'row',
@@ -330,7 +339,7 @@ export const ShareChatPage = (prop: ShareChatProp) => {
         </TouchableHighlight>
       </View>
     ),
-    [isDarkMode, onShare, selectedContact, selectedConversation]
+    [bottom, isDarkMode, onShare, selectedContact, selectedConversation]
   );
 
   const sectionData = useMemo((): ReadonlyArray<
@@ -408,6 +417,7 @@ export const ShareChatPage = (prop: ShareChatProp) => {
         sections={sectionData}
         renderSectionHeader={renderSectionHeader}
         renderItem={renderItem}
+        stickySectionHeadersEnabled={false}
         ListHeaderComponent={
           <ConversationTileWithYourself
             selecMode

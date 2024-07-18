@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		00E356F31AD99517003FC87E /* HomebaseFeedTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* HomebaseFeedTests.m */; };
+		0DEAF648E031DA4898574F4A /* Pods_HomebaseFeed_HomebaseFeedShare.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11C72CAB78583DA8A50EBA72 /* Pods_HomebaseFeed_HomebaseFeedShare.framework */; };
 		12099F9B2BB5AD1C0036F910 /* RNAudioTranscoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 12099F9A2BB5AD1C0036F910 /* RNAudioTranscoder.m */; };
 		12099F9C2BB5AD1C0036F910 /* RNAudioTranscoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 12099F9A2BB5AD1C0036F910 /* RNAudioTranscoder.m */; };
 		12099F9F2BB5BFE50036F910 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 12099F9D2BB5BBDC0036F910 /* AVFoundation.framework */; };
@@ -21,6 +22,9 @@
 		1A33DA677B214610B0C0A5D6 /* BootSplash.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 6213444B06C64852B2F3A16F /* BootSplash.storyboard */; };
 		22E72EDCFAC7A441A445A42E /* Pods_HomebaseFeed_HomebaseFeedTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5747BAF4F6F2FB06A3D9633D /* Pods_HomebaseFeed_HomebaseFeedTests.framework */; };
 		2B6D8756978087D885BFAC6C /* Pods_HomebaseFeed.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A82A28AD6276272F86DBCF26 /* Pods_HomebaseFeed.framework */; };
+		43FDB70D2C452D9500264C0E /* Base in Resources */ = {isa = PBXBuildFile; fileRef = 43FDB70C2C452D9500264C0E /* Base */; };
+		43FDB7112C452D9500264C0E /* HomebaseFeedShare.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 43FDB7072C452D9500264C0E /* HomebaseFeedShare.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		43FDB7172C452E2400264C0E /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43FDB7162C452E2400264C0E /* ShareViewController.swift */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		965585F82BA87C2E00277AF2 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 965585F72BA87C2E00277AF2 /* GoogleService-Info.plist */; };
 /* End PBXBuildFile section */
@@ -33,12 +37,35 @@
 			remoteGlobalIDString = 13B07F861A680F5B00A75B9A;
 			remoteInfo = HomebaseFeed;
 		};
+		43FDB70F2C452D9500264C0E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 83CBB9F71A601CBA00E9B192 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 43FDB7062C452D9500264C0E;
+			remoteInfo = HomebaseFeedShare;
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		43FDB6FC2C4529E300264C0E /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				43FDB7112C452D9500264C0E /* HomebaseFeedShare.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		00E356EE1AD99517003FC87E /* HomebaseFeedTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HomebaseFeedTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		00E356F11AD99517003FC87E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		00E356F21AD99517003FC87E /* HomebaseFeedTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HomebaseFeedTests.m; sourceTree = "<group>"; };
+		10F90165463A770B13CECD60 /* Pods-HomebaseFeedShare.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-HomebaseFeedShare.release.xcconfig"; path = "Target Support Files/Pods-HomebaseFeedShare/Pods-HomebaseFeedShare.release.xcconfig"; sourceTree = "<group>"; };
+		11C72CAB78583DA8A50EBA72 /* Pods_HomebaseFeed_HomebaseFeedShare.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_HomebaseFeed_HomebaseFeedShare.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		12099F992BB5AD030036F910 /* RNAudioTranscoder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = RNAudioTranscoder.h; path = AudioTranscoder/RNAudioTranscoder.h; sourceTree = "<group>"; };
 		12099F9A2BB5AD1C0036F910 /* RNAudioTranscoder.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = RNAudioTranscoder.m; path = AudioTranscoder/RNAudioTranscoder.m; sourceTree = "<group>"; };
 		12099F9D2BB5BBDC0036F910 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
@@ -55,8 +82,17 @@
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = HomebaseFeed/main.m; sourceTree = "<group>"; };
 		2054BF56247A67C80CF929E8 /* Pods-HomebaseFeed-HomebaseFeedTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-HomebaseFeed-HomebaseFeedTests.debug.xcconfig"; path = "Target Support Files/Pods-HomebaseFeed-HomebaseFeedTests/Pods-HomebaseFeed-HomebaseFeedTests.debug.xcconfig"; sourceTree = "<group>"; };
 		2AF228BE737E95E5CAC49472 /* Pods-HomebaseFeed.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-HomebaseFeed.release.xcconfig"; path = "Target Support Files/Pods-HomebaseFeed/Pods-HomebaseFeed.release.xcconfig"; sourceTree = "<group>"; };
+		318D4D15F1C19E58F378300B /* Pods-HomebaseFeedShare.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-HomebaseFeedShare.debug.xcconfig"; path = "Target Support Files/Pods-HomebaseFeedShare/Pods-HomebaseFeedShare.debug.xcconfig"; sourceTree = "<group>"; };
+		43FDB7072C452D9500264C0E /* HomebaseFeedShare.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = HomebaseFeedShare.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		43FDB70C2C452D9500264C0E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/MainInterface.storyboard; sourceTree = "<group>"; };
+		43FDB70E2C452D9500264C0E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		43FDB7152C452E2300264C0E /* HomebaseFeedShare-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "HomebaseFeedShare-Bridging-Header.h"; sourceTree = "<group>"; };
+		43FDB7162C452E2400264C0E /* ShareViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ShareViewController.swift; path = "../../../../node_modules/react-native-share-menu/ios/ShareViewController.swift"; sourceTree = "<group>"; };
+		43FDB7182C452EA700264C0E /* HomebaseFeedShare.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HomebaseFeedShare.entitlements; sourceTree = "<group>"; };
+		4CB91FFD122A330C4FAC1E30 /* Pods-HomebaseFeed-HomebaseFeedShare.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-HomebaseFeed-HomebaseFeedShare.release.xcconfig"; path = "Target Support Files/Pods-HomebaseFeed-HomebaseFeedShare/Pods-HomebaseFeed-HomebaseFeedShare.release.xcconfig"; sourceTree = "<group>"; };
 		5747BAF4F6F2FB06A3D9633D /* Pods_HomebaseFeed_HomebaseFeedTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_HomebaseFeed_HomebaseFeedTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6213444B06C64852B2F3A16F /* BootSplash.storyboard */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = BootSplash.storyboard; path = HomebaseFeed/BootSplash.storyboard; sourceTree = "<group>"; };
+		7EB15B43BC23D4D201601167 /* Pods-HomebaseFeed-HomebaseFeedShare.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-HomebaseFeed-HomebaseFeedShare.debug.xcconfig"; path = "Target Support Files/Pods-HomebaseFeed-HomebaseFeedShare/Pods-HomebaseFeed-HomebaseFeedShare.debug.xcconfig"; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = HomebaseFeed/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		965585F62BA87BE200277AF2 /* HomebaseFeed.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = HomebaseFeed.entitlements; path = HomebaseFeed/HomebaseFeed.entitlements; sourceTree = "<group>"; };
 		965585F72BA87C2E00277AF2 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
@@ -82,6 +118,14 @@
 				12099FA12BB5BFEC0036F910 /* AVFAudio.framework in Frameworks */,
 				12099F9F2BB5BFE50036F910 /* AVFoundation.framework in Frameworks */,
 				2B6D8756978087D885BFAC6C /* Pods_HomebaseFeed.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		43FDB7042C452D9500264C0E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0DEAF648E031DA4898574F4A /* Pods_HomebaseFeed_HomebaseFeedShare.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -129,8 +173,21 @@
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
 				A82A28AD6276272F86DBCF26 /* Pods_HomebaseFeed.framework */,
 				5747BAF4F6F2FB06A3D9633D /* Pods_HomebaseFeed_HomebaseFeedTests.framework */,
+				11C72CAB78583DA8A50EBA72 /* Pods_HomebaseFeed_HomebaseFeedShare.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		43FDB7082C452D9500264C0E /* HomebaseFeedShare */ = {
+			isa = PBXGroup;
+			children = (
+				43FDB7182C452EA700264C0E /* HomebaseFeedShare.entitlements */,
+				43FDB7162C452E2400264C0E /* ShareViewController.swift */,
+				43FDB70B2C452D9500264C0E /* MainInterface.storyboard */,
+				43FDB70E2C452D9500264C0E /* Info.plist */,
+				43FDB7152C452E2300264C0E /* HomebaseFeedShare-Bridging-Header.h */,
+			);
+			path = HomebaseFeedShare;
 			sourceTree = "<group>";
 		};
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
@@ -152,6 +209,7 @@
 				13B07FAE1A68108700A75B9A /* HomebaseFeed */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				00E356EF1AD99517003FC87E /* HomebaseFeedTests */,
+				43FDB7082C452D9500264C0E /* HomebaseFeedShare */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				BBD78D7AC51CEA395F1C20DB /* Pods */,
@@ -166,6 +224,7 @@
 			children = (
 				13B07F961A680F5B00A75B9A /* HomebaseFeed.app */,
 				00E356EE1AD99517003FC87E /* HomebaseFeedTests.xctest */,
+				43FDB7072C452D9500264C0E /* HomebaseFeedShare.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -177,6 +236,10 @@
 				2AF228BE737E95E5CAC49472 /* Pods-HomebaseFeed.release.xcconfig */,
 				2054BF56247A67C80CF929E8 /* Pods-HomebaseFeed-HomebaseFeedTests.debug.xcconfig */,
 				97A072281138F757C1173FC0 /* Pods-HomebaseFeed-HomebaseFeedTests.release.xcconfig */,
+				318D4D15F1C19E58F378300B /* Pods-HomebaseFeedShare.debug.xcconfig */,
+				10F90165463A770B13CECD60 /* Pods-HomebaseFeedShare.release.xcconfig */,
+				7EB15B43BC23D4D201601167 /* Pods-HomebaseFeed-HomebaseFeedShare.debug.xcconfig */,
+				4CB91FFD122A330C4FAC1E30 /* Pods-HomebaseFeed-HomebaseFeedShare.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -216,16 +279,37 @@
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				900AC0AEFB968B5365E7F38D /* [CP] Embed Pods Frameworks */,
 				A1996C062E01025C273FE2D9 /* [CP] Copy Pods Resources */,
+				43FDB6FC2C4529E300264C0E /* Embed Foundation Extensions */,
 				E81CDD410E1C9FF5B54A7057 /* [CP-User] [RNFB] Core Configuration */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				43FDB7102C452D9500264C0E /* PBXTargetDependency */,
 			);
 			name = HomebaseFeed;
 			productName = HomebaseFeed;
 			productReference = 13B07F961A680F5B00A75B9A /* HomebaseFeed.app */;
 			productType = "com.apple.product-type.application";
+		};
+		43FDB7062C452D9500264C0E /* HomebaseFeedShare */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 43FDB7122C452D9500264C0E /* Build configuration list for PBXNativeTarget "HomebaseFeedShare" */;
+			buildPhases = (
+				B5D8662A839934C707EDEA5F /* [CP] Check Pods Manifest.lock */,
+				43FDB7032C452D9500264C0E /* Sources */,
+				43FDB7042C452D9500264C0E /* Frameworks */,
+				43FDB7052C452D9500264C0E /* Resources */,
+				1EEA73ADE2B30352A78233F9 /* [CP] Copy Pods Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = HomebaseFeedShare;
+			productName = HomebaseFeedShare;
+			productReference = 43FDB7072C452D9500264C0E /* HomebaseFeedShare.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -233,6 +317,7 @@
 		83CBB9F71A601CBA00E9B192 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftUpdateCheck = 1540;
 				LastUpgradeCheck = 1210;
 				TargetAttributes = {
 					00E356ED1AD99517003FC87E = {
@@ -241,6 +326,10 @@
 					};
 					13B07F861A680F5B00A75B9A = {
 						LastSwiftMigration = 1120;
+					};
+					43FDB7062C452D9500264C0E = {
+						CreatedOnToolsVersion = 15.4;
+						LastSwiftMigration = 1540;
 					};
 				};
 			};
@@ -259,6 +348,7 @@
 			targets = (
 				13B07F861A680F5B00A75B9A /* HomebaseFeed */,
 				00E356ED1AD99517003FC87E /* HomebaseFeedTests */,
+				43FDB7062C452D9500264C0E /* HomebaseFeedShare */,
 			);
 		};
 /* End PBXProject section */
@@ -283,6 +373,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		43FDB7052C452D9500264C0E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				43FDB70D2C452D9500264C0E /* Base in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
@@ -300,6 +398,23 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "set -e\n\n\nWITH_ENVIRONMENT=\"../../../node_modules/react-native/scripts/xcode/with-environment.sh\"\nREACT_NATIVE_XCODE=\"../../../node_modules/react-native/scripts/react-native-xcode.sh\"\n\n/bin/sh -c \"$WITH_ENVIRONMENT $REACT_NATIVE_XCODE\"\n";
+		};
+		1EEA73ADE2B30352A78233F9 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-HomebaseFeed-HomebaseFeedShare/Pods-HomebaseFeed-HomebaseFeedShare-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-HomebaseFeed-HomebaseFeedShare/Pods-HomebaseFeed-HomebaseFeedShare-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-HomebaseFeed-HomebaseFeedShare/Pods-HomebaseFeed-HomebaseFeedShare-resources.sh\"\n";
+			showEnvVarsInLog = 0;
 		};
 		2B6043D0C6FCF4C0F4B4C826 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -391,6 +506,28 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-HomebaseFeed/Pods-HomebaseFeed-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
+		B5D8662A839934C707EDEA5F /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-HomebaseFeed-HomebaseFeedShare-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
 		BA9081346110B06AE7D64DAE /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -450,6 +587,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		43FDB7032C452D9500264C0E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				43FDB7172C452E2400264C0E /* ShareViewController.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -458,7 +603,23 @@
 			target = 13B07F861A680F5B00A75B9A /* HomebaseFeed */;
 			targetProxy = 00E356F41AD99517003FC87E /* PBXContainerItemProxy */;
 		};
+		43FDB7102C452D9500264C0E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 43FDB7062C452D9500264C0E /* HomebaseFeedShare */;
+			targetProxy = 43FDB70F2C452D9500264C0E /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		43FDB70B2C452D9500264C0E /* MainInterface.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				43FDB70C2C452D9500264C0E /* Base */,
+			);
+			name = MainInterface.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		00E356F61AD99517003FC87E /* Debug */ = {
@@ -516,6 +677,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D068E3CB8FCB6472EA605A69 /* Pods-HomebaseFeed.debug.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = HomebaseFeed/HomebaseFeed.entitlements;
@@ -604,6 +766,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 2AF228BE737E95E5CAC49472 /* Pods-HomebaseFeed.release.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = HomebaseFeed/HomebaseFeedRelease.entitlements;
@@ -694,6 +857,95 @@
 				PRODUCT_NAME = HomebaseFeed;
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Release;
+		};
+		43FDB7132C452D9500264C0E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7EB15B43BC23D4D201601167 /* Pods-HomebaseFeed-HomebaseFeedShare.debug.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = HomebaseFeedShare/HomebaseFeedShare.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = JNJ85M8JM6;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = HomebaseFeedShare/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = HomebaseFeedShare;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = id.homebase.feed.HomebaseFeedShare;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "HomebaseFeedShare/HomebaseFeedShare-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		43FDB7142C452D9500264C0E /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 4CB91FFD122A330C4FAC1E30 /* Pods-HomebaseFeed-HomebaseFeedShare.release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = HomebaseFeedShare/HomebaseFeedShare.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = JNJ85M8JM6;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = HomebaseFeedShare/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = HomebaseFeedShare;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = id.homebase.feed.HomebaseFeedShare;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "HomebaseFeedShare/HomebaseFeedShare-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
@@ -965,6 +1217,15 @@
 			buildConfigurations = (
 				13B07F941A680F5B00A75B9A /* Debug */,
 				13B07F951A680F5B00A75B9A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		43FDB7122C452D9500264C0E /* Build configuration list for PBXNativeTarget "HomebaseFeedShare" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				43FDB7132C452D9500264C0E /* Debug */,
+				43FDB7142C452D9500264C0E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
