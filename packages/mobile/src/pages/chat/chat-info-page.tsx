@@ -91,7 +91,7 @@ export const ChatInfoPage = memo((prop: ChatInfoProp) => {
       <Header
         title={isGroup ? 'Group Info' : 'Chat Info'}
         headerLeft={headerLeft}
-        headerRight={isGroup ? headerRight : undefined}
+        // headerRight={isGroup ? headerRight : undefined} //TODO: Enable this when we have figured out editing group conversations
         headerStyle={headerStyle}
       />
       <SafeAreaView>
