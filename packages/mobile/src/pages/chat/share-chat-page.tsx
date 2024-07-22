@@ -12,7 +12,7 @@ import { useDarkMode } from '../../hooks/useDarkMode';
 import { useAllConnections } from 'feed-app-common';
 import { useConversation } from '../../hooks/chat/useConversation';
 import { useChatMessage } from '../../hooks/chat/useChatMessage';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { DotYouProfile } from '@youfoundation/js-lib/network';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import {
@@ -30,7 +30,6 @@ import { AuthorName } from '../../components/ui/Name';
 import { SendChat } from '../../components/ui/Icons/icons';
 import { ErrorNotification } from '../../components/ui/Alert/ErrorNotification';
 import { ImageSource } from '../../provider/image/RNImageProvider';
-import { Image } from 'react-native';
 import { fixContentURI, getImageSize } from '../../utils/utils';
 import {
   ConversationWithRecentMessage,

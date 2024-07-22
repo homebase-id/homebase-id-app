@@ -37,58 +37,63 @@ export const VideoWithLoader = memo(
     const [loadVideo, setLoadVideo] = useState(true);
     const doLoadVideo = useCallback(() => setLoadVideo(true), []);
 
-    return (
-      <View
-        style={{
-          backgroundColor: Colors.black,
-          ...imageSize,
-          position: 'relative',
-        }}
-      >
-        {preview ? (
-          <>
-            <OdinImage
-              targetDrive={targetDrive}
-              fileId={fileId}
-              previewThumbnail={previewThumbnail}
-              fit={fit}
-              fileKey={fileKey}
-              imageSize={imageSize}
-              onClick={onClick}
-              avoidPayload={true}
-              style={style}
-              onLongPress={onLongPress}
-            />
+    if (preview) {
+      return (
+        <View style={style}>
+          <OdinImage
+            targetDrive={targetDrive}
+            fileId={fileId}
+            previewThumbnail={previewThumbnail}
+            fit={fit}
+            fileKey={fileKey}
+            imageSize={imageSize}
+            onClick={onClick}
+            avoidPayload={true}
+            style={style}
+            onLongPress={onLongPress}
+          />
+          <View
+            style={{
+              position: 'absolute',
+              pointerEvents: 'none',
+              top: 0,
+              left: 0,
+              bottom: 0,
+              right: 0,
+              zIndex: 20,
+              flex: 1,
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: 'rgba(0,0,0,0.4)',
+            }}
+          >
             <View
               style={{
-                position: 'absolute',
-                pointerEvents: 'none',
-                top: 0,
-                left: 0,
-                bottom: 0,
-                right: 0,
-                zIndex: 20,
-                flex: 1,
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: 'rgba(0,0,0,0.4)',
+                padding: 10,
+                borderRadius: 50,
+                borderWidth: 1,
+                borderColor: 'white',
+                backgroundColor: 'rgba(255,255,255,0.2)',
               }}
             >
-              <View
-                style={{
-                  padding: 10,
-                  borderRadius: 50,
-                  borderWidth: 1,
-                  borderColor: 'white',
-                  backgroundColor: 'rgba(255,255,255,0.2)',
-                }}
-              >
-                <Play size={'xl'} color={Colors.white} />
-              </View>
+              <Play size={'xl'} color={Colors.white} />
             </View>
-          </>
-        ) : loadVideo ? (
-          <OdinVideo targetDrive={targetDrive} fileId={fileId} fileKey={fileKey} />
+          </View>
+        </View>
+      );
+    }
+    return (
+      <>
+        {loadVideo ? (
+          <View
+            style={{
+              backgroundColor: Colors.black,
+              ...imageSize,
+              position: 'relative',
+            }}
+          >
+            <OdinVideo targetDrive={targetDrive} fileId={fileId} fileKey={fileKey} />
+          </View>
         ) : (
           <>
             <OdinImage
@@ -130,7 +135,7 @@ export const VideoWithLoader = memo(
             </View>
           </>
         )}
-      </View>
+      </>
     );
   }
 );

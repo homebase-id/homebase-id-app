@@ -3,6 +3,7 @@ import { View, Button, ScrollView } from 'react-native';
 import Toast from 'react-native-toast-message';
 import Clipboard from '@react-native-clipboard/clipboard';
 import { Text } from '../Text/Text';
+import CodePush from 'react-native-code-push';
 
 type ErrorBoundaryProps = {
   children: ReactNode;
@@ -56,7 +57,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
           <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
             <Text style={{ fontSize: 20 }}>Oops, that&apos;s an error.</Text>
             <Text>Something went wrong while rendering this component.</Text>
-            <View style={{ marginTop: 5 }}>
+            <View style={{ marginVertical: 5 }}>
               <Button
                 title={this.state.showDetails ? 'Less' : 'More information'}
                 onPress={() =>
@@ -64,6 +65,12 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
                 }
               />
             </View>
+            <Button
+              title="Reload App"
+              onPress={() => {
+                CodePush.restartApp();
+              }}
+            />
           </View>
           {this.state.showDetails ? (
             <View>

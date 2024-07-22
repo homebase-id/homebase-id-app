@@ -85,14 +85,6 @@ export const ChatAppBar = ({
     [goBack, group, isDarkMode, isSelf, odinId, selectedMessage]
   );
 
-  const defaultActions = useCallback(() => {
-    Toast.show({
-      type: 'info',
-      text1: 'No action provided',
-      text2: 'Make sure u are passing the props correctly',
-    });
-  }, []);
-
   const headerRight = useCallback(() => {
     if (!selectedMessage) {
       return (
@@ -108,6 +100,7 @@ export const ChatAppBar = ({
         </TouchableOpacity>
       );
     }
+
     return (
       <View
         style={{
@@ -115,24 +108,17 @@ export const ChatAppBar = ({
           flexDirection: 'row',
         }}
       >
-        <IconButton icon={<Reply />} onPress={selectedMessageActions?.onReply || defaultActions} />
-        <IconButton icon={<Info />} onPress={selectedMessageActions?.onInfo || defaultActions} />
-        <IconButton icon={<Copy />} onPress={selectedMessageActions?.onCopy || defaultActions} />
+        <IconButton icon={<Reply />} onPress={selectedMessageActions?.onReply} />
+        <IconButton icon={<Info />} onPress={selectedMessageActions?.onInfo} />
+        <IconButton icon={<Copy />} onPress={selectedMessageActions?.onCopy} />
         {selectedMessage.fileMetadata.senderOdinId === '' && (
-          <IconButton
-            icon={<Pencil />}
-            onPress={selectedMessageActions?.onEdit || defaultActions}
-          />
+          <IconButton icon={<Pencil />} onPress={selectedMessageActions?.onEdit} />
         )}
-        <IconButton icon={<Trash />} onPress={selectedMessageActions?.onDelete || defaultActions} />
-        <IconButton
-          icon={<Forward />}
-          onPress={selectedMessageActions?.onForward || defaultActions}
-        />
+        <IconButton icon={<Trash />} onPress={selectedMessageActions?.onDelete} />
+        <IconButton icon={<Forward />} onPress={selectedMessageActions?.onForward} />
       </View>
     );
   }, [
-    defaultActions,
     onMorePress,
     selectedMessage,
     selectedMessageActions?.onCopy,
@@ -175,11 +161,22 @@ export const IconButton = memo(
     touchableProps,
   }: {
     icon: ReactNode;
-    onPress: () => void;
+    onPress?: () => void;
     touchableProps?: Omit<TouchableOpacityProps, 'onPress'>;
   }) => {
+    const defaultActions = useCallback(() => {
+      Toast.show({
+        type: 'info',
+        text1: 'No action provided',
+        text2: 'Make sure u are passing the props correctly',
+      });
+    }, []);
     return (
-      <TouchableOpacity onPress={onPress} style={{ padding: 10 }} {...touchableProps}>
+      <TouchableOpacity
+        onPress={onPress || defaultActions}
+        style={{ padding: 10 }}
+        {...touchableProps}
+      >
         {icon}
       </TouchableOpacity>
     );

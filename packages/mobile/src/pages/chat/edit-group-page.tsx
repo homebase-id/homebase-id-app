@@ -11,6 +11,8 @@ import { GroupAvatar } from '../../components/ui/Avatars/Avatar';
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { Colors } from '../../app/Colors';
+import { launchImageLibrary } from 'react-native-image-picker';
+import { ImageSource } from '../../provider/image/RNImageProvider';
 
 export type EditGroupProp = NativeStackScreenProps<ChatStackParamList, 'EditGroup'>;
 
@@ -21,6 +23,7 @@ export function EditGroupPage(props: EditGroupProp) {
   const conversation = conversationFile.data;
   const conversationContent = conversation?.fileMetadata.appData.content;
   const [title, setTitle] = useState<string>(conversationContent?.title || '');
+  const [asset, setAsset] = useState<ImageSource | undefined>();
 
   const save = useCallback(() => {
     if (conversationContent && conversation) {
@@ -31,6 +34,25 @@ export function EditGroupPage(props: EditGroupProp) {
       });
     }
   }, [conversation, conversationContent, title, updateGroupConversation]);
+
+  const pickAvatar = useCallback(async () => {
+    const image = await launchImageLibrary({
+      mediaType: 'photo',
+      selectionLimit: 1,
+    });
+    if (image.assets) {
+      const pickedImage = image.assets[0];
+      const imageSource: ImageSource = {
+        uri: pickedImage.uri,
+        type: pickedImage.type,
+        height: pickedImage.height || 0,
+        width: pickedImage.width || 0,
+        filename: pickedImage.fileName || '',
+        fileSize: pickedImage.fileSize,
+      };
+      setAsset(imageSource);
+    }
+  }, []);
 
   useEffect(() => {
     if (updateStatus === 'success') {
@@ -86,12 +108,7 @@ export function EditGroupPage(props: EditGroupProp) {
       <SafeAreaView>
         <View style={styles.content}>
           <GroupAvatar style={styles.avatar} iconSize={'2xl'} />
-          {/* <TextButton
-          title="Edit Avatar"
-          onPress={() => {
-            //TODO Change Avatar
-          }}
-        /> */}
+          <TextButton title="Edit Avatar" onPress={pickAvatar} />
           <Input
             value={title}
             onChangeText={(title) => setTitle(title)}
