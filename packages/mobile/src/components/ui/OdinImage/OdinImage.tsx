@@ -8,7 +8,6 @@ import { ReactNode, memo, useCallback, useMemo } from 'react';
 import {
   ActivityIndicator,
   GestureResponderEvent,
-  Image,
   ImageStyle,
   Platform,
   TouchableWithoutFeedback,
@@ -18,6 +17,7 @@ import useImage from './hooks/useImage';
 import useTinyThumb from './hooks/useTinyThumb';
 import { SvgUri } from 'react-native-svg';
 import { ImageZoom, ImageZoomProps } from '@likashefqet/react-native-image-zoom';
+import Animated from 'react-native-reanimated';
 
 export interface OdinImageProps {
   odinId?: string;
@@ -36,6 +36,7 @@ export interface OdinImageProps {
   onClick?: () => void;
   onLongPress?: (e: GestureResponderEvent) => void;
   imageZoomProps?: ImageZoomProps;
+  sharedTransitionTag?: string;
 }
 
 const thumblessContentTypes = ['image/svg+xml', 'image/gif'];
@@ -57,6 +58,7 @@ export const OdinImage = memo(
     onClick,
     onLongPress,
     imageZoomProps,
+    sharedTransitionTag,
   }: OdinImageProps) => {
     // Don't set load size if it's a thumbnessLessContentType; As they don't have a thumb
     const loadSize = useMemo(
@@ -232,6 +234,7 @@ const InnerImage = memo(
     onLongPress,
     contentType,
     imageMeta,
+    sharedTransitionTag,
   }: {
     uri: string;
     imageSize?: { width: number; height: number };
@@ -248,6 +251,7 @@ const InnerImage = memo(
       imageDrive: TargetDrive;
       size?: ImageSize;
     };
+    sharedTransitionTag?: string;
 
     contentType?: ImageContentType;
   }) => {
@@ -266,7 +270,8 @@ const InnerImage = memo(
     const { invalidateCache } = useImage();
     return contentType === 'image/svg+xml' ? (
       <ClickableWrapper>
-        <View
+        <Animated.View
+          sharedTransitionTag={sharedTransitionTag}
           style={[
             {
               ...imageSize,
@@ -282,11 +287,12 @@ const InnerImage = memo(
             uri={uri}
             style={{ overflow: 'hidden', ...style }}
           />
-        </View>
+        </Animated.View>
       </ClickableWrapper>
     ) : (
       <ClickableWrapper>
-        <Image
+        <Animated.Image
+          sharedTransitionTag={sharedTransitionTag}
           onError={() => {
             if (imageMeta) {
               return invalidateCache(
@@ -325,6 +331,7 @@ const ZoomableImage = memo(
     contentType,
     imageMeta,
     imageZoomProps,
+    sharedTransitionTag,
   }: {
     uri: string;
     imageSize?: { width: number; height: number };
@@ -342,7 +349,7 @@ const ZoomableImage = memo(
       size?: ImageSize;
     };
     imageZoomProps?: ImageZoomProps;
-
+    sharedTransitionTag?: string;
     contentType?: ImageContentType;
   }) => {
     if (!enableZoom) {
@@ -357,16 +364,18 @@ const ZoomableImage = memo(
           onClick={onClick}
           onLongPress={onLongPress}
           imageMeta={imageMeta}
+          sharedTransitionTag={sharedTransitionTag}
         />
       );
     }
 
     return (
       <TouchableWithoutFeedback onPress={onClick}>
-        <View
+        <Animated.View
           style={{
             ...imageSize,
           }}
+          sharedTransitionTag={sharedTransitionTag}
         >
           <ImageZoom
             uri={uri}
@@ -380,7 +389,7 @@ const ZoomableImage = memo(
             }}
             {...imageZoomProps}
           />
-        </View>
+        </Animated.View>
       </TouchableWithoutFeedback>
     );
   }

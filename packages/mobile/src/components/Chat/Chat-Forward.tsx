@@ -12,8 +12,14 @@ import { Text } from '../ui/Text/Text';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { Colors } from '../../app/Colors';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
-import { useAllConnections } from 'feed-app-common';
-import { ListRenderItemInfo, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { useAllConnections, useDotYouClientContext } from 'feed-app-common';
+import {
+  ActivityIndicator,
+  ListRenderItemInfo,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { DotYouProfile } from '@youfoundation/js-lib/network';
 import { ContactTile } from '../Contact/Contact-Tile';
 import { CheckCircle, CircleOutlined, SendChat } from '../ui/Icons/icons';
@@ -26,12 +32,15 @@ import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { ChatStackParamList } from '../../app/ChatStack';
 import { ErrorNotification } from '../ui/Alert/ErrorNotification';
 import useImage from '../ui/OdinImage/hooks/useImage';
-import { ImageSource } from '../../provider/image/RNImageProvider';
+import { getPayloadBytes, ImageSource } from '../../provider/image/RNImageProvider';
 import { ChatDrive, UnifiedConversation } from '../../provider/chat/ConversationProvider';
 import { useConversations } from '../../hooks/chat/useConversations';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { GroupAvatar } from '../ui/Avatars/Avatar';
 import { getNewId } from '@youfoundation/js-lib/helpers';
+import { useAuth } from '../../hooks/auth/useAuth';
+import { useAudio } from '../ui/OdinAudio/hooks/useAudio';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export type ChatForwardModalProps = {
   onClose: () => void;
@@ -51,6 +60,12 @@ export const ChatForwardModal = forwardRef(
     const [selectedContact, setselectedContact] = useState<DotYouProfile[]>([]);
     const [selectedGroup, setselectedGroup] = useState<HomebaseFile<UnifiedConversation>[]>([]);
     const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
+    const dotYouClient = useDotYouClientContext();
+    const { authToken } = useAuth();
+    const getAudio = useAudio().getFromCache;
+    const { bottom } = useSafeAreaInsets();
+    const [isLoading, setIsLoading] = useState(false);
+
     const { getFromCache } = useImage();
 
     const onDismiss = useCallback(() => {
@@ -77,24 +92,54 @@ export const ChatForwardModal = forwardRef(
         conversation: HomebaseFile<UnifiedConversation>,
         message: ChatMessageIMessage
       ) {
+        setIsLoading(true);
         let imageSource: ImageSource[] = [];
         if (message.fileMetadata.payloads.length > 0) {
           const payloads = message.fileMetadata.payloads;
-          imageSource = payloads
-            .map((payload) => {
-              // We don't support sending videos and audio files for now
-              if (!payload.contentType.startsWith('image')) return;
-              const image = getFromCache(undefined, message.fileId, payload.key, ChatDrive);
-              if (!image?.imageData) return;
-              return {
-                uri: image.imageData.url,
-                width: image.imageData?.naturalSize?.pixelWidth,
-                height: image.imageData?.naturalSize?.pixelHeight,
-                type: image.imageData?.type,
-              } as ImageSource;
-            })
-            .filter(Boolean) as ImageSource[];
+          imageSource = (
+            await Promise.all(
+              payloads.map(async (payload) => {
+                if (payload.contentType.startsWith('image')) {
+                  const image = getFromCache(undefined, message.fileId, payload.key, ChatDrive);
+                  if (!image?.imageData) return;
+                  return {
+                    uri: image.imageData.url,
+                    width: image.imageData?.naturalSize?.pixelWidth,
+                    height: image.imageData?.naturalSize?.pixelHeight,
+                    type: image.imageData?.type,
+                  } as ImageSource;
+                }
+                if (payload.contentType.startsWith('video')) {
+                  if (!authToken) return;
+                  const downloadPayload = await getPayloadBytes(
+                    dotYouClient,
+                    ChatDrive,
+                    message.fileId,
+                    payload.key,
+                    authToken
+                  );
+                  if (!downloadPayload) return;
+                  return {
+                    uri: downloadPayload.uri,
+                    width: message.fileMetadata.appData.previewThumbnail?.pixelWidth || 1920,
+                    height: message.fileMetadata.appData.previewThumbnail?.pixelHeight || 1080,
+                    type: downloadPayload.type,
+                  } as ImageSource;
+                }
+                if (payload.contentType.startsWith('audio')) {
+                  const audio = getAudio(message.fileId, payload.key, ChatDrive);
+                  if (!audio) return;
+                  return {
+                    uri: audio.url,
+                    type: audio.type,
+                  } as ImageSource;
+                }
+                return;
+              })
+            )
+          ).filter(Boolean) as ImageSource[];
         }
+        setIsLoading(false);
         return sendMessage({
           conversation,
           message: message.fileMetadata.appData.content.message,
@@ -153,7 +198,10 @@ export const ChatForwardModal = forwardRef(
       }
       onDismiss();
     }, [
+      authToken,
       createConversation,
+      dotYouClient,
+      getAudio,
       getFromCache,
       message,
       navigation,
@@ -214,6 +262,7 @@ export const ChatForwardModal = forwardRef(
             backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
             flexDirection: 'row',
             justifyContent: 'flex-end',
+            paddingBottom: bottom,
             alignItems: 'center',
           }}
         >
@@ -256,6 +305,7 @@ export const ChatForwardModal = forwardRef(
           <TouchableHighlight
             underlayColor={Colors.slate[800]}
             onPress={onForward}
+            disabled={isLoading}
             style={styles.footerContainer}
           >
             <View
@@ -266,19 +316,23 @@ export const ChatForwardModal = forwardRef(
                 gap: 12,
               }}
             >
-              <Text style={styles.footerText}>Send</Text>
-              <View
-                style={{
-                  transform: [{ rotate: '50deg' }],
-                }}
-              >
-                <SendChat color={Colors.white} />
-              </View>
+              <Text style={styles.footerText}>{!isLoading ? 'Send' : 'Sending'}</Text>
+              {isLoading ? (
+                <ActivityIndicator size="small" color={Colors.white} />
+              ) : (
+                <View
+                  style={{
+                    transform: [{ rotate: '50deg' }],
+                  }}
+                >
+                  <SendChat color={Colors.white} />
+                </View>
+              )}
             </View>
           </TouchableHighlight>
         </BottomSheetFooter>
       ),
-      [isDarkMode, onForward, selectedContact, selectedGroup]
+      [bottom, isDarkMode, isLoading, onForward, selectedContact, selectedGroup]
     );
 
     return (

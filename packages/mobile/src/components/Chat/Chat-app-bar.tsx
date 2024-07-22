@@ -100,9 +100,7 @@ export const ChatAppBar = ({
         </TouchableOpacity>
       );
     }
-    const isVideoMessage = selectedMessage.fileMetadata.payloads.some((payload) =>
-      payload?.contentType?.startsWith('video')
-    );
+
     return (
       <View
         style={{
@@ -117,9 +115,7 @@ export const ChatAppBar = ({
           <IconButton icon={<Pencil />} onPress={selectedMessageActions?.onEdit} />
         )}
         <IconButton icon={<Trash />} onPress={selectedMessageActions?.onDelete} />
-        {!isVideoMessage && (
-          <IconButton icon={<Forward />} onPress={selectedMessageActions?.onForward} />
-        )}
+        <IconButton icon={<Forward />} onPress={selectedMessageActions?.onForward} />
       </View>
     );
   }, [
