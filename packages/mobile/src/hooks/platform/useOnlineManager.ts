@@ -43,6 +43,7 @@ export const useOnlineManager = () => {
         if (state.isConnected) {
           const isIdentityUp = await pingIdentity(identity);
           onlineManager.setOnline(isIdentityUp);
+          return;
         }
         onlineManager.setOnline(!!state.isConnected);
       });
