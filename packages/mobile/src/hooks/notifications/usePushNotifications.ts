@@ -109,7 +109,7 @@ export const useUnreadPushNotificationsCount = (props?: { appId?: string }) => {
 export const useRemoveNotifications = (props: { disabled: boolean; appId: string }) => {
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
-  const { data: unreadCound } = useUnreadPushNotificationsCount({ appId: props.appId });
+  const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: props.appId });
 
   const markAsRead = (appId: string) => markAllNotificationsOfAppAsRead(dotYouClient, appId);
   const mutation = useMutation({
