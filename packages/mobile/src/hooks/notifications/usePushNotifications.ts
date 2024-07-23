@@ -109,9 +109,9 @@ export const useUnreadPushNotificationsCount = (props?: { appId?: string }) => {
 export const useRemoveNotifications = (props: { disabled: boolean; appId: string }) => {
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
+  const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: props.appId });
 
   const markAsRead = (appId: string) => markAllNotificationsOfAppAsRead(dotYouClient, appId);
-
   const mutation = useMutation({
     mutationFn: markAsRead,
     onSuccess: () => {
@@ -122,8 +122,8 @@ export const useRemoveNotifications = (props: { disabled: boolean; appId: string
 
   useEffect(() => {
     (async () => {
-      if ((!props?.disabled && !props.appId) || !mutation.isIdle) return;
+      if ((!props?.disabled && !props.appId) || !mutation.isIdle || !unreadCount) return;
       mutation.mutate(props.appId);
     })();
-  }, [mutation, props?.disabled, props?.appId]);
+  }, [mutation, props?.disabled, props?.appId, unreadCount]);
 };
