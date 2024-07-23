@@ -125,5 +125,5 @@ export const useRemoveNotifications = (props: { disabled: boolean; appId: string
       if ((!props?.disabled && !props.appId) || !mutation.isIdle || !unreadCount) return;
       mutation.mutate(props.appId);
     })();
-  }, [mutation, props?.disabled, props?.appId, unreadCound]);
+  }, [mutation, props?.disabled, props?.appId, unreadCount]);
 };
