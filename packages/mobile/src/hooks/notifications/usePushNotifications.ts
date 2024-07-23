@@ -122,7 +122,7 @@ export const useRemoveNotifications = (props: { disabled: boolean; appId: string
 
   useEffect(() => {
     (async () => {
-      if ((!props?.disabled && !props.appId) || !mutation.isIdle || !unreadCound) return;
+      if ((!props?.disabled && !props.appId) || !mutation.isIdle || !unreadCount) return;
       mutation.mutate(props.appId);
     })();
   }, [mutation, props?.disabled, props?.appId, unreadCound]);
