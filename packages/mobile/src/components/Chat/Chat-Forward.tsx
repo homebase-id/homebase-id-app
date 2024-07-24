@@ -12,7 +12,7 @@ import { Text } from '../ui/Text/Text';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { Colors } from '../../app/Colors';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
-import { useAllConnections, useDotYouClientContext } from 'feed-app-common';
+import { useAllConnections } from 'feed-app-common';
 import {
   ActivityIndicator,
   ListRenderItemInfo,
@@ -32,7 +32,6 @@ import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { ChatStackParamList } from '../../app/ChatStack';
 import { ErrorNotification } from '../ui/Alert/ErrorNotification';
 import useImage from '../ui/OdinImage/hooks/useImage';
-import { getPayloadBytes, ImageSource } from '../../provider/image/RNImageProvider';
 import { ChatDrive, UnifiedConversation } from '../../provider/chat/ConversationProvider';
 import { useConversations } from '../../hooks/chat/useConversations';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
@@ -41,6 +40,8 @@ import { getNewId } from '@youfoundation/js-lib/helpers';
 import { useAuth } from '../../hooks/auth/useAuth';
 import { useAudio } from '../ui/OdinAudio/hooks/useAudio';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useVideo } from '../../hooks/video/useVideo';
+import { ImageSource } from '../../provider/image/RNImageProvider';
 
 export type ChatForwardModalProps = {
   onClose: () => void;
@@ -60,13 +61,16 @@ export const ChatForwardModal = forwardRef(
     const [selectedContact, setselectedContact] = useState<DotYouProfile[]>([]);
     const [selectedGroup, setselectedGroup] = useState<HomebaseFile<UnifiedConversation>[]>([]);
     const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
-    const dotYouClient = useDotYouClientContext();
     const { authToken } = useAuth();
-    const getAudio = useAudio().getFromCache;
     const { bottom } = useSafeAreaInsets();
     const [isLoading, setIsLoading] = useState(false);
 
+    const getAudio = useAudio().getFromCache;
     const { getFromCache } = useImage();
+    const { getFromCache: getVideoData } = useVideo({
+      fileId: message?.fileId,
+      targetDrive: ChatDrive,
+    });
 
     const onDismiss = useCallback(() => {
       if (selectedContact.length > 0) {
@@ -111,16 +115,10 @@ export const ChatForwardModal = forwardRef(
                 }
                 if (payload.contentType.startsWith('video')) {
                   if (!authToken) return;
-                  const downloadPayload = await getPayloadBytes(
-                    dotYouClient,
-                    ChatDrive,
-                    message.fileId,
-                    payload.key,
-                    authToken
-                  );
+                  const downloadPayload = await getVideoData(payload.key);
                   if (!downloadPayload) return;
                   return {
-                    uri: downloadPayload.uri,
+                    uri: downloadPayload.url,
                     width: message.fileMetadata.appData.previewThumbnail?.pixelWidth || 1920,
                     height: message.fileMetadata.appData.previewThumbnail?.pixelHeight || 1080,
                     type: downloadPayload.type,
@@ -200,9 +198,9 @@ export const ChatForwardModal = forwardRef(
     }, [
       authToken,
       createConversation,
-      dotYouClient,
       getAudio,
       getFromCache,
+      getVideoData,
       message,
       navigation,
       onDismiss,

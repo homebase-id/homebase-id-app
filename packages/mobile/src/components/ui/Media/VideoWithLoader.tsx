@@ -124,17 +124,7 @@ export const VideoWithLoader = memo(
                 onEnd={() => setLoadVideo(false)}
                 onError={(e) => console.log('error', e)}
               >
-                {isLoading && (
-                  <View
-                    style={{
-                      backgroundColor: 'rgba(0,0,0,0.4)',
-                      alignItems: 'center',
-                      alignContent: 'center',
-                    }}
-                  >
-                    <ActivityIndicator size="large" color={Colors.white} />
-                  </View>
-                )}
+                {isLoading && <ActivityIndicator size="large" color={Colors.white} />}
               </Video>
             ) : (
               <OdinWebVideo targetDrive={targetDrive} fileId={fileId} fileKey={payload.key} />
