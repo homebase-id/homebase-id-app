@@ -4,8 +4,8 @@ import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { useChatMessages } from './useChatMessages';
 import { useEffect, useState } from 'react';
 import { UnifiedConversation } from '../../provider/chat/ConversationProvider';
-import { useConversation } from './useConversation';
 import { ChatMessage } from '../../provider/chat/ChatProvider';
+import { useConversationMetadata } from './useConversationMetadata';
 
 export const useMarkMessagesAsRead = ({
   conversation,
@@ -20,17 +20,20 @@ export const useMarkMessagesAsRead = ({
   const isProcessing = useRef(false);
   const [messagesMarkedAsRead, setMessagesMarkedAsRead] = useState<boolean>(false);
 
-  const { mutate: updateConversation } = useConversation().update;
+  const {
+    single: { data: conversationMetadata },
+    update: { mutate: updateConversationMetadata },
+  } = useConversationMetadata({ conversationId: conversation?.fileMetadata.appData.uniqueId });
   const [pendingReadTime, setPendingReadTime] = useState<number | undefined>(undefined);
 
   useEffect(() => {
     (async () => {
-      if (!conversation || !messages || isProcessing.current) return;
+      if (!conversation || !conversationMetadata || !messages || isProcessing.current) return;
 
       const unreadMessages = messages.filter(
         (msg) =>
           (msg?.fileMetadata.transitCreated || msg?.fileMetadata.created) >
-            (conversation.fileMetadata.appData.content.lastReadTime || 0) &&
+          (conversationMetadata.fileMetadata.appData.content.lastReadTime || 0) &&
           msg.fileMetadata.senderOdinId
       );
 
@@ -38,7 +41,7 @@ export const useMarkMessagesAsRead = ({
         return (msg?.fileMetadata.transitCreated || msg.fileMetadata.created) > acc
           ? msg?.fileMetadata.transitCreated || msg.fileMetadata.created
           : acc;
-      }, conversation.fileMetadata.appData.content.lastReadTime || 0);
+      }, conversationMetadata.fileMetadata.appData.content.lastReadTime || 0);
 
       setPendingReadTime(newestMessageCreated);
 
@@ -60,21 +63,21 @@ export const useMarkMessagesAsRead = ({
         isProcessing.current = false;
       }
     })();
-  }, [messages]);
+  }, [messages, conversationMetadata]);
 
   useEffect(() => {
     if (!conversation || !messages) return;
 
-    if (messagesMarkedAsRead && pendingReadTime && conversation) {
-      updateConversation({
+    if (messagesMarkedAsRead && pendingReadTime && conversationMetadata) {
+      updateConversationMetadata({
         conversation: {
-          ...conversation,
+          ...conversationMetadata,
           fileMetadata: {
-            ...conversation.fileMetadata,
+            ...conversationMetadata.fileMetadata,
             appData: {
               ...conversation.fileMetadata.appData,
               content: {
-                ...conversation.fileMetadata.appData.content,
+                ...conversationMetadata.fileMetadata.appData.content,
                 lastReadTime: pendingReadTime,
               },
             },
