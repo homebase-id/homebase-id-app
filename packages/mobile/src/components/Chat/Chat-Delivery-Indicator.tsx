@@ -79,14 +79,19 @@ export const InnerDeliveryIndicator = ({
     ({ children }: { children: React.ReactNode }) => {
       if (onPress) {
         return (
-          <Pressable onPress={onPress} style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Pressable
+            onPress={onPress}
+            style={[{ flexDirection: 'row', alignItems: 'center' }, style]}
+          >
             {children}
           </Pressable>
         );
       }
-      return <View style={{ flexDirection: 'row', alignItems: 'center' }}>{children}</View>;
+      return (
+        <View style={[{ flexDirection: 'row', alignItems: 'center' }, style]}>{children}</View>
+      );
     },
-    [onPress]
+    [onPress, style]
   );
 
   return (
