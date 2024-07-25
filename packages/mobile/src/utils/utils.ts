@@ -1,3 +1,4 @@
+import { InfiniteData } from '@tanstack/react-query';
 import { Image, Linking } from 'react-native';
 import { CachesDirectoryPath, copyFile } from 'react-native-fs';
 import InAppBrowser from 'react-native-inappbrowser-reborn';
@@ -118,4 +119,20 @@ export const getImageSize = (uri: string): Promise<{ width: number, height: numb
     });
 };
 
-
+// Flattens all pages, sorts descending and slice on the max number expected
+export const flattenInfinteData = <T>(
+    rawData:
+        | InfiniteData<{
+            results: T[];
+            cursorState: unknown;
+        }>
+        | undefined,
+    pageSize?: number,
+    sortFn?: (a: T, b: T) => number
+) => {
+    return (rawData?.pages
+        .flatMap((page) => page?.results)
+        .filter((post) => !!post)
+        .sort(sortFn)
+        .slice(0, pageSize ? rawData?.pages.length * pageSize : undefined) || []) as T[];
+};
