@@ -239,6 +239,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
         userDate: new Date().getTime(),
       });
       setAssets([]);
+      setLinkPreviews(null);
       setReplyMessage(null);
     },
     [
