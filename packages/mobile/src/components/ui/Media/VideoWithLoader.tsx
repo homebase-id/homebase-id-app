@@ -17,7 +17,7 @@ import { OdinImage } from '../OdinImage/OdinImage';
 import { useVideo } from '../../../hooks/video/useVideo';
 import Video from 'react-native-video';
 
-const MAX_DOWNLOAD_SIZE = 10 * 1024 * 1024 * 1024; // 10 MB
+const MAX_DOWNLOAD_SIZE = 16 * 1024 * 1024 * 1024; // 16 MB
 
 export const VideoWithLoader = memo(
   ({
