@@ -51,6 +51,7 @@ const INCLUDED_QUERY_KEYS = [
   'chat-message',
   'chat-messages',
   'conversations',
+  'conversation-metadata',
   'chat-reaction',
   'connection-details',
   'contact',

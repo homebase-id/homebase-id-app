@@ -16,6 +16,7 @@ import { ellipsisAtMaxChar } from 'feed-app-common';
 import { AuthorName, ConnectionName } from '../ui/Name';
 import { CheckCircle, CircleOutlined } from '../ui/Icons/icons';
 import { ErrorBoundary } from '../ui/ErrorBoundary/ErrorBoundary';
+import { useConversationMetadata } from '../../hooks/chat/useConversationMetadata';
 
 type ConversationTileProps = {
   onPress?: () => void;
@@ -50,8 +51,10 @@ const ConversationTile = memo((props: ConversationTileProps) => {
   const lastMessageAuthor =
     lastMessage?.fileMetadata.senderOdinId ||
     lastMessage?.fileMetadata.appData.content.authorOdinId;
-
-  const lastReadTime = props.conversation.lastReadTime;
+  const { data: conversationMetadata } = useConversationMetadata({
+    conversationId: props.conversationId,
+  }).single;
+  const lastReadTime = conversationMetadata?.fileMetadata.appData.content.lastReadTime;
   const unreadCount = useMemo(
     () =>
       lastReadTime && flatMessages
