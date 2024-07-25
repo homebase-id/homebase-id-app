@@ -81,7 +81,7 @@ const Post = ({ postFile }: { postFile: HomebaseFile<PostContent> }) => {
         flexDirection: 'column',
       }}
     >
-      <View style={{display}}>
+      <View style={{}}>
         <Text>
           <AuthorName odinId={post.authorOdinId} />
         </Text>
