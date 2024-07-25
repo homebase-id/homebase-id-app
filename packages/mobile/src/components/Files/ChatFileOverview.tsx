@@ -24,6 +24,7 @@ import { chatStyles } from '../Chat/ChatDetail';
 import { t } from 'feed-app-common';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@react-navigation/native';
+import Video from 'react-native-video';
 
 const FilePreview = ({
   asset,
@@ -31,16 +32,17 @@ const FilePreview = ({
   imageStyle,
   size,
   children,
+  preview = false,
 }: {
   asset: Asset;
   style?: StyleProp<ViewStyle>;
   imageStyle?: ImageStyle;
   size?: { width: DimensionValue; height: DimensionValue };
   children?: React.ReactNode;
+  preview?: boolean;
 }) => {
   const isVideo = asset.type?.startsWith('video') ?? false;
   const isDocument = asset.type?.startsWith('application') ?? false;
-
   return (
     <>
       {isVideo ? (
@@ -48,15 +50,38 @@ const FilePreview = ({
           style={[
             style,
             {
-              backgroundColor: Colors.slate[200],
-
-              alignItems: 'center',
-              justifyContent: 'center',
+              overflow: 'hidden',
             },
             size,
           ]}
         >
-          <Play size={'md'} color={Colors.slate[800]} />
+          <Video
+            source={{ uri: asset.uri || asset.originalPath }}
+            style={[
+              size,
+              {
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                bottom: 0,
+                right: 0,
+              },
+            ]}
+            onError={(error) => console.error(error)}
+            resizeMode={preview ? 'cover' : 'contain'}
+            controls={!preview}
+            paused
+          />
+          {preview && (
+            <View
+              style={{
+                marginTop: 'auto',
+                marginBottom: 'auto',
+              }}
+            >
+              <Play size={'md'} />
+            </View>
+          )}
           {children}
         </View>
       ) : isDocument ? (
@@ -194,6 +219,7 @@ export const ChatFileOverview = memo(
                 <FilePreview
                   key={index}
                   asset={value}
+                  preview={value.type?.startsWith('video') ?? false}
                   size={{
                     width: 48,
                     height: 48,

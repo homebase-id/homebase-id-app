@@ -1,6 +1,12 @@
-import { EmbeddedThumb, TargetDrive } from '@youfoundation/js-lib/core';
+import { EmbeddedThumb, PayloadDescriptor, TargetDrive } from '@youfoundation/js-lib/core';
 import { memo, useCallback, useMemo, useState } from 'react';
-import { GestureResponderEvent, ImageStyle, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator,
+  GestureResponderEvent,
+  ImageStyle,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { Colors } from '../../../app/Colors';
 import WebView from 'react-native-webview';
 import { TouchableWithoutFeedback } from 'react-native';
@@ -8,6 +14,10 @@ import { useAuth } from '../../../hooks/auth/useAuth';
 import { uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
 import { Play } from '../Icons/icons';
 import { OdinImage } from '../OdinImage/OdinImage';
+import { useVideo } from '../../../hooks/video/useVideo';
+import Video from 'react-native-video';
+
+const MAX_DOWNLOAD_SIZE = 16 * 1024 * 1024 * 1024; // 16 MB
 
 export const VideoWithLoader = memo(
   ({
@@ -17,25 +27,32 @@ export const VideoWithLoader = memo(
     fit = 'cover',
     preview,
     imageSize,
-    fileKey,
     onClick,
     style,
     onLongPress,
+    payload,
   }: {
     fileId: string;
     targetDrive: TargetDrive;
     previewThumbnail?: EmbeddedThumb;
     fit?: 'cover' | 'contain';
     preview?: boolean;
-    fileKey: string;
     fullscreen?: boolean;
     imageSize?: { width: number; height: number };
     onClick?: () => void;
     onLongPress?: (e: GestureResponderEvent) => void;
     style?: ImageStyle;
+    payload: PayloadDescriptor;
   }) => {
     const [loadVideo, setLoadVideo] = useState(true);
     const doLoadVideo = useCallback(() => setLoadVideo(true), []);
+    const canDownload = !preview && payload?.bytesWritten < MAX_DOWNLOAD_SIZE;
+    const { data, isLoading } = useVideo({
+      fileId,
+      targetDrive,
+      payloadKey: payload.key,
+      enabled: canDownload,
+    }).fetch;
 
     if (preview) {
       return (
@@ -45,7 +62,7 @@ export const VideoWithLoader = memo(
             fileId={fileId}
             previewThumbnail={previewThumbnail}
             fit={fit}
-            fileKey={fileKey}
+            fileKey={payload.key}
             imageSize={imageSize}
             onClick={onClick}
             avoidPayload={true}
@@ -92,7 +109,26 @@ export const VideoWithLoader = memo(
               position: 'relative',
             }}
           >
-            <OdinVideo targetDrive={targetDrive} fileId={fileId} fileKey={fileKey} />
+            {canDownload ? (
+              <Video
+                source={{ uri: data?.url }}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  bottom: 0,
+                  right: 0,
+                }}
+                controls={true}
+                resizeMode={'contain'}
+                onEnd={() => setLoadVideo(false)}
+                onError={(e) => console.log('error', e)}
+              >
+                {isLoading && <ActivityIndicator size="large" color={Colors.white} />}
+              </Video>
+            ) : (
+              <OdinWebVideo targetDrive={targetDrive} fileId={fileId} fileKey={payload.key} />
+            )}
           </View>
         ) : (
           <>
@@ -140,7 +176,7 @@ export const VideoWithLoader = memo(
   }
 );
 
-const OdinVideo = ({
+const OdinWebVideo = ({
   fileId,
   fileKey,
 }: {
