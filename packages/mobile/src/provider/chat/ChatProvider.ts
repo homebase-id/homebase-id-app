@@ -35,6 +35,7 @@ import {
 import { ChatDrive, UnifiedConversation } from './ConversationProvider';
 import {
   assertIfDefined,
+  base64ToUint8Array,
   getNewId,
   jsonStringify64,
   stringToUint8Array,
@@ -296,12 +297,27 @@ export const uploadChatMessage = async (
       })
     );
 
+    const linkPreviewWithImage = linkPreviews.find((preview) => preview.imageUrl);
+
+    const imageSource: ImageSource | undefined = linkPreviewWithImage
+      ? {
+          height: linkPreviewWithImage.imageHeight || 0,
+          width: linkPreviewWithImage.imageWidth || 0,
+          uri: linkPreviewWithImage.imageUrl,
+        }
+      : undefined;
+
+    const { tinyThumb } = imageSource
+      ? await createThumbnails(imageSource, '')
+      : { tinyThumb: undefined };
+
     payloads.push({
       key: CHAT_LINKS_PAYLOAD_KEY,
       payload: new OdinBlob([stringToUint8Array(JSON.stringify(linkPreviews))], {
         type: 'application/json',
       }) as any as Blob,
       descriptorContent,
+      previewThumbnail: tinyThumb,
     });
   }
 
