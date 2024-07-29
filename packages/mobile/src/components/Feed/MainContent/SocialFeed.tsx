@@ -7,7 +7,7 @@ import { Text } from '../../ui/Text/Text';
 import Animated from 'react-native-reanimated';
 import { useDarkMode } from '../../../hooks/useDarkMode';
 import { Colors } from '../../../app/Colors';
-import { View } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
 import { AuthorName } from '../../ui/Name';
 import { useDotYouClientContext } from 'feed-app-common';
 import { IconButton } from '../../Chat/Chat-app-bar';
@@ -42,7 +42,7 @@ const SocialFeedMainContent = () => {
   );
 
   if (postsLoading) {
-    return <Text>Loading...</Text>;
+    return <FeedLoader />;
   }
   return (
     <Animated.FlatList
@@ -166,5 +166,23 @@ const Post = memo(({ postFile }: { postFile: HomebaseFile<PostContent> }) => {
     </Animated.View>
   );
 });
+
+const FeedLoader = () => {
+  const { isDarkMode } = useDarkMode();
+  return (
+    <View
+      style={{
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}
+    >
+      <ActivityIndicator
+        size="large"
+        color={isDarkMode ? Colors.indigo[400] : Colors.indigo[700]}
+      />
+    </View>
+  );
+};
 
 export default SocialFeedMainContent;
