@@ -1,15 +1,21 @@
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { useSocialFeed } from '../../../hooks/feed/useSocialFeed';
 import { PostContent } from '@youfoundation/js-lib/public';
-import { useMemo } from 'react';
-import { flattenInfinteData } from '../../../utils/utils';
+import { memo, useMemo } from 'react';
+import { flattenInfinteData, openURL, URL_PATTERN } from '../../../utils/utils';
 import { Text } from '../../ui/Text/Text';
-import { formatToTimeAgoWithRelativeDetail, t } from 'feed-app-common';
 import Animated from 'react-native-reanimated';
 import { useDarkMode } from '../../../hooks/useDarkMode';
 import { Colors } from '../../../app/Colors';
 import { View } from 'react-native';
 import { AuthorName } from '../../ui/Name';
+import { useDotYouClientContext } from 'feed-app-common';
+import { IconButton } from '../../Chat/Chat-app-bar';
+import { OpenHeart } from '../../ui/Icons/icons';
+import { EmptyFeed } from './EmptyFeed';
+import { Avatar } from '../../ui/Avatars/Avatar';
+import ParsedText from 'react-native-parsed-text';
+import { PostMedia } from '../Body/PostMedia';
 
 const PAGE_SIZE = 10;
 
@@ -38,28 +44,29 @@ const SocialFeedMainContent = () => {
   if (postsLoading) {
     return <Text>Loading...</Text>;
   }
-  if (flattenedPosts?.length === 0) {
-    return (
-      <Text>
-        {t('No posts yet, send a post to your followers, or start following other identities')}
-      </Text>
-    );
-  }
   return (
     <Animated.FlatList
       data={flattenedPosts}
+      contentContainerStyle={{ flexGrow: 1 }}
+      showsVerticalScrollIndicator={false}
       keyExtractor={(item) => item.fileId}
       renderItem={({ item }) => <Post postFile={item} />}
+      ListEmptyComponent={<EmptyFeed />}
       onEndReached={() => hasMorePosts && fetchNextPage()}
     />
   );
 };
 
-const Post = ({ postFile }: { postFile: HomebaseFile<PostContent> }) => {
+const Post = memo(({ postFile }: { postFile: HomebaseFile<PostContent> }) => {
   const post = postFile.fileMetadata.appData.content;
   const { isDarkMode } = useDarkMode();
   const created = new Date(postFile.fileMetadata.created);
   const now = new Date();
+  const odinId = postFile.fileMetadata.senderOdinId;
+  const authorOdinId = post.authorOdinId || odinId;
+  const identity = useDotYouClientContext().getIdentity();
+  const isExternal = odinId && odinId !== identity;
+
   const date = new Date(postFile?.fileMetadata.appData.userDate || now);
   const yearsAgo = Math.abs(new Date(now.getTime() - date.getTime()).getUTCFullYear() - 1970);
   const format: Intl.DateTimeFormatOptions = {
@@ -81,21 +88,69 @@ const Post = ({ postFile }: { postFile: HomebaseFile<PostContent> }) => {
         flexDirection: 'column',
       }}
     >
-      <View style={{}}>
-        <Text>
-          <AuthorName odinId={post.authorOdinId} />
-        </Text>
-        <Text>{date.toLocaleDateString(undefined, format)}</Text>
-      </View>
-      <Text
+      <View
         style={{
-          fontSize: 16,
+          display: 'flex',
+          flexDirection: 'row',
+          gap: 16,
+          marginBottom: 10,
+          alignItems: 'center',
         }}
       >
+        <Avatar
+          odinId={authorOdinId}
+          imageSize={{
+            height: 40,
+            width: 40,
+          }}
+          style={{
+            height: 40,
+            width: 40,
+          }}
+        />
+
+        <View>
+          <Text
+            style={{
+              fontSize: 16,
+              fontWeight: '500',
+            }}
+          >
+            <AuthorName odinId={post.authorOdinId} />
+          </Text>
+          <Text>{date.toLocaleDateString(undefined, format)}</Text>
+        </View>
+      </View>
+      <ParsedText
+        style={{
+          fontSize: 16,
+          color: isDarkMode ? Colors.white : Colors.black,
+        }}
+        parse={[
+          {
+            pattern: URL_PATTERN,
+            onPress: (url) => openURL(url),
+            style: {
+              color: isDarkMode ? Colors.indigo[200] : Colors.indigo[500],
+            },
+          },
+        ]}
+        selectable
+        selectionColor={isDarkMode ? Colors.indigo[700] : Colors.indigo[500]}
+      >
         {post.caption}
-      </Text>
+      </ParsedText>
+      <PostMedia post={postFile} />
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+        }}
+      >
+        <IconButton icon={<OpenHeart />} />
+      </View>
     </Animated.View>
   );
-};
+});
 
 export default SocialFeedMainContent;

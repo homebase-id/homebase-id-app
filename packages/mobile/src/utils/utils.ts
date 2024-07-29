@@ -136,3 +136,8 @@ export const flattenInfinteData = <T>(
         .sort(sortFn)
         .slice(0, pageSize ? rawData?.pages.length * pageSize : undefined) || []) as T[];
 };
+
+// Regular expression for URL parsing
+export const URL_PATTERN = new RegExp(
+    /((http|https|ftp):\/\/)?(([a-zA-Z0-9\-_]+\.)+[a-zA-Z]{2,})(:\d+)?(\/[^\s]*)?/gi
+);
