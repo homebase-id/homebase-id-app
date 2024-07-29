@@ -43,6 +43,7 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
   const { data: contacts, refetch } = useAllContacts(
     conversationsFetched && (!conversations || !conversations?.length)
   );
+
   const noContacts = !contacts || contacts.length === 0;
 
   const [query, setQuery] = useState<string | undefined>(undefined);
@@ -125,7 +126,7 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
   if (isQueryActive) {
     return (
       <ErrorBoundary>
-        <SearchConversationResults query={query} conversations={conversations} />
+        <SearchConversationResults query={query} conversations={conversations || []} />
       </ErrorBoundary>
     );
   }
@@ -145,7 +146,7 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
             renderItem={renderItem}
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={doRefresh} />}
           />
-        ) : (
+        ) : conversationsFetched ? (
           <ScrollView
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={doRefresh} />}
             style={{ flex: 1 }}
@@ -176,7 +177,7 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
               </View>
             )}
           </ScrollView>
-        )}
+        ) : null}
       </SafeAreaView>
     </ErrorBoundary>
   );
