@@ -30,13 +30,15 @@ import {
 import {
   ChatDrive,
   CHAT_CONVERSATION_FILE_TYPE,
-  GROUP_CHAT_CONVERSATION_FILE_TYPE,
   dsrToConversation,
+  CHAT_CONVERSATION_LOCAL_METADATA_FILE_TYPE,
+  dsrToConversationMetadata,
 } from '../../provider/chat/ConversationProvider';
 import { ChatReactionFileType } from '../../provider/chat/ChatReactionProvider';
 import { insertNewMessage, insertNewMessagesForConversation } from './useChatMessages';
 import { insertNewConversation } from './useConversations';
 import { useWebSocketContext } from '../../components/WebSocketContext/useWebSocketContext';
+import { insertNewConversationMetadata } from './useConversationMetadata';
 
 const MINUTE_IN_MS = 60000;
 const isDebug = false; // The babel plugin to remove console logs would remove any if they get to production
@@ -217,8 +219,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
         const messageId = notification.header.fileMetadata.appData.groupId;
         queryClient.invalidateQueries({ queryKey: ['chat-reaction', messageId] });
       } else if (
-        notification.header.fileMetadata.appData.fileType === CHAT_CONVERSATION_FILE_TYPE ||
-        notification.header.fileMetadata.appData.fileType === GROUP_CHAT_CONVERSATION_FILE_TYPE
+        notification.header.fileMetadata.appData.fileType === CHAT_CONVERSATION_FILE_TYPE
       ) {
         const isNewFile = notification.notificationType === 'fileAdded';
 
@@ -238,6 +239,20 @@ const useChatWebsocket = (isEnabled: boolean) => {
         }
 
         insertNewConversation(queryClient, updatedConversation, !isNewFile);
+      } else if (
+        notification.header.fileMetadata.appData.fileType ===
+        CHAT_CONVERSATION_LOCAL_METADATA_FILE_TYPE
+      ) {
+        const updatedMetadata = await dsrToConversationMetadata(
+          dotYouClient,
+          notification.header,
+          ChatDrive,
+          true
+        );
+
+        if (!updatedMetadata) return;
+
+        insertNewConversationMetadata(queryClient, updatedMetadata);
       }
     }
 

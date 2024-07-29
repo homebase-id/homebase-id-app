@@ -260,7 +260,7 @@ const InnerMediaItem = ({
       <View style={containerStyle}>
         <VideoWithLoader
           fileId={msg.fileId}
-          fileKey={payload.key}
+          payload={payload as PayloadDescriptor}
           targetDrive={ChatDrive}
           previewThumbnail={msg.fileMetadata.appData.previewThumbnail}
           fit={fit}

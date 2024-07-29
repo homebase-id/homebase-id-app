@@ -144,7 +144,7 @@ export const PreviewMedia = memo((prop: MediaProp) => {
       ) : (
         <VideoWithLoader
           fileId={fileId}
-          fileKey={fileKey}
+          payload={item}
           targetDrive={ChatDrive}
           fullscreen={true}
           previewThumbnail={msg.fileMetadata.appData.previewThumbnail}
@@ -214,7 +214,7 @@ export const PreviewMedia = memo((prop: MediaProp) => {
                     <VideoWithLoader
                       key={index}
                       fileId={msg.fileId}
-                      fileKey={item.key}
+                      payload={item}
                       targetDrive={ChatDrive}
                       previewThumbnail={
                         payloads.length === 1

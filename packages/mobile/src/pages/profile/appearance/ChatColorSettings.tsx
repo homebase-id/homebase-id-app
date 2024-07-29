@@ -74,6 +74,9 @@ export const ChatColorSettings = () => {
           name: 'Receiver',
         },
       },
+      swipeableProps: {
+        enabled: false,
+      },
       renderBubble: (props) => {
         return (
           <Bubble
@@ -125,13 +128,15 @@ export const ChatColorSettings = () => {
             }}
             wrapperStyle={{
               right: {
-                backgroundColor: isDarkMode ? `${bubbleColor?.color}` : `${bubbleColor?.color}`,
+                backgroundColor: bubbleColor?.color,
               },
             }}
           />
         );
       },
-
+      swipeableProps: {
+        enabled: false,
+      },
       showUserAvatar: false,
     };
     return {
@@ -158,7 +163,6 @@ export const ChatColorSettings = () => {
             style={[
               containerStyle,
               {
-                height: 150,
                 padding: 0,
                 margin: 16,
               },
