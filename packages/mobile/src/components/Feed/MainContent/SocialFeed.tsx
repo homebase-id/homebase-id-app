@@ -1,7 +1,7 @@
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { useSocialFeed } from '../../../hooks/feed/useSocialFeed';
 import { PostContent } from '@youfoundation/js-lib/public';
-import { memo, useMemo } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 import { flattenInfinteData, openURL, URL_PATTERN } from '../../../utils/utils';
 import { Text } from '../../ui/Text/Text';
 import Animated from 'react-native-reanimated';
@@ -16,6 +16,7 @@ import { EmptyFeed } from './EmptyFeed';
 import { Avatar } from '../../ui/Avatars/Avatar';
 import ParsedText from 'react-native-parsed-text';
 import { PostMedia } from '../Body/PostMedia';
+import { RefreshControl } from 'react-native-gesture-handler';
 
 const PAGE_SIZE = 10;
 
@@ -26,6 +27,7 @@ const SocialFeedMainContent = () => {
     isLoading: postsLoading,
     fetchNextPage,
     isFetchingNextPage,
+    refetch: refreshFeed,
   } = useSocialFeed({ pageSize: PAGE_SIZE }).fetchAll;
 
   // Flatten all pages, sorted descending and slice on the max number expected
@@ -41,6 +43,14 @@ const SocialFeedMainContent = () => {
     [posts]
   );
 
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await refreshFeed();
+    setRefreshing(false);
+  }, [refreshFeed]);
+
   if (postsLoading) {
     return <FeedLoader />;
   }
@@ -48,6 +58,7 @@ const SocialFeedMainContent = () => {
     <Animated.FlatList
       data={flattenedPosts}
       contentContainerStyle={{ flexGrow: 1 }}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       showsVerticalScrollIndicator={false}
       keyExtractor={(item) => item.fileId}
       renderItem={({ item }) => <Post postFile={item} />}
