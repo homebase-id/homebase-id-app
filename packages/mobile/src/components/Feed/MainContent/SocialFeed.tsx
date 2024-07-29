@@ -11,7 +11,7 @@ import { View } from 'react-native';
 import { AuthorName } from '../../ui/Name';
 import { useDotYouClientContext } from 'feed-app-common';
 import { IconButton } from '../../Chat/Chat-app-bar';
-import { OpenHeart } from '../../ui/Icons/icons';
+import { Comment, Forward, OpenHeart } from '../../ui/Icons/icons';
 import { EmptyFeed } from './EmptyFeed';
 import { Avatar } from '../../ui/Avatars/Avatar';
 import ParsedText from 'react-native-parsed-text';
@@ -60,7 +60,6 @@ const SocialFeedMainContent = () => {
 const Post = memo(({ postFile }: { postFile: HomebaseFile<PostContent> }) => {
   const post = postFile.fileMetadata.appData.content;
   const { isDarkMode } = useDarkMode();
-  const created = new Date(postFile.fileMetadata.created);
   const now = new Date();
   const odinId = postFile.fileMetadata.senderOdinId;
   const authorOdinId = post.authorOdinId || odinId;
@@ -112,13 +111,23 @@ const Post = memo(({ postFile }: { postFile: HomebaseFile<PostContent> }) => {
         <View>
           <Text
             style={{
-              fontSize: 16,
-              fontWeight: '500',
+              fontSize: 17,
+              fontWeight: '400',
+              opacity: 0.7,
+              color: isDarkMode ? Colors.slate[50] : Colors.slate[900],
             }}
           >
             <AuthorName odinId={post.authorOdinId} />
           </Text>
-          <Text>{date.toLocaleDateString(undefined, format)}</Text>
+          <Text
+            style={{
+              opacity: 0.7,
+              fontSize: 13,
+              color: isDarkMode ? Colors.slate[50] : Colors.slate[900],
+            }}
+          >
+            {date.toLocaleDateString(undefined, format)}
+          </Text>
         </View>
       </View>
       <ParsedText
@@ -145,9 +154,14 @@ const Post = memo(({ postFile }: { postFile: HomebaseFile<PostContent> }) => {
         style={{
           flexDirection: 'row',
           alignItems: 'center',
+          justifyContent: 'space-between',
         }}
       >
         <IconButton icon={<OpenHeart />} />
+        <View style={{ display: 'flex', flexDirection: 'row' }}>
+          <IconButton icon={<Forward />} />
+          <IconButton icon={<Comment />} />
+        </View>
       </View>
     </Animated.View>
   );

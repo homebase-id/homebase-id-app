@@ -68,6 +68,7 @@ const INCLUDED_QUERY_KEYS = [
   // 'tinyThumb',
 
   'process-inbox',
+  'social-feeds',
 ];
 const persistOptions: Omit<PersistQueryClientOptions, 'queryClient'> = {
   buster: '20240524',
