@@ -16,6 +16,7 @@ export const PostMedia = memo(({ post }: PostMediaProps) => {
   const odinId = post.fileMetadata.senderOdinId;
   const authorOdinId = post.fileMetadata.appData.content.authorOdinId || odinId;
   const { width, height } = Dimensions.get('screen');
+  const hasContent = !!post.fileMetadata.appData.content.caption;
   if (payloads?.length === 0) return null;
   if (payloads.length === 1) {
     const payload = payloads[0];
@@ -59,6 +60,9 @@ export const PostMedia = memo(({ post }: PostMediaProps) => {
       odinId={authorOdinId}
       probablyEncrypted={post.fileMetadata.isEncrypted}
       previewThumbnail={previewThumbnail}
+      style={{
+        marginTop: hasContent ? 10 : 0,
+      }}
     />
   );
 });

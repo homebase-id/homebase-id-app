@@ -68,7 +68,7 @@ export const PostTeaserCard = memo(({ postFile }: { postFile: HomebaseFile<PostC
           display: 'flex',
           flexDirection: 'row',
           gap: 16,
-          marginBottom: 10,
+          marginBottom: 8,
           alignItems: 'center',
         }}
       >

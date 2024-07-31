@@ -1,4 +1,5 @@
 import {
+  Dimensions,
   GestureResponderEvent,
   Image,
   ImageStyle,
@@ -37,6 +38,7 @@ export const MediaGallery = ({
   probablyEncrypted,
   odinId,
   globalTransitId,
+  style,
 }: {
   fileId: string;
   globalTransitId?: string;
@@ -47,13 +49,13 @@ export const MediaGallery = ({
   previewThumbnail?: EmbeddedThumb | undefined;
   payloads: PayloadDescriptor[];
   onClick?: (currIndex: number) => void;
+  style?: StyleProp<ViewStyle>;
 }) => {
   const maxVisible = 4;
   const countExcludedFromView = payloads.length - maxVisible;
-  const isGallery = payloads.length >= 2;
 
   return (
-    <View style={[styles.grid]}>
+    <View style={[styles.grid, style]}>
       {payloads.slice(0, maxVisible).map((item, index) => {
         return (
           <MediaItem
@@ -66,29 +68,25 @@ export const MediaGallery = ({
             previewThumbnail={previewThumbnail}
             targetDrive={targetDrive}
             imageSize={{
-              width: payloads.length === 3 && index === 2 ? 302 : !isGallery ? 200 : 150,
-              height: !isGallery ? 200 : 150,
+              width: payloads.length === 3 && index === 2 ? 302 : 150,
+              height: 150,
             }}
             containerStyle={{
               flexGrow: 1,
             }}
-            style={
-              isGallery
-                ? {
-                    borderTopLeftRadius: index === 0 ? 10 : 0,
-                    borderBottomLeftRadius:
-                      index === 2 || (index === 0 && payloads.length === 2) ? 10 : 0,
-                    borderTopRightRadius: index === 1 ? 10 : 0,
-                    borderBottomRightRadius:
-                      index === 3 ||
-                      (payloads.length === 3 && index === 2) ||
-                      (index === 1 && payloads.length === 2)
-                        ? 10
-                        : 0,
-                    width: payloads.length === 3 && index === 2 ? '100%' : 150,
-                  }
-                : undefined
-            }
+            style={{
+              borderTopLeftRadius: index === 0 ? 10 : 0,
+              borderBottomLeftRadius:
+                index === 2 || (index === 0 && payloads.length === 2) ? 10 : 0,
+              borderTopRightRadius: index === 1 ? 10 : 0,
+              borderBottomRightRadius:
+                index === 3 ||
+                (payloads.length === 3 && index === 2) ||
+                (index === 1 && payloads.length === 2)
+                  ? 10
+                  : 0,
+              width: payloads.length === 3 && index === 2 ? '100%' : 150,
+            }}
             onLongPress={onLongPress}
             onClick={() => onClick?.(index)}
           />
