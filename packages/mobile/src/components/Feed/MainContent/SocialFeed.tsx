@@ -57,6 +57,7 @@ const SocialFeedMainContent = memo(() => {
   if (postsLoading) {
     return <FeedLoader />;
   }
+
   return (
     <Animated.FlatList
       data={flattenedPosts}
@@ -66,7 +67,9 @@ const SocialFeedMainContent = memo(() => {
       keyExtractor={(item) => item.fileId}
       renderItem={({ item }) => <Post postFile={item} />}
       ListEmptyComponent={<EmptyFeed />}
+      ListFooterComponent={isFetchingNextPage ? <FeedLoader /> : null}
       onEndReached={() => hasMorePosts && fetchNextPage()}
+      onEndReachedThreshold={0.3}
     />
   );
 });

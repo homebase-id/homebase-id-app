@@ -51,7 +51,7 @@ export const PublicAvatar = (props: {
           ...props.style,
         }}
         onError={(e) => {
-          console.error('Error loading image', e.nativeEvent.error);
+          // console.error('Error loading image', e.nativeEvent.error);
           setIsSvg(true);
         }}
         source={{ uri: `https://${props.odinId}/pub/image` }}
