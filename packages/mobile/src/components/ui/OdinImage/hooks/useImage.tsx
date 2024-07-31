@@ -1,11 +1,20 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { ImageSize, TargetDrive, ImageContentType } from '@youfoundation/js-lib/core';
+import {
+  ImageSize,
+  TargetDrive,
+  ImageContentType,
+  SystemFileType,
+} from '@youfoundation/js-lib/core';
 import { exists } from 'react-native-fs';
 import { useAuth } from '../../../../hooks/auth/useAuth';
 import { getDecryptedImageData } from '../../../../provider/image/RNImageProvider';
 
 import { useDotYouClientContext } from 'feed-app-common';
+import {
+  getDecryptedMediaDataOverPeerByGlobalTransitId,
+  getDecryptedMediaUrlOverPeer,
+} from '../../../../provider/image/RNExternalMediaProvider';
 
 interface ImageData {
   url: string;
@@ -17,16 +26,30 @@ const useImage = (props?: {
   odinId?: string;
   imageFileId?: string | undefined;
   imageFileKey?: string | undefined;
+  imageGlobalTransitId?: string | undefined;
   imageDrive?: TargetDrive;
+  probablyEncrypted?: boolean;
+  systemFileType?: SystemFileType;
   size?: ImageSize;
   naturalSize?: ImageSize;
   lastModified?: number;
 }) => {
-  const { odinId, imageFileId, imageFileKey, imageDrive, size, naturalSize, lastModified } =
-    props || {};
+  const {
+    odinId,
+    imageFileId,
+    imageFileKey,
+    imageDrive,
+    size,
+    naturalSize,
+    lastModified,
+    imageGlobalTransitId,
+    probablyEncrypted,
+  } = props || {};
   const { authToken } = useAuth();
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
+
+  const localHost = dotYouClient.getIdentity(); // This is the identity of the user
 
   function queryKeyBuilder(
     odinId: string | undefined,
@@ -61,13 +84,19 @@ const useImage = (props?: {
     odinId: string | undefined,
     imageFileId: string,
     imageFileKey: string,
+    imageGlobalTransitId: string | undefined,
     imageDrive: TargetDrive,
     size?: ImageSize
   ) => {
     const cachedEntries = queryClient
       .getQueryCache()
       .findAll({
-        queryKey: queryKeyBuilder(odinId, imageFileId, imageFileKey, imageDrive),
+        queryKey: queryKeyBuilder(
+          odinId,
+          imageGlobalTransitId || imageFileId,
+          imageFileKey,
+          imageDrive
+        ),
         exact: false,
       })
       .filter((query) => query.state.status !== 'error');
@@ -106,9 +135,10 @@ const useImage = (props?: {
   };
 
   const fetchImageData = async (
-    odinId: string | undefined,
+    odinId: string,
     imageFileId: string | undefined,
     imageFileKey: string | undefined,
+    imageGlobalTransitId: string | undefined,
     imageDrive?: TargetDrive,
     size?: ImageSize,
     naturalSize?: ImageSize,
@@ -128,6 +158,7 @@ const useImage = (props?: {
       odinId,
       imageFileId,
       imageFileKey,
+      imageGlobalTransitId,
       imageDrive,
       size
     );
@@ -135,6 +166,68 @@ const useImage = (props?: {
     if (cachedEntry) {
       const cachedData = queryClient.getQueryData<ImageData | undefined>(cachedEntry.queryKey);
       if (cachedData && (await exists(cachedData.url))) return cachedData;
+    }
+
+    if (odinId !== localHost) {
+      if (imageGlobalTransitId) {
+        const imageBlob = await getDecryptedMediaDataOverPeerByGlobalTransitId(
+          dotYouClient,
+          odinId,
+          imageDrive,
+          imageGlobalTransitId,
+          imageFileKey,
+          authToken,
+          probablyEncrypted,
+          lastModified,
+          {
+            size,
+          }
+        );
+        if (!imageBlob) return null;
+
+        // check if imageBLob is string return string, else if odinBlob, return uri
+        if (typeof imageBlob === 'string') {
+          return {
+            url: imageBlob,
+            naturalSize: naturalSize,
+            type: 'image/jpeg',
+          };
+        } else {
+          return {
+            url: imageBlob.uri,
+            naturalSize: naturalSize,
+            type: imageBlob.type as ImageContentType,
+          };
+        }
+      } else {
+        const imageBlob = await getDecryptedMediaUrlOverPeer(
+          dotYouClient,
+          odinId,
+          imageDrive,
+          imageFileId,
+          imageFileKey,
+          authToken,
+          probablyEncrypted,
+          lastModified,
+          {
+            size,
+          }
+        );
+        if (!imageBlob) return null;
+        if (typeof imageBlob === 'string') {
+          return {
+            url: imageBlob,
+            naturalSize: naturalSize,
+            type: 'image/jpeg',
+          };
+        } else {
+          return {
+            url: imageBlob.uri,
+            naturalSize: naturalSize,
+            type: imageBlob.type as ImageContentType,
+          };
+        }
+      }
     }
 
     const imageBlob = await getDecryptedImageData(
@@ -159,12 +252,20 @@ const useImage = (props?: {
 
   return {
     fetch: useQuery({
-      queryKey: queryKeyBuilder(odinId, imageFileId, imageFileKey, imageDrive, size, lastModified),
+      queryKey: queryKeyBuilder(
+        odinId,
+        imageGlobalTransitId || imageFileId,
+        imageFileKey,
+        imageDrive,
+        size,
+        lastModified
+      ),
       queryFn: () =>
         fetchImageData(
-          odinId,
+          odinId || localHost,
           imageFileId,
           imageFileKey,
+          imageGlobalTransitId,
           imageDrive,
           size,
           naturalSize,
@@ -180,12 +281,14 @@ const useImage = (props?: {
       imageFileId: string,
       imageFileKey: string,
       imageDrive: TargetDrive,
+      imageGlobalTransitId: string | undefined,
       size?: ImageSize
     ) => {
       const largerCache = checkIfWeHaveLargerCachedImage(
         odinId,
         imageFileId,
         imageFileKey,
+        imageGlobalTransitId,
         imageDrive,
         size
       );
@@ -200,7 +303,12 @@ const useImage = (props?: {
       const cachedEntries = queryClient
         .getQueryCache()
         .findAll({
-          queryKey: queryKeyBuilder(odinId, imageFileId, imageFileKey, imageDrive),
+          queryKey: queryKeyBuilder(
+            odinId,
+            imageGlobalTransitId || imageFileId,
+            imageFileKey,
+            imageDrive
+          ),
           exact: false,
         })
         .filter((query) => query.state.status === 'success');
@@ -228,7 +336,13 @@ const useImage = (props?: {
       ) {
         return null;
       }
-      const queryKey = queryKeyBuilder(odinId, imageFileId, imageFileKey, imageDrive, size);
+      const queryKey = queryKeyBuilder(
+        odinId,
+        imageGlobalTransitId || imageFileId,
+        imageFileKey,
+        imageDrive,
+        size
+      );
       queryClient.invalidateQueries({ queryKey, exact: true });
     },
   };

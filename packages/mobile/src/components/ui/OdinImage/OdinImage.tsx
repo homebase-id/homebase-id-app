@@ -25,6 +25,7 @@ export interface OdinImageProps {
   fileId: string | undefined;
   fileKey?: string;
   lastModified?: number;
+  globalTransitId?: string;
   fit?: 'cover' | 'contain';
   imageSize?: { width: number; height: number };
   alt?: string;
@@ -37,6 +38,7 @@ export interface OdinImageProps {
   onLongPress?: (e: GestureResponderEvent) => void;
   imageZoomProps?: ImageZoomProps;
   sharedTransitionTag?: string;
+  probablyEncrypted?: boolean;
 }
 
 const thumblessContentTypes = ['image/svg+xml', 'image/gif'];
@@ -59,6 +61,8 @@ export const OdinImage = memo(
     onLongPress,
     imageZoomProps,
     sharedTransitionTag,
+    globalTransitId,
+    probablyEncrypted,
   }: OdinImageProps) => {
     // Don't set load size if it's a thumbnessLessContentType; As they don't have a thumb
     const loadSize = useMemo(
@@ -83,9 +87,9 @@ export const OdinImage = memo(
     const cachedImage = useMemo(
       () =>
         fileId && fileKey
-          ? getFromCache(odinId, fileId, fileKey, targetDrive, loadSize)
+          ? getFromCache(odinId, fileId, fileKey, targetDrive, globalTransitId, loadSize)
           : undefined,
-      [fileId, fileKey, getFromCache, odinId, targetDrive, loadSize]
+      [fileId, fileKey, getFromCache, odinId, targetDrive, globalTransitId, loadSize]
     );
 
     const embeddedThumbUrl = useMemo(() => {
@@ -131,7 +135,9 @@ export const OdinImage = memo(
       odinId,
       imageFileId: fileId,
       imageFileKey: fileKey,
+      imageGlobalTransitId: globalTransitId,
       imageDrive: targetDrive,
+      probablyEncrypted,
       size: loadSize,
       naturalSize,
       lastModified,
@@ -248,6 +254,7 @@ const InnerImage = memo(
       odinId: string | undefined;
       imageFileId: string | undefined;
       imageFileKey: string | undefined;
+      imageGlobalTransitId?: string | undefined;
       imageDrive: TargetDrive;
       size?: ImageSize;
     };
@@ -297,7 +304,7 @@ const InnerImage = memo(
             if (imageMeta) {
               return invalidateCache(
                 imageMeta?.odinId,
-                imageMeta?.imageFileId,
+                imageMeta?.imageGlobalTransitId || imageMeta?.imageFileId,
                 imageMeta?.imageFileKey,
                 imageMeta?.imageDrive,
                 imageMeta?.size

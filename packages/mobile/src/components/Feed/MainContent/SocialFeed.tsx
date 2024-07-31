@@ -9,7 +9,7 @@ import { useDarkMode } from '../../../hooks/useDarkMode';
 import { Colors } from '../../../app/Colors';
 import { ActivityIndicator, View } from 'react-native';
 import { AuthorName } from '../../ui/Name';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useCheckIdentity, useDotYouClientContext } from 'feed-app-common';
 import { IconButton } from '../../Chat/Chat-app-bar';
 import { Comment, Forward, OpenHeart } from '../../ui/Icons/icons';
 import { EmptyFeed } from './EmptyFeed';
@@ -17,10 +17,13 @@ import { Avatar } from '../../ui/Avatars/Avatar';
 import ParsedText from 'react-native-parsed-text';
 import { PostMedia } from '../Body/PostMedia';
 import { RefreshControl } from 'react-native-gesture-handler';
+import { useSocialChannel } from '../../../hooks/feed/useSocialChannel';
+import { useChannel } from '../../../hooks/feed/channels/useChannel';
+import { UnreachableIdentity } from '../UnreachableIdentity';
 
 const PAGE_SIZE = 10;
 
-const SocialFeedMainContent = () => {
+const SocialFeedMainContent = memo(() => {
   const {
     data: posts,
     hasNextPage: hasMorePosts,
@@ -66,7 +69,7 @@ const SocialFeedMainContent = () => {
       onEndReached={() => hasMorePosts && fetchNextPage()}
     />
   );
-};
+});
 
 const Post = memo(({ postFile }: { postFile: HomebaseFile<PostContent> }) => {
   const post = postFile.fileMetadata.appData.content;
@@ -77,6 +80,16 @@ const Post = memo(({ postFile }: { postFile: HomebaseFile<PostContent> }) => {
   const identity = useDotYouClientContext().getIdentity();
   const isExternal = odinId && odinId !== identity;
 
+  const { data: identityAccessible } = useCheckIdentity(isExternal ? odinId : undefined);
+
+  const { data: externalChannel } = useSocialChannel({
+    odinId: isExternal ? odinId : undefined,
+    channelId: post.channelId,
+  }).fetch;
+  const { data: internalChannel } = useChannel({
+    channelId: isExternal ? undefined : post.channelId,
+  }).fetch;
+
   const date = new Date(postFile?.fileMetadata.appData.userDate || now);
   const yearsAgo = Math.abs(new Date(now.getTime() - date.getTime()).getUTCFullYear() - 1970);
   const format: Intl.DateTimeFormatOptions = {
@@ -86,6 +99,10 @@ const Post = memo(({ postFile }: { postFile: HomebaseFile<PostContent> }) => {
     hour: 'numeric',
     minute: 'numeric',
   };
+
+  if (identityAccessible === false && isExternal) {
+    return <UnreachableIdentity postFile={postFile} odinId={odinId} />;
+  }
 
   return (
     <Animated.View

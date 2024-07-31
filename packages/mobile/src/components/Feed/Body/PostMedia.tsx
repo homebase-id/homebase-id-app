@@ -14,6 +14,8 @@ export const PostMedia = memo(({ post }: PostMediaProps) => {
   const payloads = post.fileMetadata.payloads;
   const fileId = post.fileId;
   const previewThumbnail = post.fileMetadata.appData.previewThumbnail;
+  const odinId = post.fileMetadata.senderOdinId;
+  const authorOdinId = post.fileMetadata.appData.content.authorOdinId || odinId;
   const { width, height } = Dimensions.get('screen');
   if (payloads?.length === 0) return null;
   if (payloads.length === 1) {
@@ -29,6 +31,9 @@ export const PostMedia = memo(({ post }: PostMediaProps) => {
       <OdinImage
         fileId={fileId}
         fileKey={payload.key}
+        globalTransitId={post.fileMetadata.globalTransitId}
+        probablyEncrypted={post.fileMetadata.isEncrypted}
+        odinId={authorOdinId}
         targetDrive={BlogConfig.FeedDrive}
         fit={'cover'}
         previewThumbnail={previewThumbnail}

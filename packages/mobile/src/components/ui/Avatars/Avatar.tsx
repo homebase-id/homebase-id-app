@@ -27,7 +27,6 @@ export const Avatar = memo(
             previewThumbnail={contact?.fileMetadata.appData.previewThumbnail}
             imageSize={props.imageSize || { width: 48, height: 48 }}
             fit="contain"
-            odinId={props.odinId}
             lastModified={contact?.fileMetadata.updated}
           />
         </View>
