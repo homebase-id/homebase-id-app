@@ -291,6 +291,14 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
   }, []);
 
   const openRetryModal = useCallback((message: ChatMessageIMessage) => {
+    const recipients = message?.serverMetadata?.transferHistory?.recipients;
+    // loop through the keys and get the recipient that failed
+    const failedRecipient = Object.keys(recipients ?? {}).filter((v) => {
+      return recipients && !recipients[v].latestSuccessfullyDeliveredVersionTag;
+    });
+
+    if (!failedRecipient || failedRecipient?.length === 0) return;
+
     setSelectedRetryMessage(message);
     retryModelRef.current?.present();
   }, []);
