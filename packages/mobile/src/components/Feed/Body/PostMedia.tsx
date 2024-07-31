@@ -24,7 +24,7 @@ export const PostMedia = memo(({ post }: PostMediaProps) => {
     const { width: newWidth, height: newHeight } = calculateScaledDimensions(
       previewThumbnail?.pixelWidth || 300,
       previewThumbnail?.pixelHeight || 300,
-      { width: width * 0.8, height: height * 0.68 }
+      { width: width * 0.9, height: height * 0.9 }
     );
     return (
       <MediaItem
