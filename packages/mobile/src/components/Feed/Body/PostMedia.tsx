@@ -1,10 +1,9 @@
 import { HomebaseFile } from '@youfoundation/js-lib/core';
-import { BlogConfig, PostContent } from '@youfoundation/js-lib/public';
+import { getChannelDrive, PostContent } from '@youfoundation/js-lib/public';
 import { memo } from 'react';
-import { OdinImage } from '../../ui/OdinImage/OdinImage';
 import { calculateScaledDimensions } from '../../../utils/utils';
 import { Dimensions } from 'react-native';
-import { MediaGallery } from '../../Chat/MediaMessage';
+import { MediaGallery, MediaItem } from '../../ui/Media/MediaGallery';
 
 type PostMediaProps = {
   post: HomebaseFile<PostContent>;
@@ -28,13 +27,13 @@ export const PostMedia = memo(({ post }: PostMediaProps) => {
       { width: width * 0.8, height: height * 0.68 }
     );
     return (
-      <OdinImage
+      <MediaItem
         fileId={fileId}
-        fileKey={payload.key}
+        payload={payload}
         globalTransitId={post.fileMetadata.globalTransitId}
         probablyEncrypted={post.fileMetadata.isEncrypted}
         odinId={authorOdinId}
-        targetDrive={BlogConfig.FeedDrive}
+        targetDrive={getChannelDrive(post.fileMetadata.appData.content.channelId)}
         fit={'cover'}
         previewThumbnail={previewThumbnail}
         imageSize={{
@@ -44,15 +43,21 @@ export const PostMedia = memo(({ post }: PostMediaProps) => {
         style={{
           aspectRatio,
         }}
-        sharedTransitionTag={payload.key}
+        onClick={() => {
+          //
+        }}
+        onLongPress={undefined}
       />
     );
   }
   return (
     <MediaGallery
       fileId={fileId}
-      targetDrive={BlogConfig.FeedDrive}
+      targetDrive={getChannelDrive(post.fileMetadata.appData.content.channelId)}
+      globalTransitId={post.fileMetadata.globalTransitId}
       payloads={payloads}
+      odinId={authorOdinId}
+      probablyEncrypted={post.fileMetadata.isEncrypted}
       previewThumbnail={previewThumbnail}
     />
   );
