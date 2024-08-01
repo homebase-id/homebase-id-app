@@ -1,5 +1,13 @@
 import { memo, useMemo } from 'react';
-import { StyleProp, StyleSheet, Text, TextStyle, TouchableHighlight, View } from 'react-native';
+import {
+  StyleProp,
+  StyleSheet,
+  Text,
+  TextStyle,
+  TouchableHighlight,
+  View,
+  ViewStyle,
+} from 'react-native';
 import { EmbeddedThumb, HomebaseFile } from '@youfoundation/js-lib/core';
 import { Colors } from '../../app/Colors';
 import { ChatDrive, UnifiedConversation } from '../../provider/chat/ConversationProvider';
@@ -30,6 +38,7 @@ type ConversationTileProps = {
   selectMode?: boolean;
   isSelected?: boolean;
   isSelf?: boolean;
+  style?: ViewStyle;
 };
 
 const ConversationTile = memo((props: ConversationTileProps) => {
@@ -85,7 +94,7 @@ const ConversationTile = memo((props: ConversationTileProps) => {
           marginTop: 4,
         }}
       >
-        <View style={{ ...styles.tile }}>
+        <View style={[styles.tile, props.style]}>
           <View style={{ marginRight: 16 }}>
             {!isGroup ? (
               props.isSelf ? (

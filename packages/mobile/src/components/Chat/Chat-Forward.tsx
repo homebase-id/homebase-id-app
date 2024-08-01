@@ -463,7 +463,7 @@ const GroupConversationTile = memo(
             flexDirection: 'row',
             borderRadius: 5,
             paddingHorizontal: 16,
-            paddingVertical: 4,
+            paddingVertical: 10,
             alignItems: 'center',
           }}
         >

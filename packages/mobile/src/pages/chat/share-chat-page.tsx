@@ -437,6 +437,10 @@ const InnerShareChatPage = memo(
               isSelected={selectedConversation.includes(conversation)}
               onPress={() => onSelectConversation(conversation)}
               odinId={conversation.fileMetadata.appData.content.recipients[0]}
+              fileId={conversation.fileId}
+              previewThumbnail={conversation.fileMetadata.appData.previewThumbnail}
+              payloadKey={conversation.fileMetadata.payloads?.[0]?.key}
+              style={{ padding: 0, paddingHorizontal: 16, paddingVertical: 10 }}
             />
           );
         }
