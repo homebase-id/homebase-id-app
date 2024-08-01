@@ -12,6 +12,7 @@ import {
   Platform,
   TouchableWithoutFeedback,
   View,
+  ViewStyle,
 } from 'react-native';
 import useImage from './hooks/useImage';
 import useTinyThumb from './hooks/useTinyThumb';
@@ -139,38 +140,63 @@ export const OdinImage = memo(
 
     const hasCachedImage = !!cachedImage?.imageData?.url;
 
+    const wrapperStyle: ViewStyle = useMemo(
+      () => ({
+        position: 'relative',
+        ...imageSize,
+      }),
+      [imageSize]
+    );
+
+    const thumbStyle: ImageStyle = useMemo(
+      () => ({
+        position: 'absolute', // Absolute so it takes up the full imageSize defined by the wrapper view
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        resizeMode: fit,
+        zIndex: 5, // Displayed underneath the actual image
+        ...style,
+      }),
+      [fit, style]
+    );
+
+    const imageMeta = useMemo(
+      () => ({
+        odinId,
+        imageFileId: fileId,
+        imageFileKey: fileKey,
+        imageDrive: targetDrive,
+        size: loadSize,
+      }),
+      [fileId, fileKey, loadSize, odinId, targetDrive]
+    );
+
+    const zoomableStyle: ImageStyle = useMemo(
+      () => ({
+        position: 'relative',
+        ...style,
+        zIndex: 10,
+      }),
+      [style]
+    );
+
     return (
       <>
-        <View
-          style={{
-            position: 'relative',
-            ...imageSize,
-          }}
-        >
+        <View style={wrapperStyle}>
           {/* Blurry image */}
           {/* Hide preview image when it's an enableZoom as the position absolute conflicts on the gestures */}
-          {previewUrl && (!enableZoom || (enableZoom && !imageData?.url)) ? (
+          {previewUrl &&
+          (!enableZoom || (enableZoom && !imageData?.url)) &&
+          (!previewThumbnail?.contentType ||
+            !thumblessContentTypes.includes(previewThumbnail?.contentType)) ? (
             <InnerImage
               uri={previewUrl}
               contentType={previewContentType as ImageContentType}
-              style={{
-                position: 'absolute', // Absolute so it takes up the full imageSize defined by the wrapper view
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                resizeMode: fit,
-                zIndex: 5, // Displayed underneath the actual image
-                ...style,
-              }}
+              style={thumbStyle}
               alt={alt || title}
-              imageMeta={{
-                odinId,
-                imageFileId: fileId,
-                imageFileKey: fileKey,
-                imageDrive: targetDrive,
-                size: loadSize,
-              }}
+              imageMeta={imageMeta}
               imageSize={imageSize}
               blurRadius={hasCachedImage ? 0 : 2}
               // onLongPress={onLongPress}
@@ -188,18 +214,8 @@ export const OdinImage = memo(
               alt={alt || title}
               onClick={onClick}
               onLongPress={onLongPress}
-              style={{
-                position: 'relative',
-                ...style,
-                zIndex: 10,
-              }}
-              imageMeta={{
-                odinId,
-                imageFileId: fileId,
-                imageFileKey: fileKey,
-                imageDrive: targetDrive,
-                size: loadSize,
-              }}
+              style={zoomableStyle}
+              imageMeta={imageMeta}
               imageZoomProps={imageZoomProps}
             />
           ) : null}
@@ -252,7 +268,6 @@ const InnerImage = memo(
       size?: ImageSize;
     };
     sharedTransitionTag?: string;
-
     contentType?: ImageContentType;
   }) => {
     const ClickableWrapper = useCallback(
