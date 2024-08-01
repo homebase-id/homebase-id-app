@@ -34,7 +34,7 @@ import { ErrorNotification } from '../ui/Alert/ErrorNotification';
 import useImage from '../ui/OdinImage/hooks/useImage';
 import { ChatDrive, UnifiedConversation } from '../../provider/chat/ConversationProvider';
 import { useConversations } from '../../hooks/chat/useConversations';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { EmbeddedThumb, HomebaseFile } from '@youfoundation/js-lib/core';
 import { GroupAvatar } from '../ui/Avatars/Avatar';
 import { getNewId } from '@youfoundation/js-lib/helpers';
 import { useAuth } from '../../hooks/auth/useAuth';
@@ -423,6 +423,9 @@ export const ListHeaderComponent = memo(
         {flatConversations.map((convo) => (
           <GroupConversationTile
             key={convo.fileId}
+            fileId={convo.fileId}
+            previewThumbnail={convo.fileMetadata.appData.previewThumbnail}
+            fileKey={convo.fileMetadata.payloads?.[0]?.key}
             conversation={convo.fileMetadata.appData.content}
             onPress={() => onSelect(convo)}
             isSelected={selectedGroup.includes(convo)}
@@ -440,11 +443,17 @@ const GroupConversationTile = memo(
     isSelected,
     conversation,
     onPress,
+    fileId,
+    fileKey,
+    previewThumbnail,
   }: {
     selectMode?: boolean;
     isSelected?: boolean;
     onPress?: () => void;
     conversation: UnifiedConversation;
+    fileId?: string;
+    fileKey?: string;
+    previewThumbnail?: EmbeddedThumb;
   }) => {
     const { isDarkMode } = useDarkMode();
     return (
@@ -459,7 +468,12 @@ const GroupConversationTile = memo(
           }}
         >
           <View style={{ marginRight: 16 }}>
-            <GroupAvatar />
+            <GroupAvatar
+              fileId={fileId}
+              fileKey={fileKey}
+              previewThumbnail={previewThumbnail}
+              targetDrive={ChatDrive}
+            />
           </View>
 
           <View style={styles.content}>

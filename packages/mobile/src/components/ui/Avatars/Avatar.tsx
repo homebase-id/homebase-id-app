@@ -9,6 +9,7 @@ import { Users } from '../Icons/icons';
 import { OdinImage } from '../OdinImage/OdinImage';
 import { Colors } from '../../../app/Colors';
 import { SvgUri } from 'react-native-svg';
+import { EmbeddedThumb, TargetDrive } from '@youfoundation/js-lib/core';
 
 export const Avatar = memo(
   (props: {
@@ -102,6 +103,74 @@ export const OwnerAvatar = memo(
 );
 
 export const GroupAvatar = memo(
+  ({
+    fileId,
+    fileKey,
+    previewThumbnail,
+    imageStyle,
+    targetDrive,
+    style,
+    iconSize,
+  }: {
+    fileId?: string;
+    fileKey?: string;
+    previewThumbnail?: EmbeddedThumb;
+    imageStyle?: {
+      width: number;
+      height: number;
+    };
+    targetDrive?: TargetDrive;
+    style?: StyleProp<ViewStyle>;
+    iconSize?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl' | number;
+  }) => {
+    const { isDarkMode } = useDarkMode();
+    const backgroundColor = useMemo(
+      () => (isDarkMode ? Colors.indigo[900] : Colors.violet[200]),
+      [isDarkMode]
+    );
+    if (!fileId || !fileKey || !targetDrive) {
+      return (
+        <View
+          style={[
+            styles.tinyLogo,
+            {
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: backgroundColor,
+            },
+            style,
+          ]}
+        >
+          <Users size={iconSize} />
+        </View>
+      );
+    }
+    return (
+      <View
+        style={[
+          styles.tinyLogo,
+          {
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: backgroundColor,
+          },
+          style,
+        ]}
+      >
+        <OdinImage
+          fileId={fileId}
+          fileKey={fileKey}
+          targetDrive={targetDrive}
+          previewThumbnail={previewThumbnail}
+          imageSize={imageStyle || { width: 48, height: 48 }}
+          fit="cover"
+        />
+      </View>
+    );
+  }
+);
+
+export const DefaultGroupAvatar = memo(
   (props: {
     style?: StyleProp<ViewStyle>;
     iconSize?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl' | number;

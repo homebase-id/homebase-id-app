@@ -2,7 +2,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { StyleSheet, Text, View } from 'react-native';
 import { useConversation } from '../../hooks/chat/useConversation';
 
-import { ConversationWithYourselfId } from '../../provider/chat/ConversationProvider';
+import { ChatDrive, ConversationWithYourselfId } from '../../provider/chat/ConversationProvider';
 import { Home } from '../../components/ui/Icons/icons';
 
 import { memo, useCallback, useMemo } from 'react';
@@ -85,7 +85,8 @@ export const ChatInfoPage = memo((prop: ChatInfoProp) => {
     };
   }, [isDarkMode]);
   if (!conversation) return null;
-
+  const hasGroupImage = conversation.fileMetadata.payloads?.length > 0;
+  const groupAvatarPayloadKey = conversation.fileMetadata.payloads?.[0]?.key;
   return (
     <>
       <Header
@@ -107,7 +108,18 @@ export const ChatInfoPage = memo((prop: ChatInfoProp) => {
               />
             )
           ) : (
-            <GroupAvatar style={styles.avatar} iconSize={'2xl'} />
+            <GroupAvatar
+              fileId={conversation.fileId}
+              fileKey={hasGroupImage ? groupAvatarPayloadKey : undefined}
+              targetDrive={ChatDrive}
+              previewThumbnail={conversation.fileMetadata.appData.previewThumbnail}
+              imageStyle={{
+                width: 81,
+                height: 81,
+              }}
+              style={styles.avatar}
+              iconSize={'2xl'}
+            />
           )}
           <Text
             style={[

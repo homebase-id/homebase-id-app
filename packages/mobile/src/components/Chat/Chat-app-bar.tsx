@@ -15,6 +15,8 @@ import { memo, ReactNode, useCallback, useMemo } from 'react';
 import { Copy, EllipsisVertical, Forward, Info, Pencil, Reply, Trash } from '../ui/Icons/icons';
 import Toast from 'react-native-toast-message';
 import { Avatar, GroupAvatar, OwnerAvatar } from '../ui/Avatars/Avatar';
+import { EmbeddedThumb } from '@youfoundation/js-lib/core';
+import { ChatDrive } from '../../provider/chat/ConversationProvider';
 
 export type SelectedMessageProp = {
   onReply: () => void;
@@ -35,6 +37,7 @@ export const ChatAppBar = ({
   selectedMessage,
   selectedMessageActions,
   onMorePress,
+  groupAvatarProp,
 }: {
   odinId: string;
   group?: boolean;
@@ -45,6 +48,13 @@ export const ChatAppBar = ({
   onMorePress: () => void;
   selectedMessage?: ChatMessageIMessage;
   selectedMessageActions?: SelectedMessageProp;
+  groupAvatarProp?:
+    | {
+        fileId: string;
+        fileKey: string;
+        previewThumbnail?: EmbeddedThumb;
+      }
+    | undefined;
 }) => {
   const user = useProfile().data;
   const { isDarkMode } = useDarkMode();
@@ -78,11 +88,27 @@ export const ChatAppBar = ({
             <Avatar odinId={odinId} style={styles.avatar} imageSize={{ width: 36, height: 36 }} />
           )
         ) : (
-          <GroupAvatar style={styles.avatar} />
+          <GroupAvatar
+            fileId={groupAvatarProp?.fileId}
+            targetDrive={ChatDrive}
+            previewThumbnail={groupAvatarProp?.previewThumbnail}
+            fileKey={groupAvatarProp?.fileKey}
+            style={styles.avatar}
+          />
         )}
       </View>
     ),
-    [goBack, group, isDarkMode, isSelf, odinId, selectedMessage]
+    [
+      goBack,
+      group,
+      groupAvatarProp?.fileId,
+      groupAvatarProp?.fileKey,
+      groupAvatarProp?.previewThumbnail,
+      isDarkMode,
+      isSelf,
+      odinId,
+      selectedMessage,
+    ]
   );
 
   const headerRight = useCallback(() => {

@@ -3,9 +3,11 @@ import { memo, useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
+  Image,
   ListRenderItemInfo,
   Platform,
   StyleSheet,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import { Input } from '../../components/ui/Form/Input';
@@ -18,11 +20,13 @@ import { ImageSource } from '../../provider/image/RNImageProvider';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { useConversation } from '../../hooks/chat/useConversation';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { NewChatStackParamList } from '../../app/ChatStack';
+import { ChatStackParamList, NewChatStackParamList } from '../../app/ChatStack';
 import { BackButton } from '../../components/ui/Buttons';
 import { ContactTile } from '../../components/Contact/Contact-Tile';
 import { DotYouProfile } from '@youfoundation/js-lib/network';
 import { Text } from '../../components/ui/Text/Text';
+import { Plus, Times } from '../../components/ui/Icons/icons';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
 
 type GroupCreationPageProps = NativeStackScreenProps<NewChatStackParamList, 'CreateGroup'>;
 
@@ -32,13 +36,36 @@ export const GroupCreationPage = memo((props: GroupCreationPageProps) => {
 
   const [title, setTitle] = useState<string>('');
   const [asset, setAsset] = useState<ImageSource | undefined>();
-  const { mutateAsync: createGroup, status } = useConversation().create;
+  const [loading, setLoading] = useState(false);
+  const { mutateAsync: createGroup } = useConversation().create;
+  const nav = useNavigation<NavigationProp<ChatStackParamList>>();
 
-  const onCreateGroup = useCallback(() => {
-    //TODO: Implement this function
-  }, []);
+  const onCreateGroup = useCallback(async () => {
+    setLoading(true);
+    const conversation = await createGroup({
+      recipients: recipients.map((recipient) => recipient.odinId),
+      title: title,
+      image: asset,
+      distribute: true,
+    });
+    if (conversation) {
+      navigation.popToTop();
+      navigation.goBack();
+
+      setTimeout(() => {
+        nav.navigate('ChatScreen', {
+          convoId: conversation.fileMetadata.appData.uniqueId as string,
+        });
+      }, 100);
+    }
+    setLoading(false);
+  }, [asset, createGroup, nav, navigation, recipients, title]);
 
   const pickAvatar = useCallback(async () => {
+    if (asset) {
+      setAsset(undefined);
+      return;
+    }
     const image = await launchImageLibrary({
       mediaType: 'photo',
       selectionLimit: 1,
@@ -55,7 +82,7 @@ export const GroupCreationPage = memo((props: GroupCreationPageProps) => {
       };
       setAsset(imageSource);
     }
-  }, []);
+  }, [asset]);
 
   const headerLeft = useCallback(
     (props: HeaderBackButtonProps) => {
@@ -70,14 +97,14 @@ export const GroupCreationPage = memo((props: GroupCreationPageProps) => {
   );
 
   const headerRight = useCallback(() => {
-    if (title?.length > 0) {
-      return <TextButton title="Save" style={{ marginRight: 8 }} onPress={onCreateGroup} />;
-    }
-    if (status === 'pending') {
+    if (loading) {
       return <ActivityIndicator size={'small'} style={{ marginRight: 8 }} />;
+    } else if (title?.length > 0) {
+      return <TextButton title="Create" style={{ marginRight: 8 }} onPress={onCreateGroup} />;
     }
+
     return undefined;
-  }, [onCreateGroup, status, title?.length]);
+  }, [loading, onCreateGroup, title?.length]);
 
   const { isDarkMode } = useDarkMode();
   const headerColor = useMemo(
@@ -103,8 +130,51 @@ export const GroupCreationPage = memo((props: GroupCreationPageProps) => {
       />
 
       <View style={styles.content}>
-        <GroupAvatar style={styles.avatar} iconSize={'2xl'} />
-        <TextButton title="Edit Avatar" onPress={pickAvatar} />
+        <View
+          style={[
+            styles.avatar,
+            {
+              margin: 0,
+              marginBottom: 16,
+              marginTop: 16,
+              position: 'relative',
+              alignContent: 'center',
+              justifyContent: 'center',
+            },
+          ]}
+        >
+          {!asset ? (
+            <GroupAvatar style={styles.avatar} iconSize={'2xl'} />
+          ) : (
+            <Image
+              style={[
+                styles.avatar,
+                {
+                  margin: 0,
+                  marginBottom: 16,
+                  marginTop: 16,
+                  position: 'relative',
+                  alignContent: 'center',
+                  justifyContent: 'center',
+                },
+              ]}
+              src={asset?.uri}
+            />
+          )}
+          <TouchableOpacity
+            style={{
+              position: 'absolute',
+              top: -2,
+              right: -5,
+              padding: 6,
+              borderRadius: 50,
+              backgroundColor: isDarkMode ? Colors.indigo[700] : Colors.indigo[200],
+            }}
+            onPress={pickAvatar}
+          >
+            {asset ? <Times /> : <Plus />}
+          </TouchableOpacity>
+        </View>
         <Input
           value={title}
           placeholder="Group Name (required)"
@@ -117,7 +187,9 @@ export const GroupCreationPage = memo((props: GroupCreationPageProps) => {
           }}
         />
       </View>
-      <Text style={{ margin: 16, fontSize: 18, fontWeight: '500' }}>Members</Text>
+      <Text style={{ marginHorizontal: 16, marginVertical: 12, fontSize: 18, fontWeight: '500' }}>
+        Members
+      </Text>
       <FlatList
         data={recipients}
         keyExtractor={(item) => item.odinId}
