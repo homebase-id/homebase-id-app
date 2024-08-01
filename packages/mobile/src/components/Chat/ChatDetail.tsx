@@ -63,7 +63,7 @@ import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ChatDeletedArchivalStaus, ChatMessage } from '../../provider/chat/ChatProvider';
 import { useAudioRecorder } from '../../hooks/audio/useAudioRecorderPlayer';
 import { Text } from '../ui/Text/Text';
-import { fixDocumentURI, millisToMinutesAndSeconds, openURL } from '../../utils/utils';
+import { fixDocumentURI, millisToMinutesAndSeconds, openURL, URL_PATTERN } from '../../utils/utils';
 import { SafeAreaView } from '../ui/SafeAreaView/SafeAreaView';
 import Document from 'react-native-document-picker';
 import { getLocales, uses24HourClock } from 'react-native-localize';
@@ -841,7 +841,7 @@ const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
           return (<AuthorName odinId={text.slice(1)} showYou={false} />) as unknown as string;
         },
       },
-      { type: 'url', style: linkStyle, onPress: (text: string) => openURL(text) },
+      { pattern: URL_PATTERN, style: linkStyle, onPress: (text: string) => openURL(text) },
     ];
   }, []);
 
