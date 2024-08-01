@@ -31,6 +31,7 @@ export const useConnections = (
     }
   };
 
+  // TODO: needs to get merged with useAllConnections
   return {
     fetch: useInfiniteQuery({
       queryKey: ['active-connections', activePageSize],
@@ -40,7 +41,7 @@ export const useConnections = (
       getNextPageParam: (lastPage) =>
         lastPage.results?.length >= activePageSize ? lastPage.cursor : undefined,
       refetchOnWindowFocus: false,
-      staleTime: 1000 * 60 * 60 * 24 * 1,
+      staleTime: 1000 * 60 * 60 * 24 * 1, // 1 day
     }),
   };
 };

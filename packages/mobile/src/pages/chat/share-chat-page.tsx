@@ -44,35 +44,63 @@ export type ShareChatProp = NativeStackScreenProps<ChatStackParamList, 'ShareCha
 export const ShareChatPage = (prop: ShareChatProp) => {
   const { data, mimeType } = prop.route.params;
   const { isDarkMode } = useDarkMode();
-  const { data: connections } = useAllConnections(true);
+
   const { mutateAsync: createConversation } = useConversation().create;
   const { mutate: sendMessage, error } = useChatMessage().send;
-  const [selectedContact, setselectedContact] = useState<DotYouProfile[]>([]);
+
+  const { data: connections } = useAllConnections(true);
+  const { data: allConversations } = useConversationsWithRecentMessage().all;
+
+  const [selectedContact, setSelectedContact] = useState<DotYouProfile[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<
     HomebaseFile<UnifiedConversation>[]
   >([]);
   const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
-  const { data: recentConversations } = useConversationsWithRecentMessage().all;
 
   const onSelectConversation = useCallback(
     (conversation: HomebaseFile<UnifiedConversation>) => {
-      if (selectedConversation.includes(conversation)) {
-        setSelectedConversation(selectedConversation.filter((c) => c !== conversation));
-      } else {
-        if (selectedContact.length + selectedConversation.length === maxConnectionsForward) {
-          Toast.show({
-            type: 'info',
-            text1: `You can only forward to ${maxConnectionsForward} contacts at a time`,
-            position: 'bottom',
-            visibilityTime: 2000,
-          });
+      setSelectedConversation((selectedConversation) => {
+        if (selectedConversation.includes(conversation)) {
+          return selectedConversation.filter((c) => c !== conversation);
+        } else {
+          if (selectedContact.length + selectedConversation.length === maxConnectionsForward) {
+            Toast.show({
+              type: 'info',
+              text1: `You can only forward to ${maxConnectionsForward} contacts at a time`,
+              position: 'bottom',
+              visibilityTime: 2000,
+            });
 
-          return;
+            return selectedConversation;
+          }
+          return [...selectedConversation, conversation];
         }
-        setSelectedConversation([...selectedConversation, conversation]);
-      }
+      });
     },
-    [selectedContact.length, selectedConversation]
+    [setSelectedConversation, selectedContact.length]
+  );
+
+  const onSelectContact = useCallback(
+    (contact: DotYouProfile) => {
+      setSelectedContact((selectedContact) => {
+        if (selectedContact.includes(contact)) {
+          return selectedContact.filter((c) => c !== contact);
+        } else {
+          if (selectedContact.length + selectedConversation.length === maxConnectionsForward) {
+            Toast.show({
+              type: 'info',
+              text1: `You can only forward to ${maxConnectionsForward} contacts at a time`,
+              position: 'bottom',
+              visibilityTime: 2000,
+            });
+
+            return selectedContact;
+          }
+          return [...selectedContact, contact];
+        }
+      });
+    },
+    [setSelectedContact, selectedConversation.length]
   );
 
   const onShare = useCallback(async () => {
@@ -229,29 +257,13 @@ export const ShareChatPage = (prop: ShareChatProp) => {
 
       if (section.id === 'contacts') {
         const contact = item as unknown as DotYouProfile;
+        if (contact.odinId === 'pippin.dotyou.cloud') {
+          console.log('render pippin');
+        }
         return (
           <ContactTile
             item={contact}
-            onPress={() => {
-              if (selectedContact.includes(contact)) {
-                setselectedContact(selectedContact.filter((c) => c !== contact));
-              } else {
-                if (
-                  selectedContact.length + selectedConversation.length ===
-                  maxConnectionsForward
-                ) {
-                  Toast.show({
-                    type: 'info',
-                    text1: `You can only forward to ${maxConnectionsForward} contacts at a time`,
-                    position: 'bottom',
-                    visibilityTime: 2000,
-                  });
-
-                  return;
-                }
-                setselectedContact([...selectedContact, contact]);
-              }
-            }}
+            onPress={() => onSelectContact(contact)}
             isSelected={selectedContact.includes(contact)}
             selectMode
           />
@@ -259,7 +271,7 @@ export const ShareChatPage = (prop: ShareChatProp) => {
       }
       return null;
     },
-    [onSelectConversation, selectedContact, selectedConversation]
+    [onSelectContact, onSelectConversation, selectedContact, selectedConversation]
   );
 
   const { bottom } = useSafeAreaInsets();
@@ -357,11 +369,15 @@ export const ShareChatPage = (prop: ShareChatProp) => {
       | undefined
     >
   > => {
+    if (!connections || !allConversations) {
+      return [];
+    }
+
     return [
       {
         id: 'recent',
         title: 'Recents',
-        data: recentConversations?.slice(0, 5) || [], // Show top 5 recent conversations
+        data: allConversations?.slice(0, 5) || [], // Show top 5 recent conversations
         keyExtractor: (item) => (item as ConversationWithRecentMessage).fileId,
       },
       {
@@ -371,7 +387,7 @@ export const ShareChatPage = (prop: ShareChatProp) => {
         keyExtractor: (item) => (item as DotYouProfile).odinId,
       },
     ];
-  }, [connections, recentConversations]);
+  }, [connections, allConversations]);
 
   const renderSectionHeader = useCallback(
     ({
@@ -432,7 +448,7 @@ export const ShareChatPage = (prop: ShareChatProp) => {
           />
         }
         ListFooterComponentStyle={{
-          paddingBottom: selectedConversation.length > 0 ? 100 : 20,
+          paddingBottom: 100,
         }}
       />
       {selectedContact.length > 0 || selectedConversation.length > 0 ? renderFooter() : undefined}
