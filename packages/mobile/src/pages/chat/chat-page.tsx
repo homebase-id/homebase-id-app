@@ -15,7 +15,11 @@ import {
 } from 'react-native';
 import { ChatAppBar, SelectedMessageProp } from '../../components/Chat/Chat-app-bar';
 import { Asset } from 'react-native-image-picker';
-import { ChatDeletedArchivalStaus, ChatMessage } from '../../provider/chat/ChatProvider';
+import {
+  ChatDeletedArchivalStaus,
+  ChatDeliveryStatus,
+  ChatMessage,
+} from '../../provider/chat/ChatProvider';
 import { useAuth } from '../../hooks/auth/useAuth';
 import { useChatMessages } from '../../hooks/chat/useChatMessages';
 import { useChatMessage } from '../../hooks/chat/useChatMessage';
@@ -291,16 +295,12 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
   }, []);
 
   const openRetryModal = useCallback((message: ChatMessageIMessage) => {
-    const recipients = message?.serverMetadata?.transferHistory?.recipients;
-    // loop through the keys and get the recipient that failed
-    const failedRecipient = Object.keys(recipients ?? {}).filter((v) => {
-      return recipients && !recipients[v].latestSuccessfullyDeliveredVersionTag;
-    });
+    const deliveryStatus = message.fileMetadata.appData.content.deliveryStatus;
 
-    if (!failedRecipient || failedRecipient?.length === 0) return;
-
-    setSelectedRetryMessage(message);
-    retryModelRef.current?.present();
+    if (deliveryStatus === ChatDeliveryStatus.Failed) {
+      setSelectedRetryMessage(message);
+      retryModelRef.current?.present();
+    }
   }, []);
 
   const dismissSelectedMessage = useCallback(() => {
