@@ -32,6 +32,13 @@ export const useAuthenticatedPushNotification = () => {
     }
   }, [notificationPermissionGranted]);
 
+  const reRegisterNotifaction = async () => {
+    const token = await messaging().getToken().catch((error) => {
+      console.error('Error fetching FCM Token:', error);
+    });
+    if (token) { setDeviceToken(token); }
+  };
+
   //
 
   const updateDeviceToken = useCallback(async () => {
@@ -79,7 +86,7 @@ export const useAuthenticatedPushNotification = () => {
     uploadDeviceToken();
   }, [deviceToken, mutate]);
 
-  return { removeDeviceToken };
+  return { removeDeviceToken, reRegisterNotifaction };
 
   //////////////////////////////////////////////////////////////////////////////////////////
 };

@@ -15,7 +15,11 @@ import {
 } from 'react-native';
 import { ChatAppBar, SelectedMessageProp } from '../../components/Chat/Chat-app-bar';
 import { Asset } from 'react-native-image-picker';
-import { ChatDeletedArchivalStaus, ChatMessage } from '../../provider/chat/ChatProvider';
+import {
+  ChatDeletedArchivalStaus,
+  ChatDeliveryStatus,
+  ChatMessage,
+} from '../../provider/chat/ChatProvider';
 import { useAuth } from '../../hooks/auth/useAuth';
 import { useChatMessages } from '../../hooks/chat/useChatMessages';
 import { useChatMessage } from '../../hooks/chat/useChatMessage';
@@ -291,8 +295,12 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
   }, []);
 
   const openRetryModal = useCallback((message: ChatMessageIMessage) => {
-    setSelectedRetryMessage(message);
-    retryModelRef.current?.present();
+    const deliveryStatus = message.fileMetadata.appData.content.deliveryStatus;
+
+    if (deliveryStatus === ChatDeliveryStatus.Failed) {
+      setSelectedRetryMessage(message);
+      retryModelRef.current?.present();
+    }
   }, []);
 
   const dismissSelectedMessage = useCallback(() => {
