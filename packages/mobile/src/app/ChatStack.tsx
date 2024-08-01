@@ -28,6 +28,8 @@ import { SharedItem } from '../hooks/platform/useShareManager';
 import { TabStackParamList } from './App';
 import { ShareChatPage } from '../pages/chat/share-chat-page';
 import { ContactPage } from '../pages/contacts/contact-page';
+import { GroupCreationPage } from '../pages/contacts/group-creation-page';
+import { DotYouProfile } from '@youfoundation/js-lib/network';
 
 export type ChatStackParamList = {
   Conversation: undefined;
@@ -54,6 +56,9 @@ export type ChatStackParamList = {
 export type NewChatStackParamList = {
   NewChat: undefined;
   NewGroup: undefined;
+  CreateGroup: {
+    recipients: DotYouProfile[];
+  };
 };
 
 const NewChatStack = createNativeStackNavigator<NewChatStackParamList>();
@@ -97,6 +102,14 @@ export const NewChatStackScreen = (_props: NativeStackScreenProps<ChatStackParam
         component={NewGroupPage}
         options={{
           headerTitle: 'New Group',
+          headerShown: false,
+        }}
+      />
+      <NewChatStack.Screen
+        name="CreateGroup"
+        component={GroupCreationPage}
+        options={{
+          headerTitle: 'Name Group',
           headerShown: false,
         }}
       />
