@@ -1,19 +1,19 @@
 import { useAllConnections } from 'feed-app-common';
 import { FlatList, ListRenderItemInfo, Platform, StatusBar, Text } from 'react-native';
-import { ContactTile } from '../components/Contact/Contact-Tile';
+import { ContactTile } from '../../components/Contact/Contact-Tile';
 
 import { memo, useCallback, useMemo, useState } from 'react';
 import { Header, HeaderBackButtonProps } from '@react-navigation/elements';
-import { BackButton } from '../components/ui/Buttons';
+import { BackButton } from '../../components/ui/Buttons';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { ChatStackParamList, NewChatStackParamList } from '../app/ChatStack';
-import { useConversation } from '../hooks/chat/useConversation';
+import { ChatStackParamList, NewChatStackParamList } from '../../app/ChatStack';
+import { useConversation } from '../../hooks/chat/useConversation';
 import Dialog from 'react-native-dialog';
 import { DotYouProfile } from '@youfoundation/js-lib/network';
-import { useDarkMode } from '../hooks/useDarkMode';
-import { Colors } from '../app/Colors';
-import { SafeAreaView } from '../components/ui/SafeAreaView/SafeAreaView';
+import { useDarkMode } from '../../hooks/useDarkMode';
+import { Colors } from '../../app/Colors';
+import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 
 export const NewGroupPage = memo(
   ({ navigation }: { navigation: NavigationProp<NewChatStackParamList, 'NewGroup'> }) => {
