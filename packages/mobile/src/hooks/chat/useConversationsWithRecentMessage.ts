@@ -58,7 +58,7 @@ export const useConversationsWithRecentMessage = () => {
 
   const { lastUpdate } = useLastUpdatedChatMessages();
   useEffect(() => {
-    if (!lastUpdate) return;
+    if (lastUpdate === null) return;
     buildConversationsWithRecent();
   }, [lastUpdate, buildConversationsWithRecent]);
 
@@ -77,7 +77,7 @@ export const useConversationsWithRecentMessage = () => {
 
 const useLastUpdatedChatMessages = () => {
   const queryClient = useQueryClient();
-  const [lastUpdate, setLastUpdate] = useState(0);
+  const [lastUpdate, setLastUpdate] = useState<number | null>(null);
 
   useFocusEffect(() => {
     const lastUpdates = queryClient
