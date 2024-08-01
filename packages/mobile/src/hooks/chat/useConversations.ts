@@ -17,9 +17,8 @@ export const useConversations = () => {
 
   const fetchConversations = async (
     cursorState: string | undefined
-  ): Promise<ChatConversationsReturn | null> => {
-    return await getConversations(dotYouClient, cursorState, PAGE_SIZE);
-  };
+  ): Promise<ChatConversationsReturn | null> =>
+    await getConversations(dotYouClient, cursorState, PAGE_SIZE);
 
   return {
     all: useInfiniteQuery({

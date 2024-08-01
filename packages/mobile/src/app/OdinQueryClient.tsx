@@ -60,7 +60,8 @@ const INCLUDED_QUERY_KEYS = [
   'following',
   'active-connections',
   'pending-connections',
-
+  'contacts',
+  'conversations-with-recent-message',
   // Small data (blobs to local file Uri)
   'image',
 

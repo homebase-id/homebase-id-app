@@ -1,5 +1,5 @@
 import { UnifiedConversation } from '../../provider/chat/ConversationProvider';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { useDotYouClientContext } from 'feed-app-common';
 import { ChatMessage } from '../../provider/chat/ChatProvider';
@@ -15,11 +15,8 @@ export const useConversationsWithRecentMessage = () => {
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
 
-  const { data: conversations, ...rest } = useConversations().all;
+  const { data: conversations } = useConversations().all;
 
-  const [conversationsWithRecent, setConversationsWithRecent] = useState<
-    ConversationWithRecentMessage[]
-  >([]);
   const flatConversations = useMemo(
     () =>
       (conversations?.pages
@@ -32,7 +29,7 @@ export const useConversationsWithRecentMessage = () => {
 
   const buildConversationsWithRecent = useCallback(async () => {
     if (!flatConversations || !flatConversations || flatConversations.length === 0) {
-      return flatConversations;
+      return;
     }
 
     const convoWithMessage: ConversationWithRecentMessage[] = await Promise.all(
@@ -55,26 +52,32 @@ export const useConversationsWithRecentMessage = () => {
       if (!b.lastMessage) return 1;
       return b.lastMessage.fileMetadata.created - a.lastMessage.fileMetadata.created;
     });
-    setConversationsWithRecent(convoWithMessage);
+
+    queryClient.setQueryData(['conversations-with-recent-message'], convoWithMessage);
   }, [flatConversations, dotYouClient, queryClient]);
 
   const { lastUpdate } = useLastUpdatedChatMessages();
   useEffect(() => {
-    if (!lastUpdate) return;
+    if (lastUpdate === null) return;
     buildConversationsWithRecent();
   }, [lastUpdate, buildConversationsWithRecent]);
 
   return {
-    all: {
-      ...rest,
-      data: conversationsWithRecent,
-    },
+    // We only setup a cache entry that we will fill up with the setQueryData later; So we can cache the data for offline and faster startup;
+    all: useQuery({
+      queryKey: ['conversations-with-recent-message'],
+      queryFn: () => [] as ConversationWithRecentMessage[],
+      staleTime: Infinity,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
+    }),
   };
 };
 
 const useLastUpdatedChatMessages = () => {
   const queryClient = useQueryClient();
-  const [lastUpdate, setLastUpdate] = useState(0);
+  const [lastUpdate, setLastUpdate] = useState<number | null>(null);
 
   useFocusEffect(() => {
     const lastUpdates = queryClient
