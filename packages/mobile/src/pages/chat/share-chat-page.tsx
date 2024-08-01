@@ -9,10 +9,10 @@ import {
 import { ChatStackParamList } from '../../app/ChatStack';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useDarkMode } from '../../hooks/useDarkMode';
-import { useAllConnections } from 'feed-app-common';
+import { t, useAllConnections } from 'feed-app-common';
 import { useConversation } from '../../hooks/chat/useConversation';
 import { useChatMessage } from '../../hooks/chat/useChatMessage';
-import { useCallback, useMemo, useState } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 import { DotYouProfile } from '@youfoundation/js-lib/network';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import {
@@ -44,36 +44,18 @@ export type ShareChatProp = NativeStackScreenProps<ChatStackParamList, 'ShareCha
 export const ShareChatPage = (prop: ShareChatProp) => {
   const { data, mimeType } = prop.route.params;
   const { isDarkMode } = useDarkMode();
-  const { data: connections } = useAllConnections(true);
+
   const { mutateAsync: createConversation } = useConversation().create;
   const { mutate: sendMessage, error } = useChatMessage().send;
-  const [selectedContact, setselectedContact] = useState<DotYouProfile[]>([]);
+
+  const { data: connections } = useAllConnections(true);
+  const { data: allConversations } = useConversationsWithRecentMessage().all;
+
+  const [selectedContact, setSelectedContact] = useState<DotYouProfile[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<
     HomebaseFile<UnifiedConversation>[]
   >([]);
   const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
-  const { data: recentConversations } = useConversationsWithRecentMessage().all;
-
-  const onSelectConversation = useCallback(
-    (conversation: HomebaseFile<UnifiedConversation>) => {
-      if (selectedConversation.includes(conversation)) {
-        setSelectedConversation(selectedConversation.filter((c) => c !== conversation));
-      } else {
-        if (selectedContact.length + selectedConversation.length === maxConnectionsForward) {
-          Toast.show({
-            type: 'info',
-            text1: `You can only forward to ${maxConnectionsForward} contacts at a time`,
-            position: 'bottom',
-            visibilityTime: 2000,
-          });
-
-          return;
-        }
-        setSelectedConversation([...selectedConversation, conversation]);
-      }
-    },
-    [selectedContact.length, selectedConversation]
-  );
 
   const onShare = useCallback(async () => {
     if ((selectedContact.length === 0 && selectedConversation.length === 0) || !data) {
@@ -192,76 +174,6 @@ export const ShareChatPage = (prop: ShareChatProp) => {
     sendMessage,
   ]);
 
-  const renderItem = useCallback(
-    ({
-      item,
-      section,
-    }: SectionListRenderItemInfo<
-      ConversationWithRecentMessage | DotYouProfile,
-      | {
-          id: string;
-          title: string;
-          data: ConversationWithRecentMessage[] | undefined;
-        }
-      | {
-          id: string;
-          title: string;
-          data: DotYouProfile[] | undefined;
-        }
-      | undefined
-    >) => {
-      if (section.id === 'recent') {
-        if (section.data.length === 0) {
-          return null;
-        }
-        const conversation = item as unknown as ConversationWithRecentMessage;
-        return (
-          <ConversationTile
-            conversation={conversation.fileMetadata.appData.content}
-            conversationId={conversation.fileMetadata.appData.uniqueId}
-            selectMode
-            isSelected={selectedConversation.includes(conversation)}
-            onPress={() => onSelectConversation(conversation)}
-            odinId={conversation.fileMetadata.appData.content.recipients[0]}
-          />
-        );
-      }
-
-      if (section.id === 'contacts') {
-        const contact = item as unknown as DotYouProfile;
-        return (
-          <ContactTile
-            item={contact}
-            onPress={() => {
-              if (selectedContact.includes(contact)) {
-                setselectedContact(selectedContact.filter((c) => c !== contact));
-              } else {
-                if (
-                  selectedContact.length + selectedConversation.length ===
-                  maxConnectionsForward
-                ) {
-                  Toast.show({
-                    type: 'info',
-                    text1: `You can only forward to ${maxConnectionsForward} contacts at a time`,
-                    position: 'bottom',
-                    visibilityTime: 2000,
-                  });
-
-                  return;
-                }
-                setselectedContact([...selectedContact, contact]);
-              }
-            }}
-            isSelected={selectedContact.includes(contact)}
-            selectMode
-          />
-        );
-      }
-      return null;
-    },
-    [onSelectConversation, selectedContact, selectedConversation]
-  );
-
   const { bottom } = useSafeAreaInsets();
 
   const renderFooter = useCallback(
@@ -341,43 +253,93 @@ export const ShareChatPage = (prop: ShareChatProp) => {
     [bottom, isDarkMode, onShare, selectedContact, selectedConversation]
   );
 
-  const sectionData = useMemo((): ReadonlyArray<
-    SectionListData<
-      ConversationWithRecentMessage | DotYouProfile,
-      | {
-          id: string;
-          title: string;
-          data: ConversationWithRecentMessage[] | undefined;
-        }
-      | {
-          id: string;
-          title: string;
-          data: DotYouProfile[] | undefined;
-        }
-      | undefined
-    >
-  > => {
-    return [
-      {
-        id: 'recent',
-        title: 'Recents',
-        data: recentConversations?.slice(0, 5) || [], // Show top 5 recent conversations
-        keyExtractor: (item) => (item as ConversationWithRecentMessage).fileId,
-      },
-      {
-        id: 'contacts',
-        title: 'Contacts',
-        data: connections || [],
-        keyExtractor: (item) => (item as DotYouProfile).odinId,
-      },
-    ];
-  }, [connections, recentConversations]);
+  return (
+    <SafeAreaView>
+      <ErrorNotification error={error} />
+      <InnerShareChatPage
+        connections={connections}
+        allConversations={allConversations}
+        selectedContact={selectedContact}
+        setSelectedContact={setSelectedContact}
+        selectedConversation={selectedConversation}
+        setSelectedConversation={setSelectedConversation}
+      />
+      {selectedContact.length > 0 || selectedConversation.length > 0 ? renderFooter() : undefined}
+    </SafeAreaView>
+  );
+};
 
-  const renderSectionHeader = useCallback(
-    ({
-      section: { title },
-    }: {
-      section: SectionListData<
+// Split up in two components to avoid re-rendering the whole SectionList when the footer is updated; Or when the share function changes
+const InnerShareChatPage = memo(
+  (props: {
+    connections: DotYouProfile[] | undefined;
+    allConversations: ConversationWithRecentMessage[] | undefined;
+
+    selectedContact: DotYouProfile[];
+    setSelectedContact: React.Dispatch<React.SetStateAction<DotYouProfile[]>>;
+
+    selectedConversation: HomebaseFile<UnifiedConversation>[];
+    setSelectedConversation: React.Dispatch<
+      React.SetStateAction<HomebaseFile<UnifiedConversation>[]>
+    >;
+  }) => {
+    const {
+      connections,
+      allConversations,
+      selectedContact,
+      setSelectedContact,
+      selectedConversation,
+      setSelectedConversation,
+    } = props;
+
+    const onSelectConversation = useCallback(
+      (conversation: HomebaseFile<UnifiedConversation>) => {
+        setSelectedConversation((selectedConversation) => {
+          if (selectedConversation.includes(conversation)) {
+            return selectedConversation.filter((c) => c !== conversation);
+          } else {
+            if (selectedContact.length + selectedConversation.length === maxConnectionsForward) {
+              Toast.show({
+                type: 'info',
+                text1: t('You can only forward to {0} contacts at a time', maxConnectionsForward),
+                position: 'bottom',
+                visibilityTime: 2000,
+              });
+
+              return selectedConversation;
+            }
+            return [...selectedConversation, conversation];
+          }
+        });
+      },
+      [setSelectedConversation, selectedContact.length]
+    );
+
+    const onSelectContact = useCallback(
+      (contact: DotYouProfile) => {
+        setSelectedContact((selectedContact) => {
+          if (selectedContact.includes(contact)) {
+            return selectedContact.filter((c) => c !== contact);
+          } else {
+            if (selectedContact.length + selectedConversation.length === maxConnectionsForward) {
+              Toast.show({
+                type: 'info',
+                text1: t('You can only forward to {0} contacts at a time', maxConnectionsForward),
+                position: 'bottom',
+                visibilityTime: 2000,
+              });
+
+              return selectedContact;
+            }
+            return [...selectedContact, contact];
+          }
+        });
+      },
+      [setSelectedContact, selectedConversation.length]
+    );
+
+    const sectionData = useMemo((): ReadonlyArray<
+      SectionListData<
         ConversationWithRecentMessage | DotYouProfile,
         | {
             id: string;
@@ -390,28 +352,117 @@ export const ShareChatPage = (prop: ShareChatProp) => {
             data: DotYouProfile[] | undefined;
           }
         | undefined
-      >;
-    }) => {
-      return (
-        <Text
-          style={{
-            ...styles.headerText,
-            textAlign: 'left',
-            fontSize: 18,
-            marginLeft: 16,
-            marginTop: 16,
-          }}
-        >
-          {title}
-        </Text>
-      );
-    },
-    []
-  );
+      >
+    > => {
+      return [
+        {
+          id: 'recent',
+          title: t('Recents'),
+          data: allConversations?.slice(0, 5) || [], // Show top 5 recent conversations
+          keyExtractor: (item) => (item as ConversationWithRecentMessage).fileId,
+        },
+        {
+          id: 'contacts',
+          title: t('Contacts'),
+          data: connections || [],
+          keyExtractor: (item) => (item as DotYouProfile).odinId,
+        },
+      ];
+    }, [connections, allConversations]);
 
-  return (
-    <SafeAreaView>
-      <ErrorNotification error={error} />
+    const renderSectionHeader = useCallback(
+      ({
+        section: { title },
+      }: {
+        section: SectionListData<
+          ConversationWithRecentMessage | DotYouProfile,
+          | {
+              id: string;
+              title: string;
+              data: ConversationWithRecentMessage[] | undefined;
+            }
+          | {
+              id: string;
+              title: string;
+              data: DotYouProfile[] | undefined;
+            }
+          | undefined
+        >;
+      }) => {
+        return (
+          <Text
+            style={{
+              ...styles.headerText,
+              textAlign: 'left',
+              fontSize: 18,
+              marginLeft: 16,
+              marginTop: 16,
+            }}
+          >
+            {title}
+          </Text>
+        );
+      },
+      []
+    );
+
+    const renderItem = useCallback(
+      ({
+        item,
+        section,
+      }: SectionListRenderItemInfo<
+        ConversationWithRecentMessage | DotYouProfile,
+        | {
+            id: string;
+            title: string;
+            data: ConversationWithRecentMessage[] | undefined;
+          }
+        | {
+            id: string;
+            title: string;
+            data: DotYouProfile[] | undefined;
+          }
+        | undefined
+      >) => {
+        if (section.id === 'recent') {
+          if (section.data.length === 0) {
+            return null;
+          }
+          const conversation = item as unknown as ConversationWithRecentMessage;
+          return (
+            <ConversationTile
+              conversation={conversation.fileMetadata.appData.content}
+              conversationId={conversation.fileMetadata.appData.uniqueId}
+              selectMode
+              isSelected={selectedConversation.includes(conversation)}
+              onPress={() => onSelectConversation(conversation)}
+              odinId={conversation.fileMetadata.appData.content.recipients[0]}
+            />
+          );
+        }
+
+        if (section.id === 'contacts') {
+          const contact = item as unknown as DotYouProfile;
+          return (
+            <ContactTile
+              item={contact}
+              onPress={() => onSelectContact(contact)}
+              isSelected={selectedContact.includes(contact)}
+              selectMode
+            />
+          );
+        }
+        return null;
+      },
+      [onSelectContact, onSelectConversation, selectedContact, selectedConversation]
+    );
+
+    // No need to render yet, the data is still loading and is offline available
+    if (!connections || !allConversations) {
+      return null;
+    }
+
+    return (
       <SectionList
         sections={sectionData}
         renderSectionHeader={renderSectionHeader}
@@ -432,13 +483,12 @@ export const ShareChatPage = (prop: ShareChatProp) => {
           />
         }
         ListFooterComponentStyle={{
-          paddingBottom: selectedConversation.length > 0 ? 100 : 20,
+          paddingBottom: 100,
         }}
       />
-      {selectedContact.length > 0 || selectedConversation.length > 0 ? renderFooter() : undefined}
-    </SafeAreaView>
-  );
-};
+    );
+  }
+);
 
 const styles = StyleSheet.create({
   footerContainer: {

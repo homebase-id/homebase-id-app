@@ -24,6 +24,7 @@ export const useAllConnections = (enabled: boolean) => {
     return internalGetConnections(undefined, CHUNKSIZE);
   };
 
+  // TODO: needs to get merged with useConnections
   return useQuery({
     queryKey: ['connections'],
     queryFn: fetchConnections,
