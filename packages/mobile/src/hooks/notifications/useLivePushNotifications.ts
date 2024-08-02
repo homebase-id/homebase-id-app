@@ -7,6 +7,7 @@ import {
 import { useCallback } from 'react';
 import { useNotificationSubscriber } from '../useNotificationSubscriber';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { incrementAppIdNotificationCount } from './usePushNotifications';
 
 export const useLivePushNotifications = () => {
   const queryClient = useQueryClient();
@@ -21,19 +22,21 @@ export const useLivePushNotifications = () => {
           cursor: number;
         }>(['push-notifications']);
 
-        if (!existingNotificationData) return;
-        const newNotificationData = {
-          ...existingNotificationData,
-          results: [
-            clientNotification,
-            ...existingNotificationData.results.filter(
-              (notification) =>
-                !stringGuidsEqual(notification.options.tagId, clientNotification.options.tagId)
-            ),
-          ],
-        };
+        if (existingNotificationData) {
+          const newNotificationData = {
+            ...existingNotificationData,
+            results: [
+              clientNotification,
+              ...existingNotificationData.results.filter(
+                (notification) =>
+                  !stringGuidsEqual(notification.options.tagId, clientNotification.options.tagId)
+              ),
+            ],
+          };
 
-        queryClient.setQueryData(['push-notifications'], newNotificationData);
+          queryClient.setQueryData(['push-notifications'], newNotificationData);
+        }
+        incrementAppIdNotificationCount(queryClient, clientNotification.options.appId);
       }
     },
     [queryClient]

@@ -95,13 +95,13 @@ export const useUnreadPushNotificationsCount = (props?: { appId?: string }) => {
 
   return useQuery({
     queryKey: ['push-notifications-count'],
-    // select: (counts) => {
-    //   if (!props?.appId) {
-    //     return Object.values(counts.unreadCounts).reduce((acc, count) => acc + count, 0);
-    //   }
+    select: (counts) => {
+      if (!props?.appId) {
+        return Object.values(counts).reduce((acc, count) => acc + count, 0);
+      }
 
-    //   return counts.unreadCounts[props.appId] || 0;
-    // },
+      return counts[props.appId] || 0;
+    },
     queryFn: getCounts,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
@@ -136,12 +136,7 @@ export const useRemoveNotifications = (props: { disabled: boolean; appId: string
 
   useEffect(() => {
     (async () => {
-      if (
-        props?.disabled ||
-        !props.appId ||
-        mutation.status === 'pending' ||
-        !unreadCount?.[props.appId]
-      ) {
+      if (props?.disabled || !props.appId || mutation.status === 'pending' || !unreadCount) {
         return;
       }
       mutation.mutate(props.appId);
@@ -157,6 +152,6 @@ export const incrementAppIdNotificationCount = async (queryClient: QueryClient, 
   const newCounts = {
     ...existingCounts,
   };
-  newCounts[appId] = newCounts[appId] + 1;
+  newCounts[appId] = (newCounts[appId] || 0) + 1;
   queryClient.setQueryData(['push-notifications-count'], newCounts);
 };
