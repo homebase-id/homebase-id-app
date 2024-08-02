@@ -58,16 +58,12 @@ const INCLUDED_QUERY_KEYS = [
   'profile-data',
   'followers',
   'following',
+  'connections', // TODO: 'connections' and 'active-connections' should be merged
   'active-connections',
   'pending-connections',
   'contacts',
   'conversations-with-recent-message',
-  // Small data (blobs to local file Uri)
   'image',
-
-  // Big data (base64 uri's)
-  // 'tinyThumb',
-
   'process-inbox',
   'social-feeds',
 ];
