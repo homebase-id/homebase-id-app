@@ -1,8 +1,16 @@
 import { memo, useMemo } from 'react';
-import { StyleProp, StyleSheet, Text, TextStyle, TouchableHighlight, View } from 'react-native';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import {
+  StyleProp,
+  StyleSheet,
+  Text,
+  TextStyle,
+  TouchableHighlight,
+  View,
+  ViewStyle,
+} from 'react-native';
+import { EmbeddedThumb, HomebaseFile } from '@youfoundation/js-lib/core';
 import { Colors } from '../../app/Colors';
-import { UnifiedConversation } from '../../provider/chat/ConversationProvider';
+import { ChatDrive, UnifiedConversation } from '../../provider/chat/ConversationProvider';
 import { useChatMessages } from '../../hooks/chat/useChatMessages';
 import { ChatDeletedArchivalStaus, ChatMessage } from '../../provider/chat/ChatProvider';
 import { useDarkMode } from '../../hooks/useDarkMode';
@@ -22,11 +30,15 @@ type ConversationTileProps = {
   onPress?: () => void;
   onLongPress?: () => void;
   conversation: UnifiedConversation;
+  fileId?: string;
+  payloadKey?: string;
+  previewThumbnail?: EmbeddedThumb;
   odinId: string;
   conversationId?: string;
   selectMode?: boolean;
   isSelected?: boolean;
   isSelf?: boolean;
+  style?: ViewStyle;
 };
 
 const ConversationTile = memo((props: ConversationTileProps) => {
@@ -82,7 +94,7 @@ const ConversationTile = memo((props: ConversationTileProps) => {
           marginTop: 4,
         }}
       >
-        <View style={{ ...styles.tile }}>
+        <View style={[styles.tile, props.style]}>
           <View style={{ marginRight: 16 }}>
             {!isGroup ? (
               props.isSelf ? (
@@ -91,7 +103,12 @@ const ConversationTile = memo((props: ConversationTileProps) => {
                 <Avatar odinId={props.odinId} />
               )
             ) : (
-              <GroupAvatar />
+              <GroupAvatar
+                fileId={props.fileId}
+                targetDrive={ChatDrive}
+                fileKey={props.payloadKey}
+                previewThumbnail={props.previewThumbnail}
+              />
             )}
           </View>
           <View style={styles.content}>

@@ -9,7 +9,7 @@ import { ConnectionsPage } from '../pages/profile/connections-page';
 import { FollowersPage } from '../pages/profile/followers-page';
 import { FollowingPage } from '../pages/profile/following-page';
 import { ProfilePage } from '../pages/profile/profile-page';
-import { ConnectionRequestsPage } from '../pages/home/connection-requests-page';
+import { ConnectionRequestsPage } from '../pages/profile/connection-requests-page';
 import { useDarkMode } from '../hooks/useDarkMode';
 import { NativeStackNavigationOptions } from '@react-navigation/native-stack';
 import { DriveStatusPage } from '../pages/profile/drive-status-page';

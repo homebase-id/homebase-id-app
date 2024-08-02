@@ -17,7 +17,6 @@ import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 import { Container } from '../../components/ui/Container/Container';
 import {
   AddressBook,
-  Bell,
   Download,
   Logout,
   People,
@@ -31,15 +30,14 @@ import { useAuthenticatedPushNotification } from '../../hooks/push-notification/
 
 import { ProfileInfo } from '../../components/Profile/ProfileInfo';
 import { t } from 'feed-app-common';
-import Toast from 'react-native-toast-message';
 
 type SettingsProps = NativeStackScreenProps<ProfileStackParamList, 'Overview'>;
 
 export const ProfilePage = (_props: SettingsProps) => {
   const { logout, getIdentity } = useAuth();
-  const { removeDeviceToken, reRegisterNotifaction } = useAuthenticatedPushNotification();
+  const { removeDeviceToken } = useAuthenticatedPushNotification();
   const [logoutPending, setLogoutPending] = useState(false);
-  const [notficationRegistering, setNotficationRegistering] = useState(false);
+  // const [notficationRegistering, setNotficationRegistering] = useState(false);
 
   const doLogout = async () => {
     setLogoutPending(true);
@@ -47,29 +45,29 @@ export const ProfilePage = (_props: SettingsProps) => {
     logout();
   };
 
-  const doReregisterNotifcation = async () => {
-    setNotficationRegistering(true);
-    await reRegisterNotifaction()
-      .then(() => {
-        Toast.show({
-          type: 'success',
-          text1: 'Success',
-          position: 'bottom',
-          text2: 'Notification registered',
-        });
-      })
-      .catch((error) => {
-        Toast.show({
-          type: 'error',
-          text1: 'Error',
-          text2: error.message,
-          position: 'bottom',
-        });
-      })
-      .finally(() => {
-        setNotficationRegistering(false);
-      });
-  };
+  // const doReregisterNotifcation = async () => {
+  //   setNotficationRegistering(true);
+  //   await reRegisterNotifaction()
+  //     .then(() => {
+  //       Toast.show({
+  //         type: 'success',
+  //         text1: 'Success',
+  //         position: 'bottom',
+  //         text2: 'Notification registered',
+  //       });
+  //     })
+  //     .catch((error) => {
+  //       Toast.show({
+  //         type: 'error',
+  //         text1: 'Error',
+  //         text2: error.message,
+  //         position: 'bottom',
+  //       });
+  //     })
+  //     .finally(() => {
+  //       setNotficationRegistering(false);
+  //     });
+  // };
 
   const navigate = (target: keyof ProfileStackParamList) => _props.navigation.navigate(target);
   return (
@@ -176,7 +174,7 @@ export const ProfilePage = (_props: SettingsProps) => {
               {t('Appearance')}
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             onPress={() => doReregisterNotifcation()}
             style={{
               display: 'flex',
@@ -194,7 +192,7 @@ export const ProfilePage = (_props: SettingsProps) => {
               Re Register Push Notifications
             </Text>
             {notficationRegistering ? <ActivityIndicator style={{ marginLeft: 'auto' }} /> : null}
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           <TouchableOpacity
             onPress={() => doLogout()}
             style={{

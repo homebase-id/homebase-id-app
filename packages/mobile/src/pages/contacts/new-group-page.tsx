@@ -1,48 +1,24 @@
-import { useAllConnections } from 'feed-app-common';
+import { t, useAllConnections } from 'feed-app-common';
 import { FlatList, ListRenderItemInfo, Platform, StatusBar, Text } from 'react-native';
-import { ContactTile } from '../components/Contact/Contact-Tile';
+import { ContactTile } from '../../components/Contact/Contact-Tile';
 
 import { memo, useCallback, useMemo, useState } from 'react';
 import { Header, HeaderBackButtonProps } from '@react-navigation/elements';
-import { BackButton } from '../components/ui/Buttons';
+import { BackButton } from '../../components/ui/Buttons';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { ChatStackParamList, NewChatStackParamList } from '../app/ChatStack';
-import { useConversation } from '../hooks/chat/useConversation';
-import Dialog from 'react-native-dialog';
+import { NavigationProp } from '@react-navigation/native';
+import { NewChatStackParamList } from '../../app/ChatStack';
+
 import { DotYouProfile } from '@youfoundation/js-lib/network';
-import { useDarkMode } from '../hooks/useDarkMode';
-import { Colors } from '../app/Colors';
-import { SafeAreaView } from '../components/ui/SafeAreaView/SafeAreaView';
+import { useDarkMode } from '../../hooks/useDarkMode';
+import { Colors } from '../../app/Colors';
+import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 
 export const NewGroupPage = memo(
   ({ navigation }: { navigation: NavigationProp<NewChatStackParamList, 'NewGroup'> }) => {
     const contacts = useAllConnections(true).data;
-    const [dialogVisible, setDialogVisible] = useState(false);
 
     const [selectedContacts, setSetselectedContacts] = useState<DotYouProfile[]>([]);
-    const nav = useNavigation<NavigationProp<ChatStackParamList>>();
-
-    const { mutateAsync: createNew } = useConversation().create;
-
-    const [groupTitle, setgroupTitle] = useState<string>();
-
-    const createGroupCallback = useCallback(async () => {
-      const conversation = await createNew({
-        recipients: selectedContacts.map((contact) => contact.odinId as string),
-        title: groupTitle,
-      });
-      if (conversation) {
-        setDialogVisible(false);
-        navigation.goBack();
-        navigation.goBack();
-        setTimeout(() => {
-          nav.navigate('ChatScreen', {
-            convoId: conversation.fileMetadata.appData.uniqueId as string,
-          });
-        }, 100);
-      }
-    }, [createNew, selectedContacts, groupTitle, navigation, nav]);
 
     const headerLeft = useCallback(
       (props: HeaderBackButtonProps) => {
@@ -62,10 +38,12 @@ export const NewGroupPage = memo(
           disabled: selectedContacts.length < 2,
           onPress: async () => {
             if (selectedContacts.length === 0) return;
-            setDialogVisible(true);
+            navigation.navigate('CreateGroup', {
+              recipients: selectedContacts,
+            });
           },
         }),
-      [selectedContacts.length]
+      [navigation, selectedContacts]
     );
 
     const renderItem = useCallback(
@@ -104,7 +82,7 @@ export const NewGroupPage = memo(
         <SafeAreaView>
           {Platform.OS === 'ios' && <StatusBar barStyle="light-content" />}
           <FlatList data={contacts} keyExtractor={(item) => item.odinId} renderItem={renderItem} />
-          <Dialog.Container visible={dialogVisible} onBackdropPress={() => setDialogVisible(false)}>
+          {/* <Dialog.Container visible={dialogVisible} onBackdropPress={() => setDialogVisible(false)}>
             <Dialog.Title>New Group Name</Dialog.Title>
             <Dialog.Input
               onChangeText={(value) => {
@@ -118,7 +96,7 @@ export const NewGroupPage = memo(
               }}
             />
             <Dialog.Button label="Create" onPress={createGroupCallback} />
-          </Dialog.Container>
+          </Dialog.Container> */}
         </SafeAreaView>
       </>
     );
@@ -138,7 +116,7 @@ function CreateGroup(props: { disabled: boolean; onPress: () => void }) {
           color: props.disabled ? 'grey' : isDarkMode ? Colors.white : Colors.black,
         }}
       >
-        Create
+        {t('Next')}
       </Text>
     </TouchableOpacity>
   );

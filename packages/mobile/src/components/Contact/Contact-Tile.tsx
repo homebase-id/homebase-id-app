@@ -17,12 +17,14 @@ export const ContactTile = ({
   onPress,
   isSelected,
   selectMode,
+  disabled,
 }: {
   item: DotYouProfile;
   onOpen?: (conversationId: string) => void;
   onPress?: () => void;
   isSelected?: boolean;
   selectMode?: boolean;
+  disabled?: boolean;
 }) => {
   const { data: contactData } = useContact(profile.odinId).fetch;
   const contact: ContactFile | undefined = contactData?.fileMetadata.appData.content;
@@ -45,7 +47,7 @@ export const ContactTile = ({
   return (
     <>
       <ErrorNotification error={createConversationError} />
-      <TouchableOpacity onPress={selectMode ? onPress : onClick}>
+      <TouchableOpacity disabled={disabled} onPress={selectMode ? onPress : onClick}>
         <View
           style={[
             styles.tile,
