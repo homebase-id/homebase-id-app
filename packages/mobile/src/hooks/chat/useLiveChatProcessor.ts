@@ -39,6 +39,7 @@ import { insertNewMessage, insertNewMessagesForConversation } from './useChatMes
 import { insertNewConversation } from './useConversations';
 import { useWebSocketContext } from '../../components/WebSocketContext/useWebSocketContext';
 import { insertNewConversationMetadata } from './useConversationMetadata';
+import { incrementAppIdNotificationCount } from '../notifications/usePushNotifications';
 
 const MINUTE_IN_MS = 60000;
 const isDebug = false; // The babel plugin to remove console logs would remove any if they get to production
@@ -277,6 +278,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
       };
 
       queryClient.setQueryData(['push-notifications'], newNotificationData);
+      incrementAppIdNotificationCount(queryClient, clientNotification.options.appId);
     }
   }, []);
 
@@ -322,7 +324,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
 
   return useNotificationSubscriber(
     isEnabled ? handler : undefined,
-    ['fileAdded', 'fileModified'],
+    ['fileAdded', 'fileModified', 'appNotificationAdded'],
     [ChatDrive],
     () => {
       console.log('ChatWebsocket connected');

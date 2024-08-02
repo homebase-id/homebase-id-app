@@ -1,8 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   DeleteNotifications,
   GetNotifications,
   MarkNotificationsAsRead,
+  NotificationCountsByAppId,
   PushNotification,
   getNotificationCountsByAppId,
   markAllNotificationsOfAppAsRead,
@@ -90,17 +91,17 @@ export const useUnreadPushNotificationsCount = (props?: { appId?: string }) => {
   const dotYouClient = useDotYouClientContext();
   const getNotificationCounts = async () => getNotificationCountsByAppId(dotYouClient);
 
-  const getCounts = async () => await getNotificationCounts();
+  const getCounts = async () => (await getNotificationCounts()).unreadCounts;
 
   return useQuery({
     queryKey: ['push-notifications-count'],
-    select: (counts) => {
-      if (!props?.appId) {
-        return Object.values(counts.unreadCounts).reduce((acc, count) => acc + count, 0);
-      }
+    // select: (counts) => {
+    //   if (!props?.appId) {
+    //     return Object.values(counts.unreadCounts).reduce((acc, count) => acc + count, 0);
+    //   }
 
-      return counts.unreadCounts[props.appId] || 0;
-    },
+    //   return counts.unreadCounts[props.appId] || 0;
+    // },
     queryFn: getCounts,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
@@ -111,19 +112,51 @@ export const useRemoveNotifications = (props: { disabled: boolean; appId: string
   const queryClient = useQueryClient();
   const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: props.appId });
 
-  const markAsRead = (appId: string) => markAllNotificationsOfAppAsRead(dotYouClient, appId);
+  const markAsRead = async (appId: string) => {
+    const response = await markAllNotificationsOfAppAsRead(dotYouClient, appId);
+    return response;
+  };
+
   const mutation = useMutation({
     mutationFn: markAsRead,
+    onMutate: (appId: string) => {
+      const existingCounts = queryClient.getQueryData<Record<string, number>>([
+        'push-notifications-count',
+      ]);
+      if (!existingCounts) return;
+
+      const newCounts = { ...existingCounts };
+      newCounts[appId] = 0;
+      queryClient.setQueryData(['push-notifications-count'], newCounts);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['push-notifications'] });
-      queryClient.invalidateQueries({ queryKey: ['push-notifications-count'] });
     },
   });
 
   useEffect(() => {
     (async () => {
-      if ((!props?.disabled && !props.appId) || !mutation.isIdle || !unreadCount) return;
+      if (
+        props?.disabled ||
+        !props.appId ||
+        mutation.status === 'pending' ||
+        !unreadCount?.[props.appId]
+      ) {
+        return;
+      }
       mutation.mutate(props.appId);
     })();
   }, [mutation, props?.disabled, props?.appId, unreadCount]);
+};
+
+export const incrementAppIdNotificationCount = async (queryClient: QueryClient, appId: string) => {
+  const existingCounts = queryClient.getQueryData<Record<string, number>>([
+    'push-notifications-count',
+  ]);
+  if (!existingCounts) return;
+  const newCounts = {
+    ...existingCounts,
+  };
+  newCounts[appId] = newCounts[appId] + 1;
+  queryClient.setQueryData(['push-notifications-count'], newCounts);
 };

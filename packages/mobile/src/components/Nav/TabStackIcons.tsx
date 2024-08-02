@@ -27,21 +27,21 @@ const UnreadDot = () => {
 };
 
 export const TabFeedIcon = (props: TabIconProps) => {
-  const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: FEED_APP_ID });
+  const { data: unreadCount } = useUnreadPushNotificationsCount();
   return (
     <View style={{ position: 'relative' }}>
       <Feed {...props} size={'md'} />
-      {unreadCount ? <UnreadDot /> : null}
+      {unreadCount?.[FEED_APP_ID] ? <UnreadDot /> : null}
     </View>
   );
 };
 
 export const TabChatIcon = (props: TabIconProps) => {
-  const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: CHAT_APP_ID });
+  const { data: unreadCount } = useUnreadPushNotificationsCount();
   return (
     <View style={{ position: 'relative' }}>
       <ChatIcon {...props} size={'md'} />
-      {unreadCount ? <UnreadDot /> : null}
+      {unreadCount?.[CHAT_APP_ID] ? <UnreadDot /> : null}
     </View>
   );
 };
