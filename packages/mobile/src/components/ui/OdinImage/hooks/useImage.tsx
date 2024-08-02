@@ -281,7 +281,7 @@ const useImage = (props?: {
       imageFileId: string,
       imageFileKey: string,
       imageDrive: TargetDrive,
-      imageGlobalTransitId: string | undefined,
+      imageGlobalTransitId?: string | undefined,
       size?: ImageSize
     ) => {
       const largerCache = checkIfWeHaveLargerCachedImage(
