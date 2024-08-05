@@ -53,6 +53,7 @@ export type AuthStackParamList = {
 export type TabStackParamList = {
   Home: undefined;
   Feed: undefined;
+  ComposeFeed: undefined;
   Profile: undefined;
   Chat: undefined;
 };
