@@ -62,7 +62,11 @@ export const PostInteracts = memo(
             <IconButton
               icon={<Comment />}
               onPress={() => {
-                return onCommentPress?.({ ...reactionContext, canReact });
+                const context: ReactionContext & CanReactInfo = {
+                  ...reactionContext,
+                  ...canReact,
+                };
+                return onCommentPress?.(context);
               }}
             />
           )}

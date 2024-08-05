@@ -8,7 +8,7 @@ import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/typ
 import { forwardRef, memo, useCallback, useImperativeHandle, useRef, useState } from 'react';
 import { useDarkMode } from '../../../../hooks/useDarkMode';
 import { Colors } from '../../../../app/Colors';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { Text } from '../../../ui/Text/Text';
 
 import { ReactionContext } from '@youfoundation/js-lib/public';
@@ -34,8 +34,6 @@ export const CommentsModal = memo(
 
     const { data: comments, hasNextPage, fetchNextPage } = useComments({ context }).fetch;
     const flattenedComments = comments?.pages.flatMap((page) => page.comments).reverse();
-
-    console.log('comments', flattenedComments);
 
     useImperativeHandle(ref, () => {
       return {
@@ -72,11 +70,13 @@ export const CommentsModal = memo(
         <Text style={styles.headerText}>Comments</Text>
         <BottomSheetFlatList
           data={flattenedComments}
+          contentContainerStyle={{ flexGrow: 1 }}
           onEndReached={() => {
             if (hasNextPage) {
               fetchNextPage();
             }
           }}
+          ListEmptyComponent={EmptyComponent}
           onEndReachedThreshold={0.3}
           renderItem={({ item }) => (
             <Comment
@@ -91,6 +91,31 @@ export const CommentsModal = memo(
     );
   })
 );
+
+const EmptyComponent = () => {
+  return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Text
+        style={{
+          fontSize: 18,
+          fontWeight: '600',
+          marginBottom: 16,
+        }}
+      >
+        No Comments yet
+      </Text>
+      <Text
+        style={{
+          fontSize: 14,
+          fontWeight: '400',
+          color: Colors.gray[500],
+        }}
+      >
+        Be the first to comment on this post.
+      </Text>
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   headerText: {
