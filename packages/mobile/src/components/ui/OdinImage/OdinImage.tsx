@@ -199,6 +199,7 @@ export const OdinImage = memo(
               imageMeta={imageMeta}
               imageSize={imageSize}
               blurRadius={hasCachedImage ? 0 : 2}
+              sharedTransitionTag={sharedTransitionTag}
               // onLongPress={onLongPress}
             />
           ) : null}
@@ -217,6 +218,7 @@ export const OdinImage = memo(
               style={zoomableStyle}
               imageMeta={imageMeta}
               imageZoomProps={imageZoomProps}
+              sharedTransitionTag={sharedTransitionTag}
             />
           ) : null}
 
