@@ -18,12 +18,13 @@ export const LinkPreviewFile = memo(
   ({ targetDrive, fileId, payloadKey, position }: LinkPreviewFileProps) => {
     const { data } = useLinkMetadata({ targetDrive, fileId, payloadKey });
     const { isDarkMode } = useDarkMode();
+
     if (!data || !data.length) {
       return null;
     }
     const { title, description, imageUrl, imageHeight, imageWidth, url } = data[0];
     const { width, height } = Dimensions.get('window');
-    const { height: scaledHeight, width: scaledWidth } = calculateScaledDimensions(
+    const { height: scaledHeight } = calculateScaledDimensions(
       imageWidth || 300,
       imageHeight || 300,
       {
@@ -32,16 +33,22 @@ export const LinkPreviewFile = memo(
       }
     );
     return (
-      <Pressable onPress={() => openURL(url)}>
-        <Image
-          source={{ uri: imageUrl }}
-          style={{
-            width: scaledWidth,
-            height: scaledHeight,
-            borderTopLeftRadius: 15,
-            borderTopRightRadius: 15,
-          }}
-        />
+      <Pressable
+        onPress={() => openURL(url)}
+        style={{
+          backgroundColor: '#1A1A1A47',
+          borderRadius: 15,
+        }}
+      >
+        {imageUrl && (
+          <Image
+            source={{ uri: imageUrl }}
+            style={{
+              // width: scaledWidth,
+              height: scaledHeight,
+            }}
+          />
+        )}
         <Text
           style={{
             fontSize: 16,
