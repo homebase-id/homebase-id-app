@@ -74,19 +74,19 @@ export const Comment = ({ context, canReact, commentData, onReply, isThread }: C
         display: 'flex',
         flexDirection: 'row',
         gap: 16,
-        marginHorizontal: 16,
+        marginHorizontal: 8,
         marginVertical: 12,
       }}
     >
       <Avatar
         odinId={authorOdinId}
         imageSize={{
-          width: 40,
-          height: 40,
+          width: 36,
+          height: 36,
         }}
         style={{
-          width: 40,
-          height: 40,
+          width: 36,
+          height: 36,
         }}
       />
       <View>
@@ -98,7 +98,7 @@ export const Comment = ({ context, canReact, commentData, onReply, isThread }: C
             marginBottom: 4,
           }}
         >
-          <AuthorName odinId={authorOdinId} showYou />
+          <AuthorName odinId={authorOdinId} />
         </Text>
         <Text>{commentContent.body}</Text>
       </View>
