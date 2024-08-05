@@ -1,6 +1,4 @@
 import { View } from 'react-native';
-import { IconButton } from '../Chat/Chat-app-bar';
-import { Comment, Forward, OpenHeart } from '../ui/Icons/icons';
 import { PostMedia } from './Body/PostMedia';
 import ParsedText from 'react-native-parsed-text';
 
@@ -13,132 +11,140 @@ import Animated from 'react-native-reanimated';
 import { useCheckIdentity, useDotYouClientContext } from 'feed-app-common';
 import { memo } from 'react';
 import { useDarkMode } from '../../hooks/useDarkMode';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
-import { PostContent } from '@youfoundation/js-lib/public';
+import { HomebaseFile, SecurityGroupType } from '@youfoundation/js-lib/core';
+import { PostContent, ReactionContext } from '@youfoundation/js-lib/public';
 import { useChannel } from '../../hooks/feed/channels/useChannel';
 import { useSocialChannel } from '../../hooks/feed/useSocialChannel';
 import { Colors } from '../../app/Colors';
+import { PostInteracts } from './Interacts/PostInteracts';
+import { CanReactInfo } from '../../hooks/reactions';
 
-export const PostTeaserCard = memo(({ postFile }: { postFile: HomebaseFile<PostContent> }) => {
-  const post = postFile.fileMetadata.appData.content;
-  const { isDarkMode } = useDarkMode();
-  const now = new Date();
-  const odinId = postFile.fileMetadata.senderOdinId;
-  const authorOdinId = post.authorOdinId || odinId;
-  const identity = useDotYouClientContext().getIdentity();
-  const isExternal = odinId && odinId !== identity;
+export const PostTeaserCard = memo(
+  ({
+    postFile,
+    onCommentPress,
+  }: {
+    postFile: HomebaseFile<PostContent>;
+    onCommentPress: (context: ReactionContext & CanReactInfo) => void;
+  }) => {
+    const post = postFile.fileMetadata.appData.content;
+    const { isDarkMode } = useDarkMode();
+    const now = new Date();
+    const { data: channel } = useChannel({ channelId: post.channelId }).fetch;
+    const odinId = postFile.fileMetadata.senderOdinId;
+    const authorOdinId = post.authorOdinId || odinId;
+    const identity = useDotYouClientContext().getIdentity();
+    const isExternal = odinId && odinId !== identity;
 
-  const { data: identityAccessible } = useCheckIdentity(isExternal ? odinId : undefined);
+    const { data: identityAccessible } = useCheckIdentity(isExternal ? odinId : undefined);
 
-  const { data: externalChannel } = useSocialChannel({
-    odinId: isExternal ? odinId : undefined,
-    channelId: post.channelId,
-  }).fetch;
-  const { data: internalChannel } = useChannel({
-    channelId: isExternal ? undefined : post.channelId,
-  }).fetch;
+    const { data: externalChannel } = useSocialChannel({
+      odinId: isExternal ? odinId : undefined,
+      channelId: post.channelId,
+    }).fetch;
+    const { data: internalChannel } = useChannel({
+      channelId: isExternal ? undefined : post.channelId,
+    }).fetch;
 
-  const date = new Date(postFile?.fileMetadata.appData.userDate || now);
-  const yearsAgo = Math.abs(new Date(now.getTime() - date.getTime()).getUTCFullYear() - 1970);
-  const format: Intl.DateTimeFormatOptions = {
-    month: 'short',
-    day: 'numeric',
-    year: yearsAgo !== 0 ? 'numeric' : undefined,
-    hour: 'numeric',
-    minute: 'numeric',
-  };
+    const date = new Date(postFile?.fileMetadata.appData.userDate || now);
+    const yearsAgo = Math.abs(new Date(now.getTime() - date.getTime()).getUTCFullYear() - 1970);
+    const format: Intl.DateTimeFormatOptions = {
+      month: 'short',
+      day: 'numeric',
+      year: yearsAgo !== 0 ? 'numeric' : undefined,
+      hour: 'numeric',
+      minute: 'numeric',
+    };
 
-  if (identityAccessible === false && isExternal) {
-    return <UnreachableIdentity postFile={postFile} odinId={odinId} />;
-  }
+    if (identityAccessible === false && isExternal) {
+      return <UnreachableIdentity postFile={postFile} odinId={odinId} />;
+    }
 
-  return (
-    <Animated.View
-      style={{
-        padding: 10,
-        margin: 10,
-        elevation: 5,
-        backgroundColor: isDarkMode ? Colors.black : Colors.white,
-        borderRadius: 5,
-        flexDirection: 'column',
-      }}
-    >
-      <View
+    return (
+      <Animated.View
         style={{
-          display: 'flex',
-          flexDirection: 'row',
-          gap: 16,
-          marginBottom: 8,
-          alignItems: 'center',
+          padding: 10,
+          margin: 10,
+          elevation: 5,
+          backgroundColor: isDarkMode ? Colors.black : Colors.white,
+          borderRadius: 5,
+          flexDirection: 'column',
         }}
       >
-        <Avatar
-          odinId={authorOdinId}
-          imageSize={{
-            height: 40,
-            width: 40,
-          }}
+        <View
           style={{
-            height: 40,
-            width: 40,
+            display: 'flex',
+            flexDirection: 'row',
+            gap: 16,
+            marginBottom: 8,
+            alignItems: 'center',
           }}
-        />
+        >
+          <Avatar
+            odinId={authorOdinId}
+            imageSize={{
+              height: 40,
+              width: 40,
+            }}
+            style={{
+              height: 40,
+              width: 40,
+            }}
+          />
 
-        <View>
-          <Text
-            style={{
-              fontSize: 17,
-              fontWeight: '400',
-              opacity: 0.7,
-              color: isDarkMode ? Colors.slate[50] : Colors.slate[900],
-            }}
-          >
-            <AuthorName odinId={post.authorOdinId} />
-          </Text>
-          <Text
-            style={{
-              opacity: 0.7,
-              fontSize: 13,
-              color: isDarkMode ? Colors.slate[50] : Colors.slate[900],
-            }}
-          >
-            {date.toLocaleDateString(undefined, format)}
-          </Text>
+          <View>
+            <Text
+              style={{
+                fontSize: 17,
+                fontWeight: '400',
+                opacity: 0.7,
+                color: isDarkMode ? Colors.slate[50] : Colors.slate[900],
+              }}
+            >
+              <AuthorName odinId={post.authorOdinId} />
+            </Text>
+            <Text
+              style={{
+                opacity: 0.7,
+                fontSize: 13,
+                color: isDarkMode ? Colors.slate[50] : Colors.slate[900],
+              }}
+            >
+              {date.toLocaleDateString(undefined, format)}
+            </Text>
+          </View>
         </View>
-      </View>
-      <ParsedText
-        style={{
-          fontSize: 16,
-          color: isDarkMode ? Colors.white : Colors.black,
-        }}
-        parse={[
-          {
-            pattern: URL_PATTERN,
-            onPress: (url) => openURL(url),
-            style: {
-              color: isDarkMode ? Colors.indigo[200] : Colors.indigo[500],
+        <ParsedText
+          style={{
+            fontSize: 16,
+            color: isDarkMode ? Colors.white : Colors.black,
+          }}
+          parse={[
+            {
+              pattern: URL_PATTERN,
+              onPress: (url) => openURL(url),
+              style: {
+                color: isDarkMode ? Colors.indigo[200] : Colors.indigo[500],
+              },
             },
-          },
-        ]}
-        selectable
-        selectionColor={isDarkMode ? Colors.indigo[700] : Colors.indigo[500]}
-      >
-        {post.caption}
-      </ParsedText>
-      <PostMedia post={postFile} />
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}
-      >
-        <IconButton icon={<OpenHeart />} />
-        <View style={{ display: 'flex', flexDirection: 'row' }}>
-          <IconButton icon={<Forward />} />
-          <IconButton icon={<Comment />} />
-        </View>
-      </View>
-    </Animated.View>
-  );
-});
+          ]}
+          selectable
+          selectionColor={isDarkMode ? Colors.indigo[700] : Colors.indigo[500]}
+        >
+          {post.caption}
+        </ParsedText>
+        <PostMedia post={postFile} />
+        <PostInteracts
+          postFile={postFile}
+          onCommentPress={onCommentPress}
+          isPublic={
+            channel?.serverMetadata?.accessControlList?.requiredSecurityGroup ===
+              SecurityGroupType.Anonymous ||
+            channel?.serverMetadata?.accessControlList?.requiredSecurityGroup ===
+              SecurityGroupType.Authenticated
+          }
+        />
+      </Animated.View>
+    );
+  }
+);

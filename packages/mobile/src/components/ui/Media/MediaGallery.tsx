@@ -52,7 +52,7 @@ export const MediaGallery = ({
   style?: StyleProp<ViewStyle>;
 }) => {
   const maxVisible = 4;
-  const countExcludedFromView = payloads.length - maxVisible;
+  const countExcludedFromView = payloads?.length - maxVisible;
 
   return (
     <View style={[styles.grid, style]}>

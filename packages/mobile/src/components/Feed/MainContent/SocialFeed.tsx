@@ -1,13 +1,16 @@
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { useSocialFeed } from '../../../hooks/feed/useSocialFeed';
-import { PostContent } from '@youfoundation/js-lib/public';
-import { memo, useCallback, useMemo, useState } from 'react';
+import { PostContent, ReactionContext } from '@youfoundation/js-lib/public';
+import { memo, useCallback, useMemo, useRef, useState } from 'react';
 import { flattenInfinteData } from '../../../utils/utils';
 import Animated from 'react-native-reanimated';
 import { EmptyFeed } from './EmptyFeed';
 import { RefreshControl } from 'react-native-gesture-handler';
 import { PostTeaserCard } from '../PostTeaserCard';
 import { FeedLoader } from '../Loader/FeedLoader';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import { CommentModalMethods, CommentsModal } from '../Interacts/Comments/CommentsModal';
+import { CanReactInfo } from '../../../hooks/reactions';
 
 const PAGE_SIZE = 10;
 
@@ -35,6 +38,11 @@ const SocialFeedMainContent = memo(() => {
   );
 
   const [refreshing, setRefreshing] = useState(false);
+  const commentRef = useRef<CommentModalMethods>(null);
+
+  const onCommentPress = useCallback((context: ReactionContext & CanReactInfo) => {
+    commentRef.current?.setContext(context);
+  }, []);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -47,18 +55,23 @@ const SocialFeedMainContent = memo(() => {
   }
 
   return (
-    <Animated.FlatList
-      data={flattenedPosts}
-      contentContainerStyle={{ flexGrow: 1 }}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-      showsVerticalScrollIndicator={false}
-      keyExtractor={(item) => item.fileId}
-      renderItem={({ item }) => <PostTeaserCard postFile={item} />}
-      ListEmptyComponent={<EmptyFeed />}
-      ListFooterComponent={isFetchingNextPage ? <FeedLoader /> : null}
-      onEndReached={() => hasMorePosts && fetchNextPage()}
-      onEndReachedThreshold={0.3}
-    />
+    <BottomSheetModalProvider>
+      <Animated.FlatList
+        data={flattenedPosts}
+        contentContainerStyle={{ flexGrow: 1 }}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        showsVerticalScrollIndicator={false}
+        keyExtractor={(item) => item.fileId}
+        renderItem={({ item }) => (
+          <PostTeaserCard postFile={item} onCommentPress={onCommentPress} />
+        )}
+        ListEmptyComponent={<EmptyFeed />}
+        ListFooterComponent={isFetchingNextPage ? <FeedLoader /> : null}
+        onEndReached={() => hasMorePosts && fetchNextPage()}
+        onEndReachedThreshold={0.3}
+      />
+      <CommentsModal ref={commentRef} />
+    </BottomSheetModalProvider>
   );
 });
 

@@ -17,8 +17,8 @@ export const PostMedia = memo(({ post }: PostMediaProps) => {
   const authorOdinId = post.fileMetadata.appData.content.authorOdinId || odinId;
   const { width, height } = Dimensions.get('screen');
   const hasContent = !!post.fileMetadata.appData.content.caption;
-  if (payloads?.length === 0) return null;
-  if (payloads.length === 1) {
+  if (!payloads || payloads?.length === 0) return null;
+  if (payloads?.length === 1) {
     const payload = payloads[0];
     const aspectRatio = (previewThumbnail?.pixelWidth || 1) / (previewThumbnail?.pixelHeight || 1);
 
@@ -51,6 +51,7 @@ export const PostMedia = memo(({ post }: PostMediaProps) => {
       />
     );
   }
+
   return (
     <MediaGallery
       fileId={fileId}
