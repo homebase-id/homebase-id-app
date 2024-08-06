@@ -18,6 +18,7 @@ import { useSocialChannel } from '../../hooks/feed/useSocialChannel';
 import { Colors } from '../../app/Colors';
 import { PostInteracts } from './Interacts/PostInteracts';
 import { CanReactInfo } from '../../hooks/reactions';
+import { PostMeta } from './Meta/Meta';
 
 export const PostTeaserCard = memo(
   ({
@@ -29,8 +30,6 @@ export const PostTeaserCard = memo(
   }) => {
     const post = postFile.fileMetadata.appData.content;
     const { isDarkMode } = useDarkMode();
-    const now = new Date();
-    const { data: channel } = useChannel({ channelId: post.channelId }).fetch;
     const odinId = postFile.fileMetadata.senderOdinId;
     const authorOdinId = post.authorOdinId || odinId;
     const identity = useDotYouClientContext().getIdentity();
@@ -46,15 +45,7 @@ export const PostTeaserCard = memo(
       channelId: isExternal ? undefined : post.channelId,
     }).fetch;
 
-    const date = new Date(postFile?.fileMetadata.appData.userDate || now);
-    const yearsAgo = Math.abs(new Date(now.getTime() - date.getTime()).getUTCFullYear() - 1970);
-    const format: Intl.DateTimeFormatOptions = {
-      month: 'short',
-      day: 'numeric',
-      year: yearsAgo !== 0 ? 'numeric' : undefined,
-      hour: 'numeric',
-      minute: 'numeric',
-    };
+    const channel = externalChannel || internalChannel;
 
     if (identityAccessible === false && isExternal) {
       return <UnreachableIdentity postFile={postFile} odinId={odinId} />;
@@ -103,15 +94,12 @@ export const PostTeaserCard = memo(
             >
               <AuthorName odinId={post.authorOdinId} />
             </Text>
-            <Text
-              style={{
-                opacity: 0.7,
-                fontSize: 13,
-                color: isDarkMode ? Colors.slate[50] : Colors.slate[900],
-              }}
-            >
-              {date.toLocaleDateString(undefined, format)}
-            </Text>
+            <PostMeta
+              postFile={postFile}
+              channel={channel || undefined}
+              odinId={odinId}
+              authorOdinId={authorOdinId}
+            />
           </View>
         </View>
         <ParsedText

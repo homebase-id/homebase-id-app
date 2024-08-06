@@ -84,7 +84,7 @@ const SocialFeedMainContent = memo(() => {
   }
 
   return (
-    <BottomSheetModalProvider>
+    <>
       <Animated.FlatList
         data={flattenedPosts}
         contentContainerStyle={{ flexGrow: 1 }}
@@ -98,7 +98,7 @@ const SocialFeedMainContent = memo(() => {
         onEndReachedThreshold={0.3}
       />
       <CommentsModal ref={commentRef} />
-    </BottomSheetModalProvider>
+    </>
   );
 });
 
