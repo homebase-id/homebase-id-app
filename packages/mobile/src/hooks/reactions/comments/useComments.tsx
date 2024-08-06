@@ -23,7 +23,6 @@ export const useComments = ({ context }: { context?: ReactionContext }) => {
     context?: ReactionContext;
     pageParam?: string;
   }): Promise<UseCommentsVal> => {
-    console.log('fetching comments', context, pageParam);
     if (!context) {
       return { comments: [] as HomebaseFile<ReactionFile>[], cursorState: undefined };
     }
