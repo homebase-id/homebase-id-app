@@ -26,7 +26,6 @@ import {
 import {
   toGuidId,
   getNewId,
-  makeGrid,
   getRandom16ByteArray,
   stringGuidsEqual,
   jsonStringify64,
@@ -46,6 +45,8 @@ import { createThumbnails } from '../image/RNThumbnailProvider';
 import { grabThumbnail, processVideo } from '../image/RNVideoProviderSegmenter';
 import { VideoContentType } from '@youfoundation/js-lib/media';
 import { AxiosRequestConfig } from 'axios';
+import { exists } from 'react-native-fs';
+import { fixContentURI } from '../../utils/utils';
 
 const POST_MEDIA_PAYLOAD_KEY = 'pst_mdi';
 
@@ -112,7 +113,7 @@ export const savePost = async <T extends PostContent>(
 
       onUpdate?.('Generating thumbnails', 0);
       // Custom blob to avoid reading and writing the file to disk again
-      const payloadBlob = new OdinBlob((processedMedia.filepath || processedMedia.uri) as string, {
+      const payloadBlob = new OdinBlob(processedMedia.filepath || processedMedia.uri, {
         type: 'video/mp4' as VideoContentType,
       }) as any as Blob;
 
@@ -145,11 +146,11 @@ export const savePost = async <T extends PostContent>(
     } else if (newMediaFile.type?.startsWith('image/')) {
       onUpdate?.('Generating thumbnails', 0);
 
-      const { additionalThumbnails, tinyThumb } = await createThumbnails(newMediaFile, payloadKey);
+      const { additionalThumbnails, tinyThumb } = await createThumbnails(newMediaFile, payloadKey, (newMediaFile?.type as ImageContentType) || undefined,);
 
       // Custom blob to avoid reading and writing the file to disk again
       const payloadBlob = new OdinBlob((newMediaFile.filepath || newMediaFile.uri) as string, {
-        type: newMediaFile.type || 'image/jpeg',
+        type: newMediaFile?.type || 'image/jpeg',
       }) as any as Blob;
 
       thumbnails.push(...additionalThumbnails);
@@ -157,6 +158,7 @@ export const savePost = async <T extends PostContent>(
         key: payloadKey,
         payload: payloadBlob,
         previewThumbnail: tinyThumb,
+        descriptorContent: newMediaFile?.filename || newMediaFile?.type || undefined,
       });
 
       if (tinyThumb) previewThumbnails.push(tinyThumb);
