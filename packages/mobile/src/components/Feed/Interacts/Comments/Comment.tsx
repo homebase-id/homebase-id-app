@@ -1,11 +1,19 @@
 import { RawReactionContent, ReactionContext } from '@youfoundation/js-lib/public';
 import { CanReactInfo, useReaction } from '../../../../hooks/reactions';
-import { HomebaseFile, NewHomebaseFile, ReactionFile } from '@youfoundation/js-lib/core';
+import {
+  CommentReactionPreview,
+  HomebaseFile,
+  NewHomebaseFile,
+  ReactionFile,
+} from '@youfoundation/js-lib/core';
 import { useState } from 'react';
 import { View } from 'react-native';
 import { Avatar } from '../../../ui/Avatars/Avatar';
 import { Text } from '../../../ui/Text/Text';
 import { AuthorName } from '../../../ui/Name';
+import { ellipsisAtMaxChar, t } from 'feed-app-common';
+import { useDarkMode } from '../../../../hooks/useDarkMode';
+import { Colors } from '../../../../app/Colors';
 
 export interface CommentProps {
   context: ReactionContext;
@@ -102,6 +110,71 @@ export const Comment = ({ context, canReact, commentData, onReply, isThread }: C
         </Text>
         <Text>{commentContent.body}</Text>
       </View>
+    </View>
+  );
+};
+
+const MAX_CHAR_FOR_SUMMARY = 280;
+
+export const CommentTeaser = ({ commentData }: { commentData: CommentReactionPreview }) => {
+  const { authorOdinId, body, mediaPayloadKey } = commentData;
+  const hasMedia = !!mediaPayloadKey;
+  const { isDarkMode } = useDarkMode();
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+      }}
+    >
+      <Text
+        style={{
+          fontSize: 14,
+          lineHeight: 20,
+          fontWeight: '700',
+          opacity: 0.7,
+        }}
+      >
+        <AuthorName odinId={authorOdinId} />{' '}
+      </Text>
+      {commentData.isEncrypted && body === '' ? (
+        <View
+          style={{
+            marginLeft: 2,
+            borderRadius: 4,
+            backgroundColor: isDarkMode ? Colors.slate[700] : Colors.slate[200],
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 12,
+              color: isDarkMode ? Colors.slate[700] : Colors.slate[200],
+            }}
+          >
+            {t('Encrypted')}
+          </Text>
+        </View>
+      ) : (
+        <>
+          <Text
+            style={{
+              fontSize: 14,
+              lineHeight: 20,
+              opacity: 0.5,
+            }}
+          >
+            {ellipsisAtMaxChar(body, MAX_CHAR_FOR_SUMMARY)}
+            {hasMedia && (
+              <Text
+                style={{
+                  fontStyle: 'italic',
+                }}
+              >
+                {t('Click to view image')}
+              </Text>
+            )}
+          </Text>
+        </>
+      )}
     </View>
   );
 };
