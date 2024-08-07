@@ -31,23 +31,23 @@ export const CommentTeaserList = ({
         {reactionPreview.comments.slice(0, 3).map((comment, index) => (
           <CommentTeaser commentData={comment} key={index} />
         ))}
-        {reactionPreview?.totalCount > 3 ||
-          (allEncrypted && (
-            <Pressable onPress={onExpand}>
-              <Text
-                style={{
-                  color: Colors.indigo[500],
-                  fontWeight: '700',
-                  opacity: 0.8,
-                  textDecorationLine: 'underline',
-                }}
-              >
-                {`${!allEncrypted ? t('View') : t('Decrypt')} ${reactionPreview.totalCount} ${
-                  reactionPreview.totalCount > 1 ? t('comments') : t('comment')
-                }`}
-              </Text>
-            </Pressable>
-          ))}
+        {reactionPreview?.totalCount > 3 || allEncrypted ? (
+          <Pressable onPress={onExpand}>
+            <Text
+              style={{
+                color: Colors.indigo[500],
+                fontWeight: '700',
+                opacity: 0.8,
+                fontSize: 14,
+                textDecorationLine: 'underline',
+              }}
+            >
+              {`${!allEncrypted ? t('View') : t('Decrypt')} ${reactionPreview.totalCount} ${
+                reactionPreview.totalCount > 1 ? t('comments') : t('comment')
+              }`}
+            </Text>
+          </Pressable>
+        ) : null}
       </Pressable>
     </View>
   );
