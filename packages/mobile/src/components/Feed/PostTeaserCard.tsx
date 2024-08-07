@@ -24,9 +24,11 @@ export const PostTeaserCard = memo(
   ({
     postFile,
     onCommentPress,
+    onReactionPress,
   }: {
     postFile: HomebaseFile<PostContent>;
     onCommentPress: (context: ReactionContext & CanReactInfo) => void;
+    onReactionPress: (context: ReactionContext) => void;
   }) => {
     const post = postFile.fileMetadata.appData.content;
     const { isDarkMode } = useDarkMode();
@@ -134,6 +136,7 @@ export const PostTeaserCard = memo(
         <PostInteracts
           postFile={postFile}
           onCommentPress={onCommentPress}
+          onReactionPress={onReactionPress}
           isPublic={
             channel?.serverMetadata?.accessControlList?.requiredSecurityGroup ===
               SecurityGroupType.Anonymous ||

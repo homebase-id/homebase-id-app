@@ -9,9 +9,10 @@ export const EmojiSummary = memo(
   ({
     context,
     reactionPreview,
+    onReactionPress,
   }: {
     context: ReactionContext;
-
+    onReactionPress?: () => void;
     reactionPreview?: EmojiReactionSummary;
   }) => {
     const { data: reactionSummary } = useEmojiSummary({
@@ -19,10 +20,10 @@ export const EmojiSummary = memo(
       reactionPreview: reactionPreview,
     }).fetch;
 
-    //TODO: Open Reaction Summary Modal
     if (reactionSummary && reactionSummary.totalCount > 0) {
       return (
         <Pressable
+          onPress={onReactionPress}
           style={{
             flexDirection: 'row',
             gap: 4,

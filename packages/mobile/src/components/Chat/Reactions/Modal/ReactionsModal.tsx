@@ -6,8 +6,7 @@ import { useDarkMode } from '../../../../hooks/useDarkMode';
 
 import { ChatMessageIMessage } from '../../ChatDetail';
 import { useChatReaction } from '../../../../hooks/chat/useChatReaction';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
-import { ChatReaction } from '../../../../provider/chat/ChatReactionProvider';
+
 import { Avatar, OwnerAvatar } from '../../../ui/Avatars/Avatar';
 import { AuthorName } from '../../../ui/Name';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
@@ -58,7 +57,13 @@ export const ReactionsModal = memo(
               Reactions
             </Text>
             <BottomSheetScrollView>
-              {reactions?.map((prop) => <ReactionTile key={prop.fileId} {...prop} />)}
+              {reactions?.map((prop) => (
+                <ReactionTile
+                  key={prop.fileId}
+                  reaction={prop.fileMetadata.appData.content.message}
+                  authorOdinId={prop.fileMetadata.senderOdinId}
+                />
+              ))}
             </BottomSheetScrollView>
           </View>
         </BottomSheetModal>
@@ -67,9 +72,13 @@ export const ReactionsModal = memo(
   )
 );
 
-export const ReactionTile = (prop: HomebaseFile<ChatReaction>) => {
-  const reaction = prop.fileMetadata.appData.content.message;
-  const senderOdinId = prop.fileMetadata.senderOdinId;
+export const ReactionTile = ({
+  reaction,
+  authorOdinId,
+}: {
+  reaction: string;
+  authorOdinId?: string;
+}) => {
   const { isDarkMode } = useDarkMode();
   return (
     <View
@@ -80,9 +89,9 @@ export const ReactionTile = (prop: HomebaseFile<ChatReaction>) => {
         marginTop: 10,
       }}
     >
-      {senderOdinId ? (
+      {authorOdinId ? (
         <Avatar
-          odinId={senderOdinId}
+          odinId={authorOdinId}
           imageSize={{ width: 42, height: 42 }}
           style={{
             marginRight: 16,
@@ -116,7 +125,7 @@ export const ReactionTile = (prop: HomebaseFile<ChatReaction>) => {
             color: isDarkMode ? Colors.white : Colors.slate[700],
           }}
         >
-          <AuthorName odinId={senderOdinId} showYou />
+          <AuthorName odinId={authorOdinId} showYou />
         </Text>
         <Text
           style={{

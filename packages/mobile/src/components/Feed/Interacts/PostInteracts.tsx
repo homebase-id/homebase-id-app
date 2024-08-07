@@ -13,10 +13,12 @@ export const PostInteracts = memo(
   ({
     postFile,
     onCommentPress,
+    onReactionPress,
   }: {
     postFile: HomebaseFile<PostContent>;
     isPublic?: boolean;
     onCommentPress?: (context: ReactionContext & CanReactInfo) => void;
+    onReactionPress?: (context: ReactionContext) => void;
   }) => {
     const postContent = postFile.fileMetadata.appData.content;
     const owner = useDotYouClientContext().getIdentity();
@@ -67,6 +69,7 @@ export const PostInteracts = memo(
           {!postDisabledEmoji && <IconButton icon={<OpenHeart />} />}
           <EmojiSummary
             context={reactionContext}
+            onReactionPress={() => onReactionPress?.(reactionContext)}
             reactionPreview={
               (postFile.fileMetadata.reactionPreview as ParsedReactionPreview)?.reactions
             }

@@ -12,6 +12,7 @@ import { CommentModalMethods, CommentsModal } from '../Interacts/Comments/Commen
 import { CanReactInfo } from '../../../hooks/reactions';
 import { Text } from '../../ui/Text/Text';
 import { ListRenderItemInfo } from 'react-native';
+import { PostReactionModal, ReactionModalMethods } from '../Interacts/Reactions/PostReactionModal';
 
 const PAGE_SIZE = 10;
 
@@ -40,8 +41,13 @@ const SocialFeedMainContent = memo(() => {
 
   const [refreshing, setRefreshing] = useState(false);
   const commentRef = useRef<CommentModalMethods>(null);
+  const reactionRef = useRef<ReactionModalMethods>(null);
   const onCommentPress = useCallback((context: ReactionContext & CanReactInfo) => {
     commentRef.current?.setContext(context);
+  }, []);
+
+  const onReactionPress = useCallback((context: ReactionContext) => {
+    reactionRef.current?.setContext(context);
   }, []);
 
   const onRefresh = useCallback(async () => {
@@ -73,9 +79,13 @@ const SocialFeedMainContent = memo(() => {
 
   const renderItem = useCallback(
     ({ item }: ListRenderItemInfo<HomebaseFile<PostContent>>) => (
-      <PostTeaserCard postFile={item} onCommentPress={onCommentPress} />
+      <PostTeaserCard
+        postFile={item}
+        onCommentPress={onCommentPress}
+        onReactionPress={onReactionPress}
+      />
     ),
-    [onCommentPress]
+    [onCommentPress, onReactionPress]
   );
 
   if (postsLoading) {
@@ -97,6 +107,7 @@ const SocialFeedMainContent = memo(() => {
         onEndReachedThreshold={0.3}
       />
       <CommentsModal ref={commentRef} />
+      <PostReactionModal ref={reactionRef} />
     </>
   );
 });
