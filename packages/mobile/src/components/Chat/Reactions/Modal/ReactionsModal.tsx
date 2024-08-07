@@ -1,5 +1,5 @@
 import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet';
-import { forwardRef } from 'react';
+import { forwardRef, memo } from 'react';
 import { Text, View } from 'react-native';
 import { Colors } from '../../../../app/Colors';
 import { useDarkMode } from '../../../../hooks/useDarkMode';
@@ -13,56 +13,58 @@ import { AuthorName } from '../../../ui/Name';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import { Backdrop } from '../../../ui/Modal/Backdrop';
 
-export const ReactionsModal = forwardRef(
-  (
-    { message, onClose }: { message: ChatMessageIMessage | undefined; onClose: () => void },
-    ref: React.Ref<BottomSheetModalMethods>
-  ) => {
-    const { isDarkMode } = useDarkMode();
-    const { data: reactions } = useChatReaction({
-      messageId: message?.fileMetadata.appData.uniqueId,
-      conversationId: message?.fileMetadata.appData.groupId,
-    }).get;
+export const ReactionsModal = memo(
+  forwardRef(
+    (
+      { message, onClose }: { message: ChatMessageIMessage | undefined; onClose: () => void },
+      ref: React.Ref<BottomSheetModalMethods>
+    ) => {
+      const { isDarkMode } = useDarkMode();
+      const { data: reactions } = useChatReaction({
+        messageId: message?.fileMetadata.appData.uniqueId,
+        conversationId: message?.fileMetadata.appData.groupId,
+      }).get;
 
-    return (
-      <BottomSheetModal
-        ref={ref}
-        snapPoints={['50%']}
-        backdropComponent={Backdrop}
-        onDismiss={onClose}
-        enableDismissOnClose={true}
-        enablePanDownToClose
-        index={0}
-        backgroundStyle={{
-          backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
-        }}
-        handleIndicatorStyle={{
-          backgroundColor: isDarkMode ? Colors.gray[100] : Colors.gray[500],
-        }}
-      >
-        <View
-          style={{
-            paddingHorizontal: 10,
-            flex: 1,
+      return (
+        <BottomSheetModal
+          ref={ref}
+          snapPoints={['50%']}
+          backdropComponent={Backdrop}
+          onDismiss={onClose}
+          enableDismissOnClose={true}
+          enablePanDownToClose
+          index={0}
+          backgroundStyle={{
+            backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
+          }}
+          handleIndicatorStyle={{
+            backgroundColor: isDarkMode ? Colors.gray[100] : Colors.gray[500],
           }}
         >
-          <Text
+          <View
             style={{
-              fontSize: 20,
-              fontWeight: '700',
-              color: isDarkMode ? Colors.white : Colors.slate[700],
-              marginBottom: 10,
+              paddingHorizontal: 10,
+              flex: 1,
             }}
           >
-            Reactions
-          </Text>
-          <BottomSheetScrollView>
-            {reactions?.map((prop) => <ReactionTile key={prop.fileId} {...prop} />)}
-          </BottomSheetScrollView>
-        </View>
-      </BottomSheetModal>
-    );
-  }
+            <Text
+              style={{
+                fontSize: 20,
+                fontWeight: '700',
+                color: isDarkMode ? Colors.white : Colors.slate[700],
+                marginBottom: 10,
+              }}
+            >
+              Reactions
+            </Text>
+            <BottomSheetScrollView>
+              {reactions?.map((prop) => <ReactionTile key={prop.fileId} {...prop} />)}
+            </BottomSheetScrollView>
+          </View>
+        </BottomSheetModal>
+      );
+    }
+  )
 );
 
 export const ReactionTile = (prop: HomebaseFile<ChatReaction>) => {

@@ -86,7 +86,7 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
   }, [headerTitle, isVisible, navigation]);
 
   const onShare = useCallback(() => {
-    const imageData = getImage(undefined, fileId, payloads[currIndex].key, targetDrive, {
+    const imageData = getImage(undefined, fileId, payloads[currIndex].key, targetDrive, undefined, {
       pixelWidth: width,
       pixelHeight: height,
     });

@@ -18,8 +18,7 @@ import { Comment } from './Comment';
 import { SendChat } from '../../../ui/Icons/icons';
 import { chatStyles } from '../../../Chat/ChatDetail';
 import { t } from 'feed-app-common';
-import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { TabStackParamList } from '../../../../app/App';
+
 import { Backdrop } from '../../../ui/Modal/Backdrop';
 
 export interface CommentModalMethods {
@@ -32,7 +31,6 @@ export const CommentsModal = memo(
     const { isDarkMode } = useDarkMode();
     const bottomSheetRef = useRef<BottomSheetModalMethods>(null);
     const [context, setContext] = useState<ReactionContext & CanReactInfo>();
-    const navigation = useNavigation<NavigationProp<TabStackParamList>>();
 
     const { data: comments, hasNextPage, fetchNextPage } = useComments({ context }).fetch;
     const flattenedComments = comments?.pages.flatMap((page) => page.comments).reverse();
@@ -42,19 +40,13 @@ export const CommentsModal = memo(
         setContext: (context: ReactionContext & CanReactInfo) => {
           setContext(context);
           bottomSheetRef.current?.present();
-          navigation.setOptions({
-            tabBarVisible: false,
-          });
         },
         dismiss: () => {
           setContext(undefined);
           bottomSheetRef.current?.dismiss();
-          navigation.setOptions({
-            tabBarVisible: true,
-          });
         },
       };
-    }, [navigation]);
+    }, []);
 
     const onClose = () => {
       setContext(undefined);
