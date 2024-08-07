@@ -2,7 +2,7 @@ import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { getChannelDrive, PostContent } from '@youfoundation/js-lib/public';
 import { memo } from 'react';
 import { calculateScaledDimensions } from '../../../utils/utils';
-import { Dimensions } from 'react-native';
+import { Dimensions, View } from 'react-native';
 import { MediaGallery, MediaItem } from '../../ui/Media/MediaGallery';
 
 type PostMediaProps = {
@@ -28,27 +28,33 @@ export const PostMedia = memo(({ post }: PostMediaProps) => {
       { width: width * 0.9, height: height * 0.9 }
     );
     return (
-      <MediaItem
-        fileId={fileId}
-        payload={payload}
-        globalTransitId={post.fileMetadata.globalTransitId}
-        probablyEncrypted={post.fileMetadata.isEncrypted}
-        odinId={authorOdinId}
-        targetDrive={getChannelDrive(post.fileMetadata.appData.content.channelId)}
-        fit={'cover'}
-        previewThumbnail={previewThumbnail}
-        imageSize={{
-          width: newWidth,
-          height: newHeight,
-        }}
+      <View
         style={{
-          aspectRatio,
+          marginTop: hasContent ? 10 : 0,
         }}
-        onClick={() => {
-          //
-        }}
-        onLongPress={undefined}
-      />
+      >
+        <MediaItem
+          fileId={fileId}
+          payload={payload}
+          globalTransitId={post.fileMetadata.globalTransitId}
+          probablyEncrypted={post.fileMetadata.isEncrypted}
+          odinId={authorOdinId}
+          targetDrive={getChannelDrive(post.fileMetadata.appData.content.channelId)}
+          fit={'cover'}
+          previewThumbnail={previewThumbnail}
+          imageSize={{
+            width: newWidth,
+            height: newHeight,
+          }}
+          style={{
+            aspectRatio,
+          }}
+          onClick={() => {
+            //
+          }}
+          onLongPress={undefined}
+        />
+      </View>
     );
   }
 
