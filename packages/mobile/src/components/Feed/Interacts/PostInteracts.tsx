@@ -1,11 +1,16 @@
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import {
+  EmojiReactionSummary,
+  HomebaseFile,
+  ParsedReactionPreview,
+} from '@youfoundation/js-lib/core';
 import { PostContent, ReactionContext } from '@youfoundation/js-lib/public';
 import { memo } from 'react';
 import { IconButton } from '../../Chat/Chat-app-bar';
-import { View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { OpenHeart, Forward, Comment } from '../../ui/Icons/icons';
-import { CanReactInfo, useCanReact } from '../../../hooks/reactions';
+import { CanReactInfo, useCanReact, useEmojiSummary } from '../../../hooks/reactions';
 import { useDotYouClientContext } from 'feed-app-common';
+import { Text } from '../../ui/Text/Text';
 
 export const PostInteracts = memo(
   ({
@@ -52,11 +57,23 @@ export const PostInteracts = memo(
         style={{
           flexDirection: 'row',
           alignItems: 'center',
-          justifyContent: 'space-between',
         }}
       >
         {!postDisabledEmoji && <IconButton icon={<OpenHeart />} />}
-        <View style={{ display: 'flex', flexDirection: 'row' }}>
+        <EmojiSummary
+          context={reactionContext}
+          reactionPreview={
+            (postFile.fileMetadata.reactionPreview as ParsedReactionPreview)?.reactions
+          }
+        />
+        <View
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            flex: 1,
+            justifyContent: 'flex-end',
+          }}
+        >
           <IconButton icon={<Forward />} />
           {!postDisabledComment && (
             <IconButton
@@ -75,3 +92,47 @@ export const PostInteracts = memo(
     );
   }
 );
+
+export const EmojiSummary = ({
+  context,
+  reactionPreview,
+}: {
+  context: ReactionContext;
+
+  reactionPreview?: EmojiReactionSummary;
+}) => {
+  const { data: reactionSummary } = useEmojiSummary({
+    context,
+    reactionPreview: reactionPreview,
+  }).fetch;
+
+  //TODO: Open Reaction Summary Modal
+  if (reactionSummary && reactionSummary.totalCount > 0) {
+    return (
+      <Pressable
+        style={{
+          flexDirection: 'row',
+          gap: 4,
+          alignItems: 'center',
+        }}
+      >
+        <Text
+          style={{
+            fontSize: 15,
+            opacity: 0.7,
+            fontWeight: '500',
+          }}
+        >
+          {reactionSummary.totalCount}
+        </Text>
+        <Text
+          style={{
+            fontSize: 15,
+          }}
+        >
+          {reactionSummary.reactions.slice(0, 5).map((reaction) => reaction.emoji + ' ')}
+        </Text>
+      </Pressable>
+    );
+  }
+};
