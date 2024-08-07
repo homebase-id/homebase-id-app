@@ -153,10 +153,26 @@ export const ToGroupBlock = ({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 4,
+        marginLeft: 6,
       }}
     >
-      <Text>{t('to')} </Text>
-      <TouchableOpacity onPress={() => channelLink && openURL(channelLink)}>
+      <Text
+        style={{
+          opacity: 0.6,
+          fontSize: 14,
+          fontWeight: '500',
+        }}
+      >
+        {t('to')}{' '}
+      </Text>
+      <TouchableOpacity
+        onPress={() => channelLink && openURL(channelLink)}
+        style={{
+          flexDirection: 'row',
+          gap: 4,
+          alignItems: 'center',
+        }}
+      >
         <Text
           style={{
             color: Colors.indigo[500],
@@ -168,7 +184,7 @@ export const ToGroupBlock = ({
             ? `${channel?.fileMetadata.appData.content.name}`
             : ''}
         </Text>
-        <Users color={Colors.indigo[500]} />
+        <Users color={Colors.indigo[500]} size={'sm'} />
       </TouchableOpacity>
     </View>
   );
