@@ -1,12 +1,7 @@
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import React, { forwardRef, memo, useCallback, useMemo } from 'react';
 import { useDarkMode } from '../../../../hooks/useDarkMode';
-import {
-  BottomSheetBackdropProps,
-  BottomSheetBackdrop,
-  BottomSheetModal,
-  BottomSheetView,
-} from '@gorhom/bottom-sheet';
+import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 
 import { ChatMessageIMessage } from '../../ChatDetail';
 import { Colors } from '../../../../app/Colors';
@@ -21,6 +16,7 @@ import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ChatMessage } from '../../../../provider/chat/ChatProvider';
 import { UnifiedConversation } from '../../../../provider/chat/ConversationProvider';
 import { ErrorNotification } from '../../../ui/Alert/ErrorNotification';
+import { Backdrop } from '../../../ui/Modal/Backdrop';
 export const RetryModal = forwardRef(
   (
     {
@@ -52,13 +48,6 @@ export const RetryModal = forwardRef(
       return recipients && !recipients[v].latestSuccessfullyDeliveredVersionTag;
     });
 
-    const renderBackdrop = useCallback(
-      (props: BottomSheetBackdropProps) => (
-        <BottomSheetBackdrop {...props} opacity={0.5} appearsOnIndex={0} disappearsOnIndex={-1} />
-      ),
-      []
-    );
-
     const renderTitle = useMemo(() => {
       if (recipients && Object.keys(recipients).length === 1 && failedRecipient?.length === 1) {
         return <>Failed to send to {<ConnectionName odinId={failedRecipient[0]} />}</>;
@@ -84,7 +73,7 @@ export const RetryModal = forwardRef(
       <BottomSheetModal
         ref={ref}
         snapPoints={['30%']}
-        backdropComponent={renderBackdrop}
+        backdropComponent={Backdrop}
         onDismiss={onClose}
         enableDismissOnClose={true}
         enablePanDownToClose

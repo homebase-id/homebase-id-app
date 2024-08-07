@@ -1,6 +1,4 @@
 import {
-  BottomSheetBackdrop,
-  BottomSheetBackdropProps,
   BottomSheetFlatList,
   BottomSheetFooter,
   BottomSheetFooterProps,
@@ -22,6 +20,7 @@ import { chatStyles } from '../../../Chat/ChatDetail';
 import { t } from 'feed-app-common';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { TabStackParamList } from '../../../../app/App';
+import { Backdrop } from '../../../ui/Modal/Backdrop';
 
 export interface CommentModalMethods {
   setContext: (context: ReactionContext & CanReactInfo) => void;
@@ -34,13 +33,6 @@ export const CommentsModal = memo(
     const bottomSheetRef = useRef<BottomSheetModalMethods>(null);
     const [context, setContext] = useState<ReactionContext & CanReactInfo>();
     const navigation = useNavigation<NavigationProp<TabStackParamList>>();
-
-    const renderBackdrop = useCallback(
-      (props: BottomSheetBackdropProps) => (
-        <BottomSheetBackdrop {...props} opacity={0.5} appearsOnIndex={0} disappearsOnIndex={-1} />
-      ),
-      []
-    );
 
     const { data: comments, hasNextPage, fetchNextPage } = useComments({ context }).fetch;
     const flattenedComments = comments?.pages.flatMap((page) => page.comments).reverse();
@@ -145,7 +137,7 @@ export const CommentsModal = memo(
       <BottomSheetModal
         ref={bottomSheetRef}
         snapPoints={['70%', '90%']}
-        backdropComponent={renderBackdrop}
+        backdropComponent={Backdrop}
         onDismiss={onClose}
         enableDismissOnClose={true}
         enablePanDownToClose

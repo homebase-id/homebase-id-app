@@ -25,6 +25,7 @@ export const CommentTeaserList = ({
       <Divider
         style={{
           marginBottom: 8,
+          opacity: 0.5,
         }}
       />
       <Pressable onPress={onExpand}>

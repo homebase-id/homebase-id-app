@@ -1,8 +1,4 @@
-import {
-  BottomSheetBackdrop,
-  BottomSheetBackdropProps,
-  BottomSheetModal,
-} from '@gorhom/bottom-sheet';
+import { BottomSheetModal } from '@gorhom/bottom-sheet';
 import { View } from 'react-native';
 import { useDarkMode } from '../../../../hooks/useDarkMode';
 import { emojis } from 'rn-emoji-picker/dist/data';
@@ -14,6 +10,7 @@ import { Colors } from '../../../../app/Colors';
 import { ChatMessageIMessage } from '../../ChatDetail';
 import { Emoji } from 'rn-emoji-picker/dist/interfaces';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
+import { Backdrop } from '../../../ui/Modal/Backdrop';
 
 export const EmojiPickerModal = forwardRef(
   (
@@ -36,13 +33,6 @@ export const EmojiPickerModal = forwardRef(
       conversationId: selectedMessage?.fileMetadata.appData.groupId,
     }).single.data;
 
-    const renderBackdrop = useCallback(
-      (props: BottomSheetBackdropProps) => (
-        <BottomSheetBackdrop {...props} opacity={0.5} appearsOnIndex={0} disappearsOnIndex={-1} />
-      ),
-      []
-    );
-
     const onSelectEmoji = useCallback(
       (emoji: Emoji) => {
         if (selectedMessage && ref && conversation) {
@@ -62,7 +52,7 @@ export const EmojiPickerModal = forwardRef(
       <BottomSheetModal
         ref={ref}
         snapPoints={['70%', '90%']}
-        backdropComponent={renderBackdrop}
+        backdropComponent={Backdrop}
         onDismiss={onDismiss}
         backgroundStyle={{
           backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],

@@ -1,10 +1,5 @@
-import {
-  BottomSheetBackdrop,
-  BottomSheetBackdropProps,
-  BottomSheetModal,
-  BottomSheetScrollView,
-} from '@gorhom/bottom-sheet';
-import { forwardRef, useCallback } from 'react';
+import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet';
+import { forwardRef } from 'react';
 import { Text, View } from 'react-native';
 import { Colors } from '../../../../app/Colors';
 import { useDarkMode } from '../../../../hooks/useDarkMode';
@@ -16,6 +11,7 @@ import { ChatReaction } from '../../../../provider/chat/ChatReactionProvider';
 import { Avatar, OwnerAvatar } from '../../../ui/Avatars/Avatar';
 import { AuthorName } from '../../../ui/Name';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
+import { Backdrop } from '../../../ui/Modal/Backdrop';
 
 export const ReactionsModal = forwardRef(
   (
@@ -28,18 +24,11 @@ export const ReactionsModal = forwardRef(
       conversationId: message?.fileMetadata.appData.groupId,
     }).get;
 
-    const renderBackdrop = useCallback(
-      (props: BottomSheetBackdropProps) => (
-        <BottomSheetBackdrop {...props} opacity={0.5} appearsOnIndex={0} disappearsOnIndex={-1} />
-      ),
-      []
-    );
-
     return (
       <BottomSheetModal
         ref={ref}
         snapPoints={['50%']}
-        backdropComponent={renderBackdrop}
+        backdropComponent={Backdrop}
         onDismiss={onClose}
         enableDismissOnClose={true}
         enablePanDownToClose
@@ -76,7 +65,7 @@ export const ReactionsModal = forwardRef(
   }
 );
 
-const ReactionTile = (prop: HomebaseFile<ChatReaction>) => {
+export const ReactionTile = (prop: HomebaseFile<ChatReaction>) => {
   const reaction = prop.fileMetadata.appData.content.message;
   const senderOdinId = prop.fileMetadata.senderOdinId;
   const { isDarkMode } = useDarkMode();
