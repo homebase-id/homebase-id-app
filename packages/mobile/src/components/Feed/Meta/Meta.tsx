@@ -1,13 +1,13 @@
 import { ApiType, DotYouClient, HomebaseFile, NewHomebaseFile } from '@youfoundation/js-lib/core';
 import { PostContent, ChannelDefinition, EmbeddedPost } from '@youfoundation/js-lib/public';
 import { ChannelDefinitionVm } from '../../../hooks/feed/channels/useChannels';
-import { useDotYouClientContext, useIsConnected } from 'feed-app-common';
+import { t, useDotYouClientContext, useIsConnected } from 'feed-app-common';
 import { TouchableOpacity, View } from 'react-native';
 import { Text } from '../../ui/Text/Text';
 import { useDarkMode } from '../../../hooks/useDarkMode';
 import { Colors } from '../../../app/Colors';
 import { openURL } from '../../../utils/utils';
-import { Lock } from '../../ui/Icons/icons';
+import { Lock, Users } from '../../ui/Icons/icons';
 import { aclEqual } from '@youfoundation/js-lib/helpers';
 import { AclSummary } from '../Composer/AclSummary';
 
@@ -63,8 +63,6 @@ export const PostMeta = ({
       }${isConnected && identity ? '?youauth-logon=' + identity : ''}`
     : undefined;
 
-  console.log(channelLink);
-
   const { isDarkMode } = useDarkMode();
 
   return (
@@ -96,11 +94,11 @@ export const PostMeta = ({
           }}
         >
           {postFile?.fileMetadata.isEncrypted ? (
-            <Lock size={'xs'} color={isDarkMode ? Colors.slate[500] : Colors.indigo[500]} />
+            <Lock size={'xs'} color={Colors.indigo[500]} />
           ) : null}
           <Text
             style={{
-              color: isDarkMode ? Colors.slate[500] : Colors.indigo[500],
+              color: Colors.indigo[500],
               fontWeight: '500',
               fontSize: 13,
             }}
@@ -119,6 +117,59 @@ export const PostMeta = ({
           </Text>
         </TouchableOpacity>
       ) : null}
+    </View>
+  );
+};
+
+export const ToGroupBlock = ({
+  odinId,
+  authorOdinId,
+  channel,
+}: {
+  odinId?: string;
+  authorOdinId?: string;
+  channel?:
+    | HomebaseFile<ChannelDefinitionVm | ChannelDefinition>
+    | NewHomebaseFile<ChannelDefinitionVm | ChannelDefinition>;
+}) => {
+  const dotYouClient = useDotYouClientContext();
+  const identity = dotYouClient.getIdentity();
+  const groupPost =
+    channel?.fileMetadata.appData.content.isCollaborative ||
+    (authorOdinId !== (odinId || identity) && (odinId || identity) && authorOdinId);
+  const isConnected = useIsConnected(odinId).data;
+
+  if (!groupPost) return null;
+
+  const channelLink = channel
+    ? `${odinId ? new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot() : dotYouClient.getRoot()}/posts/${
+        channel.fileMetadata.appData.content.slug
+      }${isConnected && identity ? '?youauth-logon=' + identity : ''}`
+    : undefined;
+
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+      }}
+    >
+      <Text>{t('to')} </Text>
+      <TouchableOpacity onPress={() => channelLink && openURL(channelLink)}>
+        <Text
+          style={{
+            color: Colors.indigo[500],
+            fontWeight: '500',
+            textDecorationStyle: 'solid',
+          }}
+        >
+          {channel?.fileMetadata.appData.content.name
+            ? `${channel?.fileMetadata.appData.content.name}`
+            : ''}
+        </Text>
+        <Users color={Colors.indigo[500]} />
+      </TouchableOpacity>
     </View>
   );
 };

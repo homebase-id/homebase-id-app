@@ -8,11 +8,10 @@ import { EmptyFeed } from './EmptyFeed';
 import { RefreshControl } from 'react-native-gesture-handler';
 import { PostTeaserCard } from '../PostTeaserCard';
 import { FeedLoader } from '../Loader/FeedLoader';
-import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { CommentModalMethods, CommentsModal } from '../Interacts/Comments/CommentsModal';
 import { CanReactInfo } from '../../../hooks/reactions';
 import { Text } from '../../ui/Text/Text';
-import { ListRenderItem, ListRenderItemInfo } from 'react-native';
+import { ListRenderItemInfo } from 'react-native';
 
 const PAGE_SIZE = 10;
 

@@ -1,4 +1,4 @@
-import { Circle, Path, Polygon, Svg } from 'react-native-svg';
+import { Circle, Path, Svg } from 'react-native-svg';
 import { ReactNode } from 'react';
 import { View } from 'react-native';
 import { useDarkMode } from '../../../hooks/useDarkMode';
@@ -687,6 +687,7 @@ export const SqaurePlus = (props: IconProps) => {
     </Center>
   );
 };
+
 export const Profile = (props: IconProps) => {
   const { isDarkMode } = useDarkMode();
   return (

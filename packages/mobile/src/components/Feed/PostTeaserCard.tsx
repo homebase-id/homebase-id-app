@@ -18,7 +18,7 @@ import { useSocialChannel } from '../../hooks/feed/useSocialChannel';
 import { Colors } from '../../app/Colors';
 import { PostInteracts } from './Interacts/PostInteracts';
 import { CanReactInfo } from '../../hooks/reactions';
-import { PostMeta } from './Meta/Meta';
+import { PostMeta, ToGroupBlock } from './Meta/Meta';
 
 export const PostTeaserCard = memo(
   ({
@@ -84,16 +84,27 @@ export const PostTeaserCard = memo(
           />
 
           <View>
-            <Text
+            <View
               style={{
-                fontSize: 17,
-                fontWeight: '400',
-                opacity: 0.7,
-                color: isDarkMode ? Colors.slate[50] : Colors.slate[900],
+                flexDirection: 'row',
               }}
             >
-              <AuthorName odinId={post.authorOdinId} />
-            </Text>
+              <Text
+                style={{
+                  fontSize: 17,
+                  fontWeight: '400',
+                  opacity: 0.7,
+                  color: isDarkMode ? Colors.slate[50] : Colors.slate[900],
+                }}
+              >
+                <AuthorName odinId={post.authorOdinId} />
+              </Text>
+              <ToGroupBlock
+                odinId={odinId}
+                authorOdinId={authorOdinId}
+                channel={channel || undefined}
+              />
+            </View>
             <PostMeta
               postFile={postFile}
               channel={channel || undefined}
@@ -116,8 +127,6 @@ export const PostTeaserCard = memo(
               },
             },
           ]}
-          selectable
-          selectionColor={isDarkMode ? Colors.indigo[700] : Colors.indigo[500]}
         >
           {post.caption}
         </ParsedText>
