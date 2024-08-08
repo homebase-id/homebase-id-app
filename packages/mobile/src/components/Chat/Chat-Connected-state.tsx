@@ -53,7 +53,7 @@ const RecipientConnectedState = ({ recipient }: { recipient: string }) => {
           marginRight: 16,
         }}
       >
-        You can only chat with connected identites, messages will not be delivered to{' '}
+        You can only chat with connected identities, messages will not be delivered to{' '}
         <Text
           onPress={async () => {
             await openURL(`https://${recipient}`);
