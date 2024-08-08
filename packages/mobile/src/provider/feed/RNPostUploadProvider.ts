@@ -121,17 +121,17 @@ export const savePost = async <T extends PostContent>(
       console.log('videoThumbnail', thumbnail);
       const thumbSource: ImageSource | null = thumbnail
         ? {
-          uri: thumbnail.uri,
-          width: 1920,
-          height: 1080,
-          type: thumbnail.type,
-        }
+            uri: thumbnail.uri,
+            width: 1920,
+            height: 1080,
+            type: thumbnail.type,
+          }
         : null;
       const { tinyThumb, additionalThumbnails } =
         thumbSource && thumbnail
           ? await createThumbnails(thumbSource, payloadKey, thumbnail.type as ImageContentType, [
-            { quality: 100, width: 250, height: 250 },
-          ])
+              { quality: 100, width: 250, height: 250 },
+            ])
           : { tinyThumb: undefined, additionalThumbnails: undefined };
       if (additionalThumbnails) {
         thumbnails.push(...additionalThumbnails);
@@ -146,7 +146,11 @@ export const savePost = async <T extends PostContent>(
     } else if (newMediaFile.type?.startsWith('image/')) {
       onUpdate?.('Generating thumbnails', 0);
 
-      const { additionalThumbnails, tinyThumb } = await createThumbnails(newMediaFile, payloadKey, (newMediaFile?.type as ImageContentType) || undefined,);
+      const { additionalThumbnails, tinyThumb } = await createThumbnails(
+        newMediaFile,
+        payloadKey,
+        (newMediaFile?.type as ImageContentType) || undefined
+      );
 
       // Custom blob to avoid reading and writing the file to disk again
       const payloadBlob = new OdinBlob((newMediaFile.filepath || newMediaFile.uri) as string, {
@@ -180,18 +184,17 @@ export const savePost = async <T extends PostContent>(
   if (file.fileMetadata.appData.content.type !== 'Article') {
     file.fileMetadata.appData.content.primaryMediaFile = payloads[0]
       ? {
-        fileId: undefined,
-        fileKey: payloads[0].key,
-        type: payloads[0].payload.type,
-      }
+          fileId: undefined,
+          fileKey: payloads[0].key,
+          type: payloads[0].payload.type,
+        }
       : undefined;
   }
 
   // const previewThumbnail: EmbeddedThumb | undefined =
   //   previewThumbnails?.length >= 2 ? await makeGrid(previewThumbnails) : previewThumbnails[0];
   //TODO: makeGrid not supported in RNApp so until the support is added, we will use the first thumbnail as preview thumbnail
-  const previewThumbnail: EmbeddedThumb | undefined =
-    previewThumbnails[0];
+  const previewThumbnail: EmbeddedThumb | undefined = previewThumbnails[0];
 
   onUpdate?.('Uploading', 0);
 
@@ -224,7 +227,7 @@ const uploadPost = async <T extends PostContent>(
   const encrypt = !(
     file.serverMetadata?.accessControlList?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
     file.serverMetadata?.accessControlList?.requiredSecurityGroup ===
-    SecurityGroupType.Authenticated
+      SecurityGroupType.Authenticated
   );
 
   const instructionSet: UploadInstructionSet = {
@@ -252,8 +255,9 @@ const uploadPost = async <T extends PostContent>(
     !stringGuidsEqual(existingPostWithThisSlug?.fileId, file.fileId)
   ) {
     // There is clash with an existing slug
-    file.fileMetadata.appData.content.slug = `${file.fileMetadata.appData.content.slug
-      }-${new Date().getTime()}`;
+    file.fileMetadata.appData.content.slug = `${
+      file.fileMetadata.appData.content.slug
+    }-${new Date().getTime()}`;
   }
 
   const uniqueId = file.fileMetadata.appData.content.slug
@@ -293,6 +297,38 @@ const uploadPost = async <T extends PostContent>(
     isEncrypted: encrypt,
     accessControlList: file.serverMetadata?.accessControlList,
   };
+
+  // Extensions and paths need fixing when not encrypted; It only needs to be good when
+  //   it's passed into the axios upload; And when encrypting it happens by default;
+  if (!encrypt) {
+    payloads = await Promise.all(
+      payloads.map(async (payload) => {
+        if (!('fixExtension' in payload.payload)) {
+          return payload;
+        }
+
+        const newBlob = await (payload.payload as any as OdinBlob).fixExtension();
+        return {
+          ...payload,
+          payload: newBlob as any,
+        };
+      })
+    );
+
+    thumbnails = await Promise.all(
+      thumbnails.map(async (thumb) => {
+        if (!('fixExtension' in thumb.payload)) {
+          return thumb;
+        }
+
+        const newBlob = await (thumb.payload as any as OdinBlob).fixExtension();
+        return {
+          ...thumb,
+          payload: newBlob as any,
+        };
+      })
+    );
+  }
 
   const result = await uploadFile(
     dotYouClient,
@@ -338,11 +374,12 @@ const uploadPostHeader = async <T extends PostContent>(
   if (
     existingPostWithThisSlug &&
     existingPostWithThisSlug?.fileMetadata.appData.content.id !==
-    file.fileMetadata.appData.content.id
+      file.fileMetadata.appData.content.id
   ) {
     // There is clash with an existing slug
-    file.fileMetadata.appData.content.slug = `${file.fileMetadata.appData.content.slug
-      }-${new Date().getTime()}`;
+    file.fileMetadata.appData.content.slug = `${
+      file.fileMetadata.appData.content.slug
+    }-${new Date().getTime()}`;
   }
 
   const uniqueId = file.fileMetadata.appData.content.slug
