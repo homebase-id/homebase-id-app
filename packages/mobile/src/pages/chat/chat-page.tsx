@@ -220,7 +220,6 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
           conversation: conversation,
         });
       }
-      console.log('Send Message', linkPreviews);
       sendMessage({
         conversation: conversation,
         message: message[0]?.text,
