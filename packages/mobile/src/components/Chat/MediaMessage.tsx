@@ -319,7 +319,6 @@ const InnerMediaItem = ({
           }
           onLongPress={onLongPress}
           onClick={onClick}
-          sharedTransitionTag={`${msg.fileId}-${payload.key}`}
         />
       </View>
     );
