@@ -46,7 +46,7 @@ const ReactionsModal = forwardRef((_undefined, ref: React.Ref<ReactionModalMetho
   return (
     <BottomSheetModal
       ref={bottomSheetRef}
-      snapPoints={['50%']}
+      snapPoints={['50%', '90%']}
       backdropComponent={Backdrop}
       onDismiss={onClose}
       enableDismissOnClose={true}
