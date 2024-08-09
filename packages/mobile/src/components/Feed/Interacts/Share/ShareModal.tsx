@@ -17,8 +17,10 @@ import React, {
 import { Backdrop } from '../../../ui/Modal/Backdrop';
 import { Text } from '../../../ui/Text/Text';
 import {
+  Platform,
   SectionListData,
   SectionListRenderItemInfo,
+  Share,
   StyleSheet,
   TouchableHighlight,
   View,
@@ -32,6 +34,7 @@ import {
   LinkedIn,
   Reddit,
   SendChat,
+  ShareUpArrow,
   SignalMessenger,
   WhatsApp,
   XTwitter,
@@ -173,6 +176,17 @@ export const ShareModal = memo(
 
     const socialOptions = useMemo(
       () => [
+        {
+          title: 'Share To...',
+          icon: <ShareUpArrow size={'xl'} />,
+          onPress: () => {
+            Share.share({
+              url: context?.href || '',
+              title: context?.title,
+              message: Platform.OS === 'android' ? context?.href : 'Shared from Homebase',
+            });
+          },
+        },
         {
           title: 'Copy Link',
           icon: <ChainLink size={'xl'} />,
