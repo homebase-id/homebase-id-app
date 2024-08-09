@@ -3,23 +3,20 @@ import {
   BottomSheetFooter,
   BottomSheetFooterProps,
   BottomSheetModal,
-  BottomSheetTextInput,
 } from '@gorhom/bottom-sheet';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import { forwardRef, memo, useCallback, useImperativeHandle, useRef, useState } from 'react';
 import { useDarkMode } from '../../../../hooks/useDarkMode';
 import { Colors } from '../../../../app/Colors';
-import { Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { Text } from '../../../ui/Text/Text';
 
 import { ReactionContext } from '@youfoundation/js-lib/public';
 import { CanReactInfo, useComments } from '../../../../hooks/reactions';
 import { Comment } from './Comment';
-import { SendChat } from '../../../ui/Icons/icons';
-import { chatStyles } from '../../../Chat/ChatDetail';
-import { t } from 'feed-app-common';
 
 import { Backdrop } from '../../../ui/Modal/Backdrop';
+import { CommentComposer } from './CommentComposer';
 
 export interface CommentModalMethods {
   setContext: (context: ReactionContext & CanReactInfo) => void;
@@ -51,78 +48,16 @@ export const CommentsModal = memo(
     const onClose = () => {
       setContext(undefined);
     };
-    const [message, setMessage] = useState('');
 
     const renderFooter = useCallback(
       (props: BottomSheetFooterProps) => {
         return (
           <BottomSheetFooter {...props}>
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'center',
-                alignItems: 'center',
-                gap: 6,
-                paddingHorizontal: 7,
-                paddingTop: 10,
-                // height: 120,
-                paddingBottom: Platform.select({
-                  ios: 7,
-                  android: 12,
-                }),
-              }}
-            >
-              <View
-                style={{
-                  borderRadius: 20,
-                  borderWidth: 0,
-                  paddingHorizontal: 10,
-                  paddingVertical: 5,
-                  backgroundColor: isDarkMode ? Colors.slate[800] : Colors.indigo[50],
-                  flex: 1,
-                  alignItems: 'center',
-                  flexDirection: 'row',
-                }}
-              >
-                <BottomSheetTextInput
-                  value={message}
-                  onChangeText={setMessage}
-                  placeholder={t('Add a comment...')}
-                  style={{
-                    flex: 1,
-                    maxHeight: 80,
-                    color: isDarkMode ? Colors.white : Colors.black,
-                    paddingVertical: 8,
-                  }}
-                  autoFocus={false}
-                  multiline
-                  textAlignVertical="center" // Android only
-                  autoCapitalize="sentences"
-                />
-              </View>
-              <TouchableOpacity
-                onPress={() => {
-                  //
-                }}
-                style={chatStyles.send}
-              >
-                <View
-                  style={{
-                    transform: [
-                      {
-                        rotate: '50deg',
-                      },
-                    ],
-                  }}
-                >
-                  <SendChat size={'md'} color={Colors.white} />
-                </View>
-              </TouchableOpacity>
-            </View>
+            <CommentComposer context={context as ReactionContext} canReact={context} />
           </BottomSheetFooter>
         );
       },
-      [isDarkMode, message]
+      [context]
     );
 
     return (
