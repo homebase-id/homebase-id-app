@@ -19,16 +19,19 @@ import { Colors } from '../../app/Colors';
 import { PostInteracts } from './Interacts/PostInteracts';
 import { CanReactInfo } from '../../hooks/reactions';
 import { PostMeta, ToGroupBlock } from './Meta/Meta';
+import { ShareContext } from './Interacts/Share/ShareModal';
 
 export const PostTeaserCard = memo(
   ({
     postFile,
     onCommentPress,
     onReactionPress,
+    onSharePress,
   }: {
     postFile: HomebaseFile<PostContent>;
     onCommentPress: (context: ReactionContext & CanReactInfo) => void;
     onReactionPress: (context: ReactionContext) => void;
+    onSharePress?: (context: ShareContext) => void;
   }) => {
     const post = postFile.fileMetadata.appData.content;
     const { isDarkMode } = useDarkMode();
@@ -137,6 +140,7 @@ export const PostTeaserCard = memo(
           postFile={postFile}
           onCommentPress={onCommentPress}
           onReactionPress={onReactionPress}
+          onSharePress={onSharePress}
           isPublic={
             channel?.serverMetadata?.accessControlList?.requiredSecurityGroup ===
               SecurityGroupType.Anonymous ||

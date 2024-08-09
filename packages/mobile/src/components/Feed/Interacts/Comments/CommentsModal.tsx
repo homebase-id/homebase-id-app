@@ -8,7 +8,7 @@ import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/typ
 import { forwardRef, memo, useCallback, useImperativeHandle, useRef, useState } from 'react';
 import { useDarkMode } from '../../../../hooks/useDarkMode';
 import { Colors } from '../../../../app/Colors';
-import { StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 import { Text } from '../../../ui/Text/Text';
 
 import { ReactionContext } from '@youfoundation/js-lib/public';
@@ -52,6 +52,7 @@ export const CommentsModal = memo(
     const renderFooter = useCallback(
       (props: BottomSheetFooterProps) => {
         return (
+          //TODO: Need some Keyboard avoiding improvs in Ios
           <BottomSheetFooter {...props}>
             <CommentComposer context={context as ReactionContext} canReact={context} />
           </BottomSheetFooter>
@@ -66,9 +67,9 @@ export const CommentsModal = memo(
         snapPoints={['70%', '90%']}
         backdropComponent={Backdrop}
         onDismiss={onClose}
-        enableDismissOnClose={true}
+        enableDismissOnClose
         enablePanDownToClose
-        // keyboardBehavior={'undefined'}
+        keyboardBehavior={Platform.OS === 'ios' ? 'extend' : 'interactive'}
         keyboardBlurBehavior={'restore'}
         android_keyboardInputMode="adjustResize"
         index={0}

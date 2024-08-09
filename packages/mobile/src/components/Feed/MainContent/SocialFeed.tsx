@@ -13,6 +13,7 @@ import { CanReactInfo } from '../../../hooks/reactions';
 import { Text } from '../../ui/Text/Text';
 import { ListRenderItemInfo } from 'react-native';
 import { PostReactionModal, ReactionModalMethods } from '../Interacts/Reactions/PostReactionModal';
+import { ShareContext, ShareModal, ShareModalMethods } from '../Interacts/Share/ShareModal';
 
 const PAGE_SIZE = 10;
 
@@ -39,9 +40,16 @@ const SocialFeedMainContent = memo(() => {
     [posts]
   );
 
+  /* Refs */
   const [refreshing, setRefreshing] = useState(false);
   const commentRef = useRef<CommentModalMethods>(null);
   const reactionRef = useRef<ReactionModalMethods>(null);
+  const shareRef = useRef<ShareModalMethods>(null);
+
+  const onSharePress = useCallback((context: ShareContext) => {
+    shareRef.current?.setShareContext(context);
+  }, []);
+
   const onCommentPress = useCallback((context: ReactionContext & CanReactInfo) => {
     commentRef.current?.setContext(context);
   }, []);
@@ -83,9 +91,10 @@ const SocialFeedMainContent = memo(() => {
         postFile={item}
         onCommentPress={onCommentPress}
         onReactionPress={onReactionPress}
+        onSharePress={onSharePress}
       />
     ),
-    [onCommentPress, onReactionPress]
+    [onCommentPress, onReactionPress, onSharePress]
   );
 
   if (postsLoading) {
@@ -108,6 +117,7 @@ const SocialFeedMainContent = memo(() => {
       />
       <CommentsModal ref={commentRef} />
       <PostReactionModal ref={reactionRef} />
+      <ShareModal ref={shareRef} />
     </>
   );
 });
