@@ -33,10 +33,14 @@ export const useAuthenticatedPushNotification = () => {
   }, [notificationPermissionGranted]);
 
   const reRegisterNotifaction = async () => {
-    const token = await messaging().getToken().catch((error) => {
-      console.error('Error fetching FCM Token:', error);
-    });
-    if (token) { setDeviceToken(token); }
+    if (notificationPermissionGranted) {
+      const token = await messaging().getToken().catch((error) => {
+        console.error('Error fetching FCM Token:', error);
+      });
+      if (token) { setDeviceToken(token); }
+    } else {
+      throw new Error('Notification permission not granted. Grant Permissions from the settings');
+    }
   };
 
   //

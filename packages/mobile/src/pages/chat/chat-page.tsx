@@ -213,13 +213,13 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
       if (
         messages?.filter((msg) => msg.fileId).length === 0 &&
         conversation &&
+        conversation.fileMetadata.appData.content?.recipients?.length === 1 &&
         !stringGuidsEqual(route.params.convoId, ConversationWithYourselfId)
       ) {
         inviteRecipient({
           conversation: conversation,
         });
       }
-
       sendMessage({
         conversation: conversation,
         message: message[0]?.text,
@@ -503,6 +503,15 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
             isSelf={stringGuidsEqual(route.params.convoId, ConversationWithYourselfId)}
             selectedMessage={selectedMessage?.selectedMessage}
             selectedMessageActions={selectedMessageActions}
+            groupAvatarProp={
+              isGroupChat
+                ? {
+                    fileId: conversation.fileId,
+                    fileKey: conversation.fileMetadata.payloads?.[0]?.key,
+                    previewThumbnail: conversation.fileMetadata.appData.previewThumbnail,
+                  }
+                : undefined
+            }
           />
           {isOpen ? (
             <View

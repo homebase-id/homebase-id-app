@@ -1,4 +1,5 @@
 import {
+  ActivityIndicator,
   SectionList,
   SectionListData,
   SectionListRenderItemInfo,
@@ -47,7 +48,7 @@ export const ShareChatPage = (prop: ShareChatProp) => {
 
   const { mutateAsync: createConversation } = useConversation().create;
   const { mutate: sendMessage, error } = useChatMessage().send;
-
+  const [sending, setSending] = useState(false);
   const { data: connections } = useAllConnections(true);
   const { data: allConversations } = useConversationsWithRecentMessage().all;
 
@@ -61,7 +62,7 @@ export const ShareChatPage = (prop: ShareChatProp) => {
     if ((selectedContact.length === 0 && selectedConversation.length === 0) || !data) {
       navigation.goBack();
     }
-
+    setSending(true);
     async function forwardMessages(conversation: HomebaseFile<UnifiedConversation>) {
       let text = '';
       const imageSource: ImageSource[] = [];
@@ -164,6 +165,7 @@ export const ShareChatPage = (prop: ShareChatProp) => {
       });
       navigation.goBack();
     }
+    setSending(false);
   }, [
     data,
     createConversation,
@@ -229,28 +231,33 @@ export const ShareChatPage = (prop: ShareChatProp) => {
           underlayColor={Colors.slate[800]}
           onPress={onShare}
           style={styles.footerContainer}
+          disabled={sending}
         >
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 12,
-            }}
-          >
-            <Text style={styles.footerText}>Send</Text>
+          {sending ? (
+            <ActivityIndicator color={Colors.white} />
+          ) : (
             <View
               style={{
-                transform: [{ rotate: '50deg' }],
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 12,
               }}
             >
-              <SendChat color={Colors.white} />
+              <Text style={styles.footerText}>Send</Text>
+              <View
+                style={{
+                  transform: [{ rotate: '50deg' }],
+                }}
+              >
+                <SendChat color={Colors.white} />
+              </View>
             </View>
-          </View>
+          )}
         </TouchableHighlight>
       </View>
     ),
-    [bottom, isDarkMode, onShare, selectedContact, selectedConversation]
+    [bottom, isDarkMode, onShare, selectedContact, selectedConversation, sending]
   );
 
   return (
@@ -437,6 +444,10 @@ const InnerShareChatPage = memo(
               isSelected={selectedConversation.includes(conversation)}
               onPress={() => onSelectConversation(conversation)}
               odinId={conversation.fileMetadata.appData.content.recipients[0]}
+              fileId={conversation.fileId}
+              previewThumbnail={conversation.fileMetadata.appData.previewThumbnail}
+              payloadKey={conversation.fileMetadata.payloads?.[0]?.key}
+              style={{ padding: 0, paddingHorizontal: 16, paddingVertical: 10 }}
             />
           );
         }

@@ -18,8 +18,15 @@ import {
   SendContents,
   UploadResult,
   PriorityOptions,
+  PayloadFile,
+  ThumbnailFile,
+  EmbeddedThumb,
+  ImageContentType,
 } from '@youfoundation/js-lib/core';
 import { jsonStringify64, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { ImageSource } from '../image/RNImageProvider';
+import { OdinBlob } from '../../../polyfills/OdinBlob';
+import { createThumbnails } from '../image/RNThumbnailProvider';
 
 export const CHAT_CONVERSATION_FILE_TYPE = 8888;
 export const CHAT_CONVERSATION_LOCAL_METADATA_FILE_TYPE = 8889;
@@ -194,6 +201,7 @@ export const uploadConversation = async (
   dotYouClient: DotYouClient,
   conversation: NewHomebaseFile<UnifiedConversation>,
   distribute = false,
+  image?: ImageSource,
   onVersionConflict?: () => void
 ) => {
   const identity = dotYouClient.getIdentity();
@@ -231,12 +239,43 @@ export const uploadConversation = async (
     },
   };
 
+  const payloads: PayloadFile[] = [];
+  const thumbnails: ThumbnailFile[] = [];
+  const previewThumbnails: EmbeddedThumb[] = [];
+
+  if (image) {
+    const blob = new OdinBlob(image.filepath || image.uri, {
+      type: image?.type || undefined,
+    }) as any as Blob;
+
+    const { additionalThumbnails, tinyThumb } = await createThumbnails(
+      image,
+      CONVERSATION_PAYLOAD_KEY,
+      (image?.type as ImageContentType) || undefined,
+      [
+        { quality: 75, width: 250, height: 250 },
+        { quality: 75, width: 1600, height: 1600 },
+      ]
+    );
+
+    thumbnails.push(...additionalThumbnails);
+    payloads.push({
+      key: CONVERSATION_PAYLOAD_KEY,
+      payload: blob,
+      descriptorContent: image?.filename || image?.type || undefined,
+    });
+
+    if (tinyThumb) previewThumbnails.push(tinyThumb);
+  }
+
+  uploadMetadata.appData.previewThumbnail = previewThumbnails[0];
+
   return await uploadFile(
     dotYouClient,
     uploadInstructions,
     uploadMetadata,
-    undefined,
-    undefined,
+    payloads,
+    thumbnails,
     undefined,
     onVersionConflict
   );

@@ -25,6 +25,7 @@ import { ChatConversationsReturn, useConversations } from './useConversations';
 
 import { useDotYouClientContext } from 'feed-app-common';
 import { deleteAllChatMessages } from '../../provider/chat/ChatProvider';
+import { ImageSource } from '../../provider/image/RNImageProvider';
 
 export const getSingleConversation = async (
   dotYouClient: DotYouClient,
@@ -86,9 +87,13 @@ export const useConversation = (props?: { conversationId?: string | undefined })
   const createConversation = async ({
     recipients,
     title,
+    image,
+    distribute = false,
   }: {
     recipients: string[];
     title?: string;
+    image?: ImageSource | undefined;
+    distribute?: boolean;
   }) => {
     // Check if there is already a conversations with this recipient.. If so.. Don't create a new one
     const existingConversation = await getExistingConversationsForRecipient(recipients);
@@ -120,7 +125,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
       },
     };
 
-    const uploadResult = await uploadConversation(dotYouClient, newConversation);
+    const uploadResult = await uploadConversation(dotYouClient, newConversation, distribute, image);
     if (!uploadResult) throw new Error('Failed to create the conversation');
 
     const serverVersion: HomebaseFile<UnifiedConversation> = {

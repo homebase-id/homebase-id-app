@@ -9,19 +9,18 @@ import {
   View,
 } from 'react-native';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { ChatStackParamList, NewChatStackParamList } from '../app/ChatStack';
 
 import { t, useAllConnections } from 'feed-app-common';
-
-import { ContactTile, Tile } from '../components/Contact/Contact-Tile';
-import { People, Users } from '../components/ui/Icons/icons';
+import { ChatStackParamList, NewChatStackParamList } from '../../app/ChatStack';
+import { ContactTile, Tile } from '../../components/Contact/Contact-Tile';
+import { People, Users } from '../../components/ui/Icons/icons';
+import { useAuth } from '../../hooks/auth/useAuth';
 import { memo, useCallback, useEffect, useState } from 'react';
 import { DotYouProfile } from '@youfoundation/js-lib/network';
-import { SafeAreaView } from '../components/ui/SafeAreaView/SafeAreaView';
-import { Colors } from '../app/Colors';
-import { Text } from '../components/ui/Text/Text';
-import { openURL } from '../utils/utils';
-import { useAuth } from '../hooks/auth/useAuth';
+import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
+import { Text } from '../../components/ui/Text/Text';
+import { openURL } from '../../utils/utils';
+import { Colors } from '../../app/Colors';
 
 const ListHeaderComponent = () => {
   const navigation = useNavigation<NavigationProp<NewChatStackParamList>>();

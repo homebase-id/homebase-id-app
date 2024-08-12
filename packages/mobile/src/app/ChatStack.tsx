@@ -12,8 +12,7 @@ import { Colors } from './Colors';
 
 // Pages
 import { ChatInfoPage } from '../pages/chat/chat-info-page';
-import { ContactPage } from '../pages/contact-page';
-import { NewGroupPage } from '../pages/new-group-page';
+import { NewGroupPage } from '../pages/contacts/new-group-page';
 import { PreviewMedia } from '../pages/media-preview-page';
 import ChatPage from '../pages/chat/chat-page';
 import { ConversationsPage } from '../pages/conversations-page';
@@ -33,6 +32,9 @@ import { NativeStackNavigationOptions } from '@react-navigation/native-stack';
 import { SharedItem } from '../hooks/platform/useShareManager';
 import { TabStackParamList } from './App';
 import { ShareChatPage } from '../pages/chat/share-chat-page';
+import { ContactPage } from '../pages/contacts/contact-page';
+import { GroupCreationPage } from '../pages/contacts/group-creation-page';
+import { DotYouProfile } from '@youfoundation/js-lib/network';
 
 export type ChatStackParamList = {
   Conversation: undefined;
@@ -60,6 +62,9 @@ export type ChatStackParamList = {
 export type NewChatStackParamList = {
   NewChat: undefined;
   NewGroup: undefined;
+  CreateGroup: {
+    recipients: DotYouProfile[];
+  };
 };
 
 const NewChatStack = createNativeStackNavigator<NewChatStackParamList>();
@@ -103,6 +108,14 @@ export const NewChatStackScreen = (_props: NativeStackScreenProps<ChatStackParam
         component={NewGroupPage}
         options={{
           headerTitle: 'New Group',
+          headerShown: false,
+        }}
+      />
+      <NewChatStack.Screen
+        name="CreateGroup"
+        component={GroupCreationPage}
+        options={{
+          headerTitle: 'Name Group',
           headerShown: false,
         }}
       />
