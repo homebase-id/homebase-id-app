@@ -35,6 +35,7 @@ export const ChatConnectedState = (conversation: HomebaseFile<UnifiedConversatio
 const RecipientConnectedState = ({ recipient }: { recipient: string }) => {
   const { data: isConnected, isFetched } = useIsConnected(recipient);
   const identity = useDotYouClientContext().getIdentity();
+  console.log('Error recipient connected state', isConnected);
 
   if (isConnected || !isFetched) return null;
   return (
@@ -53,7 +54,7 @@ const RecipientConnectedState = ({ recipient }: { recipient: string }) => {
           marginRight: 16,
         }}
       >
-        You can only chat with connected identities, messages will not be delivered to{' '}
+        You can only chat with connected identites, messages will not be delivered to{' '}
         <Text
           onPress={async () => {
             await openURL(`https://${recipient}`);
