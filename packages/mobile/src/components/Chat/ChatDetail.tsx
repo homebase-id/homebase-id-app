@@ -914,6 +914,8 @@ const RenderBubble = memo(
         (val) => val.contentType.startsWith('audio') || val.contentType.startsWith('application')
       );
 
+    const deleted = message?.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus;
+
     const renderTime = useCallback(
       (timeProp: TimeProps<ChatMessageIMessage>) => {
         const is24Hour = uses24HourClock();
@@ -967,7 +969,7 @@ const RenderBubble = memo(
           <ChatDeliveryIndicator msg={message} onPress={onRetryOpen} />
         )}
         renderReactions={
-          !hasReactions
+          !hasReactions || deleted
             ? undefined
             : () => {
                 const maxVisible = 2;
