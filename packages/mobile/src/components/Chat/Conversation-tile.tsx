@@ -126,6 +126,7 @@ const ConversationTile = memo((props: ConversationTileProps) => {
                     styles.description,
                     {
                       color: isDarkMode ? Colors.white : Colors.slate[900],
+                      flex: 1,
                     },
                     lastMessage.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus
                       ? styles.deleted
