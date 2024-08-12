@@ -584,6 +584,7 @@ const InnerShareListComponent = memo(
               isSelected={selectedConversation.includes(conversation)}
               onPress={() => onSelectConversation(conversation)}
               odinId={conversation.fileMetadata.appData.content.recipients[0]}
+              style={{ padding: 0, paddingHorizontal: 16, paddingVertical: 10 }}
             />
           );
         }
