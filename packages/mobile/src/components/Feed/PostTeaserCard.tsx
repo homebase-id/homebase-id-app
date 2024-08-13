@@ -9,7 +9,7 @@ import { Avatar } from '../ui/Avatars/Avatar';
 import { UnreachableIdentity } from './UnreachableIdentity';
 import Animated from 'react-native-reanimated';
 import { useCheckIdentity, useDotYouClientContext } from 'feed-app-common';
-import { memo } from 'react';
+import { memo, useCallback } from 'react';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { HomebaseFile, SecurityGroupType } from '@youfoundation/js-lib/core';
 import { PostContent, ReactionContext } from '@youfoundation/js-lib/public';
@@ -20,6 +20,9 @@ import { PostInteracts } from './Interacts/PostInteracts';
 import { CanReactInfo } from '../../hooks/reactions';
 import { PostMeta, ToGroupBlock } from './Meta/Meta';
 import { ShareContext } from './Interacts/Share/ShareModal';
+import { Ellipsis } from '../ui/Icons/icons';
+import { IconButton } from '../Chat/Chat-app-bar';
+import { PostActionProps } from './Interacts/PostActionModal';
 
 export const PostTeaserCard = memo(
   ({
@@ -27,11 +30,13 @@ export const PostTeaserCard = memo(
     onCommentPress,
     onReactionPress,
     onSharePress,
+    onMorePress,
   }: {
     postFile: HomebaseFile<PostContent>;
     onCommentPress: (context: ReactionContext & CanReactInfo) => void;
     onReactionPress: (context: ReactionContext) => void;
     onSharePress?: (context: ShareContext) => void;
+    onMorePress?: (context: PostActionProps) => void;
   }) => {
     const post = postFile.fileMetadata.appData.content;
     const { isDarkMode } = useDarkMode();
@@ -51,6 +56,17 @@ export const PostTeaserCard = memo(
     }).fetch;
 
     const channel = externalChannel || internalChannel;
+    const groupPost = authorOdinId !== (odinId || identity) && (odinId || identity) && authorOdinId;
+
+    const onPostActionPress = useCallback(() => {
+      onMorePress?.({
+        odinId,
+        postFile,
+        channel,
+        isGroupPost: !!groupPost,
+        isAuthor: authorOdinId === identity,
+      });
+    }, [authorOdinId, channel, groupPost, identity, odinId, onMorePress, postFile]);
 
     if (identityAccessible === false && isExternal) {
       return <UnreachableIdentity postFile={postFile} odinId={odinId} />;
@@ -88,7 +104,11 @@ export const PostTeaserCard = memo(
             }}
           />
 
-          <View>
+          <View
+            style={{
+              flex: 1,
+            }}
+          >
             <View
               style={{
                 flexDirection: 'row',
@@ -117,6 +137,7 @@ export const PostTeaserCard = memo(
               authorOdinId={authorOdinId}
             />
           </View>
+          <IconButton icon={<Ellipsis />} onPress={onPostActionPress} />
         </View>
         <ParsedText
           style={{

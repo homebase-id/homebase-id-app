@@ -1,4 +1,5 @@
 import {
+  GestureResponderEvent,
   Platform,
   Pressable,
   StyleProp,
@@ -194,7 +195,7 @@ export const IconButton = memo(
     textStyle,
   }: {
     icon: ReactNode;
-    onPress?: () => void;
+    onPress?: (e: GestureResponderEvent) => void;
     touchableProps?: Omit<TouchableOpacityProps, 'onPress'>;
     style?: StyleProp<ViewStyle>;
     textStyle?: TextStyle;

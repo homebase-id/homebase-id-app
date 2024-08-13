@@ -17,6 +17,7 @@ import { Comment } from './Comment';
 
 import { Backdrop } from '../../../ui/Modal/Backdrop';
 import { CommentComposer } from './CommentComposer';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export interface CommentModalMethods {
   setContext: (context: ReactionContext & CanReactInfo) => void;
@@ -49,16 +50,16 @@ export const CommentsModal = memo(
       setContext(undefined);
     };
 
+    const { bottom } = useSafeAreaInsets();
     const renderFooter = useCallback(
       (props: BottomSheetFooterProps) => {
         return (
-          //TODO: Need some Keyboard avoiding improvs in Ios
-          <BottomSheetFooter {...props}>
+          <BottomSheetFooter {...props} bottomInset={bottom}>
             <CommentComposer context={context as ReactionContext} canReact={context} />
           </BottomSheetFooter>
         );
       },
-      [context]
+      [bottom, context]
     );
 
     return (

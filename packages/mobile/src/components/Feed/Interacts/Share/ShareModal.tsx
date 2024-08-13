@@ -65,6 +65,7 @@ import { ErrorNotification } from '../../../ui/Alert/ErrorNotification';
 import { AuthorName } from '../../../ui/Name';
 import { ConversationTileWithYourself } from '../../../../pages/conversations-page';
 import ConversationTile from '../../../Chat/Conversation-tile';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export type ShareModalMethods = {
   setShareContext: (context: ShareContext) => void;
@@ -254,6 +255,7 @@ export const ShareModal = memo(
     };
 
     const { isDarkMode } = useDarkMode();
+    const { bottom } = useSafeAreaInsets();
 
     const renderAppFooter = useCallback(
       (props: BottomSheetFooterProps) => {
@@ -278,6 +280,7 @@ export const ShareModal = memo(
                 borderTopColor: isDarkMode ? Colors.gray[800] : Colors.gray[100],
                 borderTopWidth: 2,
                 elevation: 10,
+                paddingBottom: bottom,
               }}
               keyExtractor={(item) => item.title}
               renderItem={({ item }) => (

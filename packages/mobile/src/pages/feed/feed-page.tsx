@@ -45,34 +45,30 @@ export const FeedPage = memo((_props: FeedProps) => {
 
   return (
     <SafeAreaView>
-      <BottomSheetModalProvider>
-        {/* <SocialFeedWebView /> */}
-        <SocialFeedMainContent />
+      {/* <SocialFeedWebView /> */}
+      <SocialFeedMainContent />
 
-        {!keyboardVisible && (
-          <TouchableOpacity
-            style={{
-              width: 50,
-              height: 50,
-              borderRadius: 25,
-              backgroundColor: Colors.indigo[500],
-              flexDirection: 'row',
-              justifyContent: 'center',
-              alignItems: 'center',
-              position: 'absolute',
-              bottom: 20,
-              right: 20,
-            }}
-            onPress={() => setIsPostComposerOpen(true)}
-          >
-            <Plus color={Colors.white} size="lg" />
-          </TouchableOpacity>
-        )}
+      {!keyboardVisible && (
+        <TouchableOpacity
+          style={{
+            width: 50,
+            height: 50,
+            borderRadius: 25,
+            backgroundColor: Colors.indigo[500],
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignItems: 'center',
+            position: 'absolute',
+            bottom: 20,
+            right: 20,
+          }}
+          onPress={() => setIsPostComposerOpen(true)}
+        >
+          <Plus color={Colors.white} size="lg" />
+        </TouchableOpacity>
+      )}
 
-        {isPostComposerOpen && (
-          <PostComposer onPost={doCloseAndRefresh} onCancel={doCloseComposer} />
-        )}
-      </BottomSheetModalProvider>
+      {isPostComposerOpen && <PostComposer onPost={doCloseAndRefresh} onCancel={doCloseComposer} />}
     </SafeAreaView>
   );
 });

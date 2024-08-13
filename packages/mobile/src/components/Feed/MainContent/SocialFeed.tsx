@@ -14,6 +14,7 @@ import { Text } from '../../ui/Text/Text';
 import { ListRenderItemInfo } from 'react-native';
 import { PostReactionModal, ReactionModalMethods } from '../Interacts/Reactions/PostReactionModal';
 import { ShareContext, ShareModal, ShareModalMethods } from '../Interacts/Share/ShareModal';
+import { PostActionMethods, PostActionProps, PostModalAction } from '../Interacts/PostActionModal';
 
 const PAGE_SIZE = 10;
 
@@ -45,6 +46,7 @@ const SocialFeedMainContent = memo(() => {
   const commentRef = useRef<CommentModalMethods>(null);
   const reactionRef = useRef<ReactionModalMethods>(null);
   const shareRef = useRef<ShareModalMethods>(null);
+  const postActionRef = useRef<PostActionMethods>(null);
 
   const onSharePress = useCallback((context: ShareContext) => {
     shareRef.current?.setShareContext(context);
@@ -56,6 +58,10 @@ const SocialFeedMainContent = memo(() => {
 
   const onReactionPress = useCallback((context: ReactionContext) => {
     reactionRef.current?.setContext(context);
+  }, []);
+
+  const onMorePress = useCallback((context: PostActionProps) => {
+    postActionRef.current?.setContext(context);
   }, []);
 
   const onRefresh = useCallback(async () => {
@@ -92,9 +98,10 @@ const SocialFeedMainContent = memo(() => {
         onCommentPress={onCommentPress}
         onReactionPress={onReactionPress}
         onSharePress={onSharePress}
+        onMorePress={onMorePress}
       />
     ),
-    [onCommentPress, onReactionPress, onSharePress]
+    [onCommentPress, onMorePress, onReactionPress, onSharePress]
   );
 
   if (postsLoading) {
@@ -118,6 +125,7 @@ const SocialFeedMainContent = memo(() => {
       <CommentsModal ref={commentRef} />
       <PostReactionModal ref={reactionRef} />
       <ShareModal ref={shareRef} />
+      <PostModalAction ref={postActionRef} />
     </>
   );
 });

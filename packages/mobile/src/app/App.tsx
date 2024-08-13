@@ -44,6 +44,7 @@ import { ChatStack } from './ChatStack';
 import { ProfileStack } from './ProfileStack';
 import BootSplash from 'react-native-bootsplash';
 import BubbleColorProvider from '../components/BubbleContext/BubbleContext';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -178,56 +179,58 @@ const TabStack = memo(() => {
   // TODO: Hide seems slow for the chat-page.. While actually it's the ChatScreen being slow in detecting it's correct size
 
   return (
-    <TabBottom.Navigator
-      screenOptions={{
-        headerShown: false,
-        tabBarInactiveTintColor: isDarkMode ? Colors.white : Colors.black,
-        tabBarActiveTintColor: isDarkMode ? Colors.white : Colors.black,
-        tabBarActiveBackgroundColor: isDarkMode ? Colors.indigo[700] : Colors.indigo[200],
-        tabBarShowLabel: false,
-        tabBarHideOnKeyboard: true,
-        tabBarStyle: {
-          backgroundColor: isDarkMode ? Colors.indigo[900] : Colors.indigo[100],
-        },
-      }}
-      initialRouteName="Chat"
-    >
-      <TabBottom.Screen
-        name="Home"
-        component={HomePage}
-        options={{
-          tabBarIcon: TabHouseIcon,
-        }}
-      />
-      <TabBottom.Screen
-        name="Feed"
-        component={FeedPage}
-        options={{
-          tabBarIcon: TabFeedIcon,
-          // lazy: false,
-        }}
-      />
-      <TabBottom.Screen
-        name="Chat"
-        component={ChatStack}
-        options={{
-          tabBarIcon: TabChatIcon,
+    <BottomSheetModalProvider>
+      <TabBottom.Navigator
+        screenOptions={{
           headerShown: false,
-          tabBarStyle: hide
-            ? Platform.OS === 'android'
-              ? { height: 0, overflow: 'hidden', opacity: 0 }
-              : { display: 'none' }
-            : { backgroundColor: isDarkMode ? Colors.indigo[900] : Colors.indigo[100] },
+          tabBarInactiveTintColor: isDarkMode ? Colors.white : Colors.black,
+          tabBarActiveTintColor: isDarkMode ? Colors.white : Colors.black,
+          tabBarActiveBackgroundColor: isDarkMode ? Colors.indigo[700] : Colors.indigo[200],
+          tabBarShowLabel: false,
+          tabBarHideOnKeyboard: true,
+          tabBarStyle: {
+            backgroundColor: isDarkMode ? Colors.indigo[900] : Colors.indigo[100],
+          },
         }}
-      />
-      <TabBottom.Screen
-        name="Profile"
-        component={ProfileStack}
-        options={{
-          tabBarIcon: TabMenuIcon,
-        }}
-      />
-    </TabBottom.Navigator>
+        initialRouteName="Chat"
+      >
+        <TabBottom.Screen
+          name="Home"
+          component={HomePage}
+          options={{
+            tabBarIcon: TabHouseIcon,
+          }}
+        />
+        <TabBottom.Screen
+          name="Feed"
+          component={FeedPage}
+          options={{
+            tabBarIcon: TabFeedIcon,
+            // lazy: false,
+          }}
+        />
+        <TabBottom.Screen
+          name="Chat"
+          component={ChatStack}
+          options={{
+            tabBarIcon: TabChatIcon,
+            headerShown: false,
+            tabBarStyle: hide
+              ? Platform.OS === 'android'
+                ? { height: 0, overflow: 'hidden', opacity: 0 }
+                : { display: 'none' }
+              : { backgroundColor: isDarkMode ? Colors.indigo[900] : Colors.indigo[100] },
+          }}
+        />
+        <TabBottom.Screen
+          name="Profile"
+          component={ProfileStack}
+          options={{
+            tabBarIcon: TabMenuIcon,
+          }}
+        />
+      </TabBottom.Navigator>
+    </BottomSheetModalProvider>
   );
 });
 

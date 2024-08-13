@@ -1,0 +1,75 @@
+import { useState } from 'react';
+import { useManagePost } from '../../../hooks/feed/post/useManagePost';
+import { useChannel } from '../../../hooks/feed/channels/useChannel';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { PostContent } from '@youfoundation/js-lib/public';
+import { ActionButton, ActionGroupProps } from '../Interacts/PostActionModal';
+import { Copy, Pencil, Trash } from '../../ui/Icons/icons';
+import { t } from 'feed-app-common';
+import { openURL } from '../../../utils/utils';
+import { ErrorNotification } from '../../ui/Alert/ErrorNotification';
+
+export const OwnerActions = ({ postFile }: { postFile: HomebaseFile<PostContent> }) => {
+  const postContent = postFile.fileMetadata.appData.content;
+
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const { mutateAsync: removePost, error: removePostError } = useManagePost().remove;
+  const { data: channel } = useChannel({ channelId: postContent.channelId }).fetch;
+  const options: (ActionGroupProps | undefined)[] = postFile.fileId
+    ? [
+        {
+          icon: <Pencil />,
+          label: t(postContent.type === 'Article' ? 'Edit Article' : 'Edit post'),
+          onPress: () => {
+            if (postContent.type === 'Article') {
+              const targetUrl = `/apps/feed/edit/${
+                channel?.fileMetadata.appData.content.slug || channel?.fileMetadata.appData.uniqueId
+              }/${postContent.id}`;
+              openURL(targetUrl);
+            } else {
+              setIsEditOpen(true);
+            }
+          },
+        },
+        postContent.type === 'Article'
+          ? {
+              icon: <Copy />,
+              label: t('Duplicate Article'),
+              //   href: `/apps/feed/duplicate/${
+              //     channel?.fileMetadata.appData.content.slug || channel?.fileMetadata.appData.uniqueId
+              //   }/${postContent.id}`,
+              onPress: () => {
+                // openURL(`/apps/feed/duplicate/${channel?.fileMetadata.appData.content.slug || channel?.fileMetadata.appData.uniqueId}/${postContent.id}`);
+              },
+            }
+          : undefined,
+        {
+          icon: <Trash />,
+          label: t(postContent.type === 'Article' ? 'Remove Article' : 'Remove post'),
+          confirmOptions: {
+            title: `${t('Remove')} "${postContent.caption.substring(0, 50) || t('Untitled')}"`,
+            buttonText: 'Permanently remove',
+            body: t('Are you sure you want to remove this post? This action cannot be undone.'),
+          },
+          onPress: async () => {
+            await removePost({
+              channelId: postContent.channelId,
+              postFile,
+            });
+
+            return false;
+          },
+        },
+      ]
+    : [];
+
+  return (
+    <>
+      <ErrorNotification error={removePostError} />
+      {options.map((option, index) => {
+        if (!option) return null;
+        return <ActionButton key={index} {...option} />;
+      })}
+    </>
+  );
+};

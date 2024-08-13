@@ -1217,3 +1217,35 @@ export const ShareUpArrow = (props: IconProps) => {
     </Svg>
   );
 };
+
+export const Flag = (props: IconProps) => {
+  const { isDarkMode } = useDarkMode();
+  return (
+    <Svg
+      {...getSize(props.size || 'md')}
+      color={props.color || (isDarkMode ? 'white' : 'black')}
+      viewBox="0 0 448 512"
+    >
+      <Path
+        fill="currentColor"
+        d="M64 32C64 14.3 49.7 0 32 0S0 14.3 0 32L0 64 0 368 0 480c0 17.7 14.3 32 32 32s32-14.3 32-32l0-128 64.3-16.1c41.1-10.3 84.6-5.5 122.5 13.4c44.2 22.1 95.5 24.8 141.7 7.4l34.7-13c12.5-4.7 20.8-16.6 20.8-30l0-247.7c0-23-24.2-38-44.8-27.7l-9.6 4.8c-46.3 23.2-100.8 23.2-147.1 0c-35.1-17.6-75.4-22-113.5-12.5L64 48l0-16z"
+      />
+    </Svg>
+  );
+};
+
+export const Block = (props: IconProps) => {
+  const { isDarkMode } = useDarkMode();
+  return (
+    <Svg
+      {...getSize(props.size || 'md')}
+      color={props.color || (isDarkMode ? 'white' : 'black')}
+      viewBox="0 0 512 512"
+    >
+      <Path
+        fill="currentColor"
+        d="M367.2 412.5L99.5 144.8C77.1 176.1 64 214.5 64 256c0 106 86 192 192 192c41.5 0 79.9-13.1 111.2-35.5zm45.3-45.3C434.9 335.9 448 297.5 448 256c0-106-86-192-192-192c-41.5 0-79.9 13.1-111.2 35.5L412.5 367.2zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256z"
+      />
+    </Svg>
+  );
+};
