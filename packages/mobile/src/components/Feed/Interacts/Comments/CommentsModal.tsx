@@ -54,12 +54,18 @@ export const CommentsModal = memo(
     const renderFooter = useCallback(
       (props: BottomSheetFooterProps) => {
         return (
-          <BottomSheetFooter {...props} bottomInset={bottom}>
+          <BottomSheetFooter
+            {...props}
+            bottomInset={bottom}
+            style={{
+              backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
+            }}
+          >
             <CommentComposer context={context as ReactionContext} canReact={context} />
           </BottomSheetFooter>
         );
       },
-      [bottom, context]
+      [bottom, context, isDarkMode]
     );
 
     return (
