@@ -5,16 +5,23 @@ import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { PostContent } from '@youfoundation/js-lib/public';
 import { ActionButton, ActionGroupProps } from '../Interacts/PostActionModal';
 import { Copy, Pencil, Trash } from '../../ui/Icons/icons';
-import { t } from 'feed-app-common';
+import { t, useDotYouClientContext } from 'feed-app-common';
 import { openURL } from '../../../utils/utils';
 import { ErrorNotification } from '../../ui/Alert/ErrorNotification';
 
-export const OwnerActions = ({ postFile }: { postFile: HomebaseFile<PostContent> }) => {
+export const OwnerActions = ({
+  postFile,
+  onClose,
+}: {
+  postFile: HomebaseFile<PostContent>;
+  onClose?: () => void;
+}) => {
   const postContent = postFile.fileMetadata.appData.content;
 
   const [isEditOpen, setIsEditOpen] = useState(false);
   const { mutateAsync: removePost, error: removePostError } = useManagePost().remove;
   const { data: channel } = useChannel({ channelId: postContent.channelId }).fetch;
+  const host = useDotYouClientContext().getEndpoint();
   const options: (ActionGroupProps | undefined)[] = postFile.fileId
     ? [
         {
@@ -29,6 +36,7 @@ export const OwnerActions = ({ postFile }: { postFile: HomebaseFile<PostContent>
             } else {
               setIsEditOpen(true);
             }
+            onClose?.();
           },
         },
         postContent.type === 'Article'
@@ -39,7 +47,10 @@ export const OwnerActions = ({ postFile }: { postFile: HomebaseFile<PostContent>
               //     channel?.fileMetadata.appData.content.slug || channel?.fileMetadata.appData.uniqueId
               //   }/${postContent.id}`,
               onPress: () => {
-                // openURL(`/apps/feed/duplicate/${channel?.fileMetadata.appData.content.slug || channel?.fileMetadata.appData.uniqueId}/${postContent.id}`);
+                openURL(
+                  `${host}/apps/feed/duplicate/${channel?.fileMetadata.appData.content.slug || channel?.fileMetadata.appData.uniqueId}/${postContent.id}`
+                );
+                onClose?.();
               },
             }
           : undefined,
@@ -57,7 +68,7 @@ export const OwnerActions = ({ postFile }: { postFile: HomebaseFile<PostContent>
               postFile,
             });
 
-            return false;
+            onClose?.();
           },
         },
       ]

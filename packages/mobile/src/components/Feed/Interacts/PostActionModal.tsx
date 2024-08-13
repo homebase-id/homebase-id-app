@@ -47,16 +47,14 @@ export const PostModalAction = forwardRef((_undefined, ref: Ref<PostActionMethod
         setContext(context);
         bottomSheetRef.current?.present();
       },
-      dismiss: () => {
-        onClose();
-        bottomSheetRef.current?.dismiss();
-      },
+      dismiss: onClose,
     }),
     []
   );
 
   const onClose = () => {
     setContext(undefined);
+    bottomSheetRef.current?.dismiss();
   };
 
   return (
@@ -82,11 +80,19 @@ export const PostModalAction = forwardRef((_undefined, ref: Ref<PostActionMethod
       >
         {context ? (
           context.isGroupPost ? (
-            <GroupChannelActions postFile={context.postFile} odinId={context.odinId} />
+            <GroupChannelActions
+              postFile={context.postFile}
+              odinId={context.odinId}
+              onClose={onClose}
+            />
           ) : !context.odinId || context.isAuthor ? (
-            <OwnerActions postFile={context.postFile} />
+            <OwnerActions postFile={context.postFile} onClose={onClose} />
           ) : context.odinId ? (
-            <ExternalActions odinId={context.odinId} postFile={context.postFile} />
+            <ExternalActions
+              odinId={context.odinId}
+              postFile={context.postFile}
+              onClose={onClose}
+            />
           ) : null
         ) : null}
       </View>
@@ -109,9 +115,11 @@ export type ActionGroupProps = {
 const ExternalActions = ({
   odinId,
   postFile,
+  onClose,
 }: {
   odinId: string;
   postFile: HomebaseFile<PostContent>;
+  onClose?: () => void;
 }) => {
   const identity = useDotYouClientContext().getIdentity();
   const {
@@ -124,13 +132,17 @@ const ExternalActions = ({
     {
       icon: <Users />,
       label: `${t('Follow settings')}`,
-      onPress: () => openURL(`${host}/owner/connections/${odinId}/follow-settings`),
+      onPress: () => {
+        openURL(`${host}/owner/connections/${odinId}/follow-settings`);
+        onClose?.();
+      },
     },
     {
       icon: <Times />,
       label: `${t('Remove this post from my feed')}`,
       onPress: () => {
         removeFromMyFeed({ postFile });
+        onClose?.();
       },
     },
     {
@@ -139,6 +151,7 @@ const ExternalActions = ({
       onPress: async () => {
         const reportUrl = await getReportContentUrl();
         openURL(reportUrl);
+        onClose?.();
       },
     },
     {
@@ -146,6 +159,7 @@ const ExternalActions = ({
       label: `${t('Block this user')}`,
       onPress: () => {
         openURL(`${host}/owner/connections/${odinId}/block`);
+        onClose?.();
       },
     },
   ];
@@ -164,6 +178,7 @@ const GroupChannelActions = ({
   channelLink,
   channel,
   postFile,
+  onClose,
 }: {
   odinId?: string;
   channelLink?: string;
@@ -171,6 +186,7 @@ const GroupChannelActions = ({
     | HomebaseFile<ChannelDefinitionVm | ChannelDefinition>
     | NewHomebaseFile<ChannelDefinitionVm | ChannelDefinition>;
   postFile: HomebaseFile<PostContent>;
+  onClose?: () => void;
 }) => {
   const identity = useDotYouClientContext().getIdentity();
   const isAuthor = postFile.fileMetadata.appData.content.authorOdinId === identity;
@@ -187,7 +203,10 @@ const GroupChannelActions = ({
     options.push({
       icon: <ChainLink />,
       label: `${t('Go to collaborative channel')}`,
-      onPress: () => openURL(channelLink),
+      onPress: () => {
+        openURL(channelLink);
+        onClose?.();
+      },
     });
   }
   options.push({
@@ -195,6 +214,7 @@ const GroupChannelActions = ({
     label: `${t('Remove this post from my feed')}`,
     onPress: () => {
       removeFromMyFeed({ postFile });
+      onClose?.();
     },
   });
   if (!isAuthor) {
@@ -204,6 +224,7 @@ const GroupChannelActions = ({
       onPress: async () => {
         const reportUrl = await getReportContentUrl();
         openURL(reportUrl);
+        onClose?.();
       },
     });
   }
@@ -228,8 +249,7 @@ const GroupChannelActions = ({
           channelId: postFile.fileMetadata.appData.content.channelId,
           postFile,
         });
-
-        return false;
+        onClose?.();
       },
     });
   }
