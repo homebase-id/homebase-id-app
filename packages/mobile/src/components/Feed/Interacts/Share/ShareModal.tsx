@@ -312,9 +312,10 @@ export const ShareModal = memo(
                 flexDirection: 'row',
                 justifyContent: 'flex-end',
                 alignItems: 'center',
+                paddingBottom: bottom,
               }}
             >
-              <View style={styles.namesContainer}>
+              <View style={[styles.namesContainer]}>
                 {selectedConversation.map((group) => {
                   return (
                     <Text
@@ -378,7 +379,7 @@ export const ShareModal = memo(
         }
         return renderAppFooter(props);
       },
-      [isDarkMode, onShare, renderAppFooter, selectedContact, selectedConversation]
+      [bottom, isDarkMode, onShare, renderAppFooter, selectedContact, selectedConversation]
     );
 
     return (
