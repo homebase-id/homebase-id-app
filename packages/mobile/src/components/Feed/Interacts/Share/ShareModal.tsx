@@ -279,7 +279,6 @@ export const ShareModal = memo(
                 flexDirection: 'row',
                 borderTopColor: isDarkMode ? Colors.gray[800] : Colors.gray[100],
                 borderTopWidth: 2,
-                elevation: 10,
                 paddingBottom: bottom,
               }}
               keyExtractor={(item) => item.title}
@@ -298,7 +297,7 @@ export const ShareModal = memo(
           </BottomSheetFooter>
         );
       },
-      [isDarkMode, socialOptions]
+      [bottom, isDarkMode, socialOptions]
     );
 
     const renderFooter = useCallback(
