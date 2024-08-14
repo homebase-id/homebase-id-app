@@ -132,13 +132,23 @@ export const ChatDetail = memo(
     const { isDarkMode } = useDarkMode();
     const identity = useAuth().getIdentity();
 
-    // We will fetch the draft message from the cache only once
-    const { mutate: onInputTextChanged } = useDraftMessage(conversationId).set;
     const textRef = useRef<TextInput>(null);
 
     const [draftMessage, setdraftMessage] = useState<string | undefined>();
 
-    const { getDraftMessage } = useDraftMessage(conversationId);
+    const _doSend = useCallback(
+      (message: ChatMessageIMessage[]) => {
+        doSend(message);
+        setdraftMessage(undefined);
+      },
+      [doSend]
+    );
+
+    // We will fetch the draft message from the cache only once
+    const {
+      getDraftMessage,
+      set: { mutate: onInputTextChanged },
+    } = useDraftMessage(conversationId);
 
     // Fetch draftmessage only once when the component mounts
     useEffect(() => {
@@ -669,7 +679,7 @@ export const ChatDetail = memo(
       <SafeAreaView>
         <GiftedChat<ChatMessageIMessage>
           messages={messages}
-          onSend={doSend}
+          onSend={_doSend}
           locale={locale}
           textInputRef={textRef}
           onInputTextChanged={onTextInputChanged}
