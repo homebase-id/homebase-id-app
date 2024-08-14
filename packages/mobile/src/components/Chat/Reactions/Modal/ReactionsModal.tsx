@@ -1,6 +1,6 @@
 import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { forwardRef, memo } from 'react';
-import { Text, View } from 'react-native';
+import { ActivityIndicator, Text, View } from 'react-native';
 import { Colors } from '../../../../app/Colors';
 import { useDarkMode } from '../../../../hooks/useDarkMode';
 
@@ -19,7 +19,7 @@ export const ReactionsModal = memo(
       ref: React.Ref<BottomSheetModalMethods>
     ) => {
       const { isDarkMode } = useDarkMode();
-      const { data: reactions } = useChatReaction({
+      const { data: reactions, isLoading } = useChatReaction({
         messageId: message?.fileMetadata.appData.uniqueId,
         conversationId: message?.fileMetadata.appData.groupId,
       }).get;
@@ -56,15 +56,26 @@ export const ReactionsModal = memo(
             >
               Reactions
             </Text>
-            <BottomSheetScrollView>
-              {reactions?.map((prop) => (
-                <ReactionTile
-                  key={prop.fileId}
-                  reaction={prop.fileMetadata.appData.content.message}
-                  authorOdinId={prop.fileMetadata.senderOdinId}
-                />
-              ))}
-            </BottomSheetScrollView>
+            {isLoading ? (
+              <ActivityIndicator
+                size={'large'}
+                style={{
+                  flex: 1,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              />
+            ) : (
+              <BottomSheetScrollView>
+                {reactions?.map((prop) => (
+                  <ReactionTile
+                    key={prop.fileId}
+                    reaction={prop.fileMetadata.appData.content.message}
+                    authorOdinId={prop.fileMetadata.senderOdinId}
+                  />
+                ))}
+              </BottomSheetScrollView>
+            )}
           </View>
         </BottomSheetModal>
       );

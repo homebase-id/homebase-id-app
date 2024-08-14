@@ -9,11 +9,12 @@ import { memo } from 'react';
 import { IconButton } from '../../Chat/Chat-app-bar';
 import { View } from 'react-native';
 import { OpenHeart, Comment, ShareNode } from '../../ui/Icons/icons';
-import { CanReactInfo, useCanReact } from '../../../hooks/reactions';
+import { CanReactInfo, useCanReact, useReaction } from '../../../hooks/reactions';
 import { useDotYouClientContext } from 'feed-app-common';
 import { EmojiSummary } from './EmojiSummary';
 import { CommentTeaserList } from './CommentsTeaserList';
 import { ShareContext } from './Share/ShareModal';
+import { ErrorNotification } from '../../ui/Alert/ErrorNotification';
 
 export const PostInteracts = memo(
   ({
@@ -46,6 +47,11 @@ export const PostInteracts = memo(
       isOwner: false,
     });
 
+    const {
+      saveEmoji: { mutate: postEmoji, error: postEmojiError },
+      // removeEmoji: { mutate: removeEmoji, error: removeEmojiError },
+    } = useReaction();
+
     if (!postFile.fileMetadata.globalTransitId || !postFile.fileId) return null;
 
     const reactionContext: ReactionContext = {
@@ -57,6 +63,15 @@ export const PostInteracts = memo(
         isEncrypted: postFile.fileMetadata.isEncrypted || false,
       },
     };
+
+    const onLike = () =>
+      postEmoji({
+        emojiData: {
+          authorOdinId: owner || '',
+          body: '❤️',
+        },
+        context: reactionContext,
+      });
 
     const onCommentPressHandler = () => {
       const context: ReactionContext & CanReactInfo = {
@@ -86,7 +101,8 @@ export const PostInteracts = memo(
             alignItems: 'center',
           }}
         >
-          {!postDisabledEmoji && <IconButton icon={<OpenHeart />} />}
+          {!postDisabledEmoji && <IconButton icon={<OpenHeart />} onPress={onLike} />}
+          <ErrorNotification error={postEmojiError} />
           <EmojiSummary
             context={reactionContext}
             onReactionPress={() => onReactionPress?.(reactionContext)}
