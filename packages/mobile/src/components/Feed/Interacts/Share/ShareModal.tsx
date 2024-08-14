@@ -17,6 +17,7 @@ import React, {
 import { Backdrop } from '../../../ui/Modal/Backdrop';
 import { Text } from '../../../ui/Text/Text';
 import {
+  Linking,
   Platform,
   SectionListData,
   SectionListRenderItemInfo,
@@ -52,7 +53,7 @@ import {
 } from '../../../../provider/chat/ConversationProvider';
 import { ListHeaderComponent, maxConnectionsForward } from '../../../Chat/Chat-Forward';
 import { ChatStackParamList } from '../../../../app/ChatStack';
-import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { Link, NavigationProp, useNavigation } from '@react-navigation/native';
 import { t, useAllConnections } from 'feed-app-common';
 import { useConversation } from '../../../../hooks/chat/useConversation';
 import { useChatMessage } from '../../../../hooks/chat/useChatMessage';
@@ -205,16 +206,17 @@ export const ShareModal = memo(
           title: 'Whatsapp',
           icon: <WhatsApp size={'xl'} />,
           onPress: () => {
-            openURL(`whatsapp://send?text=${context?.title || ''}${context?.href}`);
+            Linking.openURL(`whatsapp://send?text=${context?.title || ''}${context?.href}`);
           },
         },
-        {
-          title: 'Signal',
-          icon: <SignalMessenger size={'xl'} />,
-          onPress: () => {
-            openURL(`sgnl://send?text=${context?.title || ''}${context?.href}`);
-          },
-        },
+        //NOTE: Signal does not support url scheme atm.
+        // {
+        //   title: 'Signal',
+        //   icon: <SignalMessenger size={'xl'} />,
+        //   onPress: () => {
+        //     Linking.openURL(`sgnl://send?text=${context?.title || ''}${context?.href}`);
+        //   },
+        // },
         {
           title: 'Facebook',
           icon: <Facebook size={'xl'} />,
