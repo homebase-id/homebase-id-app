@@ -97,7 +97,11 @@ export const Comment = ({ context, canReact, commentData, onReply, isThread }: C
           height: 36,
         }}
       />
-      <View>
+      <View
+        style={{
+          flex: 1,
+        }}
+      >
         <Text
           style={{
             fontSize: 16,
@@ -108,7 +112,13 @@ export const Comment = ({ context, canReact, commentData, onReply, isThread }: C
         >
           <AuthorName odinId={authorOdinId} />
         </Text>
-        <Text>{commentContent.body}</Text>
+        <Text
+          style={{
+            flex: 1,
+          }}
+        >
+          {commentContent.body}
+        </Text>
       </View>
     </View>
   );

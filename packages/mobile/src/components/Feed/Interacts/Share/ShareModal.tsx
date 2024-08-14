@@ -36,7 +36,6 @@ import {
   Reddit,
   SendChat,
   ShareUpArrow,
-  SignalMessenger,
   WhatsApp,
   XTwitter,
 } from '../../../ui/Icons/icons';
@@ -53,7 +52,7 @@ import {
 } from '../../../../provider/chat/ConversationProvider';
 import { ListHeaderComponent, maxConnectionsForward } from '../../../Chat/Chat-Forward';
 import { ChatStackParamList } from '../../../../app/ChatStack';
-import { Link, NavigationProp, useNavigation } from '@react-navigation/native';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { t, useAllConnections } from 'feed-app-common';
 import { useConversation } from '../../../../hooks/chat/useConversation';
 import { useChatMessage } from '../../../../hooks/chat/useChatMessage';
