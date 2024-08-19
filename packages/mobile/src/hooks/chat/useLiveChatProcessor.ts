@@ -171,7 +171,8 @@ const useChatWebsocket = (isEnabled: boolean) => {
 
     if (
       (notification.notificationType === 'fileAdded' ||
-        notification.notificationType === 'fileModified') &&
+        notification.notificationType === 'fileModified' ||
+        notification.notificationType === 'statisticsChanged') &&
       stringGuidsEqual(notification.targetDrive?.alias, ChatDrive.alias) &&
       stringGuidsEqual(notification.targetDrive?.type, ChatDrive.type)
     ) {
@@ -280,6 +281,25 @@ const useChatWebsocket = (isEnabled: boolean) => {
       }
       incrementAppIdNotificationCount(queryClient, clientNotification.options.appId);
     }
+
+    if (
+      notification.notificationType === 'reactionContentAdded' ||
+      notification.notificationType === 'reactionContentDeleted'
+    ) {
+      if (notification.notificationType === 'reactionContentAdded') {
+        insertNewReaction(
+          queryClient,
+          notification.fileId.fileId,
+          notification as ReactionNotification
+        );
+      } else if (notification.notificationType === 'reactionContentDeleted') {
+        removeReaction(
+          queryClient,
+          notification.fileId.fileId,
+          notification as ReactionNotification
+        );
+      }
+    }
   }, []);
 
   const chatMessagesQueueTunnel = useRef<HomebaseFile<ChatMessage>[]>([]);
@@ -324,7 +344,14 @@ const useChatWebsocket = (isEnabled: boolean) => {
 
   return useNotificationSubscriber(
     isEnabled ? handler : undefined,
-    ['fileAdded', 'fileModified', 'appNotificationAdded'],
+    [
+      'fileAdded',
+      'fileModified',
+      'reactionContentAdded',
+      'reactionContentDeleted',
+      'statisticsChanged',
+      'appNotificationAdded',
+    ],
     [ChatDrive],
     () => {
       console.log('ChatWebsocket connected');

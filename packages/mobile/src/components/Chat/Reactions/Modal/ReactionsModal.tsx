@@ -11,8 +11,7 @@ import { useDarkMode } from '../../../../hooks/useDarkMode';
 
 import { ChatMessageIMessage } from '../../ChatDetail';
 import { useChatReaction } from '../../../../hooks/chat/useChatReaction';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
-import { ChatReaction } from '../../../../provider/chat/ChatReactionProvider';
+import { ReactionFile } from '@youfoundation/js-lib/core';
 import { Avatar, OwnerAvatar } from '../../../ui/Avatars/Avatar';
 import { AuthorName } from '../../../ui/Name';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
@@ -24,8 +23,8 @@ export const ReactionsModal = forwardRef(
   ) => {
     const { isDarkMode } = useDarkMode();
     const { data: reactions } = useChatReaction({
-      messageId: message?.fileMetadata.appData.uniqueId,
-      conversationId: message?.fileMetadata.appData.groupId,
+      messageFileId: message?.fileId,
+      messageGlobalTransitId: message?.fileMetadata.globalTransitId,
     }).get;
 
     const renderBackdrop = useCallback(
@@ -76,9 +75,9 @@ export const ReactionsModal = forwardRef(
   }
 );
 
-const ReactionTile = (prop: HomebaseFile<ChatReaction>) => {
-  const reaction = prop.fileMetadata.appData.content.message;
-  const senderOdinId = prop.fileMetadata.senderOdinId;
+const ReactionTile = (prop: ReactionFile) => {
+  const reaction = prop.body;
+  const senderOdinId = prop.authorOdinId;
   const { isDarkMode } = useDarkMode();
   return (
     <View

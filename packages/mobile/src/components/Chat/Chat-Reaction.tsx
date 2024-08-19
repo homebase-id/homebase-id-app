@@ -1,5 +1,5 @@
 import { StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native';
-import { memo, useCallback, useEffect, useMemo } from 'react';
+import { memo, useCallback, useEffect } from 'react';
 import { Portal } from 'react-native-portalize';
 
 import Animated, {
@@ -11,12 +11,13 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useChatReaction } from '../../hooks/chat/useChatReaction';
 import { useConversation } from '../../hooks/chat/useConversation';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile, ReactionFile } from '@youfoundation/js-lib/core';
 import { ChatMessage } from '../../provider/chat/ChatProvider';
 import { Colors } from '../../app/Colors';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { ErrorNotification } from '../ui/Alert/ErrorNotification';
 import { SelectedMessageState } from '../../pages/chat/chat-page';
+import { useDotYouClientContext } from 'feed-app-common';
 
 const ChatReaction = memo(
   ({
@@ -82,16 +83,19 @@ const ChatReaction = memo(
       };
     });
 
+    const hasReactions =
+      message?.fileMetadata.reactionPreview?.reactions &&
+      Object.keys(message.fileMetadata.reactionPreview?.reactions).length;
+
     const { add, get, remove } = useChatReaction({
-      conversationId: message?.fileMetadata.appData.groupId,
-      messageId: message?.fileMetadata.appData.uniqueId,
+      messageFileId: hasReactions ? message?.fileId : undefined,
+      messageGlobalTransitId: message?.fileMetadata.globalTransitId,
     });
 
+    const identity = useDotYouClientContext().getIdentity();
     const { data: reactions } = get;
-
-    const filteredReactions = useMemo(
-      () => reactions?.filter((reaction) => reaction.fileMetadata.senderOdinId === '') || [],
-      [reactions]
+    const myReactions = reactions?.filter(
+      (reaction: ReactionFile) => reaction?.authorOdinId === identity
     );
 
     const { mutate: addReaction, error: reactionError } = add;
@@ -110,14 +114,12 @@ const ChatReaction = memo(
           return;
         } else {
           if (!conversation) return;
-          const reactionStrings = filteredReactions.map(
-            (reac) => reac.fileMetadata.appData.content.message
-          );
+          const reactionStrings = myReactions.map((reac: ReactionFile) => reac.body);
           const matchedReaction = reactionStrings.indexOf(reaction);
           if (matchedReaction !== -1) {
             removeReaction({
               conversation,
-              reaction: filteredReactions[matchedReaction],
+              reaction: myReactions[matchedReaction],
               message: message as HomebaseFile<ChatMessage>,
             });
           }
@@ -133,7 +135,7 @@ const ChatReaction = memo(
         addReaction,
         afterSendReaction,
         conversation,
-        filteredReactions,
+        myReactions,
         message,
         openEmojiPicker,
         removeReaction,
