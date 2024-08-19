@@ -1090,6 +1090,7 @@ const RenderBubble = memo(
 
 const RenderReplyMessageView = memo((props: BubbleProps<ChatMessageIMessage>) => {
   const { data: replyMessage } = useChatMessage({
+    conversationId: props.currentMessage?.fileMetadata.appData.groupId,
     messageId: props.currentMessage?.fileMetadata.appData.content.replyId,
   }).get;
   const { isDarkMode } = useDarkMode();

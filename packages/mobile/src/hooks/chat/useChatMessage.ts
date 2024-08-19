@@ -104,15 +104,15 @@ const sendMessage = async ({
             newChat.fileMetadata.appData.uniqueId
           )
             ? ({
-              ...msg,
-              fileMetadata: {
-                ...msg?.fileMetadata,
-                payloads: (msg?.fileMetadata.payloads?.map((payload) => ({
-                  ...payload,
-                  uploadProgress: { phase, progress },
-                })) || []) as NewPayloadDescriptor,
-              },
-            } as HomebaseFile<ChatMessage>)
+                ...msg,
+                fileMetadata: {
+                  ...msg?.fileMetadata,
+                  payloads: (msg?.fileMetadata.payloads?.map((payload) => ({
+                    ...payload,
+                    uploadProgress: { phase, progress },
+                  })) || []) as NewPayloadDescriptor,
+                },
+              } as HomebaseFile<ChatMessage>)
             : msg
         ),
       })),
@@ -193,11 +193,11 @@ export const getSendChatMessageMutationOptions: (queryClient: QueryClient) => Us
           previewThumbnail:
             files && files.length === 1
               ? {
-                contentType: files[0].type as string,
-                content: files[0].uri || files[0].filepath || '',
-                pixelWidth: files[0].width,
-                pixelHeight: files[0].height,
-              }
+                  contentType: files[0].type as string,
+                  content: files[0].uri || files[0].filepath || '',
+                  pixelWidth: files[0].width,
+                  pixelHeight: files[0].height,
+                }
               : undefined,
         },
         payloads: files?.map((file) => ({
@@ -205,8 +205,8 @@ export const getSendChatMessageMutationOptions: (queryClient: QueryClient) => Us
           pendingFile:
             file.filepath || file.uri
               ? (new OdinBlob((file.uri || file.filepath) as string, {
-                type: file.type || undefined,
-              }) as any as Blob)
+                  type: file.type || undefined,
+                }) as any as Blob)
               : undefined,
         })),
       },
@@ -314,16 +314,16 @@ export const getUpdateChatMessageMutationOptions: (queryClient: QueryClient) => 
   },
   {
     extistingMessages:
-    | InfiniteData<
-      {
-        searchResults: (HomebaseFile<ChatMessage> | null)[];
-        cursorState: string;
-        queryTime: number;
-        includeMetadataHeader: boolean;
-      },
-      unknown
-    >
-    | undefined;
+      | InfiniteData<
+          {
+            searchResults: (HomebaseFile<ChatMessage> | null)[];
+            cursorState: string;
+            queryTime: number;
+            includeMetadataHeader: boolean;
+          },
+          unknown
+        >
+      | undefined;
     existingMessage: HomebaseFile<ChatMessage> | undefined;
   }
 > = (queryClient) => ({
@@ -387,20 +387,43 @@ export const getUpdateChatMessageMutationOptions: (queryClient: QueryClient) => 
   },
 });
 
-export const useChatMessage = (props?: { messageId: string | undefined }) => {
+export const useChatMessage = (props?: {
+  conversationId?: string | undefined; // Optional: if we have it we can use the cache
+  messageId: string | undefined;
+}) => {
   const queryClient = useQueryClient();
   const dotYouClient = useDotYouClientContext();
   const addError = useErrors().add;
 
-  const getMessageByUniqueId = async (messageId: string) => {
-    // TODO: Improve by fetching the message from the cache on conversations first
+  const getMessageByUniqueId = async (conversationId: string | undefined, messageId: string) => {
+    const extistingMessages = conversationId
+      ? queryClient.getQueryData<
+          InfiniteData<{
+            searchResults: (HomebaseFile<ChatMessage> | null)[];
+            cursorState: string;
+            queryTime: number;
+            includeMetadataHeader: boolean;
+          }>
+        >(['chat-messages', conversationId])
+      : undefined;
+
+    if (extistingMessages) {
+      const message = extistingMessages.pages
+        .flatMap((page) => page.searchResults)
+        .find((msg) => stringGuidsEqual(msg?.fileMetadata.appData.uniqueId, messageId));
+
+      if (message) {
+        return message;
+      }
+    }
+
     return await getChatMessage(dotYouClient, messageId);
   };
 
   return {
     get: useQuery({
       queryKey: ['chat-message', props?.messageId],
-      queryFn: () => getMessageByUniqueId(props?.messageId as string),
+      queryFn: () => getMessageByUniqueId(props?.conversationId, props?.messageId as string),
       enabled: !!props?.messageId,
       refetchOnMount: false,
       refetchOnWindowFocus: false,
