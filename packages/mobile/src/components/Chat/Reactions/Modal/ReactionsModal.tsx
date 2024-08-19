@@ -67,7 +67,9 @@ export const ReactionsModal = forwardRef(
             Reactions
           </Text>
           <BottomSheetScrollView>
-            {reactions?.map((prop) => <ReactionTile key={prop.fileId} {...prop} />)}
+            {reactions?.map((prop) => (
+              <ReactionTile key={prop.authorOdinId + prop.body} {...prop} />
+            ))}
           </BottomSheetScrollView>
         </View>
       </BottomSheetModal>

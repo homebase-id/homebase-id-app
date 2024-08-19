@@ -5,6 +5,7 @@ import {
   DotYouClient,
   HomebaseFile,
   PushNotification,
+  ReactionNotification,
   TypedConnectionNotification,
   queryBatch,
   queryModified,
@@ -40,6 +41,7 @@ import { insertNewConversation } from './useConversations';
 import { useWebSocketContext } from '../../components/WebSocketContext/useWebSocketContext';
 import { insertNewConversationMetadata } from './useConversationMetadata';
 import { incrementAppIdNotificationCount } from '../notifications/usePushNotifications';
+import { insertNewReaction, removeReaction } from './useChatReaction';
 
 const MINUTE_IN_MS = 60000;
 const isDebug = false; // The babel plugin to remove console logs would remove any if they get to production

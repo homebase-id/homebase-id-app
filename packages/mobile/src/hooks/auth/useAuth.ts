@@ -49,7 +49,7 @@ export const drives = [
     t: ChatConfig.ChatDrive.type,
     n: ChatConfig.name,
     d: 'Drive which contains all the chat messages',
-    p: DrivePermissionType.Read + DrivePermissionType.Write,
+    p: DrivePermissionType.Read + DrivePermissionType.Write + DrivePermissionType.React,
   },
   {
     // Standard profile Info
@@ -107,7 +107,7 @@ const circleDrives = [
     t: ChatConfig.ChatDrive.type,
     n: ChatConfig.name,
     d: '',
-    p: DrivePermissionType.Write,
+    p: DrivePermissionType.Write + DrivePermissionType.React,
   },
 ];
 export const appName = 'Homebase - Feed & Chat';
@@ -119,7 +119,6 @@ export const useValidTokenCheck = () => {
   const { getDotYouClient, logout } = useAuth();
   const dotYouClient = getDotYouClient();
   const { data: hasValidToken, isFetchedAfterMount } = useVerifyToken(dotYouClient);
-
 
   useEffect(() => {
     if (isFetchedAfterMount && hasValidToken === false) {
@@ -188,7 +187,16 @@ export const useAuth = () => {
     setIdentity('');
 
     queryClient.removeQueries();
-  }, [getDotYouClient, identity, queryClient, setAuthToken, setIdentity, setLastLoggedOutIdentity, setPrivateKey, setSharedSecret]);
+  }, [
+    getDotYouClient,
+    identity,
+    queryClient,
+    setAuthToken,
+    setIdentity,
+    setLastLoggedOutIdentity,
+    setPrivateKey,
+    setSharedSecret,
+  ]);
 
   return {
     logout,
@@ -225,7 +233,8 @@ export const useYouAuthAuthorization = () => {
       [ALL_CONNECTIONS_CIRCLE_ID],
       uint8ArrayToBase64(stringToUint8Array(JSON.stringify(publicKeyJwk))),
       corsHost,
-      `${Platform.OS === 'ios' ? 'iOS' : Platform.OS === 'android' ? 'Android' : Platform.OS} | ${Platform.Version
+      `${Platform.OS === 'ios' ? 'iOS' : Platform.OS === 'android' ? 'Android' : Platform.OS} | ${
+        Platform.Version
       }`
     );
   }, [setPrivateKey]);

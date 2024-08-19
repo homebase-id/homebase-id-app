@@ -1,5 +1,5 @@
 import { StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native';
-import { memo, useCallback, useEffect } from 'react';
+import { memo, useCallback, useEffect, useMemo } from 'react';
 import { Portal } from 'react-native-portalize';
 
 import Animated, {
@@ -84,18 +84,19 @@ const ChatReaction = memo(
     });
 
     const hasReactions =
-      message?.fileMetadata.reactionPreview?.reactions &&
-      Object.keys(message.fileMetadata.reactionPreview?.reactions).length;
+      selectedMessage?.selectedMessage?.fileMetadata.reactionPreview?.reactions &&
+      Object.keys(selectedMessage?.selectedMessage?.fileMetadata.reactionPreview?.reactions).length;
 
     const { add, get, remove } = useChatReaction({
-      messageFileId: hasReactions ? message?.fileId : undefined,
-      messageGlobalTransitId: message?.fileMetadata.globalTransitId,
+      messageFileId: hasReactions ? selectedMessage?.selectedMessage?.fileId : undefined,
+      messageGlobalTransitId: selectedMessage?.selectedMessage?.fileMetadata.globalTransitId,
     });
 
     const identity = useDotYouClientContext().getIdentity();
     const { data: reactions } = get;
-    const myReactions = reactions?.filter(
-      (reaction: ReactionFile) => reaction?.authorOdinId === identity
+    const myReactions = useMemo(
+      () => reactions?.filter((reaction) => reaction?.authorOdinId === identity) || [],
+      [identity, reactions]
     );
 
     const { mutate: addReaction, error: reactionError } = add;
@@ -105,7 +106,7 @@ const ChatReaction = memo(
       conversationId: message?.fileMetadata.appData.groupId,
     }).single.data;
 
-    const sendReaction = useCallback(
+    const toggleReaction = useCallback(
       (reaction: string, index: number) => {
         if (!selectedMessage) {
           return;
@@ -114,20 +115,23 @@ const ChatReaction = memo(
           return;
         } else {
           if (!conversation) return;
-          const reactionStrings = myReactions.map((reac: ReactionFile) => reac.body);
-          const matchedReaction = reactionStrings.indexOf(reaction);
-          if (matchedReaction !== -1) {
+          const matchedReaction = myReactions.find(
+            (myReaction) => myReaction.body.includes(reaction) || myReaction.body === reaction
+          );
+          if (matchedReaction) {
+            console.log(matchedReaction);
             removeReaction({
               conversation,
-              reaction: myReactions[matchedReaction],
+              reaction: matchedReaction,
               message: message as HomebaseFile<ChatMessage>,
             });
+          } else {
+            addReaction({
+              conversation: conversation,
+              message: message as HomebaseFile<ChatMessage>,
+              reaction,
+            });
           }
-          addReaction({
-            conversation: conversation,
-            message: message as HomebaseFile<ChatMessage>,
-            reaction,
-          });
         }
         afterSendReaction();
       },
@@ -160,7 +164,22 @@ const ChatReaction = memo(
           ]}
         >
           {initialReactions.map((reaction, index) => (
-            <TouchableOpacity key={index} onPress={() => sendReaction(reaction, index)}>
+            <TouchableOpacity
+              key={index}
+              onPress={() => toggleReaction(reaction, index)}
+              style={
+                myReactions.some(
+                  (myReaction) => myReaction.body.includes(reaction) || myReaction.body === reaction
+                )
+                  ? {
+                      backgroundColor: isDarkMode ? Colors.slate[600] : Colors.slate[300],
+                      borderRadius: 50,
+                      margin: -5,
+                      padding: 5,
+                    }
+                  : {}
+              }
+            >
               <Animated.Text style={textStyle}>{reaction}</Animated.Text>
             </TouchableOpacity>
           ))}

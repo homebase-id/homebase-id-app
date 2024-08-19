@@ -999,7 +999,7 @@ const RenderBubble = memo(
                               marginRight: 2,
                             }}
                           >
-                            {reaction}
+                            {reaction.body}
                           </Text>
                         );
                       })}

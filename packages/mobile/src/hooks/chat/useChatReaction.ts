@@ -18,6 +18,7 @@ import { ChatDrive, UnifiedConversation } from '../../provider/chat/Conversation
 import { ChatMessage } from '../../provider/chat/ChatProvider';
 import { getSynchronousDotYouClient } from './getSynchronousDotYouClient';
 import { addError } from '../errors/useErrors';
+import { tryJsonParse } from '@youfoundation/js-lib/helpers';
 
 const addReaction = async ({
   conversation,
@@ -29,7 +30,6 @@ const addReaction = async ({
   reaction: string;
 }) => {
   const dotYouClient = await getSynchronousDotYouClient();
-
   const conversationContent = conversation.fileMetadata.appData.content;
   const identity = dotYouClient.getIdentity();
   const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
@@ -81,7 +81,7 @@ export const getAddReactionMutationOptions: (queryClient: QueryClient) => UseMut
   onError: (err) => addError(queryClient, err, t('Failed to add reaction')),
 });
 
-const removeReaction = async ({
+const removeReactionOnServer = async ({
   conversation,
   message,
   reaction,
@@ -116,7 +116,7 @@ export const getRemoveReactionMutationOptions: (queryClient: QueryClient) => Use
   }
 > = (queryClient) => ({
   mutationKey: ['remove-reaction'],
-  mutationFn: removeReaction,
+  mutationFn: removeReactionOnServer,
   onMutate: async (variables) => {
     const { message, reaction } = variables;
     const previousReactions = queryClient.getQueryData<ReactionFile[] | undefined>([
@@ -179,4 +179,67 @@ export const useChatReaction = (props?: {
     add: useMutation(getAddReactionMutationOptions(queryClient)),
     remove: useMutation(getRemoveReactionMutationOptions(queryClient)),
   };
+};
+
+export const insertNewReaction = (
+  queryClient: QueryClient,
+  messageLocalFileId: string,
+  newReaction: GroupEmojiReaction
+) => {
+  const currentReactions = queryClient.getQueryData<ReactionFile[] | undefined>([
+    'chat-reaction',
+    messageLocalFileId,
+  ]);
+
+  if (!currentReactions) {
+    queryClient.invalidateQueries({ queryKey: ['chat-reaction', messageLocalFileId] });
+    return;
+  }
+
+  const reactionAsReactionFile: ReactionFile = {
+    authorOdinId: newReaction.odinId,
+    body: tryJsonParse<{ emoji: string }>(newReaction.reactionContent).emoji,
+  };
+
+  queryClient.setQueryData<ReactionFile[]>(
+    ['chat-reaction', messageLocalFileId],
+    [
+      ...currentReactions.filter(
+        (reaction) =>
+          reaction.authorOdinId !== reactionAsReactionFile.authorOdinId ||
+          reaction.body !== reactionAsReactionFile.body
+      ),
+      reactionAsReactionFile,
+    ]
+  );
+};
+
+export const removeReaction = (
+  queryClient: QueryClient,
+  messageLocalFileId: string,
+  removedReaction: GroupEmojiReaction
+) => {
+  const currentReactions = queryClient.getQueryData<ReactionFile[] | undefined>([
+    'chat-reaction',
+    messageLocalFileId,
+  ]);
+
+  if (!currentReactions) {
+    queryClient.invalidateQueries({ queryKey: ['chat-reaction', messageLocalFileId] });
+    return;
+  }
+
+  const reactionAsReactionFile: ReactionFile = {
+    authorOdinId: removedReaction.odinId,
+    body: tryJsonParse<{ emoji: string }>(removedReaction.reactionContent).emoji,
+  };
+
+  queryClient.setQueryData<ReactionFile[]>(
+    ['chat-reaction', messageLocalFileId],
+    currentReactions.filter(
+      (reaction) =>
+        reaction.authorOdinId !== reactionAsReactionFile.authorOdinId ||
+        reaction.body !== reactionAsReactionFile.body
+    )
+  );
 };
