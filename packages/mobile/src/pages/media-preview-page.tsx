@@ -112,35 +112,46 @@ export const PreviewMedia = memo((prop: MediaProp) => {
 
       const isVideo = type?.startsWith('video') || false;
       return !isVideo ? (
-        <OdinImage
-          fileId={fileId}
-          fileKey={fileKey}
-          enableZoom={true}
-          fit="contain"
-          imageSize={{
-            width: width,
-            height: height,
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: Colors.black,
           }}
-          targetDrive={ChatDrive}
-          previewThumbnail={msg.fileMetadata.appData.previewThumbnail}
-          imageZoomProps={{
-            isSingleTapEnabled: true,
-            onSingleTap: () => {
-              setIsVisible(!isVisible);
-            },
-            onDoubleTap: (type) => {
-              if (type === ZOOM_TYPE.ZOOM_IN) {
+        >
+          <OdinImage
+            fileId={fileId}
+            fileKey={fileKey}
+            enableZoom={true}
+            fit="contain"
+            imageSize={{
+              width: width,
+              height: height,
+            }}
+            targetDrive={ChatDrive}
+            previewThumbnail={msg.fileMetadata.appData.previewThumbnail}
+            imageZoomProps={{
+              isSingleTapEnabled: true,
+              minPanPointers: 1,
+              onSingleTap: () => {
+                setIsVisible(!isVisible);
+              },
+              onDoubleTap: (type) => {
+                if (type === ZOOM_TYPE.ZOOM_IN) {
+                  setIsVisible(false);
+                }
+              },
+              onPinchStart: () => {
                 setIsVisible(false);
-              }
-            },
-            onPinchStart: () => {
-              setIsVisible(false);
-            },
-            onResetAnimationEnd: (finished) => {
-              if (finished) setIsVisible(true);
-            },
-          }}
-        />
+              },
+              onResetAnimationEnd: (finished) => {
+                if (finished) setIsVisible(true);
+              },
+              isPanEnabled: !isVisible,
+            }}
+          />
+        </View>
       ) : (
         <VideoWithLoader
           fileId={fileId}
@@ -168,7 +179,7 @@ export const PreviewMedia = memo((prop: MediaProp) => {
         height={height}
         autoPlay={false}
         data={payloads}
-        enabled={payloads?.length > 1}
+        enabled={payloads?.length > 1 && isVisible}
         scrollAnimationDuration={1000}
         onSnapToItem={(index) => {
           setCurrIndex(index);
@@ -223,10 +234,14 @@ export const PreviewMedia = memo((prop: MediaProp) => {
                       }
                       fit="cover"
                       imageSize={{
-                        width: 200,
-                        height: 200,
+                        width: 50,
+                        height: 50,
                       }}
-                      preview={false}
+                      style={{
+                        borderRadius: 10,
+                        opacity: index === currIndex ? 0.2 : 1,
+                      }}
+                      preview={true}
                       onClick={() => {
                         ref.current?.scrollTo({
                           index,

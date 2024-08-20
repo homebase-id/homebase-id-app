@@ -143,10 +143,8 @@ const ConversationTile = memo((props: ConversationTileProps) => {
                     styles.description,
                     {
                       color: isDarkMode ? Colors.white : Colors.slate[900],
+                      flex: 1,
                     },
-                    lastMessage.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus
-                      ? styles.deleted
-                      : undefined,
                   ]}
                 >
                   {isGroup ? (
@@ -160,7 +158,15 @@ const ConversationTile = memo((props: ConversationTileProps) => {
                       {': '}
                     </Text>
                   ) : null}
-                  <ChatMessageContent {...lastMessage} />
+                  <Text
+                    style={
+                      lastMessage.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus
+                        ? styles.deleted
+                        : undefined
+                    }
+                  >
+                    <ChatMessageContent {...lastMessage} />
+                  </Text>
                 </Text>
               </View>
             ) : null}

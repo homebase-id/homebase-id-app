@@ -319,7 +319,6 @@ const InnerMediaItem = ({
           }
           onLongPress={onLongPress}
           onClick={onClick}
-          sharedTransitionTag={payload.key}
         />
       </View>
     );
