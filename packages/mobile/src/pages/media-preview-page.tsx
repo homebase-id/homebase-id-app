@@ -31,7 +31,7 @@ import Clipboard from '@react-native-clipboard/clipboard';
 import Animated from 'react-native-reanimated';
 import { ZOOM_TYPE } from '@likashefqet/react-native-image-zoom';
 import ReactNativeBlobUtil from 'react-native-blob-util';
-import { copyFile, DocumentDirectoryPath, DownloadDirectoryPath } from 'react-native-fs';
+import { copyFile, DownloadDirectoryPath } from 'react-native-fs';
 
 export type MediaProp = NativeStackScreenProps<ChatStackParamList, 'PreviewMedia'>;
 
