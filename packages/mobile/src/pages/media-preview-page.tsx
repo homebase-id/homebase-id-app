@@ -16,7 +16,7 @@ import { HeaderTitle } from '@react-navigation/elements';
 import { Text } from '../components/ui/Text/Text';
 import { formatToTimeAgoWithRelativeDetail } from 'feed-app-common';
 import { IconButton } from '../components/Chat/Chat-app-bar';
-import { ShareNode } from '../components/ui/Icons/icons';
+import { Download, ShareNode } from '../components/ui/Icons/icons';
 
 import useImage from '../components/ui/OdinImage/hooks/useImage';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
@@ -26,6 +26,8 @@ import Clipboard from '@react-native-clipboard/clipboard';
 import Animated from 'react-native-reanimated';
 import { ZOOM_TYPE } from '@likashefqet/react-native-image-zoom';
 import { CarouselRenderItemInfo } from 'react-native-reanimated-carousel/lib/typescript/types';
+import ReactNativeBlobUtil from 'react-native-blob-util';
+import { copyFile, DownloadDirectoryPath } from 'react-native-fs';
 
 export type MediaProp = NativeStackScreenProps<ChatStackParamList, 'PreviewMedia'>;
 
@@ -44,6 +46,7 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
   const { height, width } = useSafeAreaFrame();
   const getImage = useImage().getFromCache;
   const [isVisible, setIsVisible] = useState(true);
+  const autoplay = payloads.length === 1 && payloads[0].contentType?.startsWith('video');
 
   const headerTitle = useCallback(() => {
     return (
@@ -75,15 +78,60 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
     );
   }, [createdAt, senderOdinId]);
 
+  const renderDownloadButton = useCallback(() => {
+    const currPayload = payloads[currIndex];
+    if (currPayload.contentType?.startsWith('video')) {
+      return;
+    }
+    const onDownload = async () => {
+      const imageData = getImage(undefined, fileId, currPayload.key, targetDrive, undefined, {
+        pixelWidth: width,
+        pixelHeight: height,
+      });
+
+      if (!imageData || !imageData.imageData) {
+        Toast.show({
+          type: 'error',
+          text1: 'Something went wrong while downloading image',
+          position: 'bottom',
+          text2: 'Click to copy the error details',
+          onPress: () => {
+            Clipboard.setString('No image present in the cache');
+          },
+        });
+        return;
+      }
+
+      if (Platform.OS === 'ios') {
+        ReactNativeBlobUtil.ios.openDocument(imageData.imageData?.url);
+      }
+      if (Platform.OS === 'android') {
+        const destination =
+          DownloadDirectoryPath +
+          '/' +
+          `Homebase-Image-${new Date().getTime()}` +
+          `.${imageData.imageData?.type?.split('/')[1]}`;
+        await copyFile(imageData.imageData?.url, destination);
+        Toast.show({
+          type: 'success',
+          text1: 'Image downloaded successfully',
+          position: 'bottom',
+        });
+      }
+    };
+    return <IconButton icon={<Download color={Colors.white} />} onPress={onDownload} />;
+  }, [currIndex, fileId, getImage, height, payloads, targetDrive, width]);
+
   useLayoutEffect(() => {
     navigation.setOptions({
       headerTitle: headerTitle,
       headerShown: isVisible,
+      headerRight: renderDownloadButton,
       headerStyle: {
         backgroundColor: 'transparent',
       },
     });
-  }, [headerTitle, isVisible, navigation]);
+  }, [headerTitle, isVisible, navigation, renderDownloadButton]);
 
   const onShare = useCallback(() => {
     const imageData = getImage(undefined, fileId, payloads[currIndex].key, targetDrive, undefined, {
@@ -105,6 +153,7 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
     Share.open({
       type: imageData?.imageData?.type,
       url: imageData?.imageData?.url,
+      saveToFiles: true,
     });
   }, [currIndex, fileId, getImage, height, payloads, targetDrive, width]);
 
@@ -162,6 +211,7 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
           targetDrive={targetDrive}
           fullscreen={true}
           previewThumbnail={previewThumbnail}
+          autoPlay={autoplay}
           imageSize={{
             width: width,
             height: height,
@@ -169,7 +219,7 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
         />
       );
     },
-    [fileId, height, isVisible, previewThumbnail, targetDrive, width]
+    [autoplay, fileId, height, isVisible, previewThumbnail, targetDrive, width]
   );
 
   const hasVideoPayload = payloads.some((item) => item.contentType?.startsWith('video'));

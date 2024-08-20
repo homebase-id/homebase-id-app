@@ -45,7 +45,6 @@ const styles = {
       marginRight: 60,
       minHeight: 20,
       justifyContent: 'flex-end',
-      overflow: 'hidden',
     },
     containerToNext: {
       borderBottomLeftRadius: 3,
@@ -78,7 +77,6 @@ const styles = {
       marginLeft: 60,
       minHeight: 20,
       justifyContent: 'flex-end',
-      overflow: 'hidden',
     },
     containerToNext: {
       borderBottomRightRadius: 3,
