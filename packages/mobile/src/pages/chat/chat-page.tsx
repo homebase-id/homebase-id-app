@@ -231,7 +231,6 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
         console.log('invite recipient');
         inviteRecipient({ conversation });
       }
-
       sendMessage({
         conversation: conversation,
         message: message[0]?.text,
