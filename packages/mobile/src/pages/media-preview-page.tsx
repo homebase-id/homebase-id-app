@@ -32,6 +32,7 @@ import Animated from 'react-native-reanimated';
 import { ZOOM_TYPE } from '@likashefqet/react-native-image-zoom';
 import ReactNativeBlobUtil from 'react-native-blob-util';
 import { copyFile, DownloadDirectoryPath } from 'react-native-fs';
+import { CameraRoll } from '@react-native-camera-roll/camera-roll';
 
 export type MediaProp = NativeStackScreenProps<ChatStackParamList, 'PreviewMedia'>;
 
@@ -98,22 +99,20 @@ export const PreviewMedia = memo((prop: MediaProp) => {
         return;
       }
 
-      if (Platform.OS === 'ios') {
-        ReactNativeBlobUtil.ios.openDocument(imageData.imageData?.url);
-      }
-      if (Platform.OS === 'android') {
-        const destination =
-          DownloadDirectoryPath +
-          '/' +
-          `Homebase-Image-${new Date().getTime()}` +
-          `.${imageData.imageData?.type?.split('/')[1]}`;
-        await copyFile(imageData.imageData?.url, destination);
+      await CameraRoll.saveAsset(imageData.imageData?.url).catch((error) => {
         Toast.show({
-          type: 'success',
-          text1: 'Image downloaded successfully',
+          type: 'error',
+          text1: 'Failed to save image',
           position: 'bottom',
+          text2: error.message,
         });
-      }
+      });
+
+      Toast.show({
+        type: 'success',
+        text1: 'Image downloaded successfully',
+        position: 'bottom',
+      });
     };
     return <IconButton icon={<Download color={Colors.white} />} onPress={onDownload} />;
   }, [currIndex, fileId, getImage, height, payloads, width]);
@@ -151,7 +150,6 @@ export const PreviewMedia = memo((prop: MediaProp) => {
     Share.open({
       type: imageData?.imageData?.type,
       url: imageData?.imageData?.url,
-      saveToFiles: true,
     });
   }, [currIndex, fileId, getImage, height, payloads, width]);
 

@@ -48,7 +48,7 @@ const ChatReaction = memo(
       let y = Math.abs(messageCordinates.y);
       let shouldAnimate = false;
       const isLessDistanceFromTop = y < 100;
-      console.log('isLessDistanceFromTop', isLessDistanceFromTop, y);
+
       const isLessDistanceFromBottom = height - y < 0;
       if (isLessDistanceFromBottom) {
         shouldAnimate = true;
