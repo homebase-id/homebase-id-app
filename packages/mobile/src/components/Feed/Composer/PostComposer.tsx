@@ -29,6 +29,7 @@ import { Text } from '../../ui/Text/Text';
 import { ActionGroup } from '../../ui/Form/ActionGroup';
 import { openURL } from '../../../utils/utils';
 import React from 'react';
+import Animated, { SlideInDown, SlideInUp, SlideOutDown } from 'react-native-reanimated';
 
 export const PostComposer = memo(
   ({ onPost, onCancel }: { onPost?: () => void; onCancel?: () => void }) => {
@@ -114,7 +115,9 @@ export const PostComposer = memo(
     return (
       <React.Fragment>
         <ErrorNotification error={error} />
-        <View
+        <Animated.View
+          entering={SlideInDown}
+          exiting={SlideOutDown}
           style={{
             position: 'absolute',
             top: 0,
@@ -256,7 +259,7 @@ export const PostComposer = memo(
               />
             </View>
           </View>
-        </View>
+        </Animated.View>
 
         {!error ? <ProgressIndicator processingProgress={processingProgress} /> : null}
       </React.Fragment>
