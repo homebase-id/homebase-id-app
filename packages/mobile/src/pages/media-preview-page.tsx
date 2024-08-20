@@ -34,6 +34,7 @@ export type MediaProp = NativeStackScreenProps<ChatStackParamList, 'PreviewMedia
 export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
   const {
     fileId,
+    globalTransitId,
     currIndex: initialIndex,
     payloads,
     senderOdinId,
@@ -84,7 +85,7 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
       return;
     }
     const onDownload = async () => {
-      const imageData = getImage(undefined, fileId, currPayload.key, targetDrive, undefined, {
+      const imageData = getImage(undefined, fileId, currPayload.key, targetDrive, globalTransitId, {
         pixelWidth: width,
         pixelHeight: height,
       });
@@ -120,7 +121,7 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
       }
     };
     return <IconButton icon={<Download color={Colors.white} />} onPress={onDownload} />;
-  }, [currIndex, fileId, getImage, height, payloads, targetDrive, width]);
+  }, [currIndex, fileId, getImage, globalTransitId, height, payloads, targetDrive, width]);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -134,10 +135,17 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
   }, [headerTitle, isVisible, navigation, renderDownloadButton]);
 
   const onShare = useCallback(() => {
-    const imageData = getImage(undefined, fileId, payloads[currIndex].key, targetDrive, undefined, {
-      pixelWidth: width,
-      pixelHeight: height,
-    });
+    const imageData = getImage(
+      undefined,
+      fileId,
+      payloads[currIndex].key,
+      targetDrive,
+      globalTransitId,
+      {
+        pixelWidth: width,
+        pixelHeight: height,
+      }
+    );
     if (!imageData) {
       Toast.show({
         type: 'error',
@@ -155,7 +163,7 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
       url: imageData?.imageData?.url,
       saveToFiles: true,
     });
-  }, [currIndex, fileId, getImage, height, payloads, targetDrive, width]);
+  }, [currIndex, fileId, getImage, globalTransitId, height, payloads, targetDrive, width]);
 
   const renderItem = useCallback(
     ({ item }: CarouselRenderItemInfo<PayloadDescriptor>) => {
