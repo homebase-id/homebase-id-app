@@ -37,7 +37,7 @@ const RecipientConnectedState = ({ recipient }: { recipient: string }) => {
   const identity = useDotYouClientContext().getIdentity();
   console.log('Error recipient connected state', isConnected);
 
-  if (isConnected || !isFetched) return null;
+  if (isConnected === null || isConnected || !isFetched) return null;
   return (
     <View
       style={{
@@ -54,7 +54,7 @@ const RecipientConnectedState = ({ recipient }: { recipient: string }) => {
           marginRight: 16,
         }}
       >
-        You can only chat with connected identites, messages will not be delivered to{' '}
+        You can only chat with connected identities, messages will not be delivered to{' '}
         <Text
           onPress={async () => {
             await openURL(`https://${recipient}`);

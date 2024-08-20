@@ -233,10 +233,14 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
                       previewThumbnail={payloads.length === 1 ? previewThumbnail : undefined}
                       fit="cover"
                       imageSize={{
-                        width: 200,
-                        height: 200,
+                        width: 50,
+                        height: 50,
                       }}
-                      preview={false}
+                      style={{
+                        borderRadius: 10,
+                        opacity: index === currIndex ? 0.2 : 1,
+                      }}
+                      preview={true}
                       onClick={() => {
                         ref.current?.scrollTo({
                           index,

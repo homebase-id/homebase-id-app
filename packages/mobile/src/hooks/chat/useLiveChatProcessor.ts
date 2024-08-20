@@ -1,8 +1,9 @@
-import { InfiniteData, QueryClient, useQuery, useQueryClient } from '@tanstack/react-query';
+import { QueryClient, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   AppNotification,
   DeletedHomebaseFile,
   DotYouClient,
+  FileQueryParams,
   HomebaseFile,
   PushNotification,
   TypedConnectionNotification,
@@ -73,71 +74,50 @@ const useInboxProcessor = (connected?: boolean) => {
 
     const processedresult = await processInbox(dotYouClient, ChatDrive, BATCH_SIZE);
 
-    isDebug && console.log('[InboxProcessor] fetching updates since', lastProcessedWithBuffer);
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
+    isDebug && console.debug('[InboxProcessor] fetching updates since', lastProcessedWithBuffer);
+    if (lastProcessedWithBuffer) {
+      const updatedMessages = await findChangesSinceTimestamp(
+        dotYouClient,
+        lastProcessedWithBuffer,
+        {
+          targetDrive: ChatDrive,
+          fileType: [CHAT_MESSAGE_FILE_TYPE],
+        }
+      );
+      isDebug && console.debug('[InboxProcessor] new messages', updatedMessages.length);
+      await processChatMessagesBatch(dotYouClient, queryClient, updatedMessages);
 
-    // If it's been processed last more than 24h ago it's better to trust on the cache invalidation
-    try {
-      if (lastProcessedWithBuffer && lastProcessedWithBuffer > yesterday.getTime()) {
-        const modifiedCursor = getQueryModifiedCursorFromTime(lastProcessedWithBuffer); // Friday, 31 May 2024 09:38:54.678
-        const batchCursor = getQueryBatchCursorFromTime(
-          new Date().getTime(),
-          lastProcessedWithBuffer
-        );
+      const updatedConversations = await findChangesSinceTimestamp(
+        dotYouClient,
+        lastProcessedWithBuffer,
+        {
+          targetDrive: ChatDrive,
+          fileType: [CHAT_CONVERSATION_FILE_TYPE],
+        }
+      );
+      isDebug && console.debug('[InboxProcessor] new conversations', updatedConversations.length);
+      await processConversationsBatch(dotYouClient, queryClient, updatedConversations);
 
-        const newData = await queryBatch(
-          dotYouClient,
-          {
-            targetDrive: ChatDrive,
-            fileType: [CHAT_MESSAGE_FILE_TYPE],
-          },
-          {
-            maxRecords: BATCH_SIZE,
-            cursorState: batchCursor,
-            includeMetadataHeader: true,
-            includeTransferHistory: true,
-          }
-        );
-
-        const modifieData = await queryModified(
-          dotYouClient,
-          {
-            targetDrive: ChatDrive,
-            fileType: [CHAT_MESSAGE_FILE_TYPE],
-          },
-          {
-            maxRecords: BATCH_SIZE,
-            cursor: modifiedCursor,
-            excludePreviewThumbnail: false,
-            includeHeaderContent: true,
-            includeTransferHistory: true,
-          }
-        );
-
-        const newMessages = modifieData.searchResults.concat(newData.searchResults);
-        isDebug && console.debug('[InboxProcessor] new messages', newMessages.length);
-        await processChatMessagesBatch(dotYouClient, queryClient, newMessages);
-        return processedresult;
-      }
-    } catch (e) {
-      console.error(e);
+      const updatedConversationMetadatas = await findChangesSinceTimestamp(
+        dotYouClient,
+        lastProcessedWithBuffer,
+        {
+          targetDrive: ChatDrive,
+          fileType: [CHAT_CONVERSATION_LOCAL_METADATA_FILE_TYPE],
+        }
+      );
+      isDebug &&
+        console.debug('[InboxProcessor] new metadata', updatedConversationMetadatas.length);
+      await processConversationsMetadataBatch(
+        dotYouClient,
+        queryClient,
+        updatedConversationMetadatas
+      );
+    } else {
+      // We have no reference to the last time we processed the inbox, so we can only invalidate all chat messages
+      queryClient.invalidateQueries({ queryKey: ['chat-messages'], exact: false });
+      queryClient.invalidateQueries({ queryKey: ['conversations'], exact: false });
     }
-
-    // We have no reference to the last time we processed the inbox, so we can only invalidate all chat messages
-    // Start by removing all but the first pages to avoid refetching all pages
-    const queries = queryClient.getQueriesData({ queryKey: ['chat-messages'], exact: false });
-    queries.forEach(([key]) => {
-      if (Object.values(key) && Object.values(key) !== null) {
-        queryClient.setQueryData(key, (data: InfiniteData<unknown, unknown>) => {
-          return {
-            pages: data?.pages?.slice(0, 1) ?? [],
-            pageParams: data?.pageParams?.slice(0, 1) || [undefined],
-          };
-        });
-      }
-    });
-    queryClient.invalidateQueries({ queryKey: ['chat-messages'], exact: false });
 
     return processedresult;
   };
@@ -163,11 +143,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
   const [chatMessagesQueue, setChatMessagesQueue] = useState<HomebaseFile<ChatMessage>[]>([]);
 
   const handler = useCallback(async (notification: TypedConnectionNotification) => {
-    isDebug &&
-      console.debug(
-        `[ChatWebsocket] Got ${notification.notificationType}`,
-        (notification as any).header?.fileId
-      );
+    isDebug && console.debug('[ChatWebsocket] Got notification', notification);
 
     if (
       (notification.notificationType === 'fileAdded' ||
@@ -324,13 +300,38 @@ const useChatWebsocket = (isEnabled: boolean) => {
 
   return useNotificationSubscriber(
     isEnabled ? handler : undefined,
-    ['fileAdded', 'fileModified', 'appNotificationAdded'],
+    ['fileAdded', 'fileModified'],
     [ChatDrive],
     () => {
-      console.log('ChatWebsocket connected');
       queryClient.invalidateQueries({ queryKey: ['process-inbox'] });
     }
   );
+};
+
+const findChangesSinceTimestamp = async (
+  dotYouClient: DotYouClient,
+  timeStamp: number,
+  params: FileQueryParams
+) => {
+  const modifiedCursor = getQueryModifiedCursorFromTime(timeStamp); // Friday, 31 May 2024 09:38:54.678
+  const batchCursor = getQueryBatchCursorFromTime(new Date().getTime(), timeStamp);
+
+  const newFiles = await queryBatch(dotYouClient, params, {
+    maxRecords: BATCH_SIZE,
+    cursorState: batchCursor,
+    includeMetadataHeader: true,
+    includeTransferHistory: true,
+  });
+
+  const modifiedFiles = await queryModified(dotYouClient, params, {
+    maxRecords: BATCH_SIZE,
+    cursor: modifiedCursor,
+    excludePreviewThumbnail: false,
+    includeHeaderContent: true,
+    includeTransferHistory: true,
+  });
+
+  return modifiedFiles.searchResults.concat(newFiles.searchResults);
 };
 
 const processChatMessagesBatch = async (
@@ -381,6 +382,64 @@ const processChatMessagesBatch = async (
         )
       ).filter(Boolean) as HomebaseFile<ChatMessage>[];
       insertNewMessagesForConversation(queryClient, updatedConversation, updatedChatMessages);
+    })
+  );
+};
+
+const processConversationsBatch = async (
+  dotYouClient: DotYouClient,
+  queryClient: QueryClient,
+  conversations: (HomebaseFile<string> | DeletedHomebaseFile<string>)[]
+) => {
+  await Promise.all(
+    conversations.map(async (conversationsDsr) => {
+      if (conversationsDsr.fileState === 'deleted') {
+        queryClient.invalidateQueries({ queryKey: ['conversations'] });
+        return;
+      }
+
+      const updatedConversation = await dsrToConversation(
+        dotYouClient,
+        conversationsDsr,
+        ChatDrive,
+        true
+      );
+
+      if (!updatedConversation) {
+        queryClient.invalidateQueries({ queryKey: ['conversations'] });
+        return;
+      }
+
+      insertNewConversation(queryClient, updatedConversation);
+    })
+  );
+};
+
+const processConversationsMetadataBatch = async (
+  dotYouClient: DotYouClient,
+  queryClient: QueryClient,
+  conversations: (HomebaseFile<string> | DeletedHomebaseFile<string>)[]
+) => {
+  await Promise.all(
+    conversations.map(async (conversationsDsr) => {
+      if (conversationsDsr.fileState === 'deleted') {
+        queryClient.invalidateQueries({ queryKey: ['conversation-metadata'], exact: false });
+        return;
+      }
+
+      const updatedMetadata = await dsrToConversationMetadata(
+        dotYouClient,
+        conversationsDsr,
+        ChatDrive,
+        true
+      );
+
+      if (!updatedMetadata) {
+        queryClient.invalidateQueries({ queryKey: ['conversation-metadata'], exact: false });
+        return;
+      }
+
+      insertNewConversationMetadata(queryClient, updatedMetadata);
     })
   );
 };
