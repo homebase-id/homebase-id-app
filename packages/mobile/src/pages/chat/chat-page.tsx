@@ -208,29 +208,30 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
 
   const doSend = useCallback(
     (message: { text: string }[]) => {
+      if (!conversation) return;
+
       if (
-        !conversation ||
-        stringGuidsEqual(route.params.convoId, ConversationWithYourselfId) ||
-        conversation?.fileMetadata.senderOdinId
+        !stringGuidsEqual(route.params.convoId, ConversationWithYourselfId) && // You can't invite yourself
+        !conversation?.fileMetadata.senderOdinId // Only the original creator can invite
       ) {
-        return;
+        const filteredRecipients = conversation.fileMetadata.appData.content.recipients.filter(
+          (recipient) => recipient !== identity
+        );
+
+        const anyRecipientMissingConversation = filteredRecipients.some((recipient) => {
+          const latestTransferStatus =
+            conversation.serverMetadata?.transferHistory?.recipients[recipient]
+              .latestTransferStatus;
+
+          if (!latestTransferStatus) return true;
+          return FailedTransferStatuses.includes(latestTransferStatus);
+        });
+        if (anyRecipientMissingConversation) {
+          console.log('invite recipient');
+          inviteRecipient({ conversation });
+        }
       }
 
-      const filteredRecipients = conversation.fileMetadata.appData.content.recipients.filter(
-        (recipient) => recipient !== identity
-      );
-
-      const anyRecipientMissingConversation = filteredRecipients.some((recipient) => {
-        const latestTransferStatus =
-          conversation.serverMetadata?.transferHistory?.recipients[recipient].latestTransferStatus;
-
-        if (!latestTransferStatus) return true;
-        return FailedTransferStatuses.includes(latestTransferStatus);
-      });
-      if (anyRecipientMissingConversation) {
-        console.log('invite recipient');
-        inviteRecipient({ conversation });
-      }
       sendMessage({
         conversation: conversation,
         message: message[0]?.text,
