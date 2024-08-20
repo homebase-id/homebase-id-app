@@ -44,6 +44,7 @@ export const PreviewMedia = memo((prop: MediaProp) => {
   const { height, width } = useSafeAreaFrame();
   const getImage = useImage().getFromCache;
   const [isVisible, setIsVisible] = useState(true);
+  const autoplay = payloads.length === 1 && payloads[0].contentType?.startsWith('video');
 
   const headerTitle = useCallback(() => {
     return (
@@ -159,6 +160,7 @@ export const PreviewMedia = memo((prop: MediaProp) => {
           targetDrive={ChatDrive}
           fullscreen={true}
           previewThumbnail={msg.fileMetadata.appData.previewThumbnail}
+          autoPlay={autoplay}
           imageSize={{
             width: width,
             height: height,
@@ -166,7 +168,7 @@ export const PreviewMedia = memo((prop: MediaProp) => {
         />
       );
     },
-    [fileId, height, isVisible, msg.fileMetadata.appData.previewThumbnail, width]
+    [autoplay, fileId, height, isVisible, msg.fileMetadata.appData.previewThumbnail, width]
   );
 
   const hasVideoPayload = payloads.some((item) => item.contentType?.startsWith('video'));

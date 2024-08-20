@@ -31,6 +31,7 @@ export const VideoWithLoader = memo(
     style,
     onLongPress,
     payload,
+    autoPlay,
   }: {
     fileId: string;
     targetDrive: TargetDrive;
@@ -43,6 +44,7 @@ export const VideoWithLoader = memo(
     onLongPress?: (e: GestureResponderEvent) => void;
     style?: ImageStyle;
     payload: PayloadDescriptor;
+    autoPlay?: boolean;
   }) => {
     const [loadVideo, setLoadVideo] = useState(true);
     const doLoadVideo = useCallback(() => setLoadVideo(true), []);
@@ -120,11 +122,23 @@ export const VideoWithLoader = memo(
                   right: 0,
                 }}
                 controls={true}
+                paused={!autoPlay}
                 resizeMode={'contain'}
                 onEnd={() => setLoadVideo(false)}
                 onError={(e) => console.log('error', e)}
               >
-                {isLoading && <ActivityIndicator size="large" color={Colors.white} />}
+                {isLoading && (
+                  <ActivityIndicator
+                    size="large"
+                    style={{
+                      flex: 1,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      zIndex: 20,
+                    }}
+                    color={Colors.white}
+                  />
+                )}
               </Video>
             ) : (
               <OdinWebVideo targetDrive={targetDrive} fileId={fileId} fileKey={payload.key} />
