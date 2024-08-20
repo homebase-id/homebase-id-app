@@ -259,12 +259,12 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
     },
     [
       conversation,
-      messages,
       route.params.convoId,
       sendMessage,
       replyMessage?.fileMetadata.appData.uniqueId,
       assets,
       linkPreviews,
+      identity,
       inviteRecipient,
     ]
   );
