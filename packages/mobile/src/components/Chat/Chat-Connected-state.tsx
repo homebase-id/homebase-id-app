@@ -35,7 +35,6 @@ export const ChatConnectedState = (conversation: HomebaseFile<UnifiedConversatio
 const RecipientConnectedState = ({ recipient }: { recipient: string }) => {
   const { data: isConnected, isFetched } = useIsConnected(recipient);
   const identity = useDotYouClientContext().getIdentity();
-  console.log('Error recipient connected state', isConnected);
 
   if (isConnected === null || isConnected || !isFetched) return null;
   return (

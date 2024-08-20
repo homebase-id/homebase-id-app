@@ -50,12 +50,15 @@ export type ChatStackParamList = {
   ShareChat: SharedItem;
   PreviewMedia: {
     fileId: string;
+    globalTransitId?: string;
     targetDrive: TargetDrive;
     payloads: PayloadDescriptor[];
     currIndex: number;
     previewThumbnail?: EmbeddedThumb;
     senderOdinId?: string;
     createdAt?: number;
+    probablyEncrypted?: boolean;
+    transitOdinId?: string;
   };
 };
 

@@ -4,10 +4,11 @@ import { memo } from 'react';
 import { calculateScaledDimensions } from '../../../utils/utils';
 import { Dimensions, View } from 'react-native';
 import { MediaGallery, MediaItem } from '../../ui/Media/MediaGallery';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
 
-type PostMediaProps = {
-  post: HomebaseFile<PostContent>;
-};
+import { ChatStackParamList } from '../../../app/ChatStack';
+
+type PostMediaProps = { post: HomebaseFile<PostContent> };
 
 export const PostMedia = memo(({ post }: PostMediaProps) => {
   const payloads = post.fileMetadata.payloads;
@@ -17,6 +18,7 @@ export const PostMedia = memo(({ post }: PostMediaProps) => {
   const authorOdinId = post.fileMetadata.appData.content.authorOdinId || odinId;
   const { width, height } = Dimensions.get('screen');
   const hasContent = !!post.fileMetadata.appData.content.caption;
+  const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
   if (!payloads || payloads?.length === 0) return null;
   if (payloads?.length === 1) {
     const payload = payloads[0];
@@ -50,7 +52,18 @@ export const PostMedia = memo(({ post }: PostMediaProps) => {
             aspectRatio,
           }}
           onClick={() => {
-            //
+            //TODO: Back handler shouldn't redirect to chatStack
+            navigation.navigate('PreviewMedia', {
+              fileId: fileId,
+              payloads: payloads,
+              senderOdinId: authorOdinId,
+              transitOdinId: authorOdinId,
+              createdAt: post.fileMetadata.created,
+              previewThumbnail: previewThumbnail,
+              currIndex: 0,
+              targetDrive: getChannelDrive(post.fileMetadata.appData.content.channelId),
+              globalTransitId: post.fileMetadata.globalTransitId,
+            });
           }}
           onLongPress={undefined}
         />
@@ -70,6 +83,21 @@ export const PostMedia = memo(({ post }: PostMediaProps) => {
       style={{
         marginTop: hasContent ? 10 : 0,
       }}
+      onClick={(index) => {
+        //TODO: Back handler shouldn't redirect to chatStack
+        navigation.navigate('PreviewMedia', {
+          fileId: fileId,
+          payloads: payloads,
+          senderOdinId: authorOdinId,
+          transitOdinId: authorOdinId,
+          createdAt: post.fileMetadata.created,
+          previewThumbnail: previewThumbnail,
+          currIndex: index,
+          targetDrive: getChannelDrive(post.fileMetadata.appData.content.channelId),
+          globalTransitId: post.fileMetadata.globalTransitId,
+        });
+      }}
+      onLongPress={undefined}
     />
   );
 });

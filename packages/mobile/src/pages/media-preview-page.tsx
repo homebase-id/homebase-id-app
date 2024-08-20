@@ -41,6 +41,8 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
     createdAt,
     previewThumbnail,
     targetDrive,
+    probablyEncrypted,
+    transitOdinId,
   } = route.params;
   const [currIndex, setCurrIndex] = useState(initialIndex);
   const ref = useRef<ICarouselInstance>(null);
@@ -85,10 +87,17 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
       return;
     }
     const onDownload = async () => {
-      const imageData = getImage(undefined, fileId, currPayload.key, targetDrive, globalTransitId, {
-        pixelWidth: width,
-        pixelHeight: height,
-      });
+      const imageData = getImage(
+        transitOdinId,
+        fileId,
+        currPayload.key,
+        targetDrive,
+        globalTransitId,
+        {
+          pixelWidth: width,
+          pixelHeight: height,
+        }
+      );
 
       if (!imageData || !imageData.imageData) {
         Toast.show({
@@ -121,7 +130,17 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
       }
     };
     return <IconButton icon={<Download color={Colors.white} />} onPress={onDownload} />;
-  }, [currIndex, fileId, getImage, globalTransitId, height, payloads, targetDrive, width]);
+  }, [
+    currIndex,
+    fileId,
+    getImage,
+    globalTransitId,
+    height,
+    payloads,
+    targetDrive,
+    transitOdinId,
+    width,
+  ]);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -136,7 +155,7 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
 
   const onShare = useCallback(() => {
     const imageData = getImage(
-      undefined,
+      transitOdinId,
       fileId,
       payloads[currIndex].key,
       targetDrive,
@@ -163,7 +182,17 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
       url: imageData?.imageData?.url,
       saveToFiles: true,
     });
-  }, [currIndex, fileId, getImage, globalTransitId, height, payloads, targetDrive, width]);
+  }, [
+    currIndex,
+    fileId,
+    getImage,
+    globalTransitId,
+    height,
+    payloads,
+    targetDrive,
+    transitOdinId,
+    width,
+  ]);
 
   const renderItem = useCallback(
     ({ item }: CarouselRenderItemInfo<PayloadDescriptor>) => {
@@ -183,6 +212,9 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
           <OdinImage
             fileId={fileId}
             fileKey={fileKey}
+            globalTransitId={globalTransitId}
+            probablyEncrypted={probablyEncrypted}
+            odinId={transitOdinId}
             enableZoom={true}
             fit="contain"
             imageSize={{
@@ -227,7 +259,18 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
         />
       );
     },
-    [autoplay, fileId, height, isVisible, previewThumbnail, targetDrive, width]
+    [
+      autoplay,
+      fileId,
+      globalTransitId,
+      height,
+      isVisible,
+      previewThumbnail,
+      probablyEncrypted,
+      targetDrive,
+      transitOdinId,
+      width,
+    ]
   );
 
   const hasVideoPayload = payloads.some((item) => item.contentType?.startsWith('video'));
@@ -314,6 +357,9 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
                     fileKey={item.key}
                     key={item.key}
                     targetDrive={targetDrive}
+                    globalTransitId={globalTransitId}
+                    probablyEncrypted={probablyEncrypted}
+                    odinId={transitOdinId}
                     fit="cover"
                     imageSize={{
                       width: 50,
