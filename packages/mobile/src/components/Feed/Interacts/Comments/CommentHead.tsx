@@ -10,12 +10,10 @@ import { openURL } from '../../../../utils/utils';
 export const CommentHead = ({
   authorOdinId,
   setIsEdit,
-  // commentBody,
   onRemove,
 }: {
   authorOdinId: string;
   setIsEdit?: (isEdit: boolean) => void;
-  commentBody: string;
   onRemove?: () => void;
 }) => {
   const identity = useDotYouClientContext().getIdentity();

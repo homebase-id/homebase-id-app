@@ -8,7 +8,7 @@ import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/typ
 import { forwardRef, memo, useCallback, useImperativeHandle, useRef, useState } from 'react';
 import { useDarkMode } from '../../../../hooks/useDarkMode';
 import { Colors } from '../../../../app/Colors';
-import { Platform, StyleSheet, View } from 'react-native';
+import { ListRenderItemInfo, Platform, StyleSheet, View } from 'react-native';
 import { Text } from '../../../ui/Text/Text';
 
 import { ReactionContext } from '@youfoundation/js-lib/public';
@@ -18,6 +18,7 @@ import { Comment } from './Comment';
 import { Backdrop } from '../../../ui/Modal/Backdrop';
 import { CommentComposer } from './CommentComposer';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { HomebaseFile, ReactionFile } from '@youfoundation/js-lib/core';
 
 export interface CommentModalMethods {
   setContext: (context: ReactionContext & CanReactInfo) => void;
@@ -29,6 +30,7 @@ export const CommentsModal = memo(
     const { isDarkMode } = useDarkMode();
     const bottomSheetRef = useRef<BottomSheetModalMethods>(null);
     const [context, setContext] = useState<ReactionContext & CanReactInfo>();
+    const [replyThread, setReplyThread] = useState<string | undefined>();
 
     const { data: comments, hasNextPage, fetchNextPage } = useComments({ context }).fetch;
     const flattenedComments = comments?.pages.flatMap((page) => page.comments).reverse();
@@ -61,11 +63,34 @@ export const CommentsModal = memo(
               backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
             }}
           >
-            <CommentComposer context={context as ReactionContext} canReact={context} />
+            <CommentComposer
+              context={context as ReactionContext}
+              canReact={context}
+              replyThreadId={replyThread}
+            />
           </BottomSheetFooter>
         );
       },
-      [bottom, context, isDarkMode]
+      [bottom, context, isDarkMode, replyThread]
+    );
+
+    const renderItem = useCallback(
+      ({ item }: ListRenderItemInfo<HomebaseFile<ReactionFile>>) => {
+        return (
+          <Comment
+            commentData={item}
+            context={context as ReactionContext}
+            isThread={false}
+            canReact={context}
+            onReply={() => {
+              const canReact = context?.canReact === 'comment' || context?.canReact === true;
+              if (!canReact) return;
+              setReplyThread(context.target.globalTransitId);
+            }}
+          />
+        );
+      },
+      [context]
     );
 
     return (
@@ -106,14 +131,7 @@ export const CommentsModal = memo(
           }}
           ListEmptyComponent={EmptyComponent}
           onEndReachedThreshold={0.3}
-          renderItem={({ item }) => (
-            <Comment
-              commentData={item}
-              context={context as ReactionContext}
-              isThread={false}
-              canReact={context}
-            />
-          )}
+          renderItem={renderItem}
         />
       </BottomSheetModal>
     );

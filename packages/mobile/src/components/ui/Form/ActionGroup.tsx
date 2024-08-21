@@ -36,7 +36,6 @@ export const ActionGroup = ({ children, style, options }: SelectProps) => {
             backgroundColor: isDarkMode ? Colors.black : Colors.white,
             zIndex: 20,
             elevation: 20,
-
             borderWidth: 1,
             borderColor: isDarkMode ? Colors.slate[700] : Colors.gray[200],
             borderRadius: 4,

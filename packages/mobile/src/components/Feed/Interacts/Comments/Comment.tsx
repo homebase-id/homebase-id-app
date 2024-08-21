@@ -109,7 +109,6 @@ export const Comment = ({ context, canReact, commentData, onReply, isThread }: C
         <CommentHead
           authorOdinId={authorOdinId}
           setIsEdit={setIsEdit}
-          commentBody={commentContent.body}
           onRemove={
             commentData.fileId
               ? () =>
@@ -170,6 +169,7 @@ export const CommentTeaser = ({ commentData }: { commentData: CommentReactionPre
             marginLeft: 2,
             borderRadius: 4,
             backgroundColor: isDarkMode ? Colors.slate[700] : Colors.slate[200],
+            marginBottom: 2,
           }}
         >
           <Text

@@ -12,6 +12,7 @@ import { Colors } from '../../../../app/Colors';
 import { OwnerAvatar } from '../../../ui/Avatars/Avatar';
 import { ErrorNotification } from '../../../ui/Alert/ErrorNotification';
 import { CantReactInfo } from '../../CanReactInfo';
+import Animated from 'react-native-reanimated';
 
 export const CommentComposer = ({
   context,
@@ -93,10 +94,10 @@ export const CommentComposer = ({
             paddingVertical: 5,
             backgroundColor: isDarkMode ? Colors.slate[800] : Colors.indigo[50],
             flex: 1,
-            alignItems: 'center',
-            flexDirection: 'row',
+            alignItems: 'flex-start',
           }}
         >
+          {replyThreadId && <Animated.View></Animated.View>}
           <BottomSheetTextInput
             value={message}
             onChangeText={setMessage}

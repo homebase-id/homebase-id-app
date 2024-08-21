@@ -40,7 +40,6 @@ export const useComments = ({ context }: { context?: ReactionContext }) => {
     }, 100);
     return response;
   };
-
   return {
     fetch: useInfiniteQuery({
       queryKey: [
