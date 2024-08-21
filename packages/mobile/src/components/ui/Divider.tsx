@@ -27,6 +27,20 @@ export const Divider = ({
   );
 };
 
+export const HorizontalDivider = ({
+  height,
+  color,
+  style,
+}: {
+  height?: DimensionValue;
+  color?: string;
+  style?: ViewStyle;
+}) => {
+  return (
+    <View style={{ height: height || 1, backgroundColor: color || Colors.gray[300], ...style }} />
+  );
+};
+
 const styles = StyleSheet.create({
   default: {
     flexDirection: 'row',

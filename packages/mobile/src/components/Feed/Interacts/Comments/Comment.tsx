@@ -14,6 +14,9 @@ import { AuthorName } from '../../../ui/Name';
 import { ellipsisAtMaxChar, t } from 'feed-app-common';
 import { useDarkMode } from '../../../../hooks/useDarkMode';
 import { Colors } from '../../../../app/Colors';
+import { ErrorNotification } from '../../../ui/Alert/ErrorNotification';
+import { CommentHead } from './CommentHead';
+import { CommentMeta } from './CommentMeta';
 
 export interface CommentProps {
   context: ReactionContext;
@@ -86,6 +89,7 @@ export const Comment = ({ context, canReact, commentData, onReply, isThread }: C
         marginVertical: 12,
       }}
     >
+      <ErrorNotification error={postCommentError || removeCommentError} />
       <Avatar
         odinId={authorOdinId}
         imageSize={{
@@ -102,16 +106,21 @@ export const Comment = ({ context, canReact, commentData, onReply, isThread }: C
           flex: 1,
         }}
       >
-        <Text
-          style={{
-            fontSize: 16,
-            fontWeight: '500',
-            opacity: 0.7,
-            marginBottom: 4,
-          }}
-        >
-          <AuthorName odinId={authorOdinId} />
-        </Text>
+        <CommentHead
+          authorOdinId={authorOdinId}
+          setIsEdit={setIsEdit}
+          commentBody={commentContent.body}
+          onRemove={
+            commentData.fileId
+              ? () =>
+                  removeComment({
+                    context,
+                    commentFile: commentData as HomebaseFile<ReactionFile>,
+                  })
+              : undefined
+          }
+        />
+        {/* TODO: Comement Body */}
         <Text
           style={{
             flex: 1,
@@ -119,6 +128,15 @@ export const Comment = ({ context, canReact, commentData, onReply, isThread }: C
         >
           {commentContent.body}
         </Text>
+        {threadContext.target.fileId && threadContext.target.globalTransitId ? (
+          <CommentMeta
+            canReact={canReact}
+            threadContext={threadContext as ReactionContext}
+            created={(commentData as HomebaseFile<ReactionFile>).fileMetadata.created}
+            updated={(commentData as HomebaseFile<ReactionFile>).fileMetadata.updated}
+            onReply={isThread ? undefined : () => (onReply ? onReply() : setIsReply(!isReply))}
+          />
+        ) : null}
       </View>
     </View>
   );
