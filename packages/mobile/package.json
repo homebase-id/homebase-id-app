@@ -24,7 +24,7 @@
     "@peculiar/json-schema": "^1.1.12",
     "@peculiar/webcrypto": "1.4.5",
     "@react-native-async-storage/async-storage": "^1.21.0",
-    "@react-native-camera-roll/camera-roll": "^7.4.1",
+    "@react-native-camera-roll/camera-roll": "^7.8.3",
     "@react-native-clipboard/clipboard": "^1.14.0",
     "@react-native-community/blur": "^4.4.0",
     "@react-native-community/checkbox": "^0.5.17",
