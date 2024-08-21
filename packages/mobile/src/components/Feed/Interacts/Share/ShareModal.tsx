@@ -523,7 +523,7 @@ const InnerShareListComponent = memo(
 
     const renderSectionHeader = useCallback(
       ({
-        section: { title },
+        section: { title, data },
       }: {
         section: SectionListData<
           ConversationWithRecentMessage | DotYouProfile,
@@ -540,6 +540,9 @@ const InnerShareListComponent = memo(
           | undefined
         >;
       }) => {
+        if (data?.length === 0) {
+          return null;
+        }
         return (
           <Text
             style={{
