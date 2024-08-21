@@ -186,7 +186,7 @@ export const useAuth = () => {
     setAuthToken('');
     setIdentity('');
 
-    queryClient.removeQueries();
+    queryClient.clear();
   }, [
     getDotYouClient,
     identity,

@@ -66,7 +66,8 @@ export const useMarkMessagesAsRead = ({
   }, [messages, conversationMetadata]);
 
   useEffect(() => {
-    if (!conversation || !messages) return;
+    if (!conversationMetadata || !messages || !pendingReadTime) return;
+    if (conversationMetadata.fileMetadata.appData.content.lastReadTime === pendingReadTime) return;
 
     if (messagesMarkedAsRead && pendingReadTime && conversationMetadata) {
       updateConversationMetadata({
@@ -75,7 +76,7 @@ export const useMarkMessagesAsRead = ({
           fileMetadata: {
             ...conversationMetadata.fileMetadata,
             appData: {
-              ...conversation.fileMetadata.appData,
+              ...conversationMetadata.fileMetadata.appData,
               content: {
                 ...conversationMetadata.fileMetadata.appData.content,
                 lastReadTime: pendingReadTime,

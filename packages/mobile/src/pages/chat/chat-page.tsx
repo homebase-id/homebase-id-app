@@ -1,5 +1,5 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { FailedTransferStatuses, HomebaseFile } from '@youfoundation/js-lib/core';
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -209,16 +209,27 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
   const doSend = useCallback(
     (message: { text: string }[]) => {
       if (!conversation) return;
-      // If the chat was empty, invite the recipient
+
       if (
-        messages?.filter((msg) => msg.fileId).length === 0 &&
-        conversation &&
-        conversation.fileMetadata.appData.content?.recipients?.length === 1 &&
-        !stringGuidsEqual(route.params.convoId, ConversationWithYourselfId)
+        !stringGuidsEqual(route.params.convoId, ConversationWithYourselfId) && // You can't invite yourself
+        !conversation?.fileMetadata.senderOdinId // Only the original creator can invite
       ) {
-        inviteRecipient({
-          conversation: conversation,
+        const filteredRecipients = conversation.fileMetadata.appData.content.recipients.filter(
+          (recipient) => recipient !== identity
+        );
+
+        const anyRecipientMissingConversation = filteredRecipients.some((recipient) => {
+          const latestTransferStatus =
+            conversation.serverMetadata?.transferHistory?.recipients[recipient]
+              .latestTransferStatus;
+
+          if (!latestTransferStatus) return true;
+          return FailedTransferStatuses.includes(latestTransferStatus);
         });
+        if (anyRecipientMissingConversation) {
+          console.log('invite recipient');
+          inviteRecipient({ conversation });
+        }
       }
 
       sendMessage({
@@ -249,12 +260,12 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
     },
     [
       conversation,
-      messages,
       route.params.convoId,
       sendMessage,
       replyMessage?.fileMetadata.appData.uniqueId,
       assets,
       linkPreviews,
+      identity,
       inviteRecipient,
     ]
   );

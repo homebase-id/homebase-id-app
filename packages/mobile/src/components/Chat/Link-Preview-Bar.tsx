@@ -25,7 +25,7 @@ export const LinkPreviewBar = memo(
         setIsVisible(true);
 
         // If no desciprtion, title or data, no need to set the link preview
-        if (!data?.description || !data?.imageUrl || !data?.title) return;
+        if (!data?.description || !data?.title) return;
 
         onLinkData(data);
       }
@@ -41,7 +41,6 @@ export const LinkPreviewBar = memo(
     }
 
     const { title, description, imageUrl } = data;
-
     return (
       <Animated.View
         style={{
