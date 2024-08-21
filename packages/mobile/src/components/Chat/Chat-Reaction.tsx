@@ -46,9 +46,10 @@ const ChatReaction = memo(
     }, [message, messageCordinates, scale, selectedMessage, showReaction]);
 
     const reactionStyle = useAnimatedStyle(() => {
-      let y = messageCordinates.y;
+      let y = Math.abs(messageCordinates.y);
       let shouldAnimate = false;
       const isLessDistanceFromTop = y < 100;
+
       const isLessDistanceFromBottom = height - y < 0;
       if (isLessDistanceFromBottom) {
         shouldAnimate = true;
@@ -57,7 +58,7 @@ const ChatReaction = memo(
       if (isLessDistanceFromTop) {
         shouldAnimate = true;
       }
-      y = isNaN(y) ? 0 : y;
+      y = isNaN(y) ? 0 : y < 80 ? 80 + y : y;
       return {
         transform: [
           {
