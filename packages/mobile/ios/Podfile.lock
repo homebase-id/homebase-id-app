@@ -977,7 +977,7 @@ PODS:
     - glog
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
-  - react-native-cameraroll (7.8.1):
+  - react-native-cameraroll (7.8.3):
     - glog
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
@@ -1297,7 +1297,7 @@ DEPENDENCIES:
   - React-Mapbuffer (from `../../../node_modules/react-native/ReactCommon`)
   - react-native-blob-util (from `../../../node_modules/react-native-blob-util`)
   - "react-native-blur (from `../../../node_modules/@react-native-community/blur`)"
-  - "react-native-cameraroll (from `../../../node_modules/@react-native-camera-roll/camera-roll`)"
+  - "react-native-cameraroll (from `../node_modules/@react-native-camera-roll/camera-roll`)"
   - react-native-compressor (from `../../../node_modules/react-native-compressor`)
   - react-native-document-picker (from `../../../node_modules/react-native-document-picker`)
   - react-native-image-picker (from `../../../node_modules/react-native-image-picker`)
@@ -1447,7 +1447,7 @@ EXTERNAL SOURCES:
   react-native-blur:
     :path: "../../../node_modules/@react-native-community/blur"
   react-native-cameraroll:
-    :path: "../../../node_modules/@react-native-camera-roll/camera-roll"
+    :path: "../node_modules/@react-native-camera-roll/camera-roll"
   react-native-compressor:
     :path: "../../../node_modules/react-native-compressor"
   react-native-document-picker:
@@ -1612,7 +1612,7 @@ SPEC CHECKSUMS:
   React-Mapbuffer: d81d930c1b7f4db284e1d721fe7fdc99230ca108
   react-native-blob-util: 18b510205c080a453574a7d2344d64673d0ad9af
   react-native-blur: 73561b0608a43d76f2874738aee8e3909c11d083
-  react-native-cameraroll: ecc2a7301b75d1793fb364fd9771c7ed207bfa59
+  react-native-cameraroll: da5e6ab056c141650e565f17f0161a924f1dcf8d
   react-native-compressor: 58eeb2c4c9dc4c898c7085d7e72a02f7ea4cfb64
   react-native-document-picker: 5b97e24a7f1a1e4a50a72c540a043f32d29a70a2
   react-native-image-picker: 7c3a279e7a518628910f2ea02917bd3b90049465
