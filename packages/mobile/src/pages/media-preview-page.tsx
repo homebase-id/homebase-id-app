@@ -30,8 +30,6 @@ import Toast from 'react-native-toast-message';
 import Clipboard from '@react-native-clipboard/clipboard';
 import Animated from 'react-native-reanimated';
 import { ZOOM_TYPE } from '@likashefqet/react-native-image-zoom';
-import ReactNativeBlobUtil from 'react-native-blob-util';
-import { copyFile, DownloadDirectoryPath } from 'react-native-fs';
 import { CameraRoll } from '@react-native-camera-roll/camera-roll';
 
 export type MediaProp = NativeStackScreenProps<ChatStackParamList, 'PreviewMedia'>;
