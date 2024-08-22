@@ -1,5 +1,5 @@
-import { Pressable, StyleSheet, TouchableOpacity, useWindowDimensions, View } from 'react-native';
-import { memo, useEffect, useMemo, useState } from 'react';
+import { Pressable, StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native';
+import { memo, useEffect } from 'react';
 import { Portal } from 'react-native-portalize';
 
 import Animated, {
@@ -16,6 +16,8 @@ import { useDotYouClientContext } from 'feed-app-common';
 import { useDarkMode } from '../../../../hooks/useDarkMode';
 import { ErrorNotification } from '../../../ui/Alert/ErrorNotification';
 import { CantReactInfo } from '../../CanReactInfo';
+import EmojiPicker from 'rn-emoji-picker';
+import { emojis } from 'rn-emoji-picker/dist/data';
 
 export const PostReactionBar = memo(
   ({
@@ -42,13 +44,14 @@ export const PostReactionBar = memo(
     const { data: myEmojis } = useMyEmojiReactions(context).fetch;
 
     const scale = useSharedValue(0);
+    const opacity = useSharedValue(0);
     const { height } = useWindowDimensions();
 
     useEffect(() => {
       if (isActive) {
         scale.value = withSpring(1);
       } else if (!isActive) {
-        scale.value = 0;
+        scale.value = withSpring(0);
       }
     }, [isActive, scale]);
 
@@ -75,6 +78,19 @@ export const PostReactionBar = memo(
       };
     });
 
+    const emojiPickerStyle = useAnimatedStyle(() => {
+      let y = coordinates?.y || 0;
+      y = isNaN(y) ? 0 : y;
+      return {
+        opacity: withTiming(opacity.value, { duration: 200 }),
+        transform: [
+          {
+            translateY: y,
+          },
+        ],
+      };
+    });
+
     const textStyle = useAnimatedStyle(() => {
       return {
         fontSize: 28,
@@ -96,6 +112,7 @@ export const PostReactionBar = memo(
         context,
       });
 
+      opacity.value = 0;
       onClose?.();
     };
     const doUnlike = (body: string) => {
@@ -104,6 +121,19 @@ export const PostReactionBar = memo(
         context,
       });
 
+      opacity.value = 0;
+      onClose?.();
+    };
+
+    const onSelectEmoji = (emoji: { emoji: string }) => {
+      if (myEmojis?.includes(emoji.emoji)) {
+        return doUnlike(emoji.emoji);
+      }
+      doLike(emoji.emoji);
+    };
+
+    const _onClose = () => {
+      opacity.value = 0;
       onClose?.();
     };
 
@@ -114,7 +144,6 @@ export const PostReactionBar = memo(
     const defaultReactions = myEmojis && myEmojis?.length > 0 ? [...myEmojis, '➕'] : undefined;
 
     if (!canReact || canReact?.canReact === false || canReact?.canReact === 'comment') {
-      console.log('cant react');
       return (
         <Animated.View
           style={[
@@ -138,7 +167,7 @@ export const PostReactionBar = memo(
             flex: 1,
             backgroundColor: 'transparent',
           }}
-          onPress={onClose}
+          onPress={_onClose}
         >
           <ErrorNotification error={postEmojiError || removeEmojiError} />
           <Animated.View
@@ -154,24 +183,50 @@ export const PostReactionBar = memo(
               ? defaultReactions.map((reaction, index) => (
                   <TouchableOpacity
                     key={index}
-                    onPress={() => doUnlike(reaction)}
-                    style={
-                      index === defaultReactions.length - 1
-                        ? {}
-                        : {
-                            backgroundColor: Colors.red[50],
-                            borderRadius: 15,
-                          }
-                    }
+                    onPress={() => {
+                      if (index === defaultReactions.length - 1) {
+                        opacity.value = withTiming(1);
+                        return;
+                      }
+                      return doUnlike(reaction);
+                    }}
                   >
                     <Animated.Text style={textStyle}>{reaction}</Animated.Text>
                   </TouchableOpacity>
                 ))
               : initialReactions.map((reaction, index) => (
-                  <TouchableOpacity key={index} onPress={() => doLike(reaction)}>
+                  <TouchableOpacity
+                    key={index}
+                    onPress={() => {
+                      if (index === initialReactions.length - 1) {
+                        opacity.value = 1;
+                        return;
+                      }
+                      return doLike(reaction);
+                    }}
+                  >
                     <Animated.Text style={textStyle}>{reaction}</Animated.Text>
                   </TouchableOpacity>
                 ))}
+          </Animated.View>
+          <Animated.View
+            style={[
+              emojiPickerStyle,
+              {
+                marginHorizontal: 16,
+                height: 300,
+              },
+            ]}
+          >
+            <EmojiPicker
+              emojis={emojis} // emojis data source see data/emojis
+              autoFocus={true} // autofocus search input
+              loading={false} // spinner for if your emoji data or recent store is async
+              darkMode={isDarkMode} // to be or not to be, that is the question
+              perLine={7} // # of emoji's per line
+              onSelect={onSelectEmoji}
+              backgroundColor={isDarkMode ? Colors.gray[900] : Colors.slate[50]}
+            />
           </Animated.View>
         </Pressable>
       </Portal>
