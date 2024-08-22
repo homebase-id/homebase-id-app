@@ -5,19 +5,20 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
-import { HomebaseFile, NewHomebaseFile, SecurityGroupType } from '@youfoundation/js-lib/core';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import { t, useDotYouClientContext } from 'feed-app-common';
 import {
-  ChatReaction,
-  deleteReaction,
-  getReactions,
-  uploadReaction,
-} from '../../provider/chat/ChatReactionProvider';
-import { UnifiedConversation } from '../../provider/chat/ConversationProvider';
+  deleteGroupReaction,
+  getGroupReactions,
+  GroupEmojiReaction,
+  HomebaseFile,
+  ReactionFile,
+  uploadGroupReaction,
+} from '@youfoundation/js-lib/core';
+import { t, useDotYouClientContext } from 'feed-app-common';
+import { ChatDrive, UnifiedConversation } from '../../provider/chat/ConversationProvider';
 import { ChatMessage } from '../../provider/chat/ChatProvider';
 import { getSynchronousDotYouClient } from './getSynchronousDotYouClient';
 import { addError } from '../errors/useErrors';
+import { tryJsonParse } from '@youfoundation/js-lib/helpers';
 
 const addReaction = async ({
   conversation,
@@ -29,30 +30,21 @@ const addReaction = async ({
   reaction: string;
 }) => {
   const dotYouClient = await getSynchronousDotYouClient();
-
-  const conversationId = conversation.fileMetadata.appData.uniqueId as string;
   const conversationContent = conversation.fileMetadata.appData.content;
   const identity = dotYouClient.getIdentity();
   const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
 
-  const newReaction: NewHomebaseFile<ChatReaction> = {
-    fileMetadata: {
-      appData: {
-        groupId: message.fileMetadata.appData.uniqueId,
-        tags: [conversationId],
-        content: {
-          message: reaction,
-        },
-      },
-    },
-    serverMetadata: {
-      accessControlList: {
-        requiredSecurityGroup: SecurityGroupType.Connected,
-      },
-    },
-  };
+  if (!message.fileMetadata.globalTransitId) {
+    throw new Error('Message does not have a global transit id');
+  }
 
-  return await uploadReaction(dotYouClient, conversationId, newReaction, recipients);
+  return await uploadGroupReaction(
+    dotYouClient,
+    ChatDrive,
+    message.fileMetadata.globalTransitId,
+    reaction,
+    recipients
+  );
 };
 
 export const getAddReactionMutationOptions: (queryClient: QueryClient) => UseMutationOptions<
@@ -69,54 +61,49 @@ export const getAddReactionMutationOptions: (queryClient: QueryClient) => UseMut
   onMutate: async (variables) => {
     const { message } = variables;
     const previousReactions =
-      queryClient.getQueryData<HomebaseFile<ChatReaction>[]>([
-        'chat-reaction',
-        message.fileMetadata.appData.uniqueId,
-      ]) || [];
+      queryClient.getQueryData<ReactionFile[]>(['chat-reaction', message.fileId]) || [];
 
-    // if (!previousReactions) return;
-    const newReaction: NewHomebaseFile<ChatReaction> = {
-      fileMetadata: {
-        appData: {
-          content: {
-            message: variables.reaction,
-          },
-        },
-      },
-      serverMetadata: {
-        accessControlList: { requiredSecurityGroup: SecurityGroupType.Connected },
-      },
+    const newReaction: ReactionFile = {
+      authorOdinId: (await getSynchronousDotYouClient()).getIdentity(),
+      body: variables.reaction,
     };
 
     queryClient.setQueryData(
-      ['chat-reaction', message.fileMetadata.appData.uniqueId],
+      ['chat-reaction', message.fileId],
       [...previousReactions, newReaction]
     );
   },
   onSettled: (data, error, variables) => {
     queryClient.invalidateQueries({
-      queryKey: ['chat-reaction', variables.message.fileMetadata.appData.uniqueId],
+      queryKey: ['chat-reaction', variables.message.fileId],
     });
   },
   onError: (err) => addError(queryClient, err, t('Failed to add reaction')),
 });
 
-const removeReaction = async ({
+const removeReactionOnServer = async ({
   conversation,
-
+  message,
   reaction,
 }: {
   conversation: HomebaseFile<UnifiedConversation>;
   message: HomebaseFile<ChatMessage>;
-  reaction: HomebaseFile<ChatReaction>;
+  reaction: ReactionFile;
 }) => {
   const dotYouClient = await getSynchronousDotYouClient();
-
   const conversationContent = conversation.fileMetadata.appData.content;
   const identity = dotYouClient.getIdentity();
   const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
 
-  return await deleteReaction(dotYouClient, reaction, recipients);
+  if (!message.fileMetadata.globalTransitId) {
+    throw new Error('Message does not have a global transit id');
+  }
+
+  return await deleteGroupReaction(dotYouClient, ChatDrive, recipients, reaction, {
+    fileId: message.fileId,
+    globalTransitId: message.fileMetadata.globalTransitId,
+    targetDrive: ChatDrive,
+  });
 };
 
 export const getRemoveReactionMutationOptions: (queryClient: QueryClient) => UseMutationOptions<
@@ -125,28 +112,34 @@ export const getRemoveReactionMutationOptions: (queryClient: QueryClient) => Use
   {
     conversation: HomebaseFile<UnifiedConversation>;
     message: HomebaseFile<ChatMessage>;
-    reaction: HomebaseFile<ChatReaction>;
+    reaction: ReactionFile;
   }
 > = (queryClient) => ({
   mutationKey: ['remove-reaction'],
-  mutationFn: removeReaction,
+  mutationFn: removeReactionOnServer,
   onMutate: async (variables) => {
     const { message, reaction } = variables;
-    const previousReactions = queryClient.getQueryData<HomebaseFile<ChatReaction>[]>([
+    const previousReactions = queryClient.getQueryData<ReactionFile[] | undefined>([
       'chat-reaction',
-      message.fileMetadata.appData.uniqueId,
+      message.fileId,
     ]);
 
     if (!previousReactions) return;
 
     queryClient.setQueryData(
-      ['chat-reaction', message.fileMetadata.appData.uniqueId],
-      [...previousReactions.filter((r) => !stringGuidsEqual(r.fileId, reaction.fileId))]
+      ['chat-reaction', message.fileId],
+      [
+        ...previousReactions.filter(
+          (existingReaction) =>
+            existingReaction.authorOdinId !== reaction.authorOdinId ||
+            existingReaction.body !== reaction.body
+        ),
+      ]
     );
   },
   onSettled: (data, error, variables) => {
     queryClient.invalidateQueries({
-      queryKey: ['chat-reaction', variables.message.fileMetadata.appData.uniqueId],
+      queryKey: ['chat-reaction', variables.message.fileId],
     });
   },
 
@@ -154,26 +147,99 @@ export const getRemoveReactionMutationOptions: (queryClient: QueryClient) => Use
 });
 
 export const useChatReaction = (props?: {
-  conversationId: string | undefined;
-  messageId: string | undefined;
+  messageGlobalTransitId: string | undefined;
+  messageFileId: string | undefined;
 }) => {
-  const { conversationId, messageId } = props || {};
+  const { messageGlobalTransitId, messageFileId } = props || {};
 
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
 
-  const getReactionsByMessageUniqueId = (conversationId: string, messageId: string) => async () => {
-    return (await getReactions(dotYouClient, conversationId, messageId))?.searchResults || [];
+  const getReactionsByMessageGlobalTransitId = (messageGlobalTransitId: string) => async () => {
+    const reactions =
+      (
+        await getGroupReactions(dotYouClient, {
+          target: {
+            globalTransitId: messageGlobalTransitId,
+            targetDrive: ChatDrive,
+          },
+        })
+      )?.reactions || [];
+
+    return reactions;
   };
 
   return {
     get: useQuery({
-      queryKey: ['chat-reaction', messageId],
-      queryFn: getReactionsByMessageUniqueId(conversationId as string, messageId as string),
-      enabled: !!conversationId && !!messageId,
+      queryKey: ['chat-reaction', messageFileId],
+      queryFn: getReactionsByMessageGlobalTransitId(messageGlobalTransitId as string),
+      enabled: !!messageGlobalTransitId && !!messageFileId,
       staleTime: 1000 * 60 * 10, // 10 min
     }),
     add: useMutation(getAddReactionMutationOptions(queryClient)),
     remove: useMutation(getRemoveReactionMutationOptions(queryClient)),
   };
+};
+
+export const insertNewReaction = (
+  queryClient: QueryClient,
+  messageLocalFileId: string,
+  newReaction: GroupEmojiReaction
+) => {
+  const currentReactions = queryClient.getQueryData<ReactionFile[] | undefined>([
+    'chat-reaction',
+    messageLocalFileId,
+  ]);
+
+  if (!currentReactions) {
+    queryClient.invalidateQueries({ queryKey: ['chat-reaction', messageLocalFileId] });
+    return;
+  }
+
+  const reactionAsReactionFile: ReactionFile = {
+    authorOdinId: newReaction.odinId,
+    body: tryJsonParse<{ emoji: string }>(newReaction.reactionContent).emoji,
+  };
+
+  queryClient.setQueryData<ReactionFile[]>(
+    ['chat-reaction', messageLocalFileId],
+    [
+      ...currentReactions.filter(
+        (reaction) =>
+          reaction.authorOdinId !== reactionAsReactionFile.authorOdinId ||
+          reaction.body !== reactionAsReactionFile.body
+      ),
+      reactionAsReactionFile,
+    ]
+  );
+};
+
+export const removeReaction = (
+  queryClient: QueryClient,
+  messageLocalFileId: string,
+  removedReaction: GroupEmojiReaction
+) => {
+  const currentReactions = queryClient.getQueryData<ReactionFile[] | undefined>([
+    'chat-reaction',
+    messageLocalFileId,
+  ]);
+
+  if (!currentReactions) {
+    queryClient.invalidateQueries({ queryKey: ['chat-reaction', messageLocalFileId] });
+    return;
+  }
+
+  const reactionAsReactionFile: ReactionFile = {
+    authorOdinId: removedReaction.odinId,
+    body: tryJsonParse<{ emoji: string }>(removedReaction.reactionContent).emoji,
+  };
+
+  queryClient.setQueryData<ReactionFile[]>(
+    ['chat-reaction', messageLocalFileId],
+    currentReactions.filter(
+      (reaction) =>
+        reaction.authorOdinId !== reactionAsReactionFile.authorOdinId ||
+        reaction.body !== reactionAsReactionFile.body
+    )
+  );
 };

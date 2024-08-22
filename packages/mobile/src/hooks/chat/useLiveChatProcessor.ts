@@ -6,6 +6,7 @@ import {
   FileQueryParams,
   HomebaseFile,
   PushNotification,
+  ReactionNotification,
   TypedConnectionNotification,
   queryBatch,
   queryModified,
@@ -41,6 +42,7 @@ import { insertNewConversation } from './useConversations';
 import { useWebSocketContext } from '../../components/WebSocketContext/useWebSocketContext';
 import { insertNewConversationMetadata } from './useConversationMetadata';
 import { incrementAppIdNotificationCount } from '../notifications/usePushNotifications';
+import { insertNewReaction, removeReaction } from './useChatReaction';
 
 const MINUTE_IN_MS = 60000;
 const isDebug = false; // The babel plugin to remove console logs would remove any if they get to production
@@ -147,7 +149,8 @@ const useChatWebsocket = (isEnabled: boolean) => {
 
     if (
       (notification.notificationType === 'fileAdded' ||
-        notification.notificationType === 'fileModified') &&
+        notification.notificationType === 'fileModified' ||
+        notification.notificationType === 'statisticsChanged') &&
       stringGuidsEqual(notification.targetDrive?.alias, ChatDrive.alias) &&
       stringGuidsEqual(notification.targetDrive?.type, ChatDrive.type)
     ) {
@@ -256,6 +259,25 @@ const useChatWebsocket = (isEnabled: boolean) => {
       }
       incrementAppIdNotificationCount(queryClient, clientNotification.options.appId);
     }
+
+    if (
+      notification.notificationType === 'reactionContentAdded' ||
+      notification.notificationType === 'reactionContentDeleted'
+    ) {
+      if (notification.notificationType === 'reactionContentAdded') {
+        insertNewReaction(
+          queryClient,
+          notification.fileId.fileId,
+          notification as ReactionNotification
+        );
+      } else if (notification.notificationType === 'reactionContentDeleted') {
+        removeReaction(
+          queryClient,
+          notification.fileId.fileId,
+          notification as ReactionNotification
+        );
+      }
+    }
   }, []);
 
   const chatMessagesQueueTunnel = useRef<HomebaseFile<ChatMessage>[]>([]);
@@ -300,7 +322,14 @@ const useChatWebsocket = (isEnabled: boolean) => {
 
   return useNotificationSubscriber(
     isEnabled ? handler : undefined,
-    ['fileAdded', 'fileModified'],
+    [
+      'fileAdded',
+      'fileModified',
+      'reactionContentAdded',
+      'reactionContentDeleted',
+      'statisticsChanged',
+      'appNotificationAdded',
+    ],
     [ChatDrive],
     () => {
       queryClient.invalidateQueries({ queryKey: ['process-inbox'] });

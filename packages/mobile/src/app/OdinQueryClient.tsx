@@ -65,6 +65,7 @@ const INCLUDED_QUERY_KEYS = [
   'conversations-with-recent-message',
   'image',
   'process-inbox',
+  'security-context',
 ];
 const persistOptions: Omit<PersistQueryClientOptions, 'queryClient'> = {
   buster: '20240524',

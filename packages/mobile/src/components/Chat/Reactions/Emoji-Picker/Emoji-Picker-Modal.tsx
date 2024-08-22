@@ -28,10 +28,14 @@ export const EmojiPickerModal = forwardRef(
   ) => {
     const { isDarkMode } = useDarkMode();
 
+    const hasReactions =
+      selectedMessage?.fileMetadata.reactionPreview?.reactions &&
+      Object.keys(selectedMessage?.fileMetadata.reactionPreview?.reactions).length;
     const { mutate: addReaction } = useChatReaction({
-      conversationId: selectedMessage?.fileMetadata.appData.groupId,
-      messageId: selectedMessage?.fileMetadata.appData.uniqueId,
+      messageFileId: hasReactions ? selectedMessage?.fileId : undefined,
+      messageGlobalTransitId: selectedMessage?.fileMetadata.globalTransitId,
     }).add;
+
     const conversation = useConversation({
       conversationId: selectedMessage?.fileMetadata.appData.groupId,
     }).single.data;

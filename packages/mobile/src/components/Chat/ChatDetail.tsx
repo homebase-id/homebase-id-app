@@ -903,8 +903,8 @@ const RenderBubble = memo(
     const isReply = !!content?.replyId;
     const showBackground = !isEmojiOnly || isReply;
     const { data: reactions } = useChatReaction({
-      conversationId: message?.fileMetadata.appData.groupId,
-      messageId: message?.fileMetadata.appData.uniqueId,
+      messageFileId: message?.fileId,
+      messageGlobalTransitId: message?.fileMetadata.globalTransitId,
     }).get;
 
     const onRetryOpen = useCallback(() => {
@@ -912,8 +912,11 @@ const RenderBubble = memo(
     }, [message, props]);
 
     const hasReactions = (reactions && reactions?.length > 0) || false;
-    const flatReactions = useMemo(
-      () => reactions?.flatMap((val) => val.fileMetadata.appData.content.message),
+    const filteredEmojis = useMemo(
+      () =>
+        reactions?.filter((reaction) =>
+          reactions?.some((reactionFile) => reactionFile?.body === reaction?.body)
+        ) || [],
       [reactions]
     );
     // has pauload and no text but no audio payload
@@ -999,7 +1002,7 @@ const RenderBubble = memo(
                         backgroundColor: isDarkMode ? Colors.gray[800] : Colors.gray[100],
                       }}
                     >
-                      {flatReactions?.slice(0, maxVisible).map((reaction, index) => {
+                      {filteredEmojis?.slice(0, maxVisible).map((reaction, index) => {
                         return (
                           <Text
                             key={index}
@@ -1008,7 +1011,7 @@ const RenderBubble = memo(
                               marginRight: 2,
                             }}
                           >
-                            {reaction}
+                            {reaction.body}
                           </Text>
                         );
                       })}
