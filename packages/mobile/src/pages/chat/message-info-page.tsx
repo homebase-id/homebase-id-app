@@ -12,6 +12,7 @@ import { useDotYouClientContext } from 'feed-app-common';
 import { ChatStackParamList } from '../../app/ChatStack';
 import { Avatar, OwnerAvatar } from '../../components/ui/Avatars/Avatar';
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
+import { ReactionFile } from '@youfoundation/js-lib/core';
 
 export type MessageInfoProp = NativeStackScreenProps<ChatStackParamList, 'MessageInfo'>;
 
@@ -37,8 +38,8 @@ export const MessageInfoPage = ({ route }: MessageInfoProp) => {
     message.fileMetadata.senderOdinId === identity || !message.fileMetadata.senderOdinId;
 
   const { data: reactions } = useChatReaction({
-    conversationId: message.fileMetadata.appData.groupId,
-    messageId: message.fileMetadata.appData.uniqueId,
+    messageFileId: message.fileId,
+    messageGlobalTransitId: message.fileMetadata.globalTransitId,
   }).get;
 
   function renderDetails() {
@@ -124,10 +125,10 @@ export const MessageInfoPage = ({ route }: MessageInfoProp) => {
     return (
       <View>
         <Header title="Reactions" />
-        {reactions.map((reaction) => {
+        {reactions.map((reaction: ReactionFile, index: number) => {
           return (
             <View
-              key={reaction.fileId}
+              key={index}
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
@@ -135,11 +136,11 @@ export const MessageInfoPage = ({ route }: MessageInfoProp) => {
                 padding: 10,
               }}
             >
-              <AuthorImage odinId={reaction.fileMetadata.senderOdinId} />
+              <AuthorImage odinId={reaction.authorOdinId} />
               <Text style={{ ...styles.title, fontSize: 20, marginTop: 0 }}>
-                <AuthorName odinId={reaction.fileMetadata.senderOdinId} />
+                <AuthorName odinId={reaction.authorOdinId} />
               </Text>
-              <Text style={styles.emoji}>{reaction.fileMetadata.appData.content.message}</Text>
+              <Text style={styles.emoji}>{reaction.body}</Text>
             </View>
           );
         })}

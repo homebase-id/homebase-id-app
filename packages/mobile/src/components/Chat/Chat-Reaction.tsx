@@ -11,12 +11,13 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useChatReaction } from '../../hooks/chat/useChatReaction';
 import { useConversation } from '../../hooks/chat/useConversation';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile, ReactionFile } from '@youfoundation/js-lib/core';
 import { ChatMessage } from '../../provider/chat/ChatProvider';
 import { Colors } from '../../app/Colors';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { ErrorNotification } from '../ui/Alert/ErrorNotification';
 import { SelectedMessageState } from '../../pages/chat/chat-page';
+import { useDotYouClientContext } from 'feed-app-common';
 
 const ChatReaction = memo(
   ({
@@ -83,16 +84,20 @@ const ChatReaction = memo(
       };
     });
 
+    const hasReactions =
+      selectedMessage?.selectedMessage?.fileMetadata.reactionPreview?.reactions &&
+      Object.keys(selectedMessage?.selectedMessage?.fileMetadata.reactionPreview?.reactions).length;
+
     const { add, get, remove } = useChatReaction({
-      conversationId: message?.fileMetadata.appData.groupId,
-      messageId: message?.fileMetadata.appData.uniqueId,
+      messageFileId: hasReactions ? selectedMessage?.selectedMessage?.fileId : undefined,
+      messageGlobalTransitId: selectedMessage?.selectedMessage?.fileMetadata.globalTransitId,
     });
 
+    const identity = useDotYouClientContext().getIdentity();
     const { data: reactions } = get;
-
-    const filteredReactions = useMemo(
-      () => reactions?.filter((reaction) => reaction.fileMetadata.senderOdinId === '') || [],
-      [reactions]
+    const myReactions = useMemo(
+      () => reactions?.filter((reaction) => reaction?.authorOdinId === identity) || [],
+      [identity, reactions]
     );
 
     const { mutate: addReaction, error: reactionError } = add;
@@ -102,7 +107,7 @@ const ChatReaction = memo(
       conversationId: message?.fileMetadata.appData.groupId,
     }).single.data;
 
-    const sendReaction = useCallback(
+    const toggleReaction = useCallback(
       (reaction: string, index: number) => {
         if (!selectedMessage) {
           return;
@@ -111,22 +116,23 @@ const ChatReaction = memo(
           return;
         } else {
           if (!conversation) return;
-          const reactionStrings = filteredReactions.map(
-            (reac) => reac.fileMetadata.appData.content.message
+          const matchedReaction = myReactions.find(
+            (myReaction) => myReaction.body.includes(reaction) || myReaction.body === reaction
           );
-          const matchedReaction = reactionStrings.indexOf(reaction);
-          if (matchedReaction !== -1) {
+          if (matchedReaction) {
+            console.log(matchedReaction);
             removeReaction({
               conversation,
-              reaction: filteredReactions[matchedReaction],
+              reaction: matchedReaction,
               message: message as HomebaseFile<ChatMessage>,
             });
+          } else {
+            addReaction({
+              conversation: conversation,
+              message: message as HomebaseFile<ChatMessage>,
+              reaction,
+            });
           }
-          addReaction({
-            conversation: conversation,
-            message: message as HomebaseFile<ChatMessage>,
-            reaction,
-          });
         }
         afterSendReaction();
       },
@@ -134,7 +140,7 @@ const ChatReaction = memo(
         addReaction,
         afterSendReaction,
         conversation,
-        filteredReactions,
+        myReactions,
         message,
         openEmojiPicker,
         removeReaction,
@@ -159,7 +165,22 @@ const ChatReaction = memo(
           ]}
         >
           {initialReactions.map((reaction, index) => (
-            <TouchableOpacity key={index} onPress={() => sendReaction(reaction, index)}>
+            <TouchableOpacity
+              key={index}
+              onPress={() => toggleReaction(reaction, index)}
+              style={
+                myReactions.some(
+                  (myReaction) => myReaction.body.includes(reaction) || myReaction.body === reaction
+                )
+                  ? {
+                      backgroundColor: isDarkMode ? Colors.slate[600] : Colors.slate[300],
+                      borderRadius: 50,
+                      margin: -5,
+                      padding: 5,
+                    }
+                  : {}
+              }
+            >
               <Animated.Text style={textStyle}>{reaction}</Animated.Text>
             </TouchableOpacity>
           ))}

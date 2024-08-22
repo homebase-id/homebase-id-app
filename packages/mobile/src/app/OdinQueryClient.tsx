@@ -66,6 +66,7 @@ const INCLUDED_QUERY_KEYS = [
   'image',
   'process-inbox',
   'social-feeds',
+  'security-context',
 ];
 const persistOptions: Omit<PersistQueryClientOptions, 'queryClient'> = {
   buster: '20240524',

@@ -6,7 +6,7 @@ import { useDarkMode } from '../../../../hooks/useDarkMode';
 
 import { ChatMessageIMessage } from '../../ChatDetail';
 import { useChatReaction } from '../../../../hooks/chat/useChatReaction';
-
+import { ReactionFile } from '@youfoundation/js-lib/core';
 import { Avatar, OwnerAvatar } from '../../../ui/Avatars/Avatar';
 import { AuthorName } from '../../../ui/Name';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
@@ -20,8 +20,8 @@ export const ReactionsModal = memo(
     ) => {
       const { isDarkMode } = useDarkMode();
       const { data: reactions, isLoading } = useChatReaction({
-        messageId: message?.fileMetadata.appData.uniqueId,
-        conversationId: message?.fileMetadata.appData.groupId,
+        messageFileId: message?.fileId,
+        messageGlobalTransitId: message?.fileMetadata.globalTransitId,
       }).get;
 
       return (
@@ -68,11 +68,7 @@ export const ReactionsModal = memo(
             ) : (
               <BottomSheetScrollView>
                 {reactions?.map((prop) => (
-                  <ReactionTile
-                    key={prop.fileId}
-                    reaction={prop.fileMetadata.appData.content.message}
-                    authorOdinId={prop.fileMetadata.senderOdinId}
-                  />
+                  <ReactionTile key={prop.authorOdinId + prop.body} {...prop} />
                 ))}
               </BottomSheetScrollView>
             )}
@@ -83,13 +79,9 @@ export const ReactionsModal = memo(
   )
 );
 
-export const ReactionTile = ({
-  reaction,
-  authorOdinId,
-}: {
-  reaction: string;
-  authorOdinId?: string;
-}) => {
+const ReactionTile = (prop: ReactionFile) => {
+  const reaction = prop.body;
+  const senderOdinId = prop.authorOdinId;
   const { isDarkMode } = useDarkMode();
   return (
     <View
@@ -100,9 +92,9 @@ export const ReactionTile = ({
         marginTop: 10,
       }}
     >
-      {authorOdinId ? (
+      {senderOdinId ? (
         <Avatar
-          odinId={authorOdinId}
+          odinId={senderOdinId}
           imageSize={{ width: 42, height: 42 }}
           style={{
             marginRight: 16,
@@ -136,7 +128,7 @@ export const ReactionTile = ({
             color: isDarkMode ? Colors.white : Colors.slate[700],
           }}
         >
-          <AuthorName odinId={authorOdinId} showYou />
+          <AuthorName odinId={senderOdinId} showYou />
         </Text>
         <Text
           style={{

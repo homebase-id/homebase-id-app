@@ -7,7 +7,13 @@ import {
 
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import CodePush from 'react-native-code-push';
-import { useAuth, useValidTokenCheck } from '../hooks/auth/useAuth';
+import {
+  circleDrives,
+  drives,
+  permissions,
+  useAuth,
+  useValidTokenCheck,
+} from '../hooks/auth/useAuth';
 import { DotYouClientProvider } from '../components/Auth/DotYouClientProvider';
 import { Platform } from 'react-native';
 
@@ -45,6 +51,9 @@ import { ProfileStack } from './ProfileStack';
 import BootSplash from 'react-native-bootsplash';
 import BubbleColorProvider from '../components/BubbleContext/BubbleContext';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import { ExtendPermissionDialog } from '../components/Permissions/ExtendPermissionDialog';
+import { t } from 'feed-app-common';
+import { FEED_CHAT_APP_ID } from './constants';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -129,6 +138,14 @@ const AuthenticatedRoot = memo(() => {
         <WebSocketContextProvider>
           <BubbleColorProvider>
             <ErrorBoundary>
+              <ExtendPermissionDialog
+                appName={t('Homebase Feed & Chat')}
+                appId={FEED_CHAT_APP_ID}
+                drives={drives}
+                circleDrives={circleDrives}
+                permissions={permissions}
+                // needsAllConnected={true}
+              />
               <AppStackScreen />
             </ErrorBoundary>
           </BubbleColorProvider>
