@@ -1,3 +1,4 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { AppPermissionType } from '@youfoundation/js-lib/network';
 import { t, useMissingPermissions } from 'feed-app-common';
 import { useEffect } from 'react';
@@ -31,6 +32,7 @@ export const ExtendPermissionDialog = ({
   permissions: AppPermissionType[];
   needsAllConnected?: boolean;
 }) => {
+  const queryClient = useQueryClient();
   const extendPermissionUrl = useMissingPermissions({
     appId,
     drives,
@@ -41,7 +43,8 @@ export const ExtendPermissionDialog = ({
 
   useEffect(() => {
     if (extendPermissionUrl) {
-      console.log('extendPermissionUrl', extendPermissionUrl);
+      queryClient.invalidateQueries({ queryKey: ['security-context'], exact: false });
+
       Alert.alert(
         t('Missing permissions'),
         t(
