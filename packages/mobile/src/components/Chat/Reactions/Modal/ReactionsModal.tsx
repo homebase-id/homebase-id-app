@@ -68,7 +68,11 @@ export const ReactionsModal = memo(
             ) : (
               <BottomSheetScrollView>
                 {reactions?.map((prop) => (
-                  <ReactionTile key={prop.authorOdinId + prop.body} {...prop} />
+                  <ReactionTile
+                    key={prop.authorOdinId + prop.body}
+                    reaction={prop.body}
+                    {...prop}
+                  />
                 ))}
               </BottomSheetScrollView>
             )}
@@ -79,9 +83,13 @@ export const ReactionsModal = memo(
   )
 );
 
-const ReactionTile = (prop: ReactionFile) => {
-  const reaction = prop.body;
-  const senderOdinId = prop.authorOdinId;
+export const ReactionTile = ({
+  reaction,
+  authorOdinId,
+}: {
+  reaction: string;
+  authorOdinId?: string;
+}) => {
   const { isDarkMode } = useDarkMode();
   return (
     <View
@@ -92,9 +100,9 @@ const ReactionTile = (prop: ReactionFile) => {
         marginTop: 10,
       }}
     >
-      {senderOdinId ? (
+      {authorOdinId ? (
         <Avatar
-          odinId={senderOdinId}
+          odinId={authorOdinId}
           imageSize={{ width: 42, height: 42 }}
           style={{
             marginRight: 16,
@@ -128,7 +136,7 @@ const ReactionTile = (prop: ReactionFile) => {
             color: isDarkMode ? Colors.white : Colors.slate[700],
           }}
         >
-          <AuthorName odinId={senderOdinId} showYou />
+          <AuthorName odinId={authorOdinId} showYou />
         </Text>
         <Text
           style={{

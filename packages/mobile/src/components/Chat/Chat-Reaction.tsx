@@ -11,7 +11,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useChatReaction } from '../../hooks/chat/useChatReaction';
 import { useConversation } from '../../hooks/chat/useConversation';
-import { HomebaseFile, ReactionFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ChatMessage } from '../../provider/chat/ChatProvider';
 import { Colors } from '../../app/Colors';
 import { useDarkMode } from '../../hooks/useDarkMode';
