@@ -1,0 +1,73 @@
+import { AppPermissionType } from '@youfoundation/js-lib/network';
+import { t, useMissingPermissions } from 'feed-app-common';
+import { useEffect } from 'react';
+import { Alert, Linking } from 'react-native';
+import InAppBrowser from 'react-native-inappbrowser-reborn';
+
+export const ExtendPermissionDialog = ({
+  appId,
+  appName,
+  drives,
+  circleDrives,
+  permissions,
+  needsAllConnected,
+}: {
+  appId: string;
+  appName: string;
+  drives: {
+    a: string;
+    t: string;
+    n: string;
+    d: string;
+    p: number;
+  }[];
+  circleDrives?: {
+    a: string;
+    t: string;
+    n: string;
+    d: string;
+    p: number;
+  }[];
+  permissions: AppPermissionType[];
+  needsAllConnected?: boolean;
+}) => {
+  const extendPermissionUrl = useMissingPermissions({
+    appId,
+    drives,
+    circleDrives,
+    permissions,
+    needsAllConnected,
+  });
+
+  useEffect(() => {
+    if (extendPermissionUrl) {
+      console.log('extendPermissionUrl', extendPermissionUrl);
+      Alert.alert(
+        t('Missing permissions'),
+        t(
+          `The ${appName} app is missing permissions. Without the necessary permissions the functionality of ${appName} will be limited`
+        ),
+        [
+          {
+            text: 'Extend permissions',
+            onPress: async () => {
+              if (await InAppBrowser.isAvailable()) {
+                await InAppBrowser.open(extendPermissionUrl, {
+                  enableUrlBarHiding: false,
+                  enableDefaultShare: false,
+                });
+              } else Linking.openURL(extendPermissionUrl);
+            },
+          },
+          {
+            text: 'Cancel',
+            onPress: () => console.log('Cancel Pressed'),
+            style: 'cancel',
+          },
+        ]
+      );
+    }
+  }, [appName, extendPermissionUrl]);
+
+  return null;
+};

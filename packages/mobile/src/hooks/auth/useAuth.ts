@@ -88,7 +88,7 @@ export const drives = [
       DrivePermissionType.Comment,
   },
 ];
-export const permissionKeys = [
+export const permissions = [
   AppPermissionType.ReadConnections,
   AppPermissionType.ReadConnectionRequests,
   AppPermissionType.ReadCircleMembers,
@@ -101,7 +101,7 @@ export const permissionKeys = [
   AppPermissionType.SendPushNotifications,
 ];
 
-const circleDrives = [
+export const circleDrives = [
   {
     a: ChatConfig.ChatDrive.alias,
     t: ChatConfig.ChatDrive.type,
@@ -226,7 +226,7 @@ export const useYouAuthAuthorization = () => {
       'homebase-fchat://auth/finalize/',
       appName,
       appId,
-      permissionKeys,
+      permissions,
       undefined,
       drives,
       circleDrives,
