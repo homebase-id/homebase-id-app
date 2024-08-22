@@ -75,7 +75,7 @@ export const CommentComposer = ({
         style={{
           flexDirection: 'row',
           justifyContent: 'center',
-          alignItems: 'center',
+          alignItems: 'flex-end',
           gap: 6,
           paddingHorizontal: 7,
           paddingTop: 10,
