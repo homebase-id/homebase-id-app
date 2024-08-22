@@ -7,21 +7,27 @@ import { BottomSheetTextInput } from '@gorhom/bottom-sheet';
 
 import { useCallback, useState } from 'react';
 import { chatStyles } from '../../../Chat/ChatDetail';
-import { SendChat } from '../../../ui/Icons/icons';
+import { Close, SendChat } from '../../../ui/Icons/icons';
 import { Colors } from '../../../../app/Colors';
 import { OwnerAvatar } from '../../../ui/Avatars/Avatar';
 import { ErrorNotification } from '../../../ui/Alert/ErrorNotification';
 import { CantReactInfo } from '../../CanReactInfo';
-import Animated from 'react-native-reanimated';
+import Animated, { Easing, SlideInUp } from 'react-native-reanimated';
+import { Text } from '../../../ui/Text/Text';
+import { IconButton } from '../../../Chat/Chat-app-bar';
 
 export const CommentComposer = ({
   context,
   replyThreadId,
   canReact,
+  onReplyCancel,
+  replyOdinId,
 }: {
   context: ReactionContext;
   replyThreadId?: string;
   canReact?: CanReactInfo;
+  onReplyCancel?: () => void;
+  replyOdinId?: string;
 }) => {
   const {
     mutateAsync: postComment,
@@ -60,11 +66,12 @@ export const CommentComposer = ({
       });
     } catch (e) {}
     setMessage('');
-  }, [context, identity, message, postComment, postState, replyThreadId]);
+    onReplyCancel?.();
+  }, [context, identity, message, onReplyCancel, postComment, postState, replyThreadId]);
 
   if (canReact?.canReact === true || canReact?.canReact === 'comment') {
     return (
-      <View
+      <Animated.View
         style={{
           flexDirection: 'row',
           justifyContent: 'center',
@@ -97,7 +104,35 @@ export const CommentComposer = ({
             alignItems: 'flex-start',
           }}
         >
-          {replyThreadId && <Animated.View></Animated.View>}
+          {replyThreadId && (
+            <Animated.View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                alignSelf: 'flex-start',
+                marginTop: 2,
+                marginHorizontal: 2,
+              }}
+              entering={SlideInUp.withInitialValues({ originY: 10 })
+                .duration(150)
+                .easing(Easing.inOut(Easing.linear))}
+            >
+              <Text
+                ellipsizeMode="tail"
+                numberOfLines={1}
+                style={{ color: isDarkMode ? Colors.gray[400] : Colors.gray[500], flex: 1 }}
+              >
+                {t('Replying to')} {replyOdinId}
+              </Text>
+              <IconButton
+                icon={<Close />}
+                onPress={onReplyCancel}
+                style={{
+                  padding: 0,
+                }}
+              />
+            </Animated.View>
+          )}
           <BottomSheetTextInput
             value={message}
             onChangeText={setMessage}
@@ -136,7 +171,7 @@ export const CommentComposer = ({
             <SendChat size={'md'} color={Colors.white} />
           </View>
         </TouchableOpacity>
-      </View>
+      </Animated.View>
     );
   }
   return <CantReactInfo cantReact={canReact} intent="comment" />;

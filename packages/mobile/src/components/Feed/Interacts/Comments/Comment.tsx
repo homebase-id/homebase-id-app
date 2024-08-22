@@ -17,13 +17,14 @@ import { Colors } from '../../../../app/Colors';
 import { ErrorNotification } from '../../../ui/Alert/ErrorNotification';
 import { CommentHead } from './CommentHead';
 import { CommentMeta } from './CommentMeta';
+import { CommentThread } from './CommentThread';
 
 export interface CommentProps {
   context: ReactionContext;
   canReact?: CanReactInfo;
   commentData: HomebaseFile<ReactionFile> | NewHomebaseFile<RawReactionContent>;
   isThread: boolean;
-  onReply?: () => void;
+  onReply?: (replyComment: HomebaseFile<ReactionFile>) => void;
 }
 
 export interface dirtyReactionContext extends Omit<ReactionContext, 'target'> {
@@ -35,7 +36,6 @@ export interface dirtyReactionContext extends Omit<ReactionContext, 'target'> {
 }
 
 export const Comment = ({ context, canReact, commentData, onReply, isThread }: CommentProps) => {
-  const [isReply, setIsReply] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const {
     saveComment: { mutateAsync: postComment, error: postCommentError, status: postState },
@@ -133,8 +133,15 @@ export const Comment = ({ context, canReact, commentData, onReply, isThread }: C
             threadContext={threadContext as ReactionContext}
             created={(commentData as HomebaseFile<ReactionFile>).fileMetadata.created}
             updated={(commentData as HomebaseFile<ReactionFile>).fileMetadata.updated}
-            onReply={isThread ? undefined : () => (onReply ? onReply() : setIsReply(!isReply))}
+            onReply={
+              isThread ? undefined : () => onReply?.(commentData as HomebaseFile<ReactionFile>)
+            }
           />
+        ) : null}
+        {!isThread && threadContext.target.fileId && threadContext.target.globalTransitId ? (
+          <>
+            <CommentThread context={threadContext as ReactionContext} canReact={canReact} />
+          </>
         ) : null}
       </View>
     </View>

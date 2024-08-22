@@ -30,7 +30,13 @@ export const CommentsModal = memo(
     const { isDarkMode } = useDarkMode();
     const bottomSheetRef = useRef<BottomSheetModalMethods>(null);
     const [context, setContext] = useState<ReactionContext & CanReactInfo>();
-    const [replyThread, setReplyThread] = useState<string | undefined>();
+    const [replyTo, setReplyThread] = useState<
+      | {
+          replyThreadId: string | undefined;
+          authorOdinId: string;
+        }
+      | undefined
+    >();
 
     const { data: comments, hasNextPage, fetchNextPage } = useComments({ context }).fetch;
     const flattenedComments = comments?.pages.flatMap((page) => page.comments).reverse();
@@ -66,12 +72,14 @@ export const CommentsModal = memo(
             <CommentComposer
               context={context as ReactionContext}
               canReact={context}
-              replyThreadId={replyThread}
+              replyThreadId={replyTo?.replyThreadId}
+              replyOdinId={replyTo?.authorOdinId}
+              onReplyCancel={() => setReplyThread(undefined)}
             />
           </BottomSheetFooter>
         );
       },
-      [bottom, context, isDarkMode, replyThread]
+      [bottom, context, isDarkMode, replyTo]
     );
 
     const renderItem = useCallback(
@@ -82,10 +90,11 @@ export const CommentsModal = memo(
             context={context as ReactionContext}
             isThread={false}
             canReact={context}
-            onReply={() => {
-              const canReact = context?.canReact === 'comment' || context?.canReact === true;
-              if (!canReact) return;
-              setReplyThread(context.target.globalTransitId);
+            onReply={(commentFile) => {
+              setReplyThread({
+                replyThreadId: commentFile.fileMetadata.globalTransitId,
+                authorOdinId: commentFile.fileMetadata.appData.content.authorOdinId,
+              });
             }}
           />
         );
