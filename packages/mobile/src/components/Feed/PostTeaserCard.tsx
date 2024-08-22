@@ -23,6 +23,7 @@ import { ShareContext } from './Interacts/Share/ShareModal';
 import { Ellipsis } from '../ui/Icons/icons';
 import { IconButton } from '../Chat/Chat-app-bar';
 import { PostActionProps } from './Interacts/PostActionModal';
+import { Host } from 'react-native-portalize';
 
 export const PostTeaserCard = memo(
   ({

@@ -5,16 +5,23 @@ import {
   ParsedReactionPreview,
 } from '@youfoundation/js-lib/core';
 import { PostContent, ReactionContext } from '@youfoundation/js-lib/public';
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import { IconButton } from '../../Chat/Chat-app-bar';
-import { View } from 'react-native';
-import { OpenHeart, Comment, ShareNode } from '../../ui/Icons/icons';
-import { CanReactInfo, useCanReact, useReaction } from '../../../hooks/reactions';
+import { GestureResponderEvent, View } from 'react-native';
+import { OpenHeart, Comment, ShareNode, SolidHeart } from '../../ui/Icons/icons';
+import {
+  CanReactInfo,
+  useCanReact,
+  useMyEmojiReactions,
+  useReaction,
+} from '../../../hooks/reactions';
 import { useDotYouClientContext } from 'feed-app-common';
 import { EmojiSummary } from './EmojiSummary';
 import { CommentTeaserList } from './CommentsTeaserList';
 import { ShareContext } from './Share/ShareModal';
 import { ErrorNotification } from '../../ui/Alert/ErrorNotification';
+import { Colors } from '../../../app/Colors';
+import { PostReactionBar } from './Reactions/PostReactionBar';
 
 export const PostInteracts = memo(
   ({
@@ -47,11 +54,6 @@ export const PostInteracts = memo(
       isOwner: false,
     });
 
-    const {
-      saveEmoji: { mutate: postEmoji, error: postEmojiError },
-      // removeEmoji: { mutate: removeEmoji, error: removeEmojiError },
-    } = useReaction();
-
     if (!postFile.fileMetadata.globalTransitId || !postFile.fileId) return null;
 
     const reactionContext: ReactionContext = {
@@ -63,15 +65,6 @@ export const PostInteracts = memo(
         isEncrypted: postFile.fileMetadata.isEncrypted || false,
       },
     };
-
-    const onLike = () =>
-      postEmoji({
-        emojiData: {
-          authorOdinId: owner || '',
-          body: '❤️',
-        },
-        context: reactionContext,
-      });
 
     const onCommentPressHandler = () => {
       const context: ReactionContext & CanReactInfo = {
@@ -101,8 +94,7 @@ export const PostInteracts = memo(
             alignItems: 'center',
           }}
         >
-          {!postDisabledEmoji && <IconButton icon={<OpenHeart />} onPress={onLike} />}
-          <ErrorNotification error={postEmojiError} />
+          {!postDisabledEmoji && <LikeButton context={reactionContext} canReact={canReact} />}
           <EmojiSummary
             context={reactionContext}
             onReactionPress={() => onReactionPress?.(reactionContext)}
@@ -134,3 +126,76 @@ export const PostInteracts = memo(
     );
   }
 );
+
+export const LikeButton = ({
+  context,
+  canReact,
+}: {
+  context: ReactionContext;
+  canReact?: CanReactInfo;
+}) => {
+  const identity = useDotYouClientContext().getIdentity();
+  const {
+    saveEmoji: { mutate: postEmoji, error: postEmojiError },
+    removeEmoji: { mutate: removeEmoji, error: removeEmojiError },
+  } = useReaction();
+
+  const { data: myEmojis } = useMyEmojiReactions(context).fetch;
+
+  const [reactionBarVisible, setReactionBarVisible] = useState<{
+    isActive: boolean;
+    coordinates?: {
+      x: number;
+      y: number;
+    };
+  }>({ isActive: false });
+
+  const doLike = () =>
+    postEmoji({
+      emojiData: {
+        authorOdinId: identity || '',
+        body: '❤️',
+      },
+      context,
+    });
+
+  const doUnlike = () =>
+    removeEmoji({
+      emojiData: { body: '❤️', authorOdinId: identity || '' },
+      context,
+    });
+
+  const isLiked = myEmojis?.some((reaction) => reaction === '❤️');
+
+  const onLongPress = (e: GestureResponderEvent) => {
+    const y = e.nativeEvent.pageY - e.nativeEvent.locationY;
+    setReactionBarVisible({
+      isActive: true,
+      coordinates: {
+        x: e.nativeEvent.locationX,
+        y,
+      },
+    });
+  };
+
+  return (
+    <>
+      <ErrorNotification error={postEmojiError || removeEmojiError} />
+      <IconButton
+        icon={isLiked ? <SolidHeart color={Colors.red[500]} /> : <OpenHeart />}
+        onPress={isLiked ? doUnlike : doLike}
+        touchableProps={{
+          onLongPress: onLongPress,
+        }}
+      />
+
+      <PostReactionBar
+        context={context}
+        canReact={canReact}
+        isActive={reactionBarVisible.isActive}
+        coordinates={reactionBarVisible.coordinates}
+        onClose={() => setReactionBarVisible({ isActive: false })}
+      />
+    </>
+  );
+};

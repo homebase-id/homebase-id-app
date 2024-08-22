@@ -15,6 +15,7 @@ import { ListRenderItemInfo } from 'react-native';
 import { PostReactionModal, ReactionModalMethods } from '../Interacts/Reactions/PostReactionModal';
 import { ShareContext, ShareModal, ShareModalMethods } from '../Interacts/Share/ShareModal';
 import { PostActionMethods, PostActionProps, PostModalAction } from '../Interacts/PostActionModal';
+import { Host } from 'react-native-portalize';
 
 const PAGE_SIZE = 10;
 
@@ -110,18 +111,20 @@ const SocialFeedMainContent = memo(() => {
 
   return (
     <>
-      <Animated.FlatList
-        data={flattenedPosts}
-        contentContainerStyle={{ flexGrow: 1 }}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-        showsVerticalScrollIndicator={false}
-        keyExtractor={(item) => item.fileId}
-        renderItem={renderItem}
-        ListEmptyComponent={<EmptyFeed />}
-        ListFooterComponent={listFooter}
-        onEndReached={() => hasMorePosts && fetchNextPage()}
-        onEndReachedThreshold={0.3}
-      />
+      <Host>
+        <Animated.FlatList
+          data={flattenedPosts}
+          contentContainerStyle={{ flexGrow: 1 }}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+          showsVerticalScrollIndicator={false}
+          keyExtractor={(item) => item.fileId}
+          renderItem={renderItem}
+          ListEmptyComponent={<EmptyFeed />}
+          ListFooterComponent={listFooter}
+          onEndReached={() => hasMorePosts && fetchNextPage()}
+          onEndReachedThreshold={0.3}
+        />
+      </Host>
       <CommentsModal ref={commentRef} />
       <PostReactionModal ref={reactionRef} />
       <ShareModal ref={shareRef} />
