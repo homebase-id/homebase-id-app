@@ -12,7 +12,6 @@ export const useSecurityContext = (odinId?: string, isEnabled?: boolean) => {
   const fetch = async (odinId?: string) => {
     if (
       !odinId ||
-      odinId === window.location.hostname ||
       (dotYouClient.getType() === ApiType.App && odinId === dotYouClient.getIdentity())
     ) {
       return await getSecurityContext(dotYouClient);
