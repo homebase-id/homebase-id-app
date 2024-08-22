@@ -83,6 +83,7 @@ export const PostReactionBar = memo(
       y = isNaN(y) ? 0 : y;
       return {
         opacity: withTiming(opacity.value, { duration: 200 }),
+        pointerEvents: opacity.value === 0 ? 'none' : 'auto',
         transform: [
           {
             translateY: y,
