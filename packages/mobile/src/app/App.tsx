@@ -31,7 +31,7 @@ import { useRefetchOnFocus } from '../hooks/platform/useRefetchOnFocus';
 import { useOnlineManager } from '../hooks/platform/useOnlineManager';
 import { PushNotificationProvider } from '../components/push-notification/PushNotificationProvider';
 import { useAuthenticatedPushNotification } from '../hooks/push-notification/useAuthenticatedPushNotification';
-import Toast from 'react-native-toast-message';
+
 import { ErrorToaster } from '../components/ui/Alert/ErrorToaster';
 import {
   TabFeedIcon,
@@ -52,7 +52,8 @@ import BootSplash from 'react-native-bootsplash';
 import BubbleColorProvider from '../components/BubbleContext/BubbleContext';
 import { ExtendPermissionDialog } from '../components/Permissions/ExtendPermissionDialog';
 import { t } from 'feed-app-common';
-import { CHAT_APP_ID, FEED_CHAT_APP_ID } from './constants';
+import { FEED_CHAT_APP_ID } from './constants';
+import { Toast } from '../components/ui/Toast/Toast';
 
 export type AuthStackParamList = {
   Login: undefined;
