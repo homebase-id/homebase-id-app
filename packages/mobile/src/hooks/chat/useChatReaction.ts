@@ -175,6 +175,7 @@ export const useChatReaction = (props?: {
       queryFn: getReactionsByMessageGlobalTransitId(messageGlobalTransitId as string),
       enabled: !!messageGlobalTransitId && !!messageFileId,
       staleTime: 1000 * 60 * 10, // 10 min
+      refetchOnMount: true,
     }),
     add: useMutation(getAddReactionMutationOptions(queryClient)),
     remove: useMutation(getRemoveReactionMutationOptions(queryClient)),
