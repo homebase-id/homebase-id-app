@@ -2,10 +2,13 @@
 
 Homebase feed and chat app powered by Odin.
 
-<p  align="center">
-<a href='https://play.google.com/store/apps/details?id=id.homebase.feed&pcampaignid=web_share'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png' height='80px' width="32%"/></a>
-<a href='https://apps.apple.com/in/app/homebase-id/id6468971238'><img alt='Get it on Google Play' src='https://developer.apple.com/news/images/download-on-the-app-store-badge.png' height='60px' width="32%" /></a>
+
+<a href='https://play.google.com/store/apps/details?id=id.homebase.feed&pcampaignid=web_share'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png' height='80px'/></a> 
+
+<p>
+&nbsp &nbsp <a href='https://apps.apple.com/in/app/homebase-id/id6468971238'><img alt='Get it on Google Play' src='https://developer.apple.com/news/images/download-on-the-app-store-badge.png' height='54px' width="160px"/></a>
 </p>
+
 
 ## Running Locally
 
@@ -35,14 +38,14 @@ adb root
 adb reverse tcp:443 tcp:443
 ```
 
-Now you can login with local identities such as `frodo.dotyou.cloud`.
+Now you can log in with local identities such as `frodo.dotyou.cloud`.
 
 > [!Note]
 > No Such configuration is required for iOS simulators.
 
 ## Communications
 
-For reporting bugs, please use the [issue tracker](https://github.com/YouFoundation/feed-mobile-app/issues) on GitHub.
+Please use the [issue tracker](https://github.com/YouFoundation/feed-mobile-app/issues) on GitHub to report bugs.
 
 ## Security Disclosures
 
