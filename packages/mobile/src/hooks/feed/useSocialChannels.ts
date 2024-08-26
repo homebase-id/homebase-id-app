@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { getChannelsOverPeer } from '@youfoundation/js-lib/peer';
+import { getChannelsOverPeer } from '@homebase-id/js-lib/peer';
 import { useDotYouClientContext } from 'feed-app-common';
 
 interface useSocialChannelsProps {

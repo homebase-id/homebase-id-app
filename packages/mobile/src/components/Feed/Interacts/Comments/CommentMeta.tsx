@@ -1,4 +1,4 @@
-import { ReactionContext } from '@youfoundation/js-lib/public';
+import { ReactionContext } from '@homebase-id/js-lib/public';
 import { CanReactInfo, useReaction } from '../../../../hooks/reactions';
 import { View } from 'react-native';
 import TextButton from '../../../ui/Text/Text-Button';

@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useManagePost } from '../../../hooks/feed/post/useManagePost';
 import { useChannel } from '../../../hooks/feed/channels/useChannel';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
-import { PostContent } from '@youfoundation/js-lib/public';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
+import { PostContent } from '@homebase-id/js-lib/public';
 import { ActionButton, ActionGroupProps } from '../Interacts/PostActionModal';
 import { Copy, Pencil, Trash } from '../../ui/Icons/icons';
 import { t, useDotYouClientContext } from 'feed-app-common';

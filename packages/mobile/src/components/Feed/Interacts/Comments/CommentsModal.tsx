@@ -11,14 +11,14 @@ import { Colors } from '../../../../app/Colors';
 import { ListRenderItemInfo, Platform, StyleSheet, View } from 'react-native';
 import { Text } from '../../../ui/Text/Text';
 
-import { ReactionContext } from '@youfoundation/js-lib/public';
+import { ReactionContext } from '@homebase-id/js-lib/public';
 import { CanReactInfo, useComments } from '../../../../hooks/reactions';
 import { Comment } from './Comment';
 
 import { Backdrop } from '../../../ui/Modal/Backdrop';
 import { CommentComposer } from './CommentComposer';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { HomebaseFile, ReactionFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile, ReactionFile } from '@homebase-id/js-lib/core';
 import { t } from 'feed-app-common';
 
 export interface CommentModalMethods {

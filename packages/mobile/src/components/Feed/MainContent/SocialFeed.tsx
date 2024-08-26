@@ -1,6 +1,6 @@
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { useSocialFeed } from '../../../hooks/feed/useSocialFeed';
-import { PostContent, ReactionContext } from '@youfoundation/js-lib/public';
+import { PostContent, ReactionContext } from '@homebase-id/js-lib/public';
 import { memo, useCallback, useMemo, useRef, useState } from 'react';
 import { flattenInfinteData } from '../../../utils/utils';
 import Animated from 'react-native-reanimated';

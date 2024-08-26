@@ -1,5 +1,5 @@
-import { ApiType, DotYouClient, HomebaseFile, NewHomebaseFile } from '@youfoundation/js-lib/core';
-import { PostContent, ChannelDefinition, EmbeddedPost } from '@youfoundation/js-lib/public';
+import { ApiType, DotYouClient, HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
+import { PostContent, ChannelDefinition, EmbeddedPost } from '@homebase-id/js-lib/public';
 import { ChannelDefinitionVm } from '../../../hooks/feed/channels/useChannels';
 import { t, useDotYouClientContext, useIsConnected } from 'feed-app-common';
 import { TouchableOpacity, View } from 'react-native';
@@ -8,7 +8,7 @@ import { useDarkMode } from '../../../hooks/useDarkMode';
 import { Colors } from '../../../app/Colors';
 import { openURL } from '../../../utils/utils';
 import { Lock, Users } from '../../ui/Icons/icons';
-import { aclEqual } from '@youfoundation/js-lib/helpers';
+import { aclEqual } from '@homebase-id/js-lib/helpers';
 import { AclSummary } from '../Composer/AclSummary';
 
 interface PostMetaWithPostFileProps {

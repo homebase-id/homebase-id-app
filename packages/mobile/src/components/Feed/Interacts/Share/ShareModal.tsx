@@ -44,8 +44,8 @@ import Clipboard from '@react-native-clipboard/clipboard';
 import Toast from 'react-native-toast-message';
 import { openURL } from '../../../../utils/utils';
 import { ContactTile } from '../../../Contact/Contact-Tile';
-import { DotYouProfile } from '@youfoundation/js-lib/network';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { DotYouProfile } from '@homebase-id/js-lib/network';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import {
   ConversationWithYourself,
   UnifiedConversation,
@@ -60,7 +60,7 @@ import {
   ConversationWithRecentMessage,
   useConversationsWithRecentMessage,
 } from '../../../../hooks/chat/useConversationsWithRecentMessage';
-import { getNewId } from '@youfoundation/js-lib/helpers';
+import { getNewId } from '@homebase-id/js-lib/helpers';
 import { ErrorNotification } from '../../../ui/Alert/ErrorNotification';
 import { AuthorName } from '../../../ui/Name';
 import { ConversationTileWithYourself } from '../../../../pages/conversations-page';

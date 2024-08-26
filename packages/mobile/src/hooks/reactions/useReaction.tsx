@@ -6,7 +6,7 @@ import {
   removeEmojiReaction,
   saveComment,
   saveEmojiReaction,
-} from '@youfoundation/js-lib/public';
+} from '@homebase-id/js-lib/public';
 
 import { UseCommentsVal } from './comments/useComments';
 
@@ -15,7 +15,7 @@ import {
   EmojiReactionSummary,
   NewHomebaseFile,
   ReactionFile,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 import { useDotYouClientContext } from 'feed-app-common';
 
 export const useReaction = () => {

@@ -1,11 +1,11 @@
-import { RawReactionContent, ReactionContext } from '@youfoundation/js-lib/public';
+import { RawReactionContent, ReactionContext } from '@homebase-id/js-lib/public';
 import { CanReactInfo, useReaction } from '../../../../hooks/reactions';
 import {
   CommentReactionPreview,
   HomebaseFile,
   NewHomebaseFile,
   ReactionFile,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 import { useState } from 'react';
 import { View } from 'react-native';
 import { Avatar } from '../../../ui/Avatars/Avatar';

@@ -5,9 +5,9 @@ import {
   getRecentPosts,
   PostContent,
   PostType,
-} from '@youfoundation/js-lib/public';
+} from '@homebase-id/js-lib/public';
 
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { useChannels } from '../channels/useChannels';
 import { useDotYouClientContext } from 'feed-app-common';
 import { useAuth } from '../../auth/useAuth';
@@ -55,22 +55,22 @@ export const usePostsInfinite = ({
       cachedData ||
       (channelId
         ? await getPosts(
-          dotYouClient,
-          channelId,
-          postType,
-          false,
-          typeof pageParam === 'string' ? pageParam : undefined,
-          BLOG_POST_INFIITE_PAGE_SIZE
-        )
+            dotYouClient,
+            channelId,
+            postType,
+            false,
+            typeof pageParam === 'string' ? pageParam : undefined,
+            BLOG_POST_INFIITE_PAGE_SIZE
+          )
         : await getRecentPosts(
-          dotYouClient,
-          postType,
-          false,
-          typeof pageParam === 'object' ? pageParam : undefined,
-          BLOG_POST_INFIITE_PAGE_SIZE,
-          channels,
-          includeHidden
-        ));
+            dotYouClient,
+            postType,
+            false,
+            typeof pageParam === 'object' ? pageParam : undefined,
+            BLOG_POST_INFIITE_PAGE_SIZE,
+            channels,
+            includeHidden
+          ));
 
     return {
       results: response.results.filter(

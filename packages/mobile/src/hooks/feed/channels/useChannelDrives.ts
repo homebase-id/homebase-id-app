@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { BlogConfig } from '@youfoundation/js-lib/public';
-import { getDrivesByType } from '@youfoundation/js-lib/core';
+import { BlogConfig } from '@homebase-id/js-lib/public';
+import { getDrivesByType } from '@homebase-id/js-lib/core';
 import { useDotYouClientContext } from 'feed-app-common';
 
 export const useChannelDrives = (isEnabled: boolean) => {

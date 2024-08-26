@@ -6,9 +6,9 @@ import { Colors } from '../../../../app/Colors';
 import { Text } from '../../../ui/Text/Text';
 import { View } from 'react-native';
 import { useDarkMode } from '../../../../hooks/useDarkMode';
-import { ReactionContext } from '@youfoundation/js-lib/public';
+import { ReactionContext } from '@homebase-id/js-lib/public';
 import { useEmojiReactions } from '../../../../hooks/reactions';
-import { ReactionFile } from '@youfoundation/js-lib/core';
+import { ReactionFile } from '@homebase-id/js-lib/core';
 import { ReactionTile } from '../../../Chat/Reactions/Modal/ReactionsModal';
 
 export interface ReactionModalMethods {

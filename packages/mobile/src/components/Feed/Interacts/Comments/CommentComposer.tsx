@@ -1,4 +1,4 @@
-import { ReactionContext } from '@youfoundation/js-lib/public';
+import { ReactionContext } from '@homebase-id/js-lib/public';
 import { CanReactInfo, useReaction } from '../../../../hooks/reactions';
 import { t, useDotYouClientContext } from 'feed-app-common';
 import { Platform, TouchableOpacity, View } from 'react-native';

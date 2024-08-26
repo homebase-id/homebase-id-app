@@ -1,4 +1,4 @@
-import { CommentsReactionSummary } from '@youfoundation/js-lib/core';
+import { CommentsReactionSummary } from '@homebase-id/js-lib/core';
 import { Pressable, View } from 'react-native';
 import { Divider } from '../../ui/Divider';
 import { t } from 'feed-app-common';

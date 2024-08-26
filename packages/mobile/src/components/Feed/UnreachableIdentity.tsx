@@ -1,5 +1,5 @@
-import { HomebaseFile } from '@youfoundation/js-lib/core';
-import { PostContent } from '@youfoundation/js-lib/public';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
+import { PostContent } from '@homebase-id/js-lib/public';
 import { t, useDotYouClientContext } from 'feed-app-common';
 import { useManageSocialFeed } from '../../hooks/feed/useManageSocialFeed';
 import { Text } from '../ui/Text/Text';

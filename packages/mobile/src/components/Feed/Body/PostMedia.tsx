@@ -1,5 +1,5 @@
-import { HomebaseFile } from '@youfoundation/js-lib/core';
-import { getChannelDrive, PostContent } from '@youfoundation/js-lib/public';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
+import { getChannelDrive, PostContent } from '@homebase-id/js-lib/public';
 import { memo } from 'react';
 import { calculateScaledDimensions } from '../../../utils/utils';
 import { Dimensions, View } from 'react-native';

@@ -3,8 +3,8 @@ import {
   DotYouClient,
   HomebaseFile,
   ParsedReactionPreview,
-} from '@youfoundation/js-lib/core';
-import { PostContent, ReactionContext } from '@youfoundation/js-lib/public';
+} from '@homebase-id/js-lib/core';
+import { PostContent, ReactionContext } from '@homebase-id/js-lib/public';
 import { memo, useState } from 'react';
 import { IconButton } from '../../Chat/Chat-app-bar';
 import { GestureResponderEvent, View } from 'react-native';

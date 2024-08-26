@@ -10,7 +10,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { Colors } from '../../../../app/Colors';
-import { ReactionContext } from '@youfoundation/js-lib/public';
+import { ReactionContext } from '@homebase-id/js-lib/public';
 import { CanReactInfo, useMyEmojiReactions, useReaction } from '../../../../hooks/reactions';
 import { useDotYouClientContext } from 'feed-app-common';
 import { useDarkMode } from '../../../../hooks/useDarkMode';

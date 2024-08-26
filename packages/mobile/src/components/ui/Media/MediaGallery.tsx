@@ -16,7 +16,7 @@ import {
   NewPayloadDescriptor,
   PayloadDescriptor,
   TargetDrive,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 import { Text } from '../Text/Text';
 import { ChatDrive } from '../../../provider/chat/ConversationProvider';
 import { useDarkMode } from '../../../hooks/useDarkMode';

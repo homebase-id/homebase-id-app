@@ -1,16 +1,16 @@
 import { useQuery } from '@tanstack/react-query';
-import { getChannelsOverPeer } from '@youfoundation/js-lib/peer';
+import { getChannelsOverPeer } from '@homebase-id/js-lib/peer';
 import {
   DrivePermissionType,
   HomebaseFile,
   getSecurityContextOverPeer,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 import {
   RemoteCollaborativeChannelDefinition,
   getChannelDrive,
   getChannelLinkDefinitions,
-} from '@youfoundation/js-lib/public';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/js-lib/public';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useDotYouClientContext } from 'feed-app-common/src/hooks/auth/useDotYouClientContext';
 import { useAllContacts } from 'feed-app-common';
 

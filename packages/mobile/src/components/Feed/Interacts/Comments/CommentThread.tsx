@@ -1,4 +1,4 @@
-import { ReactionContext } from '@youfoundation/js-lib/public';
+import { ReactionContext } from '@homebase-id/js-lib/public';
 import { CanReactInfo, useComments } from '../../../../hooks/reactions';
 import { Comment } from './Comment';
 import TextButton from '../../../ui/Text/Text-Button';

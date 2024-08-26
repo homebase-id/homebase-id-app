@@ -1,7 +1,7 @@
 import { memo, useCallback, useMemo, useRef, useState } from 'react';
 import { useAuth } from '../../../hooks/auth/useAuth';
 import { useDarkMode } from '../../../hooks/useDarkMode';
-import { uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
+import { uint8ArrayToBase64 } from '@homebase-id/js-lib/helpers';
 import { Text } from '../../ui/Text/Text';
 import { Linking, RefreshControl, ScrollView, View } from 'react-native';
 import { t } from 'feed-app-common';

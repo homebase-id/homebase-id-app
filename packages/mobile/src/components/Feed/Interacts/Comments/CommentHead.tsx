@@ -1,6 +1,6 @@
 import { t, useDotYouClientContext } from 'feed-app-common';
 import { Block, Ellipsis, Pencil, Times } from '../../../ui/Icons/icons';
-import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
+import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 import { View } from 'react-native';
 import { Text } from '../../../ui/Text/Text';
 import { AuthorName } from '../../../ui/Name';
