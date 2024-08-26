@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
-import { hasValidToken } from '@youfoundation/js-lib/auth';
+import { hasValidToken } from '@homebase-id/js-lib/auth';
 import { useEncrtypedStorage } from './useEncryptedStorage';
-import { DotYouClient } from '@youfoundation/js-lib/core';
+import { DotYouClient } from '@homebase-id/js-lib/core';
 import { useNetInfo } from '@react-native-community/netinfo';
 
 const MINUTE_IN_MS = 60000;

@@ -4,9 +4,9 @@ import {
   exchangeDigestForToken,
   getBrowser,
   getOperatingSystem,
-} from '@youfoundation/js-lib/auth';
-import { DotYouClient, ApiType } from '@youfoundation/js-lib/core';
-import { base64ToUint8Array, uint8ArrayToBase64, cbcDecrypt } from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/js-lib/auth';
+import { DotYouClient, ApiType } from '@homebase-id/js-lib/core';
+import { base64ToUint8Array, uint8ArrayToBase64, cbcDecrypt } from '@homebase-id/js-lib/helpers';
 
 import crypto from 'react-native-quick-crypto';
 (globalThis as any).crypto.getRandomValues = crypto.getRandomValues;

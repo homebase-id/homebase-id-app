@@ -10,18 +10,18 @@ import {
   TypedConnectionNotification,
   queryBatch,
   queryModified,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 import {
   getQueryBatchCursorFromTime,
   getQueryModifiedCursorFromTime,
-} from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/js-lib/helpers';
 
-import { processInbox } from '@youfoundation/js-lib/peer';
+import { processInbox } from '@homebase-id/js-lib/peer';
 
 import { useNotificationSubscriber } from '../useNotificationSubscriber';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { getConversationQueryOptions, useConversation } from './useConversation';
 import { useDotYouClientContext } from 'feed-app-common';
 import {

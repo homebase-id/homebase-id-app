@@ -2,9 +2,9 @@ import {
   stringifyToQueryParams,
   getUniqueDrivesWithHighestPermission,
   stringGuidsEqual,
-} from '@youfoundation/js-lib/helpers';
-import { AppPermissionType } from '@youfoundation/js-lib/network';
-import { getExtendAppRegistrationParams } from '@youfoundation/js-lib/auth';
+} from '@homebase-id/js-lib/helpers';
+import { AppPermissionType } from '@homebase-id/js-lib/network';
+import { getExtendAppRegistrationParams } from '@homebase-id/js-lib/auth';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 import { useSecurityContext } from './useSecurityContext';
 

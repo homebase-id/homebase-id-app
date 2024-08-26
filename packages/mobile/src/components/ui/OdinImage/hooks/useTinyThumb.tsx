@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { TargetDrive } from '@youfoundation/js-lib/core';
-import { getDecryptedThumbnailMeta } from '@youfoundation/js-lib/media';
+import { TargetDrive } from '@homebase-id/js-lib/core';
+import { getDecryptedThumbnailMeta } from '@homebase-id/js-lib/media';
 import { useDotYouClientContext } from 'feed-app-common';
 
 const useTinyThumb = ({

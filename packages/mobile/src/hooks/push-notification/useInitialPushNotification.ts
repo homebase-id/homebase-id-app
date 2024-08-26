@@ -1,9 +1,9 @@
 import messaging from '@react-native-firebase/messaging';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { tryJsonParse } from '@youfoundation/js-lib/helpers';
+import { tryJsonParse } from '@homebase-id/js-lib/helpers';
 import { navigateOnNotification } from '../../components/Dashboard/NotificationsOverview';
 import { TabStackParamList } from '../../app/App';
-import { PushNotification } from '@youfoundation/js-lib/core';
+import { PushNotification } from '@homebase-id/js-lib/core';
 import { useDotYouClientContext } from 'feed-app-common';
 import { useCallback, useEffect } from 'react';
 import { ChatStackParamList } from '../../app/ChatStack';

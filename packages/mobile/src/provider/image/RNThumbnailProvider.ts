@@ -3,9 +3,9 @@ import {
   ImageSize,
   ThumbnailFile,
   EmbeddedThumb,
-} from '@youfoundation/js-lib/core';
-import { ThumbnailInstruction } from '@youfoundation/js-lib/media';
-import { base64ToUint8Array, uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/js-lib/core';
+import { ThumbnailInstruction } from '@homebase-id/js-lib/media';
+import { base64ToUint8Array, uint8ArrayToBase64 } from '@homebase-id/js-lib/helpers';
 import { Platform } from 'react-native';
 import { readFile } from 'react-native-fs';
 import ImageResizer, { ResizeFormat } from '@bam.tech/react-native-image-resizer';

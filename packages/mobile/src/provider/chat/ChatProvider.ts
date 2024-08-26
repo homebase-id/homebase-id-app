@@ -31,7 +31,7 @@ import {
   RecipientTransferHistory,
   TransferStatus,
   deleteFile,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 import { ChatDrive, UnifiedConversation } from './ConversationProvider';
 import {
   assertIfDefined,
@@ -39,13 +39,13 @@ import {
   getNewId,
   jsonStringify64,
   stringToUint8Array,
-} from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/js-lib/helpers';
 import { OdinBlob } from '../../../polyfills/OdinBlob';
 import { ImageSource } from '../image/RNImageProvider';
 import { createThumbnails } from '../image/RNThumbnailProvider';
 import { grabThumbnail, processVideo } from '../image/RNVideoProviderSegmenter';
-import { LinkPreview, LinkPreviewDescriptor, VideoContentType } from '@youfoundation/js-lib/media';
-import { sendReadReceipt } from '@youfoundation/js-lib/peer';
+import { LinkPreview, LinkPreviewDescriptor, VideoContentType } from '@homebase-id/js-lib/media';
+import { sendReadReceipt } from '@homebase-id/js-lib/peer';
 
 const CHAT_APP_ID = '2d781401-3804-4b57-b4aa-d8e4e2ef39f4';
 

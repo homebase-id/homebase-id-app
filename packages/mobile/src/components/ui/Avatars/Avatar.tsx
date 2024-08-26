@@ -1,5 +1,5 @@
-import { CONTACT_PROFILE_IMAGE_KEY, ContactConfig } from '@youfoundation/js-lib/network';
-import { GetTargetDriveFromProfileId, BuiltInProfiles } from '@youfoundation/js-lib/profile';
+import { CONTACT_PROFILE_IMAGE_KEY, ContactConfig } from '@homebase-id/js-lib/network';
+import { GetTargetDriveFromProfileId, BuiltInProfiles } from '@homebase-id/js-lib/profile';
 import { memo, useMemo, useState } from 'react';
 import { ImageStyle, StyleProp, ViewStyle, View, StyleSheet, Image, Platform } from 'react-native';
 import useContact from '../../../hooks/contact/useContact';
@@ -9,7 +9,7 @@ import { Users } from '../Icons/icons';
 import { OdinImage } from '../OdinImage/OdinImage';
 import { Colors } from '../../../app/Colors';
 import { SvgUri } from 'react-native-svg';
-import { EmbeddedThumb, TargetDrive } from '@youfoundation/js-lib/core';
+import { EmbeddedThumb, TargetDrive } from '@homebase-id/js-lib/core';
 
 export const Avatar = memo(
   (props: {

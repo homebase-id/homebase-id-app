@@ -12,7 +12,7 @@ import { Container } from '../../../ui/Container/Container';
 import { StyleSheet } from 'react-native';
 import { TouchableHighlight } from 'react-native-gesture-handler';
 import { useChatMessage } from '../../../../hooks/chat/useChatMessage';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { ChatMessage } from '../../../../provider/chat/ChatProvider';
 import { UnifiedConversation } from '../../../../provider/chat/ConversationProvider';
 import { ErrorNotification } from '../../../ui/Alert/ErrorNotification';

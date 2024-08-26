@@ -19,9 +19,9 @@ import { memo, ReactNode, useCallback, useMemo } from 'react';
 import { Copy, EllipsisVertical, Forward, Info, Pencil, Reply, Trash } from '../ui/Icons/icons';
 import Toast from 'react-native-toast-message';
 import { Avatar, GroupAvatar, OwnerAvatar } from '../ui/Avatars/Avatar';
-import { Text } from '../ui/Text/Text';
-import { EmbeddedThumb } from '@youfoundation/js-lib/core';
+import { EmbeddedThumb } from '@homebase-id/js-lib/core';
 import { ChatDrive } from '../../provider/chat/ConversationProvider';
+import { Text } from '../ui/Text/Text';
 
 export type SelectedMessageProp = {
   onReply: () => void;

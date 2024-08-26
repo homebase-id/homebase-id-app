@@ -23,7 +23,7 @@ import {
   EmbeddedThumb,
   PayloadDescriptor,
   TargetDrive,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 import { ChatMessage } from '../provider/chat/ChatProvider';
 import { MessageInfoPage } from '../pages/chat/message-info-page';
 import { UnifiedConversation } from '../provider/chat/ConversationProvider';
@@ -34,7 +34,7 @@ import { TabStackParamList } from './App';
 import { ShareChatPage } from '../pages/chat/share-chat-page';
 import { ContactPage } from '../pages/contacts/contact-page';
 import { GroupCreationPage } from '../pages/contacts/group-creation-page';
-import { DotYouProfile } from '@youfoundation/js-lib/network';
+import { DotYouProfile } from '@homebase-id/js-lib/network';
 
 export type ChatStackParamList = {
   Conversation: undefined;

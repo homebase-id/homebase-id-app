@@ -56,10 +56,9 @@ import ChatMessageBox from '../../components/Chat/Chat-Message-box';
 import { OdinImage } from '../../components/ui/OdinImage/OdinImage';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { ChatDeliveryIndicator } from '../../components/Chat/Chat-Delivery-Indicator';
-import { useChatReaction } from '../../hooks/chat/useChatReaction';
 import { Avatar as AppAvatar, OwnerAvatar } from '../../components/ui/Avatars/Avatar';
 import { AuthorName, ConnectionName } from '../../components/ui/Name';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { ChatDeletedArchivalStaus, ChatMessage } from '../../provider/chat/ChatProvider';
 import { useAudioRecorder } from '../../hooks/audio/useAudioRecorderPlayer';
 import { Text } from '../ui/Text/Text';
@@ -81,7 +80,8 @@ import { TouchableHighlight } from 'react-native-gesture-handler';
 import { ParseShape } from 'react-native-gifted-chat/src/MessageText';
 import { MentionDropDown } from './Mention-Dropdown';
 import { LinkPreviewBar } from './Link-Preview-Bar';
-import { LinkPreview } from '@youfoundation/js-lib/media';
+import { LinkPreview } from '@homebase-id/js-lib/media';
+import { tryJsonParse } from '@homebase-id/js-lib/helpers';
 
 export type ChatMessageIMessage = IMessage & HomebaseFile<ChatMessage>;
 
@@ -902,23 +902,20 @@ const RenderBubble = memo(
       false;
     const isReply = !!content?.replyId;
     const showBackground = !isEmojiOnly || isReply;
-    const { data: reactions } = useChatReaction({
-      messageFileId: message?.fileId,
-      messageGlobalTransitId: message?.fileMetadata.globalTransitId,
-    }).get;
 
     const onRetryOpen = useCallback(() => {
       props.onRetryClick(message);
     }, [message, props]);
 
+    const reactions =
+      (message.fileMetadata.reactionPreview?.reactions &&
+        Object.values(message.fileMetadata.reactionPreview?.reactions).map((reaction) => {
+          return tryJsonParse<{ emoji: string }>(reaction.reactionContent).emoji;
+        })) ||
+      [];
+    const filteredEmojis = Array.from(new Set(reactions));
     const hasReactions = (reactions && reactions?.length > 0) || false;
-    const filteredEmojis = useMemo(
-      () =>
-        reactions?.filter((reaction) =>
-          reactions?.some((reactionFile) => reactionFile?.body === reaction?.body)
-        ) || [],
-      [reactions]
-    );
+
     // has pauload and no text but no audio payload
     const hasPayloadandNoText =
       message?.fileMetadata.payloads?.length > 0 &&
@@ -1011,7 +1008,7 @@ const RenderBubble = memo(
                               marginRight: 2,
                             }}
                           >
-                            {reaction.body}
+                            {reaction}
                           </Text>
                         );
                       })}

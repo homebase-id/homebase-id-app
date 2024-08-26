@@ -3,10 +3,10 @@ import {
   TypedConnectionNotification,
   PushNotification,
   AppNotification,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 import { useCallback } from 'react';
 import { useNotificationSubscriber } from '../useNotificationSubscriber';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { incrementAppIdNotificationCount } from './usePushNotifications';
 
 export const useLivePushNotifications = () => {

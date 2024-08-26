@@ -1,5 +1,5 @@
 import messaging, { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
-import { PushNotification } from '@youfoundation/js-lib/core';
+import { PushNotification } from '@homebase-id/js-lib/core';
 import notifee, { AndroidVisibility } from '@notifee/react-native';
 import { bodyFormer } from '../../components/Dashboard/NotificationsOverview';
 import axios from 'axios';

@@ -1,4 +1,4 @@
-import { TargetDrive } from '@youfoundation/js-lib/core';
+import { TargetDrive } from '@homebase-id/js-lib/core';
 import { useAuth } from '../../../../hooks/auth/useAuth';
 import { useDotYouClientContext } from 'feed-app-common';
 import { useQuery, useQueryClient } from '@tanstack/react-query';

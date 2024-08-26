@@ -3,9 +3,9 @@ import {
   NewHomebaseFile,
   AccessControlList,
   SecurityGroupType,
-} from '@youfoundation/js-lib/core';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import { ChannelDefinition, BlogConfig, ReactAccess } from '@youfoundation/js-lib/public';
+} from '@homebase-id/js-lib/core';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { ChannelDefinition, BlogConfig, ReactAccess } from '@homebase-id/js-lib/public';
 import { t, useDotYouClientContext } from 'feed-app-common';
 import { useState, useMemo, useCallback, useLayoutEffect, useRef, useEffect, memo } from 'react';
 import { View, TextInput, TouchableOpacity } from 'react-native';

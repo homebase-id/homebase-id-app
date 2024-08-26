@@ -5,7 +5,7 @@ import { memo, useCallback, useLayoutEffect, useRef, useState } from 'react';
 import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel';
 import { OdinImage } from '../components/ui/OdinImage/OdinImage';
 import { ChatStackParamList } from '../app/ChatStack';
-import { PayloadDescriptor } from '@youfoundation/js-lib/core';
+import { PayloadDescriptor } from '@homebase-id/js-lib/core';
 
 import Share from 'react-native-share';
 import { useSafeAreaFrame } from 'react-native-safe-area-context';

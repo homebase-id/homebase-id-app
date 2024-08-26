@@ -1,5 +1,5 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { FailedTransferStatuses, HomebaseFile } from '@youfoundation/js-lib/core';
+import { FailedTransferStatuses, HomebaseFile } from '@homebase-id/js-lib/core';
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -29,7 +29,7 @@ import {
   UnifiedConversation,
 } from '../../provider/chat/ConversationProvider';
 import { ImageSource } from '../../provider/image/RNImageProvider';
-import { getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { getNewId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import useContact from '../../hooks/contact/useContact';
 import { useMarkMessagesAsRead } from '../../hooks/chat/useMarkMessagesAsRead';
 import ChatReaction from '../../components/Chat/Chat-Reaction';
@@ -57,7 +57,7 @@ import { OfflineState } from '../../components/Platform/OfflineState';
 import { RetryModal } from '../../components/Chat/Reactions/Modal/RetryModal';
 import { t } from 'feed-app-common';
 import { useWebSocketContext } from '../../components/WebSocketContext/useWebSocketContext';
-import { LinkPreview } from '@youfoundation/js-lib/media';
+import { LinkPreview } from '@homebase-id/js-lib/media';
 
 export type SelectedMessageState = {
   messageCordinates: { x: number; y: number };

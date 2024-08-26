@@ -18,7 +18,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { DotYouProfile } from '@youfoundation/js-lib/network';
+import { DotYouProfile } from '@homebase-id/js-lib/network';
 import { ContactTile } from '../Contact/Contact-Tile';
 import { CheckCircle, CircleOutlined, SendChat } from '../ui/Icons/icons';
 import { AuthorName } from '../ui/Name';
@@ -32,9 +32,9 @@ import { ErrorNotification } from '../ui/Alert/ErrorNotification';
 import useImage from '../ui/OdinImage/hooks/useImage';
 import { ChatDrive, UnifiedConversation } from '../../provider/chat/ConversationProvider';
 import { useConversations } from '../../hooks/chat/useConversations';
-import { EmbeddedThumb, HomebaseFile } from '@youfoundation/js-lib/core';
+import { EmbeddedThumb, HomebaseFile } from '@homebase-id/js-lib/core';
 import { GroupAvatar } from '../ui/Avatars/Avatar';
-import { getNewId } from '@youfoundation/js-lib/helpers';
+import { getNewId } from '@homebase-id/js-lib/helpers';
 import { useAuth } from '../../hooks/auth/useAuth';
 import { useAudio } from '../ui/OdinAudio/hooks/useAudio';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';

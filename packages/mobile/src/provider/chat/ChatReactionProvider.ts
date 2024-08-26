@@ -15,9 +15,9 @@ import {
   queryBatch,
   uploadFile,
   PriorityOptions,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 import { ChatDrive } from './ConversationProvider';
-import { assertIfDefined, getNewId, jsonStringify64 } from '@youfoundation/js-lib/helpers';
+import { assertIfDefined, getNewId, jsonStringify64 } from '@homebase-id/js-lib/helpers';
 import { CHAT_APP_ID } from '../../app/constants';
 import { t } from 'feed-app-common';
 

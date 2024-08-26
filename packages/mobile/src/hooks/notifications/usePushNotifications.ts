@@ -7,9 +7,9 @@ import {
   PushNotification,
   getNotificationCountsByAppId,
   markAllNotificationsOfAppAsRead,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 import { useEffect } from 'react';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useDotYouClientContext } from 'feed-app-common';
 
 const PAGE_SIZE = 700;

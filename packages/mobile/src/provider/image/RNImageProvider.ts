@@ -12,14 +12,14 @@ import {
   ImageSize,
   SystemFileType,
   decryptKeyHeader,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 import {
   ImageMetadata,
   MediaUploadMeta,
   ThumbnailInstruction,
   ImageUploadResult,
   MediaConfig,
-} from '@youfoundation/js-lib/media';
+} from '@homebase-id/js-lib/media';
 import {
   getRandom16ByteArray,
   getNewId,
@@ -31,7 +31,7 @@ import {
   cbcEncrypt,
   uint8ArrayToBase64,
   splitSharedSecretEncryptedKeyHeader,
-} from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/js-lib/helpers';
 import { createThumbnails } from './RNThumbnailProvider';
 import { OdinBlob } from '../../../polyfills/OdinBlob';
 import { AxiosRequestConfig } from 'axios';
@@ -366,8 +366,9 @@ const buildIvFromQueryString = async (querystring: string) => {
   const uniqueQueryKey = (() => {
     // Check if it's a direct file request
     if (searchParams.has('fileId')) {
-      return `${searchParams.get('fileId')} ${searchParams.get('key') || searchParams.get('payloadKey')
-        }-${searchParams.get('height')}x${searchParams.get('width')}`;
+      return `${searchParams.get('fileId')} ${
+        searchParams.get('key') || searchParams.get('payloadKey')
+      }-${searchParams.get('height')}x${searchParams.get('width')}`;
     }
     // Check if it's a query-batch/modifed request; Queries on a single drive (alias)
     else if (searchParams.has('alias')) return querystring;

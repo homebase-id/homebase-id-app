@@ -12,13 +12,13 @@ import {
   HomebaseFile,
   ReactionFile,
   uploadGroupReaction,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 import { t, useDotYouClientContext } from 'feed-app-common';
 import { ChatDrive, UnifiedConversation } from '../../provider/chat/ConversationProvider';
 import { ChatMessage } from '../../provider/chat/ChatProvider';
 import { getSynchronousDotYouClient } from './getSynchronousDotYouClient';
 import { addError } from '../errors/useErrors';
-import { tryJsonParse } from '@youfoundation/js-lib/helpers';
+import { tryJsonParse } from '@homebase-id/js-lib/helpers';
 
 const addReaction = async ({
   conversation,
@@ -175,6 +175,7 @@ export const useChatReaction = (props?: {
       queryFn: getReactionsByMessageGlobalTransitId(messageGlobalTransitId as string),
       enabled: !!messageGlobalTransitId && !!messageFileId,
       staleTime: 1000 * 60 * 10, // 10 min
+      refetchOnMount: true,
     }),
     add: useMutation(getAddReactionMutationOptions(queryClient)),
     remove: useMutation(getRemoveReactionMutationOptions(queryClient)),

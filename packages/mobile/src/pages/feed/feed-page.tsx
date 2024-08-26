@@ -7,10 +7,8 @@ import { Colors } from '../../app/Colors';
 import { useRemoveNotifications } from '../../hooks/notifications/usePushNotifications';
 import { FEED_APP_ID } from '../../app/constants';
 import { PostComposer } from '../../components/Feed/Composer/PostComposer';
-import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { Plus } from '../../components/ui/Icons/icons';
 import { useIsFocused } from '@react-navigation/native';
-import { SocialFeedWebView } from '../../components/Feed/MainContent/SocialFeedWebView';
 import SocialFeedMainContent from '../../components/Feed/MainContent/SocialFeed';
 
 type FeedProps = NativeStackScreenProps<TabStackParamList, 'Feed'>;
