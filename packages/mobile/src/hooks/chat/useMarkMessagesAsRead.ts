@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 
 import { useChatMessages } from './useChatMessages';
 import { useEffect, useState } from 'react';
@@ -33,7 +33,7 @@ export const useMarkMessagesAsRead = ({
       const unreadMessages = messages.filter(
         (msg) =>
           (msg?.fileMetadata.transitCreated || msg?.fileMetadata.created) >
-          (conversationMetadata.fileMetadata.appData.content.lastReadTime || 0) &&
+            (conversationMetadata.fileMetadata.appData.content.lastReadTime || 0) &&
           msg.fileMetadata.senderOdinId
       );
 

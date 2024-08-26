@@ -28,7 +28,7 @@ const { OdinBlobModule } = NativeModules;
  *
  * Reference: https://developer.mozilla.org/en-US/docs/Web/API/Blob
  */
-import { base64ToUint8Array, getNewId, uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
+import { base64ToUint8Array, getNewId, uint8ArrayToBase64 } from '@homebase-id/js-lib/helpers';
 import { CachesDirectoryPath, readFile, writeFile, unlink, copyFile } from 'react-native-fs';
 
 class Blob {

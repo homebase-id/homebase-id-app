@@ -4,7 +4,7 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { TabStackParamList } from '../../app/App';
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 import WebView from 'react-native-webview';
-import { uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
+import { uint8ArrayToBase64 } from '@homebase-id/js-lib/helpers';
 import { Keyboard, Linking, RefreshControl, TouchableOpacity } from 'react-native';
 import { useAuth } from '../../hooks/auth/useAuth';
 import { Colors } from '../../app/Colors';

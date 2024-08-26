@@ -18,7 +18,7 @@ import ChatPage from '../pages/chat/chat-page';
 import { ConversationsPage } from '../pages/conversations-page';
 import EditGroupPage from '../pages/chat/edit-group-page';
 import { useDarkMode } from '../hooks/useDarkMode';
-import { HomebaseFile, EmbeddedThumb } from '@youfoundation/js-lib/core';
+import { HomebaseFile, EmbeddedThumb } from '@homebase-id/js-lib/core';
 import { ChatMessage } from '../provider/chat/ChatProvider';
 import { MessageInfoPage } from '../pages/chat/message-info-page';
 import { UnifiedConversation } from '../provider/chat/ConversationProvider';
@@ -29,7 +29,7 @@ import { TabStackParamList } from './App';
 import { ShareChatPage } from '../pages/chat/share-chat-page';
 import { ContactPage } from '../pages/contacts/contact-page';
 import { GroupCreationPage } from '../pages/contacts/group-creation-page';
-import { DotYouProfile } from '@youfoundation/js-lib/network';
+import { DotYouProfile } from '@homebase-id/js-lib/network';
 
 export type ChatStackParamList = {
   Conversation: undefined;

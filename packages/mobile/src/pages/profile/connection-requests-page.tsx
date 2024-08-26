@@ -8,7 +8,7 @@ import { HomeStackParamList } from '../../app/App';
 import { usePendingConnections } from '../../hooks/connections/usePendingConnections';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { useDotYouClientContext } from 'feed-app-common';
-import { RedactedConnectionRequest } from '@youfoundation/js-lib/network';
+import { RedactedConnectionRequest } from '@homebase-id/js-lib/network';
 import { openURL } from '../../utils/utils';
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 

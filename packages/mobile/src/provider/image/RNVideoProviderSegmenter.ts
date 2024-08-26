@@ -1,5 +1,5 @@
 import { ImageSource } from './RNImageProvider';
-import { getNewId } from '@youfoundation/js-lib/helpers';
+import { getNewId } from '@homebase-id/js-lib/helpers';
 
 import { CachesDirectoryPath, exists, read, stat } from 'react-native-fs';
 import { Video } from 'react-native-compressor';
@@ -7,7 +7,7 @@ import { Platform } from 'react-native';
 
 import MP4Box from 'mp4box';
 import { FFmpegKit, SessionState } from 'ffmpeg-kit-react-native';
-import { SegmentedVideoMetadata } from '@youfoundation/js-lib/media';
+import { SegmentedVideoMetadata } from '@homebase-id/js-lib/media';
 import { OdinBlob } from '../../../polyfills/OdinBlob';
 
 const CompressVideo = async (

@@ -23,7 +23,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ChatStackParamList, NewChatStackParamList } from '../../app/ChatStack';
 import { BackButton } from '../../components/ui/Buttons';
 import { ContactTile } from '../../components/Contact/Contact-Tile';
-import { DotYouProfile } from '@youfoundation/js-lib/network';
+import { DotYouProfile } from '@homebase-id/js-lib/network';
 import { Text } from '../../components/ui/Text/Text';
 import { Plus, Times } from '../../components/ui/Icons/icons';
 import { NavigationProp, useNavigation } from '@react-navigation/native';

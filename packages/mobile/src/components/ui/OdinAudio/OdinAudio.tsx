@@ -1,4 +1,4 @@
-import { PayloadDescriptor } from '@youfoundation/js-lib/core';
+import { PayloadDescriptor } from '@homebase-id/js-lib/core';
 import { useAudioPlayback } from '../../../hooks/audio/useAudioRecorderPlayer';
 import { ActivityIndicator, Pressable, View } from 'react-native';
 import { memo } from 'react';

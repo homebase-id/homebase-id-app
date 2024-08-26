@@ -1,5 +1,5 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { fetchFollowers } from '@youfoundation/js-lib/network';
+import { fetchFollowers } from '@homebase-id/js-lib/network';
 import { useDotYouClientContext } from 'feed-app-common';
 
 type useFollowerInfiniteProps = {

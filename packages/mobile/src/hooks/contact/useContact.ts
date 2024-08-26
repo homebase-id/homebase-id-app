@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { ContactFile, getContactByOdinId } from '@youfoundation/js-lib/network';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { ContactFile, getContactByOdinId } from '@homebase-id/js-lib/network';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { useDotYouClientContext } from 'feed-app-common';
 
 const useContact = (odinId?: string) => {

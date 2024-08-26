@@ -3,7 +3,7 @@ import {
   HomebaseFile,
   NewHomebaseFile,
   SecurityGroupType,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 import {
   Tweet,
   Media,
@@ -11,8 +11,8 @@ import {
   BlogConfig,
   EmbeddedPost,
   ReactAccess,
-} from '@youfoundation/js-lib/public';
-import { getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/js-lib/public';
+import { getNewId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useState } from 'react';
 import { usePost } from './usePost';
 import { useDotYouClientContext } from 'feed-app-common';

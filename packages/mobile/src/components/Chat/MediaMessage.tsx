@@ -20,7 +20,7 @@ import { OdinImage } from '../ui/OdinImage/OdinImage';
 
 import { ChatMessageIMessage } from './ChatDetail';
 import { OdinAudio } from '../ui/OdinAudio/OdinAudio';
-import { NewPayloadDescriptor, PayloadDescriptor } from '@youfoundation/js-lib/core';
+import { NewPayloadDescriptor, PayloadDescriptor } from '@homebase-id/js-lib/core';
 import { StyleProp } from 'react-native';
 import { OdinBlob } from '../../../polyfills/OdinBlob';
 import { Colors } from '../../app/Colors';

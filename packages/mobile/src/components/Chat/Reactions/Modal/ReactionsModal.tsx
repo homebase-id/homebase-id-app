@@ -11,7 +11,7 @@ import { useDarkMode } from '../../../../hooks/useDarkMode';
 
 import { ChatMessageIMessage } from '../../ChatDetail';
 import { useChatReaction } from '../../../../hooks/chat/useChatReaction';
-import { ReactionFile } from '@youfoundation/js-lib/core';
+import { ReactionFile } from '@homebase-id/js-lib/core';
 import { Avatar, OwnerAvatar } from '../../../ui/Avatars/Avatar';
 import { AuthorName } from '../../../ui/Name';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';

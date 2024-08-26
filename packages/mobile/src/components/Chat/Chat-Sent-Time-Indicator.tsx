@@ -1,4 +1,4 @@
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { ChatMessage } from '../../provider/chat/ChatProvider';
 import { memo, useEffect, useMemo, useState } from 'react';
 import { Text } from 'react-native';

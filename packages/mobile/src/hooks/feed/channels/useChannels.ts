@@ -3,10 +3,10 @@ import {
   ChannelDefinition,
   ChannelTemplate,
   getChannelDefinitions,
-} from '@youfoundation/js-lib/public';
+} from '@homebase-id/js-lib/public';
 
 import { fetchCachedPublicChannels } from './cachedDataHelpers';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { useDotYouClientContext } from 'feed-app-common';
 export interface ChannelDefinitionVm extends ChannelDefinition {
   template: ChannelTemplate;

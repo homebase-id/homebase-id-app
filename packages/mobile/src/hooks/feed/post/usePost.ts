@@ -5,8 +5,8 @@ import {
   useMutation,
   useQueryClient,
 } from '@tanstack/react-query';
-import { PostContent, getPost, removePost } from '@youfoundation/js-lib/public';
-import { MediaFile } from '@youfoundation/js-lib/core';
+import { PostContent, getPost, removePost } from '@homebase-id/js-lib/public';
+import { MediaFile } from '@homebase-id/js-lib/core';
 import { savePost as savePostFile } from '../../../provider/feed/RNPostUploadProvider';
 
 import {
@@ -14,7 +14,7 @@ import {
   MultiRequestCursoredResult,
   NewHomebaseFile,
   UploadResult,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 import { getRichTextFromString, t, useDotYouClientContext } from 'feed-app-common';
 import { ImageSource } from '../../../provider/image/RNImageProvider';
 import { getSynchronousDotYouClient } from '../../chat/getSynchronousDotYouClient';

@@ -1,5 +1,5 @@
-import { AccessControlList, SecurityGroupType } from '@youfoundation/js-lib/core';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { AccessControlList, SecurityGroupType } from '@homebase-id/js-lib/core';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { t, ellipsisAtMaxChar } from 'feed-app-common';
 import { useCircles } from '../../../hooks/circles/useCircles';
 import { IconProps, OpenLock, Lock } from '../../ui/Icons/icons';

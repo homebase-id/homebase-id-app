@@ -1,5 +1,5 @@
-import { DotYouClient, ApiType } from '@youfoundation/js-lib/core';
-import { base64ToUint8Array } from '@youfoundation/js-lib/helpers';
+import { DotYouClient, ApiType } from '@homebase-id/js-lib/core';
+import { base64ToUint8Array } from '@homebase-id/js-lib/helpers';
 import { MMKVLoader } from 'react-native-mmkv-storage';
 
 const APP_AUTH_TOKEN = 'bx0900';

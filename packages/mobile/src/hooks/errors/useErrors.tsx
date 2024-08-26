@@ -4,7 +4,7 @@ import {
   OdinErrorDetails,
   getKnownOdinErrorMessages,
   getOdinErrorDetails,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 
 export interface Error {
   type: 'warning' | 'critical';
