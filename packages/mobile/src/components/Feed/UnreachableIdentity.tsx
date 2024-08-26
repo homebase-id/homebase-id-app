@@ -1,6 +1,6 @@
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { PostContent } from '@youfoundation/js-lib/public';
-import { useDotYouClientContext } from 'feed-app-common';
+import { t, useDotYouClientContext } from 'feed-app-common';
 import { useManageSocialFeed } from '../../hooks/feed/useManageSocialFeed';
 import { Text } from '../ui/Text/Text';
 import { useDarkMode } from '../../hooks/useDarkMode';
@@ -38,7 +38,7 @@ export const UnreachableIdentity = ({ postFile, odinId }: UnreachableIdentityPro
           opacity: 0.7,
         }}
       >
-        Can&apos;t reach this identity atm{' '}
+        {t('Can&apos;t reach this identity atm')}{' '}
       </Text>
     </View>
   );

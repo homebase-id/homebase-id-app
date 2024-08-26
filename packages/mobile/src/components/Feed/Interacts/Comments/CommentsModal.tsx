@@ -19,6 +19,7 @@ import { Backdrop } from '../../../ui/Modal/Backdrop';
 import { CommentComposer } from './CommentComposer';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HomebaseFile, ReactionFile } from '@youfoundation/js-lib/core';
+import { t } from 'feed-app-common';
 
 export interface CommentModalMethods {
   setContext: (context: ReactionContext & CanReactInfo) => void;
@@ -158,7 +159,7 @@ const EmptyComponent = () => {
           textAlign: 'center',
         }}
       >
-        No Comments yet
+        {t('No Comments yet')}
       </Text>
       <Text
         style={{

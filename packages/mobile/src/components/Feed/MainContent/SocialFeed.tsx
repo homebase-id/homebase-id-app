@@ -16,6 +16,7 @@ import { PostReactionModal, ReactionModalMethods } from '../Interacts/Reactions/
 import { ShareContext, ShareModal, ShareModalMethods } from '../Interacts/Share/ShareModal';
 import { PostActionMethods, PostActionProps, PostModalAction } from '../Interacts/PostActionModal';
 import { Host } from 'react-native-portalize';
+import { t } from 'feed-app-common';
 
 const PAGE_SIZE = 10;
 
@@ -86,7 +87,7 @@ const SocialFeedMainContent = memo(() => {
             fontStyle: 'italic',
           }}
         >
-          No more posts. Expecting more? Make sure you&apos;re following them.
+          {t('No more posts. Expecting more? Make sure you&apos;re following them.')}
         </Text>
       );
     }
