@@ -199,12 +199,12 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
   const { mutateAsync: inviteRecipient } = useConversation().inviteRecipient;
 
   const [linkPreviews, setLinkPreviews] = useState<LinkPreview | null>(null);
-  const onDismissLinkPreview = () => {
+  const onDismissLinkPreview = useCallback(() => {
     setLinkPreviews(null);
-  };
-  const onLinkData = (link: LinkPreview) => {
+  }, []);
+  const onLinkData = useCallback((link: LinkPreview) => {
     setLinkPreviews(link);
-  };
+  }, []);
 
   const doSend = useCallback(
     (message: { text: string }[]) => {
