@@ -54,6 +54,8 @@ import { ExtendPermissionDialog } from '../components/Permissions/ExtendPermissi
 import { t } from 'feed-app-common';
 import { FEED_CHAT_APP_ID } from './constants';
 import { Toast } from '../components/ui/Toast/Toast';
+import { useLivePushNotifications } from '../hooks/notifications/useLivePushNotifications';
+import { NotificationToaster } from '../components/ui/Alert/NotificationToaster';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -102,11 +104,11 @@ const RootStack = () => {
       ref={navigationContainerRef}
       theme={isDarkMode ? DarkTheme : DefaultTheme}
       onReady={() => {
-        setRouteName(navigationContainerRef.getCurrentRoute()?.name || null);
+        setRouteName(navigationContainerRef.getCurrentRoute() || null);
         BootSplash.hide();
       }}
       onStateChange={async () => {
-        const currentRouteName = navigationContainerRef.getCurrentRoute()?.name || null;
+        const currentRouteName = navigationContainerRef.getCurrentRoute() || null;
         setRouteName(currentRouteName);
       }}
     >
@@ -145,6 +147,7 @@ const AuthenticatedRoot = memo(() => {
                 permissions={permissions}
                 // needsAllConnected={true}
               />
+              <NotificationToaster />
               <AppStackScreen />
             </ErrorBoundary>
           </BubbleColorProvider>
@@ -162,6 +165,7 @@ const AppStackScreen = memo(() => {
   useAuthenticatedPushNotification();
   useInitialPushNotification();
   useShareManager();
+  useLivePushNotifications();
 
   return <TabStack />;
 });
@@ -191,7 +195,7 @@ const TabStack = memo(() => {
     'ConnectQr',
   ];
   const { routeName } = useRouteContext();
-  const hide = !routeName || !rootRoutes.includes(routeName);
+  const hide = !routeName || !rootRoutes.includes(routeName.name);
   // TODO: Hide seems slow for the chat-page.. While actually it's the ChatScreen being slow in detecting it's correct size
 
   return (

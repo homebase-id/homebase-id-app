@@ -8,7 +8,6 @@ import { Avatar } from '../Avatars/Avatar';
 
 export type NotificationToastProps = {
   odinId: string;
-  conversationId?: string;
 };
 
 export function NotificationToast(props: ToastConfigParams<NotificationToastProps>) {
