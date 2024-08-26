@@ -1,4 +1,4 @@
-import { TargetDrive } from '@youfoundation/js-lib/core';
+import { TargetDrive } from '@homebase-id/js-lib/core';
 import { memo } from 'react';
 import { Dimensions, Image, Pressable } from 'react-native';
 import { useLinkMetadata } from '../../../hooks/links/useLinkPreview';

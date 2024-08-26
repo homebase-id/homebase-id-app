@@ -1,4 +1,4 @@
-import { GetTargetDriveFromProfileId, BuiltInProfiles } from '@youfoundation/js-lib/profile';
+import { GetTargetDriveFromProfileId, BuiltInProfiles } from '@homebase-id/js-lib/profile';
 import { TouchableOpacity, View } from 'react-native';
 import { useAuth } from '../../hooks/auth/useAuth';
 import { useProfile } from '../../hooks/profile/useProfile';

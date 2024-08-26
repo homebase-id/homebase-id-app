@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { ImageSize, TargetDrive, ImageContentType } from '@youfoundation/js-lib/core';
+import { ImageSize, TargetDrive, ImageContentType } from '@homebase-id/js-lib/core';
 import { exists } from 'react-native-fs';
 import { useAuth } from '../../../../hooks/auth/useAuth';
 import { getDecryptedImageData } from '../../../../provider/image/RNImageProvider';

@@ -16,14 +16,14 @@ import { useAuth, useYouAuthAuthorization } from '../../hooks/auth/useAuth';
 import { Container } from '../../components/ui/Container/Container';
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 import { Colors } from '../../app/Colors';
-import { stringifyToQueryParams } from '@youfoundation/js-lib/helpers';
+import { stringifyToQueryParams } from '@homebase-id/js-lib/helpers';
 import { doCheckIdentity } from '../../hooks/checkIdentity/useCheckIdentity';
 import { CheckForUpdates, VersionInfo } from '../profile/profile-page';
 import { InAppBrowser } from 'react-native-inappbrowser-reborn';
 
 import logo from '../../assets/homebase.png';
 import { Input } from '../../components/ui/Form/Input';
-import { YouAuthorizationParams } from '@youfoundation/js-lib/auth';
+import { YouAuthorizationParams } from '@homebase-id/js-lib/auth';
 import { AuthorName } from '../../components/ui/Name';
 import { PublicAvatar } from '../../components/ui/Avatars/Avatar';
 import { useDarkMode } from '../../hooks/useDarkMode';

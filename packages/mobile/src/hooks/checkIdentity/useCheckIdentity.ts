@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { getDomainFromUrl } from '@youfoundation/js-lib/helpers';
+import { getDomainFromUrl } from '@homebase-id/js-lib/helpers';
 import axios from 'axios';
 
 export const useCheckIdentity = (odinId?: string) => {

@@ -1,9 +1,4 @@
-import {
-  EmbeddedThumb,
-  ImageContentType,
-  ImageSize,
-  TargetDrive,
-} from '@youfoundation/js-lib/core';
+import { EmbeddedThumb, ImageContentType, ImageSize, TargetDrive } from '@homebase-id/js-lib/core';
 import { ReactNode, memo, useCallback, useMemo } from 'react';
 import {
   ActivityIndicator,

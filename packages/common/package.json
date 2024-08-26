@@ -11,7 +11,7 @@
   "types": "./index.ts",
   "sideEffects": false,
   "dependencies": {
-    "@youfoundation/js-lib": "*"
+    "@homebase-id/js-lib": "*"
   },
   "peerDependencies": {
     "@tanstack/react-query": "^5.4.3"

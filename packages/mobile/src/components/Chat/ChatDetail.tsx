@@ -58,7 +58,7 @@ import { useDarkMode } from '../../hooks/useDarkMode';
 import { ChatDeliveryIndicator } from '../../components/Chat/Chat-Delivery-Indicator';
 import { Avatar as AppAvatar, OwnerAvatar } from '../../components/ui/Avatars/Avatar';
 import { AuthorName, ConnectionName } from '../../components/ui/Name';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { ChatDeletedArchivalStaus, ChatMessage } from '../../provider/chat/ChatProvider';
 import { useAudioRecorder } from '../../hooks/audio/useAudioRecorderPlayer';
 import { Text } from '../ui/Text/Text';
@@ -80,8 +80,8 @@ import { TouchableHighlight } from 'react-native-gesture-handler';
 import { ParseShape } from 'react-native-gifted-chat/src/MessageText';
 import { MentionDropDown } from './Mention-Dropdown';
 import { LinkPreviewBar } from './Link-Preview-Bar';
-import { LinkPreview } from '@youfoundation/js-lib/media';
-import { tryJsonParse } from '@youfoundation/js-lib/helpers';
+import { LinkPreview } from '@homebase-id/js-lib/media';
+import { tryJsonParse } from '@homebase-id/js-lib/helpers';
 
 export type ChatMessageIMessage = IMessage & HomebaseFile<ChatMessage>;
 

@@ -2,9 +2,9 @@ import { Dimensions, TouchableOpacity, View } from 'react-native';
 
 import { usePushNotifications } from '../../hooks/notifications/usePushNotifications';
 import { memo, useMemo, useState } from 'react';
-import { PushNotification } from '@youfoundation/js-lib/core';
+import { PushNotification } from '@homebase-id/js-lib/core';
 import { formatToTimeAgoWithRelativeDetail, t, useDotYouClientContext } from 'feed-app-common';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import {
   CHAT_APP_ID,
   FEED_APP_ID,

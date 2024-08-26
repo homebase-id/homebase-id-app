@@ -14,14 +14,14 @@ import {
   softDeleteChatMessage,
 } from '../../provider/chat/ChatProvider';
 
-import { DotYouClient, HomebaseFile } from '@youfoundation/js-lib/core';
+import { DotYouClient, HomebaseFile } from '@homebase-id/js-lib/core';
 import { useDotYouClientContext } from 'feed-app-common';
 import {
   ConversationWithYourselfId,
   UnifiedConversation,
 } from '../../provider/chat/ConversationProvider';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import { SendReadReceiptResponseRecipientStatus } from '@youfoundation/js-lib/peer';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { SendReadReceiptResponseRecipientStatus } from '@homebase-id/js-lib/peer';
 
 const FIRST_PAGE_SIZE = 15;
 const PAGE_SIZE = 100;

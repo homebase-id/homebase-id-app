@@ -19,13 +19,8 @@ import {
   HomebaseFile,
   NewHomebaseFile,
   SecurityGroupType,
-} from '@youfoundation/js-lib/core';
-import {
-  formatGuidId,
-  getNewId,
-  getNewXorId,
-  stringGuidsEqual,
-} from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/js-lib/core';
+import { formatGuidId, getNewId, getNewXorId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { ChatConversationsReturn } from './useConversations';
 
 import { useDotYouClientContext } from 'feed-app-common';

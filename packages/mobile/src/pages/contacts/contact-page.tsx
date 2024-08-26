@@ -16,7 +16,7 @@ import { ContactTile, Tile } from '../../components/Contact/Contact-Tile';
 import { People, Users } from '../../components/ui/Icons/icons';
 import { useAuth } from '../../hooks/auth/useAuth';
 import { memo, useCallback, useEffect, useState } from 'react';
-import { DotYouProfile } from '@youfoundation/js-lib/network';
+import { DotYouProfile } from '@homebase-id/js-lib/network';
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 import { Text } from '../../components/ui/Text/Text';
 import { openURL } from '../../utils/utils';

@@ -1,4 +1,4 @@
-import { DotYouProfile, getConnections } from '@youfoundation/js-lib/network';
+import { DotYouProfile, getConnections } from '@homebase-id/js-lib/network';
 
 import { useQuery } from '@tanstack/react-query';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';

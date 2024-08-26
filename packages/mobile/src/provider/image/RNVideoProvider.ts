@@ -9,15 +9,15 @@ import {
   uploadFile,
   getFileHeader,
   ImageContentType,
-} from '@youfoundation/js-lib/core';
-import { getRandom16ByteArray, getNewId, jsonStringify64 } from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/js-lib/core';
+import { getRandom16ByteArray, getNewId, jsonStringify64 } from '@homebase-id/js-lib/helpers';
 import {
   MediaConfig,
   MediaUploadMeta,
   PlainVideoMetadata,
   SegmentedVideoMetadata,
   VideoUploadResult,
-} from '@youfoundation/js-lib/media';
+} from '@homebase-id/js-lib/media';
 import { OdinBlob } from '../../../polyfills/OdinBlob';
 import { ImageSource } from './RNImageProvider';
 import { createThumbnails } from './RNThumbnailProvider';
@@ -57,11 +57,11 @@ export const uploadVideo = async (
 
   const { tinyThumb, additionalThumbnails } = uploadMeta?.thumb
     ? await createThumbnails(
-      uploadMeta.thumb.payload,
-      DEFAULT_PAYLOAD_KEY,
-      uploadMeta.thumb?.type,
-      [{ quality: 100, width: 250, height: 250 }]
-    )
+        uploadMeta.thumb.payload,
+        DEFAULT_PAYLOAD_KEY,
+        uploadMeta.thumb?.type,
+        [{ quality: 100, width: 250, height: 250 }]
+      )
     : { tinyThumb: undefined, additionalThumbnails: undefined };
 
   // Updating images in place is a rare thing, but if it happens there is often no versionTag, so we need to fetch it first

@@ -12,7 +12,7 @@ import { useDotYouClientContext } from 'feed-app-common';
 import { ChatStackParamList } from '../../app/ChatStack';
 import { Avatar, OwnerAvatar } from '../../components/ui/Avatars/Avatar';
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
-import { ReactionFile } from '@youfoundation/js-lib/core';
+import { ReactionFile } from '@homebase-id/js-lib/core';
 
 export type MessageInfoProp = NativeStackScreenProps<ChatStackParamList, 'MessageInfo'>;
 

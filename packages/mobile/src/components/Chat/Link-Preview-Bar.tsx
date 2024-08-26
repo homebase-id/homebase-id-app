@@ -6,7 +6,7 @@ import { memo, useCallback, useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { Close } from '../ui/Icons/icons';
-import { LinkPreview } from '@youfoundation/js-lib/media';
+import { LinkPreview } from '@homebase-id/js-lib/media';
 
 export type LinkPreviewProps = {
   textToSearchIn: string;

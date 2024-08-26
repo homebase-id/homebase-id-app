@@ -4,7 +4,7 @@ import {
   BuiltInAttributes,
   BuiltInProfiles,
   getProfileAttributes,
-} from '@youfoundation/js-lib/profile';
+} from '@homebase-id/js-lib/profile';
 import { useDotYouClientContext } from 'feed-app-common';
 
 export const useProfile = () => {
