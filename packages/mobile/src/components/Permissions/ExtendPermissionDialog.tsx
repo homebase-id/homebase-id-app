@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { AppPermissionType } from '@youfoundation/js-lib/network';
+import { AppPermissionType } from '@homebase-id/js-lib/network';
 import { t, useMissingPermissions } from 'feed-app-common';
 import { useEffect } from 'react';
 import { Alert, Linking } from 'react-native';

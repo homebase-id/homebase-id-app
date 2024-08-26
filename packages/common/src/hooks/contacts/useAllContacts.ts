@@ -1,7 +1,7 @@
-import { ContactFile, getContacts } from '@youfoundation/js-lib/network';
+import { ContactFile, getContacts } from '@homebase-id/js-lib/network';
 
 import { useQuery } from '@tanstack/react-query';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 
 const CHUNKSIZE = 200;

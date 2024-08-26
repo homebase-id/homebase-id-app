@@ -22,7 +22,7 @@ import {
   UploadResult,
   ImageContentType,
   PriorityOptions,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 import {
   toGuidId,
   getNewId,
@@ -30,7 +30,7 @@ import {
   stringGuidsEqual,
   jsonStringify64,
   stringToUint8Array,
-} from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/js-lib/helpers';
 import {
   PostContent,
   getPost,
@@ -38,12 +38,12 @@ import {
   getPostBySlug,
   BlogConfig,
   postTypeToDataType,
-} from '@youfoundation/js-lib/public';
+} from '@homebase-id/js-lib/public';
 import { OdinBlob } from '../../../polyfills/OdinBlob';
 import { ImageSource } from '../image/RNImageProvider';
 import { createThumbnails } from '../image/RNThumbnailProvider';
 import { grabThumbnail, processVideo } from '../image/RNVideoProviderSegmenter';
-import { VideoContentType } from '@youfoundation/js-lib/media';
+import { VideoContentType } from '@homebase-id/js-lib/media';
 import { AxiosRequestConfig } from 'axios';
 import { exists } from 'react-native-fs';
 import { fixContentURI } from '../../utils/utils';

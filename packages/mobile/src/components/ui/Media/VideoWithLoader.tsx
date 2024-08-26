@@ -1,4 +1,4 @@
-import { EmbeddedThumb, PayloadDescriptor, TargetDrive } from '@youfoundation/js-lib/core';
+import { EmbeddedThumb, PayloadDescriptor, TargetDrive } from '@homebase-id/js-lib/core';
 import { memo, useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
@@ -11,7 +11,7 @@ import { Colors } from '../../../app/Colors';
 import WebView from 'react-native-webview';
 import { TouchableWithoutFeedback } from 'react-native';
 import { useAuth } from '../../../hooks/auth/useAuth';
-import { uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
+import { uint8ArrayToBase64 } from '@homebase-id/js-lib/helpers';
 import { Play } from '../Icons/icons';
 import { OdinImage } from '../OdinImage/OdinImage';
 import { useVideo } from '../../../hooks/video/useVideo';

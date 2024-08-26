@@ -14,8 +14,8 @@ import { t, useAllConnections } from 'feed-app-common';
 import { useConversation } from '../../hooks/chat/useConversation';
 import { useChatMessage } from '../../hooks/chat/useChatMessage';
 import { memo, useCallback, useMemo, useState } from 'react';
-import { DotYouProfile } from '@youfoundation/js-lib/network';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { DotYouProfile } from '@homebase-id/js-lib/network';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import {
   ConversationWithYourself,
   UnifiedConversation,
@@ -37,7 +37,7 @@ import {
   useConversationsWithRecentMessage,
 } from '../../hooks/chat/useConversationsWithRecentMessage';
 import ConversationTile from '../../components/Chat/Conversation-tile';
-import { getNewId } from '@youfoundation/js-lib/helpers';
+import { getNewId } from '@homebase-id/js-lib/helpers';
 import { ConversationTileWithYourself } from '../conversations-page';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 

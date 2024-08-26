@@ -1,6 +1,6 @@
 import { TouchableOpacity, View, StyleSheet } from 'react-native';
 import { useConversation } from '../../hooks/chat/useConversation';
-import { ContactFile, DotYouProfile } from '@youfoundation/js-lib/network';
+import { ContactFile, DotYouProfile } from '@homebase-id/js-lib/network';
 import { CheckCircle, ChevronRight, CircleOutlined } from '../ui/Icons/icons';
 import { Colors } from '../../app/Colors';
 

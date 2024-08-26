@@ -1,4 +1,4 @@
-import { getConnections } from '@youfoundation/js-lib/network';
+import { getConnections } from '@homebase-id/js-lib/network';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useDotYouClientContext } from 'feed-app-common';
 

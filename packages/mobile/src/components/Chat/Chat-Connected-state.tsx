@@ -1,4 +1,4 @@
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { useDotYouClientContext, useIsConnected } from 'feed-app-common';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Text } from '../ui/Text/Text';

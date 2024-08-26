@@ -9,7 +9,7 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import { NavigationProp } from '@react-navigation/native';
 import { NewChatStackParamList } from '../../app/ChatStack';
 
-import { DotYouProfile } from '@youfoundation/js-lib/network';
+import { DotYouProfile } from '@homebase-id/js-lib/network';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { Colors } from '../../app/Colors';
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';

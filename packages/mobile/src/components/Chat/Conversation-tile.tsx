@@ -8,7 +8,7 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
-import { EmbeddedThumb, HomebaseFile } from '@youfoundation/js-lib/core';
+import { EmbeddedThumb, HomebaseFile } from '@homebase-id/js-lib/core';
 import { Colors } from '../../app/Colors';
 import { ChatDrive, UnifiedConversation } from '../../provider/chat/ConversationProvider';
 import { useChatMessages } from '../../hooks/chat/useChatMessages';

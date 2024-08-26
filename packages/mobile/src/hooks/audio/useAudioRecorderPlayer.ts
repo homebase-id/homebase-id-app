@@ -11,7 +11,7 @@ import AudioRecorderPlayer, {
 } from 'react-native-audio-recorder-player';
 import { CachesDirectoryPath } from 'react-native-fs';
 import { transcodeAudio } from '../../provider/audio/AudioTranscoder';
-import { getNewId } from '@youfoundation/js-lib/helpers';
+import { getNewId } from '@homebase-id/js-lib/helpers';
 import { useAudioContext } from '../../components/AudioContext/useAudioContext';
 
 const audioSet: AudioSet = {

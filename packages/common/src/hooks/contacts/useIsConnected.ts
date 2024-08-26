@@ -1,9 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  ConnectionInfo,
-  ConnectionRequest,
-  getConnectionInfo,
-} from '@youfoundation/js-lib/network';
+import { ConnectionInfo, ConnectionRequest, getConnectionInfo } from '@homebase-id/js-lib/network';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 
 export const useIsConnected = (odinId?: string) => {

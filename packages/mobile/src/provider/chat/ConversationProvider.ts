@@ -22,8 +22,8 @@ import {
   ThumbnailFile,
   EmbeddedThumb,
   ImageContentType,
-} from '@youfoundation/js-lib/core';
-import { jsonStringify64, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/js-lib/core';
+import { jsonStringify64, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { ImageSource } from '../image/RNImageProvider';
 import { OdinBlob } from '../../../polyfills/OdinBlob';
 import { createThumbnails } from '../image/RNThumbnailProvider';
@@ -142,9 +142,9 @@ export const getConversation = async (dotYouClient: DotYouClient, conversationId
           ...conversationHeader.fileMetadata.appData.content,
           recipients: (conversationHeader.fileMetadata.appData.content as GroupConversation)
             .recipients || [
-              (conversationHeader.fileMetadata.appData.content as SingleConversation).recipient,
-              dotYouClient.getIdentity(),
-            ],
+            (conversationHeader.fileMetadata.appData.content as SingleConversation).recipient,
+            dotYouClient.getIdentity(),
+          ],
         },
       },
     },
@@ -179,11 +179,11 @@ export const dsrToConversation = async (
             ...attrContent,
             recipients: (attrContent as GroupConversation).recipients
               ? [
-                ...(attrContent as GroupConversation).recipients.filter(
-                  (recipient) => recipient !== identity
-                ),
-                identity,
-              ]
+                  ...(attrContent as GroupConversation).recipients.filter(
+                    (recipient) => recipient !== identity
+                  ),
+                  identity,
+                ]
               : [(attrContent as SingleConversation).recipient, identity],
           },
         },
@@ -212,13 +212,13 @@ export const uploadConversation = async (
     },
     transitOptions: distribute
       ? {
-        recipients: conversation.fileMetadata.appData.content.recipients.filter(
-          (recipient) => recipient !== identity
-        ),
-        schedule: ScheduleOptions.SendLater,
-        priority: PriorityOptions.Medium,
-        sendContents: SendContents.All,
-      }
+          recipients: conversation.fileMetadata.appData.content.recipients.filter(
+            (recipient) => recipient !== identity
+          ),
+          schedule: ScheduleOptions.SendLater,
+          priority: PriorityOptions.Medium,
+          sendContents: SendContents.All,
+        }
       : undefined,
   };
 
@@ -295,13 +295,13 @@ export const updateConversation = async (
     },
     transitOptions: distribute
       ? {
-        recipients: conversation.fileMetadata.appData.content.recipients.filter(
-          (recipient) => recipient !== identity
-        ),
-        schedule: ScheduleOptions.SendLater,
-        priority: PriorityOptions.Medium,
-        sendContents: SendContents.All,
-      }
+          recipients: conversation.fileMetadata.appData.content.recipients.filter(
+            (recipient) => recipient !== identity
+          ),
+          schedule: ScheduleOptions.SendLater,
+          priority: PriorityOptions.Medium,
+          sendContents: SendContents.All,
+        }
       : undefined,
   };
 
@@ -330,19 +330,19 @@ export const updateConversation = async (
     uploadMetadata,
     !ignoreConflict
       ? async () => {
-        const existingConversation = await getConversation(
-          dotYouClient,
-          conversation.fileMetadata.appData.uniqueId as string
-        );
-        if (!existingConversation) return;
-        conversation.fileMetadata.versionTag = existingConversation.fileMetadata.versionTag;
-        conversation.sharedSecretEncryptedKeyHeader =
-          existingConversation.sharedSecretEncryptedKeyHeader;
-        return updateConversation(dotYouClient, conversation, distribute, true);
-      }
+          const existingConversation = await getConversation(
+            dotYouClient,
+            conversation.fileMetadata.appData.uniqueId as string
+          );
+          if (!existingConversation) return;
+          conversation.fileMetadata.versionTag = existingConversation.fileMetadata.versionTag;
+          conversation.sharedSecretEncryptedKeyHeader =
+            existingConversation.sharedSecretEncryptedKeyHeader;
+          return updateConversation(dotYouClient, conversation, distribute, true);
+        }
       : () => {
-        // We just supress the warning; As we are ignoring the conflict following @param ignoreConflict
-      }
+          // We just supress the warning; As we are ignoring the conflict following @param ignoreConflict
+        }
   );
 };
 
@@ -467,8 +467,6 @@ export interface JoinConversationRequest {
   conversationId: string;
   title: string;
 }
-
-
 
 export interface JoinGroupConversationRequest extends JoinConversationRequest {
   recipients: string[];

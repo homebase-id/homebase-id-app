@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { getPendingRequests } from '@youfoundation/js-lib/network';
-import { PagingOptions } from '@youfoundation/js-lib/core';
+import { getPendingRequests } from '@homebase-id/js-lib/network';
+import { PagingOptions } from '@homebase-id/js-lib/core';
 import { useDotYouClientContext } from 'feed-app-common';
 
 interface useConnectionsProps {

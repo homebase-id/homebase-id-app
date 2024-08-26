@@ -12,8 +12,8 @@ import {
   NewHomebaseFile,
   NewPayloadDescriptor,
   SecurityGroupType,
-} from '@youfoundation/js-lib/core';
-import { getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/js-lib/core';
+import { getNewId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 
 import { t, useDotYouClientContext } from 'feed-app-common';
 import {
@@ -31,7 +31,7 @@ import {
 import { OdinBlob } from '../../../polyfills/OdinBlob';
 import { getSynchronousDotYouClient } from './getSynchronousDotYouClient';
 import { useErrors, addError } from '../errors/useErrors';
-import { LinkPreview } from '@youfoundation/js-lib/media';
+import { LinkPreview } from '@homebase-id/js-lib/media';
 
 const sendMessage = async ({
   conversation,

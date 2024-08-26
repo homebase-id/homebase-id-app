@@ -1,4 +1,4 @@
-import { NewPayloadDescriptor, PayloadDescriptor, TargetDrive } from '@youfoundation/js-lib/core';
+import { NewPayloadDescriptor, PayloadDescriptor, TargetDrive } from '@homebase-id/js-lib/core';
 import { memo, useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Platform, Pressable, StyleSheet, View } from 'react-native';
 import { Download, Pdf } from '../Icons/icons';

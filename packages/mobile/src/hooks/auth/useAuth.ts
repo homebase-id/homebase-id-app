@@ -1,10 +1,10 @@
-import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
+import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 import {
   base64ToUint8Array,
   byteArrayToString,
   stringToUint8Array,
   uint8ArrayToBase64,
-} from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/js-lib/helpers';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import useVerifyToken from './useVerifyToken';
 import {
@@ -12,17 +12,17 @@ import {
   getRegistrationParams as getRegistrationParamsYouAuth,
   finalizeAuthentication as finalizeAuthenticationYouAuth,
 } from '../../provider/auth/AuthenticationProvider';
-import { logout as logoutYouauth } from '@youfoundation/js-lib/auth';
+import { logout as logoutYouauth } from '@homebase-id/js-lib/auth';
 import { useEncrtypedStorage } from './useEncryptedStorage';
 import { Platform } from 'react-native';
-import { DrivePermissionType } from '@youfoundation/js-lib/core';
+import { DrivePermissionType } from '@homebase-id/js-lib/core';
 import {
   ALL_CONNECTIONS_CIRCLE_ID,
   AppPermissionType,
   ContactConfig,
-} from '@youfoundation/js-lib/network';
-import { BlogConfig, HomePageConfig } from '@youfoundation/js-lib/public';
-import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
+} from '@homebase-id/js-lib/network';
+import { BlogConfig, HomePageConfig } from '@homebase-id/js-lib/public';
+import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@homebase-id/js-lib/profile';
 import { useQueryClient } from '@tanstack/react-query';
 
 const StandardProfileDrive = GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId);
