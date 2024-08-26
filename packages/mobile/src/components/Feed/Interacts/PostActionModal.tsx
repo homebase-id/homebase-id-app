@@ -1,5 +1,5 @@
-import { ApiType, DotYouClient, HomebaseFile, NewHomebaseFile } from '@youfoundation/js-lib/core';
-import { ChannelDefinition, PostContent } from '@youfoundation/js-lib/public';
+import { ApiType, DotYouClient, HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
+import { ChannelDefinition, PostContent } from '@homebase-id/js-lib/public';
 import { forwardRef, ReactNode, Ref, useImperativeHandle, useRef, useState } from 'react';
 import { ChannelDefinitionVm } from '../../../hooks/feed/channels/useChannels';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
