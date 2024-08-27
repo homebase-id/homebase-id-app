@@ -223,7 +223,7 @@ const TabStack = memo(() => {
           component={FeedPage}
           options={{
             tabBarIcon: TabFeedIcon,
-            // lazy: false,
+            lazy: false,
           }}
         />
         <TabBottom.Screen
