@@ -10,11 +10,13 @@ import { PostComposer } from '../../components/Feed/Composer/PostComposer';
 import { Plus } from '../../components/ui/Icons/icons';
 import { useIsFocused } from '@react-navigation/native';
 import SocialFeedMainContent from '../../components/Feed/MainContent/SocialFeed';
+import { useLivePushNotifications } from '../../hooks/notifications/useLivePushNotifications';
 
 type FeedProps = NativeStackScreenProps<TabStackParamList, 'Feed'>;
 
 export const FeedPage = memo((_props: FeedProps) => {
   const [isPostComposerOpen, setIsPostComposerOpen] = useState<boolean>();
+  useLivePushNotifications();
 
   const isFocused = useIsFocused();
   useRemoveNotifications({ disabled: !isFocused, appId: FEED_APP_ID });

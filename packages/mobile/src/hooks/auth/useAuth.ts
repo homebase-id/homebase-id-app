@@ -186,7 +186,7 @@ export const useAuth = () => {
     setAuthToken('');
     setIdentity('');
 
-    queryClient.clear();
+    queryClient.removeQueries();
   }, [
     getDotYouClient,
     identity,
@@ -233,8 +233,7 @@ export const useYouAuthAuthorization = () => {
       [ALL_CONNECTIONS_CIRCLE_ID],
       uint8ArrayToBase64(stringToUint8Array(JSON.stringify(publicKeyJwk))),
       corsHost,
-      `${Platform.OS === 'ios' ? 'iOS' : Platform.OS === 'android' ? 'Android' : Platform.OS} | ${
-        Platform.Version
+      `${Platform.OS === 'ios' ? 'iOS' : Platform.OS === 'android' ? 'Android' : Platform.OS} | ${Platform.Version
       }`
     );
   }, [setPrivateKey]);

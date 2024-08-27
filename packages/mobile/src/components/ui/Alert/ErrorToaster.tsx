@@ -5,7 +5,6 @@ import { useEffect } from 'react';
 import { Alert } from 'react-native';
 import { t } from 'feed-app-common';
 
-// TODO: Create a PositiveToaster component
 export const ErrorToaster = () => {
   const {
     fetch: { data: errors },
