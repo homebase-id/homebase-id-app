@@ -165,7 +165,6 @@ const AppStackScreen = memo(() => {
   useAuthenticatedPushNotification();
   useInitialPushNotification();
   useShareManager();
-  useLivePushNotifications();
 
   return <TabStack />;
 });
