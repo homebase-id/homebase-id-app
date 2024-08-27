@@ -91,7 +91,7 @@ const SocialFeedMainContent = memo(() => {
             fontStyle: 'italic',
           }}
         >
-          {t('No more posts. Expecting more? Make sure you&apos;re following them.')}
+          {t("No more posts. Expecting more? Make sure you're following them.")}
         </Text>
       );
     }

@@ -38,7 +38,7 @@ export const UnreachableIdentity = ({ postFile, odinId }: UnreachableIdentityPro
           opacity: 0.7,
         }}
       >
-        {t('Can&apos;t reach this identity atm')}{' '}
+        {t("Can't reach this identity atm")}{' '}
       </Text>
     </View>
   );
