@@ -17,6 +17,7 @@ import { ShareContext, ShareModal, ShareModalMethods } from '../Interacts/Share/
 import { PostActionMethods, PostActionProps, PostModalAction } from '../Interacts/PostActionModal';
 import { Host } from 'react-native-portalize';
 import { t } from 'feed-app-common';
+import { useScrollToTop } from '@react-navigation/native';
 
 const PAGE_SIZE = 10;
 
@@ -43,12 +44,15 @@ const SocialFeedMainContent = memo(() => {
     [posts]
   );
 
-  /* Refs */
   const [refreshing, setRefreshing] = useState(false);
+  /* Refs */
+  const scrollRef = useRef<Animated.FlatList<any>>(null);
   const commentRef = useRef<CommentModalMethods>(null);
   const reactionRef = useRef<ReactionModalMethods>(null);
   const shareRef = useRef<ShareModalMethods>(null);
   const postActionRef = useRef<PostActionMethods>(null);
+
+  useScrollToTop(scrollRef);
 
   const onSharePress = useCallback((context: ShareContext) => {
     shareRef.current?.setShareContext(context);
@@ -114,6 +118,7 @@ const SocialFeedMainContent = memo(() => {
     <>
       <Host>
         <Animated.FlatList
+          ref={scrollRef}
           data={flattenedPosts}
           contentContainerStyle={{ flexGrow: 1 }}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}

@@ -113,4 +113,6 @@ export const NotificationToaster = () => {
   useEffect(() => {
     handleNotification();
   }, [handleNotification]);
+
+  return <></>;
 };
