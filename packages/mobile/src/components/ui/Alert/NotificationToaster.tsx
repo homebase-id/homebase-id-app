@@ -16,6 +16,7 @@ import { bodyFormer, navigateOnNotification } from '../../Dashboard/Notification
 import Toast from 'react-native-toast-message';
 import { memo, useCallback, useEffect } from 'react';
 import { getContactByOdinId } from '@homebase-id/js-lib/network';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export const NotificationToaster = memo(() => {
   const { routeName } = useRouteContext();
@@ -26,6 +27,7 @@ export const NotificationToaster = memo(() => {
   const isConversationScreen = routeName?.name === 'Conversation' && !routeName.params;
   const isChatScreen = routeName?.name === 'ChatScreen' && routeName.params;
   const isFeedScreen = routeName?.name === 'Feed';
+  const { top } = useSafeAreaInsets();
   const {
     fetch: { data: notifications },
     dismiss: dismissNotification,
@@ -83,6 +85,7 @@ export const NotificationToaster = memo(() => {
         position: 'top',
         swipeable: true,
         visibilityTime: 4000,
+        topOffset: top,
         onPress: () => {
           navigateOnNotification(notification, identity, chatNavigator, feedNavigator);
           Toast.hide();
@@ -104,6 +107,7 @@ export const NotificationToaster = memo(() => {
     isFeedScreen,
     notifications,
     routeName,
+    top,
   ]);
 
   useEffect(() => {

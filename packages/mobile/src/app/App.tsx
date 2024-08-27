@@ -54,7 +54,6 @@ import { ExtendPermissionDialog } from '../components/Permissions/ExtendPermissi
 import { t } from 'feed-app-common';
 import { FEED_CHAT_APP_ID } from './constants';
 import { Toast } from '../components/ui/Toast/Toast';
-import { useLivePushNotifications } from '../hooks/notifications/useLivePushNotifications';
 import { NotificationToaster } from '../components/ui/Alert/NotificationToaster';
 
 export type AuthStackParamList = {
@@ -227,7 +226,7 @@ const TabStack = memo(() => {
           // Ios does not load webview until the window is focussed so keep it lazy until needed
           // see: https://github.com/react-native-webview/react-native-webview/pull/813#issuecomment-526216535
           // UPD: https://github.com/react-native-webview/react-native-webview/pull/3041
-          lazy: Platform.OS === 'android' ? false : true,
+          lazy: false,
         }}
       />
       <TabBottom.Screen
