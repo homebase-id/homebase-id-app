@@ -14,11 +14,11 @@ import {
 } from '../../../app/constants';
 import { bodyFormer, navigateOnNotification } from '../../Dashboard/NotificationsOverview';
 import Toast from 'react-native-toast-message';
-import { memo, useCallback, useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { getContactByOdinId } from '@homebase-id/js-lib/network';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-export const NotificationToaster = memo(() => {
+export const NotificationToaster = () => {
   const { route } = useRouteContext();
   const dotYouClient = useDotYouClientContext();
   const identity = useDotYouClientContext().getIdentity();
@@ -113,6 +113,4 @@ export const NotificationToaster = memo(() => {
   useEffect(() => {
     handleNotification();
   }, [handleNotification]);
-
-  return <></>;
-});
+};
