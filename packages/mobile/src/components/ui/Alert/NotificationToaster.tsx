@@ -15,9 +15,11 @@ import {
 import { bodyFormer, navigateOnNotification } from '../../Dashboard/NotificationsOverview';
 import Toast from 'react-native-toast-message';
 import { memo, useCallback, useEffect } from 'react';
+import { getContactByOdinId } from '@homebase-id/js-lib/network';
 
 export const NotificationToaster = memo(() => {
   const { routeName } = useRouteContext();
+  const dotYouClient = useDotYouClientContext();
   const identity = useDotYouClientContext().getIdentity();
   const chatNavigator = useNavigation<NavigationProp<ChatStackParamList>>();
   const feedNavigator = useNavigation<NavigationProp<TabStackParamList>>();
@@ -31,7 +33,7 @@ export const NotificationToaster = memo(() => {
   //   console.log('notifications', notifications?.length);
   const handleNotification = useCallback(() => {
     if (!notifications) return;
-    notifications.map((notification) => {
+    notifications.map(async (notification) => {
       const appId = notification.options.appId;
       const appName = stringGuidsEqual(appId, OWNER_APP_ID)
         ? 'Homebase'
@@ -44,7 +46,10 @@ export const NotificationToaster = memo(() => {
               : stringGuidsEqual(appId, MAIL_APP_ID)
                 ? 'Homebase - Mail'
                 : `Unknown (${appId})`;
-      const body = bodyFormer(notification, false, appName, notification.senderId);
+      const contactFile = await getContactByOdinId(dotYouClient, notification.senderId);
+      const senderName =
+        contactFile?.fileMetadata.appData.content.name?.displayName || notification.senderId;
+      const body = bodyFormer(notification, false, appName, senderName);
       const isChatNotification = stringGuidsEqual(appId, CHAT_APP_ID);
       const isFeedNotification = stringGuidsEqual(appId, FEED_APP_ID);
       if (isChatNotification) {
@@ -73,7 +78,7 @@ export const NotificationToaster = memo(() => {
       }
       return Toast.show({
         type: 'notification',
-        text1: appName, // TODO: Show senderName instead of APP Name
+        text1: appName,
         text2: body,
         position: 'top',
         swipeable: true,
@@ -91,6 +96,7 @@ export const NotificationToaster = memo(() => {
   }, [
     chatNavigator,
     dismissNotification,
+    dotYouClient,
     feedNavigator,
     identity,
     isChatScreen,
