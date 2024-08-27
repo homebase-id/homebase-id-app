@@ -240,6 +240,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
 
     if (notification.notificationType === 'appNotificationAdded') {
       const clientNotification = notification as AppNotification;
+      add(clientNotification);
 
       const existingNotificationData = queryClient.getQueryData<{
         results: PushNotification[];
@@ -281,10 +282,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
       }
     }
 
-    if (notification.notificationType === 'appNotificationAdded') {
-      const clientNotification = notification as AppNotification;
-      add(clientNotification);
-    }
+
   }, []);
 
   const chatMessagesQueueTunnel = useRef<HomebaseFile<ChatMessage>[]>([]);
