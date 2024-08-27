@@ -221,7 +221,7 @@ export const PostReactionBar = memo(
           >
             <EmojiPicker
               emojis={emojis} // emojis data source see data/emojis
-              autoFocus={true} // autofocus search input
+              autoFocus={false} // autofocus search input
               loading={false} // spinner for if your emoji data or recent store is async
               darkMode={isDarkMode} // to be or not to be, that is the question
               perLine={7} // # of emoji's per line

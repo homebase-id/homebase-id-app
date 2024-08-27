@@ -143,7 +143,6 @@ export const CommentComposer = ({
               color: isDarkMode ? Colors.white : Colors.black,
               paddingVertical: 8,
             }}
-            autoFocus={false}
             multiline
             textAlignVertical="center" // Android only
             autoCapitalize="sentences"
