@@ -96,19 +96,19 @@ const StackRoot = createNativeStackNavigator<AuthStackParamList>();
 const RootStack = () => {
   const { isAuthenticated } = useAuth();
   const { isDarkMode } = useDarkMode();
-  const { setRouteName } = useRouteContext();
+  const { setRoute } = useRouteContext();
 
   return (
     <NavigationContainer
       ref={navigationContainerRef}
       theme={isDarkMode ? DarkTheme : DefaultTheme}
       onReady={() => {
-        setRouteName(navigationContainerRef.getCurrentRoute() || null);
+        setRoute(navigationContainerRef.getCurrentRoute() || null);
         BootSplash.hide();
       }}
       onStateChange={async () => {
         const currentRouteName = navigationContainerRef.getCurrentRoute() || null;
-        setRouteName(currentRouteName);
+        setRoute(currentRouteName);
       }}
     >
       <StackRoot.Navigator
@@ -192,8 +192,8 @@ const TabStack = memo(() => {
     'DriveStatus',
     'ConnectQr',
   ];
-  const { routeName } = useRouteContext();
-  const hide = !routeName || !rootRoutes.includes(routeName.name);
+  const { route } = useRouteContext();
+  const hide = !route || !rootRoutes.includes(route.name);
   // TODO: Hide seems slow for the chat-page.. While actually it's the ChatScreen being slow in detecting it's correct size
 
   return (

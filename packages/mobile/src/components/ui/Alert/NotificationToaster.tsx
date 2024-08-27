@@ -19,14 +19,14 @@ import { getContactByOdinId } from '@homebase-id/js-lib/network';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export const NotificationToaster = memo(() => {
-  const { routeName } = useRouteContext();
+  const { route } = useRouteContext();
   const dotYouClient = useDotYouClientContext();
   const identity = useDotYouClientContext().getIdentity();
   const chatNavigator = useNavigation<NavigationProp<ChatStackParamList>>();
   const feedNavigator = useNavigation<NavigationProp<TabStackParamList>>();
-  const isConversationScreen = routeName?.name === 'Conversation' && !routeName.params;
-  const isChatScreen = routeName?.name === 'ChatScreen' && routeName.params;
-  const isFeedScreen = routeName?.name === 'Feed';
+  const isConversationScreen = route?.name === 'Conversation' && !route.params;
+  const isChatScreen = route?.name === 'ChatScreen' && route.params;
+  const isFeedScreen = route?.name === 'Feed';
   const { top } = useSafeAreaInsets();
   const {
     fetch: { data: notifications },
@@ -68,7 +68,7 @@ export const NotificationToaster = memo(() => {
           isChatScreen &&
           stringGuidsEqual(
             notification.options.typeId,
-            (routeName.params as { convoId: string }).convoId
+            (route.params as { convoId: string }).convoId
           )
         ) {
           dismissNotification(notification);
@@ -106,7 +106,7 @@ export const NotificationToaster = memo(() => {
     isConversationScreen,
     isFeedScreen,
     notifications,
-    routeName,
+    route,
     top,
   ]);
 

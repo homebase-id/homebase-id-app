@@ -2,15 +2,17 @@ import { Route } from '@react-navigation/native';
 import { createContext, useState, ReactNode, Dispatch, SetStateAction } from 'react';
 
 export const RouteContext = createContext<{
-  routeName: Route<string> | null;
-  setRouteName: Dispatch<SetStateAction<Route<string> | null>>;
+  route: Route<string> | null;
+  setRoute: Dispatch<SetStateAction<Route<string> | null>>;
 } | null>(null);
 
 export const RouteContextProvider = ({ children }: { children: ReactNode }) => {
-  const [routeName, setRouteName] = useState<Route<string> | null>(null);
+  const [route, setRoute] = useState<Route<string> | null>(null);
 
   return (
-    <RouteContext.Provider value={{ routeName, setRouteName }}>{children}</RouteContext.Provider>
+    <RouteContext.Provider value={{ route: route, setRoute: setRoute }}>
+      {children}
+    </RouteContext.Provider>
   );
 };
 
