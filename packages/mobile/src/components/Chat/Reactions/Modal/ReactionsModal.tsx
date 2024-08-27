@@ -11,6 +11,7 @@ import { Avatar, OwnerAvatar } from '../../../ui/Avatars/Avatar';
 import { AuthorName } from '../../../ui/Name';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import { Backdrop } from '../../../ui/Modal/Backdrop';
+import { openURL } from '../../../../utils/utils';
 
 export const ReactionsModal = memo(
   forwardRef(
@@ -109,6 +110,7 @@ export const ReactionTile = ({
             width: 42,
             height: 42,
           }}
+          onPress={() => openURL(`https://${authorOdinId}/`)}
         />
       ) : (
         <OwnerAvatar
