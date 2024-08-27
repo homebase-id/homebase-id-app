@@ -18,6 +18,7 @@ import { Container } from '../../components/ui/Container/Container';
 import {
   AddressBook,
   Download,
+  Gear,
   Logout,
   People,
   RecycleBin,
@@ -275,6 +276,24 @@ export const ProfilePage = (_props: SettingsProps) => {
               Drive Status
             </Text>
           </TouchableOpacity> */}
+          <TouchableOpacity
+            onPress={() => navigate('Debug')}
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+              paddingVertical: 12,
+            }}
+          >
+            <Gear size={'lg'} />
+            <Text
+              style={{
+                marginLeft: 16,
+              }}
+            >
+              Debug
+            </Text>
+          </TouchableOpacity>
           <VersionInfo />
         </ScrollView>
       </Container>

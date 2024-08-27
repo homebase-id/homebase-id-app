@@ -21,12 +21,13 @@ import { useNetInfo } from '@react-native-community/netinfo';
 import { Text, View } from 'react-native';
 import { t } from 'feed-app-common';
 import { useErrors } from '../../hooks/errors/useErrors';
+import { useLivePushNotifications } from '../../hooks/notifications/useLivePushNotifications';
 
 type FeedProps = NativeStackScreenProps<TabStackParamList, 'Feed'>;
 
 export const FeedPage = memo((_props: FeedProps) => {
   const netInfo = useNetInfo();
-
+  useLivePushNotifications();
   const { isDarkMode } = useDarkMode();
   const { authToken, getIdentity, getSharedSecret } = useAuth();
   const identity = getIdentity();

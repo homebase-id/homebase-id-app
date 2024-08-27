@@ -31,7 +31,7 @@ import { useRefetchOnFocus } from '../hooks/platform/useRefetchOnFocus';
 import { useOnlineManager } from '../hooks/platform/useOnlineManager';
 import { PushNotificationProvider } from '../components/push-notification/PushNotificationProvider';
 import { useAuthenticatedPushNotification } from '../hooks/push-notification/useAuthenticatedPushNotification';
-import Toast from 'react-native-toast-message';
+
 import { ErrorToaster } from '../components/ui/Alert/ErrorToaster';
 import {
   TabFeedIcon,
@@ -52,7 +52,9 @@ import BootSplash from 'react-native-bootsplash';
 import BubbleColorProvider from '../components/BubbleContext/BubbleContext';
 import { ExtendPermissionDialog } from '../components/Permissions/ExtendPermissionDialog';
 import { t } from 'feed-app-common';
-import { CHAT_APP_ID, FEED_CHAT_APP_ID } from './constants';
+import { FEED_CHAT_APP_ID } from './constants';
+import { Toast } from '../components/ui/Toast/Toast';
+import { NotificationToaster } from '../components/ui/Alert/NotificationToaster';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -94,19 +96,19 @@ const StackRoot = createNativeStackNavigator<AuthStackParamList>();
 const RootStack = () => {
   const { isAuthenticated } = useAuth();
   const { isDarkMode } = useDarkMode();
-  const { setRouteName } = useRouteContext();
+  const { setRoute } = useRouteContext();
 
   return (
     <NavigationContainer
       ref={navigationContainerRef}
       theme={isDarkMode ? DarkTheme : DefaultTheme}
       onReady={() => {
-        setRouteName(navigationContainerRef.getCurrentRoute()?.name || null);
+        setRoute(navigationContainerRef.getCurrentRoute() || null);
         BootSplash.hide();
       }}
       onStateChange={async () => {
-        const currentRouteName = navigationContainerRef.getCurrentRoute()?.name || null;
-        setRouteName(currentRouteName);
+        const currentRouteName = navigationContainerRef.getCurrentRoute() || null;
+        setRoute(currentRouteName);
       }}
     >
       <StackRoot.Navigator
@@ -144,6 +146,7 @@ const AuthenticatedRoot = memo(() => {
                 permissions={permissions}
                 // needsAllConnected={true}
               />
+              <NotificationToaster />
               <AppStackScreen />
             </ErrorBoundary>
           </BubbleColorProvider>
@@ -189,8 +192,8 @@ const TabStack = memo(() => {
     'DriveStatus',
     'ConnectQr',
   ];
-  const { routeName } = useRouteContext();
-  const hide = !routeName || !rootRoutes.includes(routeName);
+  const { route } = useRouteContext();
+  const hide = !route || !rootRoutes.includes(route.name);
   // TODO: Hide seems slow for the chat-page.. While actually it's the ChatScreen being slow in detecting it's correct size
 
   return (
