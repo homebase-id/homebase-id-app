@@ -43,6 +43,7 @@ import { useWebSocketContext } from '../../components/WebSocketContext/useWebSoc
 import { insertNewConversationMetadata } from './useConversationMetadata';
 import { incrementAppIdNotificationCount } from '../notifications/usePushNotifications';
 import { insertNewReaction, removeReaction } from './useChatReaction';
+import { useNotification } from '../notifications/useNotification';
 
 const MINUTE_IN_MS = 60000;
 const isDebug = false; // The babel plugin to remove console logs would remove any if they get to production
@@ -140,6 +141,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
   const {
     restoreChat: { mutate: restoreChat },
   } = useConversation();
+  const { add } = useNotification();
   const queryClient = useQueryClient();
 
   const [chatMessagesQueue, setChatMessagesQueue] = useState<HomebaseFile<ChatMessage>[]>([]);
@@ -238,6 +240,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
 
     if (notification.notificationType === 'appNotificationAdded') {
       const clientNotification = notification as AppNotification;
+      add(clientNotification);
 
       const existingNotificationData = queryClient.getQueryData<{
         results: PushNotification[];
@@ -278,6 +281,8 @@ const useChatWebsocket = (isEnabled: boolean) => {
         );
       }
     }
+
+
   }, []);
 
   const chatMessagesQueueTunnel = useRef<HomebaseFile<ChatMessage>[]>([]);
@@ -401,11 +406,11 @@ const processChatMessagesBatch = async (
           uniqueMessagesPerConversation[updatedConversation].map(async (newMessage) =>
             typeof newMessage.fileMetadata.appData.content === 'string'
               ? await dsrToMessage(
-                  dotYouClient,
-                  newMessage as HomebaseFile<string>,
-                  ChatDrive,
-                  true
-                )
+                dotYouClient,
+                newMessage as HomebaseFile<string>,
+                ChatDrive,
+                true
+              )
               : (newMessage as HomebaseFile<ChatMessage>)
           )
         )

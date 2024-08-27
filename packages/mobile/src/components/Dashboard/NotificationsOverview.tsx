@@ -22,14 +22,12 @@ import { openURL } from '../../utils/utils';
 import { Text } from '../ui/Text/Text';
 import Toast from 'react-native-toast-message';
 import Clipboard from '@react-native-clipboard/clipboard';
-import { useLivePushNotifications } from '../../hooks/notifications/useLivePushNotifications';
 
 import { TabStackParamList } from '../../app/App';
 import { ErrorNotification } from '../ui/Alert/ErrorNotification';
 import { Avatar } from '../ui/Avatars/Avatar';
 
 export const NotificationsOverview = memo(() => {
-  useLivePushNotifications();
   const { data: notifications } = usePushNotifications().fetch;
   const groupedNotificationsPerDay = useMemo(
     () =>

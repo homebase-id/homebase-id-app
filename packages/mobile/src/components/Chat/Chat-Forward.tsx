@@ -233,8 +233,9 @@ export const ChatForwardModal = forwardRef(
               } else {
                 if (selectedContact.length === maxConnectionsForward) {
                   Toast.show({
-                    type: 'error',
-                    text1: `You can only forward to ${maxConnectionsForward} contacts at a time`,
+                    type: 'info',
+                    text1: 'Forward limit reached',
+                    text2: `You can only forward to ${maxConnectionsForward} contacts at a time`,
                     position: 'bottom',
                     visibilityTime: 2000,
                   });
@@ -336,7 +337,7 @@ export const ChatForwardModal = forwardRef(
     return (
       <BottomSheetModal
         ref={ref}
-        snapPoints={['69%', '99%']}
+        snapPoints={['69%', '93%']}
         onDismiss={onDismiss}
         enableDismissOnClose={true}
         backdropComponent={renderBackdrop}

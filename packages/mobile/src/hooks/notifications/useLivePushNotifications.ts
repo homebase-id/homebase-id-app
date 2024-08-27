@@ -8,15 +8,17 @@ import { useCallback } from 'react';
 import { useNotificationSubscriber } from '../useNotificationSubscriber';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { incrementAppIdNotificationCount } from './usePushNotifications';
+import { useNotification } from './useNotification';
 
 export const useLivePushNotifications = () => {
   const queryClient = useQueryClient();
+  const { add } = useNotification();
+
 
   const handler = useCallback(
     (wsNotification: TypedConnectionNotification) => {
       if (wsNotification.notificationType === 'appNotificationAdded') {
         const clientNotification = wsNotification as AppNotification;
-
         const existingNotificationData = queryClient.getQueryData<{
           results: PushNotification[];
           cursor: number;
@@ -37,10 +39,12 @@ export const useLivePushNotifications = () => {
           queryClient.setQueryData(['push-notifications'], newNotificationData);
         }
         incrementAppIdNotificationCount(queryClient, clientNotification.options.appId);
+        add(clientNotification);
       }
     },
-    [queryClient]
+    [add, queryClient]
   );
+
 
   useNotificationSubscriber(handler, ['appNotificationAdded'], []);
 };
