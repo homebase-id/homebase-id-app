@@ -1,4 +1,3 @@
-import { CommentsReactionSummary } from '@homebase-id/js-lib/core';
 import { Pressable, View } from 'react-native';
 import { Divider } from '../../ui/Divider';
 import { t } from 'feed-app-common';
@@ -6,6 +5,7 @@ import { Text } from '../../ui/Text/Text';
 import { CommentTeaser } from './Comments/Comment';
 import { Colors } from '../../../app/Colors';
 import { memo } from 'react';
+import { CommentsReactionSummary } from '@homebase-id/js-lib/public';
 
 export const CommentTeaserList = memo(
   ({

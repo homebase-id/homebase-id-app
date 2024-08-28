@@ -1,11 +1,6 @@
-import {
-  ApiType,
-  DotYouClient,
-  HomebaseFile,
-  ParsedReactionPreview,
-} from '@homebase-id/js-lib/core';
-import { PostContent, ReactionContext } from '@homebase-id/js-lib/public';
-import { memo, useCallback, useMemo, useState } from 'react';
+import { ApiType, DotYouClient, HomebaseFile } from '@homebase-id/js-lib/core';
+import { parseReactionPreview, PostContent, ReactionContext } from '@homebase-id/js-lib/public';
+import { memo, useMemo, useState } from 'react';
 import { IconButton } from '../../Chat/Chat-app-bar';
 import { GestureResponderEvent, View } from 'react-native';
 import { OpenHeart, Comment, ShareNode, SolidHeart } from '../../ui/Icons/icons';
@@ -75,13 +70,13 @@ export const PostInteracts = memo(
       };
     }, [authorOdinId, postContent.channelId, postFile]);
 
-    const onCommentPressHandler = useCallback(() => {
+    const onCommentPressHandler = () => {
       const context: ReactionContext & CanReactInfo = {
         ...reactionContext,
         ...canReact,
       };
       return onCommentPress?.(context);
-    }, [canReact, onCommentPress, reactionContext]);
+    };
 
     const permalink = useMemo(
       () =>
@@ -89,6 +84,11 @@ export const PostInteracts = memo(
           postContent.slug ?? postContent.id
         }`,
       [authorOdinId, postContent]
+    );
+
+    const parsedReactionPreview = useMemo(
+      () => parseReactionPreview(postFile.fileMetadata.reactionPreview),
+      [postFile.fileMetadata.reactionPreview]
     );
 
     const onSharePressHandler = () => {
@@ -113,9 +113,7 @@ export const PostInteracts = memo(
           <EmojiSummary
             context={reactionContext}
             onReactionPress={() => onReactionPress?.(reactionContext)}
-            reactionPreview={
-              (postFile.fileMetadata.reactionPreview as ParsedReactionPreview)?.reactions
-            }
+            reactionPreview={parsedReactionPreview.reactions}
           />
           <View
             style={{
@@ -132,9 +130,7 @@ export const PostInteracts = memo(
           </View>
         </View>
         <CommentTeaserList
-          reactionPreview={
-            (postFile.fileMetadata.reactionPreview as ParsedReactionPreview).comments
-          }
+          reactionPreview={parsedReactionPreview.comments}
           onExpand={onCommentPressHandler}
         />
       </>
