@@ -41,6 +41,12 @@ Now you can log in with local identities such as `frodo.dotyou.cloud`.
 > [!Note]
 > No Such configuration is required for iOS simulators.
 
+## Contributing
+
+Contributions are highly Welcomed 💙 . Feel free to open PRs for small issues such as typos. For large issues or features, please open an issue and wait for it to be assigned to you.
+
+You can reach out to us on our [Discord](LINK-DISCORD-SERVER) server if you have any questions or need help.
+
 ## Communications
 
 Please use the [issue tracker](https://github.com/YouFoundation/feed-mobile-app/issues) on GitHub to report bugs.
