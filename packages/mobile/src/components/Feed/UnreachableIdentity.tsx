@@ -5,6 +5,7 @@ import { useManageSocialFeed } from '../../hooks/feed/useManageSocialFeed';
 import { Text } from '../ui/Text/Text';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { View } from 'react-native';
+import { memo } from 'react';
 
 interface UnreachableIdentityProps {
   className?: string;
@@ -13,7 +14,7 @@ interface UnreachableIdentityProps {
 }
 
 //TODO: UI improvs
-export const UnreachableIdentity = ({ postFile, odinId }: UnreachableIdentityProps) => {
+export const UnreachableIdentity = memo(({ postFile, odinId }: UnreachableIdentityProps) => {
   const host = useDotYouClientContext().getRoot();
   const { isDarkMode } = useDarkMode();
 
@@ -29,7 +30,6 @@ export const UnreachableIdentity = ({ postFile, odinId }: UnreachableIdentityPro
         marginVertical: 5,
         borderRadius: 5,
         elevation: 5,
-
         backgroundColor: isDarkMode ? 'black' : 'white',
       }}
     >
@@ -42,4 +42,4 @@ export const UnreachableIdentity = ({ postFile, odinId }: UnreachableIdentityPro
       </Text>
     </View>
   );
-};
+});

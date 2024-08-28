@@ -1,6 +1,6 @@
-import { View } from 'react-native';
+import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { PostMedia } from './Body/PostMedia';
-import ParsedText from 'react-native-parsed-text';
+import ParsedText, { ParseShape } from 'react-native-parsed-text';
 
 import { openURL, URL_PATTERN } from '../../utils/utils';
 import { Text } from '../ui/Text/Text';
@@ -9,7 +9,7 @@ import { Avatar } from '../ui/Avatars/Avatar';
 import { UnreachableIdentity } from './UnreachableIdentity';
 import Animated from 'react-native-reanimated';
 import { useCheckIdentity, useDotYouClientContext } from 'feed-app-common';
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { HomebaseFile, SecurityGroupType } from '@homebase-id/js-lib/core';
 import { PostContent, ReactionContext } from '@homebase-id/js-lib/public';
@@ -38,11 +38,11 @@ export const PostTeaserCard = memo(
     onSharePress?: (context: ShareContext) => void;
     onMorePress?: (context: PostActionProps) => void;
   }) => {
-    const post = postFile.fileMetadata.appData.content;
     const { isDarkMode } = useDarkMode();
+    const identity = useDotYouClientContext().getIdentity();
+    const post = postFile.fileMetadata.appData.content;
     const odinId = postFile.fileMetadata.senderOdinId;
     const authorOdinId = post.authorOdinId || odinId;
-    const identity = useDotYouClientContext().getIdentity();
     const isExternal = odinId && odinId !== identity;
 
     const { data: identityAccessible } = useCheckIdentity(isExternal ? odinId : undefined);
@@ -51,6 +51,7 @@ export const PostTeaserCard = memo(
       odinId: isExternal ? odinId : undefined,
       channelId: post.channelId,
     }).fetch;
+
     const { data: internalChannel } = useChannel({
       channelId: isExternal ? undefined : post.channelId,
     }).fetch;
@@ -68,52 +69,49 @@ export const PostTeaserCard = memo(
       });
     }, [authorOdinId, channel, groupPost, identity, odinId, onMorePress, postFile]);
 
+    const parse: ParseShape[] = useMemo(
+      () => [
+        {
+          pattern: URL_PATTERN,
+          onPress: (url) => openURL(url),
+          style: {
+            color: isDarkMode ? Colors.indigo[200] : Colors.indigo[500],
+          },
+        },
+      ],
+      [isDarkMode]
+    );
+
+    const viewStyle = useMemo(() => {
+      return {
+        padding: 10,
+        margin: 10,
+        elevation: 5,
+        backgroundColor: isDarkMode ? Colors.black : Colors.white,
+        borderRadius: 5,
+        flexDirection: 'column',
+      } as StyleProp<ViewStyle>;
+    }, [isDarkMode]);
+
+    const isPublic = useMemo(
+      () =>
+        channel?.serverMetadata?.accessControlList?.requiredSecurityGroup ===
+          SecurityGroupType.Anonymous ||
+        channel?.serverMetadata?.accessControlList?.requiredSecurityGroup ===
+          SecurityGroupType.Authenticated,
+      [channel]
+    );
+
     if (identityAccessible === false && isExternal) {
       return <UnreachableIdentity postFile={postFile} odinId={odinId} />;
     }
 
     return (
-      <Animated.View
-        style={{
-          padding: 10,
-          margin: 10,
-          elevation: 5,
-          backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          borderRadius: 5,
-          flexDirection: 'column',
-        }}
-      >
-        <View
-          style={{
-            display: 'flex',
-            flexDirection: 'row',
-            gap: 16,
-            marginBottom: 8,
-            alignItems: 'center',
-          }}
-        >
-          <Avatar
-            odinId={authorOdinId}
-            imageSize={{
-              height: 40,
-              width: 40,
-            }}
-            style={{
-              height: 40,
-              width: 40,
-            }}
-          />
-
-          <View
-            style={{
-              flex: 1,
-            }}
-          >
-            <View
-              style={{
-                flexDirection: 'row',
-              }}
-            >
+      <Animated.View style={viewStyle}>
+        <View style={styles.header}>
+          <Avatar odinId={authorOdinId} imageSize={styles.imageSize} style={styles.imageSize} />
+          <View style={{ flex: 1 }}>
+            <View style={{ flexDirection: 'row' }}>
               <Text
                 style={{
                   fontSize: 17,
@@ -144,15 +142,7 @@ export const PostTeaserCard = memo(
             fontSize: 16,
             color: isDarkMode ? Colors.white : Colors.black,
           }}
-          parse={[
-            {
-              pattern: URL_PATTERN,
-              onPress: (url) => openURL(url),
-              style: {
-                color: isDarkMode ? Colors.indigo[200] : Colors.indigo[500],
-              },
-            },
-          ]}
+          parse={parse}
         >
           {post.caption}
         </ParsedText>
@@ -162,14 +152,23 @@ export const PostTeaserCard = memo(
           onCommentPress={onCommentPress}
           onReactionPress={onReactionPress}
           onSharePress={onSharePress}
-          isPublic={
-            channel?.serverMetadata?.accessControlList?.requiredSecurityGroup ===
-              SecurityGroupType.Anonymous ||
-            channel?.serverMetadata?.accessControlList?.requiredSecurityGroup ===
-              SecurityGroupType.Authenticated
-          }
+          isPublic={isPublic}
         />
       </Animated.View>
     );
   }
 );
+
+const styles = StyleSheet.create({
+  header: {
+    display: 'flex',
+    flexDirection: 'row',
+    gap: 16,
+    marginBottom: 8,
+    alignItems: 'center',
+  },
+  imageSize: {
+    height: 40,
+    width: 40,
+  },
+});

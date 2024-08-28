@@ -3,7 +3,7 @@ import { useSocialFeed } from '../../../hooks/feed/useSocialFeed';
 import { PostContent, ReactionContext } from '@homebase-id/js-lib/public';
 import { memo, useCallback, useMemo, useRef, useState } from 'react';
 import { flattenInfinteData } from '../../../utils/utils';
-import Animated from 'react-native-reanimated';
+import Animated, { useAnimatedRef } from 'react-native-reanimated';
 import { EmptyFeed } from './EmptyFeed';
 import { RefreshControl } from 'react-native-gesture-handler';
 import { PostTeaserCard } from '../PostTeaserCard';
@@ -45,8 +45,9 @@ const SocialFeedMainContent = memo(() => {
   );
 
   const [refreshing, setRefreshing] = useState(false);
+
   /* Refs */
-  const scrollRef = useRef<Animated.FlatList<any>>(null);
+  const scrollRef = useAnimatedRef<Animated.FlatList<any>>();
   const commentRef = useRef<CommentModalMethods>(null);
   const reactionRef = useRef<ReactionModalMethods>(null);
   const shareRef = useRef<ShareModalMethods>(null);
@@ -128,7 +129,7 @@ const SocialFeedMainContent = memo(() => {
           ListEmptyComponent={<EmptyFeed />}
           ListFooterComponent={listFooter}
           onEndReached={() => hasMorePosts && fetchNextPage()}
-          onEndReachedThreshold={0.3}
+          onEndReachedThreshold={0.5}
         />
       </Host>
       <CommentsModal ref={commentRef} />
