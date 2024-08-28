@@ -2,13 +2,11 @@
 
 Homebase feed and chat app powered by Odin.
 
-
-<a href='https://play.google.com/store/apps/details?id=id.homebase.feed&pcampaignid=web_share'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png' height='80px'/></a> 
+<a href='https://play.google.com/store/apps/details?id=id.homebase.feed&pcampaignid=web_share'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png' height='80px'/></a>
 
 <p>
 &nbsp &nbsp <a href='https://apps.apple.com/in/app/homebase-id/id6468971238'><img alt='Get it on Google Play' src='https://developer.apple.com/news/images/download-on-the-app-store-badge.png' height='54px' width="160px"/></a>
 </p>
-
 
 ## Running Locally
 
@@ -49,7 +47,7 @@ Please use the [issue tracker](https://github.com/YouFoundation/feed-mobile-app/
 
 ## Security Disclosures
 
-If you discover any security issues, please send an email to [security@homebase.id](mailto:security@homebase.id). The email is automatically CCed to the entire team and we'll respond promptly.
+If you discover any security issues, please send an email to [security@homebase.id](mailto:info@homebase.id). The email is automatically CCed to the entire team and we'll respond promptly.
 
 ## License
 
