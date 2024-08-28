@@ -129,7 +129,7 @@ const SocialFeedMainContent = memo(() => {
           ListEmptyComponent={<EmptyFeed />}
           ListFooterComponent={listFooter}
           onEndReached={() => hasMorePosts && fetchNextPage()}
-          onEndReachedThreshold={0.5}
+          onEndReachedThreshold={0.3}
         />
       </Host>
       <CommentsModal ref={commentRef} />

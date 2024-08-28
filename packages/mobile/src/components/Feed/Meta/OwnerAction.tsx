@@ -39,9 +39,6 @@ export const OwnerActions = memo(
             ? {
                 icon: <Copy />,
                 label: t('Duplicate Article'),
-                //   href: `/apps/feed/duplicate/${
-                //     channel?.fileMetadata.appData.content.slug || channel?.fileMetadata.appData.uniqueId
-                //   }/${postContent.id}`,
                 onPress: () => {
                   openURL(
                     `${host}/apps/feed/duplicate/${channel?.fileMetadata.appData.content.slug || channel?.fileMetadata.appData.uniqueId}/${postContent.id}`

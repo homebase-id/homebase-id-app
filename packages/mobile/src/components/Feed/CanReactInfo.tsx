@@ -33,6 +33,7 @@ export const CantReactInfo = memo(
           style={{
             gap: 4,
             flexDirection: 'row',
+            marginHorizontal: 4,
           }}
         >
           <ActivityIndicator size={'small'} />

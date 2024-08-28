@@ -5,7 +5,7 @@ import {
   ParsedReactionPreview,
 } from '@homebase-id/js-lib/core';
 import { PostContent, ReactionContext } from '@homebase-id/js-lib/public';
-import { memo, useState } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 import { IconButton } from '../../Chat/Chat-app-bar';
 import { GestureResponderEvent, View } from 'react-native';
 import { OpenHeart, Comment, ShareNode, SolidHeart } from '../../ui/Icons/icons';
@@ -39,12 +39,21 @@ export const PostInteracts = memo(
     const postContent = postFile.fileMetadata.appData.content;
     const owner = useDotYouClientContext().getIdentity();
     const authorOdinId = postContent.authorOdinId || owner;
-    const postDisabledEmoji =
-      postContent.reactAccess !== undefined &&
-      (postContent.reactAccess === false || postContent.reactAccess === 'comment');
-    const postDisabledComment =
-      postContent.reactAccess !== undefined &&
-      (postContent.reactAccess === false || postContent.reactAccess === 'emoji');
+
+    const postDisabledEmoji = useMemo(
+      () =>
+        postContent.reactAccess !== undefined &&
+        (postContent.reactAccess === false || postContent.reactAccess === 'comment'),
+      [postContent.reactAccess]
+    );
+
+    const postDisabledComment = useMemo(
+      () =>
+        postContent.reactAccess !== undefined &&
+        (postContent.reactAccess === false || postContent.reactAccess === 'emoji'),
+      [postContent.reactAccess]
+    );
+
     const { data: canReact } = useCanReact({
       authorOdinId,
       channelId: postContent.channelId,
@@ -54,29 +63,33 @@ export const PostInteracts = memo(
       isOwner: false,
     });
 
-    if (!postFile.fileMetadata.globalTransitId || !postFile.fileId) return null;
+    const reactionContext: ReactionContext = useMemo(() => {
+      return {
+        authorOdinId: authorOdinId,
+        channelId: postContent.channelId,
+        target: {
+          globalTransitId: postFile.fileMetadata.globalTransitId || '',
+          fileId: postFile.fileId,
+          isEncrypted: postFile.fileMetadata.isEncrypted || false,
+        },
+      };
+    }, [authorOdinId, postContent.channelId, postFile]);
 
-    const reactionContext: ReactionContext = {
-      authorOdinId: authorOdinId,
-      channelId: postContent.channelId,
-      target: {
-        globalTransitId: postFile.fileMetadata.globalTransitId,
-        fileId: postFile.fileId,
-        isEncrypted: postFile.fileMetadata.isEncrypted || false,
-      },
-    };
-
-    const onCommentPressHandler = () => {
+    const onCommentPressHandler = useCallback(() => {
       const context: ReactionContext & CanReactInfo = {
         ...reactionContext,
         ...canReact,
       };
       return onCommentPress?.(context);
-    };
+    }, [canReact, onCommentPress, reactionContext]);
 
-    const permalink = `${new DotYouClient({ identity: authorOdinId || undefined, api: ApiType.Guest }).getRoot()}/posts/${postContent.channelId}/${
-      postContent.slug ?? postContent.id
-    }`;
+    const permalink = useMemo(
+      () =>
+        `${new DotYouClient({ identity: authorOdinId || undefined, api: ApiType.Guest }).getRoot()}/posts/${postContent.channelId}/${
+          postContent.slug ?? postContent.id
+        }`,
+      [authorOdinId, postContent]
+    );
 
     const onSharePressHandler = () => {
       const context: ShareContext = {
@@ -85,6 +98,8 @@ export const PostInteracts = memo(
       };
       return onSharePress?.(context);
     };
+
+    if (!postFile.fileMetadata.globalTransitId || !postFile.fileId) return null;
 
     return (
       <>

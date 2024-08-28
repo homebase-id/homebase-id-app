@@ -6,8 +6,8 @@ import {
   NewHomebaseFile,
   ReactionFile,
 } from '@homebase-id/js-lib/core';
-import { useState } from 'react';
-import { View } from 'react-native';
+import { memo, useCallback, useMemo, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
 import { Avatar } from '../../../ui/Avatars/Avatar';
 import { Text } from '../../../ui/Text/Text';
 import { AuthorName } from '../../../ui/Name';
@@ -35,122 +35,102 @@ export interface dirtyReactionContext extends Omit<ReactionContext, 'target'> {
   };
 }
 
-export const Comment = ({ context, canReact, commentData, onReply, isThread }: CommentProps) => {
-  const [isEdit, setIsEdit] = useState(false);
-  const {
-    saveComment: { mutateAsync: postComment, error: postCommentError, status: postState },
-    removeComment: { mutateAsync: removeComment, error: removeCommentError },
-  } = useReaction();
+export const Comment = memo(
+  ({ context, canReact, commentData, onReply, isThread }: CommentProps) => {
+    const [isEdit, setIsEdit] = useState(false);
+    const {
+      saveComment: { mutateAsync: postComment, error: postCommentError, status: postState },
+      removeComment: { mutateAsync: removeComment, error: removeCommentError },
+    } = useReaction();
 
-  const fileId = commentData.fileId;
-  const commentContent = commentData.fileMetadata.appData.content;
-  const authorOdinId = commentContent.authorOdinId;
+    const fileId = commentData.fileId;
+    const commentContent = commentData.fileMetadata.appData.content;
+    const authorOdinId = commentContent.authorOdinId;
 
-  const threadContext: dirtyReactionContext = {
-    ...context,
-    target: {
-      fileId: commentData.fileId,
-      globalTransitId: (commentData as HomebaseFile<ReactionFile>).fileMetadata.globalTransitId,
-      isEncrypted: (commentData as HomebaseFile<ReactionFile>).fileMetadata.isEncrypted || false,
-    },
-  };
+    const threadContext: dirtyReactionContext = useMemo(() => {
+      return {
+        ...context,
+        target: {
+          fileId: commentData.fileId,
+          globalTransitId: (commentData as HomebaseFile<ReactionFile>).fileMetadata.globalTransitId,
+          isEncrypted:
+            (commentData as HomebaseFile<ReactionFile>).fileMetadata.isEncrypted || false,
+        },
+      };
+    }, [commentData, context]);
 
-  const doUpdate = (newBody: string, newAttachment?: File) => {
-    (async () => {
-      await postComment({
-        context,
-        commentData: {
-          ...commentData,
-          fileMetadata: {
-            ...commentData.fileMetadata,
-            appData: {
-              ...commentData.fileMetadata.appData,
+    const doUpdate = useCallback(
+      (newBody: string, newAttachment?: File) => {
+        (async () => {
+          await postComment({
+            context,
+            commentData: {
+              ...commentData,
+              fileMetadata: {
+                ...commentData.fileMetadata,
+                appData: {
+                  ...commentData.fileMetadata.appData,
 
-              content: {
-                ...commentData.fileMetadata.appData.content,
-                body: newBody,
-                attachment: newAttachment,
+                  content: {
+                    ...commentData.fileMetadata.appData.content,
+                    body: newBody,
+                    attachment: newAttachment,
+                  },
+                },
               },
             },
-          },
-        },
-      });
+          });
 
-      setIsEdit(false);
-    })();
-  };
-  return (
-    <View
-      style={{
-        display: 'flex',
-        flexDirection: 'row',
-        gap: 16,
-        marginHorizontal: 8,
-        marginVertical: 12,
-      }}
-    >
-      <ErrorNotification error={postCommentError || removeCommentError} />
-      <Avatar
-        odinId={authorOdinId}
-        imageSize={{
-          width: 36,
-          height: 36,
-        }}
-        style={{
-          width: 36,
-          height: 36,
-        }}
-      />
-      <View
-        style={{
-          flex: 1,
-        }}
-      >
-        <CommentHead
-          authorOdinId={authorOdinId}
-          setIsEdit={setIsEdit}
-          onRemove={
-            commentData.fileId
-              ? () =>
-                  removeComment({
-                    context,
-                    commentFile: commentData as HomebaseFile<ReactionFile>,
-                  })
-              : undefined
-          }
-        />
-        {/* TODO: Comement Body */}
-        <Text
-          style={{
-            flex: 1,
-          }}
-        >
-          {commentContent.body}
-        </Text>
-        {threadContext.target.fileId && threadContext.target.globalTransitId ? (
-          <CommentMeta
-            canReact={canReact}
-            threadContext={threadContext as ReactionContext}
-            created={(commentData as HomebaseFile<ReactionFile>).fileMetadata.created}
-            updated={(commentData as HomebaseFile<ReactionFile>).fileMetadata.updated}
-            onReply={
-              isThread ? undefined : () => onReply?.(commentData as HomebaseFile<ReactionFile>)
+          setIsEdit(false);
+        })();
+      },
+      [commentData, context, postComment]
+    );
+    return (
+      <View style={styles.container}>
+        <ErrorNotification error={postCommentError || removeCommentError} />
+        <Avatar odinId={authorOdinId} imageSize={styles.imageSize} style={styles.imageSize} />
+        <View style={{ flex: 1 }}>
+          <CommentHead
+            authorOdinId={authorOdinId}
+            setIsEdit={setIsEdit}
+            onRemove={
+              commentData.fileId
+                ? () =>
+                    removeComment({
+                      context,
+                      commentFile: commentData as HomebaseFile<ReactionFile>,
+                    })
+                : undefined
             }
           />
-        ) : null}
-        {!isThread && threadContext.target.fileId && threadContext.target.globalTransitId ? (
-          <>
-            <CommentThread context={threadContext as ReactionContext} canReact={canReact} />
-          </>
-        ) : null}
+          {/* TODO: Comement Body */}
+          <Text style={{ flex: 1 }}>{commentContent.body}</Text>
+          {threadContext.target.fileId && threadContext.target.globalTransitId ? (
+            <CommentMeta
+              canReact={canReact}
+              threadContext={threadContext as ReactionContext}
+              created={(commentData as HomebaseFile<ReactionFile>).fileMetadata.created}
+              updated={(commentData as HomebaseFile<ReactionFile>).fileMetadata.updated}
+              onReply={
+                isThread ? undefined : () => onReply?.(commentData as HomebaseFile<ReactionFile>)
+              }
+            />
+          ) : null}
+          {!isThread && threadContext.target.fileId && threadContext.target.globalTransitId ? (
+            <>
+              <CommentThread context={threadContext as ReactionContext} canReact={canReact} />
+            </>
+          ) : null}
+        </View>
       </View>
-    </View>
-  );
-};
+    );
+  }
+);
 
 const MAX_CHAR_FOR_SUMMARY = 280;
 
-export const CommentTeaser = ({ commentData }: { commentData: CommentReactionPreview }) => {
+export const CommentTeaser = memo(({ commentData }: { commentData: CommentReactionPreview }) => {
   const { authorOdinId, body, mediaPayloadKey } = commentData;
   const hasMedia = !!mediaPayloadKey;
   const { isDarkMode } = useDarkMode();
@@ -160,14 +140,7 @@ export const CommentTeaser = ({ commentData }: { commentData: CommentReactionPre
         flexDirection: 'row',
       }}
     >
-      <Text
-        style={{
-          fontSize: 14,
-          lineHeight: 20,
-          fontWeight: '700',
-          opacity: 0.7,
-        }}
-      >
+      <Text style={styles.comentAuthorText}>
         <AuthorName odinId={authorOdinId} />{' '}
       </Text>
       {commentData.isEncrypted && body === '' ? (
@@ -212,4 +185,24 @@ export const CommentTeaser = ({ commentData }: { commentData: CommentReactionPre
       )}
     </View>
   );
-};
+});
+
+const styles = StyleSheet.create({
+  container: {
+    display: 'flex',
+    flexDirection: 'row',
+    gap: 16,
+    marginHorizontal: 8,
+    marginVertical: 12,
+  },
+  imageSize: {
+    width: 36,
+    height: 36,
+  },
+  comentAuthorText: {
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: '700',
+    opacity: 0.7,
+  },
+});

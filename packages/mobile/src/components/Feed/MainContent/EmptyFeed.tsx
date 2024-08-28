@@ -4,8 +4,9 @@ import { View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { useDarkMode } from '../../../hooks/useDarkMode';
 import { Colors } from '../../../app/Colors';
+import { memo } from 'react';
 
-export const EmptyFeed = () => {
+export const EmptyFeed = memo(() => {
   return (
     <View
       style={{
@@ -26,7 +27,7 @@ export const EmptyFeed = () => {
       </Text>
     </View>
   );
-};
+});
 
 const EmptyPostIllustration = (props: { color?: string }) => {
   const { isDarkMode } = useDarkMode();

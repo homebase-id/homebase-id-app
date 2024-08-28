@@ -1,8 +1,9 @@
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { Colors } from '../../../app/Colors';
 import { useDarkMode } from '../../../hooks/useDarkMode';
+import { memo } from 'react';
 
-export const FeedLoader = () => {
+export const FeedLoader = memo(() => {
   const { isDarkMode } = useDarkMode();
   return (
     <View style={styles.container}>
@@ -12,7 +13,7 @@ export const FeedLoader = () => {
       />
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {
