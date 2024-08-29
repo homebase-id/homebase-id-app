@@ -10,15 +10,15 @@ import { PostComposer } from '../../components/Feed/Composer/PostComposer';
 import { Plus } from '../../components/ui/Icons/icons';
 import { useIsFocused } from '@react-navigation/native';
 import SocialFeedMainContent from '../../components/Feed/MainContent/SocialFeed';
+import { FeedStackParamList } from '../../app/FeedStack';
 
-type FeedProps = NativeStackScreenProps<TabStackParamList, 'Feed'>;
+type FeedProps = NativeStackScreenProps<FeedStackParamList, 'Home'>;
 
 export const FeedPage = memo((_props: FeedProps) => {
   const [isPostComposerOpen, setIsPostComposerOpen] = useState<boolean>();
 
   const isFocused = useIsFocused();
   useRemoveNotifications({ disabled: !isFocused, appId: FEED_APP_ID });
-  // useLiveFeedProcessor();
 
   const doCloseComposer = useCallback(() => setIsPostComposerOpen(false), []);
   const doCloseAndRefresh = useCallback(() => {

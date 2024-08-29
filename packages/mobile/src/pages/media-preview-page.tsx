@@ -27,8 +27,12 @@ import Animated from 'react-native-reanimated';
 import { ZOOM_TYPE } from '@likashefqet/react-native-image-zoom';
 import { CarouselRenderItemInfo } from 'react-native-reanimated-carousel/lib/typescript/types';
 import { CameraRoll } from '@react-native-camera-roll/camera-roll';
+import { FeedStackParamList } from '../app/FeedStack';
 
-export type MediaProp = NativeStackScreenProps<ChatStackParamList, 'PreviewMedia'>;
+export type MediaProp = NativeStackScreenProps<
+  ChatStackParamList | FeedStackParamList,
+  'PreviewMedia'
+>;
 
 export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
   const {

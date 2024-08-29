@@ -23,7 +23,6 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Colors } from './Colors';
 
 // Pages
-import { FeedPage } from '../pages/feed/feed-page';
 import { HomePage } from '../pages/home/home-page';
 import { LoginPage } from '../pages/login/login-page';
 import { useDarkMode } from '../hooks/useDarkMode';
@@ -56,6 +55,7 @@ import { t } from 'feed-app-common';
 import { FEED_CHAT_APP_ID } from './constants';
 import { Toast } from '../components/ui/Toast/Toast';
 import { NotificationToaster } from '../components/ui/Alert/NotificationToaster';
+import { FeedStack } from './FeedStack';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -65,7 +65,6 @@ export type AuthStackParamList = {
 export type TabStackParamList = {
   Home: undefined;
   Feed: undefined;
-  ComposeFeed: undefined;
   Profile: undefined;
   Chat: undefined;
 };
@@ -193,6 +192,7 @@ const TabStack = memo(() => {
     'Following',
     'DriveStatus',
     'ConnectQr',
+    'MediaPreview',
   ];
   const { route } = useRouteContext();
   const hide = !route || !rootRoutes.includes(route.name);
@@ -223,9 +223,14 @@ const TabStack = memo(() => {
         />
         <TabBottom.Screen
           name="Feed"
-          component={FeedPage}
+          component={FeedStack}
           options={{
             tabBarIcon: TabFeedIcon,
+            tabBarStyle: hide
+              ? Platform.OS === 'android'
+                ? { height: 0, overflow: 'hidden', opacity: 0 }
+                : { display: 'none' }
+              : { backgroundColor: isDarkMode ? Colors.indigo[900] : Colors.indigo[100] },
             // lazy: false,
           }}
         />
