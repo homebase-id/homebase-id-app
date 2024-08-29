@@ -52,7 +52,6 @@ export const PostMedia = memo(({ post }: PostMediaProps) => {
             aspectRatio,
           }}
           onClick={() => {
-            //TODO: Back handler shouldn't redirect to chatStack
             navigation.navigate('PreviewMedia', {
               fileId: fileId,
               payloads: payloads,
@@ -84,7 +83,6 @@ export const PostMedia = memo(({ post }: PostMediaProps) => {
         marginTop: hasContent ? 10 : 0,
       }}
       onClick={(index) => {
-        //TODO: Back handler shouldn't redirect to chatStack
         navigation.navigate('PreviewMedia', {
           fileId: fileId,
           payloads: payloads,
