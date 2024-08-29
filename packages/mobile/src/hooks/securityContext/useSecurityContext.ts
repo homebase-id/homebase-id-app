@@ -18,7 +18,7 @@ export const useSecurityContext = (odinId?: string, isEnabled?: boolean) => {
       refetchOnMount: false,
       refetchOnWindowFocus: false,
       staleTime: Infinity,
-      enabled: isEnabled === undefined ? true : isEnabled,
+      enabled: isEnabled || true,
     }),
   };
 };

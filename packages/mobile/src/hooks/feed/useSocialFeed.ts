@@ -53,7 +53,7 @@ const useFeedWebsocket = (isEnabled: boolean) => {
     ) {
       queryClient.invalidateQueries({ queryKey: ['social-feeds'] });
     }
-  }, []);
+  }, [queryClient]);
 
   useNotificationSubscriber(
     isEnabled ? handler : undefined,
@@ -62,15 +62,20 @@ const useFeedWebsocket = (isEnabled: boolean) => {
   );
 };
 
+export const useLiveFeedProcessor = () => {
+  const { status: inboxStatus } = useInboxProcessor(true);
+
+  useFeedWebsocket(inboxStatus === 'success');
+}
+
 export const useSocialFeed = ({ pageSize = 10 }: { pageSize: number }) => {
   const dotYouClient = useDotYouClientContext();
+
   const { data: ownChannels, isFetched: channelsFetched } = useChannels({
     isAuthenticated: true,
     isOwner: true,
   });
 
-  const { status: inboxStatus } = useInboxProcessor(true);
-  useFeedWebsocket(inboxStatus === 'success');
 
   const fetchAll = async ({
     pageParam,
@@ -92,8 +97,8 @@ export const useSocialFeed = ({ pageSize = 10 }: { pageSize: number }) => {
       queryFn: ({ pageParam }) => fetchAll({ pageParam }),
       getNextPageParam: (lastPage) =>
         lastPage &&
-        lastPage?.results?.length >= 1 &&
-        (lastPage?.cursorState || lastPage?.ownerCursorState)
+          lastPage?.results?.length >= 1 &&
+          (lastPage?.cursorState || lastPage?.ownerCursorState)
           ? { cursorState: lastPage.cursorState, ownerCursorState: lastPage.ownerCursorState }
           : undefined,
       refetchOnMount: false,

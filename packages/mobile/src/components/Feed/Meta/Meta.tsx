@@ -90,13 +90,7 @@ export const PostMeta = memo(
             style={styles.pressableContainer}
           >
             {postFile?.fileMetadata.isEncrypted && <Lock size={'xs'} color={Colors.indigo[500]} />}
-            <Text
-              style={{
-                color: Colors.indigo[500],
-                fontWeight: '500',
-                fontSize: 13,
-              }}
-            >
+            <Text style={styles.aclText}>
               {(isAuthor || !odinId) &&
               channel?.serverMetadata &&
               postFile?.serverMetadata &&
@@ -148,26 +142,12 @@ export const ToGroupBlock = memo(
 
     return (
       <View style={styles.groupContainer}>
-        <Text
-          style={{
-            opacity: 0.6,
-            fontSize: 14,
-            fontWeight: '500',
-          }}
-        >
-          {t('to')}{' '}
-        </Text>
+        <Text style={styles.toText}>{t('to')} </Text>
         <TouchableOpacity
           onPress={() => channelLink && openURL(channelLink)}
           style={styles.pressableContainer}
         >
-          <Text
-            style={{
-              color: Colors.indigo[500],
-              fontWeight: '500',
-              textDecorationStyle: 'solid',
-            }}
-          >
+          <Text style={styles.channelText}>
             {channel?.fileMetadata.appData.content.name
               ? `${channel?.fileMetadata.appData.content.name}`
               : ''}
@@ -196,5 +176,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 4,
     alignItems: 'center',
+  },
+  aclText: {
+    color: Colors.indigo[500],
+    fontWeight: '500',
+    fontSize: 13,
+  },
+  channelText: {
+    color: Colors.indigo[500],
+    fontWeight: '500',
+    textDecorationStyle: 'solid',
+  },
+  toText: {
+    opacity: 0.6,
+    fontSize: 14,
+    fontWeight: '500',
   },
 });

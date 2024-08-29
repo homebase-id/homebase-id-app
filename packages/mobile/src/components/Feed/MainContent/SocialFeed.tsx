@@ -18,6 +18,10 @@ import { PostActionMethods, PostActionProps, PostModalAction } from '../Interact
 import { Host } from 'react-native-portalize';
 import { t } from 'feed-app-common';
 import { useScrollToTop } from '@react-navigation/native';
+import {
+  PostEmojiPickerModal,
+  PostEmojiPickerModalMethods,
+} from '../Interacts/Reactions/PostEmojiPickerModal';
 
 const PAGE_SIZE = 10;
 
@@ -52,6 +56,7 @@ const SocialFeedMainContent = memo(() => {
   const reactionRef = useRef<ReactionModalMethods>(null);
   const shareRef = useRef<ShareModalMethods>(null);
   const postActionRef = useRef<PostActionMethods>(null);
+  const postEmojiPickerRef = useRef<PostEmojiPickerModalMethods>(null);
 
   useScrollToTop(scrollRef);
 
@@ -69,6 +74,10 @@ const SocialFeedMainContent = memo(() => {
 
   const onMorePress = useCallback((context: PostActionProps) => {
     postActionRef.current?.setContext(context);
+  }, []);
+
+  const onEmojiModalOpen = useCallback((context: ReactionContext) => {
+    postEmojiPickerRef.current?.setContext(context);
   }, []);
 
   const onRefresh = useCallback(async () => {
@@ -96,7 +105,7 @@ const SocialFeedMainContent = memo(() => {
         </Text>
       );
     }
-  }, [flattenedPosts?.length, isFetchingNextPage]);
+  }, [flattenedPosts, isFetchingNextPage]);
 
   const renderItem = useCallback(
     ({ item }: ListRenderItemInfo<HomebaseFile<PostContent>>) => (
@@ -106,9 +115,10 @@ const SocialFeedMainContent = memo(() => {
         onReactionPress={onReactionPress}
         onSharePress={onSharePress}
         onMorePress={onMorePress}
+        onEmojiModalOpen={onEmojiModalOpen}
       />
     ),
-    [onCommentPress, onMorePress, onReactionPress, onSharePress]
+    [onCommentPress, onMorePress, onReactionPress, onSharePress, onEmojiModalOpen]
   );
 
   if (postsLoading) {
@@ -129,13 +139,14 @@ const SocialFeedMainContent = memo(() => {
           ListEmptyComponent={<EmptyFeed />}
           ListFooterComponent={listFooter}
           onEndReached={() => hasMorePosts && fetchNextPage()}
-          onEndReachedThreshold={0.3}
+          onEndReachedThreshold={0.5}
         />
       </Host>
       <CommentsModal ref={commentRef} />
       <PostReactionModal ref={reactionRef} />
       <ShareModal ref={shareRef} />
       <PostModalAction ref={postActionRef} />
+      <PostEmojiPickerModal ref={postEmojiPickerRef} />
     </>
   );
 });

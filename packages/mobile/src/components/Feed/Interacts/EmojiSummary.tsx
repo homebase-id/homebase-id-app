@@ -1,7 +1,6 @@
 import { Pressable } from 'react-native';
 import { Text } from '../../ui/Text/Text';
-import { ReactionContext } from '@homebase-id/js-lib/public';
-import { EmojiReactionSummary } from '@homebase-id/js-lib/core';
+import { EmojiReactionSummary, ReactionContext } from '@homebase-id/js-lib/public';
 import { useEmojiSummary } from '../../../hooks/reactions';
 import { memo } from 'react';
 

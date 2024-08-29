@@ -1,6 +1,6 @@
 import { ApiType, DotYouClient, HomebaseFile } from '@homebase-id/js-lib/core';
 import { parseReactionPreview, PostContent, ReactionContext } from '@homebase-id/js-lib/public';
-import { memo, useMemo, useState } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 import { IconButton } from '../../Chat/Chat-app-bar';
 import { GestureResponderEvent, View } from 'react-native';
 import { OpenHeart, Comment, ShareNode, SolidHeart } from '../../ui/Icons/icons';
@@ -24,30 +24,25 @@ export const PostInteracts = memo(
     onCommentPress,
     onReactionPress,
     onSharePress,
+    onEmojiModalOpen,
   }: {
     postFile: HomebaseFile<PostContent>;
     isPublic?: boolean;
     onCommentPress?: (context: ReactionContext & CanReactInfo) => void;
     onReactionPress?: (context: ReactionContext) => void;
     onSharePress?: (context: ShareContext) => void;
+    onEmojiModalOpen?: (context: ReactionContext) => void;
   }) => {
     const postContent = postFile.fileMetadata.appData.content;
     const owner = useDotYouClientContext().getIdentity();
     const authorOdinId = postContent.authorOdinId || owner;
+    const postDisabledEmoji =
+      postContent.reactAccess !== undefined &&
+      (postContent.reactAccess === false || postContent.reactAccess === 'comment');
 
-    const postDisabledEmoji = useMemo(
-      () =>
-        postContent.reactAccess !== undefined &&
-        (postContent.reactAccess === false || postContent.reactAccess === 'comment'),
-      [postContent.reactAccess]
-    );
-
-    const postDisabledComment = useMemo(
-      () =>
-        postContent.reactAccess !== undefined &&
-        (postContent.reactAccess === false || postContent.reactAccess === 'emoji'),
-      [postContent.reactAccess]
-    );
+    const postDisabledComment =
+      postContent.reactAccess !== undefined &&
+      (postContent.reactAccess === false || postContent.reactAccess === 'emoji');
 
     const { data: canReact } = useCanReact({
       authorOdinId,
@@ -70,13 +65,21 @@ export const PostInteracts = memo(
       };
     }, [authorOdinId, postContent.channelId, postFile]);
 
-    const onCommentPressHandler = () => {
+    const onCommentPressHandler = useCallback(() => {
       const context: ReactionContext & CanReactInfo = {
         ...reactionContext,
         ...canReact,
       };
       return onCommentPress?.(context);
-    };
+    }, [canReact, onCommentPress, reactionContext]);
+
+    const onEmojiPressHandler = useCallback(() => {
+      return onEmojiModalOpen?.(reactionContext);
+    }, [reactionContext, onEmojiModalOpen]);
+
+    const onReactionPressHandler = useCallback(() => {
+      return onReactionPress?.(reactionContext);
+    }, [reactionContext]);
 
     const permalink = useMemo(
       () =>
@@ -86,18 +89,15 @@ export const PostInteracts = memo(
       [authorOdinId, postContent]
     );
 
-    const parsedReactionPreview = useMemo(
-      () => parseReactionPreview(postFile.fileMetadata.reactionPreview),
-      [postFile.fileMetadata.reactionPreview]
-    );
+    const parsedReactionPreview = parseReactionPreview(postFile.fileMetadata.reactionPreview);
 
-    const onSharePressHandler = () => {
+    const onSharePressHandler = useCallback(() => {
       const context: ShareContext = {
         href: permalink,
         title: postContent.caption,
       };
       return onSharePress?.(context);
-    };
+    }, [permalink, postContent]);
 
     if (!postFile.fileMetadata.globalTransitId || !postFile.fileId) return null;
 
@@ -109,10 +109,16 @@ export const PostInteracts = memo(
             alignItems: 'center',
           }}
         >
-          {!postDisabledEmoji && <LikeButton context={reactionContext} canReact={canReact} />}
+          {!postDisabledEmoji && (
+            <LikeButton
+              context={reactionContext}
+              canReact={canReact}
+              onEmojiModalOpen={onEmojiPressHandler}
+            />
+          )}
           <EmojiSummary
             context={reactionContext}
-            onReactionPress={() => onReactionPress?.(reactionContext)}
+            onReactionPress={onReactionPressHandler}
             reactionPreview={parsedReactionPreview.reactions}
           />
           <View
@@ -138,75 +144,80 @@ export const PostInteracts = memo(
   }
 );
 
-export const LikeButton = ({
-  context,
-  canReact,
-}: {
-  context: ReactionContext;
-  canReact?: CanReactInfo;
-}) => {
-  const identity = useDotYouClientContext().getIdentity();
-  const {
-    saveEmoji: { mutate: postEmoji, error: postEmojiError },
-    removeEmoji: { mutate: removeEmoji, error: removeEmojiError },
-  } = useReaction();
+export const LikeButton = memo(
+  ({
+    context,
+    canReact,
+    onEmojiModalOpen,
+  }: {
+    context: ReactionContext;
+    canReact?: CanReactInfo;
+    onEmojiModalOpen?: () => void;
+  }) => {
+    const identity = useDotYouClientContext().getIdentity();
+    const {
+      saveEmoji: { mutate: postEmoji, error: postEmojiError },
+      removeEmoji: { mutate: removeEmoji, error: removeEmojiError },
+    } = useReaction();
 
-  const { data: myEmojis } = useMyEmojiReactions(context).fetch;
+    const { data: myEmojis } = useMyEmojiReactions(context).fetch;
 
-  const [reactionBarVisible, setReactionBarVisible] = useState<{
-    isActive: boolean;
-    coordinates?: {
-      x: number;
-      y: number;
+    const [reactionBarVisible, setReactionBarVisible] = useState<{
+      isActive: boolean;
+      coordinates?: {
+        x: number;
+        y: number;
+      };
+    }>({ isActive: false });
+
+    const doLike = () =>
+      postEmoji({
+        emojiData: {
+          authorOdinId: identity || '',
+          body: '❤️',
+        },
+        context,
+      });
+
+    const doUnlike = () =>
+      removeEmoji({
+        emojiData: { body: '❤️', authorOdinId: identity || '' },
+        context,
+      });
+
+    const isLiked = myEmojis?.some((reaction) => reaction === '❤️');
+
+    const onLongPress = (e: GestureResponderEvent) => {
+      const y = e.nativeEvent.pageY - e.nativeEvent.locationY;
+      setReactionBarVisible({
+        isActive: true,
+        coordinates: {
+          x: e.nativeEvent.locationX,
+          y,
+        },
+      });
     };
-  }>({ isActive: false });
 
-  const doLike = () =>
-    postEmoji({
-      emojiData: {
-        authorOdinId: identity || '',
-        body: '❤️',
-      },
-      context,
-    });
+    return (
+      <>
+        <ErrorNotification error={postEmojiError || removeEmojiError} />
+        <IconButton
+          icon={isLiked ? <SolidHeart color={Colors.red[500]} /> : <OpenHeart />}
+          onPress={isLiked ? doUnlike : doLike}
+          touchableProps={{
+            onLongPress: onLongPress,
+          }}
+        />
 
-  const doUnlike = () =>
-    removeEmoji({
-      emojiData: { body: '❤️', authorOdinId: identity || '' },
-      context,
-    });
-
-  const isLiked = myEmojis?.some((reaction) => reaction === '❤️');
-
-  const onLongPress = (e: GestureResponderEvent) => {
-    const y = e.nativeEvent.pageY - e.nativeEvent.locationY;
-    setReactionBarVisible({
-      isActive: true,
-      coordinates: {
-        x: e.nativeEvent.locationX,
-        y,
-      },
-    });
-  };
-
-  return (
-    <>
-      <ErrorNotification error={postEmojiError || removeEmojiError} />
-      <IconButton
-        icon={isLiked ? <SolidHeart color={Colors.red[500]} /> : <OpenHeart />}
-        onPress={isLiked ? doUnlike : doLike}
-        touchableProps={{
-          onLongPress: onLongPress,
-        }}
-      />
-
-      <PostReactionBar
-        context={context}
-        canReact={canReact}
-        isActive={reactionBarVisible.isActive}
-        coordinates={reactionBarVisible.coordinates}
-        onClose={() => setReactionBarVisible({ isActive: false })}
-      />
-    </>
-  );
-};
+        <PostReactionBar
+          context={context}
+          canReact={canReact}
+          isActive={reactionBarVisible.isActive}
+          coordinates={reactionBarVisible.coordinates}
+          onClose={() => setReactionBarVisible({ isActive: false })}
+          onEmojiModalOpen={onEmojiModalOpen}
+        />
+      </>
+    );
+  }
+);

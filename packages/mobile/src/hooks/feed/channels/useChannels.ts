@@ -29,7 +29,6 @@ export const useChannels = ({
 }) => {
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
-
   const fetchChannelData = async () => {
     const fetchDynamicData = async () => {
       try {

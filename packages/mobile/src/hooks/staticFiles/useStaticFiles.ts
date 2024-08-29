@@ -29,7 +29,7 @@ export const useStaticFiles = () => {
 
     await Promise.all(publishActions);
 
-    console.debug('[COMPLETEDED] Static file publish');
+    console.debug('[COMPLETED] Static file publish');
   };
 
   return {

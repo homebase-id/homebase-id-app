@@ -8,11 +8,10 @@ import { AuthorName } from '../ui/Name';
 import { Avatar } from '../ui/Avatars/Avatar';
 import { UnreachableIdentity } from './UnreachableIdentity';
 import Animated from 'react-native-reanimated';
-import { useCheckIdentity, useDotYouClientContext } from 'feed-app-common';
 import { memo, useCallback, useMemo } from 'react';
 import { useDarkMode } from '../../hooks/useDarkMode';
-import { HomebaseFile, SecurityGroupType } from '@homebase-id/js-lib/core';
-import { PostContent, ReactionContext } from '@homebase-id/js-lib/public';
+import { HomebaseFile, NewHomebaseFile, SecurityGroupType } from '@homebase-id/js-lib/core';
+import { ChannelDefinition, PostContent, ReactionContext } from '@homebase-id/js-lib/public';
 import { useChannel } from '../../hooks/feed/channels/useChannel';
 import { useSocialChannel } from '../../hooks/feed/useSocialChannel';
 import { Colors } from '../../app/Colors';
@@ -23,6 +22,8 @@ import { ShareContext } from './Interacts/Share/ShareModal';
 import { Ellipsis } from '../ui/Icons/icons';
 import { IconButton } from '../Chat/Chat-app-bar';
 import { PostActionProps } from './Interacts/PostActionModal';
+import { useDotYouClientContext } from 'feed-app-common';
+import { useCheckIdentity } from '../../hooks/checkIdentity/useCheckIdentity';
 
 export const PostTeaserCard = memo(
   ({
@@ -31,19 +32,21 @@ export const PostTeaserCard = memo(
     onReactionPress,
     onSharePress,
     onMorePress,
+    onEmojiModalOpen,
   }: {
     postFile: HomebaseFile<PostContent>;
     onCommentPress: (context: ReactionContext & CanReactInfo) => void;
     onReactionPress: (context: ReactionContext) => void;
     onSharePress?: (context: ShareContext) => void;
     onMorePress?: (context: PostActionProps) => void;
+    onEmojiModalOpen?: (context: ReactionContext) => void;
   }) => {
-    const { isDarkMode } = useDarkMode();
     const identity = useDotYouClientContext().getIdentity();
     const post = postFile.fileMetadata.appData.content;
     const odinId = postFile.fileMetadata.senderOdinId;
     const authorOdinId = post.authorOdinId || odinId;
     const isExternal = odinId && odinId !== identity;
+    const groupPost = authorOdinId !== (odinId || identity) && (odinId || identity) && authorOdinId;
 
     const { data: identityAccessible } = useCheckIdentity(isExternal ? odinId : undefined);
 
@@ -57,7 +60,6 @@ export const PostTeaserCard = memo(
     }).fetch;
 
     const channel = externalChannel || internalChannel;
-    const groupPost = authorOdinId !== (odinId || identity) && (odinId || identity) && authorOdinId;
 
     const onPostActionPress = useCallback(() => {
       onMorePress?.({
@@ -68,30 +70,6 @@ export const PostTeaserCard = memo(
         isAuthor: authorOdinId === identity,
       });
     }, [authorOdinId, channel, groupPost, identity, odinId, onMorePress, postFile]);
-
-    const parse: ParseShape[] = useMemo(
-      () => [
-        {
-          pattern: URL_PATTERN,
-          onPress: (url) => openURL(url),
-          style: {
-            color: isDarkMode ? Colors.indigo[200] : Colors.indigo[500],
-          },
-        },
-      ],
-      [isDarkMode]
-    );
-
-    const viewStyle = useMemo(() => {
-      return {
-        padding: 10,
-        margin: 10,
-        elevation: 5,
-        backgroundColor: isDarkMode ? Colors.black : Colors.white,
-        borderRadius: 5,
-        flexDirection: 'column',
-      } as StyleProp<ViewStyle>;
-    }, [isDarkMode]);
 
     const isPublic = useMemo(
       () =>
@@ -105,6 +83,74 @@ export const PostTeaserCard = memo(
     if (identityAccessible === false && isExternal) {
       return <UnreachableIdentity postFile={postFile} odinId={odinId} />;
     }
+
+    return (
+      <InnerPostTeaserCard
+        postFile={postFile}
+        channel={channel}
+        onCommentPress={onCommentPress}
+        onPostActionPress={onPostActionPress}
+        onReactionPress={onReactionPress}
+        onSharePress={onSharePress}
+        onEmojiModalOpen={onEmojiModalOpen}
+        isPublic={isPublic}
+      />
+    );
+  }
+);
+
+export const InnerPostTeaserCard = memo(
+  ({
+    postFile,
+    channel,
+    onCommentPress,
+    onReactionPress,
+    onSharePress,
+    onPostActionPress,
+    onEmojiModalOpen,
+    isPublic,
+  }: {
+    postFile: HomebaseFile<PostContent>;
+    channel?:
+      | NewHomebaseFile<ChannelDefinition>
+      | HomebaseFile<ChannelDefinition>
+      | undefined
+      | null;
+    onPostActionPress: () => void;
+    onCommentPress: (context: ReactionContext & CanReactInfo) => void;
+    onReactionPress: (context: ReactionContext) => void;
+    onSharePress?: (context: ShareContext) => void;
+    onEmojiModalOpen?: (context: ReactionContext) => void;
+    isPublic: boolean;
+  }) => {
+    const { isDarkMode } = useDarkMode();
+    const post = postFile.fileMetadata.appData.content;
+    const odinId = postFile.fileMetadata.senderOdinId;
+    const authorOdinId = post.authorOdinId || odinId;
+
+    const viewStyle = useMemo(() => {
+      return {
+        padding: 10,
+        margin: 10,
+        elevation: 5,
+        backgroundColor: isDarkMode ? Colors.black : Colors.white,
+        borderRadius: 5,
+        flexDirection: 'column',
+      } as StyleProp<ViewStyle>;
+    }, [isDarkMode]);
+
+    const parse: ParseShape[] = useMemo(
+      () => [
+        {
+          pattern: URL_PATTERN,
+          onPress: (url) => openURL(url),
+          style: {
+            color: isDarkMode ? Colors.indigo[200] : Colors.indigo[500],
+          },
+        },
+      ],
+      [isDarkMode]
+    );
 
     return (
       <Animated.View style={viewStyle}>
@@ -152,6 +198,7 @@ export const PostTeaserCard = memo(
           onCommentPress={onCommentPress}
           onReactionPress={onReactionPress}
           onSharePress={onSharePress}
+          onEmojiModalOpen={onEmojiModalOpen}
           isPublic={isPublic}
         />
       </Animated.View>

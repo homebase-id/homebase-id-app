@@ -26,6 +26,7 @@ export const PostReactionBar = memo(
     coordinates,
     isActive,
     onClose,
+    onEmojiModalOpen,
   }: {
     context: ReactionContext;
     canReact?: CanReactInfo;
@@ -35,6 +36,7 @@ export const PostReactionBar = memo(
     };
     isActive: boolean;
     onClose: () => void;
+    onEmojiModalOpen?: () => void;
   }) => {
     const identity = useDotYouClientContext().getIdentity();
     const {
@@ -44,7 +46,6 @@ export const PostReactionBar = memo(
     const { data: myEmojis } = useMyEmojiReactions(context).fetch;
 
     const scale = useSharedValue(0);
-    const opacity = useSharedValue(0);
     const { height } = useWindowDimensions();
 
     useEffect(() => {
@@ -78,20 +79,6 @@ export const PostReactionBar = memo(
       };
     });
 
-    const emojiPickerStyle = useAnimatedStyle(() => {
-      let y = coordinates?.y || 0;
-      y = isNaN(y) ? 0 : y;
-      return {
-        opacity: withTiming(opacity.value, { duration: 200 }),
-        pointerEvents: opacity.value === 0 ? 'none' : 'auto',
-        transform: [
-          {
-            translateY: y,
-          },
-        ],
-      };
-    });
-
     const textStyle = useAnimatedStyle(() => {
       return {
         fontSize: 28,
@@ -113,7 +100,6 @@ export const PostReactionBar = memo(
         context,
       });
 
-      opacity.value = 0;
       onClose?.();
     };
     const doUnlike = (body: string) => {
@@ -122,19 +108,10 @@ export const PostReactionBar = memo(
         context,
       });
 
-      opacity.value = 0;
       onClose?.();
     };
 
-    const onSelectEmoji = (emoji: { emoji: string }) => {
-      if (myEmojis?.includes(emoji.emoji)) {
-        return doUnlike(emoji.emoji);
-      }
-      doLike(emoji.emoji);
-    };
-
     const _onClose = () => {
-      opacity.value = 0;
       onClose?.();
     };
 
@@ -186,7 +163,8 @@ export const PostReactionBar = memo(
                     key={index}
                     onPress={() => {
                       if (index === defaultReactions.length - 1) {
-                        opacity.value = withTiming(1);
+                        onEmojiModalOpen?.();
+                        onClose?.();
                         return;
                       }
                       return doUnlike(reaction);
@@ -200,7 +178,8 @@ export const PostReactionBar = memo(
                     key={index}
                     onPress={() => {
                       if (index === initialReactions.length - 1) {
-                        opacity.value = 1;
+                        onEmojiModalOpen?.();
+                        onClose?.();
                         return;
                       }
                       return doLike(reaction);
@@ -210,25 +189,27 @@ export const PostReactionBar = memo(
                   </TouchableOpacity>
                 ))}
           </Animated.View>
-          <Animated.View
-            style={[
-              emojiPickerStyle,
-              {
-                marginHorizontal: 16,
-                height: 300,
-              },
-            ]}
-          >
-            <EmojiPicker
-              emojis={emojis} // emojis data source see data/emojis
-              autoFocus={false} // autofocus search input
-              loading={false} // spinner for if your emoji data or recent store is async
-              darkMode={isDarkMode} // to be or not to be, that is the question
-              perLine={7} // # of emoji's per line
-              onSelect={onSelectEmoji}
-              backgroundColor={isDarkMode ? Colors.gray[900] : Colors.slate[50]}
-            />
-          </Animated.View>
+          {/* {isActive && (
+            <Animated.View
+              style={[
+                emojiPickerStyle,
+                {
+                  marginHorizontal: 16,
+                  height: 300,
+                },
+              ]}
+            >
+              <EmojiPicker
+                emojis={emojis} // emojis data source see data/emojis
+                autoFocus={false} // autofocus search input
+                loading={false} // spinner for if your emoji data or recent store is async
+                darkMode={isDarkMode} // to be or not to be, that is the question
+                perLine={7} // # of emoji's per line
+                onSelect={onSelectEmoji}
+                backgroundColor={isDarkMode ? Colors.gray[900] : Colors.slate[50]}
+              />
+            </Animated.View>
+          )} */}
         </Pressable>
       </Portal>
     );

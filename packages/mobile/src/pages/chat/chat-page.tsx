@@ -127,8 +127,10 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
     conversationId: route.params.convoId,
   }).single;
 
-  const { mutate: clearChat, error: clearChatError } = useConversation().clearChat;
-  const { mutate: deleteChat, error: deleteChatError } = useConversation().deleteChat;
+  const {
+    clearChat: { mutate: clearChat, error: clearChatError },
+    deleteChat: { mutate: deleteChat, error: deleteChatError },
+  } = useConversation();
 
   const filteredRecipients = conversation?.fileMetadata.appData.content.recipients.filter(
     (recipient) => recipient !== identity
