@@ -89,7 +89,10 @@ export const PostInteracts = memo(
       [authorOdinId, postContent]
     );
 
-    const parsedReactionPreview = parseReactionPreview(postFile.fileMetadata.reactionPreview);
+    const parsedReactionPreview = useMemo(
+      () => parseReactionPreview(postFile.fileMetadata.reactionPreview),
+      [postFile.fileMetadata.reactionPreview]
+    );
 
     const onSharePressHandler = useCallback(() => {
       const context: ShareContext = {

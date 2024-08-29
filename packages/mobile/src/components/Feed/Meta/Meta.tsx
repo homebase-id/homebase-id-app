@@ -100,7 +100,7 @@ export const PostMeta = memo(
               ) ? (
                 <AclSummary acl={postFile.serverMetadata.accessControlList} />
               ) : (
-                <>{channel?.fileMetadata.appData.content.name || ''}</>
+                channel?.fileMetadata.appData.content.name || ''
               )}
             </Text>
           </TouchableOpacity>

@@ -50,16 +50,10 @@ export const PostTeaserCard = memo(
 
     const { data: identityAccessible } = useCheckIdentity(isExternal ? odinId : undefined);
 
-    const { data: externalChannel } = useSocialChannel({
+    const { data: channel } = useChannel({
+      channelKey: isExternal ? undefined : post.channelId,
       odinId: isExternal ? odinId : undefined,
-      channelId: post.channelId,
     }).fetch;
-
-    const { data: internalChannel } = useChannel({
-      channelId: isExternal ? undefined : post.channelId,
-    }).fetch;
-
-    const channel = externalChannel || internalChannel;
 
     const onPostActionPress = useCallback(() => {
       onMorePress?.({
@@ -83,6 +77,9 @@ export const PostTeaserCard = memo(
     if (identityAccessible === false && isExternal) {
       return <UnreachableIdentity postFile={postFile} odinId={odinId} />;
     }
+
+    // Makes sure that the InnerPostTeaserCard is not re-rendered if the channel is not available yet
+    if (!postFile || !channel) return null;
 
     return (
       <InnerPostTeaserCard

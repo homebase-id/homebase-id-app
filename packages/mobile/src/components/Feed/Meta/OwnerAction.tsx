@@ -13,9 +13,9 @@ export const OwnerActions = memo(
   ({ postFile, onClose }: { postFile: HomebaseFile<PostContent>; onClose?: () => void }) => {
     const postContent = postFile.fileMetadata.appData.content;
 
-    const [isEditOpen, setIsEditOpen] = useState(false);
+    const [isEditOpen, setIsEditOpen] = useState(false); // TODO: Setup edit post modal
     const { mutateAsync: removePost, error: removePostError } = useManagePost().remove;
-    const { data: channel } = useChannel({ channelId: postContent.channelId }).fetch;
+    const { data: channel } = useChannel({ channelKey: postContent.channelId }).fetch;
     const host = useDotYouClientContext().getEndpoint();
     const options: (ActionGroupProps | undefined)[] = postFile.fileId
       ? [

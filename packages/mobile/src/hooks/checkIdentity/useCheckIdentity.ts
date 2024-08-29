@@ -2,11 +2,13 @@ import { useQuery } from '@tanstack/react-query';
 import { getDomainFromUrl } from '@homebase-id/js-lib/helpers';
 import axios from 'axios';
 
+const MINUTE_IN_MS = 60000;
+
 export const useCheckIdentity = (odinId?: string) => {
   return useQuery({
     queryKey: ['check-identity', odinId],
     queryFn: () => doCheckIdentity(odinId),
-    staleTime: 1000 * 60 * 60,
+    staleTime: MINUTE_IN_MS,
     refetchOnMount: false,
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,

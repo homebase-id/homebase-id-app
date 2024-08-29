@@ -34,7 +34,6 @@ export type FeedStackParamList = {
 
 const StackFeed = createNativeStackNavigator<FeedStackParamList>();
 export const FeedStack = (_props: NativeStackScreenProps<TabStackParamList, 'Feed'>) => {
-  //   useLiveFeedProcessor();
   const { isDarkMode } = useDarkMode();
   const screenOptions = useMemo(
     () =>
@@ -57,15 +56,23 @@ export const FeedStack = (_props: NativeStackScreenProps<TabStackParamList, 'Fee
   );
 
   return (
-    <StackFeed.Navigator screenOptions={screenOptions}>
-      <StackFeed.Screen name="Home" component={FeedPage} />
-      <StackFeed.Screen
-        name="PreviewMedia"
-        component={PreviewMedia}
-        options={{
-          animation: 'slide_from_bottom',
-        }}
-      />
-    </StackFeed.Navigator>
+    <>
+      <FeedProcessor />
+      <StackFeed.Navigator screenOptions={screenOptions}>
+        <StackFeed.Screen name="Home" component={FeedPage} />
+        <StackFeed.Screen
+          name="PreviewMedia"
+          component={PreviewMedia}
+          options={{
+            animation: 'slide_from_bottom',
+          }}
+        />
+      </StackFeed.Navigator>
+    </>
   );
+};
+
+const FeedProcessor = () => {
+  useLiveFeedProcessor();
+  return null;
 };

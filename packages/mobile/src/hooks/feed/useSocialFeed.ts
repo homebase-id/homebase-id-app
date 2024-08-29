@@ -44,16 +44,19 @@ const useInboxProcessor = (isEnabled?: boolean) => {
 const useFeedWebsocket = (isEnabled: boolean) => {
   const queryClient = useQueryClient();
 
-  const handler = useCallback((notification: TypedConnectionNotification) => {
-    if (
-      (notification.notificationType === 'fileAdded' ||
-        notification.notificationType === 'fileModified') &&
-      stringGuidsEqual(notification.targetDrive?.alias, BlogConfig.FeedDrive.alias) &&
-      stringGuidsEqual(notification.targetDrive?.type, BlogConfig.FeedDrive.type)
-    ) {
-      queryClient.invalidateQueries({ queryKey: ['social-feeds'] });
-    }
-  }, [queryClient]);
+  const handler = useCallback(
+    (notification: TypedConnectionNotification) => {
+      if (
+        (notification.notificationType === 'fileAdded' ||
+          notification.notificationType === 'fileModified') &&
+        stringGuidsEqual(notification.targetDrive?.alias, BlogConfig.FeedDrive.alias) &&
+        stringGuidsEqual(notification.targetDrive?.type, BlogConfig.FeedDrive.type)
+      ) {
+        queryClient.invalidateQueries({ queryKey: ['social-feeds'] });
+      }
+    },
+    [queryClient]
+  );
 
   useNotificationSubscriber(
     isEnabled ? handler : undefined,
@@ -66,7 +69,7 @@ export const useLiveFeedProcessor = () => {
   const { status: inboxStatus } = useInboxProcessor(true);
 
   useFeedWebsocket(inboxStatus === 'success');
-}
+};
 
 export const useSocialFeed = ({ pageSize = 10 }: { pageSize: number }) => {
   const dotYouClient = useDotYouClientContext();
@@ -75,7 +78,6 @@ export const useSocialFeed = ({ pageSize = 10 }: { pageSize: number }) => {
     isAuthenticated: true,
     isOwner: true,
   });
-
 
   const fetchAll = async ({
     pageParam,
@@ -97,13 +99,14 @@ export const useSocialFeed = ({ pageSize = 10 }: { pageSize: number }) => {
       queryFn: ({ pageParam }) => fetchAll({ pageParam }),
       getNextPageParam: (lastPage) =>
         lastPage &&
-          lastPage?.results?.length >= 1 &&
-          (lastPage?.cursorState || lastPage?.ownerCursorState)
+        lastPage?.results?.length >= 1 &&
+        (lastPage?.cursorState || lastPage?.ownerCursorState)
           ? { cursorState: lastPage.cursorState, ownerCursorState: lastPage.ownerCursorState }
           : undefined,
       refetchOnMount: false,
       refetchOnWindowFocus: false,
       enabled: channelsFetched,
+      staleTime: MINUTE_IN_MS * 1,
     }),
   };
 };

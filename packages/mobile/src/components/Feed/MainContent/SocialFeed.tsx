@@ -36,17 +36,16 @@ const SocialFeedMainContent = memo(() => {
   } = useSocialFeed({ pageSize: PAGE_SIZE }).fetchAll;
 
   // Flatten all pages, sorted descending and slice on the max number expected
-  const flattenedPosts = useMemo(
-    () =>
-      flattenInfinteData<HomebaseFile<PostContent>>(
-        posts,
-        hasMorePosts ? PAGE_SIZE : undefined, // If we're out of ServerSide pages we don't want to slice
-        (a, b) =>
-          (b.fileMetadata.appData.userDate || b.fileMetadata.created) -
-          (a.fileMetadata.appData.userDate || a.fileMetadata.created)
-      ),
-    [posts]
-  );
+  const flattenedPosts = useMemo(() => {
+    if (!posts) return [];
+    return flattenInfinteData<HomebaseFile<PostContent>>(
+      posts,
+      hasMorePosts ? PAGE_SIZE : undefined, // If we're out of ServerSide pages we don't want to slice
+      (a, b) =>
+        (b.fileMetadata.appData.userDate || b.fileMetadata.created) -
+        (a.fileMetadata.appData.userDate || a.fileMetadata.created)
+    );
+  }, [posts]);
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -87,9 +86,7 @@ const SocialFeedMainContent = memo(() => {
   }, [refreshFeed]);
 
   const listFooter = useMemo(() => {
-    if (isFetchingNextPage) {
-      return <FeedLoader />;
-    }
+    if (isFetchingNextPage) return <FeedLoader />;
 
     if (flattenedPosts?.length > 0) {
       return (
@@ -121,9 +118,12 @@ const SocialFeedMainContent = memo(() => {
     [onCommentPress, onMorePress, onReactionPress, onSharePress, onEmojiModalOpen]
   );
 
-  if (postsLoading) {
-    return <FeedLoader />;
-  }
+  const onEndReached = useCallback(
+    () => hasMorePosts && fetchNextPage(),
+    [hasMorePosts, fetchNextPage]
+  );
+
+  if (postsLoading) return <FeedLoader />;
 
   return (
     <>
@@ -138,7 +138,7 @@ const SocialFeedMainContent = memo(() => {
           renderItem={renderItem}
           ListEmptyComponent={<EmptyFeed />}
           ListFooterComponent={listFooter}
-          onEndReached={() => hasMorePosts && fetchNextPage()}
+          onEndReached={onEndReached}
           onEndReachedThreshold={0.5}
         />
       </Host>
