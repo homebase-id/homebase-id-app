@@ -45,10 +45,9 @@ import { createThumbnails } from '../image/RNThumbnailProvider';
 import { grabThumbnail, processVideo } from '../image/RNVideoProviderSegmenter';
 import { VideoContentType } from '@homebase-id/js-lib/media';
 import { AxiosRequestConfig } from 'axios';
-import { exists } from 'react-native-fs';
-import { fixContentURI } from '../../utils/utils';
 
 const POST_MEDIA_PAYLOAD_KEY = 'pst_mdi';
+
 
 export const savePost = async <T extends PostContent>(
   dotYouClient: DotYouClient,
@@ -121,17 +120,17 @@ export const savePost = async <T extends PostContent>(
       console.log('videoThumbnail', thumbnail);
       const thumbSource: ImageSource | null = thumbnail
         ? {
-            uri: thumbnail.uri,
-            width: 1920,
-            height: 1080,
-            type: thumbnail.type,
-          }
+          uri: thumbnail.uri,
+          width: 1920,
+          height: 1080,
+          type: thumbnail.type,
+        }
         : null;
       const { tinyThumb, additionalThumbnails } =
         thumbSource && thumbnail
           ? await createThumbnails(thumbSource, payloadKey, thumbnail.type as ImageContentType, [
-              { quality: 100, width: 250, height: 250 },
-            ])
+            { quality: 100, width: 250, height: 250 },
+          ])
           : { tinyThumb: undefined, additionalThumbnails: undefined };
       if (additionalThumbnails) {
         thumbnails.push(...additionalThumbnails);
@@ -184,10 +183,10 @@ export const savePost = async <T extends PostContent>(
   if (file.fileMetadata.appData.content.type !== 'Article') {
     file.fileMetadata.appData.content.primaryMediaFile = payloads[0]
       ? {
-          fileId: undefined,
-          fileKey: payloads[0].key,
-          type: payloads[0].payload.type,
-        }
+        fileId: undefined,
+        fileKey: payloads[0].key,
+        type: payloads[0].payload.type,
+      }
       : undefined;
   }
 
@@ -227,7 +226,7 @@ const uploadPost = async <T extends PostContent>(
   const encrypt = !(
     file.serverMetadata?.accessControlList?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
     file.serverMetadata?.accessControlList?.requiredSecurityGroup ===
-      SecurityGroupType.Authenticated
+    SecurityGroupType.Authenticated
   );
 
   const instructionSet: UploadInstructionSet = {
@@ -255,9 +254,8 @@ const uploadPost = async <T extends PostContent>(
     !stringGuidsEqual(existingPostWithThisSlug?.fileId, file.fileId)
   ) {
     // There is clash with an existing slug
-    file.fileMetadata.appData.content.slug = `${
-      file.fileMetadata.appData.content.slug
-    }-${new Date().getTime()}`;
+    file.fileMetadata.appData.content.slug = `${file.fileMetadata.appData.content.slug
+      }-${new Date().getTime()}`;
   }
 
   const uniqueId = file.fileMetadata.appData.content.slug
@@ -374,12 +372,11 @@ const uploadPostHeader = async <T extends PostContent>(
   if (
     existingPostWithThisSlug &&
     existingPostWithThisSlug?.fileMetadata.appData.content.id !==
-      file.fileMetadata.appData.content.id
+    file.fileMetadata.appData.content.id
   ) {
     // There is clash with an existing slug
-    file.fileMetadata.appData.content.slug = `${
-      file.fileMetadata.appData.content.slug
-    }-${new Date().getTime()}`;
+    file.fileMetadata.appData.content.slug = `${file.fileMetadata.appData.content.slug
+      }-${new Date().getTime()}`;
   }
 
   const uniqueId = file.fileMetadata.appData.content.slug
