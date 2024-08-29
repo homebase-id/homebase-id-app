@@ -80,6 +80,14 @@ export interface ShareContext {
 export const ShareModal = memo(
   forwardRef((_undefined, ref: React.Ref<ShareModalMethods>) => {
     const [context, setContext] = useState<ShareContext | undefined>();
+    const [selectedContact, setselectedContact] = useState<DotYouProfile[]>([]);
+    const [selectedConversation, setSelectedConversation] = useState<
+      HomebaseFile<UnifiedConversation>[]
+    >([]);
+
+    const { isDarkMode } = useDarkMode();
+    const { bottom } = useSafeAreaInsets();
+
     const bottomSheetRef = useRef<BottomSheetModalMethods>(null);
     const { mutateAsync: createConversation } = useConversation().create;
     const { mutate: sendMessage, error } = useChatMessage().send;
@@ -88,15 +96,11 @@ export const ShareModal = memo(
     const { data: allConversations } = useConversationsWithRecentMessage().all;
     const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
 
-    const [selectedContact, setselectedContact] = useState<DotYouProfile[]>([]);
-    const [selectedConversation, setSelectedConversation] = useState<
-      HomebaseFile<UnifiedConversation>[]
-    >([]);
-
+    console.log('ShareModal');
     useImperativeHandle(ref, () => {
       return {
         setShareContext: (context: ShareContext) => {
-          setContext(context);
+          // setContext(context);
           bottomSheetRef.current?.present();
         },
         dismiss: onClose,
@@ -254,9 +258,6 @@ export const ShareModal = memo(
       setSelectedConversation([]);
       bottomSheetRef.current?.dismiss();
     };
-
-    const { isDarkMode } = useDarkMode();
-    const { bottom } = useSafeAreaInsets();
 
     const renderAppFooter = useCallback(
       (props: BottomSheetFooterProps) => {
@@ -425,10 +426,8 @@ const InnerShareListComponent = memo(
   (props: {
     connections: DotYouProfile[] | undefined;
     allConversations: ConversationWithRecentMessage[] | undefined;
-
     selectedContact: DotYouProfile[];
     setSelectedContact: React.Dispatch<React.SetStateAction<DotYouProfile[]>>;
-
     selectedConversation: HomebaseFile<UnifiedConversation>[];
     setSelectedConversation: React.Dispatch<
       React.SetStateAction<HomebaseFile<UnifiedConversation>[]>
@@ -452,7 +451,8 @@ const InnerShareListComponent = memo(
             if (selectedContact.length + selectedConversation.length === maxConnectionsForward) {
               Toast.show({
                 type: 'info',
-                text1: t('You can only forward to {0} contacts at a time', maxConnectionsForward),
+                text1: t('Max Forward Limit Reached'),
+                text2: t('You can only forward to {0} contacts at a time', maxConnectionsForward),
                 position: 'bottom',
                 visibilityTime: 2000,
               });
@@ -463,7 +463,7 @@ const InnerShareListComponent = memo(
           }
         });
       },
-      [setSelectedConversation, selectedContact.length]
+      [setSelectedConversation, selectedContact]
     );
 
     const onSelectContact = useCallback(
@@ -475,7 +475,8 @@ const InnerShareListComponent = memo(
             if (selectedContact.length + selectedConversation.length === maxConnectionsForward) {
               Toast.show({
                 type: 'info',
-                text1: t('You can only forward to {0} contacts at a time', maxConnectionsForward),
+                text1: t('Max Forward Limit Reached'),
+                text2: t('You can only forward to {0} contacts at a time', maxConnectionsForward),
                 position: 'bottom',
                 visibilityTime: 2000,
               });

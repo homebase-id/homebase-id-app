@@ -18,6 +18,7 @@ export const FeedPage = memo((_props: FeedProps) => {
 
   const isFocused = useIsFocused();
   useRemoveNotifications({ disabled: !isFocused, appId: FEED_APP_ID });
+  // useLiveFeedProcessor();
 
   const doCloseComposer = useCallback(() => setIsPostComposerOpen(false), []);
   const doCloseAndRefresh = useCallback(() => {

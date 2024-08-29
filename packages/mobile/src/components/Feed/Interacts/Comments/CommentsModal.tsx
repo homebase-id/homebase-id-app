@@ -148,7 +148,7 @@ export const CommentsModal = memo(
   })
 );
 
-const EmptyComponent = memo(() => {
+const EmptyComponent = () => {
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
       <Text
@@ -172,7 +172,7 @@ const EmptyComponent = memo(() => {
       </Text>
     </View>
   );
-});
+};
 
 const styles = StyleSheet.create({
   headerText: {
