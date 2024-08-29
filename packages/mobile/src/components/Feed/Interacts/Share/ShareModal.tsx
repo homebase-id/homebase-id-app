@@ -96,7 +96,6 @@ export const ShareModal = memo(
     const { data: allConversations } = useConversationsWithRecentMessage().all;
     const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
 
-    console.log('ShareModal');
     useImperativeHandle(ref, () => {
       return {
         setShareContext: (context: ShareContext) => {
