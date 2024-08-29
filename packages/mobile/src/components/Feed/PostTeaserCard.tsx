@@ -51,7 +51,7 @@ export const PostTeaserCard = memo(
     const { data: identityAccessible } = useCheckIdentity(isExternal ? odinId : undefined);
 
     const { data: channel } = useChannel({
-      channelKey: isExternal ? undefined : post.channelId,
+      channelKey: post.channelId,
       odinId: isExternal ? odinId : undefined,
     }).fetch;
 
