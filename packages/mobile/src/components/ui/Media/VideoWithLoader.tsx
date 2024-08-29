@@ -23,6 +23,8 @@ export const VideoWithLoader = memo(
   ({
     fileId,
     targetDrive,
+    globalTransitId,
+    odinId,
     previewThumbnail,
     fit = 'cover',
     preview,
@@ -32,8 +34,11 @@ export const VideoWithLoader = memo(
     onLongPress,
     payload,
     autoPlay,
+    probablyEncrypted,
   }: {
     fileId: string;
+    odinId?: string;
+    globalTransitId?: string;
     targetDrive: TargetDrive;
     previewThumbnail?: EmbeddedThumb;
     fit?: 'cover' | 'contain';
@@ -45,13 +50,17 @@ export const VideoWithLoader = memo(
     style?: ImageStyle;
     payload: PayloadDescriptor;
     autoPlay?: boolean;
+    probablyEncrypted?: boolean;
   }) => {
     const [loadVideo, setLoadVideo] = useState(true);
     const doLoadVideo = useCallback(() => setLoadVideo(true), []);
     const canDownload = !preview && payload?.bytesWritten < MAX_DOWNLOAD_SIZE;
     const { data, isLoading } = useVideo({
+      odinId,
       fileId,
       targetDrive,
+      videoGlobalTransitId: globalTransitId,
+      probablyEncrypted,
       payloadKey: payload.key,
       enabled: canDownload,
     }).fetch;

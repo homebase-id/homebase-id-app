@@ -27,6 +27,7 @@ import { t } from 'feed-app-common';
 import { VideoWithLoader } from './VideoWithLoader';
 import { OdinAudio } from '../OdinAudio/OdinAudio';
 import { LinkPreviewFile } from './LinkPreviewFile';
+import { POST_LINKS_PAYLOAD_KEY } from '@homebase-id/js-lib/public';
 
 export const MediaGallery = ({
   fileId,
@@ -158,7 +159,7 @@ export const MediaItem = ({
   const isVideo = payload.contentType?.startsWith('video');
   const isAudio = payload.contentType?.startsWith('audio');
   const isImage = payload.contentType?.startsWith('image');
-  const isLink = payload.key === CHAT_LINKS_PAYLOAD_KEY;
+  const isLink = payload.key === CHAT_LINKS_PAYLOAD_KEY || payload.key === POST_LINKS_PAYLOAD_KEY;
 
   if (!payload.contentType || !payload.key || !fileId) {
     if (isImage && (payload as NewPayloadDescriptor).pendingFile) {

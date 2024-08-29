@@ -332,6 +332,9 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
                       payload={item}
                       targetDrive={targetDrive}
                       previewThumbnail={payloads.length === 1 ? previewThumbnail : undefined}
+                      globalTransitId={globalTransitId}
+                      probablyEncrypted={probablyEncrypted}
+                      odinId={transitOdinId}
                       fit="cover"
                       imageSize={{
                         width: 50,
