@@ -12,7 +12,7 @@ import { Platform } from 'react-native';
 import { Colors } from './Colors';
 import { FeedPage } from '../pages/feed/feed-page';
 import { PreviewMedia } from '../pages/media-preview-page';
-import { PostComposer } from '../pages/feed/PostComposer';
+import { PostComposer } from '../pages/feed/post-composer';
 
 export type FeedStackParamList = {
   Home: undefined;

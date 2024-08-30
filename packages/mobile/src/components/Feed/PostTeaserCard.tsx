@@ -24,6 +24,7 @@ import { IconButton } from '../Chat/Chat-app-bar';
 import { PostActionProps } from './Interacts/PostActionModal';
 import { useDotYouClientContext } from 'feed-app-common';
 import { useCheckIdentity } from '../../hooks/checkIdentity/useCheckIdentity';
+import { PostBody } from './Body/PostBody';
 
 export const PostTeaserCard = memo(
   ({
@@ -136,19 +137,6 @@ export const InnerPostTeaserCard = memo(
       } as StyleProp<ViewStyle>;
     }, [isDarkMode]);
 
-    const parse: ParseShape[] = useMemo(
-      () => [
-        {
-          pattern: URL_PATTERN,
-          onPress: (url) => openURL(url),
-          style: {
-            color: isDarkMode ? Colors.indigo[200] : Colors.indigo[500],
-          },
-        },
-      ],
-      [isDarkMode]
-    );
-
     return (
       <Animated.View style={viewStyle}>
         <View style={styles.header}>
@@ -180,15 +168,14 @@ export const InnerPostTeaserCard = memo(
           </View>
           <IconButton icon={<Ellipsis />} onPress={onPostActionPress} />
         </View>
-        <ParsedText
-          style={{
-            fontSize: 16,
-            color: isDarkMode ? Colors.white : Colors.black,
-          }}
-          parse={parse}
-        >
-          {post.caption}
-        </ParsedText>
+        <PostBody
+          post={post}
+          odinId={odinId}
+          fileId={postFile.fileId}
+          globalTransitId={postFile.fileMetadata.globalTransitId}
+          lastModified={postFile.fileMetadata.updated}
+          payloads={postFile.fileMetadata.payloads}
+        />
         <PostMedia post={postFile} />
         <PostInteracts
           postFile={postFile}
