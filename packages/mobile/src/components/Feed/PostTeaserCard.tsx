@@ -1,8 +1,5 @@
 import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { PostMedia } from './Body/PostMedia';
-import ParsedText, { ParseShape } from 'react-native-parsed-text';
-
-import { openURL, URL_PATTERN } from '../../utils/utils';
 import { Text } from '../ui/Text/Text';
 import { AuthorName } from '../ui/Name';
 import { Avatar } from '../ui/Avatars/Avatar';
@@ -13,7 +10,6 @@ import { useDarkMode } from '../../hooks/useDarkMode';
 import { HomebaseFile, NewHomebaseFile, SecurityGroupType } from '@homebase-id/js-lib/core';
 import { ChannelDefinition, PostContent, ReactionContext } from '@homebase-id/js-lib/public';
 import { useChannel } from '../../hooks/feed/channels/useChannel';
-import { useSocialChannel } from '../../hooks/feed/useSocialChannel';
 import { Colors } from '../../app/Colors';
 import { PostInteracts } from './Interacts/PostInteracts';
 import { CanReactInfo } from '../../hooks/reactions';
