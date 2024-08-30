@@ -108,10 +108,8 @@ export const getDecryptedMediaUrlOverPeer = async (
   fileId: string,
   fileKey: string,
   authToken: string,
-
   isProbablyEncrypted?: boolean,
   lastModified?: number,
-
   options?: {
     size?: ImageSize; // Passing size will get a thumb, otherwise the payload
     systemFileType?: SystemFileType;

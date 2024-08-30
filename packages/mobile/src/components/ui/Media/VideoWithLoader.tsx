@@ -54,7 +54,7 @@ export const VideoWithLoader = memo(
     probablyEncrypted?: boolean;
     lastModified?: number;
   }) => {
-    const [loadVideo, setLoadVideo] = useState(true);
+    const [loadVideo, setLoadVideo] = useState(autoPlay);
     const doLoadVideo = useCallback(() => setLoadVideo(true), []);
     const canDownload = !preview && payload?.bytesWritten < MAX_DOWNLOAD_SIZE;
     const { data, isLoading } = useVideo({
@@ -128,7 +128,7 @@ export const VideoWithLoader = memo(
           >
             {canDownload ? (
               <Video
-                source={{ uri: data?.url }}
+                source={{ uri: data?.uri }}
                 style={{
                   position: 'absolute',
                   top: 0,
@@ -137,7 +137,7 @@ export const VideoWithLoader = memo(
                   right: 0,
                 }}
                 controls={true}
-                paused={!autoPlay}
+                paused={loadVideo}
                 resizeMode={'contain'}
                 onEnd={() => setLoadVideo(false)}
                 onError={(e) => console.log('error', e)}
