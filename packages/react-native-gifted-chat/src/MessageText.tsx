@@ -158,8 +158,8 @@ export function MessageText<TMessage extends IMessage = IMessage>({
         ]}
         parse={[
           ...parsePatterns!(linkStyle),
-          { type: 'phone', style: linkStyle, onPress: onPhonePress },
           { type: 'email', style: linkStyle, onPress: onEmailPress },
+          { type: 'phone', style: linkStyle, onPress: onPhonePress },
         ]}
         childrenProps={{ ...textProps }}
       >

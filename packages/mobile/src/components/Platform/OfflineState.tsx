@@ -5,6 +5,7 @@ import { onlineManager } from '@tanstack/react-query';
 import { fetch } from '@react-native-community/netinfo';
 import { useEffect, useState } from 'react';
 import { useDarkMode } from '../../hooks/useDarkMode';
+import Animated, { SlideInDown, SlideInUp, SlideOutUp } from 'react-native-reanimated';
 
 export const OfflineState = ({ isConnected }: { isConnected?: boolean | null }) => {
   const [isOnline, setIsOnline] = useState(onlineManager.isOnline());
@@ -33,9 +34,15 @@ const ConnectingState = () => {
   );
 };
 
+const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
+
 const NoInternetState = () => {
   return (
-    <TouchableOpacity
+    <AnimatedTouchableOpacity
+      entering={SlideInDown.withInitialValues({
+        originY: -100,
+      })}
+      exiting={SlideOutUp.duration(200)}
       onPress={() => {
         fetch().then((state) => {
           // When in doubt set online
@@ -46,7 +53,7 @@ const NoInternetState = () => {
       <View style={noInternetStyles.container}>
         <Text style={noInternetStyles.text}>{t('No internet connection')}</Text>
       </View>
-    </TouchableOpacity>
+    </AnimatedTouchableOpacity>
   );
 };
 

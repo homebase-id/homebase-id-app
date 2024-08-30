@@ -10,6 +10,7 @@
 
 'use strict';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type BlobData = any;
 type BlobOptions = {
   type?: string;

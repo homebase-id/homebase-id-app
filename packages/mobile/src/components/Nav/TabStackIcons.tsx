@@ -1,6 +1,6 @@
 import { View } from 'react-native';
 import { useUnreadPushNotificationsCount } from '../../hooks/notifications/usePushNotifications';
-import { Bars, ChatIcon, Feed, House } from '../ui/Icons/icons';
+import { Bars, ChatIcon, Feed, House, SqaurePlus } from '../ui/Icons/icons';
 import { Colors } from '../../app/Colors';
 import { CHAT_APP_ID, FEED_APP_ID } from '../../app/constants';
 
@@ -48,3 +48,4 @@ export const TabChatIcon = (props: TabIconProps) => {
 
 export const TabHouseIcon = (props: TabIconProps) => <House {...props} size={'md'} />;
 export const TabMenuIcon = (props: TabIconProps) => <Bars {...props} size={'md'} />;
+export const TabComposeFeedIcon = (props: TabIconProps) => <SqaurePlus {...props} size={'md'} />;

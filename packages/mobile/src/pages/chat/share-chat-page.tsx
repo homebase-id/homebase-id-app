@@ -381,7 +381,7 @@ const InnerShareChatPage = memo(
 
     const renderSectionHeader = useCallback(
       ({
-        section: { title },
+        section: { title, data },
       }: {
         section: SectionListData<
           ConversationWithRecentMessage | DotYouProfile,
@@ -398,6 +398,9 @@ const InnerShareChatPage = memo(
           | undefined
         >;
       }) => {
+        if (data?.length === 0) {
+          return null;
+        }
         return (
           <Text
             style={{

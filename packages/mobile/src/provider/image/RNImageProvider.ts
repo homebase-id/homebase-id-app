@@ -245,7 +245,6 @@ export const getPayloadBytes = async (
 
   const { lastModified } = options || {};
 
-  // const client = getAxiosClient(dotYouClient, systemFileType);
   const request = {
     ...targetDrive,
     fileId,
@@ -338,6 +337,8 @@ export const getDecryptedImageData = async (
     lastModified,
   });
 };
+
+
 
 // helpers
 interface SharedSecretEncryptedPayload {

@@ -1,4 +1,4 @@
-import { StyleSheet, View, ViewStyle } from 'react-native';
+import { DimensionValue, StyleSheet, View, ViewStyle } from 'react-native';
 import { Text } from './Text/Text';
 import { Colors } from '../../app/Colors';
 
@@ -9,7 +9,7 @@ export const Divider = ({
   style,
 }: {
   text?: string;
-  width?: number;
+  width?: DimensionValue;
   color?: string;
   style?: ViewStyle;
 }) => {
@@ -24,6 +24,20 @@ export const Divider = ({
       <Text style={{ marginHorizontal: 10 }}>{text}</Text>
       <View style={{ flex: 1, height: width || 1, backgroundColor: color || Colors.gray[300] }} />
     </View>
+  );
+};
+
+export const HorizontalDivider = ({
+  height,
+  color,
+  style,
+}: {
+  height?: DimensionValue;
+  color?: string;
+  style?: ViewStyle;
+}) => {
+  return (
+    <View style={{ height: height || 1, backgroundColor: color || Colors.gray[300], ...style }} />
   );
 };
 

@@ -206,7 +206,7 @@ export const getSendChatMessageMutationOptions: (queryClient: QueryClient) => Us
             file.filepath || file.uri
               ? (new OdinBlob((file.uri || file.filepath) as string, {
                   type: file.type || undefined,
-                }) as any as Blob)
+                }) as unknown as Blob)
               : undefined,
         })),
       },

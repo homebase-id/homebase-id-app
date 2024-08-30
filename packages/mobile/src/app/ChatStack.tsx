@@ -18,7 +18,12 @@ import ChatPage from '../pages/chat/chat-page';
 import { ConversationsPage } from '../pages/conversations-page';
 import EditGroupPage from '../pages/chat/edit-group-page';
 import { useDarkMode } from '../hooks/useDarkMode';
-import { HomebaseFile, EmbeddedThumb } from '@homebase-id/js-lib/core';
+import {
+  HomebaseFile,
+  EmbeddedThumb,
+  PayloadDescriptor,
+  TargetDrive,
+} from '@homebase-id/js-lib/core';
 import { ChatMessage } from '../provider/chat/ChatProvider';
 import { MessageInfoPage } from '../pages/chat/message-info-page';
 import { UnifiedConversation } from '../provider/chat/ConversationProvider';
@@ -44,12 +49,16 @@ export type ChatStackParamList = {
   EditGroup: { convoId: string };
   ShareChat: SharedItem;
   PreviewMedia: {
-    msg: HomebaseFile<ChatMessage>;
     fileId: string;
-    payloadKey: string;
+    globalTransitId?: string;
+    targetDrive: TargetDrive;
+    payloads: PayloadDescriptor[];
     currIndex: number;
-    type?: string;
     previewThumbnail?: EmbeddedThumb;
+    senderOdinId?: string;
+    createdAt?: number;
+    probablyEncrypted?: boolean;
+    transitOdinId?: string;
   };
 };
 

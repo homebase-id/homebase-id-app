@@ -1,10 +1,14 @@
 import {
+  GestureResponderEvent,
   Platform,
   Pressable,
+  StyleProp,
   StyleSheet,
+  TextStyle,
   TouchableOpacity,
   TouchableOpacityProps,
   View,
+  ViewStyle,
 } from 'react-native';
 import { Header, HeaderBackButton } from '@react-navigation/elements';
 import { useProfile } from '../../hooks/profile/useProfile';
@@ -17,6 +21,7 @@ import Toast from 'react-native-toast-message';
 import { Avatar, GroupAvatar, OwnerAvatar } from '../ui/Avatars/Avatar';
 import { EmbeddedThumb } from '@homebase-id/js-lib/core';
 import { ChatDrive } from '../../provider/chat/ConversationProvider';
+import { Text } from '../ui/Text/Text';
 
 export type SelectedMessageProp = {
   onReply: () => void;
@@ -185,10 +190,16 @@ export const IconButton = memo(
     icon,
     onPress,
     touchableProps,
+    style,
+    title,
+    textStyle,
   }: {
     icon: ReactNode;
-    onPress?: () => void;
+    onPress?: (e: GestureResponderEvent) => void;
     touchableProps?: Omit<TouchableOpacityProps, 'onPress'>;
+    style?: StyleProp<ViewStyle>;
+    textStyle?: TextStyle;
+    title?: string;
   }) => {
     const defaultActions = useCallback(() => {
       Toast.show({
@@ -198,13 +209,38 @@ export const IconButton = memo(
       });
     }, []);
     return (
-      <TouchableOpacity
-        onPress={onPress || defaultActions}
-        style={{ padding: 10 }}
-        {...touchableProps}
+      <View
+        style={
+          title
+            ? {
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: 8,
+              }
+            : undefined
+        }
       >
-        {icon}
-      </TouchableOpacity>
+        <TouchableOpacity
+          onPress={onPress || defaultActions}
+          style={[{ padding: 10 }, style]}
+          {...touchableProps}
+        >
+          {icon}
+        </TouchableOpacity>
+        {title && (
+          <Text
+            style={
+              textStyle || {
+                fontSize: 12,
+                fontWeight: '400',
+                textAlign: 'center',
+              }
+            }
+          >
+            {title}
+          </Text>
+        )}
+      </View>
     );
   }
 );
