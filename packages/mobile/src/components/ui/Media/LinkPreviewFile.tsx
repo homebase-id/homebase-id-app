@@ -10,13 +10,22 @@ import { Colors } from '../../../app/Colors';
 type LinkPreviewFileProps = {
   targetDrive: TargetDrive;
   fileId: string;
+  globalTransitId?: string;
+  odinId?: string;
   payloadKey: string;
   position: string;
 };
 
 export const LinkPreviewFile = memo(
-  ({ targetDrive, fileId, payloadKey, position }: LinkPreviewFileProps) => {
-    const { data } = useLinkMetadata({ targetDrive, fileId, payloadKey });
+  ({
+    targetDrive,
+    fileId,
+    payloadKey,
+    position,
+    globalTransitId,
+    odinId,
+  }: LinkPreviewFileProps) => {
+    const { data } = useLinkMetadata({ targetDrive, fileId, payloadKey, globalTransitId, odinId });
     const { isDarkMode } = useDarkMode();
 
     if (!data || !data.length) {

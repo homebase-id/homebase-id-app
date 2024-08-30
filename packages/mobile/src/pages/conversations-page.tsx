@@ -8,7 +8,12 @@ import {
 } from 'react-native';
 import ConversationTile from '../components/Chat/Conversation-tile';
 
-import { NavigationProp, useIsFocused, useNavigation } from '@react-navigation/native';
+import {
+  NavigationProp,
+  useIsFocused,
+  useNavigation,
+  useScrollToTop,
+} from '@react-navigation/native';
 import { ChatStackParamList } from '../app/ChatStack';
 import {
   ConversationWithRecentMessage,
@@ -17,7 +22,7 @@ import {
 import { ConversationWithYourselfId } from '../provider/chat/ConversationProvider';
 import { useAuth } from '../hooks/auth/useAuth';
 import { useProfile } from '../hooks/profile/useProfile';
-import { memo, useCallback, useLayoutEffect, useMemo, useState } from 'react';
+import { memo, useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useRemoveNotifications } from '../hooks/notifications/usePushNotifications';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Text } from '../components/ui/Text/Text';
@@ -50,6 +55,9 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
   const { isDarkMode } = useDarkMode();
   const queryClient = useQueryClient();
   const identity = useDotYouClientContext().getIdentity();
+
+  const scrollRef = useRef<FlatList<ConversationWithRecentMessage>>(null);
+  useScrollToTop(scrollRef);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -144,7 +152,9 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
         <OfflineState />
         {conversations && conversations?.length ? (
           <FlatList
+            ref={scrollRef}
             data={conversations}
+            showsVerticalScrollIndicator={false}
             keyExtractor={keyExtractor}
             contentInsetAdjustmentBehavior="automatic"
             ListHeaderComponent={<ConversationTileWithYourself />}

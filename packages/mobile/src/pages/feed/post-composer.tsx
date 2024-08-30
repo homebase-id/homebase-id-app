@@ -12,257 +12,259 @@ import { View, TextInput, TouchableOpacity } from 'react-native';
 import { Asset, launchImageLibrary } from 'react-native-image-picker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useChannels } from '../../../hooks/feed/channels/useChannels';
-import { usePostComposer } from '../../../hooks/feed/post/usePostComposer';
-import { useDarkMode } from '../../../hooks/useDarkMode';
-import { ErrorNotification } from '../../ui/Alert/ErrorNotification';
-import { Plus, Ellipsis, Globe, Lock, Pencil } from '../../ui/Icons/icons';
-import { FileOverview } from '../../Files/FileOverview';
-import { Select, Option } from '../../ui/Form/Select';
-import { AclIcon, AclSummary } from './AclSummary';
-import { Colors } from '../../../app/Colors';
-import { ImageSource } from '../../../provider/image/RNImageProvider';
+import { useChannels } from '../../hooks/feed/channels/useChannels';
+import { usePostComposer } from '../../hooks/feed/post/usePostComposer';
+import { useDarkMode } from '../../hooks/useDarkMode';
+import { ErrorNotification } from '../../components/ui/Alert/ErrorNotification';
+import { Plus, Ellipsis, Globe, Lock, Pencil } from '../../components/ui/Icons/icons';
+import { FileOverview } from '../../components/Files/FileOverview';
+import { Select, Option } from '../../components/ui/Form/Select';
+import { AclIcon, AclSummary } from '../../components/Feed/Composer/AclSummary';
+import { Colors } from '../../app/Colors';
+import { ImageSource } from '../../provider/image/RNImageProvider';
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
-import { useCircles } from '../../../hooks/circles/useCircles';
+import { useCircles } from '../../hooks/circles/useCircles';
 import { ScrollView } from 'react-native-gesture-handler';
-import { Text } from '../../ui/Text/Text';
-import { ActionGroup } from '../../ui/Form/ActionGroup';
-import { openURL } from '../../../utils/utils';
+import { Text } from '../../components/ui/Text/Text';
+import { ActionGroup } from '../../components/ui/Form/ActionGroup';
+import { openURL } from '../../utils/utils';
 import React from 'react';
+import Animated, { SlideInDown, SlideOutDown } from 'react-native-reanimated';
+import { FeedStackParamList } from '../../app/FeedStack';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
-export const PostComposer = memo(
-  ({ onPost, onCancel }: { onPost?: () => void; onCancel?: () => void }) => {
-    const { isDarkMode } = useDarkMode();
-    const insets = useSafeAreaInsets();
-    const [stateIndex, setStateIndex] = useState(0); // Used to force a re-render of the component, to reset the input
+type PostComposerProps = NativeStackScreenProps<FeedStackParamList, 'Compose'>;
 
-    const identity = useDotYouClientContext().getIdentity();
+export const PostComposer = memo(({ navigation }: PostComposerProps) => {
+  const { isDarkMode } = useDarkMode();
+  const insets = useSafeAreaInsets();
+  const [stateIndex, setStateIndex] = useState(0); // Used to force a re-render of the component, to reset the input
 
-    const { savePost, processingProgress, error } = usePostComposer();
+  const identity = useDotYouClientContext().getIdentity();
 
-    const [caption, setCaption] = useState<string>('');
-    const [channel, setChannel] = useState<
-      HomebaseFile<ChannelDefinition> | NewHomebaseFile<ChannelDefinition>
-    >(BlogConfig.PublicChannelNewDsr);
-    const [customAcl, setCustomAcl] = useState<AccessControlList | undefined>(undefined);
-    const [assets, setAssets] = useState<Asset[]>([]);
+  const { savePost, processingProgress, error } = usePostComposer();
 
-    const [reactAccess, setReactAccess] = useState<ReactAccess | undefined>(undefined);
+  const [caption, setCaption] = useState<string>('');
+  const [channel, setChannel] = useState<
+    HomebaseFile<ChannelDefinition> | NewHomebaseFile<ChannelDefinition>
+  >(BlogConfig.PublicChannelNewDsr);
+  const [customAcl, setCustomAcl] = useState<AccessControlList | undefined>(undefined);
+  const [assets, setAssets] = useState<Asset[]>([]);
 
-    const isPosting = useMemo(() => !!processingProgress?.phase, [processingProgress]);
+  const [reactAccess, setReactAccess] = useState<ReactAccess | undefined>(undefined);
 
-    const resetUi = useCallback(() => {
-      setCaption('');
-      setAssets([]);
-      setStateIndex((i) => i + 1);
-    }, []);
+  const isPosting = useMemo(() => !!processingProgress?.phase, [processingProgress]);
 
-    const doPost = useCallback(async () => {
-      if (isPosting) return;
-      await savePost(
-        caption,
-        assets.map<ImageSource>((value) => {
-          return {
-            height: value.height || 0,
-            width: value.width || 0,
-            name: value.fileName,
-            type: value.type && value.type === 'image/jpg' ? 'image/jpeg' : value.type,
-            uri: value.uri,
-            filename: value.fileName,
-            date: Date.parse(value.timestamp || new Date().toUTCString()),
-            filepath: value.originalPath,
-            id: value.id,
-            fileSize: value.fileSize,
-          };
-        }),
-        undefined,
-        channel,
-        reactAccess,
-        customAcl
-      );
-      resetUi();
-      onPost && onPost();
-    }, [isPosting, savePost, caption, assets, channel, reactAccess, customAcl, resetUi, onPost]);
+  const resetUi = useCallback(() => {
+    setCaption('');
+    setAssets([]);
+    setStateIndex((i) => i + 1);
+  }, []);
 
-    const handleImageIconPress = useCallback(async () => {
-      const imagePickerResult = await launchImageLibrary({
-        mediaType: 'mixed',
-        selectionLimit: 10,
-      });
-      if (imagePickerResult.didCancel || imagePickerResult.errorCode) return;
-
-      setAssets(
-        imagePickerResult.assets
-          ?.filter(Boolean)
-          .filter((file) => Object.keys(file)?.length && file.type) ?? []
-      );
-    }, [setAssets]);
-
-    const handleChange = useCallback(
-      (
-        channel: HomebaseFile<ChannelDefinition> | undefined,
-        acl: AccessControlList | undefined
-      ) => {
-        channel && setChannel(channel);
-        setCustomAcl(acl);
-      },
-      []
+  const doPost = useCallback(async () => {
+    if (isPosting) return;
+    await savePost(
+      caption,
+      assets.map<ImageSource>((value) => {
+        return {
+          height: value.height || 0,
+          width: value.width || 0,
+          name: value.fileName,
+          type: value.type && value.type === 'image/jpg' ? 'image/jpeg' : value.type,
+          uri: value.uri,
+          filename: value.fileName,
+          date: Date.parse(value.timestamp || new Date().toUTCString()),
+          filepath: value.originalPath,
+          id: value.id,
+          fileSize: value.fileSize,
+        };
+      }),
+      undefined,
+      channel,
+      reactAccess,
+      customAcl
     );
+    resetUi();
+    navigation.goBack();
+  }, [isPosting, savePost, caption, assets, channel, reactAccess, customAcl, resetUi]);
 
-    const canPost = caption?.length || assets?.length;
+  const handleImageIconPress = useCallback(async () => {
+    const imagePickerResult = await launchImageLibrary({
+      mediaType: 'mixed',
+      selectionLimit: 10,
+    });
+    if (imagePickerResult.didCancel || imagePickerResult.errorCode) return;
 
-    return (
-      <React.Fragment>
-        <ErrorNotification error={error} />
+    setAssets(
+      imagePickerResult.assets
+        ?.filter(Boolean)
+        .filter((file) => Object.keys(file)?.length && file.type) ?? []
+    );
+  }, [setAssets]);
+
+  const handleChange = useCallback(
+    (channel: HomebaseFile<ChannelDefinition> | undefined, acl: AccessControlList | undefined) => {
+      channel && setChannel(channel);
+      setCustomAcl(acl);
+    },
+    []
+  );
+
+  const canPost = caption?.length || assets?.length;
+
+  return (
+    <React.Fragment>
+      <ErrorNotification error={error} />
+      <Animated.View
+        entering={SlideInDown}
+        exiting={SlideOutDown}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          paddingTop: insets.top + 8,
+          paddingBottom: 16,
+          paddingHorizontal: 8,
+          backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
+          zIndex: 0,
+        }}
+      >
         <View
           style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            paddingTop: insets.top + 8,
-            paddingBottom: 16,
-            paddingHorizontal: 8,
-            backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
-            zIndex: 0,
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingBottom: 8,
           }}
         >
-          <View
+          <TouchableOpacity
             style={{
+              paddingHorizontal: 8,
+              paddingTop: 8,
+              paddingBottom: 12,
+            }}
+            onPress={() => navigation.goBack()}
+          >
+            <Text style={{ fontSize: 16 }}>{t('Cancel')}</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={{
+              backgroundColor: Colors.indigo[500],
+              opacity: canPost ? 1 : 0.5,
+
+              paddingHorizontal: 8,
+              paddingVertical: 6,
+              borderRadius: 5,
+              display: 'flex',
               flexDirection: 'row',
-              justifyContent: 'space-between',
               alignItems: 'center',
-              paddingBottom: 8,
+              zIndex: -1,
             }}
+            disabled={!canPost}
+            onPress={doPost}
           >
-            <TouchableOpacity
-              style={{
-                paddingHorizontal: 8,
-                paddingTop: 8,
-                paddingBottom: 12,
-              }}
-              onPress={onCancel}
-            >
-              <Text style={{ fontSize: 16 }}>{t('Cancel')}</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={{
-                backgroundColor: Colors.indigo[500],
-                opacity: canPost ? 1 : 0.5,
-
-                paddingHorizontal: 8,
-                paddingVertical: 6,
-                borderRadius: 5,
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
-                zIndex: -1,
-              }}
-              disabled={!canPost}
-              onPress={doPost}
-            >
-              <Text style={{ color: Colors.white, fontSize: 16 }}>{t('Post')}</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View
-            style={{
-              padding: 16,
-              backgroundColor: isDarkMode ? Colors.black : Colors.white,
-              borderWidth: 1,
-              borderColor: isDarkMode ? Colors.slate[800] : Colors.gray[100],
-              borderRadius: 6,
-            }}
-          >
-            <TextInput
-              placeholder="What's up?"
-              style={{
-                paddingVertical: 5,
-                lineHeight: 20,
-                fontSize: 16,
-                minHeight: 124,
-                color: isDarkMode ? Colors.white : Colors.black,
-              }}
-              multiline={true}
-              onChange={(event) => setCaption(event.nativeEvent.text)}
-              key={stateIndex}
-            />
-
-            <FileOverview assets={assets} setAssets={setAssets} />
-
-            <View
-              style={{
-                display: 'flex',
-                flexDirection: 'row-reverse',
-                alignItems: 'center',
-                gap: 8,
-                zIndex: -1,
-                marginVertical: 8,
-              }}
-            >
-              {channel.serverMetadata?.accessControlList ? (
-                <AclIcon size={'sm'} acl={customAcl || channel.serverMetadata?.accessControlList} />
-              ) : null}
-
-              {channel.serverMetadata?.accessControlList ? (
-                <Text style={{ fontSize: 12 }}>
-                  <AclSummary acl={customAcl || channel.serverMetadata?.accessControlList} />
-                </Text>
-              ) : null}
-            </View>
-
-            <View
-              style={{
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 10,
-              }}
-            >
-              <TouchableOpacity onPress={handleImageIconPress}>
-                <Plus size={'sm'} />
-              </TouchableOpacity>
-              <ActionGroup
-                options={[
-                  reactAccess === false
-                    ? {
-                        label: t('Enable reactions'),
-                        icon: Globe,
-                        onPress: () => setReactAccess(true),
-                      }
-                    : {
-                        label: t('Disable reactions'),
-                        icon: Lock,
-                        onPress: () => setReactAccess(false),
-                      },
-                  {
-                    label: t('See my drafts'),
-                    onPress: () => openURL(`https://${identity}/apps/feed/articles`),
-                    icon: Pencil,
-                  },
-                ]}
-              >
-                <Ellipsis size={'sm'} />
-              </ActionGroup>
-
-              <ChannelOrAclSelector
-                defaultChannelValue={
-                  channel?.fileMetadata?.appData?.uniqueId || BlogConfig.PublicChannelId
-                }
-                defaultAcl={customAcl}
-                onChange={handleChange}
-              />
-            </View>
-          </View>
+            <Text style={{ color: Colors.white, fontSize: 16 }}>{t('Post')}</Text>
+          </TouchableOpacity>
         </View>
 
-        {!error ? <ProgressIndicator processingProgress={processingProgress} /> : null}
-      </React.Fragment>
-    );
-  }
-);
+        <View
+          style={{
+            padding: 16,
+            backgroundColor: isDarkMode ? Colors.black : Colors.white,
+            borderWidth: 1,
+            borderColor: isDarkMode ? Colors.slate[800] : Colors.gray[100],
+            borderRadius: 6,
+          }}
+        >
+          <TextInput
+            placeholder="What's up?"
+            style={{
+              paddingVertical: 5,
+              lineHeight: 20,
+              fontSize: 16,
+              minHeight: 124,
+              color: isDarkMode ? Colors.white : Colors.black,
+            }}
+            multiline={true}
+            onChange={(event) => setCaption(event.nativeEvent.text)}
+            key={stateIndex}
+          />
+
+          <FileOverview assets={assets} setAssets={setAssets} />
+
+          <View
+            style={{
+              display: 'flex',
+              flexDirection: 'row-reverse',
+              alignItems: 'center',
+              gap: 8,
+              zIndex: -1,
+              marginVertical: 8,
+            }}
+          >
+            {channel.serverMetadata?.accessControlList ? (
+              <AclIcon size={'sm'} acl={customAcl || channel.serverMetadata?.accessControlList} />
+            ) : null}
+
+            {channel.serverMetadata?.accessControlList ? (
+              <Text style={{ fontSize: 12 }}>
+                <AclSummary acl={customAcl || channel.serverMetadata?.accessControlList} />
+              </Text>
+            ) : null}
+          </View>
+
+          <View
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 10,
+            }}
+          >
+            <TouchableOpacity onPress={handleImageIconPress}>
+              <Plus size={'sm'} />
+            </TouchableOpacity>
+            <ActionGroup
+              options={[
+                reactAccess === false
+                  ? {
+                      label: t('Enable reactions'),
+                      icon: Globe,
+                      onPress: () => setReactAccess(true),
+                    }
+                  : {
+                      label: t('Disable reactions'),
+                      icon: Lock,
+                      onPress: () => setReactAccess(false),
+                    },
+                {
+                  label: t('See my drafts'),
+                  onPress: () => openURL(`https://${identity}/apps/feed/articles`),
+                  icon: Pencil,
+                },
+              ]}
+            >
+              <Ellipsis size={'sm'} />
+            </ActionGroup>
+
+            <ChannelOrAclSelector
+              defaultChannelValue={
+                channel?.fileMetadata?.appData?.uniqueId || BlogConfig.PublicChannelId
+              }
+              defaultAcl={customAcl}
+              onChange={handleChange}
+            />
+          </View>
+        </View>
+      </Animated.View>
+
+      {!error ? <ProgressIndicator processingProgress={processingProgress} /> : null}
+    </React.Fragment>
+  );
+});
 
 const ChannelOrAclSelector = memo(
   ({

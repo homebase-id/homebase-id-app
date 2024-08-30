@@ -5,8 +5,8 @@ import { Container } from '../../components/ui/Container/Container';
 
 import { TabStackParamList } from '../../app/App';
 import { t } from 'feed-app-common';
-import React, { useMemo, useCallback } from 'react';
-import { View, TouchableOpacity, Text, ListRenderItemInfo, FlatList } from 'react-native';
+import React, { useMemo, useCallback, useRef } from 'react';
+import { View, TouchableOpacity, ListRenderItemInfo, FlatList } from 'react-native';
 import { Dashboard } from '../../components/Dashboard/Dashboard';
 import { ProfileInfo } from '../../components/Profile/ProfileInfo';
 import { ErrorNotification } from '../../components/ui/Alert/ErrorNotification';
@@ -14,6 +14,8 @@ import { Times } from '../../components/ui/Icons/icons';
 import { usePushNotifications } from '../../hooks/notifications/usePushNotifications';
 import { PushNotification } from '@homebase-id/js-lib/core';
 import { NotificationDay } from '../../components/Dashboard/NotificationsOverview';
+import { useScrollToTop } from '@react-navigation/native';
+import { Text } from '../../components/ui/Text/Text';
 
 type HomeProps = NativeStackScreenProps<TabStackParamList, 'Home'>;
 
@@ -39,6 +41,9 @@ export const HomePage = (_props: HomeProps) => {
       ) || {},
     [flattenedNotifications]
   );
+
+  const scrollRef = useRef<FlatList<string>>(null);
+  useScrollToTop(scrollRef);
 
   const { mutate: remove, error: removeError } = usePushNotifications().remove;
   const doClearAll = useCallback(() => remove(flattenedNotifications.map((n) => n.id) || []), []);
@@ -74,7 +79,9 @@ export const HomePage = (_props: HomeProps) => {
       <Container style={{ flex: 1 }}>
         {flattenedNotifications?.length ? (
           <FlatList
+            ref={scrollRef}
             data={Object.keys(groupedNotificationsPerDay)}
+            showsVerticalScrollIndicator={false}
             contentContainerStyle={{ gap: 8 }}
             ListHeaderComponent={renderHeader}
             renderItem={renderItem}

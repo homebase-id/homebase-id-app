@@ -23,7 +23,6 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Colors } from './Colors';
 
 // Pages
-import { FeedPage } from '../pages/feed/feed-page';
 import { HomePage } from '../pages/home/home-page';
 import { LoginPage } from '../pages/login/login-page';
 import { useDarkMode } from '../hooks/useDarkMode';
@@ -50,11 +49,13 @@ import { ChatStack } from './ChatStack';
 import { ProfileStack } from './ProfileStack';
 import BootSplash from 'react-native-bootsplash';
 import BubbleColorProvider from '../components/BubbleContext/BubbleContext';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { ExtendPermissionDialog } from '../components/Permissions/ExtendPermissionDialog';
 import { t } from 'feed-app-common';
 import { FEED_CHAT_APP_ID } from './constants';
 import { Toast } from '../components/ui/Toast/Toast';
 import { NotificationToaster } from '../components/ui/Alert/NotificationToaster';
+import { FeedStack } from './FeedStack';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -191,65 +192,70 @@ const TabStack = memo(() => {
     'Following',
     'DriveStatus',
     'ConnectQr',
+    'MediaPreview',
   ];
   const { route } = useRouteContext();
   const hide = !route || !rootRoutes.includes(route.name);
   // TODO: Hide seems slow for the chat-page.. While actually it's the ChatScreen being slow in detecting it's correct size
 
   return (
-    <TabBottom.Navigator
-      screenOptions={{
-        headerShown: false,
-        tabBarInactiveTintColor: isDarkMode ? Colors.white : Colors.black,
-        tabBarActiveTintColor: isDarkMode ? Colors.white : Colors.black,
-        tabBarActiveBackgroundColor: isDarkMode ? Colors.indigo[700] : Colors.indigo[200],
-        tabBarShowLabel: false,
-        tabBarHideOnKeyboard: true,
-        tabBarStyle: {
-          backgroundColor: isDarkMode ? Colors.indigo[900] : Colors.indigo[100],
-        },
-      }}
-      initialRouteName="Chat"
-    >
-      <TabBottom.Screen
-        name="Home"
-        component={HomePage}
-        options={{
-          tabBarIcon: TabHouseIcon,
-        }}
-      />
-      <TabBottom.Screen
-        name="Feed"
-        component={FeedPage}
-        options={{
-          tabBarIcon: TabFeedIcon,
-          // Ios does not load webview until the window is focussed so keep it lazy until needed
-          // see: https://github.com/react-native-webview/react-native-webview/pull/813#issuecomment-526216535
-          // UPD: https://github.com/react-native-webview/react-native-webview/pull/3041
-          lazy: Platform.OS === 'android' ? false : true,
-        }}
-      />
-      <TabBottom.Screen
-        name="Chat"
-        component={ChatStack}
-        options={{
-          tabBarIcon: TabChatIcon,
+    <BottomSheetModalProvider>
+      <TabBottom.Navigator
+        screenOptions={{
           headerShown: false,
-          tabBarStyle: hide
-            ? Platform.OS === 'android'
-              ? { height: 0, overflow: 'hidden', opacity: 0 }
-              : { display: 'none' }
-            : { backgroundColor: isDarkMode ? Colors.indigo[900] : Colors.indigo[100] },
+          tabBarInactiveTintColor: isDarkMode ? Colors.white : Colors.black,
+          tabBarActiveTintColor: isDarkMode ? Colors.white : Colors.black,
+          tabBarActiveBackgroundColor: isDarkMode ? Colors.indigo[700] : Colors.indigo[200],
+          tabBarShowLabel: false,
+          tabBarHideOnKeyboard: true,
+          tabBarStyle: {
+            backgroundColor: isDarkMode ? Colors.indigo[900] : Colors.indigo[100],
+          },
         }}
-      />
-      <TabBottom.Screen
-        name="Profile"
-        component={ProfileStack}
-        options={{
-          tabBarIcon: TabMenuIcon,
-        }}
-      />
-    </TabBottom.Navigator>
+        initialRouteName="Chat"
+      >
+        <TabBottom.Screen
+          name="Home"
+          component={HomePage}
+          options={{
+            tabBarIcon: TabHouseIcon,
+          }}
+        />
+        <TabBottom.Screen
+          name="Feed"
+          component={FeedStack}
+          options={{
+            tabBarIcon: TabFeedIcon,
+            tabBarStyle: hide
+              ? Platform.OS === 'android'
+                ? { height: 0, overflow: 'hidden', opacity: 0 }
+                : { display: 'none' }
+              : { backgroundColor: isDarkMode ? Colors.indigo[900] : Colors.indigo[100] },
+            // lazy: false,
+          }}
+        />
+        <TabBottom.Screen
+          name="Chat"
+          component={ChatStack}
+          options={{
+            tabBarIcon: TabChatIcon,
+            headerShown: false,
+            tabBarStyle: hide
+              ? Platform.OS === 'android'
+                ? { height: 0, overflow: 'hidden', opacity: 0 }
+                : { display: 'none' }
+              : { backgroundColor: isDarkMode ? Colors.indigo[900] : Colors.indigo[100] },
+          }}
+        />
+        <TabBottom.Screen
+          name="Profile"
+          component={ProfileStack}
+          options={{
+            tabBarIcon: TabMenuIcon,
+          }}
+        />
+      </TabBottom.Navigator>
+    </BottomSheetModalProvider>
   );
 });
 

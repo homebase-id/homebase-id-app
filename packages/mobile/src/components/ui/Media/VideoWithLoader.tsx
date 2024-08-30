@@ -23,6 +23,8 @@ export const VideoWithLoader = memo(
   ({
     fileId,
     targetDrive,
+    globalTransitId,
+    odinId,
     previewThumbnail,
     fit = 'cover',
     preview,
@@ -32,8 +34,12 @@ export const VideoWithLoader = memo(
     onLongPress,
     payload,
     autoPlay,
+    probablyEncrypted,
+    lastModified,
   }: {
     fileId: string;
+    odinId?: string;
+    globalTransitId?: string;
     targetDrive: TargetDrive;
     previewThumbnail?: EmbeddedThumb;
     fit?: 'cover' | 'contain';
@@ -45,15 +51,21 @@ export const VideoWithLoader = memo(
     style?: ImageStyle;
     payload: PayloadDescriptor;
     autoPlay?: boolean;
+    probablyEncrypted?: boolean;
+    lastModified?: number;
   }) => {
-    const [loadVideo, setLoadVideo] = useState(true);
+    const [loadVideo, setLoadVideo] = useState(autoPlay);
     const doLoadVideo = useCallback(() => setLoadVideo(true), []);
     const canDownload = !preview && payload?.bytesWritten < MAX_DOWNLOAD_SIZE;
     const { data, isLoading } = useVideo({
+      odinId,
       fileId,
       targetDrive,
+      videoGlobalTransitId: globalTransitId,
+      probablyEncrypted,
       payloadKey: payload.key,
       enabled: canDownload,
+      lastModified,
     }).fetch;
 
     if (preview) {
@@ -63,6 +75,9 @@ export const VideoWithLoader = memo(
             targetDrive={targetDrive}
             fileId={fileId}
             previewThumbnail={previewThumbnail}
+            globalTransitId={globalTransitId}
+            probablyEncrypted={probablyEncrypted}
+            odinId={odinId}
             fit={fit}
             fileKey={payload.key}
             imageSize={imageSize}
@@ -113,7 +128,7 @@ export const VideoWithLoader = memo(
           >
             {canDownload ? (
               <Video
-                source={{ uri: data?.url }}
+                source={{ uri: data?.uri }}
                 style={{
                   position: 'absolute',
                   top: 0,
@@ -122,7 +137,7 @@ export const VideoWithLoader = memo(
                   right: 0,
                 }}
                 controls={true}
-                paused={!autoPlay}
+                paused={loadVideo}
                 resizeMode={'contain'}
                 onEnd={() => setLoadVideo(false)}
                 onError={(e) => console.log('error', e)}

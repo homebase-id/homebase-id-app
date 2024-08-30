@@ -25,6 +25,7 @@ import { t } from 'feed-app-common';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@react-navigation/native';
 import Video from 'react-native-video';
+import Animated, { SlideInDown, SlideOutDown } from 'react-native-reanimated';
 
 const FilePreview = ({
   asset,
@@ -178,7 +179,13 @@ export const ChatFileOverview = memo(
     }, [setAssets]);
 
     return (
-      <>
+      <Animated.View
+        entering={SlideInDown}
+        exiting={SlideOutDown}
+        style={{
+          flex: 1,
+        }}
+      >
         <View
           style={{
             flex: 1,
@@ -423,7 +430,7 @@ export const ChatFileOverview = memo(
             </TouchableOpacity>
           )}
         </View>
-      </>
+      </Animated.View>
     );
   }
 );

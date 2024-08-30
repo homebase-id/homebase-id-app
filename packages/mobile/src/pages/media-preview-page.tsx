@@ -1,16 +1,11 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ChatDrive } from '../provider/chat/ConversationProvider';
 import { VideoWithLoader } from '../components/ui/Media/VideoWithLoader';
 
 import { memo, useCallback, useLayoutEffect, useRef, useState } from 'react';
-import Carousel from 'react-native-reanimated-carousel';
+import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel';
 import { OdinImage } from '../components/ui/OdinImage/OdinImage';
 import { ChatStackParamList } from '../app/ChatStack';
 import { PayloadDescriptor } from '@homebase-id/js-lib/core';
-import {
-  CarouselRenderItemInfo,
-  ICarouselInstance,
-} from 'react-native-reanimated-carousel/lib/typescript/types';
 
 import Share from 'react-native-share';
 import { useSafeAreaFrame } from 'react-native-safe-area-context';
@@ -30,16 +25,28 @@ import Toast from 'react-native-toast-message';
 import Clipboard from '@react-native-clipboard/clipboard';
 import Animated from 'react-native-reanimated';
 import { ZOOM_TYPE } from '@likashefqet/react-native-image-zoom';
+import { CarouselRenderItemInfo } from 'react-native-reanimated-carousel/lib/typescript/types';
 import { CameraRoll } from '@react-native-camera-roll/camera-roll';
+import { FeedStackParamList } from '../app/FeedStack';
 
-export type MediaProp = NativeStackScreenProps<ChatStackParamList, 'PreviewMedia'>;
+export type MediaProp = NativeStackScreenProps<
+  ChatStackParamList | FeedStackParamList,
+  'PreviewMedia'
+>;
 
-export const PreviewMedia = memo((prop: MediaProp) => {
-  const msg = prop.route.params.msg;
-  const fileId = msg.fileId;
-  const payloads = msg.fileMetadata.payloads;
-  const initialIndex = prop.route.params.currIndex;
-
+export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
+  const {
+    fileId,
+    globalTransitId,
+    currIndex: initialIndex,
+    payloads,
+    senderOdinId,
+    createdAt,
+    previewThumbnail,
+    targetDrive,
+    probablyEncrypted,
+    transitOdinId,
+  } = route.params;
   const [currIndex, setCurrIndex] = useState(initialIndex);
   const ref = useRef<ICarouselInstance>(null);
   const { height, width } = useSafeAreaFrame();
@@ -55,23 +62,27 @@ export const PreviewMedia = memo((prop: MediaProp) => {
           alignItems: Platform.OS === 'ios' ? 'center' : 'flex-start',
         }}
       >
-        <HeaderTitle
-          style={{
-            color: Colors.white,
-          }}
-        >
-          <AuthorName odinId={msg.fileMetadata.senderOdinId} showYou />
-        </HeaderTitle>
-        <Text
-          style={{
-            color: Colors.white,
-          }}
-        >
-          {formatToTimeAgoWithRelativeDetail(new Date(msg.fileMetadata.created), true)}
-        </Text>
+        {senderOdinId && (
+          <HeaderTitle
+            style={{
+              color: Colors.white,
+            }}
+          >
+            <AuthorName odinId={senderOdinId} showYou />
+          </HeaderTitle>
+        )}
+        {createdAt && (
+          <Text
+            style={{
+              color: Colors.white,
+            }}
+          >
+            {formatToTimeAgoWithRelativeDetail(new Date(createdAt), true)}
+          </Text>
+        )}
       </Animated.View>
     );
-  }, [msg.fileMetadata.created, msg.fileMetadata.senderOdinId]);
+  }, [createdAt, senderOdinId]);
 
   const renderDownloadButton = useCallback(() => {
     const currPayload = payloads[currIndex];
@@ -79,10 +90,17 @@ export const PreviewMedia = memo((prop: MediaProp) => {
       return;
     }
     const onDownload = async () => {
-      const imageData = getImage(undefined, fileId, currPayload.key, ChatDrive, {
-        pixelWidth: width,
-        pixelHeight: height,
-      });
+      const imageData = getImage(
+        transitOdinId,
+        fileId,
+        currPayload.key,
+        targetDrive,
+        globalTransitId,
+        {
+          pixelWidth: width,
+          pixelHeight: height,
+        }
+      );
 
       if (!imageData || !imageData.imageData) {
         Toast.show({
@@ -113,10 +131,19 @@ export const PreviewMedia = memo((prop: MediaProp) => {
       });
     };
     return <IconButton icon={<Download color={Colors.white} />} onPress={onDownload} />;
-  }, [currIndex, fileId, getImage, height, payloads, width]);
+  }, [
+    currIndex,
+    fileId,
+    getImage,
+    globalTransitId,
+    height,
+    payloads,
+    targetDrive,
+    transitOdinId,
+    width,
+  ]);
 
   useLayoutEffect(() => {
-    const navigation = prop.navigation;
     navigation.setOptions({
       headerTitle: headerTitle,
       headerShown: isVisible,
@@ -125,14 +152,20 @@ export const PreviewMedia = memo((prop: MediaProp) => {
         backgroundColor: 'transparent',
       },
     });
-    // StatusBar.setBarStyle('light-content');
-  }, [headerTitle, isVisible, prop.navigation, renderDownloadButton]);
+  }, [headerTitle, isVisible, navigation, renderDownloadButton]);
 
   const onShare = useCallback(() => {
-    const imageData = getImage(undefined, fileId, payloads[currIndex].key, ChatDrive, {
-      pixelWidth: width,
-      pixelHeight: height,
-    });
+    const imageData = getImage(
+      transitOdinId,
+      fileId,
+      payloads[currIndex].key,
+      targetDrive,
+      globalTransitId,
+      {
+        pixelWidth: width,
+        pixelHeight: height,
+      }
+    );
     if (!imageData) {
       Toast.show({
         type: 'error',
@@ -149,7 +182,17 @@ export const PreviewMedia = memo((prop: MediaProp) => {
       type: imageData?.imageData?.type,
       url: imageData?.imageData?.url,
     });
-  }, [currIndex, fileId, getImage, height, payloads, width]);
+  }, [
+    currIndex,
+    fileId,
+    getImage,
+    globalTransitId,
+    height,
+    payloads,
+    targetDrive,
+    transitOdinId,
+    width,
+  ]);
 
   const renderItem = useCallback(
     ({ item }: CarouselRenderItemInfo<PayloadDescriptor>) => {
@@ -169,14 +212,17 @@ export const PreviewMedia = memo((prop: MediaProp) => {
           <OdinImage
             fileId={fileId}
             fileKey={fileKey}
+            globalTransitId={globalTransitId}
+            probablyEncrypted={probablyEncrypted}
+            odinId={transitOdinId}
             enableZoom={true}
             fit="contain"
             imageSize={{
               width: width,
               height: height,
             }}
-            targetDrive={ChatDrive}
-            previewThumbnail={msg.fileMetadata.appData.previewThumbnail}
+            targetDrive={targetDrive}
+            previewThumbnail={previewThumbnail}
             imageZoomProps={{
               isSingleTapEnabled: true,
               minPanPointers: 1,
@@ -202,9 +248,12 @@ export const PreviewMedia = memo((prop: MediaProp) => {
         <VideoWithLoader
           fileId={fileId}
           payload={item}
-          targetDrive={ChatDrive}
+          targetDrive={targetDrive}
           fullscreen={true}
-          previewThumbnail={msg.fileMetadata.appData.previewThumbnail}
+          previewThumbnail={previewThumbnail}
+          odinId={transitOdinId}
+          globalTransitId={globalTransitId}
+          probablyEncrypted={probablyEncrypted}
           autoPlay={autoplay}
           imageSize={{
             width: width,
@@ -213,7 +262,18 @@ export const PreviewMedia = memo((prop: MediaProp) => {
         />
       );
     },
-    [autoplay, fileId, height, isVisible, msg.fileMetadata.appData.previewThumbnail, width]
+    [
+      autoplay,
+      fileId,
+      globalTransitId,
+      height,
+      isVisible,
+      previewThumbnail,
+      probablyEncrypted,
+      targetDrive,
+      transitOdinId,
+      width,
+    ]
   );
 
   const hasVideoPayload = payloads.some((item) => item.contentType?.startsWith('video'));
@@ -271,14 +331,14 @@ export const PreviewMedia = memo((prop: MediaProp) => {
                   return (
                     <VideoWithLoader
                       key={index}
-                      fileId={msg.fileId}
+                      fileId={fileId}
                       payload={item}
-                      targetDrive={ChatDrive}
-                      previewThumbnail={
-                        payloads.length === 1
-                          ? msg.fileMetadata.appData.previewThumbnail
-                          : undefined
-                      }
+                      targetDrive={targetDrive}
+                      previewThumbnail={payloads.length === 1 ? previewThumbnail : undefined}
+                      globalTransitId={globalTransitId}
+                      probablyEncrypted={probablyEncrypted}
+                      odinId={transitOdinId}
+                      lastModified={item.lastModified}
                       fit="cover"
                       imageSize={{
                         width: 50,
@@ -300,10 +360,13 @@ export const PreviewMedia = memo((prop: MediaProp) => {
                 }
                 return (
                   <OdinImage
-                    fileId={msg.fileId}
+                    fileId={fileId}
                     fileKey={item.key}
                     key={item.key}
-                    targetDrive={ChatDrive}
+                    targetDrive={targetDrive}
+                    globalTransitId={globalTransitId}
+                    probablyEncrypted={probablyEncrypted}
+                    odinId={transitOdinId}
                     fit="cover"
                     imageSize={{
                       width: 50,

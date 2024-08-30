@@ -2,13 +2,11 @@
 
 Homebase feed and chat app powered by Odin.
 
-
-<a href='https://play.google.com/store/apps/details?id=id.homebase.feed&pcampaignid=web_share'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png' height='80px'/></a> 
+<a href='https://play.google.com/store/apps/details?id=id.homebase.feed&pcampaignid=web_share'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png' height='80px'/></a>
 
 <p>
 &nbsp &nbsp <a href='https://apps.apple.com/in/app/homebase-id/id6468971238'><img alt='Get it on Google Play' src='https://developer.apple.com/news/images/download-on-the-app-store-badge.png' height='54px' width="160px"/></a>
 </p>
-
 
 ## Running Locally
 
@@ -43,13 +41,19 @@ Now you can log in with local identities such as `frodo.dotyou.cloud`.
 > [!Note]
 > No Such configuration is required for iOS simulators.
 
+## Contributing
+
+Contributions are highly Welcomed 💙 . Feel free to open PRs for small issues such as typos. For large issues or features, please open an issue and wait for it to be assigned to you.
+
+You can reach out to us on our [Discord](LINK-DISCORD-SERVER) server if you have any questions or need help.
+
 ## Communications
 
 Please use the [issue tracker](https://github.com/YouFoundation/feed-mobile-app/issues) on GitHub to report bugs.
 
 ## Security Disclosures
 
-If you discover any security issues, please send an email to [security@homebase.id](mailto:security@homebase.id). The email is automatically CCed to the entire team and we'll respond promptly.
+If you discover any security issues, please send an email to [security@homebase.id](mailto:info@homebase.id). The email is automatically CCed to the entire team and we'll respond promptly.
 
 ## License
 

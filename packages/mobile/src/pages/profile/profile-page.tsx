@@ -276,7 +276,7 @@ export const ProfilePage = (_props: SettingsProps) => {
               Drive Status
             </Text>
           </TouchableOpacity> */}
-          <TouchableOpacity
+          {/* <TouchableOpacity
             onPress={() => navigate('Debug')}
             style={{
               display: 'flex',
@@ -293,7 +293,7 @@ export const ProfilePage = (_props: SettingsProps) => {
             >
               Debug
             </Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           <VersionInfo />
         </ScrollView>
       </Container>

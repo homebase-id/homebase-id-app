@@ -1,7 +1,16 @@
 import { CONTACT_PROFILE_IMAGE_KEY, ContactConfig } from '@homebase-id/js-lib/network';
 import { GetTargetDriveFromProfileId, BuiltInProfiles } from '@homebase-id/js-lib/profile';
 import { memo, useMemo, useState } from 'react';
-import { ImageStyle, StyleProp, ViewStyle, View, StyleSheet, Image, Platform } from 'react-native';
+import {
+  ImageStyle,
+  StyleProp,
+  ViewStyle,
+  View,
+  StyleSheet,
+  Image,
+  Platform,
+  Pressable,
+} from 'react-native';
 import useContact from '../../../hooks/contact/useContact';
 import { useProfile } from '../../../hooks/profile/useProfile';
 import { useDarkMode } from '../../../hooks/useDarkMode';
@@ -15,6 +24,7 @@ export const Avatar = memo(
   (props: {
     odinId: string;
     style?: ImageStyle;
+    onPress?: () => void;
     imageSize?: { width: number; height: number };
   }) => {
     const { data: contact } = useContact(props.odinId).fetch;
@@ -28,13 +38,13 @@ export const Avatar = memo(
             previewThumbnail={contact?.fileMetadata.appData.previewThumbnail}
             imageSize={props.imageSize || { width: 48, height: 48 }}
             fit="contain"
-            odinId={props.odinId}
             lastModified={contact?.fileMetadata.updated}
+            onClick={props.onPress}
           />
         </View>
       );
     } else {
-      return <PublicAvatar odinId={props.odinId} style={props.style} imageSize={props.imageSize} />;
+      return <PublicAvatar {...props} />;
     }
   }
 );
@@ -42,22 +52,25 @@ export const Avatar = memo(
 export const PublicAvatar = (props: {
   odinId: string;
   style?: ImageStyle;
+  onPress?: () => void;
   imageSize?: { width: number; height: number };
 }) => {
   const [isSvg, setIsSvg] = useState(false);
   if (!isSvg) {
     return (
-      <Image
-        style={{
-          ...styles.tinyLogo,
-          ...props.style,
-        }}
-        onError={(e) => {
-          console.error('Error loading image', e.nativeEvent.error);
-          setIsSvg(true);
-        }}
-        source={{ uri: `https://${props.odinId}/pub/image` }}
-      />
+      <Pressable onPress={props.onPress}>
+        <Image
+          style={{
+            ...styles.tinyLogo,
+            ...props.style,
+          }}
+          onError={(e) => {
+            // console.error('Error loading image', e.nativeEvent.error);
+            setIsSvg(true);
+          }}
+          source={{ uri: `https://${props.odinId}/pub/image` }}
+        />
+      </Pressable>
     );
   } else {
     return (
@@ -72,12 +85,14 @@ export const PublicAvatar = (props: {
           Platform.OS === 'android' ? props.style : undefined,
         ]}
       >
-        <SvgUri
-          width={props.imageSize?.width}
-          height={props.imageSize?.height}
-          uri={`https://${props.odinId}/pub/image`}
-          style={{ overflow: 'hidden', ...props.style }}
-        />
+        <Pressable onPress={props.onPress}>
+          <SvgUri
+            width={props.imageSize?.width}
+            height={props.imageSize?.height}
+            uri={`https://${props.odinId}/pub/image`}
+            style={{ overflow: 'hidden', ...props.style }}
+          />
+        </Pressable>
       </View>
     );
   }

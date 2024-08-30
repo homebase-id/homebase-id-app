@@ -42,7 +42,7 @@ export const drives = [
     t: BlogConfig.FeedDrive.type,
     n: '',
     d: '',
-    p: DrivePermissionType.Read + DrivePermissionType.Write,
+    p: DrivePermissionType.Read + DrivePermissionType.Write + DrivePermissionType.Comment + DrivePermissionType.React,
   },
   {
     a: ChatConfig.ChatDrive.alias,
