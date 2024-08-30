@@ -208,6 +208,10 @@ export const MediaItem = ({
           payload={payload as PayloadDescriptor}
           targetDrive={targetDrive}
           previewThumbnail={previewThumbnail}
+          globalTransitId={globalTransitId}
+          probablyEncrypted={probablyEncrypted}
+          odinId={odinId}
+          lastModified={payload.lastModified}
           fit={fit}
           imageSize={imageSize}
           preview

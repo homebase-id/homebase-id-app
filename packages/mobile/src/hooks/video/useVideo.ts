@@ -19,6 +19,7 @@ export const useVideo = ({
   payloadKey,
   enabled = false,
   probablyEncrypted,
+  lastModified,
 }: {
   odinId?: string;
   fileId?: string;
@@ -27,6 +28,7 @@ export const useVideo = ({
   probablyEncrypted?: boolean;
   payloadKey?: string;
   enabled?: boolean;
+  lastModified?: number;
 }) => {
   const queryClient = useQueryClient();
   const dotyouClient = useDotYouClientContext();
@@ -35,10 +37,12 @@ export const useVideo = ({
 
   const fetchVideo = async ({ payloadKey }: { payloadKey?: string }) => {
     if (!fileId || !targetDrive || !payloadKey || !token) return;
+    console.log(odinId, localHost);
     if (odinId && odinId !== localHost) {
       if (videoGlobalTransitId) {
         const payload = await getPayloadBytesOverPeerByGlobalTransitId(dotyouClient, odinId, targetDrive, videoGlobalTransitId, payloadKey, token, {
           decrypt: probablyEncrypted,
+          lastModified,
         })
         if (!payload) return;
       } else {

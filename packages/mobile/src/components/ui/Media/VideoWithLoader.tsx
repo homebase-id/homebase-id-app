@@ -35,6 +35,7 @@ export const VideoWithLoader = memo(
     payload,
     autoPlay,
     probablyEncrypted,
+    lastModified,
   }: {
     fileId: string;
     odinId?: string;
@@ -51,6 +52,7 @@ export const VideoWithLoader = memo(
     payload: PayloadDescriptor;
     autoPlay?: boolean;
     probablyEncrypted?: boolean;
+    lastModified?: number;
   }) => {
     const [loadVideo, setLoadVideo] = useState(true);
     const doLoadVideo = useCallback(() => setLoadVideo(true), []);
@@ -63,6 +65,7 @@ export const VideoWithLoader = memo(
       probablyEncrypted,
       payloadKey: payload.key,
       enabled: canDownload,
+      lastModified,
     }).fetch;
 
     if (preview) {
@@ -72,6 +75,9 @@ export const VideoWithLoader = memo(
             targetDrive={targetDrive}
             fileId={fileId}
             previewThumbnail={previewThumbnail}
+            globalTransitId={globalTransitId}
+            probablyEncrypted={probablyEncrypted}
+            odinId={odinId}
             fit={fit}
             fileKey={payload.key}
             imageSize={imageSize}

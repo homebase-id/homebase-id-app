@@ -7,6 +7,7 @@ import { MediaGallery, MediaItem } from '../../ui/Media/MediaGallery';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 
 import { ChatStackParamList } from '../../../app/ChatStack';
+import { FeedStackParamList } from '../../../app/FeedStack';
 
 type PostMediaProps = { post: HomebaseFile<PostContent> };
 
@@ -18,7 +19,7 @@ export const PostMedia = memo(({ post }: PostMediaProps) => {
   const authorOdinId = post.fileMetadata.appData.content.authorOdinId || odinId;
   const { width, height } = Dimensions.get('screen');
   const hasContent = !!post.fileMetadata.appData.content.caption;
-  const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
+  const navigation = useNavigation<NavigationProp<ChatStackParamList | FeedStackParamList>>();
   if (!payloads || payloads?.length === 0) return null;
   if (payloads?.length === 1) {
     const payload = payloads[0];
@@ -62,6 +63,7 @@ export const PostMedia = memo(({ post }: PostMediaProps) => {
               currIndex: 0,
               targetDrive: getChannelDrive(post.fileMetadata.appData.content.channelId),
               globalTransitId: post.fileMetadata.globalTransitId,
+              probablyEncrypted: post.fileMetadata.isEncrypted,
             });
           }}
           onLongPress={undefined}
@@ -93,6 +95,7 @@ export const PostMedia = memo(({ post }: PostMediaProps) => {
           currIndex: index,
           targetDrive: getChannelDrive(post.fileMetadata.appData.content.channelId),
           globalTransitId: post.fileMetadata.globalTransitId,
+          probablyEncrypted: post.fileMetadata.isEncrypted,
         });
       }}
       onLongPress={undefined}

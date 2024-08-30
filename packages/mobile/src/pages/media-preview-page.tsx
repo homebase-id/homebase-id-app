@@ -251,6 +251,9 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
           targetDrive={targetDrive}
           fullscreen={true}
           previewThumbnail={previewThumbnail}
+          odinId={transitOdinId}
+          globalTransitId={globalTransitId}
+          probablyEncrypted={probablyEncrypted}
           autoPlay={autoplay}
           imageSize={{
             width: width,
@@ -335,6 +338,7 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
                       globalTransitId={globalTransitId}
                       probablyEncrypted={probablyEncrypted}
                       odinId={transitOdinId}
+                      lastModified={item.lastModified}
                       fit="cover"
                       imageSize={{
                         width: 50,
