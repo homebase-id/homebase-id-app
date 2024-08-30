@@ -1,4 +1,4 @@
-import { QueryClient, useQuery, useQueryClient } from '@tanstack/react-query';
+import { InfiniteData, QueryClient, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   AppNotification,
   DeletedHomebaseFile,
@@ -41,7 +41,10 @@ import { insertNewMessage, insertNewMessagesForConversation } from './useChatMes
 import { insertNewConversation } from './useConversations';
 import { useWebSocketContext } from '../../components/WebSocketContext/useWebSocketContext';
 import { insertNewConversationMetadata } from './useConversationMetadata';
-import { incrementAppIdNotificationCount } from '../notifications/usePushNotifications';
+import {
+  incrementAppIdNotificationCount,
+  insertNewNotification,
+} from '../notifications/usePushNotifications';
 import { insertNewReaction, removeReaction } from './useChatReaction';
 import { useNotification } from '../notifications/useNotification';
 
@@ -241,25 +244,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
     if (notification.notificationType === 'appNotificationAdded') {
       const clientNotification = notification as AppNotification;
       add(clientNotification);
-
-      const existingNotificationData = queryClient.getQueryData<{
-        results: PushNotification[];
-        cursor: number;
-      }>(['push-notifications']);
-
-      if (existingNotificationData) {
-        const newNotificationData = {
-          ...existingNotificationData,
-          results: [
-            clientNotification,
-            ...existingNotificationData.results.filter(
-              (notification) =>
-                !stringGuidsEqual(notification.options.tagId, clientNotification.options.tagId)
-            ),
-          ],
-        };
-        queryClient.setQueryData(['push-notifications'], newNotificationData);
-      }
+      insertNewNotification(queryClient, clientNotification);
       incrementAppIdNotificationCount(queryClient, clientNotification.options.appId);
     }
 
@@ -281,8 +266,6 @@ const useChatWebsocket = (isEnabled: boolean) => {
         );
       }
     }
-
-
   }, []);
 
   const chatMessagesQueueTunnel = useRef<HomebaseFile<ChatMessage>[]>([]);
@@ -406,11 +389,11 @@ const processChatMessagesBatch = async (
           uniqueMessagesPerConversation[updatedConversation].map(async (newMessage) =>
             typeof newMessage.fileMetadata.appData.content === 'string'
               ? await dsrToMessage(
-                dotYouClient,
-                newMessage as HomebaseFile<string>,
-                ChatDrive,
-                true
-              )
+                  dotYouClient,
+                  newMessage as HomebaseFile<string>,
+                  ChatDrive,
+                  true
+                )
               : (newMessage as HomebaseFile<ChatMessage>)
           )
         )
