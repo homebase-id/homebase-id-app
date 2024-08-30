@@ -1,12 +1,10 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { memo, useCallback, useEffect, useState } from 'react';
-import { TabStackParamList } from '../../app/App';
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 import { Keyboard, TouchableOpacity } from 'react-native';
 import { Colors } from '../../app/Colors';
 import { useRemoveNotifications } from '../../hooks/notifications/usePushNotifications';
 import { FEED_APP_ID } from '../../app/constants';
-import { PostComposer } from '../../components/Feed/Composer/PostComposer';
 import { Plus } from '../../components/ui/Icons/icons';
 import { useIsFocused } from '@react-navigation/native';
 import SocialFeedMainContent from '../../components/Feed/MainContent/SocialFeed';
@@ -14,17 +12,9 @@ import { FeedStackParamList } from '../../app/FeedStack';
 
 type FeedProps = NativeStackScreenProps<FeedStackParamList, 'Home'>;
 
-export const FeedPage = memo((_props: FeedProps) => {
-  const [isPostComposerOpen, setIsPostComposerOpen] = useState<boolean>();
-
+export const FeedPage = memo(({ navigation }: FeedProps) => {
   const isFocused = useIsFocused();
   useRemoveNotifications({ disabled: !isFocused, appId: FEED_APP_ID });
-
-  const doCloseComposer = useCallback(() => setIsPostComposerOpen(false), []);
-  const doCloseAndRefresh = useCallback(() => {
-    setIsPostComposerOpen(false);
-    // webviewRef.current?.reload();
-  }, []);
 
   const [keyboardVisible, setKeyboardVisible] = useState<boolean>(false);
 
@@ -61,13 +51,11 @@ export const FeedPage = memo((_props: FeedProps) => {
             bottom: 20,
             right: 20,
           }}
-          onPress={() => setIsPostComposerOpen(true)}
+          onPress={() => navigation.navigate('Compose')}
         >
           <Plus color={Colors.white} size="lg" />
         </TouchableOpacity>
       )}
-
-      {isPostComposerOpen && <PostComposer onPost={doCloseAndRefresh} onCancel={doCloseComposer} />}
     </SafeAreaView>
   );
 });

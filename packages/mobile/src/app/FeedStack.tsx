@@ -12,12 +12,14 @@ import { Platform } from 'react-native';
 import { Colors } from './Colors';
 import { FeedPage } from '../pages/feed/feed-page';
 import { PreviewMedia } from '../pages/media-preview-page';
+import { PostComposer } from '../pages/feed/PostComposer';
 
 export type FeedStackParamList = {
   Home: undefined;
   Post: {
     postId: string;
   };
+  Compose: undefined;
   PreviewMedia: {
     fileId: string;
     globalTransitId?: string;
@@ -63,6 +65,13 @@ export const FeedStack = (_props: NativeStackScreenProps<TabStackParamList, 'Fee
         <StackFeed.Screen
           name="PreviewMedia"
           component={PreviewMedia}
+          options={{
+            animation: 'slide_from_bottom',
+          }}
+        />
+        <StackFeed.Screen
+          name="Compose"
+          component={PostComposer}
           options={{
             animation: 'slide_from_bottom',
           }}
