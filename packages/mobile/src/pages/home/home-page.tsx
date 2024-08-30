@@ -1,5 +1,4 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ScrollView } from 'react-native';
 
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 import { Container } from '../../components/ui/Container/Container';
@@ -15,12 +14,12 @@ type HomeProps = NativeStackScreenProps<TabStackParamList, 'Home'>;
 export const HomePage = (_props: HomeProps) => {
   return (
     <SafeAreaView>
-      <Container>
-        <ScrollView style={{ paddingVertical: 12 }}>
-          <ProfileInfo />
-          <Dashboard />
-          <NotificationsOverview />
-        </ScrollView>
+      <Container style={{ flex: 1 }}>
+        {/* <ScrollView style={{ paddingVertical: 12 }}> */}
+
+        <NotificationsOverview />
+
+        {/* </ScrollView> */}
       </Container>
     </SafeAreaView>
   );

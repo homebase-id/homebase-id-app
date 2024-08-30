@@ -1,7 +1,13 @@
-import { Dimensions, TouchableOpacity, View } from 'react-native';
+import {
+  Dimensions,
+  ListRenderItem,
+  ListRenderItemInfo,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 import { usePushNotifications } from '../../hooks/notifications/usePushNotifications';
-import { memo, useMemo, useState } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 import { PushNotification } from '@homebase-id/js-lib/core';
 import { formatToTimeAgoWithRelativeDetail, t, useDotYouClientContext } from 'feed-app-common';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
@@ -26,12 +32,20 @@ import Clipboard from '@react-native-clipboard/clipboard';
 import { TabStackParamList } from '../../app/App';
 import { ErrorNotification } from '../ui/Alert/ErrorNotification';
 import { Avatar } from '../ui/Avatars/Avatar';
+import { FlatList } from 'react-native-gesture-handler';
+import { ProfileInfo } from '../Profile/ProfileInfo';
+import { Dashboard } from './Dashboard';
 
 export const NotificationsOverview = memo(() => {
-  const { data: notifications } = usePushNotifications().fetch;
+  const { data: notifications, hasNextPage, fetchNextPage } = usePushNotifications().fetch;
+  const flattenedNotifications = useMemo(
+    () => notifications?.pages.flatMap((page) => page.results) || [],
+    [notifications]
+  );
+
   const groupedNotificationsPerDay = useMemo(
     () =>
-      notifications?.results.reduce(
+      flattenedNotifications?.reduce(
         (acc, notification) => {
           const date = new Date(notification.created).toDateString();
 
@@ -42,26 +56,17 @@ export const NotificationsOverview = memo(() => {
         },
         {} as { [key: string]: PushNotification[] }
       ) || {},
-    [notifications]
+    [flattenedNotifications]
   );
 
   const { mutate: remove, error: removeError } = usePushNotifications().remove;
-  const doClearAll = () => {
-    remove(notifications?.results.map((n) => n.id) || []);
-  };
+  const doClearAll = useCallback(() => remove(flattenedNotifications.map((n) => n.id) || []), []);
 
-  return notifications?.results?.length ? (
-    <>
-      <View
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 3,
-          paddingHorizontal: 2,
-          paddingRight: 15,
-          paddingBottom: 50,
-        }}
-      >
+  const renderHeader = useCallback(
+    () => (
+      <>
+        <ProfileInfo />
+        <Dashboard />
         <View style={{ display: 'flex', flexDirection: 'row-reverse' }}>
           <TouchableOpacity
             onPress={doClearAll}
@@ -71,15 +76,28 @@ export const NotificationsOverview = memo(() => {
             <Text>{t('Clear All')}</Text>
           </TouchableOpacity>
         </View>
-        {Object.keys(groupedNotificationsPerDay).map((day) => (
-          <NotificationDay
-            day={new Date(day)}
-            notifications={groupedNotificationsPerDay[day]}
-            key={day}
-          />
-        ))}
-        <ErrorNotification error={removeError} />
-      </View>
+      </>
+    ),
+    []
+  );
+
+  const renderItem = useCallback(
+    ({ item }: ListRenderItemInfo<string>) => (
+      <NotificationDay day={new Date(item)} notifications={groupedNotificationsPerDay[item]} />
+    ),
+    [groupedNotificationsPerDay]
+  );
+
+  return flattenedNotifications?.length ? (
+    <>
+      <FlatList
+        data={Object.keys(groupedNotificationsPerDay)}
+        contentContainerStyle={{ gap: 8 }}
+        ListHeaderComponent={renderHeader}
+        renderItem={renderItem}
+        onEndReached={() => hasNextPage && fetchNextPage()}
+      />
+      <ErrorNotification error={removeError} />
     </>
   ) : null;
 });
@@ -106,7 +124,7 @@ const NotificationDay = ({
   const isToday = day.toDateString() === today.toDateString();
 
   return (
-    <>
+    <View style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       <Text style={{ color: Colors.gray[500] }}>
         {isToday ? 'Today' : formatToTimeAgoWithRelativeDetail(day, false, true)}
       </Text>
@@ -118,7 +136,7 @@ const NotificationDay = ({
           key={appId}
         />
       ))}
-    </>
+    </View>
   );
 };
 
