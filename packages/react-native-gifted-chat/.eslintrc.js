@@ -17,5 +17,7 @@ module.exports = {
     'no-console': 0,
     'no-shadowed-variable': 0,
     'no-extra-boolean-cast': 0,
+    '@typescript-eslint/func-call-spacing': 0,
+    '@typescript-eslint/no-duplicate-enum-values': 0,
   },
-}
+};

@@ -1,6 +1,6 @@
 {
   "parserOptions": {
-    "requireConfigFile": false
+    "requireConfigFile": false,
   },
   "plugins": ["@typescript-eslint"],
   "extends": ["@react-native"],
@@ -15,12 +15,14 @@
     "react/jsx-uses-react": "off",
     "react/react-in-jsx-scope": "off",
     "@typescript-eslint/no-shadow": "off",
-    "react-hooks/exhaustive-deps": "warn"
+    "react-hooks/exhaustive-deps": "warn",
+    "@typescript-eslint/func-call-spacing": "off",
+    "@typescript-eslint/no-duplicate-enum-values": "off",
   },
   "ignorePatterns": ["webcrypto.js", "metro.config.js"],
   "settings": {
     "react": {
-      "version": "detect"
-    }
-  }
+      "version": "detect",
+    },
+  },
 }

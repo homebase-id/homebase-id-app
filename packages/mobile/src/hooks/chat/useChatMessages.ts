@@ -75,7 +75,7 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
 
     return await Promise.all(
       messages.map(async (msg) => {
-        hardDelete
+        return hardDelete
           ? await hardDeleteChatMessage(dotYouClient, msg)
           : await softDeleteChatMessage(
               dotYouClient,
