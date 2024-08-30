@@ -50,7 +50,7 @@ const SocialFeedMainContent = memo(() => {
   const [refreshing, setRefreshing] = useState(false);
 
   /* Refs */
-  const scrollRef = useAnimatedRef<Animated.FlatList<any>>();
+  const scrollRef = useAnimatedRef<Animated.FlatList<unknown>>();
   const commentRef = useRef<CommentModalMethods>(null);
   const reactionRef = useRef<ReactionModalMethods>(null);
   const shareRef = useRef<ShareModalMethods>(null);

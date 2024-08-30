@@ -165,7 +165,7 @@ export const MediaItem = ({
     if (isImage && (payload as NewPayloadDescriptor).pendingFile) {
       return (
         <Image
-          src={((payload as NewPayloadDescriptor).pendingFile as any as OdinBlob)?.uri}
+          src={((payload as NewPayloadDescriptor).pendingFile as unknown as OdinBlob)?.uri}
           style={{ ...imageSize, ...(style || { borderRadius: 10 }) }}
         />
       );

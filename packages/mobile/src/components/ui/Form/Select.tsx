@@ -84,7 +84,7 @@ export const Select = memo(({ defaultValue, children, style, onChange }: SelectP
               key={child?.key}
               onPress={() => {
                 setCurrentVal(child?.props.value);
-                onChange && child?.props.value && onChange(child?.props.value);
+                if (onChange && child?.props.value) onChange(child?.props.value);
                 setIsOpen(false);
               }}
               style={{
