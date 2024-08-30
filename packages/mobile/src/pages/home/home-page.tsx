@@ -6,7 +6,7 @@ import { Container } from '../../components/ui/Container/Container';
 import { TabStackParamList } from '../../app/App';
 import { t } from 'feed-app-common';
 import React, { useMemo, useCallback, useRef } from 'react';
-import { View, TouchableOpacity, Text, ListRenderItemInfo, FlatList } from 'react-native';
+import { View, TouchableOpacity, ListRenderItemInfo, FlatList } from 'react-native';
 import { Dashboard } from '../../components/Dashboard/Dashboard';
 import { ProfileInfo } from '../../components/Profile/ProfileInfo';
 import { ErrorNotification } from '../../components/ui/Alert/ErrorNotification';
@@ -15,6 +15,7 @@ import { usePushNotifications } from '../../hooks/notifications/usePushNotificat
 import { PushNotification } from '@homebase-id/js-lib/core';
 import { NotificationDay } from '../../components/Dashboard/NotificationsOverview';
 import { useScrollToTop } from '@react-navigation/native';
+import { Text } from '../../components/ui/Text/Text';
 
 type HomeProps = NativeStackScreenProps<TabStackParamList, 'Home'>;
 
