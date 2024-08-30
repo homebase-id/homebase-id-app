@@ -234,6 +234,8 @@ export const MediaItem = ({
       <LinkPreviewFile
         targetDrive={targetDrive}
         fileId={fileId}
+        globalTransitId={globalTransitId}
+        odinId={odinId}
         payloadKey={payload.key}
         position={position as string}
       />

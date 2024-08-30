@@ -3,6 +3,7 @@ import { useDotYouClientContext } from 'feed-app-common';
 import { Image } from 'react-native';
 import { getPayloadAsJson, TargetDrive } from '@homebase-id/js-lib/core';
 import { getLinkPreview, LinkPreview } from '@homebase-id/js-lib/media';
+import { getPayloadAsJsonOverPeer, getPayloadAsJsonOverPeerByGlobalTransitId } from '@homebase-id/js-lib/peer';
 
 export const useLinkPreview = (url: string | undefined) => {
   const dotyouclient = useDotYouClientContext();
@@ -36,16 +37,32 @@ export const useLinkMetadata = ({
   targetDrive,
   fileId,
   payloadKey,
+  odinId,
+  globalTransitId,
 }: {
   targetDrive: TargetDrive;
   fileId: string;
+  globalTransitId?: string;
+  odinId?: string;
   payloadKey: string;
 }) => {
   const dotYouClient = useDotYouClientContext();
+  const identity = dotYouClient.getIdentity();
+  const fetchLinkData = async () => {
+    if (!fileId || !payloadKey || !targetDrive) {
+      return null;
+    }
+    if (odinId && odinId !== identity) {
+      if (globalTransitId) {
+        return getPayloadAsJsonOverPeerByGlobalTransitId<LinkPreview[]>(dotYouClient, odinId, targetDrive, globalTransitId, payloadKey);
+      }
+      return getPayloadAsJsonOverPeer<LinkPreview[]>(dotYouClient, odinId, targetDrive, fileId, payloadKey);
+    }
+    return getPayloadAsJson<LinkPreview[]>(dotYouClient, targetDrive, fileId, payloadKey);
+  }
 
   return useQuery({
     queryKey: ['link-metadata', targetDrive.alias, fileId, payloadKey],
-    queryFn: async () =>
-      getPayloadAsJson<LinkPreview[]>(dotYouClient, targetDrive, fileId, payloadKey),
+    queryFn: fetchLinkData,
   });
 };
