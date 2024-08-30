@@ -1,4 +1,4 @@
-import { QueryClient, useQuery, useQueryClient } from '@tanstack/react-query';
+import { InfiniteData, QueryClient, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   AppNotification,
   DeletedHomebaseFile,
@@ -41,8 +41,12 @@ import { insertNewMessage, insertNewMessagesForConversation } from './useChatMes
 import { insertNewConversation } from './useConversations';
 import { useWebSocketContext } from '../../components/WebSocketContext/useWebSocketContext';
 import { insertNewConversationMetadata } from './useConversationMetadata';
-import { incrementAppIdNotificationCount } from '../notifications/usePushNotifications';
+import {
+  incrementAppIdNotificationCount,
+  insertNewNotification,
+} from '../notifications/usePushNotifications';
 import { insertNewReaction, removeReaction } from './useChatReaction';
+import { useNotification } from '../notifications/useNotification';
 
 const MINUTE_IN_MS = 60000;
 const isDebug = false; // The babel plugin to remove console logs would remove any if they get to production
@@ -140,6 +144,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
   const {
     restoreChat: { mutate: restoreChat },
   } = useConversation();
+  const { add } = useNotification();
   const queryClient = useQueryClient();
 
   const [chatMessagesQueue, setChatMessagesQueue] = useState<HomebaseFile<ChatMessage>[]>([]);
@@ -238,25 +243,8 @@ const useChatWebsocket = (isEnabled: boolean) => {
 
     if (notification.notificationType === 'appNotificationAdded') {
       const clientNotification = notification as AppNotification;
-
-      const existingNotificationData = queryClient.getQueryData<{
-        results: PushNotification[];
-        cursor: number;
-      }>(['push-notifications']);
-
-      if (existingNotificationData) {
-        const newNotificationData = {
-          ...existingNotificationData,
-          results: [
-            clientNotification,
-            ...existingNotificationData.results.filter(
-              (notification) =>
-                !stringGuidsEqual(notification.options.tagId, clientNotification.options.tagId)
-            ),
-          ],
-        };
-        queryClient.setQueryData(['push-notifications'], newNotificationData);
-      }
+      add(clientNotification);
+      insertNewNotification(queryClient, clientNotification);
       incrementAppIdNotificationCount(queryClient, clientNotification.options.appId);
     }
 

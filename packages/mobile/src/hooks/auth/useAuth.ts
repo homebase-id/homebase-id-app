@@ -42,7 +42,7 @@ export const drives = [
     t: BlogConfig.FeedDrive.type,
     n: '',
     d: '',
-    p: DrivePermissionType.Read + DrivePermissionType.Write,
+    p: DrivePermissionType.Read + DrivePermissionType.Write + DrivePermissionType.Comment + DrivePermissionType.React,
   },
   {
     a: ChatConfig.ChatDrive.alias,
@@ -186,7 +186,7 @@ export const useAuth = () => {
     setAuthToken('');
     setIdentity('');
 
-    queryClient.clear();
+    queryClient.removeQueries();
   }, [
     getDotYouClient,
     identity,
@@ -233,8 +233,7 @@ export const useYouAuthAuthorization = () => {
       [ALL_CONNECTIONS_CIRCLE_ID],
       uint8ArrayToBase64(stringToUint8Array(JSON.stringify(publicKeyJwk))),
       corsHost,
-      `${Platform.OS === 'ios' ? 'iOS' : Platform.OS === 'android' ? 'Android' : Platform.OS} | ${
-        Platform.Version
+      `${Platform.OS === 'ios' ? 'iOS' : Platform.OS === 'android' ? 'Android' : Platform.OS} | ${Platform.Version
       }`
     );
   }, [setPrivateKey]);

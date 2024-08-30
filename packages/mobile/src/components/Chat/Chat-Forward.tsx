@@ -1,6 +1,4 @@
 import {
-  BottomSheetBackdrop,
-  BottomSheetBackdropProps,
   BottomSheetFlatList,
   BottomSheetFooter,
   BottomSheetFooterProps,
@@ -42,6 +40,7 @@ import { useAudio } from '../ui/OdinAudio/hooks/useAudio';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useVideo } from '../../hooks/video/useVideo';
 import { ImageSource } from '../../provider/image/RNImageProvider';
+import { Backdrop } from '../ui/Modal/Backdrop';
 
 export type ChatForwardModalProps = {
   onClose: () => void;
@@ -81,13 +80,6 @@ export const ChatForwardModal = forwardRef(
       }
       onClose();
     }, [onClose, selectedContact.length, selectedGroup.length]);
-
-    const renderBackdrop = useCallback(
-      (props: BottomSheetBackdropProps) => (
-        <BottomSheetBackdrop {...props} opacity={0.5} appearsOnIndex={0} disappearsOnIndex={-1} />
-      ),
-      []
-    );
 
     const onForward = useCallback(async () => {
       if ((selectedContact.length === 0 && selectedGroup.length === 0) || !message) return;
@@ -233,8 +225,9 @@ export const ChatForwardModal = forwardRef(
               } else {
                 if (selectedContact.length === maxConnectionsForward) {
                   Toast.show({
-                    type: 'error',
-                    text1: `You can only forward to ${maxConnectionsForward} contacts at a time`,
+                    type: 'info',
+                    text1: 'Forward limit reached',
+                    text2: `You can only forward to ${maxConnectionsForward} contacts at a time`,
                     position: 'bottom',
                     visibilityTime: 2000,
                   });
@@ -336,10 +329,10 @@ export const ChatForwardModal = forwardRef(
     return (
       <BottomSheetModal
         ref={ref}
-        snapPoints={['69%', '99%']}
+        snapPoints={['69%', '93%']}
         onDismiss={onDismiss}
         enableDismissOnClose={true}
-        backdropComponent={renderBackdrop}
+        backdropComponent={Backdrop}
         enablePanDownToClose
         index={0}
         backgroundStyle={{

@@ -46,8 +46,7 @@ export const getCachedRecentPosts = async (dotYouClient: DotYouClient, postType?
     !cachedData ||
     !cachedData.postsPerChannel?.length ||
     cachedData.postsPerChannel.some((perChnl) => !perChnl.posts.length)
-  )
-    return null;
+  ) { return null; }
 
   const postsPerChannel = cachedData.postsPerChannel;
   const allCursors = cachedData.allCursors;

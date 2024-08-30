@@ -127,8 +127,10 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
     conversationId: route.params.convoId,
   }).single;
 
-  const { mutate: clearChat, error: clearChatError } = useConversation().clearChat;
-  const { mutate: deleteChat, error: deleteChatError } = useConversation().deleteChat;
+  const {
+    clearChat: { mutate: clearChat, error: clearChatError },
+    deleteChat: { mutate: deleteChat, error: deleteChatError },
+  } = useConversation();
 
   const filteredRecipients = conversation?.fileMetadata.appData.content.recipients.filter(
     (recipient) => recipient !== identity
@@ -199,12 +201,12 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
   const { mutateAsync: inviteRecipient } = useConversation().inviteRecipient;
 
   const [linkPreviews, setLinkPreviews] = useState<LinkPreview | null>(null);
-  const onDismissLinkPreview = () => {
+  const onDismissLinkPreview = useCallback(() => {
     setLinkPreviews(null);
-  };
-  const onLinkData = (link: LinkPreview) => {
+  }, []);
+  const onLinkData = useCallback((link: LinkPreview) => {
     setLinkPreviews(link);
-  };
+  }, []);
 
   const doSend = useCallback(
     (message: { text: string }[]) => {

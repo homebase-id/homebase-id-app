@@ -2,8 +2,8 @@
  * @format
  */
 
-global.process = process || {}
-global.process.browser = false
+global.process = process || {};
+global.process.browser = false;
 
 // Base64 polyfill
 import { decode, encode } from 'base-64';
@@ -43,6 +43,8 @@ global.CustomBlob = OdinBlob;
 global.localStorage = undefined;
 // eslint-disable-next-line no-undef
 localStorage = undefined;
+
+// global.debug = true;
 
 import { AppRegistry } from 'react-native';
 import App from './src/app/App';

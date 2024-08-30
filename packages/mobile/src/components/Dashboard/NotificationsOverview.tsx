@@ -3,10 +3,11 @@ import { Dimensions, TouchableOpacity, View } from 'react-native';
 import { usePushNotifications } from '../../hooks/notifications/usePushNotifications';
 import { memo, useMemo, useState } from 'react';
 import { PushNotification } from '@homebase-id/js-lib/core';
-import { formatToTimeAgoWithRelativeDetail, t, useDotYouClientContext } from 'feed-app-common';
+import { formatToTimeAgoWithRelativeDetail, useDotYouClientContext } from 'feed-app-common';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import {
   CHAT_APP_ID,
+  COMMUNITY_APP_ID,
   FEED_APP_ID,
   FEED_CHAT_APP_ID,
   MAIL_APP_ID,
@@ -22,148 +23,82 @@ import { openURL } from '../../utils/utils';
 import { Text } from '../ui/Text/Text';
 import Toast from 'react-native-toast-message';
 import Clipboard from '@react-native-clipboard/clipboard';
-import { useLivePushNotifications } from '../../hooks/notifications/useLivePushNotifications';
 
 import { TabStackParamList } from '../../app/App';
-import { ErrorNotification } from '../ui/Alert/ErrorNotification';
 import { Avatar } from '../ui/Avatars/Avatar';
 
-export const NotificationsOverview = memo(() => {
-  useLivePushNotifications();
-  const { data: notifications } = usePushNotifications().fetch;
-  const groupedNotificationsPerDay = useMemo(
-    () =>
-      notifications?.results.reduce(
+export const NotificationDay = memo(
+  ({ day, notifications }: { day: Date; notifications: PushNotification[] }) => {
+    const groupedNotifications =
+      notifications?.reduce(
         (acc, notification) => {
-          const date = new Date(notification.created).toDateString();
-
-          if (acc[date]) acc[date].push(notification);
-          else acc[date] = [notification];
+          if (acc[notification.options.appId]) acc[notification.options.appId].push(notification);
+          else acc[notification.options.appId] = [notification];
 
           return acc;
         },
         {} as { [key: string]: PushNotification[] }
-      ) || {},
-    [notifications]
-  );
+      ) || {};
 
-  const { mutate: remove, error: removeError } = usePushNotifications().remove;
-  const doClearAll = () => {
-    remove(notifications?.results.map((n) => n.id) || []);
-  };
+    const today = new Date();
+    const isToday = day.toDateString() === today.toDateString();
 
-  return notifications?.results?.length ? (
-    <>
-      <View
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 3,
-          paddingHorizontal: 2,
-          paddingRight: 15,
-          paddingBottom: 50,
-        }}
-      >
-        <View style={{ display: 'flex', flexDirection: 'row-reverse' }}>
-          <TouchableOpacity
-            onPress={doClearAll}
-            style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 5 }}
-          >
-            <Times size={'sm'} />
-            <Text>{t('Clear All')}</Text>
-          </TouchableOpacity>
-        </View>
-        {Object.keys(groupedNotificationsPerDay).map((day) => (
-          <NotificationDay
-            day={new Date(day)}
-            notifications={groupedNotificationsPerDay[day]}
-            key={day}
+    return (
+      <View style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <Text style={{ color: Colors.gray[500] }}>
+          {isToday ? 'Today' : formatToTimeAgoWithRelativeDetail(day, false, true)}
+        </Text>
+
+        {Object.keys(groupedNotifications).map((appId) => (
+          <NotificationAppGroup
+            appId={appId}
+            notifications={groupedNotifications[appId]}
+            key={appId}
           />
         ))}
-        <ErrorNotification error={removeError} />
       </View>
-    </>
-  ) : null;
-});
+    );
+  }
+);
 
-const NotificationDay = ({
-  day,
-  notifications,
-}: {
-  day: Date;
-  notifications: PushNotification[];
-}) => {
-  const groupedNotifications =
-    notifications?.reduce(
-      (acc, notification) => {
-        if (acc[notification.options.appId]) acc[notification.options.appId].push(notification);
-        else acc[notification.options.appId] = [notification];
+const NotificationAppGroup = memo(
+  ({ appId, notifications }: { appId: string; notifications: PushNotification[] }) => {
+    const appName = stringGuidsEqual(appId, OWNER_APP_ID)
+      ? 'Homebase'
+      : stringGuidsEqual(appId, FEED_APP_ID)
+        ? 'Homebase - Feed'
+        : stringGuidsEqual(appId, CHAT_APP_ID)
+          ? 'Homebase - Chat'
+          : stringGuidsEqual(appId, FEED_CHAT_APP_ID) // We shouldn't ever have this one, but for sanity
+            ? 'Homebase - Feed & Chat'
+            : stringGuidsEqual(appId, MAIL_APP_ID)
+              ? 'Homebase - Mail'
+              : stringGuidsEqual(appId, COMMUNITY_APP_ID)
+                ? 'Homebase - Community'
+                : `Unknown (${appId})`;
 
-        return acc;
-      },
-      {} as { [key: string]: PushNotification[] }
-    ) || {};
+    const groupedByTypeNotifications =
+      notifications.reduce(
+        (acc, notification) => {
+          if (acc[notification.options.typeId]) acc[notification.options.typeId].push(notification);
+          else acc[notification.options.typeId] = [notification];
 
-  const today = new Date();
-  const isToday = day.toDateString() === today.toDateString();
+          return acc;
+        },
+        {} as { [key: string]: PushNotification[] }
+      ) || {};
 
-  return (
-    <>
-      <Text style={{ color: Colors.gray[500] }}>
-        {isToday ? 'Today' : formatToTimeAgoWithRelativeDetail(day, false, true)}
-      </Text>
+    return (
+      <>
+        {Object.keys(groupedByTypeNotifications).map((typeId) => {
+          const typeGroup = groupedByTypeNotifications[typeId];
 
-      {Object.keys(groupedNotifications).map((appId) => (
-        <NotificationAppGroup
-          appId={appId}
-          notifications={groupedNotifications[appId]}
-          key={appId}
-        />
-      ))}
-    </>
-  );
-};
-
-const NotificationAppGroup = ({
-  appId,
-  notifications,
-}: {
-  appId: string;
-  notifications: PushNotification[];
-}) => {
-  const appName = stringGuidsEqual(appId, OWNER_APP_ID)
-    ? 'Homebase'
-    : stringGuidsEqual(appId, FEED_APP_ID)
-      ? 'Homebase - Feed'
-      : stringGuidsEqual(appId, CHAT_APP_ID)
-        ? 'Homebase - Chat'
-        : stringGuidsEqual(appId, FEED_CHAT_APP_ID) // We shouldn't ever have this one, but for sanity
-          ? 'Homebase - Feed & Chat'
-          : stringGuidsEqual(appId, MAIL_APP_ID)
-            ? 'Homebase - Mail'
-            : `Unknown (${appId})`;
-
-  const groupedByTypeNotifications =
-    notifications.reduce(
-      (acc, notification) => {
-        if (acc[notification.options.typeId]) acc[notification.options.typeId].push(notification);
-        else acc[notification.options.typeId] = [notification];
-
-        return acc;
-      },
-      {} as { [key: string]: PushNotification[] }
-    ) || {};
-
-  return (
-    <>
-      {Object.keys(groupedByTypeNotifications).map((typeId) => {
-        const typeGroup = groupedByTypeNotifications[typeId];
-
-        return <NotificationGroup typeGroup={typeGroup} appName={appName} key={typeId} />;
-      })}
-    </>
-  );
-};
+          return <NotificationGroup typeGroup={typeGroup} appName={appName} key={typeId} />;
+        })}
+      </>
+    );
+  }
+);
 
 const NotificationGroup = ({
   typeGroup,
@@ -382,6 +317,8 @@ export const bodyFormer = (
     } else if (payload.options.typeId === FEED_NEW_COMMENT_TYPE_ID) {
       return `${sender} commented to your post`;
     }
+  } else if (payload.options.appId === COMMUNITY_APP_ID) {
+    return `${sender} sent you ${hasMultiple ? 'multiple messages' : 'a message'}`;
   }
 
   return `${sender} sent you a notification via ${appName}`;
@@ -411,6 +348,8 @@ export const navigateOnNotification = (
     openURL(`https://${identity}/apps/mail/inbox/${notification.options.typeId}`);
   } else if (notification.options.appId === FEED_APP_ID) {
     feedNavigator.navigate('Feed');
+  } else if (notification.options.appId === COMMUNITY_APP_ID) {
+    openURL(`https://${identity}/apps/community/${notification.options.typeId}`);
   } else {
     // You shouldn't come here
     Toast.show({

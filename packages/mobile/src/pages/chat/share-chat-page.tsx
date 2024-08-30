@@ -308,7 +308,8 @@ const InnerShareChatPage = memo(
             if (selectedContact.length + selectedConversation.length === maxConnectionsForward) {
               Toast.show({
                 type: 'info',
-                text1: t('You can only forward to {0} contacts at a time', maxConnectionsForward),
+                text1: t('Forward limit reached'),
+                text2: t('You can only forward to {0} contacts at a time', maxConnectionsForward),
                 position: 'bottom',
                 visibilityTime: 2000,
               });
@@ -331,7 +332,8 @@ const InnerShareChatPage = memo(
             if (selectedContact.length + selectedConversation.length === maxConnectionsForward) {
               Toast.show({
                 type: 'info',
-                text1: t('You can only forward to {0} contacts at a time', maxConnectionsForward),
+                text1: t('Forward limit reached'),
+                text2: t('You can only forward to {0} contacts at a time', maxConnectionsForward),
                 position: 'bottom',
                 visibilityTime: 2000,
               });
@@ -379,7 +381,7 @@ const InnerShareChatPage = memo(
 
     const renderSectionHeader = useCallback(
       ({
-        section: { title },
+        section: { title, data },
       }: {
         section: SectionListData<
           ConversationWithRecentMessage | DotYouProfile,
@@ -396,6 +398,9 @@ const InnerShareChatPage = memo(
           | undefined
         >;
       }) => {
+        if (data?.length === 0) {
+          return null;
+        }
         return (
           <Text
             style={{
