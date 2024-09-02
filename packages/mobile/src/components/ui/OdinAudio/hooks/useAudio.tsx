@@ -49,13 +49,20 @@ export const useAudio = (props?: OdinAudioProps) => {
       staleTime: 1000 * 60 * 60 * 1, // 1h
       enabled: !!fileId && fileId !== '',
     }),
-    getFromCache: (fileId: string, payloadKey: string, drive: TargetDrive) => {
+    getFromCache: async (fileId: string, payloadKey: string, drive: TargetDrive) => {
+      const queryKey = ['audio', drive?.alias, fileId, payloadKey];
       const cachedEntries = queryClient.getQueryCache().find<AudioData | null>({
-        queryKey: ['audio', drive?.alias, fileId, payloadKey],
+        queryKey,
         exact: true,
       });
 
-      return cachedEntries?.state.data;
+      if (cachedEntries?.state.status === 'success') return cachedEntries?.state.data;
+
+      const audio = await fetchAudio(fileId, payloadKey, drive, lastModified);
+      if (audio) {
+        queryClient.setQueryData(queryKey, audio);
+        return audio;
+      }
     },
   };
 };

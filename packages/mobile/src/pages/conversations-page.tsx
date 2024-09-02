@@ -123,7 +123,7 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
 
     setRefreshing(false);
   }, [queryClient]);
-  const isQueryActive = useMemo(() => !!(query && query.length >= 1),[query]);
+  const isQueryActive = useMemo(() => !!(query && query.length >= 1), [query]);
   if (isQueryActive) {
     return (
       <ErrorBoundary>
@@ -202,7 +202,7 @@ const SearchConversationResults = memo(
     query: string | undefined;
     conversations: ConversationWithRecentMessage[];
   }) => {
-    const isActive = useMemo(() => !!(query && query.length >= 1),[query]);
+    const isActive = useMemo(() => !!(query && query.length >= 1), [query]);
     const { data: contacts } = useAllContacts(isActive);
     query = query?.trim().toLowerCase();
     const identity = useDotYouClientContext().getIdentity();
@@ -225,17 +225,16 @@ const SearchConversationResults = memo(
         query && contacts
           ? contacts
               .map((contact) => contact.fileMetadata.appData.content)
-              .filter(
-                (contact) =>
-                  {
-                    console.log(contact.odinId,contact.name);
-                    return contact.odinId &&
-                      (contact.odinId?.includes(query) ||
-                        contact.name?.displayName?.toLowerCase().includes(query) || 
-                        contact.name?.givenName?.toLowerCase().includes(query) || 
-                        contact.name?.surname?.toLowerCase().includes(query));
-                  }
-              )
+              .filter((contact) => {
+                console.log(contact.odinId, contact.name);
+                return (
+                  contact.odinId &&
+                  (contact.odinId?.includes(query) ||
+                    contact.name?.displayName?.toLowerCase().includes(query) ||
+                    contact.name?.givenName?.toLowerCase().includes(query) ||
+                    contact.name?.surname?.toLowerCase().includes(query))
+                );
+              })
           : [],
       [contacts, query]
     );

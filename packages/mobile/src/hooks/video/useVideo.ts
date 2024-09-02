@@ -3,12 +3,10 @@ import { useDotYouClientContext } from 'feed-app-common';
 import { useAuth } from '../auth/useAuth';
 import { getPayloadBytes } from '../../provider/image/RNImageProvider';
 import { TargetDrive } from '@homebase-id/js-lib/core';
-import { getPayloadBytesOverPeerByGlobalTransitId } from '../../provider/image/RNPeerFileByGlobalTransitProvider';
-import { getPayloadBytesOverPeer } from '../../provider/image/RNPeerFileProvider';
 import { getDecryptedMediaDataOverPeerByGlobalTransitId, getDecryptedMediaUrlOverPeer } from '../../provider/image/RNExternalMediaProvider';
 
 export type VideoData = {
-  url: string;
+  uri: string;
   type: string;
 };
 
@@ -39,9 +37,8 @@ export const useVideo = ({
   const fetchVideo = async ({ payloadKey }: { payloadKey?: string }) => {
     if (!fileId || !targetDrive || !payloadKey || !token) return;
     if (odinId && odinId !== localHost) {
-
       if (videoGlobalTransitId) {
-        const payload = await getDecryptedMediaDataOverPeerByGlobalTransitId(dotyouClient, odinId, targetDrive, videoGlobalTransitId, payloadKey, token, probablyEncrypted, lastModified)
+        const payload = await getDecryptedMediaDataOverPeerByGlobalTransitId(dotyouClient, odinId, targetDrive, videoGlobalTransitId, payloadKey, token, probablyEncrypted, lastModified);
         if (!payload) return;
 
         if (typeof payload === 'string') {
@@ -66,7 +63,7 @@ export const useVideo = ({
     const payload = await getPayloadBytes(dotyouClient, targetDrive, fileId, payloadKey, token);
     if (!payload) return;
     return {
-      url: payload.uri,
+      uri: payload.uri,
       type: payload.type,
     };
   };
@@ -78,7 +75,8 @@ export const useVideo = ({
       queryKey,
       exact: false,
     });
-    if (query?.state.status !== 'error') return query?.state.data;
+
+    if (query?.state.status === 'success') return query?.state.data;
 
     const video = await fetchVideo({ payloadKey });
     if (video) {

@@ -63,9 +63,9 @@ import {
 import { getNewId } from '@homebase-id/js-lib/helpers';
 import { ErrorNotification } from '../../../ui/Alert/ErrorNotification';
 import { AuthorName } from '../../../ui/Name';
-import { ConversationTileWithYourself } from '../../../../pages/conversations-page';
 import ConversationTile from '../../../Chat/Conversation-tile';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ConversationTileWithYourself } from '../../../Conversation/ConversationTileWithYourself';
 
 export type ShareModalMethods = {
   setShareContext: (context: ShareContext) => void;
@@ -114,6 +114,13 @@ const ShareModalListWrapper = memo(
         HomebaseFile<UnifiedConversation>[]
       >([]);
 
+      const onClose = useCallback(() => {
+        setContext(undefined);
+        setselectedContact([]);
+        setSelectedConversation([]);
+        bottomSheetRef.current?.dismiss();
+      }, []);
+
       useImperativeHandle(ref, () => {
         return {
           setShareContext: (context: ShareContext) => {
@@ -122,14 +129,7 @@ const ShareModalListWrapper = memo(
           },
           dismiss: onClose,
         };
-      }, []);
-
-      const onClose = useCallback(() => {
-        setContext(undefined);
-        setselectedContact([]);
-        setSelectedConversation([]);
-        bottomSheetRef.current?.dismiss();
-      }, []);
+      }, [onClose]);
 
       const renderFooter = useCallback(
         (props: BottomSheetFooterProps) => {
@@ -146,7 +146,7 @@ const ShareModalListWrapper = memo(
           }
           return <AppFooter context={context} {...props} />;
         },
-        [context, selectedContact, selectedConversation]
+        [context, onClose, selectedContact, selectedConversation]
       );
 
       const { isDarkMode } = useDarkMode();
@@ -389,10 +389,10 @@ const SelectedFooter = memo(
       }
       onClose();
     }, [
-      context?.href,
-      context?.title,
+      context,
       createConversation,
       navigation,
+      onClose,
       selectedContact,
       selectedConversation,
       sendMessage,

@@ -675,6 +675,18 @@ export const ChatDetail = memo(
       [bottomContainerVisible, handleAttachmentButtonAction, handleImageIconPress]
     );
 
+    const renderMessageImage = useCallback(
+      (prop: MessageImageProps<ChatMessageIMessage>) => (
+        <MediaMessage props={prop} onLongPress={onLongPress} />
+      ),
+      [onLongPress]
+    );
+
+    const renderCustomView = useCallback(
+      (prop: BubbleProps<ChatMessageIMessage>) => <RenderReplyMessageView {...prop} />,
+      []
+    );
+
     return (
       <SafeAreaView>
         <GiftedChat<ChatMessageIMessage>
@@ -690,12 +702,8 @@ export const ChatDetail = memo(
           isKeyboardInternallyHandled={true}
           keyboardShouldPersistTaps="never"
           onPaste={onPaste}
-          renderMessageImage={(prop: MessageImageProps<ChatMessageIMessage>) => (
-            <MediaMessage props={prop} onLongPress={onLongPress} />
-          )}
-          renderCustomView={(prop: BubbleProps<ChatMessageIMessage>) => (
-            <RenderReplyMessageView {...prop} />
-          )}
+          renderMessageImage={renderMessageImage}
+          renderCustomView={renderCustomView}
           renderBubble={(prop) => (
             <RenderBubble
               {...prop}
