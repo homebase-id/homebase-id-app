@@ -22,6 +22,7 @@ import {
   UploadResult,
   ImageContentType,
   PriorityOptions,
+  KeyHeader,
 } from '@homebase-id/js-lib/core';
 import {
   toGuidId,
@@ -47,7 +48,6 @@ import { VideoContentType } from '@homebase-id/js-lib/media';
 import { AxiosRequestConfig } from 'axios';
 
 const POST_MEDIA_PAYLOAD_KEY = 'pst_mdi';
-
 
 export const savePost = async <T extends PostContent>(
   dotYouClient: DotYouClient,
@@ -90,11 +90,18 @@ export const savePost = async <T extends PostContent>(
     delete (file.fileMetadata.appData.content.embeddedPost as PostContent).embeddedPost;
   }
 
+  const encrypt = !(
+    file.serverMetadata?.accessControlList?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
+    file.serverMetadata?.accessControlList?.requiredSecurityGroup ===
+      SecurityGroupType.Authenticated
+  );
+
   const targetDrive = GetTargetDriveFromChannelId(channelId);
 
   const payloads: PayloadFile[] = [];
   const thumbnails: ThumbnailFile[] = [];
   const previewThumbnails: EmbeddedThumb[] = [];
+  let keyHeader: KeyHeader | undefined;
 
   // Handle image files:
   for (let i = 0; newMediaFiles && i < newMediaFiles?.length; i++) {
@@ -103,45 +110,88 @@ export const savePost = async <T extends PostContent>(
 
     console.log('newMediaFile', newMediaFile);
     if (newMediaFile.type?.startsWith('video/')) {
-      console.log('video - newMediaFile', newMediaFile);
-      const { video: processedMedia, metadata } = await processVideo(
-        newMediaFile,
-        true,
-        (progress) => onUpdate?.('Compressing', progress)
-      );
-
-      onUpdate?.('Generating thumbnails', 0);
-      // Custom blob to avoid reading and writing the file to disk again
-      const payloadBlob = new OdinBlob(processedMedia.filepath || processedMedia.uri, {
-        type: 'video/mp4' as VideoContentType,
-      }) as any as Blob;
-
+      // Grab thumbnail
+      onUpdate?.('Grabbing thumbnail', 0);
       const thumbnail = await grabThumbnail(newMediaFile);
-      console.log('videoThumbnail', thumbnail);
       const thumbSource: ImageSource | null = thumbnail
         ? {
-          uri: thumbnail.uri,
-          width: 1920,
-          height: 1080,
-          type: thumbnail.type,
-        }
+            uri: thumbnail.uri,
+            width: 1920, //thumbnail.width || 1920,
+            height: 1080, //thumbnail.height || 1080,
+            type: thumbnail.type,
+          }
         : null;
       const { tinyThumb, additionalThumbnails } =
         thumbSource && thumbnail
           ? await createThumbnails(thumbSource, payloadKey, thumbnail.type as ImageContentType, [
-            { quality: 100, width: 250, height: 250 },
-          ])
+              { quality: 100, width: 250, height: 250 },
+            ])
           : { tinyThumb: undefined, additionalThumbnails: undefined };
       if (additionalThumbnails) {
         thumbnails.push(...additionalThumbnails);
       }
-      payloads.push({
-        key: payloadKey,
-        payload: payloadBlob,
-        descriptorContent: metadata ? jsonStringify64(metadata) : undefined,
-      });
 
       if (tinyThumb) previewThumbnails.push(tinyThumb);
+
+      // Process video
+      const { metadata, ...videoData } = await processVideo(
+        newMediaFile,
+        true,
+        (progress) => onUpdate?.('Compressing', progress),
+        encrypt
+      );
+
+      if ('segments' in videoData) {
+        console.log('HLS video', videoData);
+
+        // HLS
+        const { playlist, segments } = videoData;
+        keyHeader = videoData.keyHeader;
+        const playlistBlob = new OdinBlob(playlist.uri, {
+          type: playlist.type as VideoContentType,
+        }) as any as Blob;
+
+        payloads.push({
+          key: payloadKey,
+          payload: playlistBlob,
+          descriptorContent: jsonStringify64(metadata),
+          skipEncryption: true,
+        });
+
+        for (let j = 0; j < segments.length; j++) {
+          const segment = segments[j];
+          const segmentBlob = new OdinBlob(segment.uri, {
+            type: segment.type as VideoContentType,
+          }) as any as Blob;
+
+          payloads.push({
+            // key: `${payloadKey}_seg${j}`, => TODO: This is not allowed by the server ATM
+            key: `hls_seg${j}`,
+            payload: segmentBlob,
+            skipEncryption: true,
+            descriptorContent: 'HLS-segment',
+          });
+        }
+
+        console.log(
+          'HLS video payloads',
+          payloads.map((pyld) => (pyld.payload as any as OdinBlob).uri)
+        );
+      } else {
+        // Custom blob to avoid reading and writing the file to disk again
+        const payloadBlob = new OdinBlob(
+          (videoData.video.filepath || videoData.video.uri) as string,
+          {
+            type: 'video/mp4' as VideoContentType,
+          }
+        ) as any as Blob;
+
+        payloads.push({
+          key: payloadKey,
+          payload: payloadBlob,
+          descriptorContent: metadata ? jsonStringify64(metadata) : undefined,
+        });
+      }
     } else if (newMediaFile.type?.startsWith('image/')) {
       onUpdate?.('Generating thumbnails', 0);
 
@@ -183,10 +233,10 @@ export const savePost = async <T extends PostContent>(
   if (file.fileMetadata.appData.content.type !== 'Article') {
     file.fileMetadata.appData.content.primaryMediaFile = payloads[0]
       ? {
-        fileId: undefined,
-        fileKey: payloads[0].key,
-        type: payloads[0].payload.type,
-      }
+          fileId: undefined,
+          fileKey: payloads[0].key,
+          type: payloads[0].payload.type,
+        }
       : undefined;
   }
 
@@ -207,7 +257,10 @@ export const savePost = async <T extends PostContent>(
     targetDrive,
     onVersionConflict,
     {
-      onUploadProgress: (progress) => onUpdate?.('Uploading', progress.progress || 0),
+      axiosConfig: {
+        onUploadProgress: (progress) => onUpdate?.('Uploading', progress.progress || 0),
+      },
+      keyHeader,
     }
   );
 };
@@ -221,12 +274,15 @@ const uploadPost = async <T extends PostContent>(
   channelId: string,
   targetDrive: TargetDrive,
   onVersionConflict?: () => void,
-  axiosConfig?: AxiosRequestConfig<any> | undefined
+  options?: {
+    axiosConfig?: AxiosRequestConfig<any> | undefined;
+    keyHeader?: KeyHeader | undefined;
+  }
 ) => {
   const encrypt = !(
     file.serverMetadata?.accessControlList?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
     file.serverMetadata?.accessControlList?.requiredSecurityGroup ===
-    SecurityGroupType.Authenticated
+      SecurityGroupType.Authenticated
   );
 
   const instructionSet: UploadInstructionSet = {
@@ -254,8 +310,9 @@ const uploadPost = async <T extends PostContent>(
     !stringGuidsEqual(existingPostWithThisSlug?.fileId, file.fileId)
   ) {
     // There is clash with an existing slug
-    file.fileMetadata.appData.content.slug = `${file.fileMetadata.appData.content.slug
-      }-${new Date().getTime()}`;
+    file.fileMetadata.appData.content.slug = `${
+      file.fileMetadata.appData.content.slug
+    }-${new Date().getTime()}`;
   }
 
   const uniqueId = file.fileMetadata.appData.content.slug
@@ -336,7 +393,7 @@ const uploadPost = async <T extends PostContent>(
     thumbnails,
     encrypt,
     onVersionConflict,
-    axiosConfig
+    options
   );
   if (!result) throw new Error('Upload failed');
 
@@ -372,11 +429,12 @@ const uploadPostHeader = async <T extends PostContent>(
   if (
     existingPostWithThisSlug &&
     existingPostWithThisSlug?.fileMetadata.appData.content.id !==
-    file.fileMetadata.appData.content.id
+      file.fileMetadata.appData.content.id
   ) {
     // There is clash with an existing slug
-    file.fileMetadata.appData.content.slug = `${file.fileMetadata.appData.content.slug
-      }-${new Date().getTime()}`;
+    file.fileMetadata.appData.content.slug = `${
+      file.fileMetadata.appData.content.slug
+    }-${new Date().getTime()}`;
   }
 
   const uniqueId = file.fileMetadata.appData.content.slug

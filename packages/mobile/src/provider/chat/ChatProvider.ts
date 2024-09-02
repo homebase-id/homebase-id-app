@@ -283,6 +283,7 @@ export const uploadChatMessage = async (
   const payloads: PayloadFile[] = [];
   const thumbnails: ThumbnailFile[] = [];
   const previewThumbnails: EmbeddedThumb[] = [];
+  let keyHeader: KeyHeader | undefined;
 
   if (!files?.length && linkPreviews?.length) {
     // We only support link previews when there is no media
@@ -326,24 +327,14 @@ export const uploadChatMessage = async (
     const newMediaFile = files[i];
 
     if (newMediaFile.type?.startsWith('video/')) {
-      const { video: processedMedia, metadata } = await processVideo(
-        newMediaFile,
-        true,
-        (progress) => onUpdate?.('Compressing', progress)
-      );
-
-      onUpdate?.('Generating thumbnails', 0);
-      // Custom blob to avoid reading and writing the file to disk again
-      const payloadBlob = new OdinBlob((processedMedia.filepath || processedMedia.uri) as string, {
-        type: 'video/mp4' as VideoContentType,
-      }) as any as Blob;
-
+      // Grab thumbnail
+      onUpdate?.('Grabbing thumbnail', 0);
       const thumbnail = await grabThumbnail(newMediaFile);
       const thumbSource: ImageSource | null = thumbnail
         ? {
             uri: thumbnail.uri,
-            width: processedMedia.width || 1920,
-            height: processedMedia.height || 1080,
+            width: 1920, //thumbnail.width || 1920,
+            height: 1080, //thumbnail.height || 1080,
             type: thumbnail.type,
           }
         : null;
@@ -356,13 +347,67 @@ export const uploadChatMessage = async (
       if (additionalThumbnails) {
         thumbnails.push(...additionalThumbnails);
       }
-      payloads.push({
-        key: payloadKey,
-        payload: payloadBlob,
-        descriptorContent: metadata ? jsonStringify64(metadata) : undefined,
-      });
 
       if (tinyThumb) previewThumbnails.push(tinyThumb);
+
+      // Process video
+      const { metadata, ...videoData } = await processVideo(
+        newMediaFile,
+        true,
+        (progress) => onUpdate?.('Compressing', progress),
+        true
+      );
+
+      if ('segments' in videoData) {
+        console.log('HLS video', videoData);
+
+        // HLS
+        const { playlist, segments } = videoData;
+        keyHeader = videoData.keyHeader;
+        const playlistBlob = new OdinBlob(playlist.uri, {
+          type: playlist.type as VideoContentType,
+        }) as any as Blob;
+
+        payloads.push({
+          key: payloadKey,
+          payload: playlistBlob,
+          descriptorContent: jsonStringify64(metadata),
+          skipEncryption: true,
+        });
+
+        for (let j = 0; j < segments.length; j++) {
+          const segment = segments[j];
+          const segmentBlob = new OdinBlob(segment.uri, {
+            type: segment.type as VideoContentType,
+          }) as any as Blob;
+
+          payloads.push({
+            // key: `${payloadKey}_seg${j}`, => TODO: This is not allowed by the server ATM
+            key: `hls_seg${j}`,
+            payload: segmentBlob,
+            skipEncryption: true,
+          });
+        }
+
+        console.log(
+          'HLS video payloads',
+          payloads.map((pyld) => (pyld.payload as any as OdinBlob).data)
+        );
+      } else {
+        // Custom blob to avoid reading and writing the file to disk again
+        const payloadBlob = new OdinBlob(
+          (videoData.video.filepath || videoData.video.uri) as string,
+          {
+            type: 'video/mp4' as VideoContentType,
+          }
+        ) as any as Blob;
+
+        payloads.push({
+          key: payloadKey,
+          payload: payloadBlob,
+          descriptorContent: metadata ? jsonStringify64(metadata) : undefined,
+        });
+      }
     } else if (newMediaFile.type?.startsWith('image/')) {
       onUpdate?.('Generating thumbnails', 0);
 
@@ -404,7 +449,6 @@ export const uploadChatMessage = async (
   }
 
   uploadMetadata.appData.previewThumbnail = previewThumbnails[0];
-
   onUpdate?.('Uploading', 0);
 
   const uploadResult = await uploadFile(
@@ -417,6 +461,7 @@ export const uploadChatMessage = async (
     onVersionConflict,
     {
       onUploadProgress: (progress) => onUpdate?.('Uploading', progress.progress || 0),
+      keyHeader,
     }
   );
 

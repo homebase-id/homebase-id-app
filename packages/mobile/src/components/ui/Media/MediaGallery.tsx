@@ -22,12 +22,12 @@ import { ChatDrive } from '../../../provider/chat/ConversationProvider';
 import { useDarkMode } from '../../../hooks/useDarkMode';
 import { CHAT_LINKS_PAYLOAD_KEY } from '../../../provider/chat/ChatProvider';
 import { OdinBlob } from '../../../../polyfills/OdinBlob';
-import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { t } from 'feed-app-common';
 import { VideoWithLoader } from './VideoWithLoader';
 import { OdinAudio } from '../OdinAudio/OdinAudio';
 import { LinkPreviewFile } from './LinkPreviewFile';
 import { POST_LINKS_PAYLOAD_KEY } from '@homebase-id/js-lib/public';
+import { Colors } from '../../../app/Colors';
 
 export const MediaGallery = ({
   fileId,
