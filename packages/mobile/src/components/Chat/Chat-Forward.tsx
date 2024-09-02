@@ -95,31 +95,34 @@ export const ChatForwardModal = memo(
           for (const payload of payloads) {
             if (payload.contentType.startsWith('image')) {
               const image = getFromCache(undefined, message.fileId, payload.key, ChatDrive);
-              if (!image?.imageData) return;
-              messagePayloads.push({
-                uri: image.imageData.url,
-                width: image.imageData?.naturalSize?.pixelWidth,
-                height: image.imageData?.naturalSize?.pixelHeight,
-                type: image.imageData?.type,
-              } as ImageSource);
+              if (image?.imageData) {
+                messagePayloads.push({
+                  uri: image.imageData.url,
+                  width: image.imageData?.naturalSize?.pixelWidth,
+                  height: image.imageData?.naturalSize?.pixelHeight,
+                  type: image.imageData?.type,
+                } as ImageSource);
+              }
             }
             if (payload.contentType.startsWith('video')) {
               const downloadPayload = await getVideoData(payload.key);
-              if (!downloadPayload) return;
-              messagePayloads.push({
-                uri: downloadPayload.uri,
-                width: message.fileMetadata.appData.previewThumbnail?.pixelWidth || 1920,
-                height: message.fileMetadata.appData.previewThumbnail?.pixelHeight || 1080,
-                type: downloadPayload.type,
-              } as ImageSource);
+              if (downloadPayload) {
+                messagePayloads.push({
+                  uri: downloadPayload.uri,
+                  width: message.fileMetadata.appData.previewThumbnail?.pixelWidth || 1920,
+                  height: message.fileMetadata.appData.previewThumbnail?.pixelHeight || 1080,
+                  type: downloadPayload.type,
+                } as ImageSource);
+              }
             }
             if (payload.contentType.startsWith('audio')) {
               const audio = await getAudio(message.fileId, payload.key, ChatDrive);
-              if (!audio) return;
-              messagePayloads.push({
-                uri: audio.url,
-                type: audio.type,
-              } as ImageSource);
+              if (audio) {
+                messagePayloads.push({
+                  uri: audio.url,
+                  type: audio.type,
+                } as ImageSource);
+              }
             }
           }
         }
