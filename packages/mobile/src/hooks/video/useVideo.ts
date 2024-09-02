@@ -38,7 +38,6 @@ export const useVideo = ({
 
   const fetchVideo = async ({ payloadKey }: { payloadKey?: string }) => {
     if (!fileId || !targetDrive || !payloadKey || !token) return;
-    console.log(odinId, localHost);
     if (odinId && odinId !== localHost) {
 
       if (videoGlobalTransitId) {

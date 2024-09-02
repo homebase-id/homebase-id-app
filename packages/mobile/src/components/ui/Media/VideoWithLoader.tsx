@@ -16,6 +16,7 @@ import { Play } from '../Icons/icons';
 import { OdinImage } from '../OdinImage/OdinImage';
 import { useVideo } from '../../../hooks/video/useVideo';
 import Video from 'react-native-video';
+import { ErrorNotification } from '../Alert/ErrorNotification';
 
 const MAX_DOWNLOAD_SIZE = 16 * 1024 * 1024 * 1024; // 16 MB
 
@@ -57,7 +58,7 @@ export const VideoWithLoader = memo(
     const [loadVideo, setLoadVideo] = useState(autoPlay);
     const doLoadVideo = useCallback(() => setLoadVideo(true), []);
     const canDownload = !preview && payload?.bytesWritten < MAX_DOWNLOAD_SIZE;
-    const { data, isLoading } = useVideo({
+    const { data, isLoading, error } = useVideo({
       odinId,
       fileId,
       targetDrive,
@@ -118,6 +119,7 @@ export const VideoWithLoader = memo(
     }
     return (
       <>
+        <ErrorNotification error={error} />
         {loadVideo ? (
           <View
             style={{
