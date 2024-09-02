@@ -11,6 +11,7 @@ import {
   GroupEmojiReaction,
   HomebaseFile,
   ReactionFile,
+  ReactionPreview,
   uploadGroupReaction,
 } from '@homebase-id/js-lib/core';
 import { t, useDotYouClientContext } from 'feed-app-common';
@@ -18,7 +19,8 @@ import { ChatDrive, UnifiedConversation } from '../../provider/chat/Conversation
 import { ChatMessage } from '../../provider/chat/ChatProvider';
 import { getSynchronousDotYouClient } from './getSynchronousDotYouClient';
 import { addError } from '../errors/useErrors';
-import { tryJsonParse } from '@homebase-id/js-lib/helpers';
+import { getNewId, tryJsonParse } from '@homebase-id/js-lib/helpers';
+import { insertNewMessage } from './useChatMessages';
 
 const addReaction = async ({
   conversation,
@@ -58,20 +60,44 @@ export const getAddReactionMutationOptions: (queryClient: QueryClient) => UseMut
 > = (queryClient) => ({
   mutationKey: ['add-reaction'],
   mutationFn: addReaction,
-  onMutate: async (variables) => {
-    const { message } = variables;
+  onMutate: async ({ message, reaction }) => {
+    // Update the reaction overview
     const previousReactions =
       queryClient.getQueryData<ReactionFile[]>(['chat-reaction', message.fileId]) || [];
 
     const newReaction: ReactionFile = {
       authorOdinId: (await getSynchronousDotYouClient()).getIdentity(),
-      body: variables.reaction,
+      body: reaction,
     };
 
     queryClient.setQueryData(
       ['chat-reaction', message.fileId],
       [...previousReactions, newReaction]
     );
+
+    // Update the message reaction preview
+    const id = getNewId();
+    const reactionPreview: ReactionPreview = {
+      ...(message.fileMetadata.reactionPreview as ReactionPreview),
+      reactions: {
+        ...(message.fileMetadata.reactionPreview?.reactions as ReactionPreview['reactions']),
+        [id]: {
+          key: id,
+          count: '1',
+          reactionContent: JSON.stringify({ emoji: reaction }),
+        },
+      },
+    };
+
+    const messageWithReactionPreview: HomebaseFile<ChatMessage> = {
+      ...message,
+      fileMetadata: {
+        ...message.fileMetadata,
+        reactionPreview,
+      },
+    };
+
+    insertNewMessage(queryClient, messageWithReactionPreview);
   },
   onSettled: (data, error, variables) => {
     queryClient.invalidateQueries({
@@ -118,24 +144,56 @@ export const getRemoveReactionMutationOptions: (queryClient: QueryClient) => Use
   mutationKey: ['remove-reaction'],
   mutationFn: removeReactionOnServer,
   onMutate: async (variables) => {
+    // Update the reaction overview
     const { message, reaction } = variables;
     const previousReactions = queryClient.getQueryData<ReactionFile[] | undefined>([
       'chat-reaction',
       message.fileId,
     ]);
 
-    if (!previousReactions) return;
+    if (previousReactions) {
+      queryClient.setQueryData(
+        ['chat-reaction', message.fileId],
+        [
+          ...previousReactions.filter(
+            (existingReaction) =>
+              existingReaction.authorOdinId !== reaction.authorOdinId ||
+              existingReaction.body !== reaction.body
+          ),
+        ]
+      );
+    }
 
-    queryClient.setQueryData(
-      ['chat-reaction', message.fileId],
-      [
-        ...previousReactions.filter(
-          (existingReaction) =>
-            existingReaction.authorOdinId !== reaction.authorOdinId ||
-            existingReaction.body !== reaction.body
-        ),
-      ]
+    // Update the message reaction preview
+    const reactions = message.fileMetadata.reactionPreview?.reactions as
+      | ReactionPreview['reactions']
+      | undefined;
+    if (!reactions) return;
+
+    const reactionKey = Object.keys(reactions).find(
+      (key) =>
+        tryJsonParse<{ emoji: string }>(reactions[key].reactionContent)?.emoji === reaction.body
     );
+    if (!reactionKey) return;
+
+    const reactionPreview: ReactionPreview = {
+      ...(message.fileMetadata.reactionPreview as ReactionPreview),
+      reactions: {
+        ...reactions,
+      },
+    };
+
+    delete reactionPreview.reactions[reactionKey];
+
+    const messageWithReactionPreview: HomebaseFile<ChatMessage> = {
+      ...message,
+      fileMetadata: {
+        ...message.fileMetadata,
+        reactionPreview,
+      },
+    };
+
+    insertNewMessage(queryClient, messageWithReactionPreview);
   },
   onSettled: (data, error, variables) => {
     queryClient.invalidateQueries({
