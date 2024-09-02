@@ -123,8 +123,7 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
 
     setRefreshing(false);
   }, [queryClient]);
-
-  const isQueryActive = !!(query && query.length >= 1);
+  const isQueryActive = useMemo(() => !!(query && query.length >= 1),[query]);
   if (isQueryActive) {
     return (
       <ErrorBoundary>
@@ -203,10 +202,10 @@ const SearchConversationResults = memo(
     query: string | undefined;
     conversations: ConversationWithRecentMessage[];
   }) => {
-    const isActive = !!(query && query.length >= 1);
+    const isActive = useMemo(() => !!(query && query.length >= 1),[query]);
     const { data: contacts } = useAllContacts(isActive);
+    query = query?.trim().toLowerCase();
     const identity = useDotYouClientContext().getIdentity();
-
     const conversationResults = useMemo(
       () =>
         query && conversations
@@ -228,9 +227,14 @@ const SearchConversationResults = memo(
               .map((contact) => contact.fileMetadata.appData.content)
               .filter(
                 (contact) =>
-                  contact.odinId &&
-                  (contact.odinId?.includes(query) ||
-                    contact.name?.displayName?.toLowerCase().includes(query.toLowerCase()))
+                  {
+                    console.log(contact.odinId,contact.name);
+                    return contact.odinId &&
+                      (contact.odinId?.includes(query) ||
+                        contact.name?.displayName?.toLowerCase().includes(query) || 
+                        contact.name?.givenName?.toLowerCase().includes(query) || 
+                        contact.name?.surname?.toLowerCase().includes(query));
+                  }
               )
           : [],
       [contacts, query]
