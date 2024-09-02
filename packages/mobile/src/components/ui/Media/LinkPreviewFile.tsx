@@ -6,6 +6,8 @@ import { calculateScaledDimensions, openURL } from '../../../utils/utils';
 import { Text } from '../Text/Text';
 import { useDarkMode } from '../../../hooks/useDarkMode';
 import { Colors } from '../../../app/Colors';
+import { ellipsisAtMaxChar } from 'feed-app-common';
+import { getDomainFromUrl, getHostFromUrl } from '@homebase-id/js-lib/helpers';
 
 type LinkPreviewFileProps = {
   targetDrive: TargetDrive;
@@ -45,7 +47,7 @@ export const LinkPreviewFile = memo(
       <Pressable
         onPress={() => openURL(url)}
         style={{
-          backgroundColor: '#1A1A1A47',
+          backgroundColor: isDarkMode ? '#4646464F' : '#1A1A1A47',
           borderRadius: 15,
         }}
       >
@@ -67,7 +69,7 @@ export const LinkPreviewFile = memo(
             color: position === 'left' ? (isDarkMode ? Colors.white : Colors.black) : Colors.white,
           }}
         >
-          {title}
+          {ellipsisAtMaxChar(title || url, 50)}
         </Text>
         {description && (
           <Text
@@ -84,6 +86,19 @@ export const LinkPreviewFile = memo(
             {description}
           </Text>
         )}
+        <Text
+          style={{
+            fontSize: 13,
+            fontWeight: '500',
+            marginHorizontal: 10,
+            marginTop: 4,
+            marginBottom: 10,
+            opacity: 0.8,
+            color: position === 'left' ? (isDarkMode ? Colors.white : Colors.black) : Colors.white,
+          }}
+        >
+          {getDomainFromUrl(url)}
+        </Text>
       </Pressable>
     );
   }
