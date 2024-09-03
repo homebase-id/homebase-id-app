@@ -57,7 +57,7 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
       headerSearchBarOptions: {
         hideWhenScrolling: true,
         headerIconColor: isDarkMode ? Colors.white : Colors.black,
-        placeholder: 'Search',
+        placeholder: 'Search people',
         hideNavigationBar: true,
         autoCapitalize: 'none',
         onChangeText: (event) => {
