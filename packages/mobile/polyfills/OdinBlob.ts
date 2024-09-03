@@ -162,9 +162,9 @@ class Blob {
       }, 100);
     });
 
-    const destinationUri = `file://${CachesDirectoryPath}/${this.data.blobId}-encrypted.${
-      this.data.type.split('/')[1]
-    }`;
+    const destinationUri = `file://${CachesDirectoryPath}/${this.data.blobId}-encrypted.${getExtensionForMimeType(
+      this.data.type
+    )}`;
 
     const encryptStatus = await OdinBlobModule.encryptFileWithAesCbc16(
       this.uri,
@@ -200,9 +200,8 @@ class Blob {
       }, 100);
     });
 
-    const destinationUri = `file://${CachesDirectoryPath}/${
-      this.data.blobId
-    }.${getExtensionForMimeType(this.data.type)}`;
+    const destinationUri = `file://${CachesDirectoryPath}/${this.data.blobId
+      }.${getExtensionForMimeType(this.data.type)}`;
 
     const decryptStatus = await OdinBlobModule.decryptFileWithAesCbc16(
       this.uri,
@@ -222,9 +221,8 @@ class Blob {
   }
 
   async fixExtension() {
-    const destinationUri = `file://${CachesDirectoryPath}/${
-      this.data.blobId
-    }.${getExtensionForMimeType(this.data.type)}`;
+    const destinationUri = `file://${CachesDirectoryPath}/${this.data.blobId
+      }.${getExtensionForMimeType(this.data.type)}`;
     await copyFile(this.uri, destinationUri);
 
     await unlink(this.uri);

@@ -35,12 +35,12 @@ import { useConversations } from '../../hooks/chat/useConversations';
 import { EmbeddedThumb, HomebaseFile } from '@homebase-id/js-lib/core';
 import { GroupAvatar } from '../ui/Avatars/Avatar';
 import { getNewId } from '@homebase-id/js-lib/helpers';
-import { useAuth } from '../../hooks/auth/useAuth';
 import { useAudio } from '../ui/OdinAudio/hooks/useAudio';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useVideo } from '../../hooks/video/useVideo';
 import { ImageSource } from '../../provider/image/RNImageProvider';
 import { Backdrop } from '../ui/Modal/Backdrop';
+import { useErrors } from '../../hooks/errors/useErrors';
 
 export type ChatForwardModalProps = {
   onClose: () => void;
@@ -50,8 +50,8 @@ export type ChatForwardModalProps = {
 /// Limit to forward maximum number of contacts
 export const maxConnectionsForward = 3;
 
-export const ChatForwardModal = forwardRef(
-  (props: ChatForwardModalProps, ref: React.Ref<BottomSheetModalMethods>) => {
+export const ChatForwardModal = memo(
+  forwardRef((props: ChatForwardModalProps, ref: React.Ref<BottomSheetModalMethods>) => {
     const { onClose, selectedMessage: message } = props;
     const { isDarkMode } = useDarkMode();
     const { data: connections } = useAllConnections(true);
@@ -60,13 +60,13 @@ export const ChatForwardModal = forwardRef(
     const [selectedContact, setselectedContact] = useState<DotYouProfile[]>([]);
     const [selectedGroup, setselectedGroup] = useState<HomebaseFile<UnifiedConversation>[]>([]);
     const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
-    const { authToken } = useAuth();
     const { bottom } = useSafeAreaInsets();
     const [isLoading, setIsLoading] = useState(false);
+    const { add } = useErrors();
 
-    const getAudio = useAudio().getFromCache;
+    const getAudio = useAudio().fetchManually;
     const { getFromCache } = useImage();
-    const { getFromCache: getVideoData } = useVideo({
+    const { fetchManually: getVideoData } = useVideo({
       fileId: message?.fileId,
       targetDrive: ChatDrive,
     });
@@ -83,57 +83,64 @@ export const ChatForwardModal = forwardRef(
 
     const onForward = useCallback(async () => {
       if ((selectedContact.length === 0 && selectedGroup.length === 0) || !message) return;
-
+      setIsLoading(true);
       async function forwardMessages(
         conversation: HomebaseFile<UnifiedConversation>,
         message: ChatMessageIMessage
       ) {
-        setIsLoading(true);
-        let imageSource: ImageSource[] = [];
+        const messagePayloads: ImageSource[] = [];
         if (message.fileMetadata.payloads.length > 0) {
           const payloads = message.fileMetadata.payloads;
-          imageSource = (
-            await Promise.all(
-              payloads.map(async (payload) => {
-                if (payload.contentType.startsWith('image')) {
-                  const image = getFromCache(undefined, message.fileId, payload.key, ChatDrive);
-                  if (!image?.imageData) return;
-                  return {
-                    uri: image.imageData.url,
-                    width: image.imageData?.naturalSize?.pixelWidth,
-                    height: image.imageData?.naturalSize?.pixelHeight,
-                    type: image.imageData?.type,
-                  } as ImageSource;
-                }
-                if (payload.contentType.startsWith('video')) {
-                  if (!authToken) return;
-                  const downloadPayload = await getVideoData(payload.key);
-                  if (!downloadPayload) return;
-                  return {
-                    uri: downloadPayload.url,
-                    width: message.fileMetadata.appData.previewThumbnail?.pixelWidth || 1920,
-                    height: message.fileMetadata.appData.previewThumbnail?.pixelHeight || 1080,
-                    type: downloadPayload.type,
-                  } as ImageSource;
-                }
-                if (payload.contentType.startsWith('audio')) {
-                  const audio = getAudio(message.fileId, payload.key, ChatDrive);
-                  if (!audio) return;
-                  return {
-                    uri: audio.url,
-                    type: audio.type,
-                  } as ImageSource;
-                }
-                return;
-              })
-            )
-          ).filter(Boolean) as ImageSource[];
+
+          for (const payload of payloads) {
+            if (payload.contentType.startsWith('image')) {
+              const image = getFromCache(undefined, message.fileId, payload.key, ChatDrive);
+              if (image?.imageData) {
+                messagePayloads.push({
+                  uri: image.imageData.url,
+                  width: image.imageData?.naturalSize?.pixelWidth,
+                  height: image.imageData?.naturalSize?.pixelHeight,
+                  type: image.imageData?.type,
+                } as ImageSource);
+              }
+            }
+            if (payload.contentType.startsWith('video')) {
+              const downloadPayload = await getVideoData(payload.key);
+              if (downloadPayload) {
+                messagePayloads.push({
+                  uri: downloadPayload.uri,
+                  width: message.fileMetadata.appData.previewThumbnail?.pixelWidth || 1920,
+                  height: message.fileMetadata.appData.previewThumbnail?.pixelHeight || 1080,
+                  type: downloadPayload.type,
+                } as ImageSource);
+              }
+            }
+            if (payload.contentType.startsWith('audio')) {
+              const audio = await getAudio(message.fileId, payload.key, ChatDrive);
+              if (audio) {
+                messagePayloads.push({
+                  uri: audio.url,
+                  type: audio.type,
+                } as ImageSource);
+              }
+            }
+          }
         }
-        setIsLoading(false);
+
+        if (!message.fileMetadata.appData.content.message && messagePayloads.length === 0) {
+          add(
+            new Error(
+              "[500]: Looks like the payload data isn't present in the cache or hasn't been downloaded."
+            ),
+            "Can't forward message",
+            'No message or media to forward'
+          );
+          return;
+        }
         return sendMessage({
           conversation,
           message: message.fileMetadata.appData.content.message,
-          files: imageSource,
+          files: messagePayloads,
           chatId: getNewId(),
           userDate: new Date().getTime(),
         });
@@ -165,7 +172,6 @@ export const ChatForwardModal = forwardRef(
         if (selectedContact.length === 1) {
           const contact = selectedContact[0];
 
-          // TODO: needs to change to fetch instead of still trying to create
           const newConversation = await createConversation({
             recipients: [contact.odinId],
           });
@@ -188,7 +194,7 @@ export const ChatForwardModal = forwardRef(
       }
       onDismiss();
     }, [
-      authToken,
+      add,
       createConversation,
       getAudio,
       getFromCache,
@@ -360,7 +366,7 @@ export const ChatForwardModal = forwardRef(
         />
       </BottomSheetModal>
     );
-  }
+  })
 );
 
 export const ListHeaderComponent = memo(

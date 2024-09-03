@@ -32,6 +32,9 @@ export const useAudio = (props?: OdinAudioProps) => {
       return null;
     }
 
+    const cachedAudio = getFromCache(fileId, payloadKey, drive);
+    if (cachedAudio) return cachedAudio;
+
     const audioBlob = await getPayloadBytes(dotYouClient, drive, fileId, payloadKey, authToken, {
       lastModified,
     });
@@ -42,6 +45,24 @@ export const useAudio = (props?: OdinAudioProps) => {
       type: audioBlob.type,
     };
   };
+
+  const getFromCache = async (
+    fileId: string,
+    payloadKey: string,
+    drive: TargetDrive
+  ): Promise<AudioData | null> => {
+    const queryKey = ['audio', drive?.alias, fileId, payloadKey];
+    const cachedEntries = queryClient.getQueryCache().find<AudioData | null>({
+      queryKey,
+      exact: true,
+    });
+
+    if (cachedEntries?.state.status === 'success') {
+      return cachedEntries.state.data || null;
+    }
+    return null;
+  };
+
   return {
     fetch: useQuery({
       queryKey: ['audio', drive?.alias, fileId, payloadKey, lastModified],
@@ -49,13 +70,13 @@ export const useAudio = (props?: OdinAudioProps) => {
       staleTime: 1000 * 60 * 60 * 1, // 1h
       enabled: !!fileId && fileId !== '',
     }),
-    getFromCache: (fileId: string, payloadKey: string, drive: TargetDrive) => {
-      const cachedEntries = queryClient.getQueryCache().find<AudioData | null>({
-        queryKey: ['audio', drive?.alias, fileId, payloadKey],
-        exact: true,
-      });
-
-      return cachedEntries?.state.data;
+    fetchManually: async (fileId: string, payloadKey: string, drive: TargetDrive) => {
+      const cachedAudio = getFromCache(fileId, payloadKey, drive);
+      if (cachedAudio) return cachedAudio;
+      const audio = await fetchAudio(fileId, payloadKey, drive, lastModified);
+      if (audio) {
+        queryClient.setQueryData(['audio', drive?.alias, fileId, payloadKey, lastModified], audio);
+      }
     },
   };
 };
