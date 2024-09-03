@@ -1,8 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { TargetDrive } from '@homebase-id/js-lib/core';
+import { SystemFileType, TargetDrive } from '@homebase-id/js-lib/core';
 import { getDecryptedThumbnailMeta } from '@homebase-id/js-lib/media';
 import { useDotYouClientContext } from 'feed-app-common';
+import { getDecryptedThumbnailMetaOverPeer } from '@homebase-id/js-lib/peer';
 
 const useTinyThumb = ({
   odinId,
@@ -16,22 +17,47 @@ const useTinyThumb = ({
   imageDrive?: TargetDrive;
 }) => {
   const dotYouClient = useDotYouClientContext();
+  const identity = dotYouClient.getIdentity();
+
   const fetchImageData = async (
     odinId: string,
     imageFileId?: string,
+    imageGlobalTransitId?: string,
     imageFileKey?: string,
-    imageDrive?: TargetDrive
+    imageDrive?: TargetDrive,
+    systemFileType?: SystemFileType
   ) => {
-    if (imageFileId === undefined || imageFileId === '' || !imageDrive || !imageFileKey) {
-      return null;
+    if (
+      imageFileId === undefined ||
+      imageFileId === '' ||
+      imageFileKey === undefined ||
+      imageFileKey === '' ||
+      !imageDrive
+    ) {
+      return;
     }
+
+    if (odinId !== identity) {
+      return (
+        (await getDecryptedThumbnailMetaOverPeer(
+          dotYouClient,
+          odinId,
+          imageDrive,
+          imageFileId,
+          imageGlobalTransitId,
+          imageFileKey,
+          systemFileType
+        )) || null
+      );
+    }
+
     return (
       (await getDecryptedThumbnailMeta(
         dotYouClient,
         imageDrive,
         imageFileId,
         imageFileKey,
-        'Standard'
+        systemFileType
       )) || null
     );
   };
