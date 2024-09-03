@@ -57,7 +57,7 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
       headerSearchBarOptions: {
         hideWhenScrolling: true,
         headerIconColor: isDarkMode ? Colors.white : Colors.black,
-        placeholder: 'Search',
+        placeholder: 'Search people',
         hideNavigationBar: true,
         autoCapitalize: 'none',
         onChangeText: (event) => {
@@ -226,7 +226,6 @@ const SearchConversationResults = memo(
           ? contacts
               .map((contact) => contact.fileMetadata.appData.content)
               .filter((contact) => {
-                console.log(contact.odinId, contact.name);
                 return (
                   contact.odinId &&
                   (contact.odinId?.includes(query) ||

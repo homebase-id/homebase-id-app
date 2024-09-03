@@ -148,8 +148,9 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
       headerTitle: headerTitle,
       headerShown: isVisible,
       headerRight: renderDownloadButton,
+      headerTintColor: Colors.white,
       headerStyle: {
-        backgroundColor: 'transparent',
+        backgroundColor: Platform.OS === 'android' ? Colors.black : 'transparent',
       },
     });
   }, [headerTitle, isVisible, navigation, renderDownloadButton]);
