@@ -149,7 +149,7 @@ export const savePost = async <T extends PostContent>(
         keyHeader = videoData.keyHeader;
         const playlistBlob = new OdinBlob(playlist.uri, {
           type: playlist.type as VideoContentType,
-        }) as any as Blob;
+        }) as unknown as Blob;
 
         payloads.push({
           key: payloadKey,
@@ -162,14 +162,14 @@ export const savePost = async <T extends PostContent>(
           const segment = segments[j];
           const segmentBlob = new OdinBlob(segment.uri, {
             type: segment.type as VideoContentType,
-          }) as any as Blob;
+          }) as unknown as Blob;
 
-          payloads.push({
-            // key: `${payloadKey}_seg${j}`, => TODO: This is not allowed by the server ATM
-            key: `hls_seg${j}`,
+          thumbnails.push({
+            key: payloadKey,
             payload: segmentBlob,
+            pixelHeight: j,
+            pixelWidth: j,
             skipEncryption: true,
-            descriptorContent: 'HLS-segment',
           });
         }
 
@@ -184,7 +184,7 @@ export const savePost = async <T extends PostContent>(
           {
             type: 'video/mp4' as VideoContentType,
           }
-        ) as any as Blob;
+        ) as unknown as Blob;
 
         payloads.push({
           key: payloadKey,
@@ -204,7 +204,7 @@ export const savePost = async <T extends PostContent>(
       // Custom blob to avoid reading and writing the file to disk again
       const payloadBlob = new OdinBlob((newMediaFile.filepath || newMediaFile.uri) as string, {
         type: newMediaFile?.type || 'image/jpeg',
-      }) as any as Blob;
+      }) as unknown as Blob;
 
       thumbnails.push(...additionalThumbnails);
       payloads.push({
@@ -219,7 +219,7 @@ export const savePost = async <T extends PostContent>(
       // Custom blob to avoid reading and writing the file to disk again
       const payloadBlob = new OdinBlob((newMediaFile.filepath || newMediaFile.uri) as string, {
         type: newMediaFile.type || 'image/jpeg',
-      }) as any as Blob;
+      }) as unknown as Blob;
 
       payloads.push({
         key: payloadKey,
@@ -275,7 +275,7 @@ const uploadPost = async <T extends PostContent>(
   targetDrive: TargetDrive,
   onVersionConflict?: () => void,
   options?: {
-    axiosConfig?: AxiosRequestConfig<any> | undefined;
+    axiosConfig?: AxiosRequestConfig<unknown> | undefined;
     keyHeader?: KeyHeader | undefined;
   }
 ) => {
@@ -331,7 +331,7 @@ const uploadPost = async <T extends PostContent>(
   if (!shouldEmbedContent) {
     payloads.push({
       key: DEFAULT_PAYLOAD_KEY,
-      payload: new OdinBlob([payloadBytes], { type: 'application/json' }) as any,
+      payload: new OdinBlob([payloadBytes], { type: 'application/json' }) as unknown as Blob,
     });
   }
 
@@ -362,10 +362,10 @@ const uploadPost = async <T extends PostContent>(
           return payload;
         }
 
-        const newBlob = await (payload.payload as any as OdinBlob).fixExtension();
+        const newBlob = await (payload.payload as unknown as OdinBlob).fixExtension();
         return {
           ...payload,
-          payload: newBlob as any,
+          payload: newBlob as unknown as Blob,
         };
       })
     );
@@ -376,10 +376,10 @@ const uploadPost = async <T extends PostContent>(
           return thumb;
         }
 
-        const newBlob = await (thumb.payload as any as OdinBlob).fixExtension();
+        const newBlob = await (thumb.payload as unknown as OdinBlob).fixExtension();
         return {
           ...thumb,
-          payload: newBlob as any,
+          payload: newBlob as unknown as Blob,
         };
       })
     );
@@ -488,7 +488,7 @@ const uploadPostHeader = async <T extends PostContent>(
         [
           {
             key: DEFAULT_PAYLOAD_KEY,
-            payload: new OdinBlob([payloadBytes], { type: 'application/json' }) as any,
+            payload: new OdinBlob([payloadBytes], { type: 'application/json' }) as unknown as Blob,
           },
         ],
         undefined
@@ -599,7 +599,7 @@ const updatePost = async <T extends PostContent>(
     // Custom blob to avoid reading and writing the file to disk again
     const payloadBlob = new OdinBlob((newMediaFile.filepath || newMediaFile.uri) as string, {
       type: newMediaFile.type || 'image/jpeg',
-    }) as any as Blob;
+    }) as unknown as Blob;
 
     const { additionalThumbnails, tinyThumb } = await createThumbnails(newMediaFile, payloadKey);
 

@@ -316,7 +316,7 @@ export const uploadChatMessage = async (
       key: CHAT_LINKS_PAYLOAD_KEY,
       payload: new OdinBlob([stringToUint8Array(JSON.stringify(linkPreviews))], {
         type: 'application/json',
-      }) as any as Blob,
+      }) as unknown as Blob,
       descriptorContent,
       previewThumbnail: tinyThumb,
     });
@@ -366,7 +366,7 @@ export const uploadChatMessage = async (
         keyHeader = videoData.keyHeader;
         const playlistBlob = new OdinBlob(playlist.uri, {
           type: playlist.type as VideoContentType,
-        }) as any as Blob;
+        }) as unknown as Blob;
 
         payloads.push({
           key: payloadKey,
@@ -379,19 +379,20 @@ export const uploadChatMessage = async (
           const segment = segments[j];
           const segmentBlob = new OdinBlob(segment.uri, {
             type: segment.type as VideoContentType,
-          }) as any as Blob;
+          }) as unknown as Blob;
 
-          payloads.push({
-            // key: `${payloadKey}_seg${j}`, => TODO: This is not allowed by the server ATM
-            key: `hls_seg${j}`,
+          thumbnails.push({
+            key: payloadKey,
             payload: segmentBlob,
+            pixelHeight: j,
+            pixelWidth: j,
             skipEncryption: true,
           });
         }
 
         console.log(
           'HLS video payloads',
-          payloads.map((pyld) => (pyld.payload as any as OdinBlob).data)
+          payloads.map((pyld) => (pyld.payload as unknown as OdinBlob).data)
         );
       } else {
         // Custom blob to avoid reading and writing the file to disk again
@@ -400,7 +401,7 @@ export const uploadChatMessage = async (
           {
             type: 'video/mp4' as VideoContentType,
           }
-        ) as any as Blob;
+        ) as unknown as Blob;
 
         payloads.push({
           key: payloadKey,
@@ -413,7 +414,7 @@ export const uploadChatMessage = async (
 
       const blob = new OdinBlob(newMediaFile.filepath || newMediaFile.uri, {
         type: newMediaFile?.type || undefined,
-      }) as any as Blob;
+      }) as unknown as Blob;
 
       const { additionalThumbnails, tinyThumb } = await createThumbnails(
         newMediaFile,
@@ -437,7 +438,7 @@ export const uploadChatMessage = async (
       if (newMediaFile?.type) {
         const payloadBlob = new OdinBlob(newMediaFile.filepath || newMediaFile.uri, {
           type: newMediaFile.type,
-        }) as any as Blob;
+        }) as unknown as Blob;
 
         payloads.push({
           key: payloadKey,
@@ -460,7 +461,9 @@ export const uploadChatMessage = async (
     undefined,
     onVersionConflict,
     {
-      onUploadProgress: (progress) => onUpdate?.('Uploading', progress.progress || 0),
+      axiosConfig: {
+        onUploadProgress: (progress) => onUpdate?.('Uploading', progress.progress || 0),
+      },
       keyHeader,
     }
   );
