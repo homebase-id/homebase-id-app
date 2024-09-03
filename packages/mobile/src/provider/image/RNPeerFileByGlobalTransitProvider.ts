@@ -74,7 +74,7 @@ export const getPayloadBytesOverPeerByGlobalTransitId = async (
     })
     .then(async (res) => {
       if (res.info().status !== 200) {
-        throw new Error(`Failed to fetch payload ${res.info().status}, ${url}`);
+        throw new Error(`Failed to fetch payload ${res.info().status}`);
       }
 
       // Android filePaths need to start with file://
