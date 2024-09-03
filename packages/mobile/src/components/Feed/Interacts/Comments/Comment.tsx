@@ -141,47 +141,48 @@ export const CommentTeaser = memo(({ commentData }: { commentData: CommentReacti
     >
       <Text style={styles.comentAuthorText}>
         <AuthorName odinId={authorOdinId} />{' '}
+        {commentData.isEncrypted && body === '' ? (
+          <View
+            style={{
+              marginLeft: 2,
+              borderRadius: 4,
+              backgroundColor: isDarkMode ? Colors.slate[700] : Colors.slate[200],
+              marginBottom: 2,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 12,
+                color: isDarkMode ? Colors.slate[700] : Colors.slate[200],
+              }}
+            >
+              {t('Encrypted')}
+            </Text>
+          </View>
+        ) : (
+          <>
+            <Text
+              style={{
+                fontSize: 14,
+                lineHeight: 20,
+                opacity: 0.5,
+                fontWeight: '400',
+              }}
+            >
+              {ellipsisAtMaxChar(body, MAX_CHAR_FOR_SUMMARY)}
+              {hasMedia && (
+                <Text
+                  style={{
+                    fontStyle: 'italic',
+                  }}
+                >
+                  {t('Click to view image')}
+                </Text>
+              )}
+            </Text>
+          </>
+        )}
       </Text>
-      {commentData.isEncrypted && body === '' ? (
-        <View
-          style={{
-            marginLeft: 2,
-            borderRadius: 4,
-            backgroundColor: isDarkMode ? Colors.slate[700] : Colors.slate[200],
-            marginBottom: 2,
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 12,
-              color: isDarkMode ? Colors.slate[700] : Colors.slate[200],
-            }}
-          >
-            {t('Encrypted')}
-          </Text>
-        </View>
-      ) : (
-        <>
-          <Text
-            style={{
-              fontSize: 14,
-              lineHeight: 20,
-              opacity: 0.5,
-            }}
-          >
-            {ellipsisAtMaxChar(body, MAX_CHAR_FOR_SUMMARY)}
-            {hasMedia && (
-              <Text
-                style={{
-                  fontStyle: 'italic',
-                }}
-              >
-                {t('Click to view image')}
-              </Text>
-            )}
-          </Text>
-        </>
-      )}
     </View>
   );
 });
