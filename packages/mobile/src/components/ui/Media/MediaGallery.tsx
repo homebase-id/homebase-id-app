@@ -66,7 +66,7 @@ export const MediaGallery = memo(
               probablyEncrypted={probablyEncrypted}
               globalTransitId={globalTransitId}
               odinId={odinId}
-              previewThumbnail={previewThumbnail}
+              previewThumbnail={item.previewThumbnail}
               targetDrive={targetDrive}
               imageSize={{
                 width: payloads.length === 3 && index === 2 ? 302 : 150,
