@@ -19,12 +19,11 @@ const MediaMessage = memo(
     onLongPress: (e: GestureResponderEvent, message: ChatMessageIMessage) => void;
   }) => {
     const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
-    const { width, height } = Dimensions.get('screen');
     if (!props.currentMessage || !props.currentMessage.fileMetadata.payloads?.length) return null;
+    const { width, height } = Dimensions.get('screen');
     const { currentMessage } = props;
     const payloads = currentMessage.fileMetadata.payloads;
     const isMe = currentMessage.fileMetadata.senderOdinId === '';
-
     const onClick = (currIndex?: number) => {
       navigation.navigate('PreviewMedia', {
         fileId: currentMessage.fileId,
