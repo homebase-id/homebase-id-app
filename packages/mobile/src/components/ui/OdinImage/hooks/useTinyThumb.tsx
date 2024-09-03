@@ -74,7 +74,8 @@ const useTinyThumb = ({
         imageFileId,
         imageFileKey as string,
         imageGlobalTransitId,
-        imageDrive
+        imageDrive,
+        systemFileType
       ),
     refetchOnMount: true,
     refetchOnWindowFocus: false,
