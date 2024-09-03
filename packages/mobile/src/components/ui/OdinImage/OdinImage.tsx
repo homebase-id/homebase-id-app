@@ -98,6 +98,7 @@ export const OdinImage = memo(
       imageFileId: !ignoreTiny ? fileId : undefined,
       imageFileKey: fileKey,
       imageDrive: targetDrive,
+      imageGlobalTransitId: globalTransitId,
     });
 
     const cachedImageSizeSameorGreater = useMemo(

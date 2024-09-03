@@ -10,11 +10,15 @@ const useTinyThumb = ({
   imageFileId,
   imageFileKey,
   imageDrive,
+  imageGlobalTransitId,
+  systemFileType,
 }: {
   odinId?: string;
   imageFileId?: string;
   imageFileKey?: string;
   imageDrive?: TargetDrive;
+  imageGlobalTransitId?: string;
+  systemFileType?: SystemFileType;
 }) => {
   const dotYouClient = useDotYouClientContext();
   const identity = dotYouClient.getIdentity();
@@ -65,7 +69,13 @@ const useTinyThumb = ({
   return useQuery({
     queryKey: ['tinyThumb', odinId, imageFileId, imageDrive?.alias || ''],
     queryFn: () =>
-      fetchImageData(odinId as string, imageFileId, imageFileKey as string, imageDrive),
+      fetchImageData(
+        odinId as string,
+        imageFileId,
+        imageFileKey as string,
+        imageGlobalTransitId,
+        imageDrive
+      ),
     refetchOnMount: true,
     refetchOnWindowFocus: false,
     staleTime: 1000 * 60 * 60 * 1, // 1h
