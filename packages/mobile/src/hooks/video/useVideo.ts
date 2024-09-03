@@ -78,11 +78,7 @@ export const useVideo = ({
 
     if (query?.state.status === 'success') return query?.state.data;
 
-    const video = await fetchVideo({ payloadKey });
-    if (video) {
-      queryClient.setQueryData(queryKey, video);
-      return video;
-    }
+
   };
 
   return {
@@ -91,6 +87,15 @@ export const useVideo = ({
       queryFn: () => fetchVideo({ payloadKey }),
       enabled: enabled,
     }),
-    getFromCache: fetchFromCache,
+    fetchManually: async (payloadKey: string) => {
+      const queryKey = ['video', fileId, targetDrive.alias, payloadKey, videoGlobalTransitId, odinId];
+      const cachedVideo = await fetchFromCache(payloadKey);
+      if (cachedVideo) return cachedVideo;
+      const video = await fetchVideo({ payloadKey });
+      if (video) {
+        queryClient.setQueryData(queryKey, video);
+        return video;
+      }
+    },
   };
 };

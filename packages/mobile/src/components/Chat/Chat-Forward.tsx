@@ -64,9 +64,9 @@ export const ChatForwardModal = memo(
     const [isLoading, setIsLoading] = useState(false);
     const { add } = useErrors();
 
-    const getAudio = useAudio().getFromCache;
+    const getAudio = useAudio().fetchManually;
     const { getFromCache } = useImage();
-    const { getFromCache: getVideoData } = useVideo({
+    const { fetchManually: getVideoData } = useVideo({
       fileId: message?.fileId,
       targetDrive: ChatDrive,
     });

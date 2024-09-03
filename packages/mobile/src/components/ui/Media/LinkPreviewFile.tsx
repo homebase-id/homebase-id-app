@@ -7,7 +7,7 @@ import { Text } from '../Text/Text';
 import { useDarkMode } from '../../../hooks/useDarkMode';
 import { Colors } from '../../../app/Colors';
 import { ellipsisAtMaxChar } from 'feed-app-common';
-import { getDomainFromUrl, getHostFromUrl } from '@homebase-id/js-lib/helpers';
+import { getDomainFromUrl } from '@homebase-id/js-lib/helpers';
 
 type LinkPreviewFileProps = {
   targetDrive: TargetDrive;
