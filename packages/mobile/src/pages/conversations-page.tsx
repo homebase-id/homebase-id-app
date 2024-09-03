@@ -226,7 +226,6 @@ const SearchConversationResults = memo(
           ? contacts
               .map((contact) => contact.fileMetadata.appData.content)
               .filter((contact) => {
-                console.log(contact.odinId, contact.name);
                 return (
                   contact.odinId &&
                   (contact.odinId?.includes(query) ||
