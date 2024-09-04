@@ -133,7 +133,7 @@ export const VideoWithLoader = memo(
                 lastModified={lastModified}
               />
             ) : (
-              <OdinWebVideo targetDrive={targetDrive} fileId={fileId} fileKey={payload.key} />
+              <OdinWebVideo targetDrive={targetDrive} fileId={fileId} payload={payload} />
             )}
           </View>
         ) : (
@@ -272,16 +272,16 @@ const LocalVideo = ({
 interface OdinWebVideoProps {
   targetDrive: TargetDrive;
   fileId: string;
-  fileKey: string;
+  payload: PayloadDescriptor;
 }
 
-const OdinWebVideo = ({ fileId, fileKey }: OdinWebVideoProps) => {
+const OdinWebVideo = ({ fileId, payload }: OdinWebVideoProps) => {
   const { authToken, getIdentity, getSharedSecret } = useAuth();
   const identity = getIdentity();
 
   const uri = useMemo(
-    () => `https://${identity}/apps/chat/player/${fileId}/${fileKey}`,
-    [fileId, fileKey, identity]
+    () => `https://${identity}/apps/chat/player/${fileId}/${payload.key}`,
+    [fileId, payload, identity]
   );
 
   const sharedSecret = getSharedSecret();

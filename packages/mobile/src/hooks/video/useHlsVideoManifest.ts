@@ -209,6 +209,7 @@ const getSegmentUrl = async (
       ? `${dotYouClient.getEndpoint()}/transit/query/thumb?${stringifyToQueryParams({ odinId, ...params })}`
       : `${dotYouClient.getEndpoint()}/drive/files/thumb?${stringifyToQueryParams(params)}`;
 
+  console.error('Not implemented');
   throw new Error('Not implemented');
   //   return unenryptedThumbUrl;
   //   return InterceptionEncryptionUtil.encryptUrl(unenryptedThumbUrl, ss);

@@ -52,7 +52,10 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
   const { height, width } = useSafeAreaFrame();
   const getImage = useImage().getFromCache;
   const [isVisible, setIsVisible] = useState(true);
-  const autoplay = payloads.length === 1 && payloads[0].contentType?.startsWith('video');
+  const autoplay =
+    payloads.length === 1 &&
+    (payloads[0].contentType?.startsWith('video') ||
+      payloads[0].contentType === 'application/vnd.apple.mpegurl');
 
   const headerTitle = useCallback(() => {
     return (
@@ -86,7 +89,10 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
 
   const renderDownloadButton = useCallback(() => {
     const currPayload = payloads[currIndex];
-    if (currPayload.contentType?.startsWith('video')) {
+    if (
+      currPayload.contentType?.startsWith('video') ||
+      currPayload.contentType === 'application/vnd.apple.mpegurl'
+    ) {
       return;
     }
     const onDownload = async () => {
@@ -277,7 +283,10 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
     ]
   );
 
-  const hasVideoPayload = payloads.some((item) => item.contentType?.startsWith('video'));
+  const hasVideoPayload = payloads.some(
+    (item) =>
+      item.contentType?.startsWith('video') || item.contentType === 'application/vnd.apple.mpegurl'
+  );
 
   return (
     <BottomSheetModalProvider>
@@ -298,7 +307,7 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
         defaultIndex={initialIndex}
         renderItem={renderItem}
         style={{
-          backgroundColor: Colors.black,
+          backgroundColor: Colors.pink[100],
         }}
       />
 
@@ -313,7 +322,7 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
             flex: 1,
             display: 'flex',
             zIndex: 20,
-            backgroundColor: '#00000060',
+            backgroundColor: '',
             borderTopLeftRadius: 10,
             borderTopRightRadius: 10,
             flexDirection: 'column',

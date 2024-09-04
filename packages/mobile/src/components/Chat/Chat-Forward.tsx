@@ -105,7 +105,10 @@ export const ChatForwardModal = forwardRef(
                     type: image.imageData?.type,
                   } as ImageSource;
                 }
-                if (payload.contentType.startsWith('video')) {
+                if (
+                  payload.contentType.startsWith('video')
+                  //TODO Add support HLS video || payload.contentType === 'application/vnd.apple.mpegurl'
+                ) {
                   if (!authToken) return;
                   const downloadPayload = await getVideoData(payload.key);
                   if (!downloadPayload) return;

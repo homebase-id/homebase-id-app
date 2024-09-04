@@ -15,8 +15,9 @@ export const FileOverview = memo(
         showsHorizontalScrollIndicator={false}
       >
         {assets.map((value, index) => {
-          const isVideo = value.type?.startsWith('video') ?? false;
-          const isDocument = value.type?.startsWith('application') ?? false;
+          const isVideo =
+            value.type?.startsWith('video') || value.type === 'application/vnd.apple.mpegurl';
+          const isDocument = value.type?.startsWith('application');
           return (
             <View
               key={index}

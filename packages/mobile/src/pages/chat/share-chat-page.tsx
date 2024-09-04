@@ -87,7 +87,10 @@ export const ShareChatPage = (prop: ShareChatProp) => {
           height: size.height,
           type: mimeType,
         });
-      } else if (mimeType.startsWith('video')) {
+      } else if (
+        mimeType.startsWith('video')
+        // TODO: Add support for HLS || mimeType === 'application/vnd.apple.mpegurl'
+      ) {
         const uri = await fixContentURI(data);
         imageSource.push({
           uri: uri,
