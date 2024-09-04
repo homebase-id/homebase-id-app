@@ -155,7 +155,6 @@ export const savePost = async <T extends PostContent>(
           key: payloadKey,
           payload: playlistBlob,
           descriptorContent: jsonStringify64(metadata),
-          skipEncryption: true,
         });
 
         for (let j = 0; j < segments.length; j++) {

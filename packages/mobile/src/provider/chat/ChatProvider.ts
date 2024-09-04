@@ -372,7 +372,6 @@ export const uploadChatMessage = async (
           key: payloadKey,
           payload: playlistBlob,
           descriptorContent: jsonStringify64(metadata),
-          skipEncryption: true,
         });
 
         for (let j = 0; j < segments.length; j++) {
