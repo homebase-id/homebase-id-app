@@ -1,4 +1,4 @@
-import { useQuery, UseQueryResult } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import {
   DotYouClient,
   HomebaseFile,
@@ -6,13 +6,9 @@ import {
   TargetDrive,
   decryptKeyHeader,
   getPayloadBytes,
+  InterceptionEncryptionUtil,
 } from '@homebase-id/js-lib/core';
-import {
-  byteArrayToString,
-  getNewId,
-  stringifyToQueryParams,
-  uint8ArrayToBase64,
-} from '@homebase-id/js-lib/helpers';
+import { byteArrayToString, getNewId, stringifyToQueryParams } from '@homebase-id/js-lib/helpers';
 import { getAnonymousDirectImageUrl } from '@homebase-id/js-lib/media';
 import { getPayloadBytesOverPeer } from '@homebase-id/js-lib/peer';
 import { useVideoMetadata } from './useVideoMetadata';
@@ -27,8 +23,8 @@ export const useHlsManifest = (
   videoGlobalTransitId?: string | undefined,
   videoFileKey?: string | undefined,
   videoDrive?: TargetDrive
-): { fetch: UseQueryResult<string | null, Error> } => {
-  useLocalWebServer(Platform.OS === 'ios');
+) => {
+  useLocalWebServer(true);
 
   const dotYouClient = useDotYouClientContext();
   const identity = dotYouClient.getIdentity();
@@ -65,14 +61,13 @@ export const useHlsManifest = (
             odinId,
             videoDrive,
             videoFile.fileId,
-            videoFileKey,
-            {}
+            videoFileKey
           )
         : await getPayloadBytes(dotYouClient, videoDrive, videoFile.fileId, videoFileKey);
     };
 
     const manifestPayload = await fetchManifestPayload();
-    if (!manifestPayload) return null;
+    if (!manifestPayload || !videoFileData) return null;
 
     const contents = await replaceSegmentUrls(
       await byteArrayToString(manifestPayload.bytes),
@@ -104,7 +99,9 @@ export const useHlsManifest = (
     const filePath = `file://${CachesDirectoryPath}/${fileName}`;
     await writeFile(filePath, contents, 'utf8');
 
-    if (Platform.OS === 'ios') return `http://localhost:3000/manifest?file=${fileName}`;
+    if (Platform.OS === 'ios') {
+      return `http://localhost:3000/manifest?file=${fileName}`;
+    }
     return filePath;
   };
 
@@ -136,7 +133,6 @@ const replaceSegmentUrls = async (
   let segmentIndex = 0;
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-
     // Check if the line is an encryption key URL
     if (line.startsWith('#EXT-X-KEY:METHOD=AES-128')) {
       // Extract the URI part (key URL)
@@ -209,12 +205,19 @@ const getSegmentUrl = async (
       ? `${dotYouClient.getEndpoint()}/transit/query/thumb?${stringifyToQueryParams({ odinId, ...params })}`
       : `${dotYouClient.getEndpoint()}/drive/files/thumb?${stringifyToQueryParams(params)}`;
 
-  console.error('Not implemented');
-  throw new Error('Not implemented');
-  //   return unenryptedThumbUrl;
-  //   return InterceptionEncryptionUtil.encryptUrl(unenryptedThumbUrl, ss);
+  return InterceptionEncryptionUtil.encryptUrl(unenryptedThumbUrl, ss);
 };
 
 const getKeyUrl = async (aesKey: Uint8Array) => {
-  return `data:application/octet-stream;base64,${uint8ArrayToBase64(aesKey)}`;
+  const fileName = `${getNewId()}.key`;
+  const keyPath = `file://${CachesDirectoryPath}/${fileName}`;
+  await writeFile(keyPath, toHexString(aesKey), 'utf8');
+
+  return `http://localhost:3000/key/${fileName}`;
+};
+
+const toHexString = (byteArray: Uint8Array) => {
+  return Array.from(byteArray, function (byte) {
+    return ('0' + (byte & 0xff).toString(16)).slice(-2);
+  }).join('');
 };

@@ -16,7 +16,7 @@ import { Play } from '../Icons/icons';
 import { OdinImage } from '../OdinImage/OdinImage';
 import { useVideo } from '../../../hooks/video/useVideo';
 import { useHlsManifest } from '../../../hooks/video/useHlsVideoManifest';
-import Video from 'react-native-video';
+import Video, { DRMType } from 'react-native-video';
 
 const MAX_DOWNLOAD_SIZE = 16 * 1024 * 1024 * 1024; // 16 MB
 
@@ -103,6 +103,7 @@ export const VideoWithLoader = memo(
         </View>
       );
     }
+
     return (
       <>
         {loadVideo ? (
@@ -190,11 +191,19 @@ const HlsVideo = ({ odinId, fileId, targetDrive, globalTransitId, payload }: Loc
     payload.key,
     targetDrive
   ).fetch;
+
   if (!hlsManifest) return null;
 
   return (
     <Video
-      source={{ uri: hlsManifest, type: 'm3u8' }}
+      source={{
+        uri: hlsManifest,
+        type: 'm3u8',
+        drm: {
+          base64Certificate: false,
+        },
+      }}
+      paused={false}
       style={{
         position: 'absolute',
         top: 0,
