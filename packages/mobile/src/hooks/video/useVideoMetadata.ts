@@ -74,7 +74,7 @@ export const useVideoMetadata = (
   return {
     fetchMetadata: useQuery({
       queryKey: [
-        'video',
+        'video-metadata',
         odinId || identity,
         videoDrive?.alias,
         videoGlobalTransitId || videoFileId,

@@ -36,7 +36,7 @@ export const useVideo = ({
   const localHost = dotyouClient.getIdentity(); // This is the identity of the user
 
   const fetchVideo = async ({ payloadKey }: { payloadKey?: string }) => {
-    if (!fileId || !targetDrive || !payloadKey || !token) return;
+    if (!fileId || !targetDrive || !payloadKey || !token) return null;
     console.log(odinId, localHost);
     if (odinId && odinId !== localHost) {
       if (videoGlobalTransitId) {
