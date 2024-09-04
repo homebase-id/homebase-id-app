@@ -192,7 +192,6 @@ const HlsVideo = ({ odinId, fileId, targetDrive, globalTransitId, payload }: Loc
   ).fetch;
   if (!hlsManifest) return null;
 
-  console.log(hlsManifest);
   return (
     <Video
       source={{ uri: hlsManifest, type: 'm3u8' }}

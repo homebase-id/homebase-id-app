@@ -11,7 +11,6 @@ import {
   byteArrayToString,
   getNewId,
   stringifyToQueryParams,
-  stringToUint8Array,
   uint8ArrayToBase64,
 } from '@homebase-id/js-lib/helpers';
 import { getAnonymousDirectImageUrl } from '@homebase-id/js-lib/media';
@@ -19,6 +18,8 @@ import { getPayloadBytesOverPeer } from '@homebase-id/js-lib/peer';
 import { useVideoMetadata } from './useVideoMetadata';
 import { useDotYouClientContext } from 'feed-app-common';
 import { CachesDirectoryPath, writeFile } from 'react-native-fs';
+import { useLocalWebServer } from './useLocalWebServer';
+import { Platform } from 'react-native';
 
 export const useHlsManifest = (
   odinId?: string,
@@ -27,6 +28,8 @@ export const useHlsManifest = (
   videoFileKey?: string | undefined,
   videoDrive?: TargetDrive
 ): { fetch: UseQueryResult<string | null, Error> } => {
+  useLocalWebServer(Platform.OS === 'ios');
+
   const dotYouClient = useDotYouClientContext();
   const identity = dotYouClient.getIdentity();
   const { data: videoFileData, isFetched: videoFileDataFetched } = useVideoMetadata(
@@ -96,15 +99,13 @@ export const useHlsManifest = (
         return (await getKeyUrl(keyHeader.aesKey)) || url;
       }
     );
-    console.log('m3u8', contents);
 
-    //TODO add a local webserver to serve the m3u8 file and return the url; Silly iOS doesn't support local urls;
-    const filePath = `file://${CachesDirectoryPath}/${getNewId()}-manifest.m3u8`;
+    const fileName = `${getNewId()}-manifest.m3u8`;
+    const filePath = `file://${CachesDirectoryPath}/${fileName}`;
     await writeFile(filePath, contents, 'utf8');
-    return filePath;
 
-    // Android doesn't support data urls
-    // return `data:application/vnd.apple.mpegurl;base64,${uint8ArrayToBase64(stringToUint8Array(contents))}`;
+    if (Platform.OS === 'ios') return `http://localhost:3000/manifest?file=${fileName}`;
+    return filePath;
   };
 
   return {
