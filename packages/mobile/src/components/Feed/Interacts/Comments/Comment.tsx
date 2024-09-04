@@ -18,6 +18,7 @@ import { CommentHead } from './CommentHead';
 import { CommentMeta } from './CommentMeta';
 import { CommentThread } from './CommentThread';
 import { CommentBody } from './CommentBody';
+import { ImageSource } from '../../../../provider/image/RNImageProvider';
 
 export interface CommentProps {
   context: ReactionContext;
@@ -60,7 +61,7 @@ export const Comment = memo(
     }, [commentData, context]);
 
     const doUpdate = useCallback(
-      (newBody: string, newAttachment?: File) => {
+      (newBody: string, newAttachment?: ImageSource) => {
         (async () => {
           await postComment({
             context,

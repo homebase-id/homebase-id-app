@@ -42,8 +42,8 @@ export const CommentComposer = memo(
     const { isDarkMode } = useDarkMode();
     const [message, setMessage] = useState('');
     const identity = useDotYouClientContext().getIdentity();
-    const disabled = postState === 'pending' || message.length === 0;
     const [assets, setAssets] = useState<Asset[]>([]);
+    const disabled = postState === 'pending' || (message.length === 0 && assets.length === 0);
 
     const handleImageIconPress = useCallback(async () => {
       const medias = await launchImageLibrary({
@@ -57,7 +57,7 @@ export const CommentComposer = memo(
     }, [setAssets]);
 
     const onPostComment = useCallback(async () => {
-      if (postState === 'pending' || !message) return;
+      if (postState === 'pending' || (!message && !assets)) return;
 
       try {
         await postComment({
@@ -74,7 +74,20 @@ export const CommentComposer = memo(
                 content: {
                   authorOdinId: identity,
                   body: message,
-                  //  attachment, //TODO: Add attachment option
+                  attachment: assets.map((value) => {
+                    return {
+                      height: value.height || 0,
+                      width: value.width || 0,
+                      name: value.fileName,
+                      type: value.type && value.type === 'image/jpg' ? 'image/jpeg' : value.type,
+                      uri: value.uri,
+                      filename: value.fileName,
+                      date: Date.parse(value.timestamp || new Date().toUTCString()),
+                      filepath: value.originalPath,
+                      id: value.id,
+                      fileSize: value.fileSize,
+                    };
+                  })?.[0],
                 },
               },
             },
@@ -83,7 +96,7 @@ export const CommentComposer = memo(
       } catch (e) {}
       setMessage('');
       onReplyCancel?.();
-    }, [context, identity, message, onReplyCancel, postComment, postState, replyThreadId]);
+    }, [assets, context, identity, message, onReplyCancel, postComment, postState, replyThreadId]);
 
     if (canReact?.canReact === true || canReact?.canReact === 'comment') {
       return (
