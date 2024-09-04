@@ -240,14 +240,20 @@ const SearchConversationResults = memo(
 
     const contactsWithoutAConversation = useMemo(
       () =>
-        contactResults.filter(
-          (contact) =>
+        contactResults.filter((contact) => {
+          // filter conversations which have should not have more than 1 recipient
+          const singleConversations = conversationResults.filter((conversation) => {
+            const content = conversation.fileMetadata.appData.content;
+            return content.recipients.length === 2;
+          });
+          return (
             contact.odinId &&
-            !conversationResults.some((conversation) => {
+            !singleConversations.some((conversation) => {
               const content = conversation.fileMetadata.appData.content;
               return content.recipients.includes(contact.odinId as string);
             })
-        ),
+          );
+        }),
       [contactResults, conversationResults]
     );
     const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
