@@ -98,9 +98,12 @@ export const useHlsManifest = (
     );
     console.log('m3u8', contents);
 
+    //TODO add a local webserver to serve the m3u8 file and return the url; Silly iOS doesn't support local urls;
     const filePath = `file://${CachesDirectoryPath}/${getNewId()}-manifest.m3u8`;
     await writeFile(filePath, contents, 'utf8');
     return filePath;
+
+    // Android doesn't support data urls
     // return `data:application/vnd.apple.mpegurl;base64,${uint8ArrayToBase64(stringToUint8Array(contents))}`;
   };
 
