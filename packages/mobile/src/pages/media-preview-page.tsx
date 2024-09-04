@@ -15,7 +15,6 @@ import { AuthorName } from '../components/ui/Name';
 import { HeaderTitle } from '@react-navigation/elements';
 import { Text } from '../components/ui/Text/Text';
 import { formatToTimeAgoWithRelativeDetail } from 'feed-app-common';
-import { IconButton } from '../components/Chat/Chat-app-bar';
 import { Download, ShareNode } from '../components/ui/Icons/icons';
 
 import useImage from '../components/ui/OdinImage/hooks/useImage';
@@ -28,6 +27,7 @@ import { ZOOM_TYPE } from '@likashefqet/react-native-image-zoom';
 import { CarouselRenderItemInfo } from 'react-native-reanimated-carousel/lib/typescript/types';
 import { CameraRoll } from '@react-native-camera-roll/camera-roll';
 import { FeedStackParamList } from '../app/FeedStack';
+import { IconButton } from '../components/ui/Buttons';
 
 export type MediaProp = NativeStackScreenProps<
   ChatStackParamList | FeedStackParamList,

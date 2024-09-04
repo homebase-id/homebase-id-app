@@ -17,6 +17,8 @@ import { ErrorNotification } from '../../../ui/Alert/ErrorNotification';
 import { CommentHead } from './CommentHead';
 import { CommentMeta } from './CommentMeta';
 import { CommentThread } from './CommentThread';
+import { CommentBody } from './CommentBody';
+import { ImageSource } from '../../../../provider/image/RNImageProvider';
 
 export interface CommentProps {
   context: ReactionContext;
@@ -59,7 +61,7 @@ export const Comment = memo(
     }, [commentData, context]);
 
     const doUpdate = useCallback(
-      (newBody: string, newAttachment?: File) => {
+      (newBody: string, newAttachment?: ImageSource) => {
         (async () => {
           await postComment({
             context,
@@ -103,8 +105,13 @@ export const Comment = memo(
                 : undefined
             }
           />
-          {/* TODO: Comement Body */}
-          <Text style={{ flex: 1 }}>{commentContent.body}</Text>
+          <CommentBody
+            context={context}
+            content={commentContent}
+            previewThumbnail={commentData.fileMetadata.appData.previewThumbnail}
+            commentFileId={fileId}
+            commentLastModifed={(commentData as HomebaseFile<ReactionFile>).fileMetadata.updated}
+          />
           {threadContext.target.fileId && threadContext.target.globalTransitId ? (
             <CommentMeta
               canReact={canReact}

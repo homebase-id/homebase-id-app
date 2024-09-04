@@ -39,6 +39,7 @@ const useImage = (props?: {
     lastModified,
     imageGlobalTransitId,
     probablyEncrypted,
+    systemFileType,
   } = props || {};
   const { authToken } = useAuth();
   const dotYouClient = useDotYouClientContext();
@@ -137,7 +138,8 @@ const useImage = (props?: {
     imageDrive?: TargetDrive,
     size?: ImageSize,
     naturalSize?: ImageSize,
-    lastModified?: number
+    lastModified?: number,
+    systemFileType?: SystemFileType
   ): Promise<ImageData | null> => {
     if (
       imageFileId === undefined ||
@@ -232,7 +234,7 @@ const useImage = (props?: {
       imageFileKey,
       authToken,
       size,
-      undefined,
+      systemFileType,
       lastModified
     );
 
@@ -264,7 +266,8 @@ const useImage = (props?: {
           imageDrive,
           size,
           naturalSize,
-          lastModified
+          lastModified,
+          systemFileType
         ),
       // Stale time is 0, to always trigger a fetch,
       //   while the fetch checks if we have anything in cache from before and confirms it on disk

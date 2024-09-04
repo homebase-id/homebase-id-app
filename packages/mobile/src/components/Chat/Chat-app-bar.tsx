@@ -1,27 +1,15 @@
-import {
-  GestureResponderEvent,
-  Platform,
-  Pressable,
-  StyleProp,
-  StyleSheet,
-  TextStyle,
-  TouchableOpacity,
-  TouchableOpacityProps,
-  View,
-  ViewStyle,
-} from 'react-native';
+import { Platform, Pressable, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Header, HeaderBackButton } from '@react-navigation/elements';
 import { useProfile } from '../../hooks/profile/useProfile';
 import { Colors } from '../../app/Colors';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { ChatMessageIMessage } from './ChatDetail';
-import { memo, ReactNode, useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { Copy, EllipsisVertical, Forward, Info, Pencil, Reply, Trash } from '../ui/Icons/icons';
-import Toast from 'react-native-toast-message';
 import { Avatar, GroupAvatar, OwnerAvatar } from '../ui/Avatars/Avatar';
 import { EmbeddedThumb } from '@homebase-id/js-lib/core';
 import { ChatDrive } from '../../provider/chat/ConversationProvider';
-import { Text } from '../ui/Text/Text';
+import { IconButton } from '../ui/Buttons';
 
 export type SelectedMessageProp = {
   onReply: () => void;
@@ -184,63 +172,3 @@ const styles = StyleSheet.create({
     borderRadius: 18,
   },
 });
-
-export const IconButton = memo(
-  ({
-    icon,
-    onPress,
-    touchableProps,
-    style,
-    title,
-    textStyle,
-  }: {
-    icon: ReactNode;
-    onPress?: (e: GestureResponderEvent) => void;
-    touchableProps?: Omit<TouchableOpacityProps, 'onPress'>;
-    style?: StyleProp<ViewStyle>;
-    textStyle?: TextStyle;
-    title?: string;
-  }) => {
-    const defaultActions = useCallback(() => {
-      Toast.show({
-        type: 'info',
-        text1: 'No action provided',
-        text2: 'Make sure u are passing the props correctly',
-      });
-    }, []);
-    return (
-      <View
-        style={
-          title
-            ? {
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: 8,
-              }
-            : undefined
-        }
-      >
-        <TouchableOpacity
-          onPress={onPress || defaultActions}
-          style={[{ padding: 10 }, style]}
-          {...touchableProps}
-        >
-          {icon}
-        </TouchableOpacity>
-        {title && (
-          <Text
-            style={
-              textStyle || {
-                fontSize: 12,
-                fontWeight: '400',
-                textAlign: 'center',
-              }
-            }
-          >
-            {title}
-          </Text>
-        )}
-      </View>
-    );
-  }
-);

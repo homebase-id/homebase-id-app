@@ -1,7 +1,6 @@
 import { ApiType, DotYouClient, HomebaseFile } from '@homebase-id/js-lib/core';
 import { parseReactionPreview, PostContent, ReactionContext } from '@homebase-id/js-lib/public';
 import { memo, useCallback, useMemo, useState } from 'react';
-import { IconButton } from '../../Chat/Chat-app-bar';
 import { GestureResponderEvent, View } from 'react-native';
 import { OpenHeart, Comment, ShareNode, SolidHeart } from '../../ui/Icons/icons';
 import {
@@ -17,6 +16,7 @@ import { ShareContext } from './Share/ShareModal';
 import { ErrorNotification } from '../../ui/Alert/ErrorNotification';
 import { Colors } from '../../../app/Colors';
 import { PostReactionBar } from './Reactions/PostReactionBar';
+import { IconButton } from '../../ui/Buttons';
 
 export const PostInteracts = memo(
   ({

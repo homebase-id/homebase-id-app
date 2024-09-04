@@ -1,8 +1,20 @@
 import { ComposeChat } from './Icons/icons';
-import { Platform, StyleProp, TouchableOpacity, ViewStyle } from 'react-native';
+import {
+  GestureResponderEvent,
+  Platform,
+  StyleProp,
+  TextStyle,
+  TouchableOpacity,
+  TouchableOpacityProps,
+  ViewStyle,
+  View,
+} from 'react-native';
 import { HeaderBackButton, HeaderBackButtonProps } from '@react-navigation/elements';
 import { Colors } from '../../app/Colors';
 import { useDarkMode } from '../../hooks/useDarkMode';
+import { memo, ReactNode, useCallback } from 'react';
+import Toast from 'react-native-toast-message';
+import { Text } from './Text/Text';
 
 export const HeaderActions = (props: {
   onPress: () => void;
@@ -46,3 +58,63 @@ export const BackButton = (props: {
 const Empty = () => {
   return <></>;
 };
+
+export const IconButton = memo(
+  ({
+    icon,
+    onPress,
+    touchableProps,
+    style,
+    title,
+    textStyle,
+  }: {
+    icon: ReactNode;
+    onPress?: (e: GestureResponderEvent) => void;
+    touchableProps?: Omit<TouchableOpacityProps, 'onPress'>;
+    style?: StyleProp<ViewStyle>;
+    textStyle?: TextStyle;
+    title?: string;
+  }) => {
+    const defaultActions = useCallback(() => {
+      Toast.show({
+        type: 'info',
+        text1: 'No action provided',
+        text2: 'Make sure u are passing the props correctly',
+      });
+    }, []);
+    return (
+      <View
+        style={
+          title
+            ? {
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: 8,
+              }
+            : undefined
+        }
+      >
+        <TouchableOpacity
+          onPress={onPress || defaultActions}
+          style={[{ padding: 10 }, style]}
+          {...touchableProps}
+        >
+          {icon}
+        </TouchableOpacity>
+        {title && (
+          <Text
+            style={
+              textStyle || {
+                fontSize: 12,
+                fontWeight: '400',
+                textAlign: 'center',
+              }
+            }
+          >
+            {title}
+          </Text>
+        )}
+      </View>
+    );
+  }
+);
