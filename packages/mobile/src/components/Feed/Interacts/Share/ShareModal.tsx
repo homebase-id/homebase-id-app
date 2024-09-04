@@ -18,6 +18,7 @@ import { Backdrop } from '../../../ui/Modal/Backdrop';
 import { Text } from '../../../ui/Text/Text';
 import {
   Linking,
+  ListRenderItemInfo,
   Platform,
   SectionListData,
   SectionListRenderItemInfo,
@@ -28,7 +29,6 @@ import {
 } from 'react-native';
 import { useDarkMode } from '../../../../hooks/useDarkMode';
 import { Colors } from '../../../../app/Colors';
-import { IconButton } from '../../../Chat/Chat-app-bar';
 import {
   ChainLink,
   Facebook,
@@ -66,6 +66,7 @@ import { AuthorName } from '../../../ui/Name';
 import ConversationTile from '../../../Chat/Conversation-tile';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ConversationTileWithYourself } from '../../../Conversation/ConversationTileWithYourself';
+import { IconButton } from '../../../ui/Buttons';
 
 export type ShareModalMethods = {
   setShareContext: (context: ShareContext) => void;
@@ -272,6 +273,27 @@ const AppFooter = memo(({ context, ...props }: AppFooterProps) => {
     [context]
   );
 
+  const renderButton = useCallback(
+    ({
+      item,
+    }: ListRenderItemInfo<{
+      title: string;
+      icon: React.ReactNode;
+      onPress: () => void;
+    }>) => (
+      <IconButton
+        icon={item.icon}
+        style={{
+          backgroundColor: isDarkMode ? Colors.gray[800] : Colors.gray[100],
+          borderRadius: 36,
+        }}
+        title={item.title}
+        onPress={item.onPress}
+      />
+    ),
+    [isDarkMode]
+  );
+
   return (
     <BottomSheetFooter
       {...props}
@@ -295,17 +317,7 @@ const AppFooter = memo(({ context, ...props }: AppFooterProps) => {
           paddingBottom: bottom,
         }}
         keyExtractor={(item) => item.title}
-        renderItem={({ item }) => (
-          <IconButton
-            icon={item.icon}
-            style={{
-              backgroundColor: isDarkMode ? Colors.gray[800] : Colors.gray[100],
-              borderRadius: 36,
-            }}
-            title={item.title}
-            onPress={item.onPress}
-          />
-        )}
+        renderItem={renderButton}
       />
     </BottomSheetFooter>
   );

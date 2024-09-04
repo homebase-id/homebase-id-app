@@ -7,14 +7,17 @@ import { BottomSheetTextInput } from '@gorhom/bottom-sheet';
 
 import { memo, useCallback, useState } from 'react';
 import { chatStyles } from '../../../Chat/ChatDetail';
-import { Close, SendChat } from '../../../ui/Icons/icons';
+import { Close, Images, SendChat } from '../../../ui/Icons/icons';
 import { Colors } from '../../../../app/Colors';
 import { OwnerAvatar } from '../../../ui/Avatars/Avatar';
 import { ErrorNotification } from '../../../ui/Alert/ErrorNotification';
 import { CantReactInfo } from '../../CanReactInfo';
 import Animated, { Easing, SlideInUp } from 'react-native-reanimated';
 import { Text } from '../../../ui/Text/Text';
-import { IconButton } from '../../../Chat/Chat-app-bar';
+
+import { Asset, launchImageLibrary } from 'react-native-image-picker';
+import { IconButton } from '../../../ui/Buttons';
+import { FileOverview } from '../../../Files/FileOverview';
 
 export const CommentComposer = memo(
   ({
@@ -40,6 +43,18 @@ export const CommentComposer = memo(
     const [message, setMessage] = useState('');
     const identity = useDotYouClientContext().getIdentity();
     const disabled = postState === 'pending' || message.length === 0;
+    const [assets, setAssets] = useState<Asset[]>([]);
+
+    const handleImageIconPress = useCallback(async () => {
+      const medias = await launchImageLibrary({
+        mediaType: 'photo',
+        selectionLimit: 1,
+        includeExtra: true,
+      });
+      if (medias.didCancel) return;
+      // Keep assets without a type out of it.. We're never sure what it is...
+      setAssets(medias.assets?.filter((asset) => asset.type) ?? []);
+    }, [setAssets]);
 
     const onPostComment = useCallback(async () => {
       if (postState === 'pending' || !message) return;
@@ -134,20 +149,30 @@ export const CommentComposer = memo(
                 />
               </Animated.View>
             )}
-            <BottomSheetTextInput
-              value={message}
-              onChangeText={setMessage}
-              placeholder={t('Add a comment...')}
+            {assets && <FileOverview assets={assets} setAssets={setAssets} />}
+
+            <View
               style={{
-                flex: 1,
-                maxHeight: 80,
-                color: isDarkMode ? Colors.white : Colors.black,
-                paddingVertical: 8,
+                flexDirection: 'row',
+                alignItems: 'center',
               }}
-              multiline
-              textAlignVertical="center" // Android only
-              autoCapitalize="sentences"
-            />
+            >
+              <BottomSheetTextInput
+                value={message}
+                onChangeText={setMessage}
+                placeholder={t('Add a comment...')}
+                style={{
+                  flex: 1,
+                  maxHeight: 80,
+                  paddingVertical: 8,
+                  color: isDarkMode ? Colors.white : Colors.black,
+                }}
+                multiline
+                textAlignVertical="center" // Android only
+                autoCapitalize="sentences"
+              />
+              <IconButton icon={<Images />} onPress={handleImageIconPress} />
+            </View>
           </View>
           <TouchableOpacity
             disabled={disabled}
