@@ -142,8 +142,6 @@ export const savePost = async <T extends PostContent>(
       );
 
       if ('segments' in videoData) {
-        console.log('HLS video', videoData);
-
         // HLS
         const { playlist, segments } = videoData;
         keyHeader = videoData.keyHeader;
@@ -171,11 +169,6 @@ export const savePost = async <T extends PostContent>(
             skipEncryption: true,
           });
         }
-
-        console.log(
-          'HLS video payloads',
-          payloads.map((pyld) => (pyld.payload as any as OdinBlob).uri)
-        );
       } else {
         // Custom blob to avoid reading and writing the file to disk again
         const payloadBlob = new OdinBlob(

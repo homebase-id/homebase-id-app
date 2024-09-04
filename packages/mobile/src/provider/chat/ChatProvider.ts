@@ -359,8 +359,6 @@ export const uploadChatMessage = async (
       );
 
       if ('segments' in videoData) {
-        console.log('HLS video', videoData);
-
         // HLS
         const { playlist, segments } = videoData;
         keyHeader = videoData.keyHeader;
@@ -388,11 +386,6 @@ export const uploadChatMessage = async (
             skipEncryption: true,
           });
         }
-
-        console.log(
-          'HLS video payloads',
-          payloads.map((pyld) => (pyld.payload as unknown as OdinBlob).data)
-        );
       } else {
         // Custom blob to avoid reading and writing the file to disk again
         const payloadBlob = new OdinBlob(
