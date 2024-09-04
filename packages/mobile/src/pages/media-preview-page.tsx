@@ -199,7 +199,8 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
       const fileKey = item.key;
       const type = item.contentType;
 
-      const isVideo = type?.startsWith('video') || false;
+      const isVideo =
+        type?.startsWith('video') || type === 'application/vnd.apple.mpegurl' || false;
       return !isVideo ? (
         <View
           style={{
@@ -327,7 +328,10 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
               }}
             >
               {payloads.map((item, index) => {
-                if (item.contentType.startsWith('video')) {
+                if (
+                  item.contentType.startsWith('video') ||
+                  item.contentType === 'application/vnd.apple.mpegurl'
+                ) {
                   return (
                     <VideoWithLoader
                       key={index}
