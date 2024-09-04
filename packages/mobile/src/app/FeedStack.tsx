@@ -66,6 +66,7 @@ export const FeedStack = (_props: NativeStackScreenProps<TabStackParamList, 'Fee
           name="PreviewMedia"
           component={PreviewMedia}
           options={{
+            headerTintColor: Colors.white,
             animation: 'slide_from_bottom',
           }}
         />
