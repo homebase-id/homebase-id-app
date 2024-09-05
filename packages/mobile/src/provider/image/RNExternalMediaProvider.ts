@@ -19,7 +19,6 @@ export const getDecryptedMediaDataOverPeerByGlobalTransitId = async (
   targetDrive: TargetDrive,
   globalTransitId: string,
   fileKey: string,
-  authToken: string,
   isProbablyEncrypted?: boolean,
   lastModified?: number,
   options?: {
@@ -71,7 +70,6 @@ export const getDecryptedMediaDataOverPeerByGlobalTransitId = async (
           targetDrive,
           globalTransitId,
           fileKey,
-          authToken,
           size.pixelWidth,
           size.pixelHeight,
           { systemFileType, lastModified }
@@ -88,7 +86,6 @@ export const getDecryptedMediaDataOverPeerByGlobalTransitId = async (
       targetDrive,
       globalTransitId,
       fileKey,
-      authToken,
       {
         systemFileType,
         lastModified,
@@ -107,7 +104,6 @@ export const getDecryptedMediaUrlOverPeer = async (
   targetDrive: TargetDrive,
   fileId: string,
   fileKey: string,
-  authToken: string,
   isProbablyEncrypted?: boolean,
   lastModified?: number,
   options?: {
@@ -153,7 +149,6 @@ export const getDecryptedMediaUrlOverPeer = async (
           targetDrive,
           fileId,
           fileKey,
-          authToken,
           size.pixelWidth,
           size.pixelHeight,
           { systemFileType, lastModified }
@@ -164,18 +159,10 @@ export const getDecryptedMediaUrlOverPeer = async (
       }
     }
 
-    return await getPayloadBytesOverPeer(
-      dotYouClient,
-      odinId,
-      targetDrive,
-      fileId,
-      fileKey,
-      authToken,
-      {
-        systemFileType,
-        lastModified,
-      }
-    );
+    return await getPayloadBytesOverPeer(dotYouClient, odinId, targetDrive, fileId, fileKey, {
+      systemFileType,
+      lastModified,
+    });
   };
 
   // Direct download over transit of the data and potentially decrypt if response headers indicate encrypted

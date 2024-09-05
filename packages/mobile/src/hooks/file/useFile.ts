@@ -1,17 +1,15 @@
 import { TargetDrive } from '@homebase-id/js-lib/core';
 import { useDotYouClientContext } from 'feed-app-common';
-import { useAuth } from '../auth/useAuth';
 import { getPayloadFile } from '../../provider/files/RNFileProvider';
 import { CachesDirectoryPath, exists } from 'react-native-fs';
 import { OdinBlob } from '../../../polyfills/OdinBlob';
 
 export const useFile = ({ targetDrive }: { targetDrive: TargetDrive }) => {
   const dotYouClient = useDotYouClientContext();
-  const authToken = useAuth().authToken;
 
   const downloadFile = async (odinId: string | undefined, fileId: string, payloadKey?: string) => {
-    if (!fileId || !payloadKey || !authToken) return null;
-    const payload = await getPayloadFile(dotYouClient, targetDrive, fileId, payloadKey, authToken);
+    if (!fileId || !payloadKey) return null;
+    const payload = await getPayloadFile(dotYouClient, targetDrive, fileId, payloadKey);
     if (!payload) return null;
     return payload;
   };

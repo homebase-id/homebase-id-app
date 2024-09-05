@@ -18,7 +18,6 @@ interface AudioData {
 
 export const useAudio = (props?: OdinAudioProps) => {
   const { fileId, payloadKey, drive, lastModified } = props || {};
-  const { authToken } = useAuth();
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
 
@@ -28,11 +27,11 @@ export const useAudio = (props?: OdinAudioProps) => {
     drive?: TargetDrive,
     lastModified?: number
   ): Promise<AudioData | null> => {
-    if (fileId === undefined || fileId === '' || !drive || !payloadKey || !authToken) {
+    if (fileId === undefined || fileId === '' || !drive || !payloadKey) {
       return null;
     }
 
-    const audioBlob = await getPayloadBytes(dotYouClient, drive, fileId, payloadKey, authToken, {
+    const audioBlob = await getPayloadBytes(dotYouClient, drive, fileId, payloadKey, {
       lastModified,
     });
 

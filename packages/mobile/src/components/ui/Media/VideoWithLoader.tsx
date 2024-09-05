@@ -18,6 +18,7 @@ import { useVideo } from '../../../hooks/video/useVideo';
 import { useHlsManifest } from '../../../hooks/video/useHlsVideoManifest';
 import Video from 'react-native-video';
 import { useEncrtypedStorage } from '../../../hooks/auth/useEncryptedStorage';
+import { useDotYouClientContext } from 'feed-app-common';
 
 const MAX_DOWNLOAD_SIZE = 16 * 1024 * 1024 * 1024; // 16 MB
 
@@ -185,6 +186,7 @@ export const VideoWithLoader = memo(
 );
 
 const HlsVideo = ({ odinId, fileId, targetDrive, globalTransitId, payload }: LocalVideoProps) => {
+  const dotYouClient = useDotYouClientContext();
   const { data: hlsManifest } = useHlsManifest(
     odinId,
     fileId,
@@ -193,16 +195,13 @@ const HlsVideo = ({ odinId, fileId, targetDrive, globalTransitId, payload }: Loc
     targetDrive
   ).fetch;
 
-  const { authToken } = useEncrtypedStorage();
-  if (!hlsManifest || !authToken) return null;
+  if (!hlsManifest) return null;
 
   return (
     <Video
       source={{
         uri: hlsManifest,
-        headers: {
-          bx0900: authToken,
-        },
+        headers: dotYouClient.getHeaders(),
         type: 'm3u8',
       }}
       paused={false}

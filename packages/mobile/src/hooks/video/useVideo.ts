@@ -32,11 +32,10 @@ export const useVideo = ({
 }) => {
   const queryClient = useQueryClient();
   const dotyouClient = useDotYouClientContext();
-  const token = useAuth().authToken;
   const localHost = dotyouClient.getIdentity(); // This is the identity of the user
 
   const fetchVideo = async ({ payloadKey }: { payloadKey?: string }) => {
-    if (!fileId || !targetDrive || !payloadKey || !token) return null;
+    if (!fileId || !targetDrive || !payloadKey) return null;
     console.log(odinId, localHost);
     if (odinId && odinId !== localHost) {
       if (videoGlobalTransitId) {
@@ -46,7 +45,6 @@ export const useVideo = ({
           targetDrive,
           videoGlobalTransitId,
           payloadKey,
-          token,
           probablyEncrypted,
           lastModified
         );
@@ -66,7 +64,6 @@ export const useVideo = ({
           targetDrive,
           fileId,
           payloadKey,
-          token,
           probablyEncrypted,
           lastModified
         );
@@ -80,7 +77,7 @@ export const useVideo = ({
         return payload;
       }
     }
-    const payload = await getPayloadBytes(dotyouClient, targetDrive, fileId, payloadKey, token);
+    const payload = await getPayloadBytes(dotyouClient, targetDrive, fileId, payloadKey);
     if (!payload) return;
     return {
       url: payload.uri,

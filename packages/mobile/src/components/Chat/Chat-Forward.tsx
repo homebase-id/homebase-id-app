@@ -60,7 +60,6 @@ export const ChatForwardModal = forwardRef(
     const [selectedContact, setselectedContact] = useState<DotYouProfile[]>([]);
     const [selectedGroup, setselectedGroup] = useState<HomebaseFile<UnifiedConversation>[]>([]);
     const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
-    const { authToken } = useAuth();
     const { bottom } = useSafeAreaInsets();
     const [isLoading, setIsLoading] = useState(false);
 
@@ -110,7 +109,6 @@ export const ChatForwardModal = forwardRef(
                   payload.contentType.startsWith('video')
                   //TODO Add support HLS video || payload.contentType === 'application/vnd.apple.mpegurl'
                 ) {
-                  if (!authToken) return;
                   const downloadPayload = await getVideoData(payload.key);
                   if (!downloadPayload) return;
                   return {
@@ -192,7 +190,6 @@ export const ChatForwardModal = forwardRef(
       }
       onDismiss();
     }, [
-      authToken,
       createConversation,
       getAudio,
       getFromCache,

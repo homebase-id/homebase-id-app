@@ -36,7 +36,6 @@ export const getThumbBytesOverPeer = async (
   targetDrive: TargetDrive,
   fileId: string,
   payloadKey: string,
-  authToken: string,
   width: number,
   height: number,
   options: {
@@ -73,7 +72,7 @@ export const getThumbBytesOverPeer = async (
     fileCache: true,
   })
     .fetch('GET', url, {
-      bx0900: authToken,
+      ...dotYouClient.getHeaders(),
       'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
     })
     .then(async (res) => {
@@ -115,7 +114,6 @@ export const getPayloadBytesOverPeer = async (
   targetDrive: TargetDrive,
   fileId: string,
   key: string,
-  authToken: string,
   options: {
     systemFileType?: SystemFileType;
     decrypt?: boolean;
@@ -150,7 +148,7 @@ export const getPayloadBytesOverPeer = async (
     fileCache: true,
   })
     .fetch('GET', url, {
-      bx0900: authToken,
+      ...dotYouClient.getHeaders(),
       'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
     })
     .then(async (res) => {
