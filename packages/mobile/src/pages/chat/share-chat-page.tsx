@@ -178,8 +178,8 @@ export const ShareChatPage = (prop: ShareChatProp) => {
 
   const { bottom } = useSafeAreaInsets();
 
-  const renderFooter = useCallback(
-    () => (
+  const renderFooter = useCallback(() => {
+    return (
       <View
         style={{
           position: 'absolute',
@@ -193,6 +193,7 @@ export const ShareChatPage = (prop: ShareChatProp) => {
       >
         <View style={styles.namesContainer}>
           {selectedConversation.map((group) => {
+            const isSingleConversation = group.fileMetadata.appData.content.recipients.length === 2;
             return (
               <Text
                 key={group.fileId}
@@ -205,7 +206,11 @@ export const ShareChatPage = (prop: ShareChatProp) => {
                   overflow: 'hidden',
                 }}
               >
-                {group.fileMetadata.appData.content.title}
+                {!isSingleConversation ? (
+                  group.fileMetadata.appData.content.title
+                ) : (
+                  <AuthorName odinId={group.fileMetadata.appData.content.recipients[0]} />
+                )}
               </Text>
             );
           })}
@@ -256,9 +261,8 @@ export const ShareChatPage = (prop: ShareChatProp) => {
           )}
         </TouchableHighlight>
       </View>
-    ),
-    [bottom, isDarkMode, onShare, selectedContact, selectedConversation, sending]
-  );
+    );
+  }, [bottom, isDarkMode, onShare, selectedContact, selectedConversation, sending]);
 
   return (
     <SafeAreaView>
