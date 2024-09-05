@@ -205,7 +205,7 @@ export const LikeButton = memo(
       <>
         <ErrorNotification error={postEmojiError || removeEmojiError} />
         <IconButton
-          icon={isLiked ? <SolidHeart color={Colors.red[500]} /> : <OpenHeart />}
+          icon={<OpenHeart />}
           onPress={isLiked ? doUnlike : doLike}
           touchableProps={{
             onLongPress: onLongPress,
