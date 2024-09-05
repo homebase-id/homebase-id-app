@@ -108,82 +108,19 @@ export const savePost = async <T extends PostContent>(
     const newMediaFile = newMediaFiles[i];
     const payloadKey = newMediaFile.key || `${POST_MEDIA_PAYLOAD_KEY}${i}`;
 
-    console.log('newMediaFile', newMediaFile);
     if (newMediaFile.type?.startsWith('video/')) {
-      // Grab thumbnail
-      onUpdate?.('Grabbing thumbnail', 0);
-      const thumbnail = await grabThumbnail(newMediaFile);
-      const thumbSource: ImageSource | null = thumbnail
-        ? {
-            uri: thumbnail.uri,
-            width: 1920, //thumbnail.width || 1920,
-            height: 1080, //thumbnail.height || 1080,
-            type: thumbnail.type,
-          }
-        : null;
-      const { tinyThumb, additionalThumbnails } =
-        thumbSource && thumbnail
-          ? await createThumbnails(thumbSource, payloadKey, thumbnail.type as ImageContentType, [
-              { quality: 100, width: 250, height: 250 },
-            ])
-          : { tinyThumb: undefined, additionalThumbnails: undefined };
-      if (additionalThumbnails) {
-        thumbnails.push(...additionalThumbnails);
-      }
+      const {
+        tinyThumb: tinyThumbFromVideo,
+        thumbnails: thumbnailsFromVideo,
+        payloads: payloadsFromVideo,
+        keyHeader: keyHeaderFromVideo,
+      } = await processVideo(newMediaFile, payloadKey);
 
-      if (tinyThumb) previewThumbnails.push(tinyThumb);
+      thumbnails.push(...thumbnailsFromVideo);
+      payloads.push(...payloadsFromVideo);
 
-      // Process video
-      const { metadata, ...videoData } = await processVideo(
-        newMediaFile,
-        true,
-        (progress) => onUpdate?.('Compressing', progress),
-        encrypt
-      );
-
-      if ('segments' in videoData) {
-        // HLS
-        const { playlist, segments } = videoData;
-        keyHeader = videoData.keyHeader;
-        const playlistBlob = new OdinBlob(playlist.uri, {
-          type: playlist.type as VideoContentType,
-        }) as unknown as Blob;
-
-        payloads.push({
-          key: payloadKey,
-          payload: playlistBlob,
-          descriptorContent: jsonStringify64(metadata),
-        });
-
-        for (let j = 0; j < segments.length; j++) {
-          const segment = segments[j];
-          const segmentBlob = new OdinBlob(segment.uri, {
-            type: segment.type as VideoContentType,
-          }) as unknown as Blob;
-
-          thumbnails.push({
-            key: payloadKey,
-            payload: segmentBlob,
-            pixelHeight: j,
-            pixelWidth: j,
-            skipEncryption: true,
-          });
-        }
-      } else {
-        // Custom blob to avoid reading and writing the file to disk again
-        const payloadBlob = new OdinBlob(
-          (videoData.video.filepath || videoData.video.uri) as string,
-          {
-            type: 'video/mp4' as VideoContentType,
-          }
-        ) as unknown as Blob;
-
-        payloads.push({
-          key: payloadKey,
-          payload: payloadBlob,
-          descriptorContent: metadata ? jsonStringify64(metadata) : undefined,
-        });
-      }
+      if (tinyThumbFromVideo) previewThumbnails.push(tinyThumbFromVideo);
+      if (keyHeaderFromVideo) keyHeader = keyHeaderFromVideo;
     } else if (newMediaFile.type?.startsWith('image/')) {
       onUpdate?.('Generating thumbnails', 0);
 

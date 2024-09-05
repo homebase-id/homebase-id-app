@@ -1,5 +1,10 @@
 import { ImageSource } from './RNImageProvider';
-import { getNewId, getRandom16ByteArray, uint8ArrayToBase64 } from '@homebase-id/js-lib/helpers';
+import {
+  getNewId,
+  getRandom16ByteArray,
+  jsonStringify64,
+  uint8ArrayToBase64,
+} from '@homebase-id/js-lib/helpers';
 
 import { CachesDirectoryPath, exists, read, stat, unlink, writeFile } from 'react-native-fs';
 import { Video } from 'react-native-compressor';
@@ -7,9 +12,16 @@ import { Platform } from 'react-native';
 
 import MP4Box from 'mp4box';
 import { FFmpegKit, SessionState } from 'ffmpeg-kit-react-native';
-import { SegmentedVideoMetadata } from '@homebase-id/js-lib/media';
+import { SegmentedVideoMetadata, VideoContentType } from '@homebase-id/js-lib/media';
 import { OdinBlob } from '../../../polyfills/OdinBlob';
-import { KeyHeader } from '@homebase-id/js-lib/core';
+import {
+  EmbeddedThumb,
+  ImageContentType,
+  KeyHeader,
+  PayloadFile,
+  ThumbnailFile,
+} from '@homebase-id/js-lib/core';
+import { createThumbnails } from './RNThumbnailProvider';
 
 const CompressVideo = async (
   video: ImageSource,
@@ -321,7 +333,7 @@ interface HLSData {
   keyHeader?: KeyHeader;
 }
 
-export const processVideo = async (
+const compressAndSegmentVideo = async (
   video: ImageSource,
   compress?: boolean,
   onUpdate?: (progress: number) => void,
@@ -359,5 +371,99 @@ export const processVideo = async (
   return {
     metadata,
     video: fragmentedVideo,
+  };
+};
+
+export const processVideo = async (
+  video: ImageSource,
+  payloadKey: string,
+  compress?: boolean,
+  onUpdate?: (phase: string, progress: number) => void,
+  encrypt?: boolean
+): Promise<{
+  tinyThumb: EmbeddedThumb | undefined;
+  payloads: PayloadFile[];
+  thumbnails: ThumbnailFile[];
+  keyHeader?: KeyHeader;
+}> => {
+  let keyHeader: KeyHeader | undefined;
+  const payloads: PayloadFile[] = [];
+  const thumbnails: ThumbnailFile[] = [];
+
+  // Grab thumbnail
+  onUpdate?.('Grabbing thumbnail', 0);
+  const thumbnail = await grabThumbnail(video);
+  const thumbSource: ImageSource | null = thumbnail
+    ? {
+        uri: thumbnail.uri,
+        width: 1920, //thumbnail.width || 1920,
+        height: 1080, //thumbnail.height || 1080,
+        type: thumbnail.type,
+      }
+    : null;
+  const { tinyThumb, additionalThumbnails } =
+    thumbSource && thumbnail
+      ? await createThumbnails(thumbSource, payloadKey, thumbnail.type as ImageContentType, [
+          { quality: 100, width: 250, height: 250 },
+        ])
+      : { tinyThumb: undefined, additionalThumbnails: undefined };
+  if (additionalThumbnails) {
+    thumbnails.push(...additionalThumbnails);
+  }
+
+  // Compress and segment video
+  const { metadata, ...videoData } = await compressAndSegmentVideo(
+    video,
+    compress,
+    onUpdate ? (progress) => onUpdate('Compressing', progress) : undefined,
+    encrypt
+  );
+
+  if ('segments' in videoData) {
+    // HLS
+    const { playlist, segments } = videoData;
+    keyHeader = videoData.keyHeader;
+    const playlistBlob = new OdinBlob(playlist.uri, {
+      type: playlist.type as VideoContentType,
+    }) as unknown as Blob;
+
+    payloads.push({
+      key: payloadKey,
+      payload: playlistBlob,
+      descriptorContent: jsonStringify64(metadata),
+    });
+
+    for (let j = 0; j < segments.length; j++) {
+      const segment = segments[j];
+      const segmentBlob = new OdinBlob(segment.uri, {
+        type: segment.type as VideoContentType,
+      }) as unknown as Blob;
+
+      thumbnails.push({
+        key: payloadKey,
+        payload: segmentBlob,
+        pixelHeight: j,
+        pixelWidth: j,
+        skipEncryption: true,
+      });
+    }
+  } else {
+    // Custom blob to avoid reading and writing the file to disk again
+    const payloadBlob = new OdinBlob((videoData.video.filepath || videoData.video.uri) as string, {
+      type: 'video/mp4' as VideoContentType,
+    }) as unknown as Blob;
+
+    payloads.push({
+      key: payloadKey,
+      payload: payloadBlob,
+      descriptorContent: metadata ? jsonStringify64(metadata) : undefined,
+    });
+  }
+
+  return {
+    tinyThumb,
+    thumbnails,
+    payloads,
+    keyHeader,
   };
 };
