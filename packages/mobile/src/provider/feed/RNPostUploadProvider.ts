@@ -101,7 +101,12 @@ export const savePost = async <T extends PostContent>(
   const payloads: PayloadFile[] = [];
   const thumbnails: ThumbnailFile[] = [];
   const previewThumbnails: EmbeddedThumb[] = [];
-  let keyHeader: KeyHeader | undefined;
+  const keyHeader: KeyHeader | undefined = encrypt
+    ? {
+        iv: getRandom16ByteArray(),
+        aesKey: getRandom16ByteArray(),
+      }
+    : undefined;
 
   // Handle image files:
   for (let i = 0; newMediaFiles && i < newMediaFiles?.length; i++) {
@@ -113,14 +118,12 @@ export const savePost = async <T extends PostContent>(
         tinyThumb: tinyThumbFromVideo,
         thumbnails: thumbnailsFromVideo,
         payloads: payloadsFromVideo,
-        keyHeader: keyHeaderFromVideo,
-      } = await processVideo(newMediaFile, payloadKey);
+      } = await processVideo(newMediaFile, payloadKey, true, onUpdate, keyHeader);
 
       thumbnails.push(...thumbnailsFromVideo);
       payloads.push(...payloadsFromVideo);
 
       if (tinyThumbFromVideo) previewThumbnails.push(tinyThumbFromVideo);
-      if (keyHeaderFromVideo) keyHeader = keyHeaderFromVideo;
     } else if (newMediaFile.type?.startsWith('image/')) {
       onUpdate?.('Generating thumbnails', 0);
 

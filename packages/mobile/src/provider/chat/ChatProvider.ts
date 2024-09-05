@@ -35,16 +35,16 @@ import {
 import { ChatDrive, UnifiedConversation } from './ConversationProvider';
 import {
   assertIfDefined,
-  base64ToUint8Array,
   getNewId,
+  getRandom16ByteArray,
   jsonStringify64,
   stringToUint8Array,
 } from '@homebase-id/js-lib/helpers';
 import { OdinBlob } from '../../../polyfills/OdinBlob';
 import { ImageSource } from '../image/RNImageProvider';
 import { createThumbnails } from '../image/RNThumbnailProvider';
-import { grabThumbnail, processVideo } from '../image/RNVideoProviderSegmenter';
-import { LinkPreview, LinkPreviewDescriptor, VideoContentType } from '@homebase-id/js-lib/media';
+import { processVideo } from '../image/RNVideoProviderSegmenter';
+import { LinkPreview, LinkPreviewDescriptor } from '@homebase-id/js-lib/media';
 import { sendReadReceipt } from '@homebase-id/js-lib/peer';
 
 const CHAT_APP_ID = '2d781401-3804-4b57-b4aa-d8e4e2ef39f4';
@@ -283,7 +283,10 @@ export const uploadChatMessage = async (
   const payloads: PayloadFile[] = [];
   const thumbnails: ThumbnailFile[] = [];
   const previewThumbnails: EmbeddedThumb[] = [];
-  let keyHeader: KeyHeader | undefined;
+  const keyHeader: KeyHeader | undefined = {
+    iv: getRandom16ByteArray(),
+    aesKey: getRandom16ByteArray(),
+  };
 
   if (!files?.length && linkPreviews?.length) {
     // We only support link previews when there is no media
@@ -331,14 +334,12 @@ export const uploadChatMessage = async (
         tinyThumb: tinyThumbFromVideo,
         thumbnails: thumbnailsFromVideo,
         payloads: payloadsFromVideo,
-        keyHeader: keyHeaderFromVideo,
-      } = await processVideo(newMediaFile, payloadKey);
+      } = await processVideo(newMediaFile, payloadKey, true, onUpdate, keyHeader);
 
       thumbnails.push(...thumbnailsFromVideo);
       payloads.push(...payloadsFromVideo);
 
       if (tinyThumbFromVideo) previewThumbnails.push(tinyThumbFromVideo);
-      if (keyHeaderFromVideo) keyHeader = keyHeaderFromVideo;
     } else if (newMediaFile.type?.startsWith('image/')) {
       onUpdate?.('Generating thumbnails', 0);
 
