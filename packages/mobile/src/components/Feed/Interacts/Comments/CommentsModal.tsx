@@ -3,12 +3,21 @@ import {
   BottomSheetFooter,
   BottomSheetFooterProps,
   BottomSheetModal,
+  BottomSheetView,
 } from '@gorhom/bottom-sheet';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
-import { forwardRef, memo, useCallback, useImperativeHandle, useRef, useState } from 'react';
+import {
+  forwardRef,
+  memo,
+  useCallback,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useDarkMode } from '../../../../hooks/useDarkMode';
 import { Colors } from '../../../../app/Colors';
-import { ListRenderItemInfo, Platform, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, ListRenderItemInfo, Platform, StyleSheet, View } from 'react-native';
 import { Text } from '../../../ui/Text/Text';
 
 import { ReactionContext } from '@homebase-id/js-lib/public';
@@ -40,7 +49,13 @@ export const CommentsModal = memo(
       | undefined
     >();
 
-    const { data: comments, hasNextPage, fetchNextPage } = useComments({ context }).fetch;
+    const {
+      data: comments,
+      hasNextPage,
+      fetchNextPage,
+      isFetchingNextPage,
+      isLoading,
+    } = useComments({ context }).fetch;
     const flattenedComments = comments?.pages.flatMap((page) => page.comments).reverse();
 
     useImperativeHandle(ref, () => {
@@ -104,6 +119,10 @@ export const CommentsModal = memo(
       [context]
     );
 
+    const listFooter = useMemo(() => {
+      if (isFetchingNextPage) return <CommentsLoader />;
+    }, [isFetchingNextPage]);
+
     return (
       <BottomSheetModal
         ref={bottomSheetRef}
@@ -132,20 +151,25 @@ export const CommentsModal = memo(
         >
           <Text style={styles.headerText}>Comments</Text>
         </View>
-        <BottomSheetFlatList
-          data={flattenedComments}
-          contentContainerStyle={{ flexGrow: 1 }}
-          onEndReached={() => {
-            if (hasNextPage) {
-              fetchNextPage();
-            }
-          }}
-          ListEmptyComponent={EmptyComponent}
-          onEndReachedThreshold={0.3}
-          renderItem={renderItem}
-          ListFooterComponent={<Empty />}
-          ListFooterComponentStyle={{ paddingBottom: bottom + 100 }}
-        />
+
+        {isLoading ? (
+          <CommentsLoader />
+        ) : (
+          <BottomSheetFlatList
+            data={flattenedComments}
+            contentContainerStyle={{ flexGrow: 1 }}
+            onEndReached={() => {
+              if (hasNextPage) {
+                fetchNextPage();
+              }
+            }}
+            ListEmptyComponent={EmptyComponent}
+            onEndReachedThreshold={0.3}
+            renderItem={renderItem}
+            ListFooterComponent={listFooter}
+            ListFooterComponentStyle={{ paddingBottom: bottom + 100 }}
+          />
+        )}
       </BottomSheetModal>
     );
   })
@@ -177,6 +201,18 @@ const EmptyComponent = () => {
   );
 };
 
+const CommentsLoader = () => {
+  const { isDarkMode } = useDarkMode();
+  return (
+    <BottomSheetView style={styles.container}>
+      <ActivityIndicator
+        size="large"
+        color={isDarkMode ? Colors.indigo[400] : Colors.indigo[700]}
+      />
+    </BottomSheetView>
+  );
+};
+
 const styles = StyleSheet.create({
   headerText: {
     textAlign: 'center',
@@ -187,7 +223,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 24,
-    backgroundColor: 'grey',
   },
   contentContainer: {
     flex: 1,
