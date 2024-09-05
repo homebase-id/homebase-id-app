@@ -121,6 +121,7 @@ export const CommentsModal = memo(
 
     const listFooter = useMemo(() => {
       if (isFetchingNextPage) return <CommentsLoader />;
+      return <></>;
     }, [isFetchingNextPage]);
 
     return (
