@@ -72,11 +72,10 @@ const MB = 1000000;
 interface HLSVideo {
   playlist: ImageSource;
   segments: ImageSource[];
-  keyHeader?: KeyHeader;
 }
 const segmentVideo = async (
   video: ImageSource,
-  encrypt?: boolean
+  keyHeader?: KeyHeader
 ): Promise<ImageSource | HLSVideo | null> => {
   try {
     const source = video.filepath || video.uri;
@@ -95,14 +94,9 @@ const segmentVideo = async (
     const dirPath = CachesDirectoryPath;
     const destinationPrefix = Platform.OS === 'ios' ? '' : 'file://';
 
-    const { keyHeader, keyInfoUri, pathsToClean } =
+    const { keyInfoUri, pathsToClean } =
       (await (async () => {
-        if (encrypt) {
-          const keyHeader = {
-            iv: getRandom16ByteArray(),
-            aesKey: getRandom16ByteArray(),
-          };
-
+        if (keyHeader) {
           const keyUrl = 'http://example.com/path/to/encryption.key';
           const keyUri = `${destinationPrefix}${dirPath}/hls-encryption.key`;
           // const ivUri = `${destinationPrefix}${dirPath}/hls-iv.bin`;
@@ -114,12 +108,12 @@ const segmentVideo = async (
 
           await writeFile(keyInfoUri, keyInfo, 'utf8');
 
-          return { keyHeader, keyInfoUri, pathsToClean: [keyUri, keyInfoUri] };
+          return { keyInfoUri, pathsToClean: [keyUri, keyInfoUri] };
         }
       })()) || {};
 
     const playlistUri = `${destinationPrefix}${dirPath}/ffmpeg-segmented-${getNewId()}.m3u8`;
-    const encryptionInfo = encrypt
+    const encryptionInfo = keyHeader
       ? `-hls_key_info_file ${keyInfoUri}` // -hls_enc 1`
       : '';
 
@@ -180,7 +174,6 @@ const segmentVideo = async (
             };
           })
         ),
-        keyHeader,
       };
     } catch (error) {
       throw new Error(`FFmpeg process failed with error: ${error}`);
@@ -337,12 +330,12 @@ const compressAndSegmentVideo = async (
   video: ImageSource,
   compress?: boolean,
   onUpdate?: (progress: number) => void,
-  encrypt?: boolean
+  keyHeader?: KeyHeader
 ): Promise<VideoData | HLSData> => {
   const compressedVideo = compress
     ? await CompressVideo(video, (progress) => onUpdate?.(progress / 1.5))
     : undefined;
-  const fragmentedVideo = (await segmentVideo(compressedVideo || video, encrypt)) || video;
+  const fragmentedVideo = (await segmentVideo(compressedVideo || video, keyHeader)) || video;
   onUpdate?.(1);
 
   const playlistOrFullVideo: ImageSource | null =
@@ -363,7 +356,6 @@ const compressAndSegmentVideo = async (
     return {
       playlist: (fragmentedVideo as HLSVideo).playlist,
       segments: (fragmentedVideo as HLSVideo).segments,
-      keyHeader: (fragmentedVideo as HLSVideo).keyHeader,
       metadata,
     };
   }
@@ -379,14 +371,12 @@ export const processVideo = async (
   payloadKey: string,
   compress?: boolean,
   onUpdate?: (phase: string, progress: number) => void,
-  encrypt?: boolean
+  keyHeader?: KeyHeader
 ): Promise<{
   tinyThumb: EmbeddedThumb | undefined;
   payloads: PayloadFile[];
   thumbnails: ThumbnailFile[];
-  keyHeader?: KeyHeader;
 }> => {
-  let keyHeader: KeyHeader | undefined;
   const payloads: PayloadFile[] = [];
   const thumbnails: ThumbnailFile[] = [];
 
@@ -416,7 +406,7 @@ export const processVideo = async (
     video,
     compress,
     onUpdate ? (progress) => onUpdate('Compressing', progress) : undefined,
-    encrypt
+    keyHeader
   );
 
   if ('segments' in videoData) {
@@ -464,6 +454,5 @@ export const processVideo = async (
     tinyThumb,
     thumbnails,
     payloads,
-    keyHeader,
   };
 };
