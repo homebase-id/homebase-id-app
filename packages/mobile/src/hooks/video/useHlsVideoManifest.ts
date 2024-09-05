@@ -8,7 +8,12 @@ import {
   getPayloadBytes,
   InterceptionEncryptionUtil,
 } from '@homebase-id/js-lib/core';
-import { byteArrayToString, getNewId, stringifyToQueryParams } from '@homebase-id/js-lib/helpers';
+import {
+  byteArrayToString,
+  getNewId,
+  stringifyToQueryParams,
+  uint8ArrayToBase64,
+} from '@homebase-id/js-lib/helpers';
 import { getAnonymousDirectImageUrl } from '@homebase-id/js-lib/media';
 import { getPayloadBytesOverPeer } from '@homebase-id/js-lib/peer';
 import { useVideoMetadata } from './useVideoMetadata';
@@ -24,7 +29,7 @@ export const useHlsManifest = (
   videoFileKey?: string | undefined,
   videoDrive?: TargetDrive
 ) => {
-  useLocalWebServer(true);
+  useLocalWebServer(Platform.OS === 'ios');
 
   const dotYouClient = useDotYouClientContext();
   const identity = dotYouClient.getIdentity();
@@ -99,6 +104,7 @@ export const useHlsManifest = (
     const filePath = `file://${CachesDirectoryPath}/${fileName}`;
     await writeFile(filePath, contents, 'utf8');
 
+    // iOS needs to fetch the manifest over http; Android can use the local file on disk
     if (Platform.OS === 'ios') {
       return `http://localhost:3000/manifest?file=${fileName}`;
     }
@@ -208,16 +214,5 @@ const getSegmentUrl = async (
   return InterceptionEncryptionUtil.encryptUrl(unenryptedThumbUrl, ss);
 };
 
-const getKeyUrl = async (aesKey: Uint8Array) => {
-  const fileName = `${getNewId()}.key`;
-  const keyPath = `file://${CachesDirectoryPath}/${fileName}`;
-  await writeFile(keyPath, toHexString(aesKey), 'utf8');
-
-  return `http://localhost:3000/key/${fileName}`;
-};
-
-const toHexString = (byteArray: Uint8Array) => {
-  return Array.from(byteArray, function (byte) {
-    return ('0' + (byte & 0xff).toString(16)).slice(-2);
-  }).join('');
-};
+const getKeyUrl = async (aesKey: Uint8Array) =>
+  `data:application/octet-stream;base64,${uint8ArrayToBase64(aesKey)}`;

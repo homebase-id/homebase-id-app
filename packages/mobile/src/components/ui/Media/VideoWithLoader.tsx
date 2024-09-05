@@ -16,7 +16,8 @@ import { Play } from '../Icons/icons';
 import { OdinImage } from '../OdinImage/OdinImage';
 import { useVideo } from '../../../hooks/video/useVideo';
 import { useHlsManifest } from '../../../hooks/video/useHlsVideoManifest';
-import Video, { DRMType } from 'react-native-video';
+import Video from 'react-native-video';
+import { useEncrtypedStorage } from '../../../hooks/auth/useEncryptedStorage';
 
 const MAX_DOWNLOAD_SIZE = 16 * 1024 * 1024 * 1024; // 16 MB
 
@@ -192,16 +193,17 @@ const HlsVideo = ({ odinId, fileId, targetDrive, globalTransitId, payload }: Loc
     targetDrive
   ).fetch;
 
-  if (!hlsManifest) return null;
+  const { authToken } = useEncrtypedStorage();
+  if (!hlsManifest || !authToken) return null;
 
   return (
     <Video
       source={{
         uri: hlsManifest,
-        type: 'm3u8',
-        drm: {
-          base64Certificate: false,
+        headers: {
+          bx0900: authToken,
         },
+        type: 'm3u8',
       }}
       paused={false}
       style={{

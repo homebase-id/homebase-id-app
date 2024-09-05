@@ -216,7 +216,7 @@ export const MediaItem = ({
           lastModified={payload.lastModified}
           fit={fit}
           imageSize={imageSize}
-          preview
+          preview={true}
           style={
             style || {
               borderRadius: 10,
