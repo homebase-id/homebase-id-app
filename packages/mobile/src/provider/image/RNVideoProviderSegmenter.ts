@@ -120,7 +120,7 @@ const segmentVideo = async (
     // MDN docs (https://developer.mozilla.org/en-US/docs/Web/API/Media_Source_Extensions_API/Transcoding_assets_for_MSE#fragmenting)
     // FFMPEG fragmenting: https://ffmpeg.org/ffmpeg-formats.html#Fragmentation
     // const command = `-i ${source} -c:v copy -c:a copy -movflags frag_keyframe+empty_moov+default_base_moof ${destinationUri}`;
-    const command = `-i ${source} -codec: copy ${encryptionInfo} -hls_time 10 -hls_list_size 0 -f hls ${playlistUri}`;
+    const command = `-i ${source} -codec: copy ${encryptionInfo} -hls_time 6 -hls_list_size 0 -f hls ${playlistUri}`;
 
     // empty_moov (older version of the above)
     // const command = `-i ${source} -c copy -movflags +frag_keyframe+separate_moof+omit_tfhd_offset+empty_moov ${destinationUri}`;
@@ -336,6 +336,7 @@ const compressAndSegmentVideo = async (
     ? await CompressVideo(video, (progress) => onUpdate?.(progress / 1.5))
     : undefined;
   const fragmentedVideo = (await segmentVideo(compressedVideo || video, keyHeader)) || video;
+
   onUpdate?.(1);
 
   const playlistOrFullVideo: ImageSource | null =
