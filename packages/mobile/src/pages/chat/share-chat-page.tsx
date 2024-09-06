@@ -38,8 +38,8 @@ import {
 } from '../../hooks/chat/useConversationsWithRecentMessage';
 import ConversationTile from '../../components/Chat/Conversation-tile';
 import { getNewId } from '@homebase-id/js-lib/helpers';
-import { ConversationTileWithYourself } from '../conversations-page';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ConversationTileWithYourself } from '../../components/Conversation/ConversationTileWithYourself';
 
 export type ShareChatProp = NativeStackScreenProps<ChatStackParamList, 'ShareChat'>;
 export const ShareChatPage = (prop: ShareChatProp) => {

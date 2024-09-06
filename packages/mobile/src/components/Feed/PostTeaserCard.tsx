@@ -16,11 +16,11 @@ import { CanReactInfo } from '../../hooks/reactions';
 import { PostMeta, ToGroupBlock } from './Meta/Meta';
 import { ShareContext } from './Interacts/Share/ShareModal';
 import { Ellipsis } from '../ui/Icons/icons';
-import { IconButton } from '../Chat/Chat-app-bar';
 import { PostActionProps } from './Interacts/PostActionModal';
 import { useDotYouClientContext } from 'feed-app-common';
 import { useCheckIdentity } from '../../hooks/checkIdentity/useCheckIdentity';
 import { PostBody } from './Body/PostBody';
+import { IconButton } from '../ui/Buttons';
 
 export const PostTeaserCard = memo(
   ({

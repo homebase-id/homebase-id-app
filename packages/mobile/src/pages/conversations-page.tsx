@@ -19,37 +19,30 @@ import {
   ConversationWithRecentMessage,
   useConversationsWithRecentMessage,
 } from '../hooks/chat/useConversationsWithRecentMessage';
-import { ConversationWithYourselfId } from '../provider/chat/ConversationProvider';
-import { useAuth } from '../hooks/auth/useAuth';
-import { useProfile } from '../hooks/profile/useProfile';
 import { memo, useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useRemoveNotifications } from '../hooks/notifications/usePushNotifications';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Text } from '../components/ui/Text/Text';
 import { ScrollView } from 'react-native-gesture-handler';
 import { ContactTile } from '../components/Contact/Contact-Tile';
-import { t, useAllContacts, useDotYouClientContext } from 'feed-app-common';
+import { useAllContacts, useDotYouClientContext } from 'feed-app-common';
 import { Colors } from '../app/Colors';
 import { useDarkMode } from '../hooks/useDarkMode';
 import { CHAT_APP_ID } from '../app/constants';
 import { ErrorBoundary } from '../components/ui/ErrorBoundary/ErrorBoundary';
 import { InfiniteData, useQueryClient } from '@tanstack/react-query';
-import { Pencil, People } from '../components/ui/Icons/icons';
+import { Pencil } from '../components/ui/Icons/icons';
 import { TouchableOpacity } from '@gorhom/bottom-sheet';
 import { SafeAreaView } from '../components/ui/SafeAreaView/SafeAreaView';
-import { openURL } from '../utils/utils';
 import { OfflineState } from '../components/Platform/OfflineState';
+import { ConversationTileWithYourself } from '../components/Conversation/ConversationTileWithYourself';
+import { EmptyConversation } from '../components/Conversation/EmptyConversation';
 
 type ConversationProp = NativeStackScreenProps<ChatStackParamList, 'Conversation'>;
 
 export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
   const { data: conversations, isFetched: conversationsFetched } =
     useConversationsWithRecentMessage().all;
-  const { data: contacts, refetch } = useAllContacts(
-    conversationsFetched && (!conversations || !conversations?.length)
-  );
-
-  const noContacts = !contacts || contacts.length === 0;
 
   const [query, setQuery] = useState<string | undefined>(undefined);
   const { isDarkMode } = useDarkMode();
@@ -64,7 +57,7 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
       headerSearchBarOptions: {
         hideWhenScrolling: true,
         headerIconColor: isDarkMode ? Colors.white : Colors.black,
-        placeholder: 'Search',
+        placeholder: 'Search people',
         hideNavigationBar: true,
         autoCapitalize: 'none',
         onChangeText: (event) => {
@@ -128,14 +121,9 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
     await queryClient.invalidateQueries({ queryKey: ['conversations'] });
     await queryClient.invalidateQueries({ queryKey: ['connections'] });
 
-    if (noContacts) {
-      refetch();
-    }
-
     setRefreshing(false);
-  }, [noContacts, queryClient, refetch]);
-
-  const isQueryActive = !!(query && query.length >= 1);
+  }, [queryClient]);
+  const isQueryActive = useMemo(() => !!(query && query.length >= 1), [query]);
   if (isQueryActive) {
     return (
       <ErrorBoundary>
@@ -161,38 +149,9 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
             renderItem={renderItem}
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={doRefresh} />}
           />
-        ) : conversationsFetched ? (
-          <ScrollView
-            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={doRefresh} />}
-            style={{ flex: 1 }}
-          >
-            <ConversationTileWithYourself />
-            {noContacts ? (
-              <View style={{ padding: 16, flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-                <Text style={{ color: Colors.gray[400], fontStyle: 'italic' }}>
-                  {t('To chat with someone on Homebase you need to be connected first.')}
-                </Text>
-                <TouchableOpacity
-                  style={{
-                    gap: 8,
-                    flexDirection: 'row',
-                    marginLeft: 'auto',
-                  }}
-                  onPress={() => openURL(`https://${identity}/owner/connections`)}
-                >
-                  <Text>{t('Connect')}</Text>
-                  <People />
-                </TouchableOpacity>
-              </View>
-            ) : (
-              <View style={{ padding: 16 }}>
-                <Text style={{ color: Colors.gray[400], fontStyle: 'italic' }}>
-                  {t('No conversations found')}
-                </Text>
-              </View>
-            )}
-          </ScrollView>
-        ) : null}
+        ) : (
+          <EmptyConversation conversationsFetched={conversationsFetched} />
+        )}
       </SafeAreaView>
     </ErrorBoundary>
   );
@@ -235,45 +194,6 @@ const RemoveNotifications = memo(() => {
   return null;
 });
 
-export const ConversationTileWithYourself = memo(
-  ({
-    selecMode: selectMode,
-    isSelected,
-    onPress,
-  }: {
-    selecMode?: boolean;
-    isSelected?: boolean;
-    onPress?: () => void;
-  }) => {
-    const { data: profile } = useProfile();
-    const odinId = useAuth().getIdentity();
-    const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
-
-    const doOpen = useCallback(
-      () =>
-        navigation.navigate('ChatScreen', {
-          convoId: ConversationWithYourselfId,
-        }),
-      [navigation]
-    );
-
-    return (
-      <ConversationTile
-        odinId={odinId || ''}
-        conversation={{
-          title: profile ? `${profile?.firstName} ${profile?.surName} ` : '',
-          recipients: [],
-        }}
-        conversationId={ConversationWithYourselfId}
-        isSelf
-        isSelected={isSelected}
-        selectMode={selectMode}
-        onPress={selectMode ? onPress : doOpen}
-      />
-    );
-  }
-);
-
 const SearchConversationResults = memo(
   ({
     query,
@@ -282,10 +202,10 @@ const SearchConversationResults = memo(
     query: string | undefined;
     conversations: ConversationWithRecentMessage[];
   }) => {
-    const isActive = !!(query && query.length >= 1);
+    const isActive = useMemo(() => !!(query && query.length >= 1), [query]);
     const { data: contacts } = useAllContacts(isActive);
+    query = query?.trim().toLowerCase();
     const identity = useDotYouClientContext().getIdentity();
-
     const conversationResults = useMemo(
       () =>
         query && conversations
@@ -305,26 +225,35 @@ const SearchConversationResults = memo(
         query && contacts
           ? contacts
               .map((contact) => contact.fileMetadata.appData.content)
-              .filter(
-                (contact) =>
+              .filter((contact) => {
+                return (
                   contact.odinId &&
                   (contact.odinId?.includes(query) ||
-                    contact.name?.displayName?.toLowerCase().includes(query.toLowerCase()))
-              )
+                    contact.name?.displayName?.toLowerCase().includes(query) ||
+                    contact.name?.givenName?.toLowerCase().includes(query) ||
+                    contact.name?.surname?.toLowerCase().includes(query))
+                );
+              })
           : [],
       [contacts, query]
     );
 
     const contactsWithoutAConversation = useMemo(
       () =>
-        contactResults.filter(
-          (contact) =>
+        contactResults.filter((contact) => {
+          // filter conversations which have should not have more than 1 recipient
+          const singleConversations = conversationResults.filter((conversation) => {
+            const content = conversation.fileMetadata.appData.content;
+            return content.recipients.length === 2;
+          });
+          return (
             contact.odinId &&
-            !conversationResults.some((conversation) => {
+            !singleConversations.some((conversation) => {
               const content = conversation.fileMetadata.appData.content;
               return content.recipients.includes(contact.odinId as string);
             })
-        ),
+          );
+        }),
       [contactResults, conversationResults]
     );
     const navigation = useNavigation<NavigationProp<ChatStackParamList>>();

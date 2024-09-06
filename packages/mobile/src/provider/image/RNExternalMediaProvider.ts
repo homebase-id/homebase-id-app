@@ -12,6 +12,7 @@ import {
   getFileHeaderOverPeer,
   getFileHeaderOverPeerByGlobalTransitId,
 } from '@homebase-id/js-lib/peer';
+import { getThumbBytesOverPeerByGlobalTransitId } from './RNPeerFileByGlobalTransitProvider';
 
 export const getDecryptedMediaDataOverPeerByGlobalTransitId = async (
   dotYouClient: DotYouClient,
@@ -64,7 +65,7 @@ export const getDecryptedMediaDataOverPeerByGlobalTransitId = async (
   const getBytes = async () => {
     if (size) {
       try {
-        const thumbBytes = await getThumbBytesOverPeer(
+        const thumbBytes = await getThumbBytesOverPeerByGlobalTransitId(
           dotYouClient,
           odinId,
           targetDrive,

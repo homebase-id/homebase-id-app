@@ -86,7 +86,7 @@ export const PostComposer = memo(({ navigation }: PostComposerProps) => {
     );
     resetUi();
     navigation.goBack();
-  }, [isPosting, savePost, caption, assets, channel, reactAccess, customAcl, resetUi]);
+  }, [isPosting, savePost, caption, assets, channel, reactAccess, customAcl, resetUi, navigation]);
 
   const handleImageIconPress = useCallback(async () => {
     const imagePickerResult = await launchImageLibrary({

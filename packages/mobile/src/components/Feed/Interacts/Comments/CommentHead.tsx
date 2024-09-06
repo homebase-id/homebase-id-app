@@ -45,6 +45,7 @@ export const CommentHead = memo(
         style={{
           flexDirection: 'row',
           gap: 8,
+          zIndex: 50,
         }}
       >
         <Text

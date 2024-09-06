@@ -13,6 +13,7 @@ import { DotYouProfile } from '@homebase-id/js-lib/network';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { Colors } from '../../app/Colors';
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
+import { NoContacts } from '../../components/Contact/NoContacts';
 
 export const NewGroupPage = memo(
   ({ navigation }: { navigation: NavigationProp<NewChatStackParamList, 'NewGroup'> }) => {
@@ -81,7 +82,7 @@ export const NewGroupPage = memo(
         />
         <SafeAreaView>
           {Platform.OS === 'ios' && <StatusBar barStyle="light-content" />}
-          <FlatList data={contacts} keyExtractor={(item) => item.odinId} renderItem={renderItem} />
+          <FlatList data={contacts} keyExtractor={(item) => item.odinId} renderItem={renderItem} ListEmptyComponent={<NoContacts/>} />
           {/* <Dialog.Container visible={dialogVisible} onBackdropPress={() => setDialogVisible(false)}>
             <Dialog.Title>New Group Name</Dialog.Title>
             <Dialog.Input

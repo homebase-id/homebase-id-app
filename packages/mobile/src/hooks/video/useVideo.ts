@@ -1,6 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useDotYouClientContext } from 'feed-app-common';
-import { useAuth } from '../auth/useAuth';
 import { getPayloadBytes } from '../../provider/image/RNImageProvider';
 import { TargetDrive } from '@homebase-id/js-lib/core';
 import {
@@ -9,7 +8,7 @@ import {
 } from '../../provider/image/RNExternalMediaProvider';
 
 export type VideoData = {
-  url: string;
+  uri: string;
   type: string;
 };
 
@@ -36,7 +35,6 @@ export const useVideo = ({
 
   const fetchVideo = async ({ payloadKey }: { payloadKey?: string }) => {
     if (!fileId || !targetDrive || !payloadKey) return null;
-    console.log(odinId, localHost);
     if (odinId && odinId !== localHost) {
       if (videoGlobalTransitId) {
         const payload = await getDecryptedMediaDataOverPeerByGlobalTransitId(
@@ -80,7 +78,7 @@ export const useVideo = ({
     const payload = await getPayloadBytes(dotyouClient, targetDrive, fileId, payloadKey);
     if (!payload) return;
     return {
-      url: payload.uri,
+      uri: payload.uri,
       type: payload.type,
     };
   };
@@ -92,13 +90,8 @@ export const useVideo = ({
       queryKey,
       exact: false,
     });
-    if (query?.state.status !== 'error') return query?.state.data;
 
-    const video = await fetchVideo({ payloadKey });
-    if (video) {
-      queryClient.setQueryData(queryKey, video);
-      return video;
-    }
+    if (query?.state.status === 'success') return query?.state.data;
   };
 
   return {
@@ -106,6 +99,22 @@ export const useVideo = ({
       queryKey: ['video', fileId, targetDrive.alias, payloadKey, videoGlobalTransitId, odinId],
       queryFn: () => fetchVideo({ payloadKey }),
     }),
-    getFromCache: fetchFromCache,
+    fetchManually: async (payloadKey: string) => {
+      const queryKey = [
+        'video',
+        fileId,
+        targetDrive.alias,
+        payloadKey,
+        videoGlobalTransitId,
+        odinId,
+      ];
+      const cachedVideo = await fetchFromCache(payloadKey);
+      if (cachedVideo) return cachedVideo;
+      const video = await fetchVideo({ payloadKey });
+      if (video) {
+        queryClient.setQueryData(queryKey, video);
+        return video;
+      }
+    },
   };
 };

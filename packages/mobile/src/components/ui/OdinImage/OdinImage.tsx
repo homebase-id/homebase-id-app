@@ -1,4 +1,10 @@
-import { EmbeddedThumb, ImageContentType, ImageSize, TargetDrive } from '@homebase-id/js-lib/core';
+import {
+  EmbeddedThumb,
+  ImageContentType,
+  ImageSize,
+  SystemFileType,
+  TargetDrive,
+} from '@homebase-id/js-lib/core';
 import { ReactNode, memo, useCallback, useMemo } from 'react';
 import {
   ActivityIndicator,
@@ -34,6 +40,7 @@ export interface OdinImageProps {
   onLongPress?: (e: GestureResponderEvent) => void;
   imageZoomProps?: ImageZoomProps;
   probablyEncrypted?: boolean;
+  systemFileType?: SystemFileType;
 }
 
 const thumblessContentTypes = ['image/svg+xml', 'image/gif'];
@@ -57,6 +64,7 @@ export const OdinImage = memo(
     imageZoomProps,
     globalTransitId,
     probablyEncrypted,
+    systemFileType,
   }: OdinImageProps) => {
     // Don't set load size if it's a thumbnessLessContentType; As they don't have a thumb
     const loadSize = useMemo(
@@ -98,6 +106,8 @@ export const OdinImage = memo(
       imageFileId: !ignoreTiny ? fileId : undefined,
       imageFileKey: fileKey,
       imageDrive: targetDrive,
+      imageGlobalTransitId: globalTransitId,
+      systemFileType,
     });
 
     const cachedImageSizeSameorGreater = useMemo(
@@ -135,6 +145,7 @@ export const OdinImage = memo(
       size: loadSize,
       naturalSize,
       lastModified,
+      systemFileType,
     });
 
     const hasCachedImage = !!cachedImage?.imageData?.url;

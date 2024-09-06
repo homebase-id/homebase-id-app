@@ -138,9 +138,10 @@ export const getThumbBytesOverPeerByGlobalTransitId = async (
   if (!ss) throw new Error('Shared secret not found');
 
   const url = await encryptUrl(
-    `${dotYouClient.getEndpoint()}/transit/query/payload_byglobaltransitid?${stringifyToQueryParams({ ...request, width, height, lastModified })}`,
+    `${dotYouClient.getEndpoint()}/transit/query/thumb_byglobaltransitid?${stringifyToQueryParams({ ...request, width, height, lastModified })}`,
     ss
   );
+
   return ReactNativeBlobUtil.config({
     fileCache: true,
   })
@@ -150,7 +151,7 @@ export const getThumbBytesOverPeerByGlobalTransitId = async (
     })
     .then(async (res) => {
       if (res.info().status !== 200) {
-        throw new Error(`Failed to fetch payload ${res.info().status}`);
+        throw new Error(`Failed to fetch thumb ${res.info().status}`);
       }
 
       // Android filePaths need to start with file://
