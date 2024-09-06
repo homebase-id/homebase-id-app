@@ -15,7 +15,11 @@ import { Platform } from 'react-native';
 
 import MP4Box from 'mp4box';
 import { FFmpegKit, SessionState } from 'ffmpeg-kit-react-native';
-import { HlsVideoMetadata, SegmentedVideoMetadata } from '@homebase-id/js-lib/media';
+import {
+  HlsVideoMetadata,
+  PlainVideoMetadata,
+  SegmentedVideoMetadata,
+} from '@homebase-id/js-lib/media';
 import { OdinBlob } from '../../../polyfills/OdinBlob';
 import { KeyHeader } from '@homebase-id/js-lib/core';
 
@@ -80,12 +84,15 @@ const segmentVideo = async (
       throw new Error(`File not found: ${source}`);
     }
 
-    const sourceFileSize = await stat(source).then((stats) => stats.size);
-    if (sourceFileSize < 10 * MB) {
-      return {
-        ...video,
-      };
-    }
+    // We disbled the segmentation for now, as we only want to support playback on web of HLS;
+    // We can re-enable it when we have confirmed HLS is good
+
+    // const sourceFileSize = await stat(source).then((stats) => stats.size);
+    // if (sourceFileSize < 10 * MB) {
+    return {
+      ...video,
+    };
+    // }
 
     const dirPath = CachesDirectoryPath;
     const destinationPrefix = Platform.OS === 'ios' ? '' : 'file://';
@@ -298,7 +305,7 @@ const getCodecFromMp4Info = (info: Mp4Info): string => {
 
 interface VideoData {
   video: ImageSource;
-  metadata: SegmentedVideoMetadata;
+  metadata: PlainVideoMetadata | SegmentedVideoMetadata;
 }
 
 interface HLSData {
@@ -341,15 +348,10 @@ export const compressAndSegmentVideo = async (
     };
   }
 
-  const mp4Info = await getMp4Info(video);
-  const metadata: SegmentedVideoMetadata = {
-    isSegmented: true,
+  const metadata: PlainVideoMetadata = {
     mimeType: playlistOrFullVideo.type || 'video/mp4',
-    codec: getCodecFromMp4Info(mp4Info),
     fileSize: playlistOrFullVideo?.fileSize || 0,
-    duration: playlistOrFullVideo?.playableDuration
-      ? playlistOrFullVideo.playableDuration * 1000
-      : 0,
+    isSegmented: false,
   };
   return {
     metadata,
