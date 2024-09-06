@@ -9,7 +9,7 @@ import { useDarkMode } from '../hooks/useDarkMode';
 import { useMemo } from 'react';
 import { Platform } from 'react-native';
 import { Colors } from './Colors';
-import { FeedHeader, FeedPage } from '../pages/feed/feed-page';
+import { FeedPage } from '../pages/feed/feed-page';
 import { PreviewMedia } from '../pages/media-preview-page';
 import { PostComposer } from '../pages/feed/post-composer';
 

@@ -1,5 +1,4 @@
 import { TargetDrive } from '@homebase-id/js-lib/core';
-import { useAuth } from '../../../../hooks/auth/useAuth';
 import { useDotYouClientContext } from 'feed-app-common';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getPayloadBytes } from '../../../../provider/image/RNImageProvider';
@@ -18,7 +17,6 @@ interface AudioData {
 
 export const useAudio = (props?: OdinAudioProps) => {
   const { fileId, payloadKey, drive, lastModified } = props || {};
-  const { authToken } = useAuth();
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
 
@@ -28,14 +26,14 @@ export const useAudio = (props?: OdinAudioProps) => {
     drive?: TargetDrive,
     lastModified?: number
   ): Promise<AudioData | null> => {
-    if (fileId === undefined || fileId === '' || !drive || !payloadKey || !authToken) {
+    if (fileId === undefined || fileId === '' || !drive || !payloadKey) {
       return null;
     }
 
     const cachedAudio = getFromCache(fileId, payloadKey, drive);
     if (cachedAudio) return cachedAudio;
 
-    const audioBlob = await getPayloadBytes(dotYouClient, drive, fileId, payloadKey, authToken, {
+    const audioBlob = await getPayloadBytes(dotYouClient, drive, fileId, payloadKey, {
       lastModified,
     });
 

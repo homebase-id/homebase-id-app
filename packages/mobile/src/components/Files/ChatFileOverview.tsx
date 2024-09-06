@@ -42,8 +42,8 @@ const FilePreview = ({
   children?: React.ReactNode;
   preview?: boolean;
 }) => {
-  const isVideo = asset.type?.startsWith('video') ?? false;
-  const isDocument = asset.type?.startsWith('application') ?? false;
+  const isVideo = asset.type?.startsWith('video') || asset.type === 'application/vnd.apple.mpegurl';
+  const isDocument = asset.type?.startsWith('application');
   return (
     <>
       {isVideo ? (

@@ -22,6 +22,7 @@ import {
   UploadResult,
   ImageContentType,
   PriorityOptions,
+  KeyHeader,
 } from '@homebase-id/js-lib/core';
 import {
   toGuidId,
@@ -42,12 +43,10 @@ import {
 import { OdinBlob } from '../../../polyfills/OdinBlob';
 import { ImageSource } from '../image/RNImageProvider';
 import { createThumbnails } from '../image/RNThumbnailProvider';
-import { grabThumbnail, processVideo } from '../image/RNVideoProviderSegmenter';
-import { VideoContentType } from '@homebase-id/js-lib/media';
+import { processVideo } from '../video/RNVideoProcessor';
 import { AxiosRequestConfig } from 'axios';
 
 const POST_MEDIA_PAYLOAD_KEY = 'pst_mdi';
-
 
 export const savePost = async <T extends PostContent>(
   dotYouClient: DotYouClient,
@@ -90,58 +89,40 @@ export const savePost = async <T extends PostContent>(
     delete (file.fileMetadata.appData.content.embeddedPost as PostContent).embeddedPost;
   }
 
+  const encrypt = !(
+    file.serverMetadata?.accessControlList?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
+    file.serverMetadata?.accessControlList?.requiredSecurityGroup ===
+      SecurityGroupType.Authenticated
+  );
+
   const targetDrive = GetTargetDriveFromChannelId(channelId);
 
   const payloads: PayloadFile[] = [];
   const thumbnails: ThumbnailFile[] = [];
   const previewThumbnails: EmbeddedThumb[] = [];
+  const keyHeader: KeyHeader | undefined = encrypt
+    ? {
+        iv: getRandom16ByteArray(),
+        aesKey: getRandom16ByteArray(),
+      }
+    : undefined;
 
   // Handle image files:
   for (let i = 0; newMediaFiles && i < newMediaFiles?.length; i++) {
     const newMediaFile = newMediaFiles[i];
     const payloadKey = newMediaFile.key || `${POST_MEDIA_PAYLOAD_KEY}${i}`;
 
-    console.log('newMediaFile', newMediaFile);
     if (newMediaFile.type?.startsWith('video/')) {
-      console.log('video - newMediaFile', newMediaFile);
-      const { video: processedMedia, metadata } = await processVideo(
-        newMediaFile,
-        true,
-        (progress) => onUpdate?.('Compressing', progress)
-      );
+      const {
+        tinyThumb: tinyThumbFromVideo,
+        thumbnails: thumbnailsFromVideo,
+        payloads: payloadsFromVideo,
+      } = await processVideo(newMediaFile, payloadKey, true, onUpdate, keyHeader);
 
-      onUpdate?.('Generating thumbnails', 0);
-      // Custom blob to avoid reading and writing the file to disk again
-      const payloadBlob = new OdinBlob(processedMedia.filepath || processedMedia.uri, {
-        type: 'video/mp4' as VideoContentType,
-      }) as any as Blob;
+      thumbnails.push(...thumbnailsFromVideo);
+      payloads.push(...payloadsFromVideo);
 
-      const thumbnail = await grabThumbnail(newMediaFile);
-      console.log('videoThumbnail', thumbnail);
-      const thumbSource: ImageSource | null = thumbnail
-        ? {
-          uri: thumbnail.uri,
-          width: 1920,
-          height: 1080,
-          type: thumbnail.type,
-        }
-        : null;
-      const { tinyThumb, additionalThumbnails } =
-        thumbSource && thumbnail
-          ? await createThumbnails(thumbSource, payloadKey, thumbnail.type as ImageContentType, [
-            { quality: 100, width: 250, height: 250 },
-          ])
-          : { tinyThumb: undefined, additionalThumbnails: undefined };
-      if (additionalThumbnails) {
-        thumbnails.push(...additionalThumbnails);
-      }
-      payloads.push({
-        key: payloadKey,
-        payload: payloadBlob,
-        descriptorContent: metadata ? jsonStringify64(metadata) : undefined,
-      });
-
-      if (tinyThumb) previewThumbnails.push(tinyThumb);
+      if (tinyThumbFromVideo) previewThumbnails.push(tinyThumbFromVideo);
     } else if (newMediaFile.type?.startsWith('image/')) {
       onUpdate?.('Generating thumbnails', 0);
 
@@ -154,7 +135,7 @@ export const savePost = async <T extends PostContent>(
       // Custom blob to avoid reading and writing the file to disk again
       const payloadBlob = new OdinBlob((newMediaFile.filepath || newMediaFile.uri) as string, {
         type: newMediaFile?.type || 'image/jpeg',
-      }) as any as Blob;
+      }) as unknown as Blob;
 
       thumbnails.push(...additionalThumbnails);
       payloads.push({
@@ -169,7 +150,7 @@ export const savePost = async <T extends PostContent>(
       // Custom blob to avoid reading and writing the file to disk again
       const payloadBlob = new OdinBlob((newMediaFile.filepath || newMediaFile.uri) as string, {
         type: newMediaFile.type || 'image/jpeg',
-      }) as any as Blob;
+      }) as unknown as Blob;
 
       payloads.push({
         key: payloadKey,
@@ -183,10 +164,10 @@ export const savePost = async <T extends PostContent>(
   if (file.fileMetadata.appData.content.type !== 'Article') {
     file.fileMetadata.appData.content.primaryMediaFile = payloads[0]
       ? {
-        fileId: undefined,
-        fileKey: payloads[0].key,
-        type: payloads[0].payload.type,
-      }
+          fileId: undefined,
+          fileKey: payloads[0].key,
+          type: payloads[0].payload.type,
+        }
       : undefined;
   }
 
@@ -207,7 +188,10 @@ export const savePost = async <T extends PostContent>(
     targetDrive,
     onVersionConflict,
     {
-      onUploadProgress: (progress) => onUpdate?.('Uploading', progress.progress || 0),
+      axiosConfig: {
+        onUploadProgress: (progress) => onUpdate?.('Uploading', progress.progress || 0),
+      },
+      keyHeader,
     }
   );
 };
@@ -221,12 +205,15 @@ const uploadPost = async <T extends PostContent>(
   channelId: string,
   targetDrive: TargetDrive,
   onVersionConflict?: () => void,
-  axiosConfig?: AxiosRequestConfig<any> | undefined
+  options?: {
+    axiosConfig?: AxiosRequestConfig<unknown> | undefined;
+    keyHeader?: KeyHeader | undefined;
+  }
 ) => {
   const encrypt = !(
     file.serverMetadata?.accessControlList?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
     file.serverMetadata?.accessControlList?.requiredSecurityGroup ===
-    SecurityGroupType.Authenticated
+      SecurityGroupType.Authenticated
   );
 
   const instructionSet: UploadInstructionSet = {
@@ -254,8 +241,9 @@ const uploadPost = async <T extends PostContent>(
     !stringGuidsEqual(existingPostWithThisSlug?.fileId, file.fileId)
   ) {
     // There is clash with an existing slug
-    file.fileMetadata.appData.content.slug = `${file.fileMetadata.appData.content.slug
-      }-${new Date().getTime()}`;
+    file.fileMetadata.appData.content.slug = `${
+      file.fileMetadata.appData.content.slug
+    }-${new Date().getTime()}`;
   }
 
   const uniqueId = file.fileMetadata.appData.content.slug
@@ -274,7 +262,7 @@ const uploadPost = async <T extends PostContent>(
   if (!shouldEmbedContent) {
     payloads.push({
       key: DEFAULT_PAYLOAD_KEY,
-      payload: new OdinBlob([payloadBytes], { type: 'application/json' }) as any,
+      payload: new OdinBlob([payloadBytes], { type: 'application/json' }) as unknown as Blob,
     });
   }
 
@@ -305,10 +293,10 @@ const uploadPost = async <T extends PostContent>(
           return payload;
         }
 
-        const newBlob = await (payload.payload as any as OdinBlob).fixExtension();
+        const newBlob = await (payload.payload as unknown as OdinBlob).fixExtension();
         return {
           ...payload,
-          payload: newBlob as any,
+          payload: newBlob as unknown as Blob,
         };
       })
     );
@@ -319,10 +307,10 @@ const uploadPost = async <T extends PostContent>(
           return thumb;
         }
 
-        const newBlob = await (thumb.payload as any as OdinBlob).fixExtension();
+        const newBlob = await (thumb.payload as unknown as OdinBlob).fixExtension();
         return {
           ...thumb,
-          payload: newBlob as any,
+          payload: newBlob as unknown as Blob,
         };
       })
     );
@@ -336,7 +324,7 @@ const uploadPost = async <T extends PostContent>(
     thumbnails,
     encrypt,
     onVersionConflict,
-    axiosConfig
+    options
   );
   if (!result) throw new Error('Upload failed');
 
@@ -372,11 +360,12 @@ const uploadPostHeader = async <T extends PostContent>(
   if (
     existingPostWithThisSlug &&
     existingPostWithThisSlug?.fileMetadata.appData.content.id !==
-    file.fileMetadata.appData.content.id
+      file.fileMetadata.appData.content.id
   ) {
     // There is clash with an existing slug
-    file.fileMetadata.appData.content.slug = `${file.fileMetadata.appData.content.slug
-      }-${new Date().getTime()}`;
+    file.fileMetadata.appData.content.slug = `${
+      file.fileMetadata.appData.content.slug
+    }-${new Date().getTime()}`;
   }
 
   const uniqueId = file.fileMetadata.appData.content.slug
@@ -430,7 +419,7 @@ const uploadPostHeader = async <T extends PostContent>(
         [
           {
             key: DEFAULT_PAYLOAD_KEY,
-            payload: new OdinBlob([payloadBytes], { type: 'application/json' }) as any,
+            payload: new OdinBlob([payloadBytes], { type: 'application/json' }) as unknown as Blob,
           },
         ],
         undefined
@@ -541,7 +530,7 @@ const updatePost = async <T extends PostContent>(
     // Custom blob to avoid reading and writing the file to disk again
     const payloadBlob = new OdinBlob((newMediaFile.filepath || newMediaFile.uri) as string, {
       type: newMediaFile.type || 'image/jpeg',
-    }) as any as Blob;
+    }) as unknown as Blob;
 
     const { additionalThumbnails, tinyThumb } = await createThumbnails(newMediaFile, payloadKey);
 

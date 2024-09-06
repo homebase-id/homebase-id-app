@@ -104,7 +104,11 @@ export const ChatForwardModal = memo(
                 } as ImageSource);
               }
             }
-            if (payload.contentType.startsWith('video')) {
+            if (
+              payload.contentType.startsWith('video')
+
+              //TODO Add support HLS video || payload.contentType === 'application/vnd.apple.mpegurl'
+            ) {
               const downloadPayload = await getVideoData(payload.key);
               if (downloadPayload) {
                 messagePayloads.push({

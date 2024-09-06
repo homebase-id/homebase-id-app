@@ -36,14 +36,15 @@ import { ChatDrive, UnifiedConversation } from './ConversationProvider';
 import {
   assertIfDefined,
   getNewId,
+  getRandom16ByteArray,
   jsonStringify64,
   stringToUint8Array,
 } from '@homebase-id/js-lib/helpers';
 import { OdinBlob } from '../../../polyfills/OdinBlob';
 import { ImageSource } from '../image/RNImageProvider';
 import { createThumbnails } from '../image/RNThumbnailProvider';
-import { grabThumbnail, processVideo } from '../image/RNVideoProviderSegmenter';
-import { LinkPreview, LinkPreviewDescriptor, VideoContentType } from '@homebase-id/js-lib/media';
+import { processVideo } from '../video/RNVideoProcessor';
+import { LinkPreview, LinkPreviewDescriptor } from '@homebase-id/js-lib/media';
 import { sendReadReceipt } from '@homebase-id/js-lib/peer';
 
 const CHAT_APP_ID = '2d781401-3804-4b57-b4aa-d8e4e2ef39f4';
@@ -247,18 +248,18 @@ export const uploadChatMessage = async (
     },
     transitOptions: distribute
       ? {
-        recipients: [...recipients],
-        schedule: ScheduleOptions.SendLater,
-        priority: PriorityOptions.High,
-        sendContents: SendContents.All,
-        useAppNotification: true,
-        appNotificationOptions: {
-          appId: CHAT_APP_ID,
-          typeId: message.fileMetadata.appData.groupId || getNewId(),
-          tagId: message.fileMetadata.appData.uniqueId || getNewId(),
-          silent: false,
-        },
-      }
+          recipients: [...recipients],
+          schedule: ScheduleOptions.SendLater,
+          priority: PriorityOptions.High,
+          sendContents: SendContents.All,
+          useAppNotification: true,
+          appNotificationOptions: {
+            appId: CHAT_APP_ID,
+            typeId: message.fileMetadata.appData.groupId || getNewId(),
+            tagId: message.fileMetadata.appData.uniqueId || getNewId(),
+            silent: false,
+          },
+        }
       : undefined,
   };
 
@@ -282,6 +283,10 @@ export const uploadChatMessage = async (
   const payloads: PayloadFile[] = [];
   const thumbnails: ThumbnailFile[] = [];
   const previewThumbnails: EmbeddedThumb[] = [];
+  const keyHeader: KeyHeader | undefined = {
+    iv: getRandom16ByteArray(),
+    aesKey: getRandom16ByteArray(),
+  };
 
   if (!files?.length && linkPreviews?.length) {
     // We only support link previews when there is no media
@@ -300,10 +305,10 @@ export const uploadChatMessage = async (
 
     const imageSource: ImageSource | undefined = linkPreviewWithImage
       ? {
-        height: linkPreviewWithImage.imageHeight || 0,
-        width: linkPreviewWithImage.imageWidth || 0,
-        uri: linkPreviewWithImage.imageUrl,
-      }
+          height: linkPreviewWithImage.imageHeight || 0,
+          width: linkPreviewWithImage.imageWidth || 0,
+          uri: linkPreviewWithImage.imageUrl,
+        }
       : undefined;
 
     const { tinyThumb } = imageSource
@@ -314,7 +319,7 @@ export const uploadChatMessage = async (
       key: CHAT_LINKS_PAYLOAD_KEY,
       payload: new OdinBlob([stringToUint8Array(JSON.stringify(linkPreviews))], {
         type: 'application/json',
-      }) as any as Blob,
+      }) as unknown as Blob,
       descriptorContent,
       previewThumbnail: tinyThumb,
     });
@@ -325,49 +330,22 @@ export const uploadChatMessage = async (
     const newMediaFile = files[i];
 
     if (newMediaFile.type?.startsWith('video/')) {
-      const { video: processedMedia, metadata } = await processVideo(
-        newMediaFile,
-        true,
-        (progress) => onUpdate?.('Compressing', progress)
-      );
+      const {
+        tinyThumb: tinyThumbFromVideo,
+        thumbnails: thumbnailsFromVideo,
+        payloads: payloadsFromVideo,
+      } = await processVideo(newMediaFile, payloadKey, true, onUpdate, keyHeader);
 
-      onUpdate?.('Generating thumbnails', 0);
-      // Custom blob to avoid reading and writing the file to disk again
-      const payloadBlob = new OdinBlob((processedMedia.filepath || processedMedia.uri) as string, {
-        type: 'video/mp4' as VideoContentType,
-      }) as any as Blob;
+      thumbnails.push(...thumbnailsFromVideo);
+      payloads.push(...payloadsFromVideo);
 
-      const thumbnail = await grabThumbnail(newMediaFile);
-      const thumbSource: ImageSource | null = thumbnail
-        ? {
-          uri: thumbnail.uri,
-          width: processedMedia.width || 1920,
-          height: processedMedia.height || 1080,
-          type: thumbnail.type,
-        }
-        : null;
-      const { tinyThumb, additionalThumbnails } =
-        thumbSource && thumbnail
-          ? await createThumbnails(thumbSource, payloadKey, thumbnail.type as ImageContentType, [
-            { quality: 100, width: 250, height: 250 },
-          ])
-          : { tinyThumb: undefined, additionalThumbnails: undefined };
-      if (additionalThumbnails) {
-        thumbnails.push(...additionalThumbnails);
-      }
-      payloads.push({
-        key: payloadKey,
-        payload: payloadBlob,
-        descriptorContent: metadata ? jsonStringify64(metadata) : undefined,
-      });
-
-      if (tinyThumb) previewThumbnails.push(tinyThumb);
+      if (tinyThumbFromVideo) previewThumbnails.push(tinyThumbFromVideo);
     } else if (newMediaFile.type?.startsWith('image/')) {
       onUpdate?.('Generating thumbnails', 0);
 
       const blob = new OdinBlob(newMediaFile.filepath || newMediaFile.uri, {
         type: newMediaFile?.type || undefined,
-      }) as any as Blob;
+      }) as unknown as Blob;
 
       const { additionalThumbnails, tinyThumb } = await createThumbnails(
         newMediaFile,
@@ -391,7 +369,8 @@ export const uploadChatMessage = async (
       if (newMediaFile?.type) {
         const payloadBlob = new OdinBlob(newMediaFile.filepath || newMediaFile.uri, {
           type: newMediaFile.type,
-        }) as any as Blob;
+        }) as unknown as Blob;
+
         payloads.push({
           key: payloadKey,
           payload: payloadBlob,
@@ -402,7 +381,6 @@ export const uploadChatMessage = async (
   }
 
   uploadMetadata.appData.previewThumbnail = previewThumbnails[0];
-
   onUpdate?.('Uploading', 0);
 
   const uploadResult = await uploadFile(
@@ -414,7 +392,10 @@ export const uploadChatMessage = async (
     undefined,
     onVersionConflict,
     {
-      onUploadProgress: (progress) => onUpdate?.('Uploading', progress.progress || 0),
+      axiosConfig: {
+        onUploadProgress: (progress) => onUpdate?.('Uploading', progress.progress || 0),
+      },
+      keyHeader,
     }
   );
 
@@ -432,7 +413,7 @@ export const uploadChatMessage = async (
     for (const recipient of recipients) {
       message.fileMetadata.appData.content.deliveryDetails[recipient] =
         uploadResult.recipientStatus?.[recipient].toLowerCase() ===
-          TransferUploadStatus.EnqueuedFailed
+        TransferUploadStatus.EnqueuedFailed
           ? ChatDeliveryStatus.Failed
           : ChatDeliveryStatus.Delivered;
     }
@@ -477,11 +458,11 @@ export const updateChatMessage = async (
     },
     transitOptions: distribute
       ? {
-        recipients: [...recipients],
-        schedule: ScheduleOptions.SendLater,
-        priority: PriorityOptions.High,
-        sendContents: SendContents.All,
-      }
+          recipients: [...recipients],
+          schedule: ScheduleOptions.SendLater,
+          priority: PriorityOptions.High,
+          sendContents: SendContents.All,
+        }
       : undefined,
   };
 

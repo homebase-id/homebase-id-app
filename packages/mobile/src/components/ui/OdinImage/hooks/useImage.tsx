@@ -41,7 +41,6 @@ const useImage = (props?: {
     probablyEncrypted,
     systemFileType,
   } = props || {};
-  const { authToken } = useAuth();
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
 
@@ -141,13 +140,7 @@ const useImage = (props?: {
     lastModified?: number,
     systemFileType?: SystemFileType
   ): Promise<ImageData | null> => {
-    if (
-      imageFileId === undefined ||
-      imageFileId === '' ||
-      !imageDrive ||
-      !imageFileKey ||
-      !authToken
-    ) {
+    if (imageFileId === undefined || imageFileId === '' || !imageDrive || !imageFileKey) {
       return null;
     }
 
@@ -173,7 +166,6 @@ const useImage = (props?: {
           imageDrive,
           imageGlobalTransitId,
           imageFileKey,
-          authToken,
           probablyEncrypted,
           lastModified,
           {
@@ -203,7 +195,6 @@ const useImage = (props?: {
           imageDrive,
           imageFileId,
           imageFileKey,
-          authToken,
           probablyEncrypted,
           lastModified,
           {
@@ -232,7 +223,6 @@ const useImage = (props?: {
       imageDrive,
       imageFileId,
       imageFileKey,
-      authToken,
       size,
       systemFileType,
       lastModified
@@ -325,13 +315,7 @@ const useImage = (props?: {
       imageDrive: TargetDrive,
       size?: ImageSize
     ) => {
-      if (
-        imageFileId === undefined ||
-        imageFileId === '' ||
-        !imageDrive ||
-        !imageFileKey ||
-        !authToken
-      ) {
+      if (imageFileId === undefined || imageFileId === '' || !imageDrive || !imageFileKey) {
         return null;
       }
       const queryKey = queryKeyBuilder(
