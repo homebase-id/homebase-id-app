@@ -33,8 +33,8 @@ export const processVideo = async (
   const thumbSource: ImageSource | null = thumbnail
     ? {
         uri: thumbnail.uri,
-        width: 1920, //thumbnail.width || 1920,
-        height: 1080, //thumbnail.height || 1080,
+        width: 0,
+        height: 0,
         type: thumbnail.type,
       }
     : null;
@@ -44,6 +44,7 @@ export const processVideo = async (
           { quality: 100, width: 250, height: 250 },
         ])
       : { tinyThumb: undefined, additionalThumbnails: undefined };
+
   if (additionalThumbnails) {
     thumbnails.push(...additionalThumbnails);
   }
