@@ -25,6 +25,7 @@ export const PostInteracts = memo(
     onReactionPress,
     onSharePress,
     onEmojiModalOpen,
+    isPublic,
   }: {
     postFile: HomebaseFile<PostContent>;
     isPublic?: boolean;
@@ -132,7 +133,7 @@ export const PostInteracts = memo(
               justifyContent: 'flex-end',
             }}
           >
-            <IconButton icon={<ShareNode />} onPress={onSharePressHandler} />
+            {isPublic && <IconButton icon={<ShareNode />} onPress={onSharePressHandler} />}
             {!postDisabledComment && (
               <IconButton icon={<Comment />} onPress={onCommentPressHandler} />
             )}
