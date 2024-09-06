@@ -18,13 +18,16 @@ export const ChatMessageContent = memo(
     } else {
       const payload = payloads?.[0];
       if (!payload) return null;
-      if (payload.contentType.includes('image')) {
+      if (payload.contentType.startsWith('image')) {
         return '📷 Image';
-      } else if (payload.contentType.includes('video')) {
+      } else if (
+        payload.contentType.startsWith('video') ||
+        payload.contentType === 'application/vnd.apple.mpegurl'
+      ) {
         return '🎥 Video';
-      } else if (payload.contentType.includes('audio')) {
+      } else if (payload.contentType.startsWith('audio')) {
         return '🎵 Audio';
-      } else if (payload.contentType.includes('application')) {
+      } else if (payload.contentType.startsWith('application')) {
         return '📄 Document';
       } else {
         return '📁 File';

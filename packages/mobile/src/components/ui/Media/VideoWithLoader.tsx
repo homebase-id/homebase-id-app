@@ -15,10 +15,25 @@ import { uint8ArrayToBase64 } from '@homebase-id/js-lib/helpers';
 import { Play } from '../Icons/icons';
 import { OdinImage } from '../OdinImage/OdinImage';
 import { useVideo } from '../../../hooks/video/useVideo';
+import { useHlsManifest } from '../../../hooks/video/useHlsManifest';
 import Video from 'react-native-video';
-import { ErrorNotification } from '../Alert/ErrorNotification';
+import { useDotYouClientContext } from 'feed-app-common';
+import { useVideoMetadata } from '../../../hooks/video/useVideoMetadata';
 
 const MAX_DOWNLOAD_SIZE = 16 * 1024 * 1024 * 1024; // 16 MB
+
+interface VideoProps extends OdinWebVideoProps, LocalVideoProps {
+  previewThumbnail?: EmbeddedThumb;
+  fit?: 'cover' | 'contain';
+  preview?: boolean;
+  fullscreen?: boolean;
+  imageSize?: { width: number; height: number };
+  onClick?: () => void;
+  onLongPress?: (e: GestureResponderEvent) => void;
+  style?: ImageStyle;
+
+  autoPlay?: boolean;
+}
 
 export const VideoWithLoader = memo(
   ({
@@ -37,37 +52,18 @@ export const VideoWithLoader = memo(
     autoPlay,
     probablyEncrypted,
     lastModified,
-  }: {
-    fileId: string;
-    odinId?: string;
-    globalTransitId?: string;
-    targetDrive: TargetDrive;
-    previewThumbnail?: EmbeddedThumb;
-    fit?: 'cover' | 'contain';
-    preview?: boolean;
-    fullscreen?: boolean;
-    imageSize?: { width: number; height: number };
-    onClick?: () => void;
-    onLongPress?: (e: GestureResponderEvent) => void;
-    style?: ImageStyle;
-    payload: PayloadDescriptor;
-    autoPlay?: boolean;
-    probablyEncrypted?: boolean;
-    lastModified?: number;
-  }) => {
+  }: VideoProps) => {
     const [loadVideo, setLoadVideo] = useState(autoPlay);
     const doLoadVideo = useCallback(() => setLoadVideo(true), []);
     const canDownload = !preview && payload?.bytesWritten < MAX_DOWNLOAD_SIZE;
-    const { data, isLoading, error } = useVideo({
+
+    const { data: videoData } = useVideoMetadata(
       odinId,
       fileId,
-      targetDrive,
-      videoGlobalTransitId: globalTransitId,
-      probablyEncrypted,
-      payloadKey: payload.key,
-      enabled: canDownload,
-      lastModified,
-    }).fetch;
+      globalTransitId,
+      payload.key,
+      targetDrive
+    ).fetchMetadata;
 
     if (preview) {
       return (
@@ -117,9 +113,9 @@ export const VideoWithLoader = memo(
         </View>
       );
     }
+
     return (
       <>
-        <ErrorNotification error={error} />
         {loadVideo ? (
           <View
             style={{
@@ -128,37 +124,27 @@ export const VideoWithLoader = memo(
               position: 'relative',
             }}
           >
-            {canDownload ? (
-              <Video
-                source={{ uri: data?.uri }}
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  bottom: 0,
-                  right: 0,
-                }}
-                controls={true}
-                paused={loadVideo}
-                resizeMode={'contain'}
-                onEnd={() => setLoadVideo(false)}
-                onError={(e) => console.log('error', e)}
-              >
-                {isLoading && (
-                  <ActivityIndicator
-                    size="large"
-                    style={{
-                      flex: 1,
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      zIndex: 20,
-                    }}
-                    color={Colors.white}
-                  />
-                )}
-              </Video>
+            {videoData?.metadata.mimeType === 'application/vnd.apple.mpegurl' ? (
+              <HlsVideo
+                odinId={odinId}
+                fileId={fileId}
+                targetDrive={targetDrive}
+                globalTransitId={globalTransitId}
+                payload={payload}
+                probablyEncrypted={probablyEncrypted}
+                lastModified={lastModified}
+              />
+            ) : canDownload ? (
+              <LocalVideo
+                fileId={fileId}
+                targetDrive={targetDrive}
+                globalTransitId={globalTransitId}
+                payload={payload}
+                probablyEncrypted={probablyEncrypted}
+                lastModified={lastModified}
+              />
             ) : (
-              <OdinWebVideo targetDrive={targetDrive} fileId={fileId} fileKey={payload.key} />
+              <OdinWebVideo targetDrive={targetDrive} fileId={fileId} payload={payload} />
             )}
           </View>
         ) : (
@@ -207,20 +193,113 @@ export const VideoWithLoader = memo(
   }
 );
 
-const OdinWebVideo = ({
+const HlsVideo = ({ odinId, fileId, targetDrive, globalTransitId, payload }: LocalVideoProps) => {
+  const dotYouClient = useDotYouClientContext();
+  const { data: hlsManifest } = useHlsManifest(
+    odinId,
+    fileId,
+    globalTransitId,
+    payload.key,
+    targetDrive
+  ).fetch;
+
+  if (!hlsManifest) return null;
+
+  return (
+    <Video
+      source={{
+        uri: hlsManifest,
+        headers: dotYouClient.getHeaders(),
+        type: 'm3u8',
+      }}
+      paused={false}
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        bottom: 0,
+        right: 0,
+      }}
+      controls={true}
+      resizeMode={'contain'}
+      onError={(e) => console.log('error', e)}
+    />
+  );
+};
+
+interface LocalVideoProps {
+  odinId?: string;
+  fileId: string;
+  targetDrive: TargetDrive;
+  globalTransitId?: string;
+  payload: PayloadDescriptor;
+  probablyEncrypted?: boolean;
+  lastModified?: number;
+}
+
+const LocalVideo = ({
+  odinId,
   fileId,
-  fileKey,
-}: {
+  targetDrive,
+  globalTransitId,
+  payload,
+  probablyEncrypted,
+  lastModified,
+}: LocalVideoProps) => {
+  const { data, isLoading } = useVideo({
+    odinId,
+    fileId,
+    targetDrive,
+    videoGlobalTransitId: globalTransitId,
+    probablyEncrypted,
+    payloadKey: payload.key,
+
+    lastModified,
+  }).fetch;
+
+  return (
+    <Video
+      source={{ uri: data?.uri }}
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        bottom: 0,
+        right: 0,
+      }}
+      controls={true}
+      resizeMode={'contain'}
+      onError={(e) => console.log('error', e)}
+    >
+      {isLoading && (
+        <ActivityIndicator
+          size="large"
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 20,
+          }}
+          color={Colors.white}
+        />
+      )}
+    </Video>
+  );
+};
+
+interface OdinWebVideoProps {
   targetDrive: TargetDrive;
   fileId: string;
-  fileKey: string;
-}) => {
+  payload: PayloadDescriptor;
+}
+
+const OdinWebVideo = ({ fileId, payload }: OdinWebVideoProps) => {
   const { authToken, getIdentity, getSharedSecret } = useAuth();
   const identity = getIdentity();
 
   const uri = useMemo(
-    () => `https://${identity}/apps/chat/player/${fileId}/${fileKey}`,
-    [fileId, fileKey, identity]
+    () => `https://${identity}/apps/chat/player/${fileId}/${payload.key}`,
+    [fileId, payload, identity]
   );
 
   const sharedSecret = getSharedSecret();

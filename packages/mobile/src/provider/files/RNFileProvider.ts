@@ -18,7 +18,6 @@ export const getPayloadFile = async (
   targetDrive: TargetDrive,
   fileId: string,
   key: string,
-  authToken: string,
   progress?: ReactNativeBlobUtilConfig['Progress'],
   options?: {
     systemFileType?: SystemFileType;
@@ -57,7 +56,7 @@ export const getPayloadFile = async (
     Progress: progress,
   })
     .fetch('GET', url, {
-      bx0900: authToken,
+      ...dotYouClient.getHeaders(),
       'X-ODIN-FILE-SYSTEM-TYPE': options?.systemFileType || 'Standard',
     })
     .then(async (res) => {

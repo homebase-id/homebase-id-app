@@ -252,7 +252,11 @@ const getExtensionForMimeType = (mimeType: string) => {
     ? 'mp3'
     : mimeType === 'image/svg+xml'
       ? 'svg'
-      : mimeType.split('/')[1];
+      : mimeType === 'application/vnd.apple.mpegurl'
+        ? 'm3u8'
+        : mimeType === 'video/mp2t'
+          ? 'ts'
+          : mimeType.split('/')[1];
 };
 
 export { Blob as OdinBlob };

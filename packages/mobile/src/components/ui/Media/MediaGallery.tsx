@@ -158,7 +158,9 @@ export const MediaItem = memo(
   }) => {
     const { isDarkMode } = useDarkMode();
 
-    const isVideo = payload.contentType?.startsWith('video');
+    const isVideo =
+      payload.contentType?.startsWith('video') ||
+      payload.contentType === 'application/vnd.apple.mpegurl';
     const isAudio = payload.contentType?.startsWith('audio');
     const isImage = payload.contentType?.startsWith('image');
     const isLink = payload.key === CHAT_LINKS_PAYLOAD_KEY || payload.key === POST_LINKS_PAYLOAD_KEY;
@@ -249,7 +251,7 @@ export const MediaItem = memo(
           file={payload}
           fileId={fileId}
           targetDrive={targetDrive}
-          odinId={undefined}
+          odinId={odinId}
           overwriteTextColor={position && position === 'right'}
         />
       );

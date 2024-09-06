@@ -35,7 +35,6 @@ export const getPayloadBytesOverPeerByGlobalTransitId = async (
   targetDrive: TargetDrive,
   globalTransitId: string,
   key: string,
-  authToken: string,
   options: {
     systemFileType?: SystemFileType;
     decrypt?: boolean;
@@ -69,7 +68,7 @@ export const getPayloadBytesOverPeerByGlobalTransitId = async (
     fileCache: true,
   })
     .fetch('GET', url, {
-      bx0900: authToken,
+      ...dotYouClient.getHeaders(),
       'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
     })
     .then(async (res) => {
@@ -112,7 +111,6 @@ export const getThumbBytesOverPeerByGlobalTransitId = async (
   targetDrive: TargetDrive,
   globalTransitId: string,
   payloadKey: string,
-  authToken: string,
   width: number,
   height: number,
   options: {
@@ -148,7 +146,7 @@ export const getThumbBytesOverPeerByGlobalTransitId = async (
     fileCache: true,
   })
     .fetch('GET', url, {
-      bx0900: authToken,
+      ...dotYouClient.getHeaders(),
       'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
     })
     .then(async (res) => {
