@@ -86,13 +86,12 @@ const segmentVideo = async (
 
     // We disbled the segmentation for now, as we only want to support playback on web of HLS;
     // We can re-enable it when we have confirmed HLS is good
-
-    // const sourceFileSize = await stat(source).then((stats) => stats.size);
-    // if (sourceFileSize < 10 * MB) {
-    return {
-      ...video,
-    };
-    // }
+    const sourceFileSize = await stat(source).then((stats) => stats.size);
+    if (sourceFileSize < 5 * MB) {
+      return {
+        ...video,
+      };
+    }
 
     const dirPath = CachesDirectoryPath;
     const destinationPrefix = Platform.OS === 'ios' ? '' : 'file://';
