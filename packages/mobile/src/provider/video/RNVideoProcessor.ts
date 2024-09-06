@@ -33,8 +33,8 @@ export const processVideo = async (
   const thumbSource: ImageSource | null = thumbnail
     ? {
         uri: thumbnail.uri,
-        width: 0,
-        height: 0,
+        width: video.width || 0,
+        height: video.height || 0,
         type: thumbnail.type,
       }
     : null;
