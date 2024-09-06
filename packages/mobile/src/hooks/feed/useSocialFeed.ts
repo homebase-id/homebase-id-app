@@ -9,6 +9,7 @@ import { useChannels } from './channels/useChannels';
 import { useChannelDrives } from './channels/useChannelDrives';
 import { useDotYouClientContext } from 'feed-app-common';
 import { useNotificationSubscriber } from '../useNotificationSubscriber';
+import { ChatDrive } from '../../provider/chat/ConversationProvider';
 
 const MINUTE_IN_MS = 60000;
 
@@ -26,7 +27,6 @@ const useInboxProcessor = (isEnabled?: boolean) => {
         })
       );
     }
-
     return true;
   };
 
@@ -52,6 +52,7 @@ const useFeedWebsocket = (isEnabled: boolean) => {
         stringGuidsEqual(notification.targetDrive?.alias, BlogConfig.FeedDrive.alias) &&
         stringGuidsEqual(notification.targetDrive?.type, BlogConfig.FeedDrive.type)
       ) {
+        console.log('Invalidating social feeds');
         queryClient.invalidateQueries({ queryKey: ['social-feeds'] });
       }
     },
@@ -61,7 +62,7 @@ const useFeedWebsocket = (isEnabled: boolean) => {
   return useNotificationSubscriber(
     isEnabled ? handler : undefined,
     ['fileAdded', 'fileModified'],
-    [BlogConfig.FeedDrive],
+    [BlogConfig.FeedDrive, ChatDrive],
     () => {
       queryClient.invalidateQueries({ queryKey: ['process-inbox-feed'] });
     }

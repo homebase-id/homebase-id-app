@@ -55,7 +55,6 @@ export const FeedStack = (_props: NativeStackScreenProps<TabStackParamList, 'Fee
       }) as NativeStackNavigationOptions,
     [isDarkMode]
   );
-  console.log('FeedStack');
 
   return (
     <StackFeed.Navigator screenOptions={screenOptions}>
