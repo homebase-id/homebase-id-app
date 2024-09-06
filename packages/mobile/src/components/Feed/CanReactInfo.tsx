@@ -38,6 +38,9 @@ export const CantReactInfo = memo(
             flexDirection: 'row',
             marginHorizontal: 4,
             paddingBottom: intent === 'comment' ? bottom : 0,
+            alignContent: 'center',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
         >
           <ActivityIndicator size={'small'} />
@@ -71,6 +74,7 @@ export const CantReactInfo = memo(
           fontSize: 12,
           fontWeight: '400',
           opacity: 0.5,
+          textAlign: 'center',
         }}
       >
         {infoMessage}
