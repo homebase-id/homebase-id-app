@@ -5,10 +5,15 @@ import { Keyboard, TouchableOpacity } from 'react-native';
 import { Colors } from '../../app/Colors';
 import { useRemoveNotifications } from '../../hooks/notifications/usePushNotifications';
 import { FEED_APP_ID } from '../../app/constants';
-import { Plus } from '../../components/ui/Icons/icons';
+import { Feed, Plus } from '../../components/ui/Icons/icons';
 import { useIsFocused } from '@react-navigation/native';
 import SocialFeedMainContent from '../../components/Feed/MainContent/SocialFeed';
 import { FeedStackParamList } from '../../app/FeedStack';
+import { useLiveFeedProcessor } from '../../hooks/feed/useSocialFeed';
+import { Header } from '@react-navigation/elements';
+import { OfflineProfileAvatar, ProfileAvatar } from '../../app/ChatStack';
+import { View } from 'react-native';
+import { Text } from '../../components/ui/Text/Text';
 
 type FeedProps = NativeStackScreenProps<FeedStackParamList, 'Home'>;
 
@@ -35,6 +40,7 @@ export const FeedPage = memo(({ navigation }: FeedProps) => {
   return (
     <SafeAreaView>
       {/* <SocialFeedWebView /> */}
+      <FeedHeader />
       <SocialFeedMainContent />
 
       {!keyboardVisible && (
@@ -59,3 +65,36 @@ export const FeedPage = memo(({ navigation }: FeedProps) => {
     </SafeAreaView>
   );
 });
+
+export const FeedHeader = () => {
+  const isOnline = useLiveFeedProcessor();
+
+  const headerTitle = useCallback(
+    () => (
+      <View style={{ flexDirection: 'row', alignContent: 'center', alignItems: 'center', gap: 12 }}>
+        <Feed size={'lg'} />
+        <Text
+          style={{
+            fontSize: 20,
+            fontWeight: '600',
+          }}
+        >
+          Feed
+        </Text>
+      </View>
+    ),
+    []
+  );
+
+  return (
+    <Header
+      title="Homebase Feed"
+      headerTitleAlign="left"
+      headerTitle={headerTitle}
+      headerRight={isOnline ? ProfileAvatar : OfflineProfileAvatar}
+      headerRightContainerStyle={{ paddingRight: 16 }}
+      headerTransparent
+      headerStatusBarHeight={0}
+    />
+  );
+};

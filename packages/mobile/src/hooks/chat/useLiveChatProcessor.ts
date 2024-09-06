@@ -1,11 +1,10 @@
-import { InfiniteData, QueryClient, useQuery, useQueryClient } from '@tanstack/react-query';
+import { QueryClient, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   AppNotification,
   DeletedHomebaseFile,
   DotYouClient,
   FileQueryParams,
   HomebaseFile,
-  PushNotification,
   ReactionNotification,
   TypedConnectionNotification,
   queryBatch,
@@ -80,7 +79,9 @@ const useInboxProcessor = (connected?: boolean) => {
 
     const processedresult = await processInbox(dotYouClient, ChatDrive, BATCH_SIZE);
 
-    isDebug && console.debug('[InboxProcessor] fetching updates since', lastProcessedWithBuffer);
+    if (isDebug) {
+      console.debug('[InboxProcessor] fetching updates since', lastProcessedWithBuffer);
+    }
     if (lastProcessedWithBuffer) {
       const updatedMessages = await findChangesSinceTimestamp(
         dotYouClient,
@@ -90,7 +91,9 @@ const useInboxProcessor = (connected?: boolean) => {
           fileType: [CHAT_MESSAGE_FILE_TYPE],
         }
       );
-      isDebug && console.debug('[InboxProcessor] new messages', updatedMessages.length);
+      if (isDebug) {
+        console.debug('[InboxProcessor] new messages', updatedMessages.length);
+      }
       await processChatMessagesBatch(dotYouClient, queryClient, updatedMessages);
 
       const updatedConversations = await findChangesSinceTimestamp(
@@ -101,7 +104,9 @@ const useInboxProcessor = (connected?: boolean) => {
           fileType: [CHAT_CONVERSATION_FILE_TYPE],
         }
       );
-      isDebug && console.debug('[InboxProcessor] new conversations', updatedConversations.length);
+      if (isDebug) {
+        console.debug('[InboxProcessor] new conversations', updatedConversations.length);
+      }
       await processConversationsBatch(dotYouClient, queryClient, updatedConversations);
 
       const updatedConversationMetadatas = await findChangesSinceTimestamp(
@@ -112,8 +117,9 @@ const useInboxProcessor = (connected?: boolean) => {
           fileType: [CHAT_CONVERSATION_LOCAL_METADATA_FILE_TYPE],
         }
       );
-      isDebug &&
+      if (isDebug) {
         console.debug('[InboxProcessor] new metadata', updatedConversationMetadatas.length);
+      }
       await processConversationsMetadataBatch(
         dotYouClient,
         queryClient,
@@ -150,7 +156,9 @@ const useChatWebsocket = (isEnabled: boolean) => {
   const [chatMessagesQueue, setChatMessagesQueue] = useState<HomebaseFile<ChatMessage>[]>([]);
 
   const handler = useCallback(async (notification: TypedConnectionNotification) => {
-    isDebug && console.debug('[ChatWebsocket] Got notification', notification);
+    if (isDebug) {
+      console.debug('[ChatWebsocket] Got notification', notification);
+    }
 
     if (
       (notification.notificationType === 'fileAdded' ||
@@ -270,7 +278,9 @@ const useChatWebsocket = (isEnabled: boolean) => {
 
   const chatMessagesQueueTunnel = useRef<HomebaseFile<ChatMessage>[]>([]);
   const processQueue = useCallback(async (queuedMessages: HomebaseFile<ChatMessage>[]) => {
-    isDebug && console.debug('[ChatWebsocket] Processing queue', queuedMessages.length);
+    if (isDebug) {
+      console.debug('[ChatWebsocket] Processing queue', queuedMessages.length);
+    }
     setChatMessagesQueue([]);
     if (timeout.current) {
       clearTimeout(timeout.current);
@@ -376,11 +386,12 @@ const processChatMessagesBatch = async (
     },
     {} as Record<string, HomebaseFile<string | ChatMessage>[]>
   );
-  isDebug &&
+  if (isDebug) {
     console.debug(
       '[InboxProcessor] new conversation updates',
       Object.keys(uniqueMessagesPerConversation).length
     );
+  }
 
   await Promise.all(
     Object.keys(uniqueMessagesPerConversation).map(async (updatedConversation) => {
@@ -389,11 +400,11 @@ const processChatMessagesBatch = async (
           uniqueMessagesPerConversation[updatedConversation].map(async (newMessage) =>
             typeof newMessage.fileMetadata.appData.content === 'string'
               ? await dsrToMessage(
-                  dotYouClient,
-                  newMessage as HomebaseFile<string>,
-                  ChatDrive,
-                  true
-                )
+                dotYouClient,
+                newMessage as HomebaseFile<string>,
+                ChatDrive,
+                true
+              )
               : (newMessage as HomebaseFile<ChatMessage>)
           )
         )

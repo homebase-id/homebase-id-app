@@ -31,7 +31,7 @@ const useInboxProcessor = (isEnabled?: boolean) => {
   };
 
   return useQuery({
-    queryKey: ['process-inbox'],
+    queryKey: ['process-inbox-feed'],
     queryFn: fetchData,
     refetchOnMount: false,
     // We want to refetch on window focus, as we might have missed some messages while the window was not focused and the websocket might have lost connection
@@ -58,17 +58,21 @@ const useFeedWebsocket = (isEnabled: boolean) => {
     [queryClient]
   );
 
-  useNotificationSubscriber(
+  return useNotificationSubscriber(
     isEnabled ? handler : undefined,
     ['fileAdded', 'fileModified'],
-    [BlogConfig.FeedDrive]
+    [BlogConfig.FeedDrive],
+    () => {
+      queryClient.invalidateQueries({ queryKey: ['process-inbox-feed'] });
+    }
   );
 };
 
 export const useLiveFeedProcessor = () => {
   const { status: inboxStatus } = useInboxProcessor(true);
 
-  useFeedWebsocket(inboxStatus === 'success');
+  const isOnline = useFeedWebsocket(inboxStatus === 'success');
+  return isOnline;
 };
 
 export const useSocialFeed = ({ pageSize = 10 }: { pageSize: number }) => {
@@ -99,8 +103,8 @@ export const useSocialFeed = ({ pageSize = 10 }: { pageSize: number }) => {
       queryFn: ({ pageParam }) => fetchAll({ pageParam }),
       getNextPageParam: (lastPage) =>
         lastPage &&
-        lastPage?.results?.length >= 1 &&
-        (lastPage?.cursorState || lastPage?.ownerCursorState)
+          lastPage?.results?.length >= 1 &&
+          (lastPage?.cursorState || lastPage?.ownerCursorState)
           ? { cursorState: lastPage.cursorState, ownerCursorState: lastPage.ownerCursorState }
           : undefined,
       refetchOnMount: false,

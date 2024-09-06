@@ -5,12 +5,11 @@ import {
   NativeStackScreenProps,
 } from '@react-navigation/native-stack';
 import { TabStackParamList } from './App';
-import { useLiveFeedProcessor } from '../hooks/feed/useSocialFeed';
 import { useDarkMode } from '../hooks/useDarkMode';
 import { useMemo } from 'react';
 import { Platform } from 'react-native';
 import { Colors } from './Colors';
-import { FeedPage } from '../pages/feed/feed-page';
+import { FeedHeader, FeedPage } from '../pages/feed/feed-page';
 import { PreviewMedia } from '../pages/media-preview-page';
 import { PostComposer } from '../pages/feed/post-composer';
 
@@ -56,32 +55,25 @@ export const FeedStack = (_props: NativeStackScreenProps<TabStackParamList, 'Fee
       }) as NativeStackNavigationOptions,
     [isDarkMode]
   );
+  console.log('FeedStack');
 
   return (
-    <>
-      <FeedProcessor />
-      <StackFeed.Navigator screenOptions={screenOptions}>
-        <StackFeed.Screen name="Home" component={FeedPage} />
-        <StackFeed.Screen
-          name="PreviewMedia"
-          component={PreviewMedia}
-          options={{
-            animation: 'slide_from_bottom',
-          }}
-        />
-        <StackFeed.Screen
-          name="Compose"
-          component={PostComposer}
-          options={{
-            animation: 'slide_from_bottom',
-          }}
-        />
-      </StackFeed.Navigator>
-    </>
+    <StackFeed.Navigator screenOptions={screenOptions}>
+      <StackFeed.Screen name="Home" component={FeedPage} />
+      <StackFeed.Screen
+        name="PreviewMedia"
+        component={PreviewMedia}
+        options={{
+          animation: 'slide_from_bottom',
+        }}
+      />
+      <StackFeed.Screen
+        name="Compose"
+        component={PostComposer}
+        options={{
+          animation: 'slide_from_bottom',
+        }}
+      />
+    </StackFeed.Navigator>
   );
-};
-
-const FeedProcessor = () => {
-  useLiveFeedProcessor();
-  return null;
 };
