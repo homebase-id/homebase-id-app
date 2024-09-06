@@ -1,14 +1,18 @@
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
-import { DotYouClient, HomebaseFile, TargetDrive, getFileHeader } from '@homebase-id/js-lib/core';
+import { HomebaseFile, TargetDrive, getFileHeader } from '@homebase-id/js-lib/core';
 import { tryJsonParse } from '@homebase-id/js-lib/helpers';
-import { PlainVideoMetadata, SegmentedVideoMetadata } from '@homebase-id/js-lib/media';
+import {
+  HlsVideoMetadata,
+  PlainVideoMetadata,
+  SegmentedVideoMetadata,
+} from '@homebase-id/js-lib/media';
 import {
   getFileHeaderBytesOverPeerByGlobalTransitId,
   getFileHeaderOverPeer,
 } from '@homebase-id/js-lib/peer';
+import { useDotYouClientContext } from 'feed-app-common';
 
 export const useVideoMetadata = (
-  dotYouClient: DotYouClient,
   odinId?: string,
   videoFileId?: string | undefined,
   videoGlobalTransitId?: string | undefined,
@@ -18,11 +22,12 @@ export const useVideoMetadata = (
   fetchMetadata: UseQueryResult<
     {
       fileHeader: HomebaseFile;
-      metadata: PlainVideoMetadata | SegmentedVideoMetadata;
+      metadata: PlainVideoMetadata | SegmentedVideoMetadata | HlsVideoMetadata;
     } | null,
     Error
   >;
 } => {
+  const dotYouClient = useDotYouClientContext();
   const identity = dotYouClient.getIdentity();
 
   const fetchVideoData = async (
@@ -32,7 +37,7 @@ export const useVideoMetadata = (
     videoDrive?: TargetDrive
   ): Promise<{
     fileHeader: HomebaseFile;
-    metadata: PlainVideoMetadata | SegmentedVideoMetadata;
+    metadata: PlainVideoMetadata | SegmentedVideoMetadata | HlsVideoMetadata;
   } | null> => {
     if (
       videoFileId === undefined ||
@@ -62,7 +67,9 @@ export const useVideoMetadata = (
       const descriptor = payloadData?.descriptorContent;
       if (!descriptor) return undefined;
 
-      const parsedMetaData = tryJsonParse<PlainVideoMetadata | SegmentedVideoMetadata>(descriptor);
+      const parsedMetaData = tryJsonParse<
+        PlainVideoMetadata | SegmentedVideoMetadata | HlsVideoMetadata
+      >(descriptor);
       // The fileHeader contains the most accurate file size; So we use that one.
       parsedMetaData.fileSize = payloadData.bytesWritten;
       return { metadata: parsedMetaData, fileHeader };

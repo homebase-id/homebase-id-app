@@ -43,8 +43,7 @@ import {
 import { OdinBlob } from '../../../polyfills/OdinBlob';
 import { ImageSource } from '../image/RNImageProvider';
 import { createThumbnails } from '../image/RNThumbnailProvider';
-import { grabThumbnail, processVideo } from '../image/RNVideoProviderSegmenter';
-import { VideoContentType } from '@homebase-id/js-lib/media';
+import { processVideo } from '../video/RNVideoProcessor';
 import { AxiosRequestConfig } from 'axios';
 
 const POST_MEDIA_PAYLOAD_KEY = 'pst_mdi';

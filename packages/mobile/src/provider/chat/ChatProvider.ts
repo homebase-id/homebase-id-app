@@ -43,7 +43,7 @@ import {
 import { OdinBlob } from '../../../polyfills/OdinBlob';
 import { ImageSource } from '../image/RNImageProvider';
 import { createThumbnails } from '../image/RNThumbnailProvider';
-import { processVideo } from '../image/RNVideoProviderSegmenter';
+import { processVideo } from '../video/RNVideoProcessor';
 import { LinkPreview, LinkPreviewDescriptor } from '@homebase-id/js-lib/media';
 import { sendReadReceipt } from '@homebase-id/js-lib/peer';
 

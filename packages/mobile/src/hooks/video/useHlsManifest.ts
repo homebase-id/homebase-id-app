@@ -5,17 +5,10 @@ import {
   SystemFileType,
   TargetDrive,
   decryptKeyHeader,
-  getPayloadBytes,
   InterceptionEncryptionUtil,
 } from '@homebase-id/js-lib/core';
-import {
-  byteArrayToString,
-  getNewId,
-  stringifyToQueryParams,
-  uint8ArrayToBase64,
-} from '@homebase-id/js-lib/helpers';
+import { getNewId, stringifyToQueryParams, uint8ArrayToBase64 } from '@homebase-id/js-lib/helpers';
 import { getAnonymousDirectImageUrl } from '@homebase-id/js-lib/media';
-import { getPayloadBytesOverPeer } from '@homebase-id/js-lib/peer';
 import { useVideoMetadata } from './useVideoMetadata';
 import { useDotYouClientContext } from 'feed-app-common';
 import { CachesDirectoryPath, writeFile } from 'react-native-fs';
@@ -34,7 +27,6 @@ export const useHlsManifest = (
   const dotYouClient = useDotYouClientContext();
   const identity = dotYouClient.getIdentity();
   const { data: videoFileData, isFetched: videoFileDataFetched } = useVideoMetadata(
-    dotYouClient,
     odinId,
     videoFileId,
     videoGlobalTransitId,
@@ -59,24 +51,13 @@ export const useHlsManifest = (
       return null;
     }
 
-    const fetchManifestPayload = async () => {
-      return odinId !== identity
-        ? await getPayloadBytesOverPeer(
-            dotYouClient,
-            odinId,
-            videoDrive,
-            videoFile.fileId,
-            videoFileKey
-          )
-        : await getPayloadBytes(dotYouClient, videoDrive, videoFile.fileId, videoFileKey);
-    };
-
-    const manifestPayload = await fetchManifestPayload();
-    if (!manifestPayload || !videoFileData) return null;
+    if (!videoFileData || !('hlsPlaylist' in videoFileData.metadata) || !videoFileData?.metadata) {
+      return null;
+    }
 
     const contents = await replaceSegmentUrls(
-      await byteArrayToString(manifestPayload.bytes),
-      async (url, index) => {
+      videoFileData?.metadata.hlsPlaylist,
+      async (url) => {
         return (
           (await getSegmentUrl(
             dotYouClient,
@@ -84,7 +65,6 @@ export const useHlsManifest = (
             videoDrive,
             videoFile.fileId,
             videoFileKey,
-            index,
             videoFileData?.fileHeader.fileMetadata.isEncrypted || false
           )) || url
         );
@@ -176,7 +156,6 @@ const getSegmentUrl = async (
   videoDrive: TargetDrive,
   videoFileId: string,
   videoFileKey: string,
-  segmentIndex: number,
   isEncrypted: boolean,
   systemFileType?: SystemFileType
 ) => {
@@ -187,7 +166,7 @@ const getSegmentUrl = async (
       videoDrive,
       videoFileId,
       videoFileKey,
-      { pixelHeight: segmentIndex, pixelWidth: segmentIndex },
+      undefined,
       systemFileType
     );
   }
@@ -200,18 +179,17 @@ const getSegmentUrl = async (
   const params = {
     ...videoDrive,
     fileId: videoFileId,
-    payloadKey: videoFileKey,
-    width: segmentIndex,
-    height: segmentIndex,
+    key: videoFileKey,
+
     xfst: systemFileType || 'Standard',
   };
 
-  const unenryptedThumbUrl =
+  const unenryptedPayloadUrl =
     odinId !== identity
-      ? `${dotYouClient.getEndpoint()}/transit/query/thumb?${stringifyToQueryParams({ odinId, ...params })}`
-      : `${dotYouClient.getEndpoint()}/drive/files/thumb?${stringifyToQueryParams(params)}`;
+      ? `${dotYouClient.getEndpoint()}/transit/query/payload?${stringifyToQueryParams({ odinId, ...params })}`
+      : `${dotYouClient.getEndpoint()}/drive/files/payload?${stringifyToQueryParams(params)}`;
 
-  return InterceptionEncryptionUtil.encryptUrl(unenryptedThumbUrl, ss);
+  return InterceptionEncryptionUtil.encryptUrl(unenryptedPayloadUrl, ss);
 };
 
 const getKeyUrl = async (aesKey: Uint8Array) =>

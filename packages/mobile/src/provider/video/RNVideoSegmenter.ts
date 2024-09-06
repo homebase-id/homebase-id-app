@@ -1,27 +1,23 @@
 import { ImageSource } from './RNImageProvider';
-import {
-  getNewId,
-  getRandom16ByteArray,
-  jsonStringify64,
-  uint8ArrayToBase64,
-} from '@homebase-id/js-lib/helpers';
+import { getNewId, uint8ArrayToBase64 } from '@homebase-id/js-lib/helpers';
 
-import { CachesDirectoryPath, exists, read, stat, unlink, writeFile } from 'react-native-fs';
+import {
+  CachesDirectoryPath,
+  exists,
+  read,
+  readFile,
+  stat,
+  unlink,
+  writeFile,
+} from 'react-native-fs';
 import { Video } from 'react-native-compressor';
 import { Platform } from 'react-native';
 
 import MP4Box from 'mp4box';
 import { FFmpegKit, SessionState } from 'ffmpeg-kit-react-native';
-import { SegmentedVideoMetadata, VideoContentType } from '@homebase-id/js-lib/media';
+import { HlsVideoMetadata, SegmentedVideoMetadata } from '@homebase-id/js-lib/media';
 import { OdinBlob } from '../../../polyfills/OdinBlob';
-import {
-  EmbeddedThumb,
-  ImageContentType,
-  KeyHeader,
-  PayloadFile,
-  ThumbnailFile,
-} from '@homebase-id/js-lib/core';
-import { createThumbnails } from './RNThumbnailProvider';
+import { KeyHeader } from '@homebase-id/js-lib/core';
 
 const CompressVideo = async (
   video: ImageSource,
@@ -71,7 +67,7 @@ const toHexString = (byteArray: Uint8Array) => {
 const MB = 1000000;
 interface HLSVideo {
   playlist: ImageSource;
-  segments: ImageSource[];
+  segments: ImageSource;
 }
 const segmentVideo = async (
   video: ImageSource,
@@ -120,7 +116,7 @@ const segmentVideo = async (
     // MDN docs (https://developer.mozilla.org/en-US/docs/Web/API/Media_Source_Extensions_API/Transcoding_assets_for_MSE#fragmenting)
     // FFMPEG fragmenting: https://ffmpeg.org/ffmpeg-formats.html#Fragmentation
     // const command = `-i ${source} -c:v copy -c:a copy -movflags frag_keyframe+empty_moov+default_base_moof ${destinationUri}`;
-    const command = `-i ${source} -codec: copy ${encryptionInfo} -hls_time 6 -hls_list_size 0 -f hls ${playlistUri}`;
+    const command = `-i ${source} -codec: copy ${encryptionInfo} -hls_time 6 -hls_list_size 0 -f hls -hls_flags single_file ${playlistUri}`;
 
     // empty_moov (older version of the above)
     // const command = `-i ${source} -c copy -movflags +frag_keyframe+separate_moof+omit_tfhd_offset+empty_moov ${destinationUri}`;
@@ -140,14 +136,7 @@ const segmentVideo = async (
         throw new Error(`FFmpeg process failed with state: ${state} and rc: ${returnCode}.`);
       }
 
-      const segments: string[] = [];
-      for (let i = 0; i < 100; i++) {
-        const fragmentUri = `${playlistUri.replace('.m3u8', `${i}.ts`)}`;
-        if (!(await exists(fragmentUri))) {
-          break;
-        }
-        segments.push(fragmentUri);
-      }
+      const segmentsUri = playlistUri.replace('.m3u8', '.ts');
 
       pathsToClean?.forEach(async (path) => {
         unlink(path);
@@ -161,19 +150,12 @@ const segmentVideo = async (
           uri: playlistUri,
           filepath: playlistUri,
         },
-        segments: await Promise.all(
-          segments.map(async (segment) => {
-            const segmentFileSize = await stat(playlistUri).then((stats) => stats.size);
-
-            return {
-              ...video,
-              fileSize: segmentFileSize || video.fileSize,
-              type: 'video/mp2t',
-              uri: segment,
-              filepath: segment,
-            };
-          })
-        ),
+        segments: {
+          ...video,
+          type: 'video/mp2t',
+          uri: segmentsUri,
+          filepath: segmentsUri,
+        },
       };
     } catch (error) {
       throw new Error(`FFmpeg process failed with error: ${error}`);
@@ -320,13 +302,12 @@ interface VideoData {
 }
 
 interface HLSData {
-  playlist: ImageSource;
-  segments: ImageSource[];
-  metadata: SegmentedVideoMetadata;
+  segments: ImageSource;
+  metadata: HlsVideoMetadata;
   keyHeader?: KeyHeader;
 }
 
-const compressAndSegmentVideo = async (
+export const compressAndSegmentVideo = async (
   video: ImageSource,
   compress?: boolean,
   onUpdate?: (progress: number) => void,
@@ -342,6 +323,24 @@ const compressAndSegmentVideo = async (
   const playlistOrFullVideo: ImageSource | null =
     (fragmentedVideo as HLSVideo).playlist || fragmentedVideo;
 
+  if ('segments' in fragmentedVideo) {
+    const playlistcontent = await readFile(
+      (fragmentedVideo as HLSVideo).playlist.uri as string,
+      'utf8'
+    );
+
+    const metadata: HlsVideoMetadata = {
+      isSegmented: true,
+      mimeType: 'application/vnd.apple.mpegurl',
+      hlsPlaylist: playlistcontent,
+    };
+
+    return {
+      segments: (fragmentedVideo as HLSVideo).segments,
+      metadata,
+    };
+  }
+
   const mp4Info = await getMp4Info(video);
   const metadata: SegmentedVideoMetadata = {
     isSegmented: true,
@@ -352,108 +351,8 @@ const compressAndSegmentVideo = async (
       ? playlistOrFullVideo.playableDuration * 1000
       : 0,
   };
-
-  if ('segments' in fragmentedVideo) {
-    return {
-      playlist: (fragmentedVideo as HLSVideo).playlist,
-      segments: (fragmentedVideo as HLSVideo).segments,
-      metadata,
-    };
-  }
-
   return {
     metadata,
     video: fragmentedVideo,
-  };
-};
-
-export const processVideo = async (
-  video: ImageSource,
-  payloadKey: string,
-  compress?: boolean,
-  onUpdate?: (phase: string, progress: number) => void,
-  keyHeader?: KeyHeader
-): Promise<{
-  tinyThumb: EmbeddedThumb | undefined;
-  payloads: PayloadFile[];
-  thumbnails: ThumbnailFile[];
-}> => {
-  const payloads: PayloadFile[] = [];
-  const thumbnails: ThumbnailFile[] = [];
-
-  // Grab thumbnail
-  onUpdate?.('Grabbing thumbnail', 0);
-  const thumbnail = await grabThumbnail(video);
-  const thumbSource: ImageSource | null = thumbnail
-    ? {
-        uri: thumbnail.uri,
-        width: 1920, //thumbnail.width || 1920,
-        height: 1080, //thumbnail.height || 1080,
-        type: thumbnail.type,
-      }
-    : null;
-  const { tinyThumb, additionalThumbnails } =
-    thumbSource && thumbnail
-      ? await createThumbnails(thumbSource, payloadKey, thumbnail.type as ImageContentType, [
-          { quality: 100, width: 250, height: 250 },
-        ])
-      : { tinyThumb: undefined, additionalThumbnails: undefined };
-  if (additionalThumbnails) {
-    thumbnails.push(...additionalThumbnails);
-  }
-
-  // Compress and segment video
-  const { metadata, ...videoData } = await compressAndSegmentVideo(
-    video,
-    compress,
-    onUpdate ? (progress) => onUpdate('Compressing', progress) : undefined,
-    keyHeader
-  );
-
-  if ('segments' in videoData) {
-    // HLS
-    const { playlist, segments } = videoData;
-    keyHeader = videoData.keyHeader;
-    const playlistBlob = new OdinBlob(playlist.uri, {
-      type: playlist.type as VideoContentType,
-    }) as unknown as Blob;
-
-    payloads.push({
-      key: payloadKey,
-      payload: playlistBlob,
-      descriptorContent: jsonStringify64(metadata),
-    });
-
-    for (let j = 0; j < segments.length; j++) {
-      const segment = segments[j];
-      const segmentBlob = new OdinBlob(segment.uri, {
-        type: segment.type as VideoContentType,
-      }) as unknown as Blob;
-
-      thumbnails.push({
-        key: payloadKey,
-        payload: segmentBlob,
-        pixelHeight: j,
-        pixelWidth: j,
-        skipEncryption: true,
-      });
-    }
-  } else {
-    // Custom blob to avoid reading and writing the file to disk again
-    const payloadBlob = new OdinBlob((videoData.video.filepath || videoData.video.uri) as string, {
-      type: 'video/mp4' as VideoContentType,
-    }) as unknown as Blob;
-
-    payloads.push({
-      key: payloadKey,
-      payload: payloadBlob,
-      descriptorContent: metadata ? jsonStringify64(metadata) : undefined,
-    });
-  }
-
-  return {
-    tinyThumb,
-    thumbnails,
-    payloads,
   };
 };

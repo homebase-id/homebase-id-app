@@ -15,10 +15,10 @@ import { uint8ArrayToBase64 } from '@homebase-id/js-lib/helpers';
 import { Play } from '../Icons/icons';
 import { OdinImage } from '../OdinImage/OdinImage';
 import { useVideo } from '../../../hooks/video/useVideo';
-import { useHlsManifest } from '../../../hooks/video/useHlsVideoManifest';
+import { useHlsManifest } from '../../../hooks/video/useHlsManifest';
 import Video from 'react-native-video';
-import { useEncrtypedStorage } from '../../../hooks/auth/useEncryptedStorage';
 import { useDotYouClientContext } from 'feed-app-common';
+import { useVideoMetadata } from '../../../hooks/video/useVideoMetadata';
 
 const MAX_DOWNLOAD_SIZE = 16 * 1024 * 1024 * 1024; // 16 MB
 
@@ -56,6 +56,14 @@ export const VideoWithLoader = memo(
     const [loadVideo, setLoadVideo] = useState(autoPlay);
     const doLoadVideo = useCallback(() => setLoadVideo(true), []);
     const canDownload = !preview && payload?.bytesWritten < MAX_DOWNLOAD_SIZE;
+
+    const { data: videoData } = useVideoMetadata(
+      odinId,
+      fileId,
+      globalTransitId,
+      payload.key,
+      targetDrive
+    ).fetchMetadata;
 
     if (preview) {
       return (
@@ -116,7 +124,7 @@ export const VideoWithLoader = memo(
               position: 'relative',
             }}
           >
-            {payload.contentType === 'application/vnd.apple.mpegurl' ? (
+            {videoData?.metadata.mimeType === 'application/vnd.apple.mpegurl' ? (
               <HlsVideo
                 odinId={odinId}
                 fileId={fileId}
