@@ -55,7 +55,7 @@ export const BackButton = (props: {
   );
 };
 
-export const Empty = () => {
+const Empty = () => {
   return <></>;
 };
 
