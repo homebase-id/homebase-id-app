@@ -36,7 +36,7 @@ export const PostInteracts = memo(
   }) => {
     const postContent = postFile.fileMetadata.appData.content;
     const owner = useDotYouClientContext().getIdentity();
-    const authorOdinId = postContent.authorOdinId || owner;
+    const authorOdinId = postFile.fileMetadata.senderOdinId || owner;
     const postDisabledEmoji =
       postContent.reactAccess !== undefined &&
       (postContent.reactAccess === false || postContent.reactAccess === 'comment');
