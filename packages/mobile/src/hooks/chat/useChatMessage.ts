@@ -32,6 +32,7 @@ import { OdinBlob } from '../../../polyfills/OdinBlob';
 import { getSynchronousDotYouClient } from './getSynchronousDotYouClient';
 import { useErrors, addError } from '../errors/useErrors';
 import { LinkPreview } from '@homebase-id/js-lib/media';
+import { insertNewMessage } from './useChatMessages';
 
 const sendMessage = async ({
   conversation,
@@ -168,17 +169,6 @@ export const getSendChatMessageMutationOptions: (queryClient: QueryClient) => Us
   mutationKey: ['send-chat-message'],
   mutationFn: async (params) => sendMessage({ ...params, queryClient }),
   onMutate: async ({ conversation, replyId, files, message, chatId, userDate }) => {
-    const existingData = queryClient.getQueryData<
-      InfiniteData<{
-        searchResults: (HomebaseFile<ChatMessage> | null)[];
-        cursorState: string;
-        queryTime: number;
-        includeMetadataHeader: boolean;
-      }>
-    >(['chat-messages', conversation.fileMetadata.appData.uniqueId]);
-
-    if (!existingData) return;
-
     const newMessageDsr: NewHomebaseFile<ChatMessage> = {
       fileMetadata: {
         created: userDate,
@@ -217,69 +207,16 @@ export const getSendChatMessageMutationOptions: (queryClient: QueryClient) => Us
         },
       },
     };
-    const newData = {
-      ...existingData,
-      pages: existingData?.pages?.map((page) => ({
-        ...page,
-        searchResults: [newMessageDsr, ...page.searchResults],
-      })),
-    };
 
-    queryClient.setQueryData(
-      ['chat-messages', conversation.fileMetadata.appData.uniqueId],
-      newData
-    );
-    return { existingData };
-  },
-  onSuccess: async (newMessage, params) => {
-    if (!newMessage) return;
-    const extistingMessages = queryClient.getQueryData<
-      InfiniteData<{
-        searchResults: (HomebaseFile<ChatMessage> | null)[];
-        cursorState: string;
-        queryTime: number;
-        includeMetadataHeader: boolean;
-      }>
-    >(['chat-messages', params.conversation.fileMetadata.appData.uniqueId]);
-
-    if (extistingMessages) {
-      const newData = {
-        ...extistingMessages,
-        pages: extistingMessages?.pages?.map((page) => ({
-          ...page,
-          searchResults: page.searchResults.map((msg) => {
-            if (
-              stringGuidsEqual(
-                msg?.fileMetadata.appData.uniqueId,
-                newMessage.fileMetadata.appData.uniqueId
-              ) &&
-              (!msg?.fileMetadata.appData.content.deliveryStatus ||
-                msg?.fileMetadata.appData.content.deliveryStatus <= ChatDeliveryStatus.Sent)
-            ) {
-              // We want to keep previewThumbnail and payloads from the existing message as that holds the optimistic updates from the onMutate
-              return {
-                ...newMessage,
-                fileMetadata: {
-                  ...newMessage.fileMetadata,
-                  appData: {
-                    ...newMessage.fileMetadata.appData,
-                    previewThumbnail: msg?.fileMetadata.appData.previewThumbnail,
-                  },
-                  payloads: msg?.fileMetadata.payloads,
-                },
-              };
-            }
-
-            return msg;
-          }),
-        })),
-      };
-
-      queryClient.setQueryData(
-        ['chat-messages', params.conversation.fileMetadata.appData.uniqueId],
-        newData
-      );
+    const { extistingMessages } = insertNewMessage(queryClient, newMessageDsr);
+    if (!extistingMessages) {
+      return;
     }
+    return { existingData: extistingMessages };
+  },
+  onSuccess: async (newMessage) => {
+    if (!newMessage) return;
+    insertNewMessage(queryClient, newMessage);
   },
   onError: (err, messageParams, context) => {
     addError(queryClient, err, t('Failed to send the chat message'));
