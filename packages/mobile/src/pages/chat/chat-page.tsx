@@ -91,7 +91,8 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
       )?.map<ChatMessageIMessage>((value) => {
         // Mapping done here, because the chat component expects a different format
         return {
-          _id: value.fileId || value.fileMetadata.appData.uniqueId || getNewId(),
+          // Prefer uniqueId to avoid duplicates between onMutate and actual data
+          _id: value.fileMetadata.appData.uniqueId || value.fileId || getNewId(),
           createdAt: value.fileMetadata.created,
           text:
             value.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus

@@ -222,6 +222,11 @@ export const internalInsertNewMessage = (
   >,
   newMessage: HomebaseFile<ChatMessage>
 ) => {
+  if (!newMessage.fileMetadata.appData.uniqueId || !newMessage.fileMetadata.appData.groupId) {
+    console.warn('Message does not have uniqueId or groupId', newMessage);
+    return extistingMessages;
+  }
+
   const isNewFile = !extistingMessages.pages.some((page) =>
     page.searchResults.some(
       (msg) =>
