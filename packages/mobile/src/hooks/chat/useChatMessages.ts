@@ -14,7 +14,7 @@ import {
   softDeleteChatMessage,
 } from '../../provider/chat/ChatProvider';
 
-import { DotYouClient, HomebaseFile } from '@homebase-id/js-lib/core';
+import { DotYouClient, HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
 import { useDotYouClientContext } from 'feed-app-common';
 import {
   ConversationWithYourselfId,
@@ -152,7 +152,7 @@ export const insertNewMessagesForConversation = (
 ) => {
   const extistingMessages = queryClient.getQueryData<
     InfiniteData<{
-      searchResults: (HomebaseFile<ChatMessage> | null)[];
+      searchResults: (NewHomebaseFile<ChatMessage> | HomebaseFile<ChatMessage> | null)[];
       cursorState: string;
       queryTime: number;
       includeMetadataHeader: boolean;
@@ -185,7 +185,7 @@ export const insertNewMessagesForConversation = (
 
 export const insertNewMessage = (
   queryClient: QueryClient,
-  newMessage: HomebaseFile<ChatMessage>
+  newMessage: HomebaseFile<ChatMessage> | NewHomebaseFile<ChatMessage>
 ) => {
   const conversationId = newMessage.fileMetadata.appData.groupId;
 
@@ -208,19 +208,21 @@ export const insertNewMessage = (
   }
 
   queryClient.setQueryData(['chat-message', newMessage.fileMetadata.appData.uniqueId], newMessage);
+
+  return { extistingMessages };
 };
 
 export const internalInsertNewMessage = (
   extistingMessages: InfiniteData<
     {
-      searchResults: (HomebaseFile<ChatMessage> | null)[];
+      searchResults: (NewHomebaseFile<ChatMessage> | HomebaseFile<ChatMessage> | null)[];
       cursorState: string;
       queryTime: number;
       includeMetadataHeader: boolean;
     },
     unknown
   >,
-  newMessage: HomebaseFile<ChatMessage>
+  newMessage: HomebaseFile<ChatMessage> | NewHomebaseFile<ChatMessage>
 ) => {
   if (!newMessage.fileMetadata.appData.uniqueId || !newMessage.fileMetadata.appData.groupId) {
     console.warn('Message does not have uniqueId or groupId', newMessage);
@@ -266,7 +268,7 @@ export const internalInsertNewMessage = (
           searchResults:
             index === 0
               ? [newMessage, ...filteredSearchResults].sort(
-                  (a, b) => b.fileMetadata.created - a.fileMetadata.created
+                  (a, b) => (b.fileMetadata.created || 0) - (a.fileMetadata.created || 0)
                 ) // Re-sort the first page, as the new message might be older than the first message in the page;
               : filteredSearchResults,
         };
@@ -274,45 +276,51 @@ export const internalInsertNewMessage = (
 
       return {
         ...page,
-        searchResults: page.searchResults.reduce((acc, msg) => {
-          if (!msg) return acc;
+        searchResults: page.searchResults.reduce(
+          (acc, msg) => {
+            if (!msg) return acc;
 
-          // FileId Duplicates: Message with same fileId is already in searchResults
-          if (msg.fileId && acc.some((m) => stringGuidsEqual(m?.fileId, msg.fileId))) {
+            // FileId Duplicates: Message with same fileId is already in searchResults
+            if (msg.fileId && acc.some((m) => stringGuidsEqual(m?.fileId, msg.fileId))) {
+              return acc;
+            }
+
+            // UniqueId Duplicates: Message with same uniqueId is already in searchResults
+            if (
+              msg.fileMetadata.appData.uniqueId &&
+              acc.some((m) =>
+                stringGuidsEqual(
+                  m?.fileMetadata.appData.uniqueId,
+                  msg.fileMetadata.appData.uniqueId
+                )
+              )
+            ) {
+              return acc;
+            }
+
+            // Message in cache was from the server, then updating with fileId is enough
+            if (msg.fileId && stringGuidsEqual(msg.fileId, newMessage.fileId)) {
+              acc.push(newMessage);
+              return acc;
+            }
+
+            // Message in cache is from unknown, then ensure if we need to update the message based on uniqueId
+            if (
+              msg.fileMetadata.appData.uniqueId &&
+              stringGuidsEqual(
+                msg.fileMetadata.appData.uniqueId,
+                newMessage.fileMetadata.appData.uniqueId
+              )
+            ) {
+              acc.push(newMessage);
+              return acc;
+            }
+
+            acc.push(msg);
             return acc;
-          }
-
-          // UniqueId Duplicates: Message with same uniqueId is already in searchResults
-          if (
-            msg.fileMetadata.appData.uniqueId &&
-            acc.some((m) =>
-              stringGuidsEqual(m?.fileMetadata.appData.uniqueId, msg.fileMetadata.appData.uniqueId)
-            )
-          ) {
-            return acc;
-          }
-
-          // Message in cache was from the server, then updating with fileId is enough
-          if (msg.fileId && stringGuidsEqual(msg.fileId, newMessage.fileId)) {
-            acc.push(newMessage);
-            return acc;
-          }
-
-          // Message in cache is from unknown, then ensure if we need to update the message based on uniqueId
-          if (
-            msg.fileMetadata.appData.uniqueId &&
-            stringGuidsEqual(
-              msg.fileMetadata.appData.uniqueId,
-              newMessage.fileMetadata.appData.uniqueId
-            )
-          ) {
-            acc.push(newMessage);
-            return acc;
-          }
-
-          acc.push(msg);
-          return acc;
-        }, [] as HomebaseFile<ChatMessage>[]),
+          },
+          [] as (HomebaseFile<ChatMessage> | NewHomebaseFile<ChatMessage>)[]
+        ),
       };
     }),
   };

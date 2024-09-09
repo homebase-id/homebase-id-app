@@ -88,38 +88,56 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
         chatMessages?.pages
           .flatMap((page) => page.searchResults)
           ?.filter(Boolean) as HomebaseFile<ChatMessage>[]
-      )?.map<ChatMessageIMessage>((value) => {
-        // Mapping done here, because the chat component expects a different format
-        return {
-          // Prefer uniqueId to avoid duplicates between onMutate and actual data
-          _id: value.fileMetadata.appData.uniqueId || value.fileId || getNewId(),
-          createdAt: value.fileMetadata.created,
-          text:
-            value.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus
-              ? 'This message was deleted.'
-              : value.fileMetadata.appData.content.message,
-          user: {
-            _id:
-              value.fileMetadata.senderOdinId ||
-              value.fileMetadata.appData.content.authorOdinId ||
-              identity ||
-              '',
-            name:
-              value.fileMetadata.senderOdinId ||
-              value.fileMetadata.appData.content.authorOdinId ||
-              identity ||
-              '',
-          },
-          sent: value.fileMetadata.appData.content.deliveryStatus === 20,
-          received: value.fileMetadata.appData.content.deliveryStatus === 40,
-          pending: value.fileMetadata.appData.content.deliveryStatus === 15,
-          image:
-            value.fileMetadata.payloads?.length > 0
-              ? value.fileMetadata.payloads.length.toString()
-              : undefined,
-          ...value,
-        };
-      }) || [],
+      )
+        ?.reduce((acc, cur) => {
+          // This is to avoid any duplicates as a last resort; It should never happen that the cache has duplicates.. Keyword: "should"
+          const existing = acc.find((existing) =>
+            stringGuidsEqual(
+              existing.fileMetadata.appData.uniqueId,
+              cur.fileMetadata.appData.uniqueId
+            )
+          );
+
+          if (existing) {
+            console.warn('Duplicate message found', existing, cur);
+            return acc;
+          }
+          acc.push(cur);
+
+          return acc;
+        }, [] as HomebaseFile<ChatMessage>[])
+        ?.map<ChatMessageIMessage>((value) => {
+          // Mapping done here, because the chat component expects a different format
+          return {
+            // Prefer uniqueId to avoid duplicates between onMutate and actual data
+            _id: value.fileMetadata.appData.uniqueId || value.fileId || getNewId(),
+            createdAt: value.fileMetadata.created,
+            text:
+              value.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus
+                ? 'This message was deleted.'
+                : value.fileMetadata.appData.content.message,
+            user: {
+              _id:
+                value.fileMetadata.senderOdinId ||
+                value.fileMetadata.appData.content.authorOdinId ||
+                identity ||
+                '',
+              name:
+                value.fileMetadata.senderOdinId ||
+                value.fileMetadata.appData.content.authorOdinId ||
+                identity ||
+                '',
+            },
+            sent: value.fileMetadata.appData.content.deliveryStatus === 20,
+            received: value.fileMetadata.appData.content.deliveryStatus === 40,
+            pending: value.fileMetadata.appData.content.deliveryStatus === 15,
+            image:
+              value.fileMetadata.payloads?.length > 0
+                ? value.fileMetadata.payloads.length.toString()
+                : undefined,
+            ...value,
+          };
+        }) || [],
     [chatMessages, identity]
   );
 

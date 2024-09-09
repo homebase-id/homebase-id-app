@@ -408,6 +408,8 @@ export const uploadChatMessage = async (
         TransferUploadStatus.EnqueuedFailed
     )
   ) {
+    message.fileId = uploadResult.file.fileId;
+    message.fileMetadata.versionTag = uploadResult.newVersionTag;
     message.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Failed;
     message.fileMetadata.appData.content.deliveryDetails = {};
     for (const recipient of recipients) {
