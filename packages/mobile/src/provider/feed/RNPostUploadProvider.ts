@@ -39,12 +39,14 @@ import {
   getPostBySlug,
   BlogConfig,
   postTypeToDataType,
+  POST_LINKS_PAYLOAD_KEY,
 } from '@homebase-id/js-lib/public';
 import { OdinBlob } from '../../../polyfills/OdinBlob';
 import { ImageSource } from '../image/RNImageProvider';
 import { createThumbnails } from '../image/RNThumbnailProvider';
 import { processVideo } from '../video/RNVideoProcessor';
 import { AxiosRequestConfig } from 'axios';
+import { LinkPreview, LinkPreviewDescriptor } from '@homebase-id/js-lib/media';
 
 const POST_MEDIA_PAYLOAD_KEY = 'pst_mdi';
 
@@ -53,6 +55,7 @@ export const savePost = async <T extends PostContent>(
   file: HomebaseFile<T> | NewHomebaseFile<T>,
   channelId: string,
   toSaveFiles?: (ImageSource | MediaFile)[] | ImageSource[],
+  linkPreviews?: LinkPreview[],
   onVersionConflict?: () => void,
   onUpdate?: (phase: string, progress: number) => void
 ): Promise<UploadResult> => {
@@ -92,7 +95,7 @@ export const savePost = async <T extends PostContent>(
   const encrypt = !(
     file.serverMetadata?.accessControlList?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
     file.serverMetadata?.accessControlList?.requiredSecurityGroup ===
-      SecurityGroupType.Authenticated
+    SecurityGroupType.Authenticated
   );
 
   const targetDrive = GetTargetDriveFromChannelId(channelId);
@@ -102,10 +105,47 @@ export const savePost = async <T extends PostContent>(
   const previewThumbnails: EmbeddedThumb[] = [];
   const keyHeader: KeyHeader | undefined = encrypt
     ? {
-        iv: getRandom16ByteArray(),
-        aesKey: getRandom16ByteArray(),
-      }
+      iv: getRandom16ByteArray(),
+      aesKey: getRandom16ByteArray(),
+    }
     : undefined;
+
+  if (!newMediaFiles?.length && linkPreviews?.length) {
+    // We only support link previews when there is no media
+    const descriptorContent = JSON.stringify(
+      linkPreviews.map((preview) => {
+        return {
+          url: preview.url,
+          hasImage: !!preview.imageUrl,
+          imageWidth: preview.imageWidth,
+          imageHeight: preview.imageHeight,
+        } as LinkPreviewDescriptor;
+      })
+    );
+
+    const linkPreviewWithImage = linkPreviews.find((preview) => preview.imageUrl);
+
+    const imageSource: ImageSource | undefined = linkPreviewWithImage
+      ? {
+        height: linkPreviewWithImage.imageHeight || 0,
+        width: linkPreviewWithImage.imageWidth || 0,
+        uri: linkPreviewWithImage.imageUrl,
+      }
+      : undefined;
+
+    const { tinyThumb } = imageSource
+      ? await createThumbnails(imageSource, '')
+      : { tinyThumb: undefined };
+
+    payloads.push({
+      key: POST_LINKS_PAYLOAD_KEY,
+      payload: new OdinBlob([stringToUint8Array(JSON.stringify(linkPreviews))], {
+        type: 'application/json',
+      }) as unknown as Blob,
+      descriptorContent,
+      previewThumbnail: tinyThumb,
+    });
+  }
 
   // Handle image files:
   for (let i = 0; newMediaFiles && i < newMediaFiles?.length; i++) {
@@ -164,10 +204,10 @@ export const savePost = async <T extends PostContent>(
   if (file.fileMetadata.appData.content.type !== 'Article') {
     file.fileMetadata.appData.content.primaryMediaFile = payloads[0]
       ? {
-          fileId: undefined,
-          fileKey: payloads[0].key,
-          type: payloads[0].payload.type,
-        }
+        fileId: undefined,
+        fileKey: payloads[0].key,
+        type: payloads[0].payload.type,
+      }
       : undefined;
   }
 
@@ -213,7 +253,7 @@ const uploadPost = async <T extends PostContent>(
   const encrypt = !(
     file.serverMetadata?.accessControlList?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
     file.serverMetadata?.accessControlList?.requiredSecurityGroup ===
-      SecurityGroupType.Authenticated
+    SecurityGroupType.Authenticated
   );
 
   const instructionSet: UploadInstructionSet = {
@@ -241,9 +281,8 @@ const uploadPost = async <T extends PostContent>(
     !stringGuidsEqual(existingPostWithThisSlug?.fileId, file.fileId)
   ) {
     // There is clash with an existing slug
-    file.fileMetadata.appData.content.slug = `${
-      file.fileMetadata.appData.content.slug
-    }-${new Date().getTime()}`;
+    file.fileMetadata.appData.content.slug = `${file.fileMetadata.appData.content.slug
+      }-${new Date().getTime()}`;
   }
 
   const uniqueId = file.fileMetadata.appData.content.slug
@@ -360,12 +399,11 @@ const uploadPostHeader = async <T extends PostContent>(
   if (
     existingPostWithThisSlug &&
     existingPostWithThisSlug?.fileMetadata.appData.content.id !==
-      file.fileMetadata.appData.content.id
+    file.fileMetadata.appData.content.id
   ) {
     // There is clash with an existing slug
-    file.fileMetadata.appData.content.slug = `${
-      file.fileMetadata.appData.content.slug
-    }-${new Date().getTime()}`;
+    file.fileMetadata.appData.content.slug = `${file.fileMetadata.appData.content.slug
+      }-${new Date().getTime()}`;
   }
 
   const uniqueId = file.fileMetadata.appData.content.slug
