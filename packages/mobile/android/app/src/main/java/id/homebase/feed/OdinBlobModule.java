@@ -13,7 +13,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Base64;
+import android.util.Log;
 
 
 public class OdinBlobModule extends ReactContextBaseJavaModule {
@@ -54,17 +56,17 @@ public class OdinBlobModule extends ReactContextBaseJavaModule {
 
                 while (true) {
                     int bytesRead = fis.read(buffer);
-                    if (bytesRead == -1) {
-                        break; // End of file
+                    if (bytesRead < 16) {
+                        // Handle partial blocks (last block), encrypt and pad using doFinal
+                        byte[] encryptedBytes = bytesRead == -1 ? cipher.doFinal() : cipher.doFinal(Arrays.copyOf(buffer, bytesRead));
+                        fos.write(encryptedBytes);
+                        break;
+                    } else {
+                        // Encrypt full blocks
+                        byte[] encryptedBytes = cipher.update(buffer);
+                        fos.write(encryptedBytes);
                     }
-
-                    byte[] encryptedBytes = cipher.update(buffer);
-                    fos.write(encryptedBytes);
                 }
-
-                // Write the last block of encrypted data (with padding)
-                byte[] finalEncryptedBytes = cipher.doFinal();
-                fos.write(finalEncryptedBytes);
             }
         } catch (Exception e) {
             e.printStackTrace();
