@@ -53,7 +53,7 @@ export const LinkPreviewBar = memo(
             source={{ uri: imageUrl }}
             style={{
               width: 50,
-              height: 50,
+              // height: 50,
             }}
           />
         )}
