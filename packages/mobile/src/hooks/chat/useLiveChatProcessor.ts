@@ -1,11 +1,10 @@
-import { InfiniteData, QueryClient, useQuery, useQueryClient } from '@tanstack/react-query';
+import { QueryClient, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   AppNotification,
   DeletedHomebaseFile,
   DotYouClient,
   FileQueryParams,
   HomebaseFile,
-  PushNotification,
   ReactionNotification,
   TypedConnectionNotification,
   queryBatch,
@@ -47,6 +46,7 @@ import {
 } from '../notifications/usePushNotifications';
 import { insertNewReaction, removeReaction } from './useChatReaction';
 import { useNotification } from '../notifications/useNotification';
+import { BlogConfig } from '@homebase-id/js-lib/public';
 
 const MINUTE_IN_MS = 60000;
 const isDebug = false; // The babel plugin to remove console logs would remove any if they get to production
@@ -318,7 +318,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
       'statisticsChanged',
       'appNotificationAdded',
     ],
-    [ChatDrive],
+    [ChatDrive, BlogConfig.FeedDrive],
     () => {
       queryClient.invalidateQueries({ queryKey: ['process-inbox'] });
     }
@@ -389,11 +389,11 @@ const processChatMessagesBatch = async (
           uniqueMessagesPerConversation[updatedConversation].map(async (newMessage) =>
             typeof newMessage.fileMetadata.appData.content === 'string'
               ? await dsrToMessage(
-                  dotYouClient,
-                  newMessage as HomebaseFile<string>,
-                  ChatDrive,
-                  true
-                )
+                dotYouClient,
+                newMessage as HomebaseFile<string>,
+                ChatDrive,
+                true
+              )
               : (newMessage as HomebaseFile<ChatMessage>)
           )
         )

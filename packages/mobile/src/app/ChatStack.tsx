@@ -246,7 +246,7 @@ export const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Cha
   );
 };
 
-const ProfileAvatar = () => {
+export const ProfileAvatar = () => {
   const { isDarkMode } = useDarkMode();
   const onlineDotStyle: StyleProp<ViewStyle> = useMemo(
     () => ({
@@ -281,7 +281,7 @@ const ProfileAvatar = () => {
   );
 };
 
-const OfflineProfileAvatar = () => {
+export const OfflineProfileAvatar = () => {
   const { isDarkMode } = useDarkMode();
   const offlineDotStyle: StyleProp<ViewStyle> = useMemo(
     () => ({

@@ -3,6 +3,7 @@ import { CanReactInfo, CantReact } from '../../hooks/reactions';
 import { Text } from '../ui/Text/Text';
 import { ActivityIndicator, View } from 'react-native';
 import { memo } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export const CantReactInfo = memo(
   ({ cantReact, intent }: { cantReact: CanReactInfo | undefined; intent: 'emoji' | 'comment' }) => {
@@ -27,6 +28,8 @@ export const CantReactInfo = memo(
           : "We couldn't determine if you can react on this post",
     };
 
+    const { bottom } = useSafeAreaInsets();
+
     if (cantReact === undefined) {
       return (
         <View
@@ -34,6 +37,10 @@ export const CantReactInfo = memo(
             gap: 4,
             flexDirection: 'row',
             marginHorizontal: 4,
+            paddingBottom: intent === 'comment' ? bottom : 0,
+            alignContent: 'center',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
         >
           <ActivityIndicator size={'small'} />
@@ -67,6 +74,7 @@ export const CantReactInfo = memo(
           fontSize: 12,
           fontWeight: '400',
           opacity: 0.5,
+          textAlign: 'center',
         }}
       >
         {infoMessage}

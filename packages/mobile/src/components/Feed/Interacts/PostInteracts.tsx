@@ -2,7 +2,7 @@ import { ApiType, DotYouClient, HomebaseFile } from '@homebase-id/js-lib/core';
 import { parseReactionPreview, PostContent, ReactionContext } from '@homebase-id/js-lib/public';
 import { memo, useCallback, useMemo, useState } from 'react';
 import { GestureResponderEvent, View } from 'react-native';
-import { OpenHeart, Comment, ShareNode, SolidHeart } from '../../ui/Icons/icons';
+import { OpenHeart, Comment, ShareNode } from '../../ui/Icons/icons';
 import {
   CanReactInfo,
   useCanReact,
@@ -14,7 +14,7 @@ import { EmojiSummary } from './EmojiSummary';
 import { CommentTeaserList } from './CommentsTeaserList';
 import { ShareContext } from './Share/ShareModal';
 import { ErrorNotification } from '../../ui/Alert/ErrorNotification';
-import { Colors } from '../../../app/Colors';
+
 import { PostReactionBar } from './Reactions/PostReactionBar';
 import { IconButton } from '../../ui/Buttons';
 
@@ -25,6 +25,7 @@ export const PostInteracts = memo(
     onReactionPress,
     onSharePress,
     onEmojiModalOpen,
+    isPublic,
   }: {
     postFile: HomebaseFile<PostContent>;
     isPublic?: boolean;
@@ -35,7 +36,7 @@ export const PostInteracts = memo(
   }) => {
     const postContent = postFile.fileMetadata.appData.content;
     const owner = useDotYouClientContext().getIdentity();
-    const authorOdinId = postContent.authorOdinId || owner;
+    const authorOdinId = postFile.fileMetadata.senderOdinId || owner;
     const postDisabledEmoji =
       postContent.reactAccess !== undefined &&
       (postContent.reactAccess === false || postContent.reactAccess === 'comment');
@@ -132,7 +133,7 @@ export const PostInteracts = memo(
               justifyContent: 'flex-end',
             }}
           >
-            <IconButton icon={<ShareNode />} onPress={onSharePressHandler} />
+            {isPublic && <IconButton icon={<ShareNode />} onPress={onSharePressHandler} />}
             {!postDisabledComment && (
               <IconButton icon={<Comment />} onPress={onCommentPressHandler} />
             )}
@@ -205,7 +206,7 @@ export const LikeButton = memo(
       <>
         <ErrorNotification error={postEmojiError || removeEmojiError} />
         <IconButton
-          icon={isLiked ? <SolidHeart color={Colors.red[500]} /> : <OpenHeart />}
+          icon={<OpenHeart />}
           onPress={isLiked ? doUnlike : doLike}
           touchableProps={{
             onLongPress: onLongPress,
