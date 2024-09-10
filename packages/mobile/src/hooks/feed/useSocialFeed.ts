@@ -62,7 +62,6 @@ const useFeedWebsocket = (isEnabled: boolean) => {
     },
     [queryClient, subscribedDrives]
   );
-  console.log('useFeedWebsocket', isEnabled, isFetched);
   return useNotificationSubscriber(
     isEnabled && isFetched ? handler : undefined,
     ['fileAdded', 'fileModified'],
