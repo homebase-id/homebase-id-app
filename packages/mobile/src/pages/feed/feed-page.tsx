@@ -63,7 +63,7 @@ const FloatingActionButton = memo(() => {
   );
 });
 
-export const FeedHeader = () => {
+export const FeedHeader = memo(() => {
   const isOnline = useLiveFeedProcessor();
 
   const headerTitle = useCallback(
@@ -94,4 +94,4 @@ export const FeedHeader = () => {
       headerStatusBarHeight={0}
     />
   );
-};
+});
