@@ -16,6 +16,6 @@ export const useDriveSubscriber = () => {
         queryFn: fetchPostsDrives,
         refetchOnMount: false,
         refetchOnWindowFocus: true,
-        staleTime: 60000,
+        staleTime: 1000 * 60 * 60,
     });
 };
