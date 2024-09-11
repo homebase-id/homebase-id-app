@@ -283,10 +283,7 @@ export const uploadChatMessage = async (
   const payloads: PayloadFile[] = [];
   const thumbnails: ThumbnailFile[] = [];
   const previewThumbnails: EmbeddedThumb[] = [];
-  const keyHeader: KeyHeader | undefined = {
-    iv: getRandom16ByteArray(),
-    aesKey: getRandom16ByteArray(),
-  };
+  const aesKey: Uint8Array | undefined = getRandom16ByteArray();
 
   if (!files?.length && linkPreviews?.length) {
     // We only support link previews when there is no media
@@ -334,7 +331,7 @@ export const uploadChatMessage = async (
         tinyThumb: tinyThumbFromVideo,
         thumbnails: thumbnailsFromVideo,
         payloads: payloadsFromVideo,
-      } = await processVideo(newMediaFile, payloadKey, true, onUpdate, keyHeader);
+      } = await processVideo(newMediaFile, payloadKey, true, onUpdate, aesKey);
 
       thumbnails.push(...thumbnailsFromVideo);
       payloads.push(...payloadsFromVideo);
@@ -395,7 +392,7 @@ export const uploadChatMessage = async (
       axiosConfig: {
         onUploadProgress: (progress) => onUpdate?.('Uploading', progress.progress || 0),
       },
-      keyHeader,
+      aesKey,
     }
   );
 

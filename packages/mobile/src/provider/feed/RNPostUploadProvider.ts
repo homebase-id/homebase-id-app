@@ -95,7 +95,7 @@ export const savePost = async <T extends PostContent>(
   const encrypt = !(
     file.serverMetadata?.accessControlList?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
     file.serverMetadata?.accessControlList?.requiredSecurityGroup ===
-    SecurityGroupType.Authenticated
+      SecurityGroupType.Authenticated
   );
 
   const targetDrive = GetTargetDriveFromChannelId(channelId);
@@ -103,12 +103,7 @@ export const savePost = async <T extends PostContent>(
   const payloads: PayloadFile[] = [];
   const thumbnails: ThumbnailFile[] = [];
   const previewThumbnails: EmbeddedThumb[] = [];
-  const keyHeader: KeyHeader | undefined = encrypt
-    ? {
-      iv: getRandom16ByteArray(),
-      aesKey: getRandom16ByteArray(),
-    }
-    : undefined;
+  const aesKey: Uint8Array | undefined = encrypt ? getRandom16ByteArray() : undefined;
 
   if (!newMediaFiles?.length && linkPreviews?.length) {
     // We only support link previews when there is no media
@@ -127,10 +122,10 @@ export const savePost = async <T extends PostContent>(
 
     const imageSource: ImageSource | undefined = linkPreviewWithImage
       ? {
-        height: linkPreviewWithImage.imageHeight || 0,
-        width: linkPreviewWithImage.imageWidth || 0,
-        uri: linkPreviewWithImage.imageUrl,
-      }
+          height: linkPreviewWithImage.imageHeight || 0,
+          width: linkPreviewWithImage.imageWidth || 0,
+          uri: linkPreviewWithImage.imageUrl,
+        }
       : undefined;
 
     const { tinyThumb } = imageSource
@@ -157,7 +152,7 @@ export const savePost = async <T extends PostContent>(
         tinyThumb: tinyThumbFromVideo,
         thumbnails: thumbnailsFromVideo,
         payloads: payloadsFromVideo,
-      } = await processVideo(newMediaFile, payloadKey, true, onUpdate, keyHeader);
+      } = await processVideo(newMediaFile, payloadKey, true, onUpdate, aesKey);
 
       thumbnails.push(...thumbnailsFromVideo);
       payloads.push(...payloadsFromVideo);
@@ -204,10 +199,10 @@ export const savePost = async <T extends PostContent>(
   if (file.fileMetadata.appData.content.type !== 'Article') {
     file.fileMetadata.appData.content.primaryMediaFile = payloads[0]
       ? {
-        fileId: undefined,
-        fileKey: payloads[0].key,
-        type: payloads[0].payload.type,
-      }
+          fileId: undefined,
+          fileKey: payloads[0].key,
+          type: payloads[0].payload.type,
+        }
       : undefined;
   }
 
@@ -231,7 +226,7 @@ export const savePost = async <T extends PostContent>(
       axiosConfig: {
         onUploadProgress: (progress) => onUpdate?.('Uploading', progress.progress || 0),
       },
-      keyHeader,
+      aesKey,
     }
   );
 };
@@ -247,13 +242,13 @@ const uploadPost = async <T extends PostContent>(
   onVersionConflict?: () => void,
   options?: {
     axiosConfig?: AxiosRequestConfig<unknown> | undefined;
-    keyHeader?: KeyHeader | undefined;
+    aesKey?: Uint8Array | undefined;
   }
 ) => {
   const encrypt = !(
     file.serverMetadata?.accessControlList?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
     file.serverMetadata?.accessControlList?.requiredSecurityGroup ===
-    SecurityGroupType.Authenticated
+      SecurityGroupType.Authenticated
   );
 
   const instructionSet: UploadInstructionSet = {
@@ -281,8 +276,9 @@ const uploadPost = async <T extends PostContent>(
     !stringGuidsEqual(existingPostWithThisSlug?.fileId, file.fileId)
   ) {
     // There is clash with an existing slug
-    file.fileMetadata.appData.content.slug = `${file.fileMetadata.appData.content.slug
-      }-${new Date().getTime()}`;
+    file.fileMetadata.appData.content.slug = `${
+      file.fileMetadata.appData.content.slug
+    }-${new Date().getTime()}`;
   }
 
   const uniqueId = file.fileMetadata.appData.content.slug
@@ -399,11 +395,12 @@ const uploadPostHeader = async <T extends PostContent>(
   if (
     existingPostWithThisSlug &&
     existingPostWithThisSlug?.fileMetadata.appData.content.id !==
-    file.fileMetadata.appData.content.id
+      file.fileMetadata.appData.content.id
   ) {
     // There is clash with an existing slug
-    file.fileMetadata.appData.content.slug = `${file.fileMetadata.appData.content.slug
-      }-${new Date().getTime()}`;
+    file.fileMetadata.appData.content.slug = `${
+      file.fileMetadata.appData.content.slug
+    }-${new Date().getTime()}`;
   }
 
   const uniqueId = file.fileMetadata.appData.content.slug
