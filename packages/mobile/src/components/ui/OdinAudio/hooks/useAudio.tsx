@@ -29,14 +29,12 @@ export const useAudio = (props?: OdinAudioProps) => {
     if (fileId === undefined || fileId === '' || !drive || !payloadKey) {
       return null;
     }
-
     const cachedAudio = getFromCache(fileId, payloadKey, drive);
     if (cachedAudio) return cachedAudio;
 
     const audioBlob = await getPayloadBytes(dotYouClient, drive, fileId, payloadKey, {
       lastModified,
     });
-
     if (!audioBlob) return null;
     return {
       url: audioBlob.uri,
@@ -44,11 +42,11 @@ export const useAudio = (props?: OdinAudioProps) => {
     };
   };
 
-  const getFromCache = async (
+  const getFromCache = (
     fileId: string,
     payloadKey: string,
     drive: TargetDrive
-  ): Promise<AudioData | null> => {
+  ): AudioData | null => {
     const queryKey = ['audio', drive?.alias, fileId, payloadKey];
     const cachedEntries = queryClient.getQueryCache().find<AudioData | null>({
       queryKey,

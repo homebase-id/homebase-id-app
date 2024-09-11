@@ -46,7 +46,6 @@ import {
 } from '../notifications/usePushNotifications';
 import { insertNewReaction, removeReaction } from './useChatReaction';
 import { useNotification } from '../notifications/useNotification';
-import { BlogConfig } from '@homebase-id/js-lib/public';
 import { useDriveSubscriber } from '../drive/useDriveSubscriber';
 
 const MINUTE_IN_MS = 60000;
