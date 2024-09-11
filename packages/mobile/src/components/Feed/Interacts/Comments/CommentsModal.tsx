@@ -73,7 +73,6 @@ export const CommentsModal = memo(
     const onClose = () => {
       setContext(undefined);
     };
-    console.log('comments', context);
     const { bottom } = useSafeAreaInsets();
     const renderFooter = useCallback(
       (props: BottomSheetFooterProps) => {
