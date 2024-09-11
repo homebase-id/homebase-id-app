@@ -2,6 +2,7 @@ import { getDrivesByType } from '@homebase-id/js-lib/core';
 import { BlogConfig } from '@homebase-id/js-lib/public';
 import { useQuery } from '@tanstack/react-query';
 import { useDotYouClientContext } from 'feed-app-common';
+import { ChatDrive } from '../../provider/chat/ConversationProvider';
 
 const PAGE_SIZE = 100;
 
@@ -13,6 +14,7 @@ export const useDriveSubscriber = () => {
     };
     return useQuery({
         queryKey: ['drive-subscriber'],
+        select: (data) => [ChatDrive, BlogConfig.FeedDrive, BlogConfig.PublicChannelDrive, ...data],
         queryFn: fetchPostsDrives,
         refetchOnMount: false,
         refetchOnWindowFocus: true,

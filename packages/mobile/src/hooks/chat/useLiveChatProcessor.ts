@@ -147,11 +147,8 @@ const useChatWebsocket = (isEnabled: boolean) => {
   } = useConversation();
   const { add } = useNotification();
   const queryClient = useQueryClient();
-  const { data: channelDrives, isFetched } = useDriveSubscriber();
+  const { data: subscribedDrives, isFetched } = useDriveSubscriber();
 
-  const subscribedDrives = useMemo(() => {
-    return [ChatDrive, BlogConfig.FeedDrive, BlogConfig.PublicChannelDrive, ...(channelDrives ?? [])];
-  }, [channelDrives]);
 
   const [chatMessagesQueue, setChatMessagesQueue] = useState<HomebaseFile<ChatMessage>[]>([]);
 
@@ -326,7 +323,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
       'statisticsChanged',
       'appNotificationAdded',
     ],
-    subscribedDrives,
+    subscribedDrives || [],
     () => {
       queryClient.invalidateQueries({ queryKey: ['process-inbox'] });
     }

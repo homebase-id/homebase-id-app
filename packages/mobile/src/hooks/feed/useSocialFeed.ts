@@ -2,14 +2,12 @@ import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-quer
 import { BlogConfig } from '@homebase-id/js-lib/public';
 import { TypedConnectionNotification } from '@homebase-id/js-lib/core';
 import { getSocialFeed, processInbox } from '@homebase-id/js-lib/peer';
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useChannels } from './channels/useChannels';
-
 import { useChannelDrives } from './channels/useChannelDrives';
 import { useDotYouClientContext } from 'feed-app-common';
 import { useNotificationSubscriber } from '../useNotificationSubscriber';
-import { ChatDrive } from '../../provider/chat/ConversationProvider';
 import { useDriveSubscriber } from '../drive/useDriveSubscriber';
 
 const MINUTE_IN_MS = 60000;
@@ -44,10 +42,8 @@ const useInboxProcessor = (isEnabled?: boolean) => {
 
 const useFeedWebsocket = (isEnabled: boolean) => {
   const queryClient = useQueryClient();
-  const { data: channelDrives, isFetched } = useDriveSubscriber();
-  const subscribedDrives = useMemo(() => {
-    return [ChatDrive, BlogConfig.FeedDrive, BlogConfig.PublicChannelDrive, ...(channelDrives ?? [])];
-  }, [channelDrives]);
+  const { data: subscribedDrives, isFetched } = useDriveSubscriber();
+
 
   const handler = useCallback(
     (notification: TypedConnectionNotification) => {
@@ -55,7 +51,7 @@ const useFeedWebsocket = (isEnabled: boolean) => {
         (notification.notificationType === 'fileAdded' ||
           notification.notificationType === 'fileModified')
       ) {
-        if (subscribedDrives.slice(1).some((drive) => stringGuidsEqual(drive.alias, notification.targetDrive?.alias) && stringGuidsEqual(drive.type, notification.targetDrive?.type))) {
+        if (subscribedDrives && subscribedDrives.slice(1).some((drive) => stringGuidsEqual(drive.alias, notification.targetDrive?.alias) && stringGuidsEqual(drive.type, notification.targetDrive?.type))) {
           queryClient.invalidateQueries({ queryKey: ['social-feeds'] });
         }
       }
@@ -65,7 +61,7 @@ const useFeedWebsocket = (isEnabled: boolean) => {
   return useNotificationSubscriber(
     isEnabled && isFetched ? handler : undefined,
     ['fileAdded', 'fileModified'],
-    subscribedDrives,
+    subscribedDrives || [],
     () => {
       queryClient.invalidateQueries({ queryKey: ['process-inbox-feed'] });
     }
