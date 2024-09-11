@@ -19,16 +19,19 @@ import { getRichTextFromString, t, useDotYouClientContext } from 'feed-app-commo
 import { ImageSource } from '../../../provider/image/RNImageProvider';
 import { getSynchronousDotYouClient } from '../../chat/getSynchronousDotYouClient';
 import { addError } from '../../errors/useErrors';
+import { LinkPreview } from '@homebase-id/js-lib/media';
 
 const savePost = async ({
   postFile,
   channelId,
   mediaFiles,
+  linkPreviews,
   onUpdate,
 }: {
   postFile: NewHomebaseFile<PostContent> | HomebaseFile<PostContent>;
   channelId: string;
   mediaFiles?: (ImageSource | MediaFile)[];
+  linkPreviews?: LinkPreview[];
   onUpdate?: (phase: string, progress: number) => void;
 }) => {
   const dotYouClient = await getSynchronousDotYouClient();
@@ -54,13 +57,13 @@ const savePost = async ({
         },
       },
     };
-    return savePostFile(dotYouClient, newPost, channelId, mediaFiles, onVersionConflict);
+    return savePostFile(dotYouClient, newPost, channelId, mediaFiles, linkPreviews, onVersionConflict);
   };
 
   postFile.fileMetadata.appData.content.captionAsRichText = getRichTextFromString(
     postFile.fileMetadata.appData.content.caption.trim()
   );
-  return savePostFile(dotYouClient, postFile, channelId, mediaFiles, onVersionConflict, onUpdate);
+  return savePostFile(dotYouClient, postFile, channelId, mediaFiles, linkPreviews, onVersionConflict, onUpdate);
 };
 
 export const getSavePostMutationOptions: (queryClient: QueryClient) => MutationOptions<
@@ -70,6 +73,7 @@ export const getSavePostMutationOptions: (queryClient: QueryClient) => MutationO
     postFile: NewHomebaseFile<PostContent> | HomebaseFile<PostContent>;
     channelId: string;
     mediaFiles?: (ImageSource | MediaFile)[];
+    linkPreviews?: LinkPreview[];
     onUpdate?: (phase: string, progress: number) => void;
   },
   {
@@ -77,11 +81,12 @@ export const getSavePostMutationOptions: (queryClient: QueryClient) => MutationO
       postFile: NewHomebaseFile<PostContent> | HomebaseFile<PostContent>;
       channelId: string;
       mediaFiles?: (ImageSource | MediaFile)[] | undefined;
+      linkPreviews?: LinkPreview[] | undefined;
       onUpdate?: ((phase: string, progress: number) => void) | undefined;
     };
     previousFeed:
-      | InfiniteData<MultiRequestCursoredResult<HomebaseFile<PostContent>[]>, unknown>
-      | undefined;
+    | InfiniteData<MultiRequestCursoredResult<HomebaseFile<PostContent>[]>, unknown>
+    | undefined;
   }
 > = (queryClient) => ({
   mutationKey: ['save-post'],
@@ -121,12 +126,12 @@ export const getSavePostMutationOptions: (queryClient: QueryClient) => MutationO
       newFeed.pages[0].results = newFeed.pages[0].results.map((post) =>
         post.fileMetadata.appData.content.id === variables.postFile.fileMetadata.appData.content.id
           ? {
-              ...post,
-              fileMetadata: {
-                ...post.fileMetadata,
-                versionTag: _data.newVersionTag,
-              },
-            }
+            ...post,
+            fileMetadata: {
+              ...post.fileMetadata,
+              versionTag: _data.newVersionTag,
+            },
+          }
           : post
       );
 
@@ -247,14 +252,14 @@ export const usePost = () => {
           const newFeed = { ...previousFeed };
           newFeed.pages[0].results = newFeed.pages[0].results.map((post) =>
             post.fileMetadata.appData.content.id ===
-            variables.postFile.fileMetadata.appData.content.id
+              variables.postFile.fileMetadata.appData.content.id
               ? {
-                  ...post,
-                  fileMetadata: {
-                    ...post.fileMetadata,
-                    versionTag: _data.newVersionTag,
-                  },
-                }
+                ...post,
+                fileMetadata: {
+                  ...post.fileMetadata,
+                  versionTag: _data.newVersionTag,
+                },
+              }
               : post
           );
 

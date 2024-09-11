@@ -32,13 +32,14 @@ import React from 'react';
 import Animated, { SlideInDown, SlideOutDown } from 'react-native-reanimated';
 import { FeedStackParamList } from '../../app/FeedStack';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { LinkPreviewBar } from '../../components/Chat/Link-Preview-Bar';
+import { LinkPreview } from '@homebase-id/js-lib/media';
 
 type PostComposerProps = NativeStackScreenProps<FeedStackParamList, 'Compose'>;
 
 export const PostComposer = memo(({ navigation }: PostComposerProps) => {
   const { isDarkMode } = useDarkMode();
   const insets = useSafeAreaInsets();
-  const [stateIndex, setStateIndex] = useState(0); // Used to force a re-render of the component, to reset the input
 
   const identity = useDotYouClientContext().getIdentity();
 
@@ -52,14 +53,15 @@ export const PostComposer = memo(({ navigation }: PostComposerProps) => {
   const [assets, setAssets] = useState<Asset[]>([]);
 
   const [reactAccess, setReactAccess] = useState<ReactAccess | undefined>(undefined);
+  const [linkPreviews, setLinkPreviews] = useState<LinkPreview | null>(null);
+  const onDismissLinkPreview = useCallback(() => {
+    setLinkPreviews(null);
+  }, []);
+  const onLinkData = useCallback((link: LinkPreview) => {
+    setLinkPreviews(link);
+  }, []);
 
   const isPosting = useMemo(() => !!processingProgress?.phase, [processingProgress]);
-
-  const resetUi = useCallback(() => {
-    setCaption('');
-    setAssets([]);
-    setStateIndex((i) => i + 1);
-  }, []);
 
   const doPost = useCallback(async () => {
     if (isPosting) return;
@@ -79,14 +81,25 @@ export const PostComposer = memo(({ navigation }: PostComposerProps) => {
           fileSize: value.fileSize,
         };
       }),
+      linkPreviews ? [linkPreviews] : undefined,
       undefined,
       channel,
       reactAccess,
       customAcl
     );
-    resetUi();
+
     navigation.goBack();
-  }, [isPosting, savePost, caption, assets, channel, reactAccess, customAcl, resetUi, navigation]);
+  }, [
+    isPosting,
+    savePost,
+    caption,
+    assets,
+    linkPreviews,
+    channel,
+    reactAccess,
+    customAcl,
+    navigation,
+  ]);
 
   const handleImageIconPress = useCallback(async () => {
     const imagePickerResult = await launchImageLibrary({
@@ -187,14 +200,18 @@ export const PostComposer = memo(({ navigation }: PostComposerProps) => {
               fontSize: 16,
               minHeight: 124,
               color: isDarkMode ? Colors.white : Colors.black,
+              textAlignVertical: 'top',
             }}
             multiline={true}
             onChange={(event) => setCaption(event.nativeEvent.text)}
-            key={stateIndex}
           />
 
           <FileOverview assets={assets} setAssets={setAssets} />
-
+          <LinkPreviewBar
+            textToSearchIn={caption}
+            onLinkData={onLinkData}
+            onDismiss={onDismissLinkPreview}
+          />
           <View
             style={{
               display: 'flex',

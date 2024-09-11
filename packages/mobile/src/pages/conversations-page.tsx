@@ -37,6 +37,7 @@ import { SafeAreaView } from '../components/ui/SafeAreaView/SafeAreaView';
 import { OfflineState } from '../components/Platform/OfflineState';
 import { ConversationTileWithYourself } from '../components/Conversation/ConversationTileWithYourself';
 import { EmptyConversation } from '../components/Conversation/EmptyConversation';
+import Animated, { LinearTransition } from 'react-native-reanimated';
 
 type ConversationProp = NativeStackScreenProps<ChatStackParamList, 'Conversation'>;
 
@@ -139,8 +140,9 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
         <FloatingActionButton />
         <OfflineState />
         {conversations && conversations?.length ? (
-          <FlatList
+          <Animated.FlatList
             ref={scrollRef}
+            itemLayoutAnimation={LinearTransition}
             data={conversations}
             showsVerticalScrollIndicator={false}
             keyExtractor={keyExtractor}
