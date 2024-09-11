@@ -1,20 +1,10 @@
 import NetInfo from '@react-native-community/netinfo';
 import { onlineManager } from '@tanstack/react-query';
-import axios from 'axios';
 
 import { useEffect, useState } from 'react';
 
-// Try to make a ping request to the identity. It may happen you have a wifi connection but either the identity is down or the internet is down
-export const pingIdentity = (identity: string) => new Promise<boolean>((resolve) => {
-  axios.get(`https://${identity}/api/guest/v1/auth/ident`, {
-    timeout: 5000,
-  })
-    .then(() => resolve(true))
-    .catch(() => resolve(false));
-});
-
 export const useOnlineManager = () => {
-  const [isOffline, setIsOffline] = useState(false);
+  const [isOffline, setIsOffline] = useState(true);
 
   useEffect(() => {
     onlineManager.setEventListener((setOnline) => {

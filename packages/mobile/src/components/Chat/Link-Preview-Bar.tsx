@@ -3,7 +3,7 @@ import { useLinkPreview } from '../../hooks/links/useLinkPreview';
 
 import { Text } from '../ui/Text/Text';
 import { memo, useCallback, useEffect, useState } from 'react';
-import { View } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { Close } from '../ui/Icons/icons';
 import { LinkPreview } from '@homebase-id/js-lib/media';
@@ -17,7 +17,7 @@ export type LinkPreviewProps = {
 export const LinkPreviewBar = memo(
   ({ textToSearchIn, onDismiss, onLinkData }: LinkPreviewProps) => {
     const link = textToSearchIn.match(/(https?:\/\/[^\s]+)/g)?.[0];
-    const { data } = useLinkPreview(link).get;
+    const { data, isLoading } = useLinkPreview(link).get;
     const [isVisible, setIsVisible] = useState(false);
 
     useEffect(() => {
@@ -36,10 +36,31 @@ export const LinkPreviewBar = memo(
       onDismiss?.();
     }, [onDismiss]);
 
+    if (isLoading) {
+      return (
+        <View
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            borderWidth: 1,
+            borderColor: 'gray',
+            borderRadius: 15,
+            justifyContent: 'center',
+            padding: 8,
+            marginLeft: 8,
+            marginRight: 8,
+            marginBottom: 4,
+            position: 'relative',
+          }}
+        >
+          <ActivityIndicator size="small" color="gray" />
+        </View>
+      );
+    }
+
     if (!isVisible || !data) {
       return null;
     }
-
     const { title, description, imageUrl } = data;
     return (
       <Animated.View
@@ -53,7 +74,7 @@ export const LinkPreviewBar = memo(
             source={{ uri: imageUrl }}
             style={{
               width: 50,
-              height: 50,
+              // height: 50,
             }}
           />
         )}

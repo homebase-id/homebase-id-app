@@ -1,11 +1,10 @@
-import { InfiniteData, QueryClient, useQuery, useQueryClient } from '@tanstack/react-query';
+import { QueryClient, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   AppNotification,
   DeletedHomebaseFile,
   DotYouClient,
   FileQueryParams,
   HomebaseFile,
-  PushNotification,
   ReactionNotification,
   TypedConnectionNotification,
   queryBatch,
@@ -19,7 +18,7 @@ import {
 import { processInbox } from '@homebase-id/js-lib/peer';
 
 import { useNotificationSubscriber } from '../useNotificationSubscriber';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { getConversationQueryOptions, useConversation } from './useConversation';
@@ -47,6 +46,7 @@ import {
 } from '../notifications/usePushNotifications';
 import { insertNewReaction, removeReaction } from './useChatReaction';
 import { useNotification } from '../notifications/useNotification';
+import { useDriveSubscriber } from '../drive/useDriveSubscriber';
 
 const MINUTE_IN_MS = 60000;
 const isDebug = false; // The babel plugin to remove console logs would remove any if they get to production
@@ -146,6 +146,8 @@ const useChatWebsocket = (isEnabled: boolean) => {
   } = useConversation();
   const { add } = useNotification();
   const queryClient = useQueryClient();
+  const { data: subscribedDrives, isFetched } = useDriveSubscriber();
+
 
   const [chatMessagesQueue, setChatMessagesQueue] = useState<HomebaseFile<ChatMessage>[]>([]);
 
@@ -308,8 +310,10 @@ const useChatWebsocket = (isEnabled: boolean) => {
     }
   }, [processQueue, chatMessagesQueue]);
 
+
+
   return useNotificationSubscriber(
-    isEnabled ? handler : undefined,
+    isEnabled && isFetched ? handler : undefined,
     [
       'fileAdded',
       'fileModified',
@@ -318,7 +322,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
       'statisticsChanged',
       'appNotificationAdded',
     ],
-    [ChatDrive],
+    subscribedDrives || [],
     () => {
       queryClient.invalidateQueries({ queryKey: ['process-inbox'] });
     }
@@ -389,11 +393,11 @@ const processChatMessagesBatch = async (
           uniqueMessagesPerConversation[updatedConversation].map(async (newMessage) =>
             typeof newMessage.fileMetadata.appData.content === 'string'
               ? await dsrToMessage(
-                  dotYouClient,
-                  newMessage as HomebaseFile<string>,
-                  ChatDrive,
-                  true
-                )
+                dotYouClient,
+                newMessage as HomebaseFile<string>,
+                ChatDrive,
+                true
+              )
               : (newMessage as HomebaseFile<ChatMessage>)
           )
         )

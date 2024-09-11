@@ -87,10 +87,10 @@ export const PostMeta = memo(
         {channel ? (
           <TouchableOpacity
             onPress={() => channelLink && openURL(channelLink)}
-            style={styles.pressableContainer}
+            style={[styles.pressableContainer, { flex: 1 }]}
           >
             {postFile?.fileMetadata.isEncrypted && <Lock size={'xs'} color={Colors.indigo[500]} />}
-            <Text style={styles.aclText}>
+            <Text style={styles.aclText} numberOfLines={1}>
               {(isAuthor || !odinId) &&
               channel?.serverMetadata &&
               postFile?.serverMetadata &&
@@ -139,7 +139,6 @@ export const ToGroupBlock = memo(
       [channel, dotYouClient, identity, isConnected, odinId]
     );
     if (!groupPost) return null;
-
     return (
       <View style={styles.groupContainer}>
         <Text style={styles.toText}>{t('to')} </Text>
@@ -147,7 +146,7 @@ export const ToGroupBlock = memo(
           onPress={() => channelLink && openURL(channelLink)}
           style={styles.pressableContainer}
         >
-          <Text style={styles.channelText}>
+          <Text style={styles.channelText} numberOfLines={1}>
             {channel?.fileMetadata.appData.content.name
               ? `${channel?.fileMetadata.appData.content.name}`
               : ''}

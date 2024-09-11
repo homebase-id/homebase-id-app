@@ -5,10 +5,10 @@ import { getSocialFeed, processInbox } from '@homebase-id/js-lib/peer';
 import { useCallback } from 'react';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useChannels } from './channels/useChannels';
-
 import { useChannelDrives } from './channels/useChannelDrives';
 import { useDotYouClientContext } from 'feed-app-common';
 import { useNotificationSubscriber } from '../useNotificationSubscriber';
+import { useDriveSubscriber } from '../drive/useDriveSubscriber';
 
 const MINUTE_IN_MS = 60000;
 
@@ -26,12 +26,11 @@ const useInboxProcessor = (isEnabled?: boolean) => {
         })
       );
     }
-
     return true;
   };
 
   return useQuery({
-    queryKey: ['process-inbox'],
+    queryKey: ['process-inbox-feed'],
     queryFn: fetchData,
     refetchOnMount: false,
     // We want to refetch on window focus, as we might have missed some messages while the window was not focused and the websocket might have lost connection
@@ -43,32 +42,37 @@ const useInboxProcessor = (isEnabled?: boolean) => {
 
 const useFeedWebsocket = (isEnabled: boolean) => {
   const queryClient = useQueryClient();
+  const { data: subscribedDrives, isFetched } = useDriveSubscriber();
+
 
   const handler = useCallback(
     (notification: TypedConnectionNotification) => {
       if (
         (notification.notificationType === 'fileAdded' ||
-          notification.notificationType === 'fileModified') &&
-        stringGuidsEqual(notification.targetDrive?.alias, BlogConfig.FeedDrive.alias) &&
-        stringGuidsEqual(notification.targetDrive?.type, BlogConfig.FeedDrive.type)
+          notification.notificationType === 'fileModified')
       ) {
-        queryClient.invalidateQueries({ queryKey: ['social-feeds'] });
+        if (subscribedDrives && subscribedDrives.slice(1).some((drive) => stringGuidsEqual(drive.alias, notification.targetDrive?.alias) && stringGuidsEqual(drive.type, notification.targetDrive?.type))) {
+          queryClient.invalidateQueries({ queryKey: ['social-feeds'] });
+        }
       }
     },
-    [queryClient]
+    [queryClient, subscribedDrives]
   );
-
-  useNotificationSubscriber(
-    isEnabled ? handler : undefined,
+  return useNotificationSubscriber(
+    isEnabled && isFetched ? handler : undefined,
     ['fileAdded', 'fileModified'],
-    [BlogConfig.FeedDrive]
+    subscribedDrives || [],
+    () => {
+      queryClient.invalidateQueries({ queryKey: ['process-inbox-feed'] });
+    }
   );
 };
 
 export const useLiveFeedProcessor = () => {
   const { status: inboxStatus } = useInboxProcessor(true);
 
-  useFeedWebsocket(inboxStatus === 'success');
+  const isOnline = useFeedWebsocket(inboxStatus === 'success');
+  return isOnline;
 };
 
 export const useSocialFeed = ({ pageSize = 10 }: { pageSize: number }) => {
@@ -99,8 +103,8 @@ export const useSocialFeed = ({ pageSize = 10 }: { pageSize: number }) => {
       queryFn: ({ pageParam }) => fetchAll({ pageParam }),
       getNextPageParam: (lastPage) =>
         lastPage &&
-        lastPage?.results?.length >= 1 &&
-        (lastPage?.cursorState || lastPage?.ownerCursorState)
+          lastPage?.results?.length >= 1 &&
+          (lastPage?.cursorState || lastPage?.ownerCursorState)
           ? { cursorState: lastPage.cursorState, ownerCursorState: lastPage.ownerCursorState }
           : undefined,
       refetchOnMount: false,
