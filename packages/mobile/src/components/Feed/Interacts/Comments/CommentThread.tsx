@@ -35,7 +35,12 @@ export const CommentThread = memo(
             );
           })}
         {hasNextPage && (
-          <TextButton title={t('View Older')} onPress={fetchNextPage} style={{ padding: 10 }} />
+          <TextButton
+            title={t('View Older')}
+            onPress={fetchNextPage}
+            textStyle={{ fontSize: 16, fontWeight: '600' }}
+            unFilledStyle={{ padding: 10 }}
+          />
         )}
       </>
     );
