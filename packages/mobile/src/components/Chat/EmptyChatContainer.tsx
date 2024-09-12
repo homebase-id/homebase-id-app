@@ -52,9 +52,6 @@ export const EmptyChatContainer = ({
           onPress={() => doSend([{ text: message.text }])}
         />
       ))}
-      {/* <StarterBubbles text={t('Hello 👋')} onPress={() => {}} /> */}
-      {/* <StarterBubbles text={t('Good to see you here! 😄')} onPress={() => {}} /> */}
-      {/* <StarterBubbles text={t('Let’s catch up! ☕')} onPress={() => {}} /> */}
     </Container>
   );
 };
