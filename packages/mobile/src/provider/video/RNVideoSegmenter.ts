@@ -1,20 +1,11 @@
 import { ImageSource } from './RNImageProvider';
 import { getNewId, uint8ArrayToBase64 } from '@homebase-id/js-lib/helpers';
 
-import {
-  CachesDirectoryPath,
-  exists,
-  read,
-  readFile,
-  stat,
-  unlink,
-  writeFile,
-} from 'react-native-fs';
+import { CachesDirectoryPath, exists, readFile, stat, unlink, writeFile } from 'react-native-fs';
 import { Video } from 'react-native-compressor';
 import { Platform } from 'react-native';
 
-import MP4Box from 'mp4box';
-import { FFmpegKit, SessionState } from 'ffmpeg-kit-react-native';
+import { FFmpegKit, FFprobeKit, SessionState } from 'ffmpeg-kit-react-native';
 import {
   HlsVideoMetadata,
   PlainVideoMetadata,
@@ -73,6 +64,33 @@ interface HLSVideo {
   playlist: ImageSource;
   segments: ImageSource;
 }
+
+// Function to get video codec information
+const getVideoCodec = async (inputFilePath: string) => {
+  return new Promise((resolve, reject) => {
+    // Command to get codec information
+    const command = `-v error -select_streams v:0 -show_entries stream=codec_name -of default=noprint_wrappers=1 ${inputFilePath}`;
+
+    FFprobeKit.execute(command)
+      .then(async (session) => {
+        const state = await session.getState();
+        const returnCode = await session.getReturnCode();
+        const output = await session.getOutput();
+
+        if (state === SessionState.FAILED || !returnCode.isValueSuccess()) {
+          reject(new Error(`FFmpeg process failed with state: ${state} and rc: ${returnCode}`));
+        } else {
+          // Process output to extract codec name
+          const codec = output.trim().split('=')[1];
+          resolve(codec);
+        }
+      })
+      .catch((error) => {
+        reject(new Error(`FFmpeg process failed with error: ${error}`));
+      });
+  });
+};
+
 const segmentVideo = async (
   video: ImageSource,
   keyHeader?: KeyHeader
@@ -119,16 +137,13 @@ const segmentVideo = async (
       ? `-hls_key_info_file ${keyInfoUri}` // -hls_enc 1`
       : '';
 
-    // MDN docs (https://developer.mozilla.org/en-US/docs/Web/API/Media_Source_Extensions_API/Transcoding_assets_for_MSE#fragmenting)
-    // FFMPEG fragmenting: https://ffmpeg.org/ffmpeg-formats.html#Fragmentation
-    // const command = `-i ${source} -c:v copy -c:a copy -movflags frag_keyframe+empty_moov+default_base_moof ${destinationUri}`;
-    const command = `-i ${source} -codec: copy ${encryptionInfo} -hls_time 6 -hls_list_size 0 -f hls -hls_flags single_file ${playlistUri}`;
-
-    // empty_moov (older version of the above)
-    // const command = `-i ${source} -c copy -movflags +frag_keyframe+separate_moof+omit_tfhd_offset+empty_moov ${destinationUri}`;
-
-    // faststart (this doesn't work in firefox)
-    // const command = `-i ${source} -c copy -movflags +frag_keyframe+separate_moof+omit_tfhd_offset+faststart ${destinationUri}`;
+    let command;
+    const codec = await getVideoCodec(source);
+    if (codec === 'h264') {
+      command = `-i ${source} -codec: copy ${encryptionInfo} -hls_time 6 -hls_list_size 0 -f hls -hls_flags single_file ${playlistUri}`;
+    } else {
+      command = `-i ${source} -c:v libx264 -preset fast -crf 23 -c:a aac ${encryptionInfo} -hls_time 6 -hls_list_size 0 -f hls -hls_flags single_file ${playlistUri}`;
+    }
 
     try {
       const session = await FFmpegKit.execute(command);
@@ -228,78 +243,6 @@ export const grabThumbnail = async (video: ImageSource) => {
     console.error(`FFmpeg process failed with error: ${error}`);
     return null;
   }
-};
-
-interface Mp4Info {
-  isFragmented: boolean;
-  tracks: {
-    id: number;
-    nb_samples: number;
-    type: string;
-    codec: string;
-    movie_duration: number;
-    movie_timescale: number;
-    duration: number;
-    timescale: number;
-  }[];
-  mime: string;
-  initial_duration?: number;
-  duration: number;
-  timescale: number;
-  brands: string[];
-}
-
-type ExtendedBuffer = ArrayBuffer & { fileStart?: number };
-
-const getMp4Info = async (video: ImageSource) => {
-  const source = video.filepath || video.uri;
-
-  if (!source || !(await exists(source))) {
-    throw new Error(`File not found: ${source}`);
-  }
-
-  const stats = await stat(source);
-
-  const mp4File = MP4Box.createFile(true);
-
-  // eslint-disable-next-line no-async-promise-executor
-  return new Promise<Mp4Info>(async (resolve, reject) => {
-    mp4File.onError = (e: Error) => reject(e);
-    mp4File.onReady = (info: Mp4Info) => resolve(info);
-
-    const readChunkSize = 8192;
-    let offset = 0;
-    // let totalBytesRead = 0;
-
-    while (offset < stats.size) {
-      const bytesToRead = Math.min(readChunkSize, stats.size - offset);
-
-      const base64String = await read(source, bytesToRead, offset, 'base64');
-      const rawString = atob(base64String);
-      const arrayBuffer = new ArrayBuffer(rawString.length) as ExtendedBuffer;
-      const byteArray = new Uint8Array(arrayBuffer);
-      for (let i = 0; i < rawString.length; i++) {
-        byteArray[i] = rawString.charCodeAt(i);
-      }
-      // totalBytesRead += rawString.length;
-
-      arrayBuffer.fileStart = offset;
-      offset = mp4File.appendBuffer(arrayBuffer);
-    }
-    mp4File.flush();
-  });
-};
-
-const getCodecFromMp4Info = (info: Mp4Info): string => {
-  let codec = info.mime;
-  const avTracks = info.tracks?.filter((trck) => ['video', 'audio'].includes(trck.type));
-  if (avTracks?.length > 1) {
-    codec = `video/mp4; codecs="${avTracks
-      .map((trck) => trck.codec)
-      .join(',')}"; profiles="${info.brands.join(',')}"`;
-  }
-
-  return codec;
 };
 
 interface VideoData {
