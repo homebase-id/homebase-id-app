@@ -45,6 +45,7 @@ export type ShareChatProp = NativeStackScreenProps<ChatStackParamList, 'ShareCha
 export const ShareChatPage = (prop: ShareChatProp) => {
   const { data, mimeType } = prop.route.params;
   const { isDarkMode } = useDarkMode();
+  const isDataArray = Array.isArray(data);
 
   const { mutateAsync: createConversation } = useConversation().create;
   const { mutate: sendMessage, error } = useChatMessage().send;
@@ -67,45 +68,76 @@ export const ShareChatPage = (prop: ShareChatProp) => {
       let text = '';
       const imageSource: ImageSource[] = [];
       if (mimeType.startsWith('text')) {
-        text = data;
+        if (isDataArray) {
+          text = data.join('\n');
+        } else {
+          text = data;
+        }
       } else if (mimeType.startsWith('image')) {
-        const uri = await fixContentURI(data);
-        let size = {
-          width: 0,
-          height: 0,
-        };
-        await getImageSize(uri).then((res) => {
-          if (res instanceof Error) {
-            size = { width: 500, height: 500 };
-            return;
+        if (isDataArray) {
+          for (const rawUri of data) {
+            const uri = await fixContentURI(decodeURI(rawUri));
+            let size = {
+              width: 0,
+              height: 0,
+            };
+            await getImageSize(uri).then((res) => {
+              if (res instanceof Error) {
+                size = { width: 500, height: 500 };
+                return;
+              }
+              size = res;
+            });
+            imageSource.push({
+              uri: uri,
+              width: size.width,
+              height: size.height,
+              type: mimeType,
+            });
           }
-          size = res;
-        });
-        imageSource.push({
-          uri: uri,
-          width: size.width,
-          height: size.height,
-          type: mimeType,
-        });
+        } else {
+          const uri = await fixContentURI(data);
+          let size = {
+            width: 0,
+            height: 0,
+          };
+          await getImageSize(uri).then((res) => {
+            if (res instanceof Error) {
+              size = { width: 500, height: 500 };
+              return;
+            }
+            size = res;
+          });
+          imageSource.push({
+            uri: uri,
+            width: size.width,
+            height: size.height,
+            type: mimeType,
+          });
+        }
       } else if (
         mimeType.startsWith('video')
         // TODO: Add support for HLS || mimeType === 'application/vnd.apple.mpegurl'
       ) {
-        const uri = await fixContentURI(data);
-        imageSource.push({
-          uri: uri,
-          width: 1920,
-          height: 1080,
-          type: mimeType,
-        });
+        if (!isDataArray) {
+          const uri = await fixContentURI(data);
+          imageSource.push({
+            uri: uri,
+            width: 1920,
+            height: 1080,
+            type: mimeType,
+          });
+        }
       } else if (mimeType.startsWith('application/pdf')) {
-        const uri = await fixContentURI(data);
-        imageSource.push({
-          uri: uri,
-          type: mimeType,
-          width: 0,
-          height: 0,
-        });
+        if (!isDataArray) {
+          const uri = await fixContentURI(data);
+          imageSource.push({
+            uri: uri,
+            type: mimeType,
+            width: 0,
+            height: 0,
+          });
+        }
       }
       //TODO: Handle a case where if a conversation doesn't exist and a command needs to be sent
       return sendMessage({
@@ -170,13 +202,14 @@ export const ShareChatPage = (prop: ShareChatProp) => {
     }
     setSending(false);
   }, [
-    data,
-    createConversation,
-    mimeType,
-    navigation,
     selectedContact,
     selectedConversation,
+    data,
+    navigation,
+    mimeType,
     sendMessage,
+    isDataArray,
+    createConversation,
   ]);
 
   const { bottom } = useSafeAreaInsets();

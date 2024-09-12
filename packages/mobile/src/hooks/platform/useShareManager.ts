@@ -12,7 +12,7 @@ const EventEmitter = new NativeEventEmitter(ShareMenu);
 
 export type SharedItem = {
   mimeType: string;
-  data: string;
+  data: string | string[];
   extraData?: object;
 };
 
@@ -20,6 +20,7 @@ export const useShareManager = () => {
   const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
   const handleShare = useCallback(
     (item?: SharedItem) => {
+      console.log('item', item);
       if (!item) {
         return;
       }
