@@ -859,7 +859,14 @@ const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
           return (<AuthorName odinId={text.slice(1)} showYou={false} />) as unknown as string;
         },
       },
-      { pattern: URL_PATTERN, style: linkStyle, onPress: (text: string) => openURL(text) },
+      {
+        pattern: URL_PATTERN,
+        style: linkStyle,
+        onPress: (text: string) => {
+          if (text.startsWith('http')) return openURL(text);
+          return openURL(`https://${text}`);
+        },
+      },
     ];
   }, []);
 
