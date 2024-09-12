@@ -27,7 +27,7 @@ import { AuthorName } from '../../components/ui/Name';
 import { PublicAvatar } from '../../components/ui/Avatars/Avatar';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { Divider } from '../../components/ui/Divider';
-import Animated, { FadeIn } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 import TextButton from '../../components/ui/Text/Text-Button';
 import { t } from 'feed-app-common';
 
@@ -248,7 +248,7 @@ const LoginComponent = () => {
       <Input
         placeholder="Homebase id"
         viewStyle={{
-          marginBottom: 16,
+          marginBottom: 12,
         }}
         style={{
           // height: 40,
@@ -304,7 +304,8 @@ const LoginComponent = () => {
             marginTop: 24,
             marginBottom: 4,
           }}
-          entering={FadeIn.withInitialValues({ originY: 0 })}
+          layout={LinearTransition}
+          exiting={FadeOut}
         >
           {/* Render -----OR----- */}
           <Divider text="OR" />
