@@ -1,6 +1,6 @@
 import { InfiniteData } from '@tanstack/react-query';
 import { Image, Linking } from 'react-native';
-import { CachesDirectoryPath, copyFile } from 'react-native-fs';
+import { CachesDirectoryPath, copyFile, exists } from 'react-native-fs';
 import InAppBrowser from 'react-native-inappbrowser-reborn';
 
 //https://stackoverflow.com/a/21294619/15538463
@@ -92,20 +92,13 @@ export function fixDocumentURI(url: string): string {
 
 }
 
-export async function fixContentURI(url: string): Promise<string> {
-    if (url.startsWith('content://')) {
-        const uriComponents = url.split('/');
-        const fileNameAndExtension = uriComponents[uriComponents.length - 1];
-        const destPath = `${CachesDirectoryPath}/${fileNameAndExtension}`;
+export async function fixContentURI(url: string, format?: string): Promise<string> {
+    if (url.startsWith('content://') && format) {
+        const destPath = `${CachesDirectoryPath}/${format}`;
         await copyFile(url, destPath);
         return `file://${destPath}`;
-
     }
-    if (url.startsWith('file://')) {
-        url = decodeURI(url);
-    }
-
-    return url;
+    return decodeURI(url);
 }
 
 // Utility function to convert Image.getSize to a promise
