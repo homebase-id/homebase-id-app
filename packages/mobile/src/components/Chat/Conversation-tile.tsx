@@ -27,7 +27,7 @@ import { ErrorBoundary } from '../ui/ErrorBoundary/ErrorBoundary';
 import { useConversationMetadata } from '../../hooks/chat/useConversationMetadata';
 
 type ConversationTileProps = {
-  onPress?: () => void;
+  onPress?: (conversationId: string) => void;
   onLongPress?: () => void;
   conversation: UnifiedConversation;
   fileId?: string;
@@ -87,7 +87,7 @@ const ConversationTile = memo((props: ConversationTileProps) => {
   return (
     <ErrorBoundary>
       <TouchableHighlight
-        onPress={props.onPress}
+        onPress={() => props.onPress?.(props.conversationId as string)}
         onLongPress={props.onLongPress}
         underlayColor={underlayColor}
         style={{
@@ -121,9 +121,9 @@ const ConversationTile = memo((props: ConversationTileProps) => {
             >
               {isGroup || props.isSelf
                 ? props.conversation.title
-                : (connectionDetails?.name?.displayName || connectionDetails?.name?.givenName) ?? (
+                : ((connectionDetails?.name?.displayName || connectionDetails?.name?.givenName) ?? (
                     <ConnectionName odinId={props.odinId} />
-                  )}
+                  ))}
               {props.isSelf ? <Text style={styles.you}>(you)</Text> : null}
             </Text>
 
