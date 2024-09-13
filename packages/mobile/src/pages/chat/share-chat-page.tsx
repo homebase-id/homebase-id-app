@@ -45,7 +45,6 @@ export type ShareChatProp = NativeStackScreenProps<ChatStackParamList, 'ShareCha
 export const ShareChatPage = (prop: ShareChatProp) => {
   const { data, mimeType } = prop.route.params;
   const { isDarkMode } = useDarkMode();
-  const isDataArray = Array.isArray(data);
 
   const { mutateAsync: createConversation } = useConversation().create;
   const { mutate: sendMessage, error } = useChatMessage().send;
@@ -64,39 +63,15 @@ export const ShareChatPage = (prop: ShareChatProp) => {
       navigation.goBack();
     }
     setSending(true);
+    const sharedData = Array.isArray(data) ? data : [data];
     async function forwardMessages(conversation: HomebaseFile<UnifiedConversation>) {
       let text = '';
       const imageSource: ImageSource[] = [];
       if (mimeType.startsWith('text')) {
-        if (isDataArray) {
-          text = data.join('\n');
-        } else {
-          text = data;
-        }
+        text = sharedData.join('\n');
       } else if (mimeType.startsWith('image')) {
-        if (isDataArray) {
-          for (const rawUri of data) {
-            const uri = await fixContentURI(decodeURI(rawUri));
-            let size = {
-              width: 0,
-              height: 0,
-            };
-            await getImageSize(uri).then((res) => {
-              if (res instanceof Error) {
-                size = { width: 500, height: 500 };
-                return;
-              }
-              size = res;
-            });
-            imageSource.push({
-              uri: uri,
-              width: size.width,
-              height: size.height,
-              type: mimeType,
-            });
-          }
-        } else {
-          const uri = await fixContentURI(data);
+        for (const rawUri of sharedData) {
+          const uri = await fixContentURI(rawUri);
           let size = {
             width: 0,
             height: 0,
@@ -119,8 +94,8 @@ export const ShareChatPage = (prop: ShareChatProp) => {
         mimeType.startsWith('video')
         // TODO: Add support for HLS || mimeType === 'application/vnd.apple.mpegurl'
       ) {
-        if (!isDataArray) {
-          const uri = await fixContentURI(data);
+        for (const rawUri of sharedData) {
+          const uri = await fixContentURI(rawUri);
           imageSource.push({
             uri: uri,
             width: 1920,
@@ -129,8 +104,8 @@ export const ShareChatPage = (prop: ShareChatProp) => {
           });
         }
       } else if (mimeType.startsWith('application/pdf')) {
-        if (!isDataArray) {
-          const uri = await fixContentURI(data);
+        for (const rawUri of sharedData) {
+          const uri = await fixContentURI(rawUri);
           imageSource.push({
             uri: uri,
             type: mimeType,
@@ -208,7 +183,6 @@ export const ShareChatPage = (prop: ShareChatProp) => {
     navigation,
     mimeType,
     sendMessage,
-    isDataArray,
     createConversation,
   ]);
 
