@@ -15,6 +15,7 @@ export function millisToMinutesAndSeconds(millis: number | undefined): string {
 
 export async function openURL(url: string): Promise<void> {
     if (!url) return;
+    url = url.startsWith('http') ? url : `https://${url}`;
     if (await InAppBrowser.isAvailable()) {
         await InAppBrowser.open(url, {
             enableUrlBarHiding: false,

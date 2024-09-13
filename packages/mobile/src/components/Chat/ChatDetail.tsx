@@ -869,10 +869,7 @@ const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
       {
         pattern: URL_PATTERN,
         style: linkStyle,
-        onPress: (text: string) => {
-          if (text.startsWith('http')) return openURL(text);
-          return openURL(`https://${text}`);
-        },
+        onPress: (text: string) => openURL(text),
       },
     ];
   }, []);
