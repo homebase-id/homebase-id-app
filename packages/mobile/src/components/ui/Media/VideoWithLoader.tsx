@@ -96,6 +96,7 @@ export const VideoWithLoader = memo(
               alignItems: 'center',
               justifyContent: 'center',
               backgroundColor: 'rgba(0,0,0,0.4)',
+              borderRadius: 10,
             }}
           >
             <View
