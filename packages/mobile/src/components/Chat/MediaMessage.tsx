@@ -9,6 +9,8 @@ import { ChatStackParamList } from '../../app/ChatStack';
 import { ChatMessageIMessage } from './ChatDetail';
 import { calculateScaledDimensions } from '../../utils/utils';
 import { MediaGallery, MediaItem } from '../ui/Media/MediaGallery';
+import { useDarkMode } from '../../hooks/useDarkMode';
+import { Colors } from '../../app/Colors';
 
 const MediaMessage = memo(
   ({
@@ -43,6 +45,7 @@ const InnerMediaMessage = memo(
     containerStyle?: StyleProp<ViewStyle>;
     onLongPress: (e: GestureResponderEvent, message: ChatMessageIMessage) => void;
   }) => {
+    const { isDarkMode } = useDarkMode();
     const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
     const { width, height } = Dimensions.get('screen');
     const payloads = currentMessage.fileMetadata.payloads;
@@ -113,6 +116,10 @@ const InnerMediaMessage = memo(
         previewThumbnail={currentMessage.fileMetadata.appData.previewThumbnail}
         onLongPress={(e) => onLongPress(e, currentMessage)}
         onClick={(index) => onClick(index)}
+        style={{
+          borderRadius: 10,
+          backgroundColor: isDarkMode ? Colors.black : Colors.white,
+        }}
       />
     );
   }
