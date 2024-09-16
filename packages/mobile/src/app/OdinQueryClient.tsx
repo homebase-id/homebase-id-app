@@ -65,6 +65,8 @@ const INCLUDED_QUERY_KEYS = [
   'conversations-with-recent-message',
   'image',
   'process-inbox',
+  'channels',
+  'channel',
   'social-feeds',
   'security-context',
 ];
