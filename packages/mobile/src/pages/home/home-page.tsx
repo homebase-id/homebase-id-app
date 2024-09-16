@@ -77,17 +77,15 @@ export const HomePage = (_props: HomeProps) => {
   return (
     <SafeAreaView>
       <Container style={{ flex: 1 }}>
-        {flattenedNotifications?.length ? (
-          <FlatList
-            ref={scrollRef}
-            data={Object.keys(groupedNotificationsPerDay)}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ gap: 8 }}
-            ListHeaderComponent={renderHeader}
-            renderItem={renderItem}
-            onEndReached={() => hasNextPage && fetchNextPage()}
-          />
-        ) : null}
+        <FlatList
+          ref={scrollRef}
+          data={Object.keys(groupedNotificationsPerDay)}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ gap: 8 }}
+          ListHeaderComponent={renderHeader}
+          renderItem={renderItem}
+          onEndReached={() => hasNextPage && fetchNextPage()}
+        />
         <ErrorNotification error={removeError} />
       </Container>
     </SafeAreaView>
