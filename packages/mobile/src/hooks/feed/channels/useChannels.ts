@@ -76,6 +76,6 @@ export const useChannels = ({
     queryFn: fetchChannelData,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
-    staleTime: Infinity,
+    staleTime: 1000 * 60 * 60 * 24, // 1 Day
   });
 };
