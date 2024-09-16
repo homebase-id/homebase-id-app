@@ -266,7 +266,6 @@ const useImage = (props?: {
             const imageData = await fetchImageFromServer();
             if (!imageData) return;
 
-            console.log('Fetched a bigger image and updating cache', key);
             queryClient.setQueryData<ImageData | undefined>(
               queryKeyBuilder(odinId, imageFileId, imageFileKey, imageDrive, size, lastModified),
               imageData
@@ -278,7 +277,6 @@ const useImage = (props?: {
       }
     }
 
-    console.log('Fetching image from server', key);
     return fetchImageFromServer();
   };
 
