@@ -172,10 +172,7 @@ const createImageThumbnail = async (
 
   return createResizedImage(photo, instruction, format).then(async (resizedData) => {
     return {
-      naturalSize: {
-        pixelWidth: photo.width,
-        pixelHeight: photo.height,
-      },
+      naturalSize: rotateNaturalSize(photo, resizedData),
       thumb: {
         pixelWidth: resizedData.width,
         pixelHeight: resizedData.height,
@@ -186,6 +183,30 @@ const createImageThumbnail = async (
       },
     };
   });
+};
+
+const rotateNaturalSize = (
+  natural: { width: number; height: number },
+  resized: { width: number; height: number }
+) => {
+  const naturalAspectRatio = natural.width / natural.height;
+  const resizedAspectRatio = resized.width / resized.height;
+
+  // If the aspect ratios are equal, no 90° or 270° rotation
+  if (Math.abs(naturalAspectRatio - resizedAspectRatio) < 0.01) {
+    return {
+      pixelWidth: natural.width,
+      pixelHeight: natural.height,
+    };
+  }
+
+  // If the aspect ratio is inverted (flipped), we assume 90° or 270° rotation
+  else {
+    return {
+      pixelWidth: natural.height,
+      pixelHeight: natural.width,
+    };
+  }
 };
 
 export const createResizedImage = async (
