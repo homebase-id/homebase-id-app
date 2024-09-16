@@ -134,7 +134,7 @@ const useImage = (props?: {
   };
 
   const fetchImageData = async (
-    odinId: string,
+    odinId: string | undefined,
     imageFileId: string | undefined,
     imageFileKey: string | undefined,
     imageGlobalTransitId: string | undefined,
@@ -147,9 +147,10 @@ const useImage = (props?: {
     if (imageFileId === undefined || imageFileId === '' || !imageDrive || !imageFileKey) {
       return null;
     }
+    const key = queryKeyBuilder(odinId, imageFileId, imageFileKey, imageDrive, size, lastModified);
 
     const fetchImageFromServer = async (): Promise<ImageData | null> => {
-      if (odinId !== localHost) {
+      if (odinId && odinId !== localHost) {
         if (imageGlobalTransitId) {
           const imageBlob = await getDecryptedMediaDataOverPeerByGlobalTransitId(
             dotYouClient,
@@ -265,7 +266,7 @@ const useImage = (props?: {
             const imageData = await fetchImageFromServer();
             if (!imageData) return;
 
-            console.log('Fetched a bigger image and updating cache', imageData);
+            console.log('Fetched a bigger image and updating cache', key);
             queryClient.setQueryData<ImageData | undefined>(
               queryKeyBuilder(odinId, imageFileId, imageFileKey, imageDrive, size, lastModified),
               imageData
@@ -277,22 +278,16 @@ const useImage = (props?: {
       }
     }
 
+    console.log('Fetching image from server', key);
     return fetchImageFromServer();
   };
 
   return {
     fetch: useQuery({
-      queryKey: queryKeyBuilder(
-        odinId,
-        imageGlobalTransitId || imageFileId,
-        imageFileKey,
-        imageDrive,
-        size,
-        lastModified
-      ),
+      queryKey: queryKeyBuilder(odinId, imageFileId, imageFileKey, imageDrive, size, lastModified),
       queryFn: () =>
         fetchImageData(
-          odinId || localHost,
+          odinId,
           imageFileId,
           imageFileKey,
           imageGlobalTransitId,
@@ -305,6 +300,8 @@ const useImage = (props?: {
       // Stale time is 0, to always trigger a fetch,
       //   while the fetch checks if we have anything in cache from before and confirms it on disk
       staleTime: 0,
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
       enabled: !!imageFileId && imageFileId !== '',
     }),
     getFromCache: (

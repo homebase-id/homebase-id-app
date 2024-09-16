@@ -106,10 +106,13 @@ export const OdinImage = memo(
       [fileId, fileKey, loadSize, odinId, targetDrive]
     );
 
+    const uri = imageData?.url || embeddedThumbUrl;
+    if (!uri) return null;
+
     if (enableZoom) {
       return (
         <ZoomableImage
-          uri={imageData?.url || embeddedThumbUrl}
+          uri={uri}
           imageSize={imageSize}
           alt={alt || title}
           onPress={onClick}
@@ -125,7 +128,7 @@ export const OdinImage = memo(
     return (
       <>
         <InnerImage
-          uri={imageData?.url || embeddedThumbUrl}
+          uri={uri}
           contentType={imageData?.type || previewThumbnail?.contentType}
           style={style}
           alt={alt || title}

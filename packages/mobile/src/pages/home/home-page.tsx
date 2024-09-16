@@ -5,7 +5,7 @@ import { Container } from '../../components/ui/Container/Container';
 
 import { TabStackParamList } from '../../app/App';
 import { t } from 'feed-app-common';
-import React, { useMemo, useCallback, useRef } from 'react';
+import React, { useMemo, useCallback, useRef, useEffect } from 'react';
 import { View, TouchableOpacity, ListRenderItemInfo, FlatList } from 'react-native';
 import { Dashboard } from '../../components/Dashboard/Dashboard';
 import { ProfileInfo } from '../../components/Profile/ProfileInfo';
@@ -46,7 +46,10 @@ export const HomePage = (_props: HomeProps) => {
   useScrollToTop(scrollRef);
 
   const { mutate: remove, error: removeError } = usePushNotifications().remove;
-  const doClearAll = useCallback(() => remove(flattenedNotifications.map((n) => n.id) || []), []);
+  const doClearAll = useCallback(
+    () => remove(flattenedNotifications.map((n) => n.id) || []),
+    [flattenedNotifications, remove]
+  );
 
   const renderHeader = useCallback(
     () => (
@@ -64,7 +67,7 @@ export const HomePage = (_props: HomeProps) => {
         </View>
       </>
     ),
-    []
+    [doClearAll]
   );
 
   const renderItem = useCallback(
