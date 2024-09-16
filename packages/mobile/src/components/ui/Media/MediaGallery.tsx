@@ -28,6 +28,7 @@ import { LinkPreviewFile } from './LinkPreviewFile';
 import { POST_LINKS_PAYLOAD_KEY } from '@homebase-id/js-lib/public';
 import { Colors } from '../../../app/Colors';
 import { memo } from 'react';
+import { LinkPreviewDescriptor } from '@homebase-id/js-lib/media';
 
 export const MediaGallery = memo(
   ({
@@ -239,6 +240,10 @@ export const MediaItem = memo(
           globalTransitId={globalTransitId}
           odinId={odinId}
           payloadKey={payload.key}
+          previewThumbnail={payload.previewThumbnail || previewThumbnail}
+          descriptorContent={
+            (JSON.parse(payload.descriptorContent as string) as LinkPreviewDescriptor[])[0]
+          }
           position={position as string}
         />
       );
