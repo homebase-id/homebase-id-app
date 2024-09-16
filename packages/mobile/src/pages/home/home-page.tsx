@@ -5,7 +5,7 @@ import { Container } from '../../components/ui/Container/Container';
 
 import { TabStackParamList } from '../../app/App';
 import { t } from 'feed-app-common';
-import React, { useMemo, useCallback, useRef, useEffect } from 'react';
+import { useMemo, useCallback, useRef } from 'react';
 import { View, TouchableOpacity, ListRenderItemInfo, FlatList } from 'react-native';
 import { Dashboard } from '../../components/Dashboard/Dashboard';
 import { ProfileInfo } from '../../components/Profile/ProfileInfo';
@@ -56,18 +56,20 @@ export const HomePage = (_props: HomeProps) => {
       <>
         <ProfileInfo />
         <Dashboard />
-        <View style={{ display: 'flex', flexDirection: 'row-reverse' }}>
-          <TouchableOpacity
-            onPress={doClearAll}
-            style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 5 }}
-          >
-            <Times size={'sm'} />
-            <Text>{t('Clear All')}</Text>
-          </TouchableOpacity>
-        </View>
+        {flattenedNotifications.length ? (
+          <View style={{ display: 'flex', flexDirection: 'row-reverse' }}>
+            <TouchableOpacity
+              onPress={doClearAll}
+              style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 5 }}
+            >
+              <Times size={'sm'} />
+              <Text>{t('Clear All')}</Text>
+            </TouchableOpacity>
+          </View>
+        ) : null}
       </>
     ),
-    [doClearAll]
+    [doClearAll, flattenedNotifications]
   );
 
   const renderItem = useCallback(

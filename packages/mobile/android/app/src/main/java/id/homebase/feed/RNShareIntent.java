@@ -1,8 +1,11 @@
 package id.homebase.feed;
 
 import android.app.Activity;
+import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.webkit.MimeTypeMap;
 import androidx.annotation.Nullable;
 import com.facebook.react.bridge.*;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
@@ -34,7 +37,7 @@ public class RNShareIntent extends ReactContextBaseJavaModule implements Activit
     }
 
     @Nullable
-    private WritableMap extractShared(Intent intent)  {
+    private WritableArray extractShared(Intent intent)  {
         String type = intent.getType();
 
         if (type == null) {
@@ -43,33 +46,56 @@ public class RNShareIntent extends ReactContextBaseJavaModule implements Activit
 
         String action = intent.getAction();
 
-        WritableMap data = Arguments.createMap();
-        data.putString(MIME_TYPE_KEY, type);
+        WritableArray data = Arguments.createArray();
+//        data.putString(MIME_TYPE_KEY, type);
 
         if (Intent.ACTION_SEND.equals(action)) {
+            // If Single, we can depend on the MIME type to determine the data
+            final WritableMap intentData = Arguments.createMap();
+            intentData.putString(MIME_TYPE_KEY, type);
             if ("text/plain".equals(type)) {
-                data.putString(DATA_KEY, intent.getStringExtra(Intent.EXTRA_TEXT));
+                intentData.putString(DATA_KEY, intent.getStringExtra(Intent.EXTRA_TEXT));
+                data.pushMap(intentData);
                 return data;
             }
 
             Uri fileUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
             if (fileUri != null) {
-                data.putString(DATA_KEY, fileUri.toString());
+                intentData.putString(DATA_KEY, fileUri.toString());
+                data.pushMap(intentData);
                 return data;
             }
         } else if (Intent.ACTION_SEND_MULTIPLE.equals(action)) {
+            MimeTypeMap mime = MimeTypeMap.getSingleton();
             ArrayList<Uri> fileUris = intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
             if (fileUris != null) {
-                WritableArray uriArr = Arguments.createArray();
                 for (Uri uri : fileUris) {
-                    uriArr.pushString(uri.toString());
+                WritableMap uriData = Arguments.createMap();
+                // Get the mimeType
+                var mimeType = getMimeType(reactContext, uri);
+                    uriData.putString(DATA_KEY,uri.toString());
+                    uriData.putString(MIME_TYPE_KEY, mimeType);
+                    data.pushMap(uriData);
                 }
-                data.putArray(DATA_KEY, uriArr);
                 return data;
             }
         }
 
         return null;
+    }
+
+    private String getMimeType(Context context, Uri uri) {
+        String mimeType = null;
+        if (ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) {
+            ContentResolver cr = context.getContentResolver();
+            mimeType = cr.getType(uri);
+        } else {
+            String fileExtension = MimeTypeMap.getFileExtensionFromUrl(uri
+                    .toString());
+            mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
+                    fileExtension.toLowerCase());
+        }
+        return mimeType;
     }
 
     @ReactMethod
@@ -86,7 +112,7 @@ public class RNShareIntent extends ReactContextBaseJavaModule implements Activit
             newIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             currentActivity.startActivity(newIntent);
 
-            ReadableMap shared = extractShared(newIntent);
+            ReadableArray shared = extractShared(newIntent);
             successCallback.invoke(shared);
             clearSharedText();
             currentActivity.finish();
@@ -95,7 +121,7 @@ public class RNShareIntent extends ReactContextBaseJavaModule implements Activit
 
         Intent intent = currentActivity.getIntent();
 
-        ReadableMap shared = extractShared(intent);
+        ReadableArray shared = extractShared(intent);
         successCallback.invoke(shared);
         clearSharedText();
     }
@@ -110,7 +136,7 @@ public class RNShareIntent extends ReactContextBaseJavaModule implements Activit
         // Required for RN built in Event Emitter Calls.
     }
 
-    private void dispatchEvent(ReadableMap shared) {
+    private void dispatchEvent(ReadableArray shared) {
         if (reactContext == null || !reactContext.hasActiveCatalystInstance()) {
             return;
         }
@@ -155,7 +181,7 @@ public class RNShareIntent extends ReactContextBaseJavaModule implements Activit
             return;
         }
 
-        ReadableMap shared = extractShared(intent);
+        ReadableArray shared = extractShared(intent);
         dispatchEvent(shared);
 
         // Update intent in case the user calls `getSharedText` again

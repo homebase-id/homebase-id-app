@@ -4,9 +4,12 @@ import {
   RawReactionContent,
   ReactionContext,
 } from '@homebase-id/js-lib/public';
-import { Text } from '../../../ui/Text/Text';
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import { CommentMedia } from './CommentMedia';
+import { openURL, URL_PATTERN } from '../../../../utils/utils';
+import { useDarkMode } from '../../../../hooks/useDarkMode';
+import ParsedText, { ParseShape } from 'react-native-parsed-text';
+import { Colors } from '../../../../app/Colors';
 
 export const CommentBody = memo(
   ({
@@ -24,9 +27,30 @@ export const CommentBody = memo(
   }) => {
     const { body } = content;
     const sourceTargetDrive = context && GetTargetDriveFromChannelId(context.channelId);
+
+    const { isDarkMode } = useDarkMode();
+
+    const parse: ParseShape[] = useMemo(
+      () => [
+        {
+          pattern: URL_PATTERN,
+          onPress: (url) => openURL(url),
+          style: {
+            color: isDarkMode ? Colors.indigo[200] : Colors.indigo[500],
+          },
+        },
+      ],
+      [isDarkMode]
+    );
+
     return (
       <>
-        <Text style={{ flex: 1 }}>{body}</Text>
+        <ParsedText
+          parse={parse}
+          style={{ flex: 1, color: isDarkMode ? Colors.white : Colors.black }}
+        >
+          {body}
+        </ParsedText>
         {content.mediaPayloadKey && context && (
           <CommentMedia
             fileId={commentFileId}

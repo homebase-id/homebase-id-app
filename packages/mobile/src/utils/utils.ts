@@ -15,6 +15,7 @@ export function millisToMinutesAndSeconds(millis: number | undefined): string {
 
 export async function openURL(url: string): Promise<void> {
     if (!url) return;
+    url = url.startsWith('http') ? url : `https://${url}`;
     if (await InAppBrowser.isAvailable()) {
         await InAppBrowser.open(url, {
             enableUrlBarHiding: false,
@@ -92,20 +93,13 @@ export function fixDocumentURI(url: string): string {
 
 }
 
-export async function fixContentURI(url: string): Promise<string> {
-    if (url.startsWith('content://')) {
-        const uriComponents = url.split('/');
-        const fileNameAndExtension = uriComponents[uriComponents.length - 1];
-        const destPath = `${CachesDirectoryPath}/${fileNameAndExtension}`;
+export async function fixContentURI(url: string, format?: string): Promise<string> {
+    if (url.startsWith('content://') && format) {
+        const destPath = `${CachesDirectoryPath}/${format}`;
         await copyFile(url, destPath);
         return `file://${destPath}`;
-
     }
-    if (url.startsWith('file://')) {
-        url = decodeURI(url);
-    }
-
-    return url;
+    return decodeURI(url);
 }
 
 // Utility function to convert Image.getSize to a promise

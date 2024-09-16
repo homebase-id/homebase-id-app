@@ -82,6 +82,7 @@ import { MentionDropDown } from './Mention-Dropdown';
 import { LinkPreviewBar } from './Link-Preview-Bar';
 import { LinkPreview } from '@homebase-id/js-lib/media';
 import { tryJsonParse } from '@homebase-id/js-lib/helpers';
+import { EmptyChatContainer } from './EmptyChatContainer';
 
 export type ChatMessageIMessage = IMessage & HomebaseFile<ChatMessage>;
 
@@ -687,6 +688,11 @@ export const ChatDetail = memo(
       []
     );
 
+    const renderEmptyChat = useCallback(
+      () => <EmptyChatContainer doSend={doSend as (message: { text: string }[]) => void} />,
+      [doSend]
+    );
+
     return (
       <SafeAreaView>
         <GiftedChat<ChatMessageIMessage>
@@ -733,6 +739,7 @@ export const ChatDetail = memo(
             removeClippedSubviews: true,
             windowSize: 15,
           }}
+          renderChatEmpty={renderEmptyChat}
         />
       </SafeAreaView>
     );
@@ -859,7 +866,11 @@ const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
           return (<AuthorName odinId={text.slice(1)} showYou={false} />) as unknown as string;
         },
       },
-      { pattern: URL_PATTERN, style: linkStyle, onPress: (text: string) => openURL(text) },
+      {
+        pattern: URL_PATTERN,
+        style: linkStyle,
+        onPress: (text: string) => openURL(text),
+      },
     ];
   }, []);
 

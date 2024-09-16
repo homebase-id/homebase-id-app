@@ -17,7 +17,7 @@ export const DebugPage = (_prop: DebugProp) => {
         }}
       >
         <TextButton
-          style={{
+          unFilledStyle={{
             padding: 12,
             marginHorizontal: 20,
             borderWidth: 1,
@@ -36,7 +36,7 @@ export const DebugPage = (_prop: DebugProp) => {
           title="Send Success Toast"
         />
         <TextButton
-          style={{
+          unFilledStyle={{
             padding: 12,
             marginHorizontal: 20,
             borderWidth: 1,
@@ -55,7 +55,7 @@ export const DebugPage = (_prop: DebugProp) => {
           title="Send Error Toast"
         />
         <TextButton
-          style={{
+          unFilledStyle={{
             padding: 12,
             marginHorizontal: 20,
             borderWidth: 1,
@@ -73,7 +73,7 @@ export const DebugPage = (_prop: DebugProp) => {
           title="Send Info Toast"
         />
         <TextButton
-          style={{
+          unFilledStyle={{
             padding: 12,
             marginHorizontal: 20,
             borderWidth: 1,

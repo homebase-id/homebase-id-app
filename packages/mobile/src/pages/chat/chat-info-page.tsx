@@ -63,7 +63,7 @@ export const ChatInfoPage = memo((prop: ChatInfoProp) => {
       (conversationContent as any).version ? (
         <TextButton
           title="Edit"
-          style={{ marginRight: 8 }}
+          unFilledStyle={{ marginRight: 8 }}
           onPress={() => {
             prop.navigation.navigate('EditGroup', {
               convoId: conversationId,
