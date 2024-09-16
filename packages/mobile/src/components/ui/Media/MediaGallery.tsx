@@ -29,6 +29,7 @@ import { POST_LINKS_PAYLOAD_KEY } from '@homebase-id/js-lib/public';
 import { Colors } from '../../../app/Colors';
 import { memo } from 'react';
 import { LinkPreviewDescriptor } from '@homebase-id/js-lib/media';
+import { tryJsonParse } from '@homebase-id/js-lib/helpers';
 
 export const MediaGallery = memo(
   ({
@@ -242,7 +243,7 @@ export const MediaItem = memo(
           payloadKey={payload.key}
           previewThumbnail={payload.previewThumbnail || previewThumbnail}
           descriptorContent={
-            (JSON.parse(payload.descriptorContent as string) as LinkPreviewDescriptor[])[0]
+            tryJsonParse<LinkPreviewDescriptor[]>(payload.descriptorContent as string)[0]
           }
           position={position as string}
         />
