@@ -1,6 +1,6 @@
 import { EmbeddedThumb, TargetDrive } from '@homebase-id/js-lib/core';
 import { memo, useMemo } from 'react';
-import { Dimensions, Image, ImageBackground, Pressable, View } from 'react-native';
+import { ActivityIndicator, Dimensions, ImageBackground, Pressable } from 'react-native';
 import { useLinkMetadata } from '../../../hooks/links/useLinkPreview';
 import { calculateScaledDimensions, openURL } from '../../../utils/utils';
 import { Text } from '../Text/Text';
@@ -33,7 +33,13 @@ export const LinkPreviewFile = memo(
     previewThumbnail,
     descriptorContent,
   }: LinkPreviewFileProps) => {
-    const { data } = useLinkMetadata({ targetDrive, fileId, payloadKey, globalTransitId, odinId });
+    const { data, isLoading } = useLinkMetadata({
+      targetDrive,
+      fileId,
+      payloadKey,
+      globalTransitId,
+      odinId,
+    });
     const { isDarkMode } = useDarkMode();
     const { hasImage, url } = descriptorContent;
     const embeddedThumbUrl = useMemo(() => {
@@ -66,10 +72,21 @@ export const LinkPreviewFile = memo(
           <ImageBackground
             style={{
               flex: 1,
+              height: scaledHeight,
             }}
             blurRadius={1}
             source={{ uri: embeddedThumbUrl }}
           >
+            {isLoading && (
+              <ActivityIndicator
+                size="large"
+                color={Colors.white}
+                style={{
+                  alignSelf: 'center',
+                  flex: 1,
+                }}
+              />
+            )}
             <Animated.Image
               source={{ uri: imageUrl }}
               style={{
