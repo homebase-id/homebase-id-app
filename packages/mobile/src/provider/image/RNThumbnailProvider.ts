@@ -5,9 +5,9 @@ import {
   EmbeddedThumb,
 } from '@homebase-id/js-lib/core';
 import { ThumbnailInstruction } from '@homebase-id/js-lib/media';
-import { base64ToUint8Array, uint8ArrayToBase64 } from '@homebase-id/js-lib/helpers';
+import { base64ToUint8Array, getNewId, uint8ArrayToBase64 } from '@homebase-id/js-lib/helpers';
 import { Platform } from 'react-native';
-import { readFile } from 'react-native-fs';
+import { CachesDirectoryPath, copyFile, readFile, stat, unlink } from 'react-native-fs';
 import ImageResizer, { ResizeFormat } from '@bam.tech/react-native-image-resizer';
 import { ImageSource } from './RNImageProvider';
 import { OdinBlob } from '../../../polyfills/OdinBlob';
@@ -49,9 +49,36 @@ export const createThumbnails = async (
   tinyThumb: EmbeddedThumb;
   additionalThumbnails: ThumbnailFile[];
 }> => {
+  if (!photo.filepath && !photo.uri) throw new Error('No filepath found in image source');
+
+  // We take a copy of the file, as it can be a virtual file that is not accessible by the native code; Eg: ImageResizer
+  const copyOfSourcePath = `file://${CachesDirectoryPath}/${getNewId()}`;
+  await copyFile((photo.filepath || photo.uri) as string, copyOfSourcePath);
+
+  const fileStats = await stat(copyOfSourcePath);
+  if (fileStats.size < 1) {
+    await unlink(copyOfSourcePath);
+    throw new Error('No image data found');
+  }
+
+  const adaptedPhoto = { ...photo, filepath: copyOfSourcePath, uri: copyOfSourcePath };
+
+  const result = innerCreateThumbnails(adaptedPhoto, key, contentType, thumbSizes);
+  return result;
+};
+
+const innerCreateThumbnails = async (
+  photo: ImageSource,
+  key: string,
+  contentType?: ImageContentType,
+  thumbSizes?: ThumbnailInstruction[]
+): Promise<{
+  naturalSize: ImageSize;
+  tinyThumb: EmbeddedThumb;
+  additionalThumbnails: ThumbnailFile[];
+}> => {
   if (contentType === svgType) {
-    if (!photo.filepath && !photo.uri) throw new Error('No filepath found in image source');
-    const vectorThumb = await createVectorThumbnail((photo.filepath || photo.uri) as string, key);
+    const vectorThumb = await createVectorThumbnail(photo.filepath || (photo.uri as string), key);
 
     return {
       tinyThumb: await getEmbeddedThumbOfThumbnailFile(vectorThumb.thumb, vectorThumb.naturalSize),
@@ -129,7 +156,7 @@ const createVectorThumbnail = async (
     thumb: {
       pixelWidth: 50,
       pixelHeight: 50,
-      payload: new OdinBlob([imageBytes], { type: svgType }) as any as Blob,
+      payload: new OdinBlob([imageBytes], { type: svgType }) as unknown as Blob,
       key,
     },
   };
@@ -154,7 +181,7 @@ const createImageThumbnail = async (
         pixelHeight: resizedData.height,
         payload: new OdinBlob(resizedData.path, {
           type: `image/${instruction.type || format}`,
-        }) as any as Blob,
+        }) as unknown as Blob,
         key,
       },
     };
