@@ -74,6 +74,15 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
     });
   }, [isDarkMode, navigation]);
 
+  const onPress = useCallback(
+    (convoId: string) => {
+      navigation.navigate('ChatScreen', {
+        convoId: convoId,
+      });
+    },
+    [navigation]
+  );
+
   const renderItem = useCallback(
     ({ item }: ListRenderItemInfo<ConversationWithRecentMessage>) => {
       const hasPayload = item.fileMetadata.payloads?.length > 0;
@@ -83,13 +92,7 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
           conversationId={item.fileMetadata.appData.uniqueId}
           fileId={item.fileId}
           payloadKey={hasPayload ? item.fileMetadata.payloads[0].key : undefined}
-          onPress={() => {
-            if (item.fileMetadata.appData.uniqueId) {
-              navigation.navigate('ChatScreen', {
-                convoId: item.fileMetadata.appData.uniqueId,
-              });
-            }
-          }}
+          onPress={onPress}
           odinId={
             item.fileMetadata.appData.content.recipients.filter(
               (recipient) => recipient !== identity
@@ -98,7 +101,7 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
         />
       );
     },
-    [identity, navigation]
+    [identity, onPress]
   );
 
   const keyExtractor = useCallback((item: ConversationWithRecentMessage) => item.fileId, []);
@@ -259,6 +262,14 @@ const SearchConversationResults = memo(
       [contactResults, conversationResults]
     );
     const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
+    const onPress = useCallback(
+      (convoId: string) => {
+        navigation.navigate('ChatScreen', {
+          convoId: convoId,
+        });
+      },
+      [navigation]
+    );
 
     if (!isActive) return null;
 
@@ -285,13 +296,7 @@ const SearchConversationResults = memo(
                 key={item.fileId}
                 conversation={item.fileMetadata.appData.content}
                 conversationId={item.fileMetadata.appData.uniqueId}
-                onPress={() => {
-                  if (item.fileMetadata.appData.uniqueId) {
-                    navigation.navigate('ChatScreen', {
-                      convoId: item.fileMetadata.appData.uniqueId,
-                    });
-                  }
-                }}
+                onPress={onPress}
                 odinId={
                   item.fileMetadata.appData.content.recipients.filter(
                     (recipient) => recipient !== identity
@@ -308,11 +313,7 @@ const SearchConversationResults = memo(
                 item={{
                   odinId: item.odinId as string,
                 }}
-                onOpen={(convoId) => {
-                  navigation.navigate('ChatScreen', {
-                    convoId,
-                  });
-                }}
+                onOpen={onPress}
               />
             ))}
           </ScrollView>

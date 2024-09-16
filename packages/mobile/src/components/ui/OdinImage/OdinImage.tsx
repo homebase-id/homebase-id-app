@@ -1,22 +1,12 @@
+import { EmbeddedThumb, ImageSize, SystemFileType, TargetDrive } from '@homebase-id/js-lib/core';
+import { memo, useMemo } from 'react';
 import {
-  EmbeddedThumb,
-  ImageContentType,
-  ImageSize,
-  SystemFileType,
-  TargetDrive,
-} from '@homebase-id/js-lib/core';
-import { ReactNode, memo, useCallback, useMemo } from 'react';
-import {
-  ActivityIndicator,
   GestureResponderEvent,
   ImageStyle,
   Platform,
   TouchableWithoutFeedback,
-  View,
-  ViewStyle,
 } from 'react-native';
 import useImage from './hooks/useImage';
-import useTinyThumb from './hooks/useTinyThumb';
 import { SvgUri } from 'react-native-svg';
 import { ImageZoom, ImageZoomProps } from '@likashefqet/react-native-image-zoom';
 import Animated from 'react-native-reanimated';
@@ -32,12 +22,13 @@ export interface OdinImageProps {
   imageSize?: { width: number; height: number };
   alt?: string;
   title?: string;
-  previewThumbnail?: EmbeddedThumb;
+  previewThumbnail: EmbeddedThumb | undefined;
   avoidPayload?: boolean;
   enableZoom?: boolean;
   style?: ImageStyle;
   onClick?: () => void;
   onLongPress?: (e: GestureResponderEvent) => void;
+
   imageZoomProps?: ImageZoomProps;
   probablyEncrypted?: boolean;
   systemFileType?: SystemFileType;
@@ -82,56 +73,13 @@ export const OdinImage = memo(
                   ? Math.round(imageSize?.width * (enableZoom ? 6 : 1))
                   : undefined) || 800,
             },
-      [enableZoom, imageSize?.height, imageSize?.width, previewThumbnail?.contentType]
-    );
-
-    const { getFromCache } = useImage();
-    const cachedImage = useMemo(
-      () =>
-        fileId && fileKey
-          ? getFromCache(odinId, fileId, fileKey, targetDrive, globalTransitId, loadSize)
-          : undefined,
-      [fileId, fileKey, getFromCache, odinId, targetDrive, globalTransitId, loadSize]
+      [enableZoom, imageSize, previewThumbnail]
     );
 
     const embeddedThumbUrl = useMemo(() => {
       if (!previewThumbnail) return;
       return `data:${previewThumbnail.contentType};base64,${previewThumbnail.content}`;
     }, [previewThumbnail]);
-
-    const ignoreTiny = !!previewThumbnail || !!cachedImage;
-
-    const { data: tinyThumb } = useTinyThumb({
-      odinId,
-      imageFileId: !ignoreTiny ? fileId : undefined,
-      imageFileKey: fileKey,
-      imageDrive: targetDrive,
-      imageGlobalTransitId: globalTransitId,
-      systemFileType,
-    });
-
-    const cachedImageSizeSameorGreater = useMemo(
-      () =>
-        (cachedImage?.size &&
-          loadSize &&
-          (cachedImage.size.pixelHeight >= loadSize.pixelHeight ||
-            cachedImage.size.pixelWidth >= loadSize.pixelWidth)) ||
-        false,
-      [cachedImage?.size, loadSize]
-    );
-
-    const previewUrl = cachedImageSizeSameorGreater
-      ? undefined
-      : cachedImage?.imageData?.url || embeddedThumbUrl || tinyThumb?.url;
-    const previewContentType =
-      cachedImage?.imageData?.type || previewThumbnail?.contentType || tinyThumb?.contentType;
-
-    const naturalSize: ImageSize | undefined = tinyThumb
-      ? {
-          pixelHeight: tinyThumb.naturalSize.height,
-          pixelWidth: tinyThumb.naturalSize.width,
-        }
-      : cachedImage?.imageData?.naturalSize || previewThumbnail;
 
     const {
       fetch: { data: imageData },
@@ -143,34 +91,9 @@ export const OdinImage = memo(
       imageDrive: targetDrive,
       probablyEncrypted,
       size: loadSize,
-      naturalSize,
       lastModified,
       systemFileType,
     });
-
-    const hasCachedImage = !!cachedImage?.imageData?.url;
-
-    const wrapperStyle: ViewStyle = useMemo(
-      () => ({
-        position: 'relative',
-        ...imageSize,
-      }),
-      [imageSize]
-    );
-
-    const thumbStyle: ImageStyle = useMemo(
-      () => ({
-        position: 'absolute', // Absolute so it takes up the full imageSize defined by the wrapper view
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        resizeMode: fit,
-        zIndex: 5, // Displayed underneath the actual image
-        ...style,
-      }),
-      [fit, style]
-    );
 
     const imageMeta = useMemo(
       () => ({
@@ -183,67 +106,39 @@ export const OdinImage = memo(
       [fileId, fileKey, loadSize, odinId, targetDrive]
     );
 
-    const zoomableStyle: ImageStyle = useMemo(
-      () => ({
-        position: 'relative',
-        ...style,
-        zIndex: 10,
-      }),
-      [style]
-    );
+    const uri = imageData?.url || embeddedThumbUrl;
+    if (!uri) return null;
+
+    if (enableZoom) {
+      return (
+        <ZoomableImage
+          uri={uri}
+          imageSize={imageSize}
+          alt={alt || title}
+          onPress={onClick}
+          onLongPress={onLongPress}
+          style={style}
+          imageMeta={imageMeta}
+          imageZoomProps={imageZoomProps}
+          blurRadius={!imageData ? 2 : 0}
+        />
+      );
+    }
 
     return (
       <>
-        <View style={wrapperStyle}>
-          {/* Blurry image */}
-          {/* Hide preview image when it's an enableZoom as the position absolute conflicts on the gestures */}
-          {previewUrl &&
-          (!enableZoom || (enableZoom && !imageData?.url)) &&
-          (!previewThumbnail?.contentType ||
-            !thumblessContentTypes.includes(previewThumbnail?.contentType)) ? (
-            <InnerImage
-              uri={previewUrl}
-              contentType={previewContentType as ImageContentType}
-              style={thumbStyle}
-              alt={alt || title}
-              imageMeta={imageMeta}
-              imageSize={imageSize}
-              blurRadius={hasCachedImage ? 0 : 2}
-
-              // onLongPress={onLongPress}
-            />
-          ) : null}
-
-          {/* Actual image */}
-          {imageData?.url ? (
-            <ZoomableImage
-              uri={imageData.url}
-              contentType={imageData.type}
-              fit={fit}
-              imageSize={imageSize}
-              enableZoom={enableZoom}
-              alt={alt || title}
-              onClick={onClick}
-              onLongPress={onLongPress}
-              style={zoomableStyle}
-              imageMeta={imageMeta}
-              imageZoomProps={imageZoomProps}
-            />
-          ) : null}
-
-          {!imageData?.url && !previewUrl ? (
-            <View
-              style={{
-                justifyContent: 'center',
-                alignItems: 'center',
-                ...imageSize,
-                ...style,
-              }}
-            >
-              <ActivityIndicator size="large" />
-            </View>
-          ) : null}
-        </View>
+        <InnerImage
+          uri={uri}
+          contentType={imageData?.type || previewThumbnail?.contentType}
+          style={style}
+          alt={alt || title}
+          imageMeta={imageMeta}
+          imageSize={imageSize}
+          fit={fit}
+          blurRadius={!imageData ? 2 : 0}
+          onPress={onClick}
+          onLongPress={onLongPress}
+        />
       </>
     );
   }
@@ -257,87 +152,79 @@ const InnerImage = memo(
     blurRadius,
     style,
     fit,
-    onClick,
+    onLoad,
+    onPress,
     onLongPress,
     contentType,
     imageMeta,
   }: {
-    uri: string;
+    uri: string | undefined;
     imageSize?: { width: number; height: number };
     blurRadius?: number;
     alt?: string;
     style?: ImageStyle;
     fit?: 'cover' | 'contain';
+    onLoad?: () => void;
     onLongPress?: (e: GestureResponderEvent) => void;
-    onClick?: () => void;
+    onPress?: () => void;
     imageMeta?: {
       odinId: string | undefined;
       imageFileId: string | undefined;
       imageFileKey: string | undefined;
-      imageGlobalTransitId?: string | undefined;
       imageDrive: TargetDrive;
       size?: ImageSize;
     };
 
-    contentType?: ImageContentType;
+    contentType: string | undefined;
   }) => {
-    const ClickableWrapper = useCallback(
-      ({ children }: { children: ReactNode }) =>
-        onClick || onLongPress ? (
-          <TouchableWithoutFeedback onPress={onClick} onLongPress={onLongPress}>
-            {children}
-          </TouchableWithoutFeedback>
-        ) : (
-          <>{children}</>
-        ),
-      [onClick, onLongPress]
-    );
-
     const { invalidateCache } = useImage();
-    return contentType === 'image/svg+xml' ? (
-      <ClickableWrapper>
-        <Animated.View
-          style={[
-            {
+    return (
+      <TouchableWithoutFeedback onPress={onPress} onLongPress={onLongPress}>
+        {contentType === 'image/svg+xml' ? (
+          <Animated.View
+            style={[
+              {
+                ...imageSize,
+                ...style,
+              },
+              // SVGs styling are not supported on Android
+              Platform.OS === 'android' ? style : undefined,
+            ]}
+          >
+            <SvgUri
+              width={imageSize?.width}
+              height={imageSize?.height}
+              uri={uri || null}
+              style={{ overflow: 'hidden', ...style }}
+              onLoad={onLoad}
+            />
+          </Animated.View>
+        ) : (
+          <Animated.Image
+            onError={
+              imageMeta
+                ? () =>
+                    invalidateCache(
+                      imageMeta?.odinId,
+                      imageMeta?.imageFileId,
+                      imageMeta?.imageFileKey,
+                      imageMeta?.imageDrive,
+                      imageMeta?.size
+                    )
+                : undefined
+            }
+            onLoadEnd={onLoad}
+            source={uri ? { uri } : undefined}
+            alt={alt}
+            style={{
+              resizeMode: fit,
               ...imageSize,
               ...style,
-            },
-            // SVGs styling are not supported on Android
-            Platform.OS === 'android' ? style : undefined,
-          ]}
-        >
-          <SvgUri
-            width={imageSize?.width}
-            height={imageSize?.height}
-            uri={uri}
-            style={{ overflow: 'hidden', ...style }}
+            }}
+            blurRadius={blurRadius}
           />
-        </Animated.View>
-      </ClickableWrapper>
-    ) : (
-      <ClickableWrapper>
-        <Animated.Image
-          onError={() => {
-            if (imageMeta) {
-              return invalidateCache(
-                imageMeta?.odinId,
-                imageMeta?.imageGlobalTransitId || imageMeta?.imageFileId,
-                imageMeta?.imageFileKey,
-                imageMeta?.imageDrive,
-                imageMeta?.size
-              );
-            }
-          }}
-          source={{ uri }}
-          alt={alt}
-          style={{
-            resizeMode: fit,
-            ...imageSize,
-            ...style,
-          }}
-          blurRadius={blurRadius}
-        />
-      </ClickableWrapper>
+        )}
+      </TouchableWithoutFeedback>
     );
   }
 );
@@ -345,24 +232,20 @@ const InnerImage = memo(
 const ZoomableImage = memo(
   ({
     uri,
-    alt,
     imageSize,
-    style,
-    fit,
-    enableZoom,
-    onClick,
+    onPress,
     onLongPress,
-    contentType,
     imageMeta,
     imageZoomProps,
+
+    alt,
+    style,
+    onLoad,
+    blurRadius,
   }: {
-    uri: string;
+    uri: string | undefined;
     imageSize?: { width: number; height: number };
-    alt?: string;
-    style?: ImageStyle;
-    fit?: 'cover' | 'contain';
-    enableZoom?: boolean;
-    onClick?: () => void;
+    onPress?: () => void;
     onLongPress?: (e: GestureResponderEvent) => void;
     imageMeta?: {
       odinId: string | undefined;
@@ -371,27 +254,17 @@ const ZoomableImage = memo(
       imageDrive: TargetDrive;
       size?: ImageSize;
     };
-    imageZoomProps?: ImageZoomProps;
-    contentType?: ImageContentType;
-  }) => {
-    if (!enableZoom) {
-      return (
-        <InnerImage
-          uri={uri}
-          alt={alt}
-          imageSize={imageSize}
-          style={style}
-          fit={fit}
-          contentType={contentType}
-          onClick={onClick}
-          onLongPress={onLongPress}
-          imageMeta={imageMeta}
-        />
-      );
-    }
 
+    imageZoomProps?: ImageZoomProps;
+
+    alt?: string;
+    style?: ImageStyle;
+    onLoad?: () => void;
+    blurRadius?: number;
+  }) => {
+    const { invalidateCache } = useImage();
     return (
-      <TouchableWithoutFeedback onPress={onClick}>
+      <TouchableWithoutFeedback onPress={onPress} onLongPress={onLongPress}>
         <Animated.View
           style={{
             ...imageSize,
@@ -399,6 +272,7 @@ const ZoomableImage = memo(
         >
           <ImageZoom
             uri={uri}
+            onLoadEnd={onLoad}
             minScale={1}
             maxScale={3}
             isDoubleTapEnabled={true}
@@ -406,8 +280,23 @@ const ZoomableImage = memo(
             resizeMode="contain"
             style={{
               ...imageSize,
+              ...style,
             }}
+            onError={
+              imageMeta
+                ? () =>
+                    invalidateCache(
+                      imageMeta?.odinId,
+                      imageMeta?.imageFileId,
+                      imageMeta?.imageFileKey,
+                      imageMeta?.imageDrive,
+                      imageMeta?.size
+                    )
+                : undefined
+            }
+            alt={alt}
             {...imageZoomProps}
+            blurRadius={blurRadius}
           />
         </Animated.View>
       </TouchableWithoutFeedback>

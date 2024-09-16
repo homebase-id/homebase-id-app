@@ -54,6 +54,7 @@ const INCLUDED_QUERY_KEYS = [
   'conversation-metadata',
   'chat-reaction',
   'connection-details',
+  'contacts',
   'contact',
   'profile-data',
   'followers',
@@ -61,7 +62,6 @@ const INCLUDED_QUERY_KEYS = [
   'connections', // TODO: 'connections' and 'active-connections' should be merged
   'active-connections',
   'pending-connections',
-  'contacts',
   'conversations-with-recent-message',
   'image',
   'process-inbox',
