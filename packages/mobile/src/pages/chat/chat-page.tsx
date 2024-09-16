@@ -13,7 +13,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { ChatAppBar, SelectedMessageProp } from '../../components/Chat/Chat-app-bar';
+import { ChatAppBar, SelectedMessageProp } from '../../components/Chat/Chat-App-Bar';
 import { Asset } from 'react-native-image-picker';
 import {
   ChatDeletedArchivalStaus,
