@@ -1,6 +1,6 @@
-import { TargetDrive } from '@homebase-id/js-lib/core';
-import { memo } from 'react';
-import { Dimensions, Image, Pressable } from 'react-native';
+import { EmbeddedThumb, TargetDrive } from '@homebase-id/js-lib/core';
+import { memo, useMemo } from 'react';
+import { ActivityIndicator, Dimensions, ImageBackground, Pressable } from 'react-native';
 import { useLinkMetadata } from '../../../hooks/links/useLinkPreview';
 import { calculateScaledDimensions, openURL } from '../../../utils/utils';
 import { Text } from '../Text/Text';
@@ -8,14 +8,18 @@ import { useDarkMode } from '../../../hooks/useDarkMode';
 import { Colors } from '../../../app/Colors';
 import { ellipsisAtMaxChar } from 'feed-app-common';
 import { getDomainFromUrl } from '@homebase-id/js-lib/helpers';
+import Animated from 'react-native-reanimated';
+import { LinkPreviewDescriptor } from '@homebase-id/js-lib/media';
 
 type LinkPreviewFileProps = {
   targetDrive: TargetDrive;
-  fileId: string;
   globalTransitId?: string;
+  fileId: string;
   odinId?: string;
   payloadKey: string;
+  descriptorContent: LinkPreviewDescriptor;
   position: string;
+  previewThumbnail?: EmbeddedThumb;
 };
 
 export const LinkPreviewFile = memo(
@@ -26,18 +30,31 @@ export const LinkPreviewFile = memo(
     position,
     globalTransitId,
     odinId,
+    previewThumbnail,
+    descriptorContent,
   }: LinkPreviewFileProps) => {
-    const { data } = useLinkMetadata({ targetDrive, fileId, payloadKey, globalTransitId, odinId });
+    const { data, isLoading } = useLinkMetadata({
+      targetDrive,
+      fileId,
+      payloadKey,
+      globalTransitId,
+      odinId,
+    });
     const { isDarkMode } = useDarkMode();
-
-    if (!data || !data.length) {
-      return null;
+    const { hasImage, url } = descriptorContent;
+    const embeddedThumbUrl = useMemo(() => {
+      if (!previewThumbnail) return;
+      return `data:${previewThumbnail.contentType};base64,${previewThumbnail.content}`;
+    }, [previewThumbnail]);
+    if (data === null) {
+      return;
     }
-    const { title, description, imageUrl, imageHeight, imageWidth, url } = data[0];
+    const { title, description, imageUrl, imageHeight, imageWidth } = data?.[0] || {};
     const { width, height } = Dimensions.get('window');
+
     const { height: scaledHeight } = calculateScaledDimensions(
-      imageWidth || 300,
-      imageHeight || 300,
+      previewThumbnail?.pixelWidth || imageWidth || 300,
+      previewThumbnail?.pixelHeight || imageHeight || 300,
       {
         width: width * 0.8,
         height: height * 0.68,
@@ -51,14 +68,34 @@ export const LinkPreviewFile = memo(
           borderRadius: 15,
         }}
       >
-        {imageUrl && (
-          <Image
-            source={{ uri: imageUrl }}
+        {hasImage && (
+          <ImageBackground
             style={{
-              // width: scaledWidth,
+              flex: 1,
               height: scaledHeight,
             }}
-          />
+            blurRadius={1}
+            source={{ uri: embeddedThumbUrl }}
+          >
+            {isLoading ? (
+              <ActivityIndicator
+                size="large"
+                color={Colors.white}
+                style={{
+                  alignSelf: 'center',
+                  flex: 1,
+                }}
+              />
+            ) : (
+              <Animated.Image
+                source={{ uri: imageUrl }}
+                style={{
+                  // width: scaledWidth,
+                  height: scaledHeight,
+                }}
+              />
+            )}
+          </ImageBackground>
         )}
         <Text
           style={{
