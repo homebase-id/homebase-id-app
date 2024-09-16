@@ -46,7 +46,7 @@ export const LinkPreviewFile = memo(
       if (!previewThumbnail) return;
       return `data:${previewThumbnail.contentType};base64,${previewThumbnail.content}`;
     }, [previewThumbnail]);
-    if (data == null) {
+    if (data === null) {
       return;
     }
     const { title, description, imageUrl, imageHeight, imageWidth } = data?.[0] || {};
@@ -77,7 +77,7 @@ export const LinkPreviewFile = memo(
             blurRadius={1}
             source={{ uri: embeddedThumbUrl }}
           >
-            {isLoading && (
+            {isLoading ? (
               <ActivityIndicator
                 size="large"
                 color={Colors.white}
@@ -86,14 +86,15 @@ export const LinkPreviewFile = memo(
                   flex: 1,
                 }}
               />
+            ) : (
+              <Animated.Image
+                source={{ uri: imageUrl }}
+                style={{
+                  // width: scaledWidth,
+                  height: scaledHeight,
+                }}
+              />
             )}
-            <Animated.Image
-              source={{ uri: imageUrl }}
-              style={{
-                // width: scaledWidth,
-                height: scaledHeight,
-              }}
-            />
           </ImageBackground>
         )}
         <Text
