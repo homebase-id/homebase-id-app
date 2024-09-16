@@ -47,7 +47,7 @@ export type ChatStackParamList = {
     conversation: HomebaseFile<UnifiedConversation>;
   };
   EditGroup: { convoId: string };
-  ShareChat: SharedItem;
+  ShareChat: SharedItem[];
   PreviewMedia: {
     fileId: string;
     globalTransitId?: string;

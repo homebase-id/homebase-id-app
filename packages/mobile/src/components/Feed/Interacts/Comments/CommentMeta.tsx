@@ -7,6 +7,7 @@ import { ErrorNotification } from '../../../ui/Alert/ErrorNotification';
 import { formatToTimeAgo, t, useDotYouClientContext } from 'feed-app-common';
 import { Text } from '../../../ui/Text/Text';
 import { memo } from 'react';
+import { Colors } from '../../../../app/Colors';
 
 export const CommentMeta = memo(
   ({
@@ -46,9 +47,10 @@ export const CommentMeta = memo(
         {canReact?.canReact === true || canReact?.canReact === 'emoji' ? (
           <TextButton
             title="Like"
-            style={{
+            textStyle={{
               fontSize: 14,
               fontWeight: '600',
+              color: Colors.purple[500],
             }}
             onPress={doLike}
           />
@@ -57,9 +59,10 @@ export const CommentMeta = memo(
         {(canReact?.canReact === true || canReact?.canReact === 'comment') && onReply ? (
           <TextButton
             title="Reply"
-            style={{
+            textStyle={{
               fontSize: 14,
               fontWeight: '600',
+              color: Colors.purple[500],
             }}
             onPress={onReply}
           />

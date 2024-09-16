@@ -5,7 +5,7 @@ import { Container } from '../../components/ui/Container/Container';
 
 import { TabStackParamList } from '../../app/App';
 import { t } from 'feed-app-common';
-import React, { useMemo, useCallback, useRef } from 'react';
+import { useMemo, useCallback, useRef } from 'react';
 import { View, TouchableOpacity, ListRenderItemInfo, FlatList } from 'react-native';
 import { Dashboard } from '../../components/Dashboard/Dashboard';
 import { ProfileInfo } from '../../components/Profile/ProfileInfo';
@@ -46,25 +46,30 @@ export const HomePage = (_props: HomeProps) => {
   useScrollToTop(scrollRef);
 
   const { mutate: remove, error: removeError } = usePushNotifications().remove;
-  const doClearAll = useCallback(() => remove(flattenedNotifications.map((n) => n.id) || []), []);
+  const doClearAll = useCallback(
+    () => remove(flattenedNotifications.map((n) => n.id) || []),
+    [flattenedNotifications, remove]
+  );
 
   const renderHeader = useCallback(
     () => (
       <>
         <ProfileInfo />
         <Dashboard />
-        <View style={{ display: 'flex', flexDirection: 'row-reverse' }}>
-          <TouchableOpacity
-            onPress={doClearAll}
-            style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 5 }}
-          >
-            <Times size={'sm'} />
-            <Text>{t('Clear All')}</Text>
-          </TouchableOpacity>
-        </View>
+        {flattenedNotifications.length ? (
+          <View style={{ display: 'flex', flexDirection: 'row-reverse' }}>
+            <TouchableOpacity
+              onPress={doClearAll}
+              style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 5 }}
+            >
+              <Times size={'sm'} />
+              <Text>{t('Clear All')}</Text>
+            </TouchableOpacity>
+          </View>
+        ) : null}
       </>
     ),
-    []
+    [doClearAll, flattenedNotifications]
   );
 
   const renderItem = useCallback(
@@ -77,17 +82,15 @@ export const HomePage = (_props: HomeProps) => {
   return (
     <SafeAreaView>
       <Container style={{ flex: 1 }}>
-        {flattenedNotifications?.length ? (
-          <FlatList
-            ref={scrollRef}
-            data={Object.keys(groupedNotificationsPerDay)}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ gap: 8 }}
-            ListHeaderComponent={renderHeader}
-            renderItem={renderItem}
-            onEndReached={() => hasNextPage && fetchNextPage()}
-          />
-        ) : null}
+        <FlatList
+          ref={scrollRef}
+          data={Object.keys(groupedNotificationsPerDay)}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ gap: 8 }}
+          ListHeaderComponent={renderHeader}
+          renderItem={renderItem}
+          onEndReached={() => hasNextPage && fetchNextPage()}
+        />
         <ErrorNotification error={removeError} />
       </Container>
     </SafeAreaView>
