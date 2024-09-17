@@ -1,4 +1,4 @@
-import { Defs, Path, Rect, Stop, Svg } from 'react-native-svg';
+import { Defs, LinearGradient, Path, Rect, Stop, Svg } from 'react-native-svg';
 import { ReactNode } from 'react';
 import { View } from 'react-native';
 
@@ -51,7 +51,7 @@ export const Homebase = (props: BrandIconProps) => {
           fill="white"
         />
         <Defs>
-          <linearGradient
+          <LinearGradient
             id="paint0_linear_436_22"
             x1="795.951"
             y1="986.767"
@@ -59,14 +59,15 @@ export const Homebase = (props: BrandIconProps) => {
             y2="-58.4083"
             gradientUnits="userSpaceOnUse"
           >
-            <Stop offset="0.265" stop-color="#191272" />
-            <Stop offset="1" stop-color="#ED0342" />
-          </linearGradient>
+            <Stop offset="0.265" stopColor="#191272" />
+            <Stop offset="1" stopColor="#ED0342" />
+          </LinearGradient>
         </Defs>
       </Svg>
     </Center>
   );
 };
+
 export const HomebaseChat = (props: BrandIconProps) => {
   return (
     <Center>
@@ -77,7 +78,7 @@ export const HomebaseChat = (props: BrandIconProps) => {
           fill="white"
         />
         <Defs>
-          <linearGradient
+          <LinearGradient
             id="paint0_linear_410_40"
             x1="795.951"
             y1="986.767"
@@ -85,9 +86,9 @@ export const HomebaseChat = (props: BrandIconProps) => {
             y2="-58.4083"
             gradientUnits="userSpaceOnUse"
           >
-            <Stop offset="0.265" stop-color="#191272" />
-            <Stop offset="1" stop-color="#ED0342" />
-          </linearGradient>
+            <Stop offset="0.265" stopColor="#191272" />
+            <Stop offset="1" stopColor="#ED0342" />
+          </LinearGradient>
         </Defs>
       </Svg>
     </Center>
@@ -104,7 +105,7 @@ export const HomebaseMail = (props: BrandIconProps) => {
           fill="white"
         />
         <Defs>
-          <linearGradient
+          <LinearGradient
             id="paint0_linear_416_2"
             x1="795.951"
             y1="986.767"
@@ -112,9 +113,9 @@ export const HomebaseMail = (props: BrandIconProps) => {
             y2="-58.4078"
             gradientUnits="userSpaceOnUse"
           >
-            <Stop offset="0.265" stop-color="#191272" />
-            <Stop offset="1" stop-color="#ED0342" />
-          </linearGradient>
+            <Stop offset="0.265" stopColor="#191272" />
+            <Stop offset="1" stopColor="#ED0342" />
+          </LinearGradient>
         </Defs>
       </Svg>
     </Center>
