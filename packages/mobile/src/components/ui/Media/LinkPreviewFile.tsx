@@ -1,6 +1,6 @@
 import { EmbeddedThumb, TargetDrive } from '@homebase-id/js-lib/core';
 import { memo, useMemo } from 'react';
-import { ActivityIndicator, Dimensions, ImageBackground, Pressable } from 'react-native';
+import { ActivityIndicator, Dimensions, ImageBackground, View } from 'react-native';
 import { useLinkMetadata } from '../../../hooks/links/useLinkPreview';
 import { calculateScaledDimensions, openURL } from '../../../utils/utils';
 import { Text } from '../Text/Text';
@@ -8,8 +8,9 @@ import { useDarkMode } from '../../../hooks/useDarkMode';
 import { Colors } from '../../../app/Colors';
 import { ellipsisAtMaxChar } from 'feed-app-common';
 import { getDomainFromUrl } from '@homebase-id/js-lib/helpers';
-import Animated from 'react-native-reanimated';
+import Animated, { runOnJS } from 'react-native-reanimated';
 import { LinkPreviewDescriptor } from '@homebase-id/js-lib/media';
+import { Gesture, GestureDetector, GestureType } from 'react-native-gesture-handler';
 
 type LinkPreviewFileProps = {
   targetDrive: TargetDrive;
@@ -20,6 +21,7 @@ type LinkPreviewFileProps = {
   descriptorContent: LinkPreviewDescriptor;
   position: string;
   previewThumbnail?: EmbeddedThumb;
+  doubleTapRef?: React.RefObject<GestureType | undefined>;
 };
 
 export const LinkPreviewFile = memo(
@@ -32,6 +34,7 @@ export const LinkPreviewFile = memo(
     odinId,
     previewThumbnail,
     descriptorContent,
+    doubleTapRef,
   }: LinkPreviewFileProps) => {
     const { data, isLoading } = useLinkMetadata({
       targetDrive,
@@ -46,6 +49,15 @@ export const LinkPreviewFile = memo(
       if (!previewThumbnail) return;
       return `data:${previewThumbnail.contentType};base64,${previewThumbnail.content}`;
     }, [previewThumbnail]);
+    const tapGesture = useMemo(() => {
+      const gesture = Gesture.Tap().onStart(() => {
+        runOnJS(openURL)(url);
+      });
+      if (doubleTapRef) {
+        gesture.requireExternalGestureToFail(doubleTapRef);
+      }
+      return gesture;
+    }, [doubleTapRef, url]);
     if (data === null) {
       return;
     }
@@ -61,81 +73,84 @@ export const LinkPreviewFile = memo(
       }
     );
     return (
-      <Pressable
-        onPress={() => openURL(url)}
-        style={{
-          backgroundColor: isDarkMode ? '#4646464F' : '#1A1A1A47',
-          borderRadius: 15,
-        }}
-      >
-        {hasImage && (
-          <ImageBackground
-            style={{
-              height: scaledHeight,
-            }}
-            blurRadius={1}
-            source={{ uri: embeddedThumbUrl }}
-          >
-            {isLoading ? (
-              <ActivityIndicator
-                size="large"
-                color={Colors.white}
-                style={{
-                  alignSelf: 'center',
-                  flex: 1,
-                }}
-              />
-            ) : (
-              <Animated.Image
-                source={{ uri: imageUrl }}
-                style={{
-                  // width: scaledWidth,
-                  height: scaledHeight,
-                }}
-              />
-            )}
-          </ImageBackground>
-        )}
-        <Text
+      <GestureDetector gesture={tapGesture}>
+        <View
           style={{
-            fontSize: 16,
-            fontWeight: '500',
-            marginHorizontal: 10,
-            marginTop: 8,
-            color: position === 'left' ? (isDarkMode ? Colors.white : Colors.black) : Colors.white,
+            backgroundColor: isDarkMode ? '#4646464F' : '#1A1A1A47',
+            borderRadius: 15,
           }}
         >
-          {ellipsisAtMaxChar(title || url, 50)}
-        </Text>
-        {description && (
+          {hasImage && (
+            <ImageBackground
+              style={{
+                height: scaledHeight,
+              }}
+              blurRadius={1}
+              source={{ uri: embeddedThumbUrl }}
+            >
+              {isLoading ? (
+                <ActivityIndicator
+                  size="large"
+                  color={Colors.white}
+                  style={{
+                    alignSelf: 'center',
+                    flex: 1,
+                  }}
+                />
+              ) : (
+                <Animated.Image
+                  source={{ uri: imageUrl }}
+                  style={{
+                    // width: scaledWidth,
+                    height: scaledHeight,
+                  }}
+                />
+              )}
+            </ImageBackground>
+          )}
           <Text
             style={{
-              fontSize: 14,
-              fontWeight: '400',
+              fontSize: 16,
+              fontWeight: '500',
               marginHorizontal: 10,
-              marginTop: 4,
-              marginBottom: 10,
+              marginTop: 8,
               color:
                 position === 'left' ? (isDarkMode ? Colors.white : Colors.black) : Colors.white,
             }}
           >
-            {description}
+            {ellipsisAtMaxChar(title || url, 50)}
           </Text>
-        )}
-        <Text
-          style={{
-            fontSize: 13,
-            fontWeight: '500',
-            marginHorizontal: 10,
-            marginTop: 4,
-            marginBottom: 10,
-            opacity: 0.8,
-            color: position === 'left' ? (isDarkMode ? Colors.white : Colors.black) : Colors.white,
-          }}
-        >
-          {getDomainFromUrl(url)}
-        </Text>
-      </Pressable>
+          {description && (
+            <Text
+              style={{
+                fontSize: 14,
+                fontWeight: '400',
+                marginHorizontal: 10,
+                marginTop: 4,
+                marginBottom: 10,
+                color:
+                  position === 'left' ? (isDarkMode ? Colors.white : Colors.black) : Colors.white,
+              }}
+            >
+              {description}
+            </Text>
+          )}
+          <Text
+            style={{
+              fontSize: 13,
+              fontWeight: '500',
+              marginHorizontal: 10,
+              marginTop: 4,
+              marginBottom: 10,
+              opacity: 0.8,
+              color:
+                position === 'left' ? (isDarkMode ? Colors.white : Colors.black) : Colors.white,
+            }}
+          >
+            {getDomainFromUrl(url)}
+          </Text>
+        </View>
+      </GestureDetector>
     );
   }
 );

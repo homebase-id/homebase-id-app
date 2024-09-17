@@ -23,7 +23,6 @@ import {
 } from 'react-native-gifted-chat';
 import React, { useCallback, memo, useMemo, useRef, useEffect, useState } from 'react';
 import {
-  GestureResponderEvent,
   Keyboard,
   Platform,
   Pressable,
@@ -172,11 +171,19 @@ export const ChatDetail = memo(
     );
 
     const onLongPress = useCallback(
-      (e: GestureResponderEvent, message: ChatMessageIMessage) => {
-        const { pageY, locationY } = e.nativeEvent;
-        const y = pageY - locationY;
+      (
+        coords: {
+          x: number;
+          y: number;
+          absoluteX: number;
+          absoluteY: number;
+        },
+        message: ChatMessageIMessage
+      ) => {
+        const { absoluteY, y } = coords;
+        const newY = absoluteY - y;
 
-        doSelectMessage({ coords: { x: 0, y }, message });
+        doSelectMessage({ coords: { x: 0, y: newY }, message });
       },
       [doSelectMessage]
     );

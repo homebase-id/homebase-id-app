@@ -1,15 +1,11 @@
 import { EmbeddedThumb, ImageSize, SystemFileType, TargetDrive } from '@homebase-id/js-lib/core';
 import { memo, useMemo } from 'react';
-import {
-  GestureResponderEvent,
-  ImageStyle,
-  Platform,
-  TouchableWithoutFeedback,
-} from 'react-native';
+import { ImageStyle, Platform, TouchableWithoutFeedback } from 'react-native';
 import useImage from './hooks/useImage';
 import { SvgUri } from 'react-native-svg';
 import { ImageZoom, ImageZoomProps } from '@likashefqet/react-native-image-zoom';
-import Animated from 'react-native-reanimated';
+import Animated, { runOnJS } from 'react-native-reanimated';
+import { Gesture, GestureDetector, GestureType } from 'react-native-gesture-handler';
 
 export interface OdinImageProps {
   odinId?: string;
@@ -27,11 +23,11 @@ export interface OdinImageProps {
   enableZoom?: boolean;
   style?: ImageStyle;
   onClick?: () => void;
-  onLongPress?: (e: GestureResponderEvent) => void;
-
+  onLongPress?: (coords: { x: number; y: number; absoluteX: number; absoluteY: number }) => void;
   imageZoomProps?: ImageZoomProps;
   probablyEncrypted?: boolean;
   systemFileType?: SystemFileType;
+  doubleTapRef?: React.RefObject<GestureType | undefined>;
 }
 
 const thumblessContentTypes = ['image/svg+xml', 'image/gif'];
@@ -56,6 +52,7 @@ export const OdinImage = memo(
     globalTransitId,
     probablyEncrypted,
     systemFileType,
+    doubleTapRef,
   }: OdinImageProps) => {
     // Don't set load size if it's a thumbnessLessContentType; As they don't have a thumb
     const loadSize = useMemo(
@@ -138,6 +135,7 @@ export const OdinImage = memo(
           blurRadius={!imageData ? 2 : 0}
           onPress={onClick}
           onLongPress={onLongPress}
+          doubleTapRef={doubleTapRef}
         />
       </>
     );
@@ -157,6 +155,7 @@ const InnerImage = memo(
     onLongPress,
     contentType,
     imageMeta,
+    doubleTapRef,
   }: {
     uri: string | undefined;
     imageSize?: { width: number; height: number };
@@ -165,8 +164,9 @@ const InnerImage = memo(
     style?: ImageStyle;
     fit?: 'cover' | 'contain';
     onLoad?: () => void;
-    onLongPress?: (e: GestureResponderEvent) => void;
+    onLongPress?: (coords: { x: number; y: number; absoluteX: number; absoluteY: number }) => void;
     onPress?: () => void;
+    doubleTapRef?: React.RefObject<GestureType | undefined>;
     imageMeta?: {
       odinId: string | undefined;
       imageFileId: string | undefined;
@@ -178,8 +178,39 @@ const InnerImage = memo(
     contentType: string | undefined;
   }) => {
     const { invalidateCache } = useImage();
+    const tapGesture = useMemo(() => {
+      const tap = Gesture.Tap().onStart(() => {
+        if (onPress) {
+          runOnJS(onPress)();
+        }
+      });
+      if (doubleTapRef) {
+        tap.requireExternalGestureToFail(doubleTapRef);
+      }
+      return tap;
+    }, [doubleTapRef, onPress]);
+
+    const longPressGesture = useMemo(
+      () =>
+        Gesture.LongPress().onStart((e) => {
+          const coords = {
+            x: e.x,
+            y: e.y,
+            absoluteX: e.absoluteX,
+            absoluteY: e.absoluteY,
+          };
+          if (onLongPress) {
+            runOnJS(onLongPress)(coords);
+          }
+        }),
+      [onLongPress]
+    );
+    const composedGesture = useMemo(
+      () => Gesture.Exclusive(longPressGesture, tapGesture),
+      [longPressGesture, tapGesture]
+    );
     return (
-      <TouchableWithoutFeedback onPress={onPress} onLongPress={onLongPress}>
+      <GestureDetector gesture={composedGesture}>
         {contentType === 'image/svg+xml' ? (
           <Animated.View
             style={[
@@ -197,6 +228,18 @@ const InnerImage = memo(
               uri={uri || null}
               style={{ overflow: 'hidden', ...style }}
               onLoad={onLoad}
+              onError={
+                imageMeta
+                  ? () =>
+                      invalidateCache(
+                        imageMeta?.odinId,
+                        imageMeta?.imageFileId,
+                        imageMeta?.imageFileKey,
+                        imageMeta?.imageDrive,
+                        imageMeta?.size
+                      )
+                  : undefined
+              }
             />
           </Animated.View>
         ) : (
@@ -224,7 +267,7 @@ const InnerImage = memo(
             blurRadius={blurRadius}
           />
         )}
-      </TouchableWithoutFeedback>
+      </GestureDetector>
     );
   }
 );
@@ -237,7 +280,6 @@ const ZoomableImage = memo(
     onLongPress,
     imageMeta,
     imageZoomProps,
-
     alt,
     style,
     onLoad,
@@ -246,7 +288,7 @@ const ZoomableImage = memo(
     uri: string | undefined;
     imageSize?: { width: number; height: number };
     onPress?: () => void;
-    onLongPress?: (e: GestureResponderEvent) => void;
+    onLongPress?: (coords: { x: number; y: number; absoluteX: number; absoluteY: number }) => void;
     imageMeta?: {
       odinId: string | undefined;
       imageFileId: string | undefined;
@@ -264,7 +306,17 @@ const ZoomableImage = memo(
   }) => {
     const { invalidateCache } = useImage();
     return (
-      <TouchableWithoutFeedback onPress={onPress} onLongPress={onLongPress}>
+      <TouchableWithoutFeedback
+        onPress={onPress}
+        onLongPress={(e) =>
+          onLongPress?.({
+            x: e.nativeEvent.locationX,
+            y: e.nativeEvent.locationY,
+            absoluteX: e.nativeEvent.pageX,
+            absoluteY: e.nativeEvent.pageY,
+          })
+        }
+      >
         <Animated.View
           style={{
             ...imageSize,

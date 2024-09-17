@@ -2,7 +2,6 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { ImageSize, TargetDrive, ImageContentType, SystemFileType } from '@homebase-id/js-lib/core';
 import { exists } from 'react-native-fs';
-import { useAuth } from '../../../../hooks/auth/useAuth';
 import { getDecryptedImageData } from '../../../../provider/image/RNImageProvider';
 
 import { useDotYouClientContext } from 'feed-app-common';
@@ -147,7 +146,6 @@ const useImage = (props?: {
     if (imageFileId === undefined || imageFileId === '' || !imageDrive || !imageFileKey) {
       return null;
     }
-    const key = queryKeyBuilder(odinId, imageFileId, imageFileKey, imageDrive, size, lastModified);
 
     const fetchImageFromServer = async (): Promise<ImageData | null> => {
       if (odinId && odinId !== localHost) {
@@ -273,11 +271,14 @@ const useImage = (props?: {
           }, 0);
         }
 
+        // console.log('cached', cachedData.url);
         return cachedData;
       }
     }
 
-    return fetchImageFromServer();
+    const serverImage = await fetchImageFromServer();
+    // console.log('server', serverImage?.url);
+    return serverImage;
   };
 
   return {
@@ -298,7 +299,7 @@ const useImage = (props?: {
       // Stale time is 0, to always trigger a fetch,
       //   while the fetch checks if we have anything in cache from before and confirms it on disk
       staleTime: 0,
-      refetchOnMount: false,
+      refetchOnMount: true,
       refetchOnWindowFocus: false,
       enabled: !!imageFileId && imageFileId !== '',
     }),
@@ -355,13 +356,7 @@ const useImage = (props?: {
       if (imageFileId === undefined || imageFileId === '' || !imageDrive || !imageFileKey) {
         return null;
       }
-      const queryKey = queryKeyBuilder(
-        odinId,
-        imageGlobalTransitId || imageFileId,
-        imageFileKey,
-        imageDrive,
-        size
-      );
+      const queryKey = queryKeyBuilder(odinId, imageFileId, imageFileKey, imageDrive, size);
       queryClient.invalidateQueries({ queryKey, exact: true });
     },
   };

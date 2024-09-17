@@ -80,7 +80,7 @@ export const PostInteracts = memo(
 
     const onReactionPressHandler = useCallback(() => {
       return onReactionPress?.(reactionContext);
-    }, [reactionContext]);
+    }, [onReactionPress, reactionContext]);
 
     const permalink = useMemo(
       () =>
@@ -101,7 +101,7 @@ export const PostInteracts = memo(
         title: postContent.caption,
       };
       return onSharePress?.(context);
-    }, [permalink, postContent]);
+    }, [onSharePress, permalink, postContent.caption]);
 
     if (!postFile.fileMetadata.globalTransitId || !postFile.fileId) return null;
 
