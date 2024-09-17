@@ -71,7 +71,6 @@ export const LinkPreviewFile = memo(
         {hasImage && (
           <ImageBackground
             style={{
-              flex: 1,
               height: scaledHeight,
             }}
             blurRadius={1}
