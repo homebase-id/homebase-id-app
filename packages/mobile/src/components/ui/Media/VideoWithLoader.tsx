@@ -1,12 +1,6 @@
 import { EmbeddedThumb, PayloadDescriptor, TargetDrive } from '@homebase-id/js-lib/core';
 import { memo, useCallback, useMemo, useState } from 'react';
-import {
-  ActivityIndicator,
-  GestureResponderEvent,
-  ImageStyle,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { ActivityIndicator, ImageStyle, TouchableOpacity, View } from 'react-native';
 import { Colors } from '../../../app/Colors';
 import WebView from 'react-native-webview';
 import { TouchableWithoutFeedback } from 'react-native';
@@ -29,7 +23,7 @@ interface VideoProps extends OdinWebVideoProps, LocalVideoProps {
   fullscreen?: boolean;
   imageSize?: { width: number; height: number };
   onClick?: () => void;
-  onLongPress?: (e: GestureResponderEvent) => void;
+  onLongPress?: (coords: { x: number; y: number; absoluteX: number; absoluteY: number }) => void;
   style?: ImageStyle;
 
   autoPlay?: boolean;
