@@ -228,6 +228,18 @@ const InnerImage = memo(
               uri={uri || null}
               style={{ overflow: 'hidden', ...style }}
               onLoad={onLoad}
+              onError={
+                imageMeta
+                  ? () =>
+                      invalidateCache(
+                        imageMeta?.odinId,
+                        imageMeta?.imageFileId,
+                        imageMeta?.imageFileKey,
+                        imageMeta?.imageDrive,
+                        imageMeta?.size
+                      )
+                  : undefined
+              }
             />
           </Animated.View>
         ) : (
