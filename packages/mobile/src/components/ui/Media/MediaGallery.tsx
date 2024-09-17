@@ -251,6 +251,7 @@ export const MediaItem = memo(
           descriptorContent={
             tryJsonParse<LinkPreviewDescriptor[]>(payload.descriptorContent as string)[0]
           }
+          doubleTapRef={doubleTapRef}
           position={position as string}
         />
       );
