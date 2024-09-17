@@ -232,6 +232,7 @@ export const MediaItem = memo(
             }
             onLongPress={onLongPress}
             onClick={onClick}
+            doubleTapRef={doubleTapRef}
           />
         </View>
       );

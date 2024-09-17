@@ -13,6 +13,7 @@ import { useHlsManifest } from '../../../hooks/video/useHlsManifest';
 import Video from 'react-native-video';
 import { useDotYouClientContext } from 'feed-app-common';
 import { useVideoMetadata } from '../../../hooks/video/useVideoMetadata';
+import { GestureType } from 'react-native-gesture-handler';
 
 const MAX_DOWNLOAD_SIZE = 16 * 1024 * 1024 * 1024; // 16 MB
 
@@ -25,7 +26,7 @@ interface VideoProps extends OdinWebVideoProps, LocalVideoProps {
   onClick?: () => void;
   onLongPress?: (coords: { x: number; y: number; absoluteX: number; absoluteY: number }) => void;
   style?: ImageStyle;
-
+  doubleTapRef?: React.RefObject<GestureType | undefined>;
   autoPlay?: boolean;
 }
 
@@ -46,6 +47,7 @@ export const VideoWithLoader = memo(
     autoPlay,
     probablyEncrypted,
     lastModified,
+    doubleTapRef,
   }: VideoProps) => {
     const [loadVideo, setLoadVideo] = useState(autoPlay);
     const doLoadVideo = useCallback(() => setLoadVideo(true), []);
@@ -76,6 +78,7 @@ export const VideoWithLoader = memo(
             avoidPayload={true}
             style={style}
             onLongPress={onLongPress}
+            doubleTapRef={doubleTapRef}
           />
           <View
             style={{
