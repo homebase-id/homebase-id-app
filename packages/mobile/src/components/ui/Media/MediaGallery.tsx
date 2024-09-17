@@ -257,7 +257,7 @@ export const MediaItem = memo(
         />
       );
     }
-    if (payload.contentType.startsWith('application/')) {
+    if (payload.contentType.startsWith('application/pdf')) {
       return (
         <BoringFile
           file={payload}
