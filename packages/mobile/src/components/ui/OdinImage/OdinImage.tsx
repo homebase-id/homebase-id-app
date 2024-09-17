@@ -178,27 +178,37 @@ const InnerImage = memo(
     contentType: string | undefined;
   }) => {
     const { invalidateCache } = useImage();
-    const tapGesture = Gesture.Tap().onStart(() => {
-      if (onPress) {
-        runOnJS(onPress)();
+    const tapGesture = useMemo(() => {
+      const tap = Gesture.Tap().onStart(() => {
+        if (onPress) {
+          runOnJS(onPress)();
+        }
+      });
+      if (doubleTapRef) {
+        tap.requireExternalGestureToFail(doubleTapRef);
       }
-    });
-    if (doubleTapRef) {
-      tapGesture.requireExternalGestureToFail(doubleTapRef);
-    }
+      return tap;
+    }, [doubleTapRef, onPress]);
 
-    const longPressGesture = Gesture.LongPress().onStart((e) => {
-      const coords = {
-        x: e.x,
-        y: e.y,
-        absoluteX: e.absoluteX,
-        absoluteY: e.absoluteY,
-      };
-      if (onLongPress) {
-        runOnJS(onLongPress)(coords);
-      }
-    });
-    const composedGesture = Gesture.Exclusive(longPressGesture, tapGesture);
+    const longPressGesture = useMemo(
+      () =>
+        Gesture.LongPress().onStart((e) => {
+          const coords = {
+            x: e.x,
+            y: e.y,
+            absoluteX: e.absoluteX,
+            absoluteY: e.absoluteY,
+          };
+          if (onLongPress) {
+            runOnJS(onLongPress)(coords);
+          }
+        }),
+      [onLongPress]
+    );
+    const composedGesture = useMemo(
+      () => Gesture.Exclusive(longPressGesture, tapGesture),
+      [longPressGesture, tapGesture]
+    );
     return (
       <GestureDetector gesture={composedGesture}>
         {contentType === 'image/svg+xml' ? (

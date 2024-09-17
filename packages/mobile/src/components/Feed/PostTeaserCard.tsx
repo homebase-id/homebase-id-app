@@ -179,7 +179,7 @@ export const InnerPostTeaserCard = memo(
           lastModified={postFile.fileMetadata.updated}
           payloads={postFile.fileMetadata.payloads}
         />
-        <DoubleTapHeart onDoubleTap={() => {}} doubleTapRef={doubleTapRef}>
+        <DoubleTapHeart doubleTapRef={doubleTapRef} postFile={postFile} odinId={odinId}>
           <PostMedia post={postFile} doubleTapRef={doubleTapRef} />
         </DoubleTapHeart>
         <PostInteracts
