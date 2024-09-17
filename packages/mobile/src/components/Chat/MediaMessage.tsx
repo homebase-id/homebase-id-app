@@ -1,4 +1,4 @@
-import { Dimensions, GestureResponderEvent, StyleProp, ViewStyle } from 'react-native';
+import { Dimensions, StyleProp, ViewStyle } from 'react-native';
 import { memo, useCallback, useMemo } from 'react';
 
 import { MessageImageProps } from 'react-native-gifted-chat';
@@ -18,10 +18,26 @@ const MediaMessage = memo(
     onLongPress,
   }: {
     props: MessageImageProps<ChatMessageIMessage>;
-    onLongPress: (e: GestureResponderEvent, message: ChatMessageIMessage) => void;
+    onLongPress: (
+      coords: {
+        x: number;
+        y: number;
+        absoluteX: number;
+        absoluteY: number;
+      },
+      message: ChatMessageIMessage
+    ) => void;
   }) => {
     const longPress = useCallback(
-      (e: GestureResponderEvent, message: ChatMessageIMessage) => onLongPress?.(e, message),
+      (
+        coords: {
+          x: number;
+          y: number;
+          absoluteX: number;
+          absoluteY: number;
+        },
+        message: ChatMessageIMessage
+      ) => onLongPress?.(coords, message),
       [onLongPress]
     );
     if (!props.currentMessage || !props.currentMessage.fileMetadata.payloads?.length) return null;
@@ -43,7 +59,15 @@ const InnerMediaMessage = memo(
   }: {
     currentMessage: ChatMessageIMessage;
     containerStyle?: StyleProp<ViewStyle>;
-    onLongPress: (e: GestureResponderEvent, message: ChatMessageIMessage) => void;
+    onLongPress: (
+      coords: {
+        x: number;
+        y: number;
+        absoluteX: number;
+        absoluteY: number;
+      },
+      message: ChatMessageIMessage
+    ) => void;
   }) => {
     const { isDarkMode } = useDarkMode();
     const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
