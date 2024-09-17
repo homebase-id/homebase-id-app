@@ -17,7 +17,6 @@ import React, {
 } from 'react';
 import {
   FlatList,
-  GestureResponderEvent,
   Keyboard,
   KeyboardAvoidingView,
   LayoutChangeEvent,
@@ -180,7 +179,16 @@ export interface GiftedChatProps<TMessage extends IMessage = IMessage> {
   /* Callback when a message bubble is pressed; default is to do nothing */
   onPress?(context: any, message: TMessage): void;
   /* Callback when a message bubble is long-pressed; default is to show an ActionSheet with "Copy Text" (see example using showActionSheetWithOptions()) */
-  onLongPress?(e: GestureResponderEvent, context: any, message: TMessage): void;
+  onLongPress?(
+    coords: {
+      x: number;
+      y: number;
+      absoluteX: number;
+      absoluteY: number;
+    },
+    context: any,
+    message: TMessage,
+  ): void;
   /*Custom Username container */
   renderUsername?(user: User): React.ReactNode;
   /* Reverses display order of messages; default is true */
@@ -404,7 +412,8 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
       bottomOffsetRef.current =
         bottomOffset != null ? bottomOffset : insets.bottom;
 
-      const newMessagesContainerHeight = getMessagesContainerHeightWithKeyboard();
+      const newMessagesContainerHeight =
+        getMessagesContainerHeightWithKeyboard();
       // setMessagesContainerHeight(newMessagesContainerHeight);
       messagesContainerHeight.value = newMessagesContainerHeight;
       setTypingDisabled(true);
@@ -548,9 +557,8 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
 
     notifyInputTextReset();
 
-    const newMessagesContainerHeight = getMessagesContainerHeightWithKeyboard(
-      minComposerHeight,
-    );
+    const newMessagesContainerHeight =
+      getMessagesContainerHeightWithKeyboard(minComposerHeight);
     // setMessagesContainerHeight(newMessagesContainerHeight);
     messagesContainerHeight.value = newMessagesContainerHeight;
 
@@ -615,9 +623,8 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
       // notifyInputTextReset(); // Unnecessary on initial load
       maxHeightRef.current = layout.height;
 
-      const newMessagesContainerHeight = getMessagesContainerHeightWithKeyboard(
-        minComposerHeight,
-      );
+      const newMessagesContainerHeight =
+        getMessagesContainerHeightWithKeyboard(minComposerHeight);
       // setMessagesContainerHeight(newMessagesContainerHeight);
       messagesContainerHeight.value = newMessagesContainerHeight;
 

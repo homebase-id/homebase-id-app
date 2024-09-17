@@ -4,6 +4,8 @@ import { Container } from '../../components/ui/Container/Container';
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 import TextButton from '../../components/ui/Text/Text-Button';
 import Toast from 'react-native-toast-message';
+import { DoubleTapHeart } from '../../components/ui/DoubleTapHeart';
+import { Image } from 'react-native';
 
 type DebugProp = NativeStackScreenProps<ProfileStackParamList, 'Debug'>;
 
@@ -94,6 +96,15 @@ export const DebugPage = (_prop: DebugProp) => {
           }}
           title="Send Notification Toast"
         />
+        <DoubleTapHeart onDoubleTap={() => {}}>
+          <Image
+            height={250}
+            resizeMode="cover"
+            source={{
+              uri: 'https://images.pexels.com/photos/28316692/pexels-photo-28316692/free-photo-of-a-forest-with-a-small-stream-and-trees.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
+            }}
+          />
+        </DoubleTapHeart>
       </Container>
     </SafeAreaView>
   );
