@@ -50,7 +50,7 @@ export const LoginPage = (_props: LoginProps) => {
           <Image source={logo} style={{ width: 40, height: 40 }} />
           <Text style={{ fontSize: 25 }}>Homebase</Text>
         </View>
-        <View
+        <Animated.View
           style={{
             paddingHorizontal: 12,
             paddingVertical: 15,
@@ -58,7 +58,7 @@ export const LoginPage = (_props: LoginProps) => {
           }}
         >
           <LoginComponent />
-        </View>
+        </Animated.View>
 
         <View
           style={{
@@ -247,9 +247,6 @@ const LoginComponent = () => {
       <Text style={{ fontSize: 18 }}>Your Homebase id</Text>
       <Input
         placeholder="Homebase id"
-        viewStyle={{
-          marginBottom: 12,
-        }}
         style={{
           // height: 40,
           fontSize: Platform.OS === 'ios' ? 16 : 14,

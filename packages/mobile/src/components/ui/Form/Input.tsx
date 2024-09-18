@@ -1,4 +1,4 @@
-import { TextInput, TextInputProps, ViewStyle } from 'react-native';
+import { Platform, TextInput, TextInputProps, ViewStyle } from 'react-native';
 import { useDarkMode } from '../../../hooks/useDarkMode';
 import { Colors } from '../../../app/Colors';
 import Animated from 'react-native-reanimated';
@@ -16,7 +16,8 @@ export const Input = (props: InputProps) => {
         {
           backgroundColor: isDarkMode ? `${Colors.indigo[700]}3A` : `${Colors.indigo[300]}3C`,
           borderRadius: 8,
-          padding: 16,
+          padding: Platform.OS === 'ios' ? 16 : 4,
+          paddingLeft: 12,
           marginVertical: 12,
         },
         props.viewStyle,
