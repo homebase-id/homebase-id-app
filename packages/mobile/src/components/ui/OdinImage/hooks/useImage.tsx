@@ -2,7 +2,6 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { ImageSize, TargetDrive, ImageContentType, SystemFileType } from '@homebase-id/js-lib/core';
 import { exists } from 'react-native-fs';
-import { useAuth } from '../../../../hooks/auth/useAuth';
 import { getDecryptedImageData } from '../../../../provider/image/RNImageProvider';
 
 import { useDotYouClientContext } from 'feed-app-common';
@@ -75,23 +74,16 @@ const useImage = (props?: {
     return queryKey;
   }
 
-  const checkIfWeHaveLargerCachedImage = (
+  const getCachedImages = (
     odinId: string | undefined,
     imageFileId: string,
     imageFileKey: string,
-    imageGlobalTransitId: string | undefined,
-    imageDrive: TargetDrive,
-    size?: ImageSize
+    imageDrive: TargetDrive
   ) => {
     const cachedEntries = queryClient
       .getQueryCache()
       .findAll({
-        queryKey: queryKeyBuilder(
-          odinId,
-          imageGlobalTransitId || imageFileId,
-          imageFileKey,
-          imageDrive
-        ),
+        queryKey: queryKeyBuilder(odinId, imageFileId, imageFileKey, imageDrive),
         exact: false,
       })
       .filter((query) => query.state.status !== 'error');
@@ -111,6 +103,17 @@ const useImage = (props?: {
       };
     });
 
+    return cachedEntriesWithSize;
+  };
+
+  const checkIfWeHaveLargerCachedImage = (
+    odinId: string | undefined,
+    imageFileId: string,
+    imageFileKey: string,
+    imageDrive: TargetDrive,
+    size?: ImageSize
+  ) => {
+    const cachedEntriesWithSize = getCachedImages(odinId, imageFileId, imageFileKey, imageDrive);
     if (!size) return cachedEntriesWithSize.find((entry) => !entry.size);
 
     const cachedEntry = cachedEntriesWithSize
@@ -130,7 +133,7 @@ const useImage = (props?: {
   };
 
   const fetchImageData = async (
-    odinId: string,
+    odinId: string | undefined,
     imageFileId: string | undefined,
     imageFileKey: string | undefined,
     imageGlobalTransitId: string | undefined,
@@ -144,112 +147,146 @@ const useImage = (props?: {
       return null;
     }
 
-    const cachedEntry = checkIfWeHaveLargerCachedImage(
-      odinId,
-      imageFileId,
-      imageFileKey,
-      imageGlobalTransitId,
-      imageDrive,
-      size
-    );
+    const fetchImageFromServer = async (): Promise<ImageData | null> => {
+      if (odinId && odinId !== localHost) {
+        if (imageGlobalTransitId) {
+          const imageBlob = await getDecryptedMediaDataOverPeerByGlobalTransitId(
+            dotYouClient,
+            odinId,
+            imageDrive,
+            imageGlobalTransitId,
+            imageFileKey,
+            probablyEncrypted,
+            lastModified,
+            {
+              size,
+            }
+          );
+          if (!imageBlob) return null;
 
-    if (cachedEntry) {
-      const cachedData = queryClient.getQueryData<ImageData | undefined>(cachedEntry.queryKey);
-      if (cachedData && (await exists(cachedData.url))) return cachedData;
-    }
-
-    if (odinId !== localHost) {
-      if (imageGlobalTransitId) {
-        const imageBlob = await getDecryptedMediaDataOverPeerByGlobalTransitId(
-          dotYouClient,
-          odinId,
-          imageDrive,
-          imageGlobalTransitId,
-          imageFileKey,
-          probablyEncrypted,
-          lastModified,
-          {
-            size,
+          // check if imageBLob is string return string, else if odinBlob, return uri
+          if (typeof imageBlob === 'string') {
+            return {
+              url: imageBlob,
+              naturalSize: naturalSize,
+              type: 'image/jpeg',
+            };
+          } else {
+            return {
+              url: imageBlob.uri,
+              naturalSize: naturalSize,
+              type: imageBlob.type as ImageContentType,
+            };
           }
-        );
-        if (!imageBlob) return null;
-
-        // check if imageBLob is string return string, else if odinBlob, return uri
-        if (typeof imageBlob === 'string') {
-          return {
-            url: imageBlob,
-            naturalSize: naturalSize,
-            type: 'image/jpeg',
-          };
         } else {
-          return {
-            url: imageBlob.uri,
-            naturalSize: naturalSize,
-            type: imageBlob.type as ImageContentType,
-          };
-        }
-      } else {
-        const imageBlob = await getDecryptedMediaUrlOverPeer(
-          dotYouClient,
-          odinId,
-          imageDrive,
-          imageFileId,
-          imageFileKey,
-          probablyEncrypted,
-          lastModified,
-          {
-            size,
+          const imageBlob = await getDecryptedMediaUrlOverPeer(
+            dotYouClient,
+            odinId,
+            imageDrive,
+            imageFileId,
+            imageFileKey,
+            probablyEncrypted,
+            lastModified,
+            {
+              size,
+            }
+          );
+          if (!imageBlob) return null;
+          if (typeof imageBlob === 'string') {
+            return {
+              url: imageBlob,
+              naturalSize: naturalSize,
+              type: 'image/jpeg',
+            };
+          } else {
+            return {
+              url: imageBlob.uri,
+              naturalSize: naturalSize,
+              type: imageBlob.type as ImageContentType,
+            };
           }
-        );
-        if (!imageBlob) return null;
-        if (typeof imageBlob === 'string') {
-          return {
-            url: imageBlob,
-            naturalSize: naturalSize,
-            type: 'image/jpeg',
-          };
-        } else {
-          return {
-            url: imageBlob.uri,
-            naturalSize: naturalSize,
-            type: imageBlob.type as ImageContentType,
-          };
         }
+      }
+
+      const imageBlob = await getDecryptedImageData(
+        dotYouClient,
+        imageDrive,
+        imageFileId,
+        imageFileKey,
+        size,
+        systemFileType,
+        lastModified
+      );
+
+      if (!imageBlob) return null;
+
+      return {
+        url: imageBlob.uri,
+        naturalSize: naturalSize,
+        type: imageBlob.type as ImageContentType,
+      };
+    };
+
+    // Find any cached version, the bigger the better and if we have it return it;
+    const cachedImages = getCachedImages(odinId, imageFileId, imageFileKey, imageDrive);
+    if (cachedImages.length) {
+      const largestCachedImage = cachedImages.reduce((prev, current) => {
+        if (!prev) return current;
+
+        // No size is bigger than any size
+        if (!prev.size) return prev;
+        if (!current.size) return current;
+
+        if (
+          prev.size.pixelHeight * prev.size.pixelWidth >
+          current.size.pixelHeight * current.size.pixelWidth
+        ) {
+          return prev;
+        }
+        return current;
+      });
+
+      const cachedData = queryClient.getQueryData<ImageData | undefined>(
+        largestCachedImage.queryKey
+      );
+      if (cachedData && (await exists(cachedData.url))) {
+        // If the cached version is smaller than what we need, we'll fetch the new one and update the cache for the requested size
+        if (
+          // If the largestCachedImage has no size, it's the largest possible size
+          largestCachedImage.size &&
+          // If the requested size is bigger than the cached size
+          size &&
+          size.pixelHeight > largestCachedImage.size.pixelHeight
+        ) {
+          setTimeout(async () => {
+            //const imageBlob =
+            // TODO Fetch the right image
+            const imageData = await fetchImageFromServer();
+            if (!imageData) return;
+
+            queryClient.setQueryData<ImageData | undefined>(
+              queryKeyBuilder(odinId, imageFileId, imageFileKey, imageDrive, size, lastModified),
+              imageData
+            );
+          }, 0);
+        }
+
+        // console.log('cached', cachedData.url);
+        return cachedData;
       }
     }
 
-    const imageBlob = await getDecryptedImageData(
-      dotYouClient,
-      imageDrive,
-      imageFileId,
-      imageFileKey,
-      size,
-      systemFileType,
-      lastModified
-    );
-
-    if (!imageBlob) return null;
-
-    return {
-      url: imageBlob.uri,
-      naturalSize: naturalSize,
-      type: imageBlob.type as ImageContentType,
-    };
+    const serverImage = await fetchImageFromServer();
+    // console.log('server', serverImage?.url);
+    return serverImage;
   };
 
   return {
     fetch: useQuery({
-      queryKey: queryKeyBuilder(
-        odinId,
-        imageGlobalTransitId || imageFileId,
-        imageFileKey,
-        imageDrive,
-        size,
-        lastModified
-      ),
+      queryKey: queryKeyBuilder(odinId, imageFileId, imageFileKey, imageDrive, size, lastModified),
       queryFn: () =>
         fetchImageData(
-          odinId || localHost,
+          odinId,
           imageFileId,
           imageFileKey,
           imageGlobalTransitId,
@@ -262,6 +299,8 @@ const useImage = (props?: {
       // Stale time is 0, to always trigger a fetch,
       //   while the fetch checks if we have anything in cache from before and confirms it on disk
       staleTime: 0,
+      refetchOnMount: true,
+      refetchOnWindowFocus: false,
       enabled: !!imageFileId && imageFileId !== '',
     }),
     getFromCache: (
@@ -276,7 +315,6 @@ const useImage = (props?: {
         odinId,
         imageFileId,
         imageFileKey,
-        imageGlobalTransitId,
         imageDrive,
         size
       );
@@ -318,13 +356,7 @@ const useImage = (props?: {
       if (imageFileId === undefined || imageFileId === '' || !imageDrive || !imageFileKey) {
         return null;
       }
-      const queryKey = queryKeyBuilder(
-        odinId,
-        imageGlobalTransitId || imageFileId,
-        imageFileKey,
-        imageDrive,
-        size
-      );
+      const queryKey = queryKeyBuilder(odinId, imageFileId, imageFileKey, imageDrive, size);
       queryClient.invalidateQueries({ queryKey, exact: true });
     },
   };

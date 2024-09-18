@@ -100,7 +100,9 @@ export const GroupCreationPage = memo((props: GroupCreationPageProps) => {
     if (loading) {
       return <ActivityIndicator size={'small'} style={{ marginRight: 8 }} />;
     } else if (title?.length > 0) {
-      return <TextButton title="Create" style={{ marginRight: 8 }} onPress={onCreateGroup} />;
+      return (
+        <TextButton title="Create" unFilledStyle={{ marginRight: 8 }} onPress={onCreateGroup} />
+      );
     }
 
     return undefined;

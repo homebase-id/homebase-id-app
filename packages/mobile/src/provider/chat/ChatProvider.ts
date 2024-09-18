@@ -177,7 +177,7 @@ export const dsrToMessage = async (
 
     return chatMessage;
   } catch (ex) {
-    console.error('[DotYouCore-js] failed to get the chatMessage payload of a dsr', dsr, ex);
+    console.error('[chat-rn] failed to get the chatMessage payload of a dsr', dsr, ex);
     return null;
   }
 };
@@ -396,7 +396,9 @@ export const uploadChatMessage = async (
     }
   );
 
-  if (!uploadResult) return null;
+  if (!uploadResult) {
+    throw new Error('Failed to upload chat message');
+  }
 
   if (
     recipients.some(

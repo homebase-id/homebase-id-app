@@ -230,7 +230,7 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
               height: height,
             }}
             targetDrive={targetDrive}
-            previewThumbnail={previewThumbnail}
+            previewThumbnail={item.previewThumbnail || previewThumbnail}
             imageZoomProps={{
               isSingleTapEnabled: true,
               minPanPointers: 1,
@@ -380,6 +380,7 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
                     targetDrive={targetDrive}
                     globalTransitId={globalTransitId}
                     probablyEncrypted={probablyEncrypted}
+                    previewThumbnail={item.previewThumbnail}
                     odinId={transitOdinId}
                     fit="cover"
                     imageSize={{

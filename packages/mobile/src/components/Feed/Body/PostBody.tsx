@@ -57,9 +57,11 @@ export const PostBody = memo(
             <>
               {ellipsisAtMaxChar(post.caption, MAX_CHAR_FOR_SUMMARY)}
               <TextButton
-                style={{
+                unFilledStyle={{
                   marginLeft: 4,
+                  alignItems: 'flex-start',
                 }}
+                textStyle={{ color: Colors.purple[500], fontSize: 16 }}
                 title={t('More')}
                 onPress={() => setIsExpanded(true)}
               />

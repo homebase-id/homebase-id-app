@@ -1,12 +1,6 @@
 import { EmbeddedThumb, PayloadDescriptor, TargetDrive } from '@homebase-id/js-lib/core';
 import { memo, useCallback, useMemo, useState } from 'react';
-import {
-  ActivityIndicator,
-  GestureResponderEvent,
-  ImageStyle,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { ActivityIndicator, ImageStyle, TouchableOpacity, View } from 'react-native';
 import { Colors } from '../../../app/Colors';
 import WebView from 'react-native-webview';
 import { TouchableWithoutFeedback } from 'react-native';
@@ -19,6 +13,7 @@ import { useHlsManifest } from '../../../hooks/video/useHlsManifest';
 import Video from 'react-native-video';
 import { useDotYouClientContext } from 'feed-app-common';
 import { useVideoMetadata } from '../../../hooks/video/useVideoMetadata';
+import { GestureType } from 'react-native-gesture-handler';
 
 const MAX_DOWNLOAD_SIZE = 16 * 1024 * 1024 * 1024; // 16 MB
 
@@ -29,9 +24,9 @@ interface VideoProps extends OdinWebVideoProps, LocalVideoProps {
   fullscreen?: boolean;
   imageSize?: { width: number; height: number };
   onClick?: () => void;
-  onLongPress?: (e: GestureResponderEvent) => void;
+  onLongPress?: (coords: { x: number; y: number; absoluteX: number; absoluteY: number }) => void;
   style?: ImageStyle;
-
+  doubleTapRef?: React.RefObject<GestureType | undefined>;
   autoPlay?: boolean;
 }
 
@@ -52,6 +47,7 @@ export const VideoWithLoader = memo(
     autoPlay,
     probablyEncrypted,
     lastModified,
+    doubleTapRef,
   }: VideoProps) => {
     const [loadVideo, setLoadVideo] = useState(autoPlay);
     const doLoadVideo = useCallback(() => setLoadVideo(true), []);
@@ -82,6 +78,7 @@ export const VideoWithLoader = memo(
             avoidPayload={true}
             style={style}
             onLongPress={onLongPress}
+            doubleTapRef={doubleTapRef}
           />
           <View
             style={{
@@ -96,6 +93,7 @@ export const VideoWithLoader = memo(
               alignItems: 'center',
               justifyContent: 'center',
               backgroundColor: 'rgba(0,0,0,0.4)',
+              borderRadius: 10,
             }}
           >
             <View

@@ -1,13 +1,4 @@
-import {
-  GestureResponderEvent,
-  Image,
-  ImageStyle,
-  Pressable,
-  StyleProp,
-  StyleSheet,
-  View,
-  ViewStyle,
-} from 'react-native';
+import { Image, ImageStyle, Pressable, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { BoringFile } from './BoringFile';
 import { OdinImage } from '../OdinImage/OdinImage';
 import {
@@ -28,6 +19,9 @@ import { LinkPreviewFile } from './LinkPreviewFile';
 import { POST_LINKS_PAYLOAD_KEY } from '@homebase-id/js-lib/public';
 import { Colors } from '../../../app/Colors';
 import { memo } from 'react';
+import { LinkPreviewDescriptor } from '@homebase-id/js-lib/media';
+import { tryJsonParse } from '@homebase-id/js-lib/helpers';
+import { GestureType } from 'react-native-gesture-handler';
 
 export const MediaGallery = memo(
   ({
@@ -40,17 +34,19 @@ export const MediaGallery = memo(
     odinId,
     globalTransitId,
     style,
+    doubleTapRef,
   }: {
     fileId: string;
     globalTransitId?: string;
     probablyEncrypted?: boolean;
     odinId?: string;
-    onLongPress?: (e: GestureResponderEvent) => void;
+    onLongPress?: (coords: { x: number; y: number; absoluteX: number; absoluteY: number }) => void;
     targetDrive: TargetDrive;
     previewThumbnail?: EmbeddedThumb | undefined;
     payloads: PayloadDescriptor[];
     onClick?: (currIndex: number) => void;
     style?: StyleProp<ViewStyle>;
+    doubleTapRef?: React.RefObject<GestureType | undefined>;
   }) => {
     const maxVisible = 4;
     const countExcludedFromView = payloads?.length - maxVisible;
@@ -67,6 +63,7 @@ export const MediaGallery = memo(
               odinId={odinId}
               previewThumbnail={item.previewThumbnail}
               targetDrive={targetDrive}
+              doubleTapRef={doubleTapRef}
               imageSize={{
                 width: payloads.length === 3 && index === 2 ? 302 : 150,
                 height: 150,
@@ -105,7 +102,14 @@ export const MediaGallery = memo(
               alignItems: 'center',
               justifyContent: 'center',
             }}
-            onLongPress={onLongPress}
+            onLongPress={(e) =>
+              onLongPress?.({
+                x: e.nativeEvent.locationX,
+                y: e.nativeEvent.locationY,
+                absoluteX: e.nativeEvent.pageX,
+                absoluteY: e.nativeEvent.pageY,
+              })
+            }
             onPress={() => onClick?.(maxVisible - 1)}
           >
             <Text style={{ color: 'white', fontSize: 22, fontWeight: '500' }}>
@@ -134,6 +138,7 @@ export const MediaItem = memo(
     probablyEncrypted,
     globalTransitId,
     odinId,
+    doubleTapRef,
   }: {
     payload: PayloadDescriptor | NewPayloadDescriptor;
     containerStyle?: StyleProp<ViewStyle>;
@@ -152,8 +157,11 @@ export const MediaItem = memo(
           height: number;
         }
       | undefined;
-    onLongPress: ((e: GestureResponderEvent) => void) | undefined;
+    onLongPress:
+      | ((coords: { x: number; y: number; absoluteX: number; absoluteY: number }) => void)
+      | undefined;
     onClick: () => void;
+    doubleTapRef?: React.RefObject<GestureType | undefined>;
   }) => {
     const { isDarkMode } = useDarkMode();
 
@@ -224,6 +232,7 @@ export const MediaItem = memo(
             }
             onLongPress={onLongPress}
             onClick={onClick}
+            doubleTapRef={doubleTapRef}
           />
         </View>
       );
@@ -239,11 +248,16 @@ export const MediaItem = memo(
           globalTransitId={globalTransitId}
           odinId={odinId}
           payloadKey={payload.key}
+          previewThumbnail={payload.previewThumbnail || previewThumbnail}
+          descriptorContent={
+            tryJsonParse<LinkPreviewDescriptor[]>(payload.descriptorContent as string)[0]
+          }
+          doubleTapRef={doubleTapRef}
           position={position as string}
         />
       );
     }
-    if (payload.contentType.startsWith('application/')) {
+    if (payload.contentType.startsWith('application/pdf')) {
       return (
         <BoringFile
           file={payload}
@@ -267,6 +281,7 @@ export const MediaItem = memo(
             previewThumbnail={previewThumbnail}
             globalTransitId={globalTransitId}
             imageSize={imageSize}
+            doubleTapRef={doubleTapRef}
             style={
               style || {
                 borderRadius: 10,

@@ -179,7 +179,12 @@ export interface BubbleProps<TMessage extends IMessage> {
   gradientWrapperStyle?: LeftRightStyle<BubbleGradient>;
   onPress?(context?: any, message?: any): void;
   onLongPress?(
-    event: GestureResponderEvent,
+    coords: {
+      x: number;
+      y: number;
+      absoluteX: number;
+      absoluteY: number;
+    },
     context?: any,
     message?: any,
   ): void;
@@ -206,7 +211,7 @@ export interface BubbleProps<TMessage extends IMessage> {
 }
 
 export default class Bubble<
-  TMessage extends IMessage = IMessage
+  TMessage extends IMessage = IMessage,
 > extends React.Component<BubbleProps<TMessage>> {
   static contextType = GiftedChatContext;
 
@@ -297,8 +302,14 @@ export default class Bubble<
 
   onLongPress = (e: GestureResponderEvent) => {
     const { currentMessage } = this.props;
+    const coords = {
+      x: e.nativeEvent.pageX,
+      y: e.nativeEvent.pageY,
+      absoluteX: e.nativeEvent.locationX,
+      absoluteY: e.nativeEvent.locationY,
+    };
     if (this.props.onLongPress) {
-      this.props.onLongPress(e, this.context, this.props.currentMessage);
+      this.props.onLongPress(coords, this.context, this.props.currentMessage);
     } else if (currentMessage && currentMessage.text) {
       const { optionTitles } = this.props;
       const options =
@@ -325,12 +336,8 @@ export default class Bubble<
   };
 
   styledBubbleToNext() {
-    const {
-      currentMessage,
-      nextMessage,
-      position,
-      containerToNextStyle,
-    } = this.props;
+    const { currentMessage, nextMessage, position, containerToNextStyle } =
+      this.props;
     if (
       currentMessage &&
       nextMessage &&
@@ -481,12 +488,8 @@ export default class Bubble<
 
   renderTime() {
     if (this.props.currentMessage && this.props.currentMessage.createdAt) {
-      const {
-        containerStyle,
-        wrapperStyle,
-        textStyle,
-        ...timeProps
-      } = this.props;
+      const { containerStyle, wrapperStyle, textStyle, ...timeProps } =
+        this.props;
       if (this.props.renderTime) {
         return this.props.renderTime(timeProps);
       }

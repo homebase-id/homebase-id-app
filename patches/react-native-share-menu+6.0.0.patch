@@ -245,10 +245,10 @@ index 3884e25..0000000
 -  }
 -}
 diff --git a/node_modules/react-native-share-menu/ios/Modules/ShareMenu.swift b/node_modules/react-native-share-menu/ios/Modules/ShareMenu.swift
-index 74badda..e894b1b 100644
+index 74badda..1b010a9 100644
 --- a/node_modules/react-native-share-menu/ios/Modules/ShareMenu.swift
 +++ b/node_modules/react-native-share-menu/ios/Modules/ShareMenu.swift
-@@ -100,25 +100,59 @@ class ShareMenu: RCTEventEmitter {
+@@ -100,26 +100,45 @@ class ShareMenu: RCTEventEmitter {
  
      @objc(getSharedText:)
      func getSharedText(callback: RCTResponseSenderBlock) {
@@ -267,35 +267,32 @@ index 74badda..e894b1b 100644
 +               print("Error: sharedData is not in the expected format.")
 +               return
 +           }
++        
 +
-+           // Flatten the array of dictionaries into a single dictionary
-+           var data = validSharedData.reduce(into: [String: Any]()) { (result, dict) in
-+               for (key, value) in dict {
-+                   result[key] = value
-+               }
-+           }
-+
-+           if let bundleId = Bundle.main.bundleIdentifier, let userDefaults = UserDefaults(suiteName: "group.\(bundleId)") {
-+               if let extraData = userDefaults.object(forKey: USER_DEFAULTS_EXTRA_DATA_KEY) as? [String: Any] {
-+                   data[EXTRA_DATA_KEY] = extraData
-+               } else {
-+                   data[EXTRA_DATA_KEY] = NSNull()
-+               }
-+           } else {
-+               print("Error: \(NO_APP_GROUP_ERROR)")
-+           }
-+
-+           // Remove keys with NSNull values
-+           data = data.filter { !($0.value is NSNull) }
++           
++//           var data = [DATA_KEY: sharedData] as [String: Any]
++//
++//           if let bundleId = Bundle.main.bundleIdentifier, let userDefaults = UserDefaults(suiteName: "group.\(bundleId)") {
++//               if let extraData = userDefaults.object(forKey: USER_DEFAULTS_EXTRA_DATA_KEY) as? [String: Any] {
++//                   data[EXTRA_DATA_KEY] = extraData
++//               } else {
++//                   data[EXTRA_DATA_KEY] = NSNull()
++//               }
++//           } else {
++//               print("Error: \(NO_APP_GROUP_ERROR)")
++//           }
++//
++//           // Remove keys with NSNull values
++//           data = data.filter { !($0.value is NSNull) }
 +
 +           // Check if data is empty
-+           if data.isEmpty {
++        if ((sharedData?.isEmpty) != nil) {
 +               print("No valid data to share.")
 +               return
 +           }
 +
 +           // Pass the object (dictionary) directly to the callback
-+           callback([data])
++        callback(sharedData)
 +
 +           // Clear sharedData
 +           sharedData = nil
@@ -303,25 +300,16 @@ index 74badda..e894b1b 100644
      
      func dispatchEvent(with data: [[String:String]], and extraData: [String:Any]?) {
          guard hasListeners else { return }
- 
+         
 -        var finalData = [DATA_KEY: data] as [String: Any]
 -        if (extraData != nil) {
 -            finalData[EXTRA_DATA_KEY] = extraData
 -        }
-+        // Flatten the array of dictionaries into a single dictionary
-+            var finalData = data.reduce(into: [String: Any]()) { (result, dict) in
-+                for (key, value) in dict {
-+                    result[key] = value
-+                }
-+            }
-+            
-+        // Add extraData to finalData if extraData is not nil
-+            if let extraData = extraData {
-+                finalData[EXTRA_DATA_KEY] = extraData
-+            }
-         
-         sendEvent(withName: NEW_SHARE_EVENT, body: finalData)
+-        
+-        sendEvent(withName: NEW_SHARE_EVENT, body: finalData)
++        sendEvent(withName: NEW_SHARE_EVENT, body: data)
      }
+ }
 diff --git a/node_modules/react-native-share-menu/ios/ReactShareViewController.swift b/node_modules/react-native-share-menu/ios/ReactShareViewController.swift
 index f42bce6..ee36062 100644
 --- a/node_modules/react-native-share-menu/ios/ReactShareViewController.swift
@@ -348,3 +336,16 @@ index 308ec99..d64822e 100644
  
  #import <React/RCTLinkingManager.h>
  
+diff --git a/node_modules/react-native-share-menu/ios/ShareViewController.swift b/node_modules/react-native-share-menu/ios/ShareViewController.swift
+index 12d8c92..2fa209e 100644
+--- a/node_modules/react-native-share-menu/ios/ShareViewController.swift
++++ b/node_modules/react-native-share-menu/ios/ShareViewController.swift
+@@ -7,6 +7,8 @@
+ //  Created by Gustavo Parreira on 26/07/2020.
+ //
+ //  Modified by Veselin Stoyanov on 17/04/2021.
++//
++//  Modified by Bishwajeet Parhi on 13/09/2024
+ 
+ import Foundation
+ import MobileCoreServices

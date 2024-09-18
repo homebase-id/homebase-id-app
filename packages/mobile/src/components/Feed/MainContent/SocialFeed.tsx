@@ -45,7 +45,7 @@ const SocialFeedMainContent = memo(() => {
         (b.fileMetadata.appData.userDate || b.fileMetadata.created) -
         (a.fileMetadata.appData.userDate || a.fileMetadata.created)
     );
-  }, [posts]);
+  }, [hasMorePosts, posts]);
 
   const [refreshing, setRefreshing] = useState(false);
 

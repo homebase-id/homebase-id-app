@@ -5,7 +5,7 @@ import { onlineManager } from '@tanstack/react-query';
 import { fetch } from '@react-native-community/netinfo';
 import { useEffect, useState } from 'react';
 import { useDarkMode } from '../../hooks/useDarkMode';
-import Animated, { SlideInDown, SlideInUp, SlideOutUp } from 'react-native-reanimated';
+import Animated, { SlideInDown, SlideOutUp } from 'react-native-reanimated';
 
 export const OfflineState = ({ isConnected }: { isConnected?: boolean | null }) => {
   const [isOnline, setIsOnline] = useState(onlineManager.isOnline());
