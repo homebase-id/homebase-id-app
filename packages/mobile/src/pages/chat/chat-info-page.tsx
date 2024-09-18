@@ -121,7 +121,7 @@ export const ChatInfoPage = memo((prop: ChatInfoProp) => {
               iconSize={'2xl'}
             />
           )}
-          <Text
+          {/* <Text
             style={{
               backgroundColor: Colors.indigo[500],
               color: Colors.white,
@@ -131,7 +131,7 @@ export const ChatInfoPage = memo((prop: ChatInfoProp) => {
             }}
           >
             Auto-connected
-          </Text>
+          </Text> */}
           <Text
             style={[
               styles.title,

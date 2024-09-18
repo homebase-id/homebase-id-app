@@ -10,7 +10,7 @@ import { Platform } from 'react-native';
 import { CachesDirectoryPath, copyFile, readFile, stat, unlink } from 'react-native-fs';
 import ImageResizer, { ResizeFormat } from '@bam.tech/react-native-image-resizer';
 import { ImageSource } from './RNImageProvider';
-import { OdinBlob } from '../../../polyfills/OdinBlob';
+import { getExtensionForMimeType, OdinBlob } from '../../../polyfills/OdinBlob';
 
 export const baseThumbSizes: ThumbnailInstruction[] = [
   { quality: 75, width: 250, height: 250 },
@@ -52,7 +52,7 @@ export const createThumbnails = async (
   if (!photo.filepath && !photo.uri) throw new Error('No filepath found in image source');
 
   // We take a copy of the file, as it can be a virtual file that is not accessible by the native code; Eg: ImageResizer
-  const copyOfSourcePath = `file://${CachesDirectoryPath}/${getNewId()}.${photo.type?.split('/')[1]}`;
+  const copyOfSourcePath = `file://${CachesDirectoryPath}/${getNewId()}.${getExtensionForMimeType(photo.type)}`;
   await copyFile((photo.filepath || photo.uri) as string, copyOfSourcePath);
 
   const fileStats = await stat(copyOfSourcePath);
