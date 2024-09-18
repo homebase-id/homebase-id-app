@@ -52,7 +52,7 @@ export const createThumbnails = async (
   if (!photo.filepath && !photo.uri) throw new Error('No filepath found in image source');
 
   // We take a copy of the file, as it can be a virtual file that is not accessible by the native code; Eg: ImageResizer
-  const copyOfSourcePath = `file://${CachesDirectoryPath}/${getNewId()}`;
+  const copyOfSourcePath = `file://${CachesDirectoryPath}/${getNewId()}.${photo.type?.split('/')[1]}`;
   await copyFile((photo.filepath || photo.uri) as string, copyOfSourcePath);
 
   const fileStats = await stat(copyOfSourcePath);
