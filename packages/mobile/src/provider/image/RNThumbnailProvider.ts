@@ -193,7 +193,8 @@ const rotateNaturalSize = (
   const resizedAspectRatio = resized.width / resized.height;
 
   // If the aspect ratios are equal, no 90° or 270° rotation
-  if (Math.abs(naturalAspectRatio - resizedAspectRatio) < 0.01) {
+  // Error margin of 0.25 to account for rounding errors as the resized version is smaller so the aspect ratio is less precise
+  if (Math.abs(naturalAspectRatio - resizedAspectRatio) < 0.25) {
     return {
       pixelWidth: natural.width,
       pixelHeight: natural.height,
