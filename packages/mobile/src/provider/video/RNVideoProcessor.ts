@@ -9,6 +9,7 @@ import {
   KeyHeader,
   PayloadFile,
   ThumbnailFile,
+  GenerateKeyHeader,
 } from '@homebase-id/js-lib/core';
 import { createThumbnails } from '../image/RNThumbnailProvider';
 import { grabThumbnail, compressAndSegmentVideo } from './RNVideoSegmenter';
@@ -18,12 +19,14 @@ export const processVideo = async (
   payloadKey: string,
   compress?: boolean,
   onUpdate?: (phase: string, progress: number) => void,
-  keyHeader?: KeyHeader
+  aesKey?: Uint8Array
 ): Promise<{
   tinyThumb: EmbeddedThumb | undefined;
   payloads: PayloadFile[];
   thumbnails: ThumbnailFile[];
 }> => {
+  const keyHeader: KeyHeader | undefined = aesKey ? GenerateKeyHeader(aesKey) : undefined;
+
   const payloads: PayloadFile[] = [];
   const thumbnails: ThumbnailFile[] = [];
 
@@ -69,7 +72,10 @@ export const processVideo = async (
       key: payloadKey,
       payload: segmentsBlob,
       descriptorContent: jsonStringify64(metadata),
-      skipEncryption: true,
+
+      ...(keyHeader && keyHeader.iv
+        ? { skipEncryption: true, iv: keyHeader.iv }
+        : { skipEncryption: false }),
     });
   } else {
     // Custom blob to avoid reading and writing the file to disk again

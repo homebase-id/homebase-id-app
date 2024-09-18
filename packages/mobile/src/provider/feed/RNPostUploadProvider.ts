@@ -103,12 +103,7 @@ export const savePost = async <T extends PostContent>(
   const payloads: PayloadFile[] = [];
   const thumbnails: ThumbnailFile[] = [];
   const previewThumbnails: EmbeddedThumb[] = [];
-  const keyHeader: KeyHeader | undefined = encrypt
-    ? {
-        iv: getRandom16ByteArray(),
-        aesKey: getRandom16ByteArray(),
-      }
-    : undefined;
+  const aesKey: Uint8Array | undefined = encrypt ? getRandom16ByteArray() : undefined;
 
   if (!newMediaFiles?.length && linkPreviews?.length) {
     // We only support link previews when there is no media
@@ -157,7 +152,7 @@ export const savePost = async <T extends PostContent>(
         tinyThumb: tinyThumbFromVideo,
         thumbnails: thumbnailsFromVideo,
         payloads: payloadsFromVideo,
-      } = await processVideo(newMediaFile, payloadKey, true, onUpdate, keyHeader);
+      } = await processVideo(newMediaFile, payloadKey, true, onUpdate, aesKey);
 
       thumbnails.push(...thumbnailsFromVideo);
       payloads.push(...payloadsFromVideo);
@@ -231,7 +226,7 @@ export const savePost = async <T extends PostContent>(
       axiosConfig: {
         onUploadProgress: (progress) => onUpdate?.('Uploading', progress.progress || 0),
       },
-      keyHeader,
+      aesKey,
     }
   );
 };
@@ -247,7 +242,7 @@ const uploadPost = async <T extends PostContent>(
   onVersionConflict?: () => void,
   options?: {
     axiosConfig?: AxiosRequestConfig<unknown> | undefined;
-    keyHeader?: KeyHeader | undefined;
+    aesKey?: Uint8Array | undefined;
   }
 ) => {
   const encrypt = !(
