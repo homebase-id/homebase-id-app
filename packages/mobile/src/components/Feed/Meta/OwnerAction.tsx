@@ -1,19 +1,26 @@
-import { memo, useState } from 'react';
+import { memo } from 'react';
 import { useManagePost } from '../../../hooks/feed/post/useManagePost';
 import { useChannel } from '../../../hooks/feed/channels/useChannel';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { PostContent } from '@homebase-id/js-lib/public';
-import { ActionButton, ActionGroupProps } from '../Interacts/PostActionModal';
 import { Copy, Pencil, Trash } from '../../ui/Icons/icons';
 import { t, useDotYouClientContext } from 'feed-app-common';
 import { openURL } from '../../../utils/utils';
 import { ErrorNotification } from '../../ui/Alert/ErrorNotification';
+import { ActionButton, ActionGroupProps } from './Actions';
 
 export const OwnerActions = memo(
-  ({ postFile, onClose }: { postFile: HomebaseFile<PostContent>; onClose?: () => void }) => {
+  ({
+    postFile,
+    onClose,
+    onEdit,
+  }: {
+    postFile: HomebaseFile<PostContent>;
+    onClose?: () => void;
+    onEdit?: () => void;
+  }) => {
     const postContent = postFile.fileMetadata.appData.content;
 
-    const [isEditOpen, setIsEditOpen] = useState(false); // TODO: Setup edit post modal
     const { mutateAsync: removePost, error: removePostError } = useManagePost().remove;
     const { data: channel } = useChannel({ channelKey: postContent.channelId }).fetch;
     const host = useDotYouClientContext().getRoot();
@@ -30,9 +37,8 @@ export const OwnerActions = memo(
                 }/${postContent.id}`;
                 openURL(targetUrl);
               } else {
-                setIsEditOpen(true);
+                onEdit?.();
               }
-              onClose?.();
             },
           },
           postContent.type === 'Article'
