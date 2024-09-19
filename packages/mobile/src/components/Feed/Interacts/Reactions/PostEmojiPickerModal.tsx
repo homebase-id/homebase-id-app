@@ -45,21 +45,24 @@ export const PostEmojiPickerModal = forwardRef(
     const { data: myEmojis } = useMyEmojiReactions(context).fetch;
     const identity = useDotYouClientContext().getIdentity();
 
-    const onSelectEmoji = useCallback((emoji: Emoji) => {
-      if (!context) return;
-      if (myEmojis && myEmojis?.length > 0 && myEmojis.includes(emoji.emoji)) {
-        removeEmoji({
-          emojiData: { body: emoji.emoji, authorOdinId: identity || '' },
-          context,
-        });
-      } else {
-        postEmoji({
-          emojiData: { body: emoji.emoji, authorOdinId: identity || '' },
-          context,
-        });
-      }
-      onDismiss();
-    }, []);
+    const onSelectEmoji = useCallback(
+      (emoji: Emoji) => {
+        if (!context) return;
+        if (myEmojis && myEmojis?.length > 0 && myEmojis.includes(emoji.emoji)) {
+          removeEmoji({
+            emojiData: { body: emoji.emoji, authorOdinId: identity || '' },
+            context,
+          });
+        } else {
+          postEmoji({
+            emojiData: { body: emoji.emoji, authorOdinId: identity || '' },
+            context,
+          });
+        }
+        onDismiss();
+      },
+      [context, identity, myEmojis, postEmoji, removeEmoji]
+    );
 
     const onDismiss = () => {
       setContext(undefined);
