@@ -453,18 +453,22 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
           label: 'Clear Chat',
           onPress: () => {
             if (!conversation) return;
-            Alert.alert('Clear Chat', 'Are you sure you want to clear this chat?', [
-              { text: 'Cancel', style: 'cancel' },
-              {
-                text: 'Clear',
-                style: 'destructive',
-                onPress: () => {
-                  clearChat({
-                    conversation: conversation,
-                  });
+            Alert.alert(
+              'Clear Chat',
+              "Are you sure you want to clear the chat history? You won't be able to recover them later",
+              [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                  text: 'Clear',
+                  style: 'destructive',
+                  onPress: () => {
+                    clearChat({
+                      conversation: conversation,
+                    });
+                  },
                 },
-              },
-            ]);
+              ]
+            );
           },
         },
         route.params.convoId !== ConversationWithYourselfId
@@ -472,19 +476,23 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
               label: 'Delete',
               onPress: () => {
                 if (!conversation) return;
-                Alert.alert('Delete Chat', 'Are you sure you want to delete this chat?', [
-                  { text: 'Cancel', style: 'cancel' },
-                  {
-                    text: 'Delete',
-                    style: 'destructive',
-                    onPress: () => {
-                      deleteChat({
-                        conversation: conversation,
-                      });
-                      navigation.navigate('Conversation');
+                Alert.alert(
+                  'Delete Chat',
+                  "Are you sure you want to delete this chat? You won't be able to recover them later",
+                  [
+                    { text: 'Cancel', style: 'cancel' },
+                    {
+                      text: 'Delete',
+                      style: 'destructive',
+                      onPress: () => {
+                        deleteChat({
+                          conversation: conversation,
+                        });
+                        navigation.navigate('Conversation');
+                      },
                     },
-                  },
-                ]);
+                  ]
+                );
               },
             }
           : undefined,

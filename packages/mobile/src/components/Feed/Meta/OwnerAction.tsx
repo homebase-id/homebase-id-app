@@ -16,7 +16,7 @@ export const OwnerActions = memo(
     const [isEditOpen, setIsEditOpen] = useState(false); // TODO: Setup edit post modal
     const { mutateAsync: removePost, error: removePostError } = useManagePost().remove;
     const { data: channel } = useChannel({ channelKey: postContent.channelId }).fetch;
-    const host = useDotYouClientContext().getEndpoint();
+    const host = useDotYouClientContext().getRoot();
     const options: (ActionGroupProps | undefined)[] = postFile.fileId
       ? [
           {
@@ -24,7 +24,7 @@ export const OwnerActions = memo(
             label: t(postContent.type === 'Article' ? 'Edit Article' : 'Edit post'),
             onPress: () => {
               if (postContent.type === 'Article') {
-                const targetUrl = `/apps/feed/edit/${
+                const targetUrl = `${host}/apps/feed/edit/${
                   channel?.fileMetadata.appData.content.slug ||
                   channel?.fileMetadata.appData.uniqueId
                 }/${postContent.id}`;

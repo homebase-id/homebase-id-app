@@ -18,7 +18,7 @@ import { CommentHead } from './CommentHead';
 import { CommentMeta } from './CommentMeta';
 import { CommentThread } from './CommentThread';
 import { CommentBody } from './CommentBody';
-import { ImageSource } from '../../../../provider/image/RNImageProvider';
+import { Asset } from 'react-native-image-picker';
 
 export interface CommentProps {
   context: ReactionContext;
@@ -62,7 +62,7 @@ export const Comment = memo(
     }, [commentData, context]);
 
     const doUpdate = useCallback(
-      (newBody: string, newAttachment?: ImageSource) => {
+      (newBody: string, newAttachment?: Asset) => {
         (async () => {
           await postComment({
             context,
@@ -76,7 +76,21 @@ export const Comment = memo(
                   content: {
                     ...commentData.fileMetadata.appData.content,
                     body: newBody,
-                    attachment: newAttachment,
+                    attachment: newAttachment && {
+                      height: newAttachment.height || 0,
+                      width: newAttachment.width || 0,
+
+                      type:
+                        newAttachment.type && newAttachment.type === 'image/jpg'
+                          ? 'image/jpeg'
+                          : newAttachment.type,
+                      uri: newAttachment.uri,
+                      filename: newAttachment.fileName,
+                      date: Date.parse(newAttachment.timestamp || new Date().toUTCString()),
+                      filepath: newAttachment.originalPath,
+                      id: newAttachment.id,
+                      fileSize: newAttachment.fileSize,
+                    },
                   },
                 },
               },
@@ -112,6 +126,10 @@ export const Comment = memo(
             previewThumbnail={commentData.fileMetadata.appData.previewThumbnail}
             commentFileId={fileId}
             commentLastModifed={(commentData as HomebaseFile<ReactionFile>).fileMetadata.updated}
+            updateState={postState}
+            isEdit={isEdit}
+            onUpdate={doUpdate}
+            onCancel={() => setIsEdit(false)}
           />
           {threadContext.target.fileId && threadContext.target.globalTransitId ? (
             <CommentMeta

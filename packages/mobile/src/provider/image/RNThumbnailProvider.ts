@@ -10,7 +10,7 @@ import { Platform } from 'react-native';
 import { CachesDirectoryPath, copyFile, readFile, stat, unlink } from 'react-native-fs';
 import ImageResizer, { ResizeFormat } from '@bam.tech/react-native-image-resizer';
 import { ImageSource } from './RNImageProvider';
-import { OdinBlob } from '../../../polyfills/OdinBlob';
+import { getExtensionForMimeType, OdinBlob } from '../../../polyfills/OdinBlob';
 
 export const baseThumbSizes: ThumbnailInstruction[] = [
   { quality: 75, width: 250, height: 250 },
@@ -52,7 +52,7 @@ export const createThumbnails = async (
   if (!photo.filepath && !photo.uri) throw new Error('No filepath found in image source');
 
   // We take a copy of the file, as it can be a virtual file that is not accessible by the native code; Eg: ImageResizer
-  const copyOfSourcePath = `file://${CachesDirectoryPath}/${getNewId()}`;
+  const copyOfSourcePath = `file://${CachesDirectoryPath}/${getNewId()}.${getExtensionForMimeType(photo.type)}`;
   await copyFile((photo.filepath || photo.uri) as string, copyOfSourcePath);
 
   const fileStats = await stat(copyOfSourcePath);
@@ -193,7 +193,8 @@ const rotateNaturalSize = (
   const resizedAspectRatio = resized.width / resized.height;
 
   // If the aspect ratios are equal, no 90° or 270° rotation
-  if (Math.abs(naturalAspectRatio - resizedAspectRatio) < 0.01) {
+  // Error margin of 0.25 to account for rounding errors as the resized version is smaller so the aspect ratio is less precise
+  if (Math.abs(naturalAspectRatio - resizedAspectRatio) < 0.25) {
     return {
       pixelWidth: natural.width,
       pixelHeight: natural.height,
