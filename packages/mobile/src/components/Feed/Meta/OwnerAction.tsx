@@ -16,7 +16,7 @@ export const OwnerActions = memo(
     const [isEditOpen, setIsEditOpen] = useState(false); // TODO: Setup edit post modal
     const { mutateAsync: removePost, error: removePostError } = useManagePost().remove;
     const { data: channel } = useChannel({ channelKey: postContent.channelId }).fetch;
-    const host = useDotYouClientContext().getEndpoint();
+    const host = useDotYouClientContext().getRoot();
     const options: (ActionGroupProps | undefined)[] = postFile.fileId
       ? [
           {
