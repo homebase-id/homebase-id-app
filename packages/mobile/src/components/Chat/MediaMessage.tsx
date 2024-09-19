@@ -140,6 +140,7 @@ const InnerMediaMessage = memo(
         previewThumbnail={currentMessage.fileMetadata.appData.previewThumbnail}
         onLongPress={(e) => onLongPress(e, currentMessage)}
         onClick={(index) => onClick(index)}
+        isChat
         style={{
           borderRadius: 10,
           backgroundColor: isDarkMode ? Colors.black : Colors.white,
