@@ -24,7 +24,7 @@ export const CommentHead = memo(
     const actionOptions = [];
 
     if (identity && isAuthor && setIsEdit && onRemove) {
-      // actionOptions.push({ label: t('Edit'), onPress: () => setIsEdit(true), icon: Pencil });
+      actionOptions.push({ label: t('Edit'), onPress: () => setIsEdit(true), icon: Pencil });
       actionOptions.push({ label: t('Remove'), onPress: onRemove, icon: Times });
     }
 

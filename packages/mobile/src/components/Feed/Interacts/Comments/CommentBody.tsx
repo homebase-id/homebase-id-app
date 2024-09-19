@@ -10,6 +10,8 @@ import { openURL, URL_PATTERN } from '../../../../utils/utils';
 import { useDarkMode } from '../../../../hooks/useDarkMode';
 import ParsedText, { ParseShape } from 'react-native-parsed-text';
 import { Colors } from '../../../../app/Colors';
+import { CommentEditor } from './CommentComposer';
+import { Asset } from 'react-native-image-picker';
 
 export const CommentBody = memo(
   ({
@@ -18,12 +20,20 @@ export const CommentBody = memo(
     commentLastModifed,
     content,
     previewThumbnail,
+    updateState,
+    onUpdate,
+    onCancel,
+    isEdit,
   }: {
     context?: ReactionContext;
     commentFileId?: string;
     commentLastModifed?: number;
     content: RawReactionContent | ReactionFile;
     previewThumbnail?: EmbeddedThumb;
+    isEdit?: boolean;
+    updateState: 'pending' | 'loading' | 'success' | 'error' | 'idle';
+    onUpdate?: (commentBody: string, attachment?: Asset) => void;
+    onCancel?: () => void;
   }) => {
     const { body } = content;
     const sourceTargetDrive = context && GetTargetDriveFromChannelId(context.channelId);
@@ -42,6 +52,17 @@ export const CommentBody = memo(
       ],
       [isDarkMode]
     );
+
+    if (isEdit && onUpdate) {
+      return (
+        <CommentEditor
+          defaultBody={body}
+          doPost={onUpdate}
+          onCancel={onCancel}
+          postState={updateState}
+        />
+      );
+    }
 
     return (
       <>
