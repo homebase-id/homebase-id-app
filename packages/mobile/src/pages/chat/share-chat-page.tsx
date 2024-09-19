@@ -147,7 +147,6 @@ export const ShareChatPage = (prop: ShareChatProp) => {
       if (selectedContact.length === 1) {
         const contact = selectedContact[0];
 
-        // TODO: needs to change to fetch instead of still trying to create
         const conversation = await createConversation({
           recipients: [contact.odinId],
         });

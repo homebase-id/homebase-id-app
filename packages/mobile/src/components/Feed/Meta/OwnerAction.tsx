@@ -24,7 +24,7 @@ export const OwnerActions = memo(
             label: t(postContent.type === 'Article' ? 'Edit Article' : 'Edit post'),
             onPress: () => {
               if (postContent.type === 'Article') {
-                const targetUrl = `/apps/feed/edit/${
+                const targetUrl = `${host}/apps/feed/edit/${
                   channel?.fileMetadata.appData.content.slug ||
                   channel?.fileMetadata.appData.uniqueId
                 }/${postContent.id}`;
