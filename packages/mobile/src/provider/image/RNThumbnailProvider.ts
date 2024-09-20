@@ -11,6 +11,7 @@ import { CachesDirectoryPath, copyFile, readFile, stat, unlink } from 'react-nat
 import ImageResizer, { ResizeFormat } from '@bam.tech/react-native-image-resizer';
 import { ImageSource } from './RNImageProvider';
 import { getExtensionForMimeType, OdinBlob } from '../../../polyfills/OdinBlob';
+import { isBase64ImageURI } from '../../utils/utils';
 
 export const baseThumbSizes: ThumbnailInstruction[] = [
   { quality: 75, width: 250, height: 250 },
@@ -50,15 +51,19 @@ export const createThumbnails = async (
   additionalThumbnails: ThumbnailFile[];
 }> => {
   if (!photo.filepath && !photo.uri) throw new Error('No filepath found in image source');
+  let copyOfSourcePath = photo.filepath || photo.uri as string;
 
-  // We take a copy of the file, as it can be a virtual file that is not accessible by the native code; Eg: ImageResizer
-  const copyOfSourcePath = `file://${CachesDirectoryPath}/${getNewId()}.${getExtensionForMimeType(photo.type)}`;
-  await copyFile((photo.filepath || photo.uri) as string, copyOfSourcePath);
 
-  const fileStats = await stat(copyOfSourcePath);
-  if (fileStats.size < 1) {
-    await unlink(copyOfSourcePath);
-    throw new Error('No image data found');
+  if (!isBase64ImageURI(copyOfSourcePath)) {
+    // We take a copy of the file, as it can be a virtual file that is not accessible by the native code; Eg: ImageResizer
+    copyOfSourcePath = `file://${CachesDirectoryPath}/${getNewId()}.${getExtensionForMimeType(photo.type)}`;
+    await copyFile((photo.filepath || photo.uri) as string, copyOfSourcePath);
+
+    const fileStats = await stat(copyOfSourcePath);
+    if (fileStats.size < 1) {
+      await unlink(copyOfSourcePath);
+      throw new Error('No image data found');
+    }
   }
 
   const adaptedPhoto = { ...photo, filepath: copyOfSourcePath, uri: copyOfSourcePath };
