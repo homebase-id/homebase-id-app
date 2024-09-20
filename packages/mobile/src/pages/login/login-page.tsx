@@ -17,7 +17,7 @@ import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 import { Colors } from '../../app/Colors';
 import { stringifyToQueryParams } from '@homebase-id/js-lib/helpers';
 import { doCheckIdentity } from '../../hooks/checkIdentity/useCheckIdentity';
-import { CheckForUpdates, VersionInfo } from '../profile/profile-page';
+import { VersionInfo } from '../profile/profile-page';
 import { InAppBrowser } from 'react-native-inappbrowser-reborn';
 
 import logo from '../../assets/homebase.png';
@@ -72,13 +72,13 @@ export const LoginPage = (_props: LoginProps) => {
           }}
         >
           <VersionInfo />
-          <CheckForUpdates
+          {/* <CheckForUpdates
             hideIcon={true}
             style={{
               alignItems: 'center',
               paddingBottom: 12,
             }}
-          />
+          /> */}
         </View>
       </Container>
     </SafeAreaView>
