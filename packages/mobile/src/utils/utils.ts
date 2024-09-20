@@ -131,6 +131,14 @@ export const flattenInfinteData = <T>(
         .slice(0, pageSize ? rawData?.pages.length * pageSize : undefined) || []) as T[];
 };
 
+export function isBase64ImageURI(url: string): boolean {
+    // Regular expression to check for a Base64 image URI
+    const base64ImagePattern = /^data:image\/(png|jpeg|jpg|gif|bmp|svg\+xml);base64,([A-Za-z0-9+/=]+)$/;
+
+    // Test the given URL against the regex pattern
+    return base64ImagePattern.test(url);
+}
+
 // Regular expression for URL parsing
 export const URL_PATTERN = new RegExp(
     /((http|https|ftp):\/\/)?(([a-zA-Z0-9\-_]+\.)+[a-zA-Z]{2,})(:\d+)?(\/[^\s]*)?/gi
