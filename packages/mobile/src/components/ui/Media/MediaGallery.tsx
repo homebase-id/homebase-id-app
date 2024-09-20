@@ -1,4 +1,13 @@
-import { Image, ImageStyle, Pressable, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
+import {
+  Image,
+  ImageBackground,
+  ImageStyle,
+  Pressable,
+  StyleProp,
+  StyleSheet,
+  View,
+  ViewStyle,
+} from 'react-native';
 import { BoringFile } from './BoringFile';
 import { OdinImage } from '../OdinImage/OdinImage';
 import {
@@ -18,11 +27,12 @@ import { OdinAudio } from '../OdinAudio/OdinAudio';
 import { LinkPreviewFile } from './LinkPreviewFile';
 import { POST_LINKS_PAYLOAD_KEY } from '@homebase-id/js-lib/public';
 import { Colors } from '../../../app/Colors';
-import { memo } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 import { LinkPreviewDescriptor } from '@homebase-id/js-lib/media';
 import { tryJsonParse } from '@homebase-id/js-lib/helpers';
 import { GestureType } from 'react-native-gesture-handler';
 
+const GAP_SIZE = 2;
 export const MediaGallery = memo(
   ({
     fileId,
@@ -31,6 +41,7 @@ export const MediaGallery = memo(
     onClick,
     targetDrive,
     probablyEncrypted,
+    previewThumbnail,
     odinId,
     globalTransitId,
     style,
@@ -50,9 +61,54 @@ export const MediaGallery = memo(
   }) => {
     const maxVisible = 4;
     const countExcludedFromView = payloads?.length - maxVisible;
+    const [wrapperWidth, setWrapperWidth] = useState<number | undefined>(undefined);
+
+    const imageSize = useCallback(
+      (index: number) => {
+        if (!wrapperWidth) return null;
+
+        return {
+          width: payloads.length === 3 && index === 2 ? wrapperWidth : wrapperWidth / 2 - GAP_SIZE,
+          height: wrapperWidth / 2 - GAP_SIZE,
+        };
+      },
+      [payloads.length, wrapperWidth]
+    );
+
+    const embeddedThumbUrl = useMemo(() => {
+      if (!previewThumbnail) return;
+      return `data:${previewThumbnail.contentType};base64,${previewThumbnail.content}`;
+    }, [previewThumbnail]);
+
     return (
-      <View style={[styles.grid, style]}>
+      <View
+        style={[
+          styles.grid,
+          style,
+          {
+            flex: 1,
+            width: '100%',
+            aspectRatio: payloads.length > 2 ? 1 : 2,
+            position: 'relative',
+          },
+        ]}
+        onLayout={(e) => setWrapperWidth(e.nativeEvent.layout.width)}
+      >
+        <ImageBackground
+          source={{ uri: embeddedThumbUrl }}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            bottom: 0,
+            right: 0,
+            opacity: wrapperWidth ? 0 : 1,
+          }}
+          blurRadius={2}
+        />
         {payloads.slice(0, maxVisible).map((item, index) => {
+          const size = imageSize(index);
+          if (!size) return null;
           return (
             <MediaItem
               key={item.key || index}
@@ -64,10 +120,7 @@ export const MediaGallery = memo(
               previewThumbnail={item.previewThumbnail}
               targetDrive={targetDrive}
               doubleTapRef={doubleTapRef}
-              imageSize={{
-                width: payloads.length === 3 && index === 2 ? 302 : 150,
-                height: 150,
-              }}
+              imageSize={size}
               containerStyle={{
                 flexGrow: 1,
               }}
@@ -82,7 +135,6 @@ export const MediaGallery = memo(
                   (index === 1 && payloads.length === 2)
                     ? 10
                     : 0,
-                width: payloads.length === 3 && index === 2 ? '100%' : 150,
               }}
               onLongPress={onLongPress}
               onClick={() => onClick?.(index)}
@@ -90,32 +142,43 @@ export const MediaGallery = memo(
           );
         })}
         {countExcludedFromView > 0 && (
-          <Pressable
+          <View
             style={{
-              width: 150,
-              height: 150,
               position: 'absolute',
               bottom: 0,
               right: 0,
-              zIndex: 10,
-              backgroundColor: 'rgba(0,0,0,0.5)',
-              alignItems: 'center',
-              justifyContent: 'center',
+              top: 0,
+              left: 0,
+              display: 'flex',
             }}
-            onLongPress={(e) =>
-              onLongPress?.({
-                x: e.nativeEvent.locationX,
-                y: e.nativeEvent.locationY,
-                absoluteX: e.nativeEvent.pageX,
-                absoluteY: e.nativeEvent.pageY,
-              })
-            }
-            onPress={() => onClick?.(maxVisible - 1)}
           >
-            <Text style={{ color: 'white', fontSize: 22, fontWeight: '500' }}>
-              +{countExcludedFromView}
-            </Text>
-          </Pressable>
+            <Pressable
+              style={{
+                ...(imageSize(3) || { width: 0, heigth: 0 }),
+                marginTop: 'auto',
+                marginLeft: 'auto',
+
+                backgroundColor: 'rgba(0,0,0,0.5)',
+                alignItems: 'center',
+                justifyContent: 'center',
+
+                borderBottomRightRadius: 10,
+              }}
+              onLongPress={(e) =>
+                onLongPress?.({
+                  x: e.nativeEvent.locationX,
+                  y: e.nativeEvent.locationY,
+                  absoluteX: e.nativeEvent.pageX,
+                  absoluteY: e.nativeEvent.pageY,
+                })
+              }
+              onPress={() => onClick?.(maxVisible - 1)}
+            >
+              <Text style={{ color: 'white', fontSize: 22, fontWeight: '500' }}>
+                +{countExcludedFromView}
+              </Text>
+            </Pressable>
+          </View>
         )}
       </View>
     );
@@ -304,7 +367,6 @@ const styles = StyleSheet.create({
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 2,
-    width: 302,
+    gap: GAP_SIZE,
   },
 });
