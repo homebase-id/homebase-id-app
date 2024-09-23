@@ -60,7 +60,6 @@ export const VideoWithLoader = memo(
       payload.key,
       targetDrive
     ).fetchMetadata;
-    console.log('videoData', videoData?.metadata);
     if (preview) {
       return (
         <View style={style}>
