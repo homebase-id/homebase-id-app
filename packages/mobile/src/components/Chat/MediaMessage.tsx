@@ -143,6 +143,7 @@ const InnerMediaMessage = memo(
         style={{
           borderRadius: 10,
           backgroundColor: isDarkMode ? Colors.black : Colors.white,
+          maxWidth: width * 0.8,
         }}
       />
     );
