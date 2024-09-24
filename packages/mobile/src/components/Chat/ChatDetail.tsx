@@ -309,7 +309,6 @@ export const ChatDetail = memo(
           type: [Document.types.pdf, Document.types.doc, Document.types.docx], // Don't add support for all files. Keeping it pdf and docs for now
           mode: 'open',
         });
-        console.log(document);
         document.fileCopyUri = fixDocumentURI(document.fileCopyUri || document.uri);
         const asset: Asset = {
           uri: document.fileCopyUri,

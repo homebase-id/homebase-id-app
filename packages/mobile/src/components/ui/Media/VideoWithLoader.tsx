@@ -134,6 +134,7 @@ export const VideoWithLoader = memo(
               />
             ) : canDownload ? (
               <LocalVideo
+                odinId={odinId}
                 fileId={fileId}
                 targetDrive={targetDrive}
                 globalTransitId={globalTransitId}
@@ -251,7 +252,6 @@ const LocalVideo = ({
     videoGlobalTransitId: globalTransitId,
     probablyEncrypted,
     payloadKey: payload.key,
-
     lastModified,
   }).fetch;
 

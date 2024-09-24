@@ -1,3 +1,4 @@
+import { getNewId } from '@homebase-id/js-lib/helpers';
 import { InfiniteData } from '@tanstack/react-query';
 import { Image, Linking } from 'react-native';
 import { CachesDirectoryPath, copyFile } from 'react-native-fs';
@@ -95,7 +96,7 @@ export function fixDocumentURI(url: string): string {
 
 export async function fixContentURI(url: string, format?: string): Promise<string> {
     if (url.startsWith('content://') && format) {
-        const destPath = `${CachesDirectoryPath}/${format}`;
+        const destPath = `${CachesDirectoryPath}/${getNewId()}.${format}`;
         await copyFile(url, destPath);
         return `file://${destPath}`;
     }

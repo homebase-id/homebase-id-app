@@ -137,7 +137,9 @@ export const MediaGallery = memo(
                     : 0,
               }}
               onLongPress={onLongPress}
-              onClick={() => onClick?.(index)}
+              onClick={() => {
+                return onClick?.(index);
+              }}
             />
           );
         })}
@@ -150,6 +152,7 @@ export const MediaGallery = memo(
               top: 0,
               left: 0,
               display: 'flex',
+              pointerEvents: 'none',
             }}
           >
             <Pressable

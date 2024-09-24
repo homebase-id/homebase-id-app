@@ -160,6 +160,7 @@ const useImage = (props?: {
             lastModified,
             {
               size,
+              systemFileType,
             }
           );
           if (!imageBlob) return null;
@@ -189,6 +190,7 @@ const useImage = (props?: {
             lastModified,
             {
               size,
+              systemFileType,
             }
           );
           if (!imageBlob) return null;
