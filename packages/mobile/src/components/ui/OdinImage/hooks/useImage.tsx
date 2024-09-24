@@ -45,14 +45,15 @@ const useImage = (props?: {
 
   const localHost = dotYouClient.getIdentity(); // This is the identity of the user
 
-  function queryKeyBuilder(
+  const roundToNearest25 = (value: number) => Math.round(value / 25) * 25;
+  const queryKeyBuilder = (
     odinId: string | undefined,
     imageFileId: string | undefined,
     imageFileKey: string | undefined,
     imageDrive: TargetDrive | undefined,
     size?: ImageSize,
     lastModified?: number
-  ) {
+  ) => {
     const queryKey = [
       'image',
       odinId || '',
@@ -62,9 +63,8 @@ const useImage = (props?: {
     ];
 
     if (size) {
-      queryKey.push(
-        `${Math.round(size.pixelHeight / 25) * 25}x${Math.round(size?.pixelWidth / 25) * 25}`
-      );
+      // We round the size to the nearest 25 to avoid having too many different sizes in cache
+      queryKey.push(`${roundToNearest25(size.pixelHeight)}x${roundToNearest25(size?.pixelWidth)}`);
     }
 
     if (lastModified) {
@@ -72,7 +72,7 @@ const useImage = (props?: {
     }
 
     return queryKey;
-  }
+  };
 
   const getCachedImages = (
     odinId: string | undefined,
@@ -272,14 +272,11 @@ const useImage = (props?: {
             );
           }, 0);
         }
-
-        // console.log('cached', cachedData.url);
         return cachedData;
       }
     }
 
     const serverImage = await fetchImageFromServer();
-    // console.log('server', serverImage?.url);
     return serverImage;
   };
 
@@ -293,7 +290,13 @@ const useImage = (props?: {
           imageFileKey,
           imageGlobalTransitId,
           imageDrive,
-          size,
+          // We round the size to find matching cache entries as we do with the cache key
+          size
+            ? {
+                pixelHeight: roundToNearest25(size.pixelHeight),
+                pixelWidth: roundToNearest25(size.pixelWidth),
+              }
+            : undefined,
           naturalSize,
           lastModified,
           systemFileType
