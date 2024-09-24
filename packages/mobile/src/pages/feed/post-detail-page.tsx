@@ -61,7 +61,7 @@ export const PostDetailPage = ({ route: { params } }: PostDetailPageProps) => {
     authorOdinId,
     channelId: postContent?.channelId || channelKey,
     postContent: postContent,
-    isEnabled: true,
+    isEnabled: postContent?.channelId || channelKey ? true : false,
     isAuthenticated: true,
     isOwner: false,
   });
