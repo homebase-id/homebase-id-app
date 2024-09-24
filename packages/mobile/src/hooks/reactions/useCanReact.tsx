@@ -9,7 +9,7 @@ import { useSecurityContext } from '../securityContext/useSecurityContext';
 interface UseCanReactProps {
   authorOdinId: string;
   channelId: string;
-  postContent: PostContent;
+  postContent?: PostContent | undefined;
   isEnabled: boolean;
   isOwner: boolean;
   isAuthenticated: boolean;
@@ -84,7 +84,7 @@ export const useCanReact = ({
   };
 
   return useQuery({
-    queryKey: ['can-react', authorOdinId, channelId, postContent.id],
+    queryKey: ['can-react', authorOdinId, channelId, postContent?.id],
     queryFn: isCanReact,
     refetchOnMount: false,
     refetchOnWindowFocus: false,

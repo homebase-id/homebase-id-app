@@ -3,7 +3,6 @@ import {
   BottomSheetFooter,
   BottomSheetFooterProps,
   BottomSheetModal,
-  BottomSheetView,
 } from '@gorhom/bottom-sheet';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import {
@@ -201,15 +200,15 @@ const EmptyComponent = () => {
   );
 };
 
-const CommentsLoader = () => {
+export const CommentsLoader = () => {
   const { isDarkMode } = useDarkMode();
   return (
-    <BottomSheetView style={styles.container}>
+    <View style={styles.container}>
       <ActivityIndicator
         size="large"
         color={isDarkMode ? Colors.indigo[400] : Colors.indigo[700]}
       />
-    </BottomSheetView>
+    </View>
   );
 };
 

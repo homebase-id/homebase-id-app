@@ -1,4 +1,10 @@
-import { EmbeddedThumb, PayloadDescriptor, TargetDrive } from '@homebase-id/js-lib/core';
+import {
+  EmbeddedThumb,
+  HomebaseFile,
+  NewHomebaseFile,
+  PayloadDescriptor,
+  TargetDrive,
+} from '@homebase-id/js-lib/core';
 import {
   createNativeStackNavigator,
   NativeStackNavigationOptions,
@@ -12,11 +18,17 @@ import { Colors } from './Colors';
 import { FeedPage } from '../pages/feed/feed-page';
 import { PreviewMedia } from '../pages/media-preview-page';
 import { PostComposer } from '../pages/feed/post-composer';
+import { PostDetailPage } from '../pages/feed/post-detail-page';
+import { ChannelDefinition, PostContent } from '@homebase-id/js-lib/public';
 
 export type FeedStackParamList = {
   Home: undefined;
   Post: {
-    postId: string;
+    postKey: string;
+    channelKey: string;
+    odinId: string;
+    postFile?: HomebaseFile<PostContent>;
+    channel?: HomebaseFile<ChannelDefinition> | NewHomebaseFile<ChannelDefinition>;
   };
   Compose: undefined;
   PreviewMedia: {
@@ -71,6 +83,13 @@ export const FeedStack = (_props: NativeStackScreenProps<TabStackParamList, 'Fee
         component={PostComposer}
         options={{
           animation: 'slide_from_bottom',
+        }}
+      />
+      <StackFeed.Screen
+        name="Post"
+        component={PostDetailPage}
+        options={{
+          headerShown: true,
         }}
       />
     </StackFeed.Navigator>

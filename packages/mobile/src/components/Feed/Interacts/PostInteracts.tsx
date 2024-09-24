@@ -26,6 +26,7 @@ export const PostInteracts = memo(
     onSharePress,
     onEmojiModalOpen,
     isPublic,
+    showCommentPreview = true,
   }: {
     postFile: HomebaseFile<PostContent>;
     isPublic?: boolean;
@@ -33,6 +34,7 @@ export const PostInteracts = memo(
     onReactionPress?: (context: ReactionContext) => void;
     onSharePress?: (context: ShareContext) => void;
     onEmojiModalOpen?: (context: ReactionContext) => void;
+    showCommentPreview?: boolean;
   }) => {
     const postContent = postFile.fileMetadata.appData.content;
     const owner = useDotYouClientContext().getIdentity();
@@ -133,16 +135,32 @@ export const PostInteracts = memo(
               justifyContent: 'flex-end',
             }}
           >
-            {isPublic && <IconButton icon={<ShareNode />} onPress={onSharePressHandler} />}
+            {isPublic && (
+              <IconButton
+                icon={<ShareNode />}
+                onPress={onSharePressHandler}
+                touchableProps={{
+                  disabled: !onSharePress,
+                }}
+              />
+            )}
             {!postDisabledComment && (
-              <IconButton icon={<Comment />} onPress={onCommentPressHandler} />
+              <IconButton
+                icon={<Comment />}
+                onPress={onCommentPressHandler}
+                touchableProps={{
+                  disabled: !onCommentPress,
+                }}
+              />
             )}
           </View>
         </View>
-        <CommentTeaserList
-          reactionPreview={parsedReactionPreview.comments}
-          onExpand={onCommentPressHandler}
-        />
+        {showCommentPreview && (
+          <CommentTeaserList
+            reactionPreview={parsedReactionPreview.comments}
+            onExpand={onCommentPressHandler}
+          />
+        )}
       </>
     );
   }
