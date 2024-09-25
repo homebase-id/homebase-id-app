@@ -13,6 +13,7 @@ import { ReactionContext } from '@homebase-id/js-lib/public';
 import { useMyEmojiReactions, useReaction } from '../../../../hooks/reactions';
 import { useDotYouClientContext } from 'feed-app-common';
 import { ErrorNotification } from '../../../ui/Alert/ErrorNotification';
+import { useBottomSheetBackHandler } from '../../../../hooks/useBottomSheetBackHandler';
 
 export type PostEmojiPickerModalMethods = {
   setContext: (context: ReactionContext) => void;
@@ -24,6 +25,7 @@ export const PostEmojiPickerModal = forwardRef(
     const { isDarkMode } = useDarkMode();
     const bottomSheetRef = useRef<BottomSheetModalMethods>(null);
     const [context, setContext] = useState<ReactionContext>();
+    const { handleSheetPositionChange } = useBottomSheetBackHandler(bottomSheetRef);
 
     useImperativeHandle(ref, () => {
       return {
@@ -72,6 +74,7 @@ export const PostEmojiPickerModal = forwardRef(
     return (
       <BottomSheetModal
         ref={bottomSheetRef}
+        onChange={handleSheetPositionChange}
         snapPoints={['70%', '90%']}
         backdropComponent={Backdrop}
         onDismiss={onDismiss}

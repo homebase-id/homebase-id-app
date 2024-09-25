@@ -13,6 +13,7 @@ import { ExternalActions, GroupChannelActions } from '../Meta/Actions';
 import EditGroupPage from '../../../pages/chat/edit-group-page';
 import { EditPostModal } from '../EditPost/EditPostModal';
 import { useSharedValue } from 'react-native-reanimated';
+import { useBottomSheetBackHandler } from '../../../hooks/useBottomSheetBackHandler';
 
 export type PostActionMethods = {
   setContext: (context: PostActionProps) => void;
@@ -44,6 +45,7 @@ export const PostModalAction = memo(
       if (isEditOpen) setIsEditOpen(false);
       if (snapPoints.value[0] === '90%') snapPoints.value = ['50%', '70%'];
     }, [isEditOpen, snapPoints]);
+    const { handleSheetPositionChange } = useBottomSheetBackHandler(bottomSheetRef);
 
     useImperativeHandle(
       ref,
@@ -67,6 +69,7 @@ export const PostModalAction = memo(
       <BottomSheetModal
         ref={bottomSheetRef}
         snapPoints={snapPoints}
+        onChange={handleSheetPositionChange}
         backdropComponent={Backdrop}
         onDismiss={onClose}
         enableDismissOnClose

@@ -212,6 +212,18 @@ const HlsVideo = ({ odinId, fileId, targetDrive, globalTransitId, payload }: Loc
       }}
       controls={true}
       resizeMode={'contain'}
+      renderLoader={
+        <ActivityIndicator
+          size="large"
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 20,
+          }}
+          color={Colors.white}
+        />
+      }
       onError={(e) => console.log('error', e)}
     />
   );
@@ -259,6 +271,18 @@ const LocalVideo = ({
       controls={true}
       resizeMode={'contain'}
       onError={(e) => console.log('error', e)}
+      renderLoader={
+        <ActivityIndicator
+          size="large"
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 20,
+          }}
+          color={Colors.white}
+        />
+      }
     >
       {isLoading && (
         <ActivityIndicator

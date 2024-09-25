@@ -10,6 +10,7 @@ import { ReactionContext } from '@homebase-id/js-lib/public';
 import { useEmojiReactions } from '../../../../hooks/reactions';
 import { ReactionFile } from '@homebase-id/js-lib/core';
 import { ReactionTile } from '../../../Chat/Reactions/Modal/ReactionsModal';
+import { useBottomSheetBackHandler } from '../../../../hooks/useBottomSheetBackHandler';
 
 export interface ReactionModalMethods {
   setContext: (context: ReactionContext) => void;
@@ -22,6 +23,7 @@ const ReactionsModal = memo(
     const bottomSheetRef = useRef<BottomSheetModalMethods>(null);
     const [context, setContext] = useState<ReactionContext>();
     const { data: reactionDetails, hasNextPage, fetchNextPage } = useEmojiReactions(context).fetch;
+    const { handleSheetPositionChange } = useBottomSheetBackHandler(bottomSheetRef);
 
     const flattenedReactions = reactionDetails?.pages
       .flatMap((page) => page?.reactions)
@@ -47,6 +49,7 @@ const ReactionsModal = memo(
     return (
       <BottomSheetModal
         ref={bottomSheetRef}
+        onChange={handleSheetPositionChange}
         snapPoints={['50%', '90%']}
         backdropComponent={Backdrop}
         onDismiss={onClose}
