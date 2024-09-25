@@ -28,6 +28,7 @@ import { CommentComposer } from './CommentComposer';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HomebaseFile, ReactionFile } from '@homebase-id/js-lib/core';
 import { t } from 'feed-app-common';
+import { EmptyComment } from './EmptyComment';
 
 export interface CommentModalMethods {
   setContext: (context: ReactionContext & CanReactInfo) => void;
@@ -162,7 +163,7 @@ export const CommentsModal = memo(
                 fetchNextPage();
               }
             }}
-            ListEmptyComponent={EmptyComponent}
+            ListEmptyComponent={EmptyComment}
             onEndReachedThreshold={0.3}
             renderItem={renderItem}
             ListFooterComponent={listFooter}
@@ -173,32 +174,6 @@ export const CommentsModal = memo(
     );
   })
 );
-
-const EmptyComponent = () => {
-  return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text
-        style={{
-          fontSize: 18,
-          fontWeight: '600',
-          marginBottom: 16,
-          textAlign: 'center',
-        }}
-      >
-        {t('No Comments yet')}
-      </Text>
-      <Text
-        style={{
-          fontSize: 14,
-          fontWeight: '400',
-          color: Colors.gray[500],
-        }}
-      >
-        Be the first to comment on this post.
-      </Text>
-    </View>
-  );
-};
 
 export const CommentsLoader = () => {
   const { isDarkMode } = useDarkMode();

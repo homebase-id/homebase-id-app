@@ -1,15 +1,22 @@
 import { ChannelDefinition, PostContent, ReactionContext } from '@homebase-id/js-lib/public';
 import { PostActionProps } from '../Interacts/PostActionModal';
 import { HomebaseFile, NewHomebaseFile, ReactionFile } from '@homebase-id/js-lib/core';
-import Animated from 'react-native-reanimated';
+import Animated, {
+  KeyboardState,
+  useAnimatedKeyboard,
+  useAnimatedStyle,
+  withTiming,
+} from 'react-native-reanimated';
 import { PostDetailCard } from '../Detail/PostDetailCard';
 import { CommentsLoader } from '../Interacts/Comments/CommentsModal';
 import { ShareContext } from '../Interacts/Share/ShareModal';
 import { useCallback, useMemo, useState } from 'react';
 import { useDotYouClientContext } from 'feed-app-common';
 import { useCanReact, useComments } from '../../../hooks/reactions';
-import { ListRenderItemInfo } from 'react-native';
+import { ListRenderItemInfo, Platform } from 'react-native';
 import { Comment } from '../Interacts/Comments/Comment';
+import { EmptyComment } from '../Interacts/Comments/EmptyComment';
+import { CommentComposer } from '../Interacts/Comments/CommentComposer';
 
 export type NewType = ReactionContext;
 
@@ -96,6 +103,39 @@ export const PostDetailMainContent = ({
     return <></>;
   }, [isFetchingNextPage]);
 
+  const { height, state } = useAnimatedKeyboard();
+
+  const paddingBottom = Platform.select({
+    ios: 28,
+    android: 12,
+    default: 0,
+  });
+
+  const animatedStyles = useAnimatedStyle(() => {
+    console.log('height', height.value);
+    function calculateHeight() {
+      if (height.value > 0) {
+        return -height.value + paddingBottom;
+      } else {
+        return -height.value;
+      }
+    }
+    if ([KeyboardState.OPEN, KeyboardState.OPENING].includes(state.value)) {
+      return {
+        transform: [{ translateY: calculateHeight() }],
+      };
+    }
+    return {
+      transform: [
+        {
+          translateY: withTiming(0, {
+            duration: 250,
+          }),
+        },
+      ],
+    };
+  });
+
   return (
     <>
       <Animated.FlatList
@@ -119,6 +159,7 @@ export const PostDetailMainContent = ({
         keyExtractor={(item) => item.fileId}
         renderItem={renderItem}
         ListFooterComponent={listFooter}
+        ListEmptyComponent={EmptyComment}
         onEndReached={() => {
           if (hasNextPage) {
             fetchNextPage();
@@ -127,6 +168,16 @@ export const PostDetailMainContent = ({
         onEndReachedThreshold={0.5}
       />
       {isLoading && <CommentsLoader />}
+      <Animated.View style={animatedStyles}>
+        <CommentComposer
+          context={reactionContext as ReactionContext}
+          canReact={canReact}
+          isBottomSheet={false}
+          replyThreadId={replyTo?.replyThreadId}
+          replyOdinId={replyTo?.authorOdinId}
+          onReplyCancel={() => setReplyThread(undefined)}
+        />
+      </Animated.View>
     </>
   );
 };
