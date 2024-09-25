@@ -67,6 +67,7 @@ import ConversationTile from '../../../Chat/Conversation-tile';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ConversationTileWithYourself } from '../../../Conversation/ConversationTileWithYourself';
 import { IconButton } from '../../../ui/Buttons';
+import { useBottomSheetBackHandler } from '../../../../hooks/useBottomSheetBackHandler';
 
 export type ShareModalMethods = {
   setShareContext: (context: ShareContext) => void;
@@ -114,6 +115,7 @@ const ShareModalListWrapper = memo(
       const [selectedConversation, setSelectedConversation] = useState<
         HomebaseFile<UnifiedConversation>[]
       >([]);
+      const { handleSheetPositionChange } = useBottomSheetBackHandler(bottomSheetRef);
 
       const onClose = useCallback(() => {
         setContext(undefined);
@@ -155,6 +157,7 @@ const ShareModalListWrapper = memo(
       return (
         <BottomSheetModal
           ref={bottomSheetRef}
+          onChange={handleSheetPositionChange}
           backdropComponent={Backdrop}
           onDismiss={onClose}
           enableDismissOnClose
