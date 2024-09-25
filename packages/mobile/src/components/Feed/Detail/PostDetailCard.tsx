@@ -128,6 +128,7 @@ export const PostDetailCard = memo(
           onEmojiModalOpen={onEmojiModalOpen}
           isPublic={isPublic}
           showCommentPreview={false}
+          showSummary
         />
       </Animated.View>
     );
