@@ -90,6 +90,7 @@ export const FeedStack = (_props: NativeStackScreenProps<TabStackParamList, 'Fee
         component={PostDetailPage}
         options={{
           headerShown: true,
+          animation: 'slide_from_right',
         }}
       />
     </StackFeed.Navigator>

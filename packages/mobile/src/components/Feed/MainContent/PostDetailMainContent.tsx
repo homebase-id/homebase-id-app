@@ -112,7 +112,6 @@ export const PostDetailMainContent = ({
   });
 
   const animatedStyles = useAnimatedStyle(() => {
-    console.log('height', height.value);
     function calculateHeight() {
       if (height.value > 0) {
         return -height.value + paddingBottom;
