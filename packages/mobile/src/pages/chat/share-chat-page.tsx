@@ -25,7 +25,10 @@ import Toast from 'react-native-toast-message';
 import { ContactTile } from '../../components/Contact/Contact-Tile';
 import { Text } from '../../components/ui/Text/Text';
 import { Colors } from '../../app/Colors';
-import { ListHeaderComponent, maxConnectionsForward } from '../../components/Chat/Chat-Forward';
+import {
+  GroupConversationsComponent,
+  maxConnectionsForward,
+} from '../../components/Chat/Chat-Forward';
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 import { AuthorName } from '../../components/ui/Name';
 import { SendChat } from '../../components/ui/Icons/icons';
@@ -503,7 +506,7 @@ const InnerShareChatPage = memo(
         }
         ListFooterComponent={
           //Actually a Group Component
-          <ListHeaderComponent
+          <GroupConversationsComponent
             selectedGroup={selectedConversation}
             setselectedGroup={setSelectedConversation}
           />

@@ -50,7 +50,7 @@ import {
   ConversationWithYourself,
   UnifiedConversation,
 } from '../../../../provider/chat/ConversationProvider';
-import { ListHeaderComponent, maxConnectionsForward } from '../../../Chat/Chat-Forward';
+import { GroupConversationsComponent, maxConnectionsForward } from '../../../Chat/Chat-Forward';
 import { ChatStackParamList } from '../../../../app/ChatStack';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { t, useAllConnections } from 'feed-app-common';
@@ -698,7 +698,7 @@ const ShareModalList = memo(
         }
         ListFooterComponent={
           //Actually a Group Component
-          <ListHeaderComponent
+          <GroupConversationsComponent
             selectedGroup={selectedConversation}
             setselectedGroup={setSelectedConversation}
           />
