@@ -248,18 +248,18 @@ export const uploadChatMessage = async (
     },
     transitOptions: distribute
       ? {
-          recipients: [...recipients],
-          schedule: ScheduleOptions.SendLater,
-          priority: PriorityOptions.High,
-          sendContents: SendContents.All,
-          useAppNotification: true,
-          appNotificationOptions: {
-            appId: CHAT_APP_ID,
-            typeId: message.fileMetadata.appData.groupId || getNewId(),
-            tagId: message.fileMetadata.appData.uniqueId || getNewId(),
-            silent: false,
-          },
-        }
+        recipients: [...recipients],
+        schedule: ScheduleOptions.SendLater,
+        priority: PriorityOptions.High,
+        sendContents: SendContents.All,
+        useAppNotification: true,
+        appNotificationOptions: {
+          appId: CHAT_APP_ID,
+          typeId: message.fileMetadata.appData.groupId || getNewId(),
+          tagId: message.fileMetadata.appData.uniqueId || getNewId(),
+          silent: false,
+        },
+      }
       : undefined,
   };
 
@@ -302,10 +302,10 @@ export const uploadChatMessage = async (
 
     const imageSource: ImageSource | undefined = linkPreviewWithImage
       ? {
-          height: linkPreviewWithImage.imageHeight || 0,
-          width: linkPreviewWithImage.imageWidth || 0,
-          uri: linkPreviewWithImage.imageUrl,
-        }
+        height: linkPreviewWithImage.imageHeight || 0,
+        width: linkPreviewWithImage.imageWidth || 0,
+        uri: linkPreviewWithImage.imageUrl,
+      }
       : undefined;
 
     const { tinyThumb } = imageSource
@@ -359,6 +359,7 @@ export const uploadChatMessage = async (
         key: payloadKey,
         payload: blob,
         descriptorContent: newMediaFile?.filename || newMediaFile?.type || undefined,
+        previewThumbnail: tinyThumb,
       });
 
       if (tinyThumb) previewThumbnails.push(tinyThumb);
@@ -414,7 +415,7 @@ export const uploadChatMessage = async (
     for (const recipient of recipients) {
       message.fileMetadata.appData.content.deliveryDetails[recipient] =
         uploadResult.recipientStatus?.[recipient].toLowerCase() ===
-        TransferUploadStatus.EnqueuedFailed
+          TransferUploadStatus.EnqueuedFailed
           ? ChatDeliveryStatus.Failed
           : ChatDeliveryStatus.Delivered;
     }
@@ -459,11 +460,11 @@ export const updateChatMessage = async (
     },
     transitOptions: distribute
       ? {
-          recipients: [...recipients],
-          schedule: ScheduleOptions.SendLater,
-          priority: PriorityOptions.High,
-          sendContents: SendContents.All,
-        }
+        recipients: [...recipients],
+        schedule: ScheduleOptions.SendLater,
+        priority: PriorityOptions.High,
+        sendContents: SendContents.All,
+      }
       : undefined,
   };
 

@@ -41,6 +41,7 @@ import { useVideo } from '../../hooks/video/useVideo';
 import { ImageSource } from '../../provider/image/RNImageProvider';
 import { Backdrop } from '../ui/Modal/Backdrop';
 import { useErrors } from '../../hooks/errors/useErrors';
+import { getImageSize } from '../../utils/utils';
 
 export type ChatForwardModalProps = {
   onClose: () => void;
@@ -95,11 +96,29 @@ export const ChatForwardModal = memo(
           for (const payload of payloads) {
             if (payload.contentType.startsWith('image')) {
               const image = getFromCache(undefined, message.fileId, payload.key, ChatDrive);
+              let imageSize: {
+                width: number;
+                height: number;
+              } = {
+                width: payload.previewThumbnail?.pixelWidth || 0,
+                height: payload.previewThumbnail?.pixelHeight || 0,
+              };
+
               if (image?.imageData) {
+                // If the image size is undefined, fetch the image size
+                if (imageSize.width === 0 || imageSize.height === 0) {
+                  await getImageSize(image.imageData.url).then((res) => {
+                    if (res instanceof Error) {
+                      imageSize = { width: 500, height: 500 };
+                      return;
+                    }
+                    imageSize = res;
+                  });
+                }
                 messagePayloads.push({
                   uri: image.imageData.url,
-                  width: image.imageData?.naturalSize?.pixelWidth,
-                  height: image.imageData?.naturalSize?.pixelHeight,
+                  width: imageSize.width,
+                  height: imageSize.height,
                   type: image.imageData?.type,
                 } as ImageSource);
               }
