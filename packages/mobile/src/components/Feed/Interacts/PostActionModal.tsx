@@ -10,7 +10,6 @@ import { Colors } from '../../../app/Colors';
 import { Platform, View } from 'react-native';
 import { OwnerActions } from '../Meta/OwnerAction';
 import { ExternalActions, GroupChannelActions } from '../Meta/Actions';
-import EditGroupPage from '../../../pages/chat/edit-group-page';
 import { EditPostModal } from '../EditPost/EditPostModal';
 import { useSharedValue } from 'react-native-reanimated';
 
