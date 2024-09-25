@@ -29,6 +29,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HomebaseFile, ReactionFile } from '@homebase-id/js-lib/core';
 import { t } from 'feed-app-common';
 import { EmptyComment } from './EmptyComment';
+import { useBottomSheetBackHandler } from '../../../../hooks/useBottomSheetBackHandler';
+
 
 export interface CommentModalMethods {
   setContext: (context: ReactionContext & CanReactInfo) => void;
@@ -39,6 +41,7 @@ export const CommentsModal = memo(
   forwardRef((_undefined, ref: React.Ref<CommentModalMethods>) => {
     const { isDarkMode } = useDarkMode();
     const bottomSheetRef = useRef<BottomSheetModalMethods>(null);
+    const { handleSheetPositionChange } = useBottomSheetBackHandler(bottomSheetRef);
     const [context, setContext] = useState<ReactionContext & CanReactInfo>();
     const [replyTo, setReplyThread] = useState<
       | {
@@ -134,6 +137,7 @@ export const CommentsModal = memo(
         keyboardBehavior={Platform.OS === 'ios' ? 'extend' : 'interactive'}
         keyboardBlurBehavior={'restore'}
         android_keyboardInputMode="adjustResize"
+        onChange={handleSheetPositionChange}
         index={0}
         backgroundStyle={{
           backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
