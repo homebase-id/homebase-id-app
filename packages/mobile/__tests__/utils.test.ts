@@ -15,6 +15,12 @@ jest.mock('react-native', () => ({
 }));
 
 describe('utils.ts', () => {
+    beforeEach(() => {
+        (InAppBrowser.isAvailable as jest.Mock).mockClear();
+        (InAppBrowser.open as jest.Mock).mockClear();
+        (Linking.openURL as jest.Mock).mockClear();
+
+    });
     describe('millisToMinutesAndSeconds', () => {
         it('should convert milliseconds to minutes and seconds', () => {
             expect(millisToMinutesAndSeconds(61000)).toBe('1:01');
