@@ -88,37 +88,56 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
         chatMessages?.pages
           .flatMap((page) => page.searchResults)
           ?.filter(Boolean) as HomebaseFile<ChatMessage>[]
-      )?.map<ChatMessageIMessage>((value) => {
-        // Mapping done here, because the chat component expects a different format
-        return {
-          _id: value.fileId || value.fileMetadata.appData.uniqueId || getNewId(),
-          createdAt: value.fileMetadata.created,
-          text:
-            value.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus
-              ? 'This message was deleted.'
-              : value.fileMetadata.appData.content.message,
-          user: {
-            _id:
-              value.fileMetadata.senderOdinId ||
-              value.fileMetadata.appData.content.authorOdinId ||
-              identity ||
-              '',
-            name:
-              value.fileMetadata.senderOdinId ||
-              value.fileMetadata.appData.content.authorOdinId ||
-              identity ||
-              '',
-          },
-          sent: value.fileMetadata.appData.content.deliveryStatus === 20,
-          received: value.fileMetadata.appData.content.deliveryStatus === 40,
-          pending: value.fileMetadata.appData.content.deliveryStatus === 15,
-          image:
-            value.fileMetadata.payloads?.length > 0
-              ? value.fileMetadata.payloads.length.toString()
-              : undefined,
-          ...value,
-        };
-      }) || [],
+      )
+        ?.reduce((acc, cur) => {
+          // This is to avoid any duplicates as a last resort; It should never happen that the cache has duplicates.. Keyword: "should"
+          const existing = acc.find((existing) =>
+            stringGuidsEqual(
+              existing.fileMetadata.appData.uniqueId,
+              cur.fileMetadata.appData.uniqueId
+            )
+          );
+
+          if (existing) {
+            console.warn('Duplicate message found', existing, cur);
+            return acc;
+          }
+          acc.push(cur);
+
+          return acc;
+        }, [] as HomebaseFile<ChatMessage>[])
+        ?.map<ChatMessageIMessage>((value) => {
+          // Mapping done here, because the chat component expects a different format
+          return {
+            // Prefer uniqueId to avoid duplicates between onMutate and actual data
+            _id: value.fileMetadata.appData.uniqueId || value.fileId || getNewId(),
+            createdAt: value.fileMetadata.created,
+            text:
+              value.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus
+                ? 'This message was deleted.'
+                : value.fileMetadata.appData.content.message,
+            user: {
+              _id:
+                value.fileMetadata.senderOdinId ||
+                value.fileMetadata.appData.content.authorOdinId ||
+                identity ||
+                '',
+              name:
+                value.fileMetadata.senderOdinId ||
+                value.fileMetadata.appData.content.authorOdinId ||
+                identity ||
+                '',
+            },
+            sent: value.fileMetadata.appData.content.deliveryStatus === 20,
+            received: value.fileMetadata.appData.content.deliveryStatus === 40,
+            pending: value.fileMetadata.appData.content.deliveryStatus === 15,
+            image:
+              value.fileMetadata.payloads?.length > 0
+                ? value.fileMetadata.payloads.length.toString()
+                : undefined,
+            ...value,
+          };
+        }) || [],
     [chatMessages, identity]
   );
 
@@ -434,18 +453,22 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
           label: 'Clear Chat',
           onPress: () => {
             if (!conversation) return;
-            Alert.alert('Clear Chat', 'Are you sure you want to clear this chat?', [
-              { text: 'Cancel', style: 'cancel' },
-              {
-                text: 'Clear',
-                style: 'destructive',
-                onPress: () => {
-                  clearChat({
-                    conversation: conversation,
-                  });
+            Alert.alert(
+              'Clear Chat',
+              "Are you sure you want to clear the chat history? You won't be able to recover them later",
+              [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                  text: 'Clear',
+                  style: 'destructive',
+                  onPress: () => {
+                    clearChat({
+                      conversation: conversation,
+                    });
+                  },
                 },
-              },
-            ]);
+              ]
+            );
           },
         },
         route.params.convoId !== ConversationWithYourselfId
@@ -453,19 +476,23 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
               label: 'Delete',
               onPress: () => {
                 if (!conversation) return;
-                Alert.alert('Delete Chat', 'Are you sure you want to delete this chat?', [
-                  { text: 'Cancel', style: 'cancel' },
-                  {
-                    text: 'Delete',
-                    style: 'destructive',
-                    onPress: () => {
-                      deleteChat({
-                        conversation: conversation,
-                      });
-                      navigation.navigate('Conversation');
+                Alert.alert(
+                  'Delete Chat',
+                  "Are you sure you want to delete this chat? You won't be able to recover them later",
+                  [
+                    { text: 'Cancel', style: 'cancel' },
+                    {
+                      text: 'Delete',
+                      style: 'destructive',
+                      onPress: () => {
+                        deleteChat({
+                          conversation: conversation,
+                        });
+                        navigation.navigate('Conversation');
+                      },
                     },
-                  },
-                ]);
+                  ]
+                );
               },
             }
           : undefined,

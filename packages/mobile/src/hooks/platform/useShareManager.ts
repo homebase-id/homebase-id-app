@@ -19,7 +19,7 @@ export type SharedItem = {
 export const useShareManager = () => {
   const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
   const handleShare = useCallback(
-    (item?: SharedItem) => {
+    (item?: SharedItem[]) => {
       if (!item) {
         return;
       }

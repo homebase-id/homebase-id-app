@@ -1,7 +1,6 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback, useEffect, useState } from 'react';
 import {
-  Button,
   View,
   Linking,
   Image,
@@ -18,7 +17,7 @@ import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 import { Colors } from '../../app/Colors';
 import { stringifyToQueryParams } from '@homebase-id/js-lib/helpers';
 import { doCheckIdentity } from '../../hooks/checkIdentity/useCheckIdentity';
-import { CheckForUpdates, VersionInfo } from '../profile/profile-page';
+import { VersionInfo } from '../profile/profile-page';
 import { InAppBrowser } from 'react-native-inappbrowser-reborn';
 
 import logo from '../../assets/homebase.png';
@@ -28,6 +27,9 @@ import { AuthorName } from '../../components/ui/Name';
 import { PublicAvatar } from '../../components/ui/Avatars/Avatar';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { Divider } from '../../components/ui/Divider';
+import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
+import TextButton from '../../components/ui/Text/Text-Button';
+import { t } from 'feed-app-common';
 
 type LoginProps = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 
@@ -48,7 +50,7 @@ export const LoginPage = (_props: LoginProps) => {
           <Image source={logo} style={{ width: 40, height: 40 }} />
           <Text style={{ fontSize: 25 }}>Homebase</Text>
         </View>
-        <View
+        <Animated.View
           style={{
             paddingHorizontal: 12,
             paddingVertical: 15,
@@ -56,7 +58,7 @@ export const LoginPage = (_props: LoginProps) => {
           }}
         >
           <LoginComponent />
-        </View>
+        </Animated.View>
 
         <View
           style={{
@@ -70,13 +72,13 @@ export const LoginPage = (_props: LoginProps) => {
           }}
         >
           <VersionInfo />
-          <CheckForUpdates
+          {/* <CheckForUpdates
             hideIcon={true}
             style={{
               alignItems: 'center',
               paddingBottom: 12,
             }}
-          />
+          /> */}
         </View>
       </Container>
     </SafeAreaView>
@@ -242,12 +244,13 @@ const LoginComponent = () => {
 
   return (
     <>
-      <Text style={{ fontSize: Platform.OS === 'ios' ? 20 : 18 }}>Your Homebase id</Text>
+      <Text style={{ fontSize: 18 }}>Your Homebase id</Text>
       <Input
         placeholder="Homebase id"
         style={{
-          height: 40,
+          // height: 40,
           fontSize: Platform.OS === 'ios' ? 16 : 14,
+          // marginBottom: 16,
         }}
         onChangeText={setOdinId}
         autoCapitalize="none"
@@ -255,19 +258,51 @@ const LoginComponent = () => {
         onSubmitEditing={onLogin}
       />
 
-      {invalid ? <Text style={{ color: Colors.red[500] }}>Invalid homebase id</Text> : null}
-
-      {finalizeState === 'error' ? (
-        <Text style={{ color: Colors.red[500] }}>Something went wrong, please try again</Text>
+      {invalid ? (
+        <Animated.Text entering={FadeIn} style={{ color: Colors.red[500], marginBottom: 4 }}>
+          {t('Invalid homebase id')}
+        </Animated.Text>
       ) : null}
 
-      <Button title="Login" disabled={!odinId} onPress={onLogin} />
+      {finalizeState === 'error' ? (
+        <Text style={{ color: Colors.red[500], marginBottom: 4 }}>
+          {t('Something went wrong, please try again')}
+        </Text>
+      ) : null}
 
-      {lastIdentity && !odinId && (
-        <View
-          style={{
-            marginBottom: 10,
+      <View
+        style={{
+          alignItems: 'center',
+        }}
+      >
+        <TextButton
+          title="Login"
+          onPress={onLogin}
+          showLoaderOnPress={true}
+          filled={true}
+          lightColor={Colors.indigo[400]}
+          darkColor={Colors.indigo[800]}
+          underlayColor={isDarkMode ? Colors.indigo[900] : Colors.indigo[300]}
+          disabled={!odinId}
+          filledStyle={{
+            marginVertical: 8,
           }}
+          textStyle={{
+            fontSize: 16,
+            lineHeight: 24,
+            fontWeight: '600',
+            color: Colors.white,
+          }}
+        />
+      </View>
+      {lastIdentity && !odinId && (
+        <Animated.View
+          style={{
+            marginTop: 24,
+            marginBottom: 4,
+          }}
+          layout={LinearTransition}
+          exiting={FadeOut}
         >
           {/* Render -----OR----- */}
           <Divider text="OR" />
@@ -278,7 +313,8 @@ const LoginComponent = () => {
               backgroundColor: isDarkMode ? Colors.indigo[700] : Colors.indigo[100],
               marginLeft: 'auto',
               marginRight: 'auto',
-              borderRadius: 15,
+              borderRadius: 10,
+              paddingHorizontal: 8,
             }}
           >
             <View
@@ -301,7 +337,7 @@ const LoginComponent = () => {
               </Text>
             </View>
           </TouchableOpacity>
-        </View>
+        </Animated.View>
       )}
 
       <View
@@ -314,7 +350,9 @@ const LoginComponent = () => {
         }}
       >
         <TouchableOpacity onPress={showSignUpAlert}>
-          <Text style={{ textDecorationLine: 'underline' }}>Don&apos;t have an account?</Text>
+          <Text style={{ textDecorationLine: 'underline', fontSize: 14, lineHeight: 24 }}>
+            Don&apos;t have an account?
+          </Text>
         </TouchableOpacity>
       </View>
     </>

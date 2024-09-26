@@ -45,12 +45,12 @@ const SocialFeedMainContent = memo(() => {
         (b.fileMetadata.appData.userDate || b.fileMetadata.created) -
         (a.fileMetadata.appData.userDate || a.fileMetadata.created)
     );
-  }, [posts]);
+  }, [hasMorePosts, posts]);
 
   const [refreshing, setRefreshing] = useState(false);
 
   /* Refs */
-  const scrollRef = useAnimatedRef<Animated.FlatList<any>>();
+  const scrollRef = useAnimatedRef<Animated.FlatList<unknown>>();
   const commentRef = useRef<CommentModalMethods>(null);
   const reactionRef = useRef<ReactionModalMethods>(null);
   const shareRef = useRef<ShareModalMethods>(null);

@@ -13,6 +13,7 @@ import { ReactionContext } from '@homebase-id/js-lib/public';
 import { useMyEmojiReactions, useReaction } from '../../../../hooks/reactions';
 import { useDotYouClientContext } from 'feed-app-common';
 import { ErrorNotification } from '../../../ui/Alert/ErrorNotification';
+import { useBottomSheetBackHandler } from '../../../../hooks/useBottomSheetBackHandler';
 
 export type PostEmojiPickerModalMethods = {
   setContext: (context: ReactionContext) => void;
@@ -24,6 +25,7 @@ export const PostEmojiPickerModal = forwardRef(
     const { isDarkMode } = useDarkMode();
     const bottomSheetRef = useRef<BottomSheetModalMethods>(null);
     const [context, setContext] = useState<ReactionContext>();
+    const { handleSheetPositionChange } = useBottomSheetBackHandler(bottomSheetRef);
 
     useImperativeHandle(ref, () => {
       return {
@@ -45,21 +47,24 @@ export const PostEmojiPickerModal = forwardRef(
     const { data: myEmojis } = useMyEmojiReactions(context).fetch;
     const identity = useDotYouClientContext().getIdentity();
 
-    const onSelectEmoji = useCallback((emoji: Emoji) => {
-      if (!context) return;
-      if (myEmojis && myEmojis?.length > 0 && myEmojis.includes(emoji.emoji)) {
-        removeEmoji({
-          emojiData: { body: emoji.emoji, authorOdinId: identity || '' },
-          context,
-        });
-      } else {
-        postEmoji({
-          emojiData: { body: emoji.emoji, authorOdinId: identity || '' },
-          context,
-        });
-      }
-      onDismiss();
-    }, []);
+    const onSelectEmoji = useCallback(
+      (emoji: Emoji) => {
+        if (!context) return;
+        if (myEmojis && myEmojis?.length > 0 && myEmojis.includes(emoji.emoji)) {
+          removeEmoji({
+            emojiData: { body: emoji.emoji, authorOdinId: identity || '' },
+            context,
+          });
+        } else {
+          postEmoji({
+            emojiData: { body: emoji.emoji, authorOdinId: identity || '' },
+            context,
+          });
+        }
+        onDismiss();
+      },
+      [context, identity, myEmojis, postEmoji, removeEmoji]
+    );
 
     const onDismiss = () => {
       setContext(undefined);
@@ -69,6 +74,7 @@ export const PostEmojiPickerModal = forwardRef(
     return (
       <BottomSheetModal
         ref={bottomSheetRef}
+        onChange={handleSheetPositionChange}
         snapPoints={['70%', '90%']}
         backdropComponent={Backdrop}
         onDismiss={onDismiss}

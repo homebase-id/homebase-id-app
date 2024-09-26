@@ -1,23 +1,28 @@
 import { EmbeddedThumb, PayloadDescriptor, TargetDrive } from '@homebase-id/js-lib/core';
-import { memo, useCallback, useMemo, useState } from 'react';
-import {
-  ActivityIndicator,
-  GestureResponderEvent,
-  ImageStyle,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { memo, useCallback, useState } from 'react';
+import { ActivityIndicator, ImageStyle, TouchableOpacity, View } from 'react-native';
 import { Colors } from '../../../app/Colors';
-import WebView from 'react-native-webview';
-import { TouchableWithoutFeedback } from 'react-native';
-import { useAuth } from '../../../hooks/auth/useAuth';
-import { uint8ArrayToBase64 } from '@homebase-id/js-lib/helpers';
 import { Play } from '../Icons/icons';
 import { OdinImage } from '../OdinImage/OdinImage';
 import { useVideo } from '../../../hooks/video/useVideo';
+import { useHlsManifest } from '../../../hooks/video/useHlsManifest';
 import Video from 'react-native-video';
+import { useDotYouClientContext } from 'feed-app-common';
+import { useVideoMetadata } from '../../../hooks/video/useVideoMetadata';
+import { GestureType } from 'react-native-gesture-handler';
 
-const MAX_DOWNLOAD_SIZE = 16 * 1024 * 1024 * 1024; // 16 MB
+interface VideoProps extends LocalVideoProps {
+  previewThumbnail?: EmbeddedThumb;
+  fit?: 'cover' | 'contain';
+  preview?: boolean;
+  fullscreen?: boolean;
+  imageSize?: { width: number; height: number };
+  onClick?: () => void;
+  onLongPress?: (coords: { x: number; y: number; absoluteX: number; absoluteY: number }) => void;
+  style?: ImageStyle;
+  doubleTapRef?: React.RefObject<GestureType | undefined>;
+  autoPlay?: boolean;
+}
 
 export const VideoWithLoader = memo(
   ({
@@ -36,37 +41,18 @@ export const VideoWithLoader = memo(
     autoPlay,
     probablyEncrypted,
     lastModified,
-  }: {
-    fileId: string;
-    odinId?: string;
-    globalTransitId?: string;
-    targetDrive: TargetDrive;
-    previewThumbnail?: EmbeddedThumb;
-    fit?: 'cover' | 'contain';
-    preview?: boolean;
-    fullscreen?: boolean;
-    imageSize?: { width: number; height: number };
-    onClick?: () => void;
-    onLongPress?: (e: GestureResponderEvent) => void;
-    style?: ImageStyle;
-    payload: PayloadDescriptor;
-    autoPlay?: boolean;
-    probablyEncrypted?: boolean;
-    lastModified?: number;
-  }) => {
+    doubleTapRef,
+  }: VideoProps) => {
     const [loadVideo, setLoadVideo] = useState(autoPlay);
     const doLoadVideo = useCallback(() => setLoadVideo(true), []);
-    const canDownload = !preview && payload?.bytesWritten < MAX_DOWNLOAD_SIZE;
-    const { data, isLoading } = useVideo({
+
+    const { data: videoData } = useVideoMetadata(
       odinId,
       fileId,
-      targetDrive,
-      videoGlobalTransitId: globalTransitId,
-      probablyEncrypted,
-      payloadKey: payload.key,
-      enabled: canDownload,
-      lastModified,
-    }).fetch;
+      globalTransitId,
+      payload.key,
+      targetDrive
+    ).fetchMetadata;
 
     if (preview) {
       return (
@@ -85,6 +71,7 @@ export const VideoWithLoader = memo(
             avoidPayload={true}
             style={style}
             onLongPress={onLongPress}
+            doubleTapRef={doubleTapRef}
           />
           <View
             style={{
@@ -99,6 +86,7 @@ export const VideoWithLoader = memo(
               alignItems: 'center',
               justifyContent: 'center',
               backgroundColor: 'rgba(0,0,0,0.4)',
+              borderRadius: 10,
             }}
           >
             <View
@@ -116,6 +104,7 @@ export const VideoWithLoader = memo(
         </View>
       );
     }
+
     return (
       <>
         {loadVideo ? (
@@ -126,37 +115,26 @@ export const VideoWithLoader = memo(
               position: 'relative',
             }}
           >
-            {canDownload ? (
-              <Video
-                source={{ uri: data?.uri }}
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  bottom: 0,
-                  right: 0,
-                }}
-                controls={true}
-                paused={loadVideo}
-                resizeMode={'contain'}
-                onEnd={() => setLoadVideo(false)}
-                onError={(e) => console.log('error', e)}
-              >
-                {isLoading && (
-                  <ActivityIndicator
-                    size="large"
-                    style={{
-                      flex: 1,
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      zIndex: 20,
-                    }}
-                    color={Colors.white}
-                  />
-                )}
-              </Video>
+            {videoData?.metadata.mimeType === 'application/vnd.apple.mpegurl' ? (
+              <HlsVideo
+                odinId={odinId}
+                fileId={fileId}
+                targetDrive={targetDrive}
+                globalTransitId={globalTransitId}
+                payload={payload}
+                probablyEncrypted={probablyEncrypted}
+                lastModified={lastModified}
+              />
             ) : (
-              <OdinWebVideo targetDrive={targetDrive} fileId={fileId} fileKey={payload.key} />
+              <LocalVideo
+                odinId={odinId}
+                fileId={fileId}
+                targetDrive={targetDrive}
+                globalTransitId={globalTransitId}
+                payload={payload}
+                probablyEncrypted={probablyEncrypted}
+                lastModified={lastModified}
+              />
             )}
           </View>
         ) : (
@@ -205,77 +183,119 @@ export const VideoWithLoader = memo(
   }
 );
 
-const OdinWebVideo = ({
-  fileId,
-  fileKey,
-}: {
-  targetDrive: TargetDrive;
-  fileId: string;
-  fileKey: string;
-}) => {
-  const { authToken, getIdentity, getSharedSecret } = useAuth();
-  const identity = getIdentity();
+const HlsVideo = ({ odinId, fileId, targetDrive, globalTransitId, payload }: LocalVideoProps) => {
+  const dotYouClient = useDotYouClientContext();
+  const { data: hlsManifest } = useHlsManifest(
+    odinId,
+    fileId,
+    globalTransitId,
+    payload.key,
+    targetDrive
+  ).fetch;
 
-  const uri = useMemo(
-    () => `https://${identity}/apps/chat/player/${fileId}/${fileKey}`,
-    [fileId, fileKey, identity]
-  );
+  if (!hlsManifest) return null;
 
-  const sharedSecret = getSharedSecret();
-  const base64SharedSecret = sharedSecret ? uint8ArrayToBase64(sharedSecret) : '';
-
-  const INJECTED_JAVASCRIPT = `(function() {
-    const APP_SHARED_SECRET_KEY = 'APPS_chat';
-    const APP_AUTH_TOKEN_KEY = 'BX0900_chat';
-    const IDENTITY_KEY = 'identity';
-    const APP_CLIENT_TYPE_KEY = 'client_type';
-
-    const APP_SHARED_SECRET = '${base64SharedSecret}';
-    const APP_AUTH_TOKEN = '${authToken}';
-    const IDENTITY = '${identity}';
-    const APP_CLIENT_TYPE = 'react-native';
-
-    window.localStorage.setItem(APP_SHARED_SECRET_KEY, APP_SHARED_SECRET);
-    window.localStorage.setItem(APP_AUTH_TOKEN_KEY, APP_AUTH_TOKEN);
-    window.localStorage.setItem(IDENTITY_KEY, IDENTITY);
-    window.localStorage.setItem(APP_CLIENT_TYPE_KEY, APP_CLIENT_TYPE);
-  })();`;
-
-  if (identity && uri) {
-    return (
-      <TouchableWithoutFeedback>
-        <WebView
-          source={{
-            uri,
-          }}
-          mixedContentMode="always"
-          javaScriptEnabled={true}
-          mediaPlaybackRequiresUserAction={false}
-          injectedJavaScriptBeforeContentLoaded={INJECTED_JAVASCRIPT}
+  return (
+    <Video
+      source={{
+        uri: hlsManifest,
+        headers: dotYouClient.getHeaders(),
+        type: 'm3u8',
+      }}
+      paused={false}
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        bottom: 0,
+        right: 0,
+      }}
+      controls={true}
+      resizeMode={'contain'}
+      renderLoader={
+        <ActivityIndicator
+          size="large"
           style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            bottom: 0,
-            right: 0,
-            backgroundColor: Colors.black,
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 20,
           }}
-          allowsInlineMediaPlayback={true}
-          allowsProtectedMedia={true}
-          allowsAirPlayForMediaPlayback={true}
-          allowsFullscreenVideo={true}
-          onError={(syntheticEvent) => {
-            console.log('onerror');
-            const { nativeEvent } = syntheticEvent;
-            console.warn('WebView error: ', nativeEvent);
-          }}
-          onHttpError={(syntheticEvent) => {
-            const { nativeEvent } = syntheticEvent;
-            console.warn('WebView error: ', nativeEvent);
-          }}
-          onMessage={(_data) => console.log(_data.nativeEvent.data)}
+          color={Colors.white}
         />
-      </TouchableWithoutFeedback>
-    );
-  } else return null;
+      }
+      onError={(e) => console.log('error', e)}
+    />
+  );
+};
+
+interface LocalVideoProps {
+  odinId?: string;
+  fileId: string;
+  targetDrive: TargetDrive;
+  globalTransitId?: string;
+  payload: PayloadDescriptor;
+  probablyEncrypted?: boolean;
+  lastModified?: number;
+}
+
+const LocalVideo = ({
+  odinId,
+  fileId,
+  targetDrive,
+  globalTransitId,
+  payload,
+  probablyEncrypted,
+  lastModified,
+}: LocalVideoProps) => {
+  const { data, isLoading } = useVideo({
+    odinId,
+    fileId,
+    targetDrive,
+    videoGlobalTransitId: globalTransitId,
+    probablyEncrypted,
+    payloadKey: payload.key,
+    lastModified,
+  }).fetch;
+
+  return (
+    <Video
+      source={{ uri: data?.uri }}
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        bottom: 0,
+        right: 0,
+      }}
+      controls={true}
+      resizeMode={'contain'}
+      onError={(e) => console.log('error', e)}
+      renderLoader={
+        <ActivityIndicator
+          size="large"
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 20,
+          }}
+          color={Colors.white}
+        />
+      }
+    >
+      {isLoading && (
+        <ActivityIndicator
+          size="large"
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 20,
+          }}
+          color={Colors.white}
+        />
+      )}
+    </Video>
+  );
 };

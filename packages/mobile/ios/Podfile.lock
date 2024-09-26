@@ -53,6 +53,9 @@ PODS:
     - GoogleUtilities/UserDefaults (~> 7.8)
     - nanopb (< 2.30911.0, >= 2.30908.0)
   - fmt (6.2.1)
+  - GCDWebServer (3.5.4):
+    - GCDWebServer/Core (= 3.5.4)
+  - GCDWebServer/Core (3.5.4)
   - glog (0.3.5)
   - GoogleDataTransport (9.4.1):
     - GoogleUtilities/Environment (~> 7.7)
@@ -987,6 +990,9 @@ PODS:
     - React-Core
   - react-native-document-picker (9.3.0):
     - React-Core
+  - react-native-http-bridge-refurbished (1.2.9):
+    - GCDWebServer
+    - React
   - react-native-image-picker (7.1.2):
     - glog
     - RCT-Folly (= 2022.05.16.00)
@@ -1014,12 +1020,12 @@ PODS:
     - glog
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
-  - react-native-video (6.4.2):
+  - react-native-video (6.5.0):
     - glog
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
-    - react-native-video/Video (= 6.4.2)
-  - react-native-video/Video (6.4.2):
+    - react-native-video/Video (= 6.5.0)
+  - react-native-video/Video (6.5.0):
     - glog
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
@@ -1300,6 +1306,7 @@ DEPENDENCIES:
   - "react-native-cameraroll (from `../node_modules/@react-native-camera-roll/camera-roll`)"
   - react-native-compressor (from `../../../node_modules/react-native-compressor`)
   - react-native-document-picker (from `../../../node_modules/react-native-document-picker`)
+  - react-native-http-bridge-refurbished (from `../../../node_modules/react-native-http-bridge-refurbished`)
   - react-native-image-picker (from `../../../node_modules/react-native-image-picker`)
   - "react-native-image-resizer (from `../../../node_modules/@bam.tech/react-native-image-resizer`)"
   - react-native-mmkv-storage (from `../../../node_modules/react-native-mmkv-storage`)
@@ -1308,7 +1315,7 @@ DEPENDENCIES:
   - react-native-quick-crypto (from `../../../node_modules/react-native-quick-crypto`)
   - react-native-safe-area-context (from `../../../node_modules/react-native-safe-area-context`)
   - "react-native-slider (from `../../../node_modules/@react-native-community/slider`)"
-  - react-native-video (from `../../../node_modules/react-native-video`)
+  - react-native-video (from `../node_modules/react-native-video`)
   - react-native-webview (from `../../../node_modules/react-native-webview`)
   - React-nativeconfig (from `../../../node_modules/react-native/ReactCommon`)
   - React-NativeModulesApple (from `../../../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios`)
@@ -1366,6 +1373,7 @@ SPEC REPOS:
     - FirebaseInstallations
     - FirebaseMessaging
     - fmt
+    - GCDWebServer
     - GoogleDataTransport
     - GoogleUtilities
     - JWT
@@ -1452,6 +1460,8 @@ EXTERNAL SOURCES:
     :path: "../../../node_modules/react-native-compressor"
   react-native-document-picker:
     :path: "../../../node_modules/react-native-document-picker"
+  react-native-http-bridge-refurbished:
+    :path: "../../../node_modules/react-native-http-bridge-refurbished"
   react-native-image-picker:
     :path: "../../../node_modules/react-native-image-picker"
   react-native-image-resizer:
@@ -1469,7 +1479,7 @@ EXTERNAL SOURCES:
   react-native-slider:
     :path: "../../../node_modules/@react-native-community/slider"
   react-native-video:
-    :path: "../../../node_modules/react-native-video"
+    :path: "../node_modules/react-native-video"
   react-native-webview:
     :path: "../../../node_modules/react-native-webview"
   React-nativeconfig:
@@ -1577,6 +1587,7 @@ SPEC CHECKSUMS:
   FirebaseInstallations: 60c1d3bc1beef809fd1ad1189a8057a040c59f2e
   FirebaseMessaging: 4d52717dd820707cc4eadec5eb981b4832ec8d5d
   fmt: ff9d55029c625d3757ed641535fd4a75fedc7ce9
+  GCDWebServer: 2c156a56c8226e2d5c0c3f208a3621ccffbe3ce4
   glog: c5d68082e772fa1c511173d6b30a9de2c05a69a2
   GoogleDataTransport: 6c09b596d841063d76d4288cc2d2f42cc36e1e2a
   GoogleUtilities: ea963c370a38a8069cc5f7ba4ca849a60b6d7d15
@@ -1615,6 +1626,7 @@ SPEC CHECKSUMS:
   react-native-cameraroll: da5e6ab056c141650e565f17f0161a924f1dcf8d
   react-native-compressor: 58eeb2c4c9dc4c898c7085d7e72a02f7ea4cfb64
   react-native-document-picker: 5b97e24a7f1a1e4a50a72c540a043f32d29a70a2
+  react-native-http-bridge-refurbished: e2e45508ec1573999ace69a0b880eee8f0e5bab2
   react-native-image-picker: 7c3a279e7a518628910f2ea02917bd3b90049465
   react-native-image-resizer: fd0c333eca55147bd55c5e054cac95dcd0da6814
   react-native-mmkv-storage: cfb6854594cfdc5f7383a9e464bb025417d1721c
@@ -1623,7 +1635,7 @@ SPEC CHECKSUMS:
   react-native-quick-crypto: 82eedfdbd352c8fa861512f80f07d069c411c9b8
   react-native-safe-area-context: a240ad4b683349e48b1d51fed1611138d1bdad97
   react-native-slider: 9cfd2f0af9efe89a3ed372fcda8eca65109aa94c
-  react-native-video: 244d6e4f8f426df9d5cc20915a56194399e9e067
+  react-native-video: 4ef29a37403ecc9b6eaaf18fdcd79917b09a32f9
   react-native-webview: ae503c7787c3bd5bdbda622209c45b961241b2fd
   React-nativeconfig: e700ac3ec3d66329076bd2c2787a204411815d43
   React-NativeModulesApple: f7fa541118d195ac850ca2ea460f338152ced167

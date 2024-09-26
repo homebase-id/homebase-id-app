@@ -63,7 +63,7 @@ export const useMarkMessagesAsRead = ({
         isProcessing.current = false;
       }
     })();
-  }, [messages, conversationMetadata]);
+  }, [messages, conversationMetadata, conversation, markAsRead]);
 
   useEffect(() => {
     if (!conversationMetadata || !messages || !pendingReadTime) return;
@@ -89,5 +89,11 @@ export const useMarkMessagesAsRead = ({
       setMessagesMarkedAsRead(false);
       isProcessing.current = false;
     }
-  }, [messagesMarkedAsRead]);
+  }, [
+    conversationMetadata,
+    messages,
+    messagesMarkedAsRead,
+    pendingReadTime,
+    updateConversationMetadata,
+  ]);
 };

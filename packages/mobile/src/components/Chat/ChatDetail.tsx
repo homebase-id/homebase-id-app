@@ -23,7 +23,6 @@ import {
 } from 'react-native-gifted-chat';
 import React, { useCallback, memo, useMemo, useRef, useEffect, useState } from 'react';
 import {
-  GestureResponderEvent,
   Keyboard,
   Platform,
   Pressable,
@@ -82,6 +81,7 @@ import { MentionDropDown } from './Mention-Dropdown';
 import { LinkPreviewBar } from './Link-Preview-Bar';
 import { LinkPreview } from '@homebase-id/js-lib/media';
 import { tryJsonParse } from '@homebase-id/js-lib/helpers';
+import { EmptyChatContainer } from './EmptyChatContainer';
 
 export type ChatMessageIMessage = IMessage & HomebaseFile<ChatMessage>;
 
@@ -171,11 +171,19 @@ export const ChatDetail = memo(
     );
 
     const onLongPress = useCallback(
-      (e: GestureResponderEvent, message: ChatMessageIMessage) => {
-        const { pageY, locationY } = e.nativeEvent;
-        const y = pageY - locationY;
+      (
+        coords: {
+          x: number;
+          y: number;
+          absoluteX: number;
+          absoluteY: number;
+        },
+        message: ChatMessageIMessage
+      ) => {
+        const { absoluteY, y } = coords;
+        const newY = absoluteY - y;
 
-        doSelectMessage({ coords: { x: 0, y }, message });
+        doSelectMessage({ coords: { x: 0, y: newY }, message });
       },
       [doSelectMessage]
     );
@@ -301,7 +309,6 @@ export const ChatDetail = memo(
           type: [Document.types.pdf, Document.types.doc, Document.types.docx], // Don't add support for all files. Keeping it pdf and docs for now
           mode: 'open',
         });
-        console.log(document);
         document.fileCopyUri = fixDocumentURI(document.fileCopyUri || document.uri);
         const asset: Asset = {
           uri: document.fileCopyUri,
@@ -675,6 +682,23 @@ export const ChatDetail = memo(
       [bottomContainerVisible, handleAttachmentButtonAction, handleImageIconPress]
     );
 
+    const renderMessageImage = useCallback(
+      (prop: MessageImageProps<ChatMessageIMessage>) => (
+        <MediaMessage props={prop} onLongPress={onLongPress} />
+      ),
+      [onLongPress]
+    );
+
+    const renderCustomView = useCallback(
+      (prop: BubbleProps<ChatMessageIMessage>) => <RenderReplyMessageView {...prop} />,
+      []
+    );
+
+    const renderEmptyChat = useCallback(
+      () => <EmptyChatContainer doSend={doSend as (message: { text: string }[]) => void} />,
+      [doSend]
+    );
+
     return (
       <SafeAreaView>
         <GiftedChat<ChatMessageIMessage>
@@ -690,12 +714,8 @@ export const ChatDetail = memo(
           isKeyboardInternallyHandled={true}
           keyboardShouldPersistTaps="never"
           onPaste={onPaste}
-          renderMessageImage={(prop: MessageImageProps<ChatMessageIMessage>) => (
-            <MediaMessage props={prop} onLongPress={onLongPress} />
-          )}
-          renderCustomView={(prop: BubbleProps<ChatMessageIMessage>) => (
-            <RenderReplyMessageView {...prop} />
-          )}
+          renderMessageImage={renderMessageImage}
+          renderCustomView={renderCustomView}
           renderBubble={(prop) => (
             <RenderBubble
               {...prop}
@@ -725,6 +745,7 @@ export const ChatDetail = memo(
             removeClippedSubviews: true,
             windowSize: 15,
           }}
+          renderChatEmpty={renderEmptyChat}
         />
       </SafeAreaView>
     );
@@ -851,7 +872,11 @@ const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
           return (<AuthorName odinId={text.slice(1)} showYou={false} />) as unknown as string;
         },
       },
-      { pattern: URL_PATTERN, style: linkStyle, onPress: (text: string) => openURL(text) },
+      {
+        pattern: URL_PATTERN,
+        style: linkStyle,
+        onPress: (text: string) => openURL(text),
+      },
     ];
   }, []);
 

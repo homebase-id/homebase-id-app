@@ -5,7 +5,7 @@ import { AuthorName } from '../ui/Name';
 import { Avatar } from '../ui/Avatars/Avatar';
 import { UnreachableIdentity } from './UnreachableIdentity';
 import Animated from 'react-native-reanimated';
-import { memo, useCallback, useMemo } from 'react';
+import { memo, useCallback, useMemo, useRef } from 'react';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { HomebaseFile, NewHomebaseFile, SecurityGroupType } from '@homebase-id/js-lib/core';
 import { ChannelDefinition, PostContent, ReactionContext } from '@homebase-id/js-lib/public';
@@ -16,11 +16,13 @@ import { CanReactInfo } from '../../hooks/reactions';
 import { PostMeta, ToGroupBlock } from './Meta/Meta';
 import { ShareContext } from './Interacts/Share/ShareModal';
 import { Ellipsis } from '../ui/Icons/icons';
-import { IconButton } from '../Chat/Chat-app-bar';
 import { PostActionProps } from './Interacts/PostActionModal';
 import { useDotYouClientContext } from 'feed-app-common';
 import { useCheckIdentity } from '../../hooks/checkIdentity/useCheckIdentity';
 import { PostBody } from './Body/PostBody';
+import { IconButton } from '../ui/Buttons';
+import { DoubleTapHeart } from '../ui/DoubleTapHeart';
+import { GestureType } from 'react-native-gesture-handler';
 
 export const PostTeaserCard = memo(
   ({
@@ -133,6 +135,11 @@ export const InnerPostTeaserCard = memo(
       } as StyleProp<ViewStyle>;
     }, [isDarkMode]);
 
+    // This is neeeded to keep a reference of doubleTapGesture. So this would be used
+    // to trigger the double tap animation from the parent component and avoid triggering single Tap
+    // or any other gesture until this fails
+    const doubleTapRef = useRef<GestureType>();
+
     return (
       <Animated.View style={viewStyle}>
         <View style={styles.header}>
@@ -172,7 +179,9 @@ export const InnerPostTeaserCard = memo(
           lastModified={postFile.fileMetadata.updated}
           payloads={postFile.fileMetadata.payloads}
         />
-        <PostMedia post={postFile} />
+        <DoubleTapHeart doubleTapRef={doubleTapRef} postFile={postFile} odinId={odinId}>
+          <PostMedia post={postFile} doubleTapRef={doubleTapRef} />
+        </DoubleTapHeart>
         <PostInteracts
           postFile={postFile}
           onCommentPress={onCommentPress}

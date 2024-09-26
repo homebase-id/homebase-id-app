@@ -59,7 +59,7 @@ export const useLinkMetadata = ({
       return getPayloadAsJsonOverPeer<LinkPreview[]>(dotYouClient, odinId, targetDrive, fileId, payloadKey);
     }
     return getPayloadAsJson<LinkPreview[]>(dotYouClient, targetDrive, fileId, payloadKey);
-  }
+  };
 
   return useQuery({
     queryKey: ['link-metadata', targetDrive.alias, fileId, payloadKey],

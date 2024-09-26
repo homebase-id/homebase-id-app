@@ -1,19 +1,20 @@
 import {
-  BottomSheetFlatList,
   BottomSheetFooter,
   BottomSheetFooterProps,
   BottomSheetModal,
+  BottomSheetSectionList,
   TouchableHighlight,
 } from '@gorhom/bottom-sheet';
-import { forwardRef, memo, useCallback, useState } from 'react';
+import { forwardRef, memo, useCallback, useMemo, useState } from 'react';
 import { Text } from '../ui/Text/Text';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { Colors } from '../../app/Colors';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
-import { useAllConnections } from 'feed-app-common';
+import { t, useAllConnections } from 'feed-app-common';
 import {
   ActivityIndicator,
-  ListRenderItemInfo,
+  SectionListData,
+  SectionListRenderItemInfo,
   StyleSheet,
   TouchableOpacity,
   View,
@@ -30,17 +31,28 @@ import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { ChatStackParamList } from '../../app/ChatStack';
 import { ErrorNotification } from '../ui/Alert/ErrorNotification';
 import useImage from '../ui/OdinImage/hooks/useImage';
-import { ChatDrive, UnifiedConversation } from '../../provider/chat/ConversationProvider';
+import {
+  ChatDrive,
+  ConversationWithYourself,
+  UnifiedConversation,
+} from '../../provider/chat/ConversationProvider';
 import { useConversations } from '../../hooks/chat/useConversations';
 import { EmbeddedThumb, HomebaseFile } from '@homebase-id/js-lib/core';
 import { GroupAvatar } from '../ui/Avatars/Avatar';
 import { getNewId } from '@homebase-id/js-lib/helpers';
-import { useAuth } from '../../hooks/auth/useAuth';
 import { useAudio } from '../ui/OdinAudio/hooks/useAudio';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useVideo } from '../../hooks/video/useVideo';
 import { ImageSource } from '../../provider/image/RNImageProvider';
 import { Backdrop } from '../ui/Modal/Backdrop';
+import { useErrors } from '../../hooks/errors/useErrors';
+import { getImageSize } from '../../utils/utils';
+import {
+  ConversationWithRecentMessage,
+  useConversationsWithRecentMessage,
+} from '../../hooks/chat/useConversationsWithRecentMessage';
+import ConversationTile from './Conversation-tile';
+import { ConversationTileWithYourself } from '../Conversation/ConversationTileWithYourself';
 
 export type ChatForwardModalProps = {
   onClose: () => void;
@@ -50,23 +62,26 @@ export type ChatForwardModalProps = {
 /// Limit to forward maximum number of contacts
 export const maxConnectionsForward = 3;
 
-export const ChatForwardModal = forwardRef(
-  (props: ChatForwardModalProps, ref: React.Ref<BottomSheetModalMethods>) => {
+export const ChatForwardModal = memo(
+  forwardRef((props: ChatForwardModalProps, ref: React.Ref<BottomSheetModalMethods>) => {
     const { onClose, selectedMessage: message } = props;
     const { isDarkMode } = useDarkMode();
     const { data: connections } = useAllConnections(true);
+    const { data: allConversations } = useConversationsWithRecentMessage().all;
     const { mutateAsync: createConversation } = useConversation().create;
     const { mutate: sendMessage, error } = useChatMessage().send;
     const [selectedContact, setselectedContact] = useState<DotYouProfile[]>([]);
-    const [selectedGroup, setselectedGroup] = useState<HomebaseFile<UnifiedConversation>[]>([]);
+    const [selectedConversation, setSelectedConversation] = useState<
+      HomebaseFile<UnifiedConversation>[]
+    >([]);
     const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
-    const { authToken } = useAuth();
     const { bottom } = useSafeAreaInsets();
     const [isLoading, setIsLoading] = useState(false);
+    const { add } = useErrors();
 
-    const getAudio = useAudio().getFromCache;
+    const getAudio = useAudio().fetchManually;
     const { getFromCache } = useImage();
-    const { getFromCache: getVideoData } = useVideo({
+    const { fetchManually: getVideoData } = useVideo({
       fileId: message?.fileId,
       targetDrive: ChatDrive,
     });
@@ -75,65 +90,94 @@ export const ChatForwardModal = forwardRef(
       if (selectedContact.length > 0) {
         setselectedContact([]);
       }
-      if (selectedGroup.length > 0) {
-        setselectedGroup([]);
+      if (selectedConversation.length > 0) {
+        setSelectedConversation([]);
       }
       onClose();
-    }, [onClose, selectedContact.length, selectedGroup.length]);
+    }, [onClose, selectedContact.length, selectedConversation.length]);
 
     const onForward = useCallback(async () => {
-      if ((selectedContact.length === 0 && selectedGroup.length === 0) || !message) return;
-
+      if ((selectedContact.length === 0 && selectedConversation.length === 0) || !message) return;
+      setIsLoading(true);
       async function forwardMessages(
         conversation: HomebaseFile<UnifiedConversation>,
         message: ChatMessageIMessage
       ) {
-        setIsLoading(true);
-        let imageSource: ImageSource[] = [];
+        const messagePayloads: ImageSource[] = [];
         if (message.fileMetadata.payloads.length > 0) {
           const payloads = message.fileMetadata.payloads;
-          imageSource = (
-            await Promise.all(
-              payloads.map(async (payload) => {
-                if (payload.contentType.startsWith('image')) {
-                  const image = getFromCache(undefined, message.fileId, payload.key, ChatDrive);
-                  if (!image?.imageData) return;
-                  return {
-                    uri: image.imageData.url,
-                    width: image.imageData?.naturalSize?.pixelWidth,
-                    height: image.imageData?.naturalSize?.pixelHeight,
-                    type: image.imageData?.type,
-                  } as ImageSource;
+
+          for (const payload of payloads) {
+            if (payload.contentType.startsWith('image')) {
+              const image = getFromCache(undefined, message.fileId, payload.key, ChatDrive);
+              let imageSize: {
+                width: number;
+                height: number;
+              } = {
+                width: payload.previewThumbnail?.pixelWidth || 0,
+                height: payload.previewThumbnail?.pixelHeight || 0,
+              };
+
+              if (image?.imageData) {
+                // If the image size is undefined, fetch the image size
+                if (imageSize.width === 0 || imageSize.height === 0) {
+                  await getImageSize(image.imageData.url).then((res) => {
+                    if (res instanceof Error) {
+                      imageSize = { width: 500, height: 500 };
+                      return;
+                    }
+                    imageSize = res;
+                  });
                 }
-                if (payload.contentType.startsWith('video')) {
-                  if (!authToken) return;
-                  const downloadPayload = await getVideoData(payload.key);
-                  if (!downloadPayload) return;
-                  return {
-                    uri: downloadPayload.url,
-                    width: message.fileMetadata.appData.previewThumbnail?.pixelWidth || 1920,
-                    height: message.fileMetadata.appData.previewThumbnail?.pixelHeight || 1080,
-                    type: downloadPayload.type,
-                  } as ImageSource;
-                }
-                if (payload.contentType.startsWith('audio')) {
-                  const audio = getAudio(message.fileId, payload.key, ChatDrive);
-                  if (!audio) return;
-                  return {
-                    uri: audio.url,
-                    type: audio.type,
-                  } as ImageSource;
-                }
-                return;
-              })
-            )
-          ).filter(Boolean) as ImageSource[];
+                messagePayloads.push({
+                  uri: image.imageData.url,
+                  width: imageSize.width,
+                  height: imageSize.height,
+                  type: image.imageData?.type,
+                } as ImageSource);
+              }
+            }
+            if (
+              payload.contentType.startsWith('video')
+
+              //TODO Add support HLS video || payload.contentType === 'application/vnd.apple.mpegurl'
+            ) {
+              const downloadPayload = await getVideoData(payload.key);
+              if (downloadPayload) {
+                messagePayloads.push({
+                  uri: downloadPayload.uri,
+                  width: message.fileMetadata.appData.previewThumbnail?.pixelWidth || 1920,
+                  height: message.fileMetadata.appData.previewThumbnail?.pixelHeight || 1080,
+                  type: downloadPayload.type,
+                } as ImageSource);
+              }
+            }
+            if (payload.contentType.startsWith('audio')) {
+              const audio = await getAudio(message.fileId, payload.key, ChatDrive);
+              if (audio) {
+                messagePayloads.push({
+                  uri: audio.url,
+                  type: audio.type,
+                } as ImageSource);
+              }
+            }
+          }
         }
-        setIsLoading(false);
+
+        if (!message.fileMetadata.appData.content.message && messagePayloads.length === 0) {
+          add(
+            new Error(
+              "[500]: Looks like the payload data isn't present in the cache or hasn't been downloaded."
+            ),
+            "Can't forward message",
+            'No message or media to forward'
+          );
+          return;
+        }
         return sendMessage({
           conversation,
           message: message.fileMetadata.appData.content.message,
-          files: imageSource,
+          files: messagePayloads,
           chatId: getNewId(),
           userDate: new Date().getTime(),
         });
@@ -152,9 +196,9 @@ export const ChatForwardModal = forwardRef(
         );
       }
 
-      if (selectedGroup.length > 0) {
+      if (selectedConversation.length > 0) {
         promises.push(
-          ...selectedGroup.flatMap((group) => {
+          ...selectedConversation.flatMap((group) => {
             return forwardMessages(group, message);
           })
         );
@@ -165,7 +209,6 @@ export const ChatForwardModal = forwardRef(
         if (selectedContact.length === 1) {
           const contact = selectedContact[0];
 
-          // TODO: needs to change to fetch instead of still trying to create
           const newConversation = await createConversation({
             recipients: [contact.odinId],
           });
@@ -173,8 +216,8 @@ export const ChatForwardModal = forwardRef(
             convoId: newConversation.fileMetadata.appData.uniqueId as string,
           });
         }
-        if (selectedGroup.length === 1) {
-          const group = selectedGroup[0];
+        if (selectedConversation.length === 1) {
+          const group = selectedConversation[0];
           navigation.navigate('ChatScreen', {
             convoId: group.fileMetadata.appData.uniqueId as string,
           });
@@ -188,7 +231,7 @@ export const ChatForwardModal = forwardRef(
       }
       onDismiss();
     }, [
-      authToken,
+      add,
       createConversation,
       getAudio,
       getFromCache,
@@ -197,53 +240,9 @@ export const ChatForwardModal = forwardRef(
       navigation,
       onDismiss,
       selectedContact,
-      selectedGroup,
+      selectedConversation,
       sendMessage,
     ]);
-
-    const renderItem = useCallback(
-      ({ item, index }: ListRenderItemInfo<DotYouProfile>) => (
-        <>
-          {index === 0 && (
-            <Text
-              style={{
-                ...styles.headerText,
-                textAlign: 'left',
-                fontSize: 18,
-                marginLeft: 16,
-                marginTop: 16,
-              }}
-            >
-              Contacts
-            </Text>
-          )}
-          <ContactTile
-            item={item}
-            onPress={() => {
-              if (selectedContact.includes(item)) {
-                setselectedContact(selectedContact.filter((contact) => contact !== item));
-              } else {
-                if (selectedContact.length === maxConnectionsForward) {
-                  Toast.show({
-                    type: 'info',
-                    text1: 'Forward limit reached',
-                    text2: `You can only forward to ${maxConnectionsForward} contacts at a time`,
-                    position: 'bottom',
-                    visibilityTime: 2000,
-                  });
-
-                  return;
-                }
-                setselectedContact([...selectedContact, item]);
-              }
-            }}
-            isSelected={selectedContact.includes(item)}
-            selectMode
-          />
-        </>
-      ),
-      [selectedContact]
-    );
 
     const renderFooter = useCallback(
       (props: BottomSheetFooterProps) => (
@@ -258,7 +257,7 @@ export const ChatForwardModal = forwardRef(
           }}
         >
           <View style={styles.namesContainer}>
-            {selectedGroup.map((group) => {
+            {selectedConversation.map((group) => {
               return (
                 <Text
                   key={group.fileId}
@@ -323,7 +322,7 @@ export const ChatForwardModal = forwardRef(
           </TouchableHighlight>
         </BottomSheetFooter>
       ),
-      [bottom, isDarkMode, isLoading, onForward, selectedContact, selectedGroup]
+      [bottom, isDarkMode, isLoading, onForward, selectedContact, selectedConversation]
     );
 
     return (
@@ -342,28 +341,250 @@ export const ChatForwardModal = forwardRef(
           backgroundColor: isDarkMode ? Colors.gray[100] : Colors.gray[500],
         }}
         footerComponent={
-          selectedContact.length > 0 || selectedGroup.length > 0 ? renderFooter : undefined
+          selectedContact.length > 0 || selectedConversation.length > 0 ? renderFooter : undefined
         }
       >
         <ErrorNotification error={error} />
         <Text style={styles.headerText}>Forward To</Text>
-        <BottomSheetFlatList
-          data={connections}
-          keyExtractor={(item) => item.odinId}
-          ListHeaderComponent={
-            <ListHeaderComponent
-              selectedGroup={selectedGroup}
-              setselectedGroup={setselectedGroup}
-            />
-          }
-          renderItem={renderItem}
+        <InnerForwardListPage
+          connections={connections}
+          allConversations={allConversations}
+          selectedContact={selectedContact}
+          setSelectedContact={setselectedContact}
+          selectedConversation={selectedConversation}
+          setSelectedConversation={setSelectedConversation}
         />
       </BottomSheetModal>
+    );
+  })
+);
+const InnerForwardListPage = memo(
+  (props: {
+    connections: DotYouProfile[] | undefined;
+    allConversations: ConversationWithRecentMessage[] | undefined;
+    selectedContact: DotYouProfile[];
+    setSelectedContact: React.Dispatch<React.SetStateAction<DotYouProfile[]>>;
+    selectedConversation: HomebaseFile<UnifiedConversation>[];
+    setSelectedConversation: React.Dispatch<
+      React.SetStateAction<HomebaseFile<UnifiedConversation>[]>
+    >;
+  }) => {
+    const {
+      connections,
+      allConversations,
+      selectedContact,
+      setSelectedContact,
+      selectedConversation,
+      setSelectedConversation,
+    } = props;
+
+    const onSelectConversation = useCallback(
+      (conversation: HomebaseFile<UnifiedConversation>) => {
+        setSelectedConversation((selectedConversation) => {
+          if (selectedConversation.includes(conversation)) {
+            return selectedConversation.filter((c) => c !== conversation);
+          } else {
+            if (selectedContact.length + selectedConversation.length === maxConnectionsForward) {
+              Toast.show({
+                type: 'info',
+                text1: t('Forward limit reached'),
+                text2: t('You can only forward to {0} contacts at a time', maxConnectionsForward),
+                position: 'bottom',
+                visibilityTime: 2000,
+              });
+
+              return selectedConversation;
+            }
+            return [...selectedConversation, conversation];
+          }
+        });
+      },
+      [setSelectedConversation, selectedContact.length]
+    );
+
+    const onSelectContact = useCallback(
+      (contact: DotYouProfile) => {
+        setSelectedContact((selectedContact) => {
+          if (selectedContact.includes(contact)) {
+            return selectedContact.filter((c) => c !== contact);
+          } else {
+            if (selectedContact.length + selectedConversation.length === maxConnectionsForward) {
+              Toast.show({
+                type: 'info',
+                text1: t('Forward limit reached'),
+                text2: t('You can only forward to {0} contacts at a time', maxConnectionsForward),
+                position: 'bottom',
+                visibilityTime: 2000,
+              });
+
+              return selectedContact;
+            }
+            return [...selectedContact, contact];
+          }
+        });
+      },
+      [setSelectedContact, selectedConversation.length]
+    );
+
+    const sectionData = useMemo((): ReadonlyArray<
+      SectionListData<
+        ConversationWithRecentMessage | DotYouProfile,
+        | {
+            id: string;
+            title: string;
+            data: ConversationWithRecentMessage[] | undefined;
+          }
+        | {
+            id: string;
+            title: string;
+            data: DotYouProfile[] | undefined;
+          }
+        | undefined
+      >
+    > => {
+      return [
+        {
+          id: 'recent',
+          title: t('Recents'),
+          data: allConversations?.slice(0, 5) || [], // Show top 5 recent conversations
+          keyExtractor: (item) => (item as ConversationWithRecentMessage).fileId,
+        },
+        {
+          id: 'contacts',
+          title: t('Contacts'),
+          data: connections || [],
+          keyExtractor: (item) => (item as DotYouProfile).odinId,
+        },
+      ];
+    }, [connections, allConversations]);
+
+    const renderSectionHeader = useCallback(
+      ({
+        section: { title, data },
+      }: {
+        section: SectionListData<
+          ConversationWithRecentMessage | DotYouProfile,
+          | {
+              id: string;
+              title: string;
+              data: ConversationWithRecentMessage[] | undefined;
+            }
+          | {
+              id: string;
+              title: string;
+              data: DotYouProfile[] | undefined;
+            }
+          | undefined
+        >;
+      }) => {
+        if (data?.length === 0) {
+          return null;
+        }
+        return (
+          <Text
+            style={{
+              ...styles.headerText,
+              textAlign: 'left',
+              fontSize: 18,
+              marginLeft: 16,
+              marginTop: 16,
+            }}
+          >
+            {title}
+          </Text>
+        );
+      },
+      []
+    );
+
+    const renderItem = useCallback(
+      ({
+        item,
+        section,
+      }: SectionListRenderItemInfo<
+        ConversationWithRecentMessage | DotYouProfile,
+        | {
+            id: string;
+            title: string;
+            data: ConversationWithRecentMessage[] | undefined;
+          }
+        | {
+            id: string;
+            title: string;
+            data: DotYouProfile[] | undefined;
+          }
+        | undefined
+      >) => {
+        if (section.id === 'recent') {
+          if (section.data.length === 0) {
+            return null;
+          }
+          const conversation = item as unknown as ConversationWithRecentMessage;
+          return (
+            <ConversationTile
+              conversation={conversation.fileMetadata.appData.content}
+              conversationId={conversation.fileMetadata.appData.uniqueId}
+              selectMode
+              isSelected={selectedConversation.includes(conversation)}
+              onPress={() => onSelectConversation(conversation)}
+              odinId={conversation.fileMetadata.appData.content.recipients[0]}
+              fileId={conversation.fileId}
+              previewThumbnail={conversation.fileMetadata.appData.previewThumbnail}
+              payloadKey={conversation.fileMetadata.payloads?.[0]?.key}
+              style={{ padding: 0, paddingHorizontal: 16, paddingVertical: 10 }}
+            />
+          );
+        }
+
+        if (section.id === 'contacts') {
+          const contact = item as unknown as DotYouProfile;
+          return (
+            <ContactTile
+              item={contact}
+              onPress={() => onSelectContact(contact)}
+              isSelected={selectedContact.includes(contact)}
+              selectMode
+            />
+          );
+        }
+        return null;
+      },
+      [onSelectContact, onSelectConversation, selectedContact, selectedConversation]
+    );
+
+    // No need to render yet, the data is still loading and is offline available
+    if (!connections || !allConversations) {
+      return null;
+    }
+    return (
+      <BottomSheetSectionList
+        sections={sectionData}
+        renderSectionHeader={renderSectionHeader}
+        renderItem={renderItem}
+        stickySectionHeadersEnabled={false}
+        ListHeaderComponent={
+          <ConversationTileWithYourself
+            selecMode
+            isSelected={selectedConversation.includes(ConversationWithYourself)}
+            onPress={() => onSelectConversation(ConversationWithYourself)}
+          />
+        }
+        ListFooterComponent={
+          //Actually a Group Component
+          <GroupConversationsComponent
+            selectedGroup={selectedConversation}
+            setselectedGroup={setSelectedConversation}
+          />
+        }
+        ListFooterComponentStyle={{
+          paddingBottom: 100,
+        }}
+      />
     );
   }
 );
 
-export const ListHeaderComponent = memo(
+export const GroupConversationsComponent = memo(
   ({
     selectedGroup,
     setselectedGroup,

@@ -10,6 +10,7 @@
 
 'use strict';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type BlobData = any;
 type BlobOptions = {
   type?: string;
@@ -161,9 +162,9 @@ class Blob {
       }, 100);
     });
 
-    const destinationUri = `file://${CachesDirectoryPath}/${this.data.blobId}-encrypted.${
-      this.data.type.split('/')[1]
-    }`;
+    const destinationUri = `file://${CachesDirectoryPath}/${this.data.blobId}-encrypted.${getExtensionForMimeType(
+      this.data.type
+    )}`;
 
     const encryptStatus = await OdinBlobModule.encryptFileWithAesCbc16(
       this.uri,
@@ -248,12 +249,17 @@ class Blob {
   }
 }
 
-const getExtensionForMimeType = (mimeType: string) => {
+export const getExtensionForMimeType = (mimeType: string | undefined | null) => {
+  if (!mimeType) return 'bin';
   return mimeType === 'audio/mpeg'
     ? 'mp3'
     : mimeType === 'image/svg+xml'
       ? 'svg'
-      : mimeType.split('/')[1];
+      : mimeType === 'application/vnd.apple.mpegurl'
+        ? 'm3u8'
+        : mimeType === 'video/mp2t'
+          ? 'ts'
+          : mimeType.split('/')[1];
 };
 
 export { Blob as OdinBlob };

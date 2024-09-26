@@ -18,6 +18,7 @@ import { Backdrop } from '../../../ui/Modal/Backdrop';
 import { Text } from '../../../ui/Text/Text';
 import {
   Linking,
+  ListRenderItemInfo,
   Platform,
   SectionListData,
   SectionListRenderItemInfo,
@@ -28,7 +29,6 @@ import {
 } from 'react-native';
 import { useDarkMode } from '../../../../hooks/useDarkMode';
 import { Colors } from '../../../../app/Colors';
-import { IconButton } from '../../../Chat/Chat-app-bar';
 import {
   ChainLink,
   Facebook,
@@ -50,7 +50,7 @@ import {
   ConversationWithYourself,
   UnifiedConversation,
 } from '../../../../provider/chat/ConversationProvider';
-import { ListHeaderComponent, maxConnectionsForward } from '../../../Chat/Chat-Forward';
+import { GroupConversationsComponent, maxConnectionsForward } from '../../../Chat/Chat-Forward';
 import { ChatStackParamList } from '../../../../app/ChatStack';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { t, useAllConnections } from 'feed-app-common';
@@ -63,9 +63,11 @@ import {
 import { getNewId } from '@homebase-id/js-lib/helpers';
 import { ErrorNotification } from '../../../ui/Alert/ErrorNotification';
 import { AuthorName } from '../../../ui/Name';
-import { ConversationTileWithYourself } from '../../../../pages/conversations-page';
 import ConversationTile from '../../../Chat/Conversation-tile';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ConversationTileWithYourself } from '../../../Conversation/ConversationTileWithYourself';
+import { IconButton } from '../../../ui/Buttons';
+import { useBottomSheetBackHandler } from '../../../../hooks/useBottomSheetBackHandler';
 
 export type ShareModalMethods = {
   setShareContext: (context: ShareContext) => void;
@@ -113,6 +115,14 @@ const ShareModalListWrapper = memo(
       const [selectedConversation, setSelectedConversation] = useState<
         HomebaseFile<UnifiedConversation>[]
       >([]);
+      const { handleSheetPositionChange } = useBottomSheetBackHandler(bottomSheetRef);
+
+      const onClose = useCallback(() => {
+        setContext(undefined);
+        setselectedContact([]);
+        setSelectedConversation([]);
+        bottomSheetRef.current?.dismiss();
+      }, []);
 
       useImperativeHandle(ref, () => {
         return {
@@ -122,14 +132,7 @@ const ShareModalListWrapper = memo(
           },
           dismiss: onClose,
         };
-      }, []);
-
-      const onClose = useCallback(() => {
-        setContext(undefined);
-        setselectedContact([]);
-        setSelectedConversation([]);
-        bottomSheetRef.current?.dismiss();
-      }, []);
+      }, [onClose]);
 
       const renderFooter = useCallback(
         (props: BottomSheetFooterProps) => {
@@ -146,7 +149,7 @@ const ShareModalListWrapper = memo(
           }
           return <AppFooter context={context} {...props} />;
         },
-        [context, selectedContact, selectedConversation]
+        [context, onClose, selectedContact, selectedConversation]
       );
 
       const { isDarkMode } = useDarkMode();
@@ -154,6 +157,7 @@ const ShareModalListWrapper = memo(
       return (
         <BottomSheetModal
           ref={bottomSheetRef}
+          onChange={handleSheetPositionChange}
           backdropComponent={Backdrop}
           onDismiss={onClose}
           enableDismissOnClose
@@ -272,6 +276,27 @@ const AppFooter = memo(({ context, ...props }: AppFooterProps) => {
     [context]
   );
 
+  const renderButton = useCallback(
+    ({
+      item,
+    }: ListRenderItemInfo<{
+      title: string;
+      icon: React.ReactNode;
+      onPress: () => void;
+    }>) => (
+      <IconButton
+        icon={item.icon}
+        style={{
+          backgroundColor: isDarkMode ? Colors.gray[800] : Colors.gray[100],
+          borderRadius: 36,
+        }}
+        title={item.title}
+        onPress={item.onPress}
+      />
+    ),
+    [isDarkMode]
+  );
+
   return (
     <BottomSheetFooter
       {...props}
@@ -295,17 +320,7 @@ const AppFooter = memo(({ context, ...props }: AppFooterProps) => {
           paddingBottom: bottom,
         }}
         keyExtractor={(item) => item.title}
-        renderItem={({ item }) => (
-          <IconButton
-            icon={item.icon}
-            style={{
-              backgroundColor: isDarkMode ? Colors.gray[800] : Colors.gray[100],
-              borderRadius: 36,
-            }}
-            title={item.title}
-            onPress={item.onPress}
-          />
-        )}
+        renderItem={renderButton}
       />
     </BottomSheetFooter>
   );
@@ -332,7 +347,6 @@ const SelectedFooter = memo(
       }
 
       async function forwardMessages(conversation: HomebaseFile<UnifiedConversation>) {
-        //TODO: Handle a case where if a conversation doesn't exist and a command needs to be sent
         return sendMessage({
           conversation,
           message: `${context?.title || ''}${context?.href}`,
@@ -366,7 +380,6 @@ const SelectedFooter = memo(
         if (selectedContact.length === 1) {
           const contact = selectedContact[0];
 
-          // TODO: needs to change to fetch instead of still trying to create
           const conversation = await createConversation({
             recipients: [contact.odinId],
           });
@@ -389,10 +402,10 @@ const SelectedFooter = memo(
       }
       onClose();
     }, [
-      context?.href,
-      context?.title,
+      context,
       createConversation,
       navigation,
+      onClose,
       selectedContact,
       selectedConversation,
       sendMessage,
@@ -685,7 +698,7 @@ const ShareModalList = memo(
         }
         ListFooterComponent={
           //Actually a Group Component
-          <ListHeaderComponent
+          <GroupConversationsComponent
             selectedGroup={selectedConversation}
             setselectedGroup={setSelectedConversation}
           />

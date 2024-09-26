@@ -5,12 +5,13 @@ import {
   EmbeddedThumb,
 } from '@homebase-id/js-lib/core';
 import { ThumbnailInstruction } from '@homebase-id/js-lib/media';
-import { base64ToUint8Array, uint8ArrayToBase64 } from '@homebase-id/js-lib/helpers';
+import { base64ToUint8Array, getNewId, uint8ArrayToBase64 } from '@homebase-id/js-lib/helpers';
 import { Platform } from 'react-native';
-import { readFile } from 'react-native-fs';
+import { CachesDirectoryPath, copyFile, readFile, stat, unlink } from 'react-native-fs';
 import ImageResizer, { ResizeFormat } from '@bam.tech/react-native-image-resizer';
 import { ImageSource } from './RNImageProvider';
-import { OdinBlob } from '../../../polyfills/OdinBlob';
+import { getExtensionForMimeType, OdinBlob } from '../../../polyfills/OdinBlob';
+import { isBase64ImageURI } from '../../utils/utils';
 
 export const baseThumbSizes: ThumbnailInstruction[] = [
   { quality: 75, width: 250, height: 250 },
@@ -49,9 +50,40 @@ export const createThumbnails = async (
   tinyThumb: EmbeddedThumb;
   additionalThumbnails: ThumbnailFile[];
 }> => {
+  if (!photo.filepath && !photo.uri) throw new Error('No filepath found in image source');
+  let copyOfSourcePath = photo.filepath || photo.uri as string;
+
+
+  if (!isBase64ImageURI(copyOfSourcePath)) {
+    // We take a copy of the file, as it can be a virtual file that is not accessible by the native code; Eg: ImageResizer
+    copyOfSourcePath = `file://${CachesDirectoryPath}/${getNewId()}.${getExtensionForMimeType(photo.type)}`;
+    await copyFile((photo.filepath || photo.uri) as string, copyOfSourcePath);
+
+    const fileStats = await stat(copyOfSourcePath);
+    if (fileStats.size < 1) {
+      await unlink(copyOfSourcePath);
+      throw new Error('No image data found');
+    }
+  }
+
+  const adaptedPhoto = { ...photo, filepath: copyOfSourcePath, uri: copyOfSourcePath };
+
+  const result = innerCreateThumbnails(adaptedPhoto, key, contentType, thumbSizes);
+  return result;
+};
+
+const innerCreateThumbnails = async (
+  photo: ImageSource,
+  key: string,
+  contentType?: ImageContentType,
+  thumbSizes?: ThumbnailInstruction[]
+): Promise<{
+  naturalSize: ImageSize;
+  tinyThumb: EmbeddedThumb;
+  additionalThumbnails: ThumbnailFile[];
+}> => {
   if (contentType === svgType) {
-    if (!photo.filepath && !photo.uri) throw new Error('No filepath found in image source');
-    const vectorThumb = await createVectorThumbnail((photo.filepath || photo.uri) as string, key);
+    const vectorThumb = await createVectorThumbnail(photo.filepath || (photo.uri as string), key);
 
     return {
       tinyThumb: await getEmbeddedThumbOfThumbnailFile(vectorThumb.thumb, vectorThumb.naturalSize),
@@ -129,7 +161,7 @@ const createVectorThumbnail = async (
     thumb: {
       pixelWidth: 50,
       pixelHeight: 50,
-      payload: new OdinBlob([imageBytes], { type: svgType }) as any as Blob,
+      payload: new OdinBlob([imageBytes], { type: svgType }) as unknown as Blob,
       key,
     },
   };
@@ -145,20 +177,42 @@ const createImageThumbnail = async (
 
   return createResizedImage(photo, instruction, format).then(async (resizedData) => {
     return {
-      naturalSize: {
-        pixelWidth: photo.width,
-        pixelHeight: photo.height,
-      },
+      naturalSize: rotateNaturalSize(photo, resizedData),
       thumb: {
         pixelWidth: resizedData.width,
         pixelHeight: resizedData.height,
         payload: new OdinBlob(resizedData.path, {
           type: `image/${instruction.type || format}`,
-        }) as any as Blob,
+        }) as unknown as Blob,
         key,
       },
     };
   });
+};
+
+const rotateNaturalSize = (
+  natural: { width: number; height: number },
+  resized: { width: number; height: number }
+) => {
+  const naturalAspectRatio = natural.width / natural.height;
+  const resizedAspectRatio = resized.width / resized.height;
+
+  // If the aspect ratios are equal, no 90° or 270° rotation
+  // Error margin of 0.25 to account for rounding errors as the resized version is smaller so the aspect ratio is less precise
+  if (Math.abs(naturalAspectRatio - resizedAspectRatio) < 0.25) {
+    return {
+      pixelWidth: natural.width,
+      pixelHeight: natural.height,
+    };
+  }
+
+  // If the aspect ratio is inverted (flipped), we assume 90° or 270° rotation
+  else {
+    return {
+      pixelWidth: natural.height,
+      pixelHeight: natural.width,
+    };
+  }
 };
 
 export const createResizedImage = async (

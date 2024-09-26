@@ -1,3 +1,4 @@
+import { getNewId } from '@homebase-id/js-lib/helpers';
 import { InfiniteData } from '@tanstack/react-query';
 import { Image, Linking } from 'react-native';
 import { CachesDirectoryPath, copyFile } from 'react-native-fs';
@@ -15,6 +16,7 @@ export function millisToMinutesAndSeconds(millis: number | undefined): string {
 
 export async function openURL(url: string): Promise<void> {
     if (!url) return;
+    url = url.startsWith('http') ? url : `https://${url}`;
     if (await InAppBrowser.isAvailable()) {
         await InAppBrowser.open(url, {
             enableUrlBarHiding: false,
@@ -92,20 +94,13 @@ export function fixDocumentURI(url: string): string {
 
 }
 
-export async function fixContentURI(url: string): Promise<string> {
-    if (url.startsWith('content://')) {
-        const uriComponents = url.split('/');
-        const fileNameAndExtension = uriComponents[uriComponents.length - 1];
-        const destPath = `${CachesDirectoryPath}/${fileNameAndExtension}`;
+export async function fixContentURI(url: string, format?: string): Promise<string> {
+    if (url.startsWith('content://') && format) {
+        const destPath = `${CachesDirectoryPath}/${getNewId()}.${format}`;
         await copyFile(url, destPath);
         return `file://${destPath}`;
-
     }
-    if (url.startsWith('file://')) {
-        url = decodeURI(url);
-    }
-
-    return url;
+    return decodeURI(url);
 }
 
 // Utility function to convert Image.getSize to a promise
@@ -136,6 +131,14 @@ export const flattenInfinteData = <T>(
         .sort(sortFn)
         .slice(0, pageSize ? rawData?.pages.length * pageSize : undefined) || []) as T[];
 };
+
+export function isBase64ImageURI(url: string): boolean {
+    // Regular expression to check for a Base64 image URI
+    const base64ImagePattern = /^data:image\/(png|jpeg|jpg|gif|bmp|svg\+xml);base64,([A-Za-z0-9+/=]+)$/;
+
+    // Test the given URL against the regex pattern
+    return base64ImagePattern.test(url);
+}
 
 // Regular expression for URL parsing
 export const URL_PATTERN = new RegExp(

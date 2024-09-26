@@ -1,22 +1,21 @@
 import { InfiniteData, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  RawReactionContent,
+  EmojiReactionSummary,
   ReactionContext,
   removeComment,
+  RawReactionContent,
   removeEmojiReaction,
-  saveComment,
   saveEmojiReaction,
 } from '@homebase-id/js-lib/public';
 
 import { UseCommentsVal } from './comments/useComments';
 
-import {
-  HomebaseFile,
-  EmojiReactionSummary,
-  NewHomebaseFile,
-  ReactionFile,
-} from '@homebase-id/js-lib/core';
+import { HomebaseFile, NewHomebaseFile, ReactionFile } from '@homebase-id/js-lib/core';
 import { useDotYouClientContext } from 'feed-app-common';
+import {
+  RawReactionContent as RNRawReactionContent,
+  saveComment,
+} from '../../provider/feed/RNPostReactionProvider';
 
 export const useReaction = () => {
   const queryClient = useQueryClient();
@@ -29,7 +28,7 @@ export const useReaction = () => {
     context: ReactionContext;
     commentData:
       | Omit<HomebaseFile<ReactionFile>, 'serverMetadata'>
-      | Omit<NewHomebaseFile<RawReactionContent>, 'serverMetadata'>;
+      | Omit<NewHomebaseFile<RNRawReactionContent>, 'serverMetadata'>;
   }) => {
     return await saveComment(dotYouClient, context, {
       ...commentData,

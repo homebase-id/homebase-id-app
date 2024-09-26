@@ -7,15 +7,18 @@
     "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended",
     "plugin:react/recommended",
-    "plugin:react/jsx-runtime"
+    "plugin:react/jsx-runtime",
   ],
   "rules": {
     "react/no-children-prop": "off",
-    "ts-ignore": "off"
+    "ts-ignore": "off",
+    "@typescript-eslint/func-call-spacing": "off",
+    "@typescript-eslint/no-duplicate-enum-values": "off",
+    "@typescript-eslint/no-unused-expressions": ["error", { "allowShortCircuit": true }],
   },
   "settings": {
     "react": {
-      "version": "detect"
-    }
-  }
+      "version": "detect",
+    },
+  },
 }

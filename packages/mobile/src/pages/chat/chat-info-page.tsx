@@ -63,7 +63,7 @@ export const ChatInfoPage = memo((prop: ChatInfoProp) => {
       (conversationContent as any).version ? (
         <TextButton
           title="Edit"
-          style={{ marginRight: 8 }}
+          unFilledStyle={{ marginRight: 8 }}
           onPress={() => {
             prop.navigation.navigate('EditGroup', {
               convoId: conversationId,
@@ -121,6 +121,17 @@ export const ChatInfoPage = memo((prop: ChatInfoProp) => {
               iconSize={'2xl'}
             />
           )}
+          {/* <Text
+            style={{
+              backgroundColor: Colors.indigo[500],
+              color: Colors.white,
+              padding: 5,
+              borderRadius: 10,
+              overflow: 'hidden',
+            }}
+          >
+            Auto-connected
+          </Text> */}
           <Text
             style={[
               styles.title,

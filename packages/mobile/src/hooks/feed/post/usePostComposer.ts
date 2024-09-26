@@ -17,6 +17,7 @@ import { useState } from 'react';
 import { usePost } from './usePost';
 import { useDotYouClientContext } from 'feed-app-common';
 import { ImageSource } from '../../../provider/image/RNImageProvider';
+import { LinkPreview } from '@homebase-id/js-lib/media';
 
 type CollaborativeChannelDefinition = ChannelDefinition & { acl: AccessControlList };
 
@@ -32,6 +33,7 @@ export const usePostComposer = () => {
   const savePost = async (
     caption: string | undefined,
     mediaFiles: ImageSource[] | undefined,
+    linkPreviews: LinkPreview[] | undefined,
     embeddedPost: EmbeddedPost | undefined,
     channel: HomebaseFile<ChannelDefinition> | NewHomebaseFile<ChannelDefinition>,
     reactAccess: ReactAccess | undefined,
@@ -67,24 +69,25 @@ export const usePostComposer = () => {
         },
         serverMetadata: overrideAcl
           ? {
-              accessControlList: overrideAcl,
-            }
+            accessControlList: overrideAcl,
+          }
           : channel.serverMetadata ||
-            ((channel.fileMetadata.appData.content as CollaborativeChannelDefinition).acl
-              ? {
-                  accessControlList: (
-                    channel.fileMetadata.appData.content as CollaborativeChannelDefinition
-                  ).acl,
-                }
-              : undefined) || {
-              accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
-            },
+          ((channel.fileMetadata.appData.content as CollaborativeChannelDefinition).acl
+            ? {
+              accessControlList: (
+                channel.fileMetadata.appData.content as CollaborativeChannelDefinition
+              ).acl,
+            }
+            : undefined) || {
+            accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
+          },
       };
 
       await savePostFile({
         postFile: postFile,
         channelId: channel.fileMetadata.appData.uniqueId as string,
         mediaFiles: mediaFiles,
+        linkPreviews: linkPreviews,
         onUpdate: (phase, progress) => setProcessingProgress({ phase, progress }),
       });
     } catch (ex) {

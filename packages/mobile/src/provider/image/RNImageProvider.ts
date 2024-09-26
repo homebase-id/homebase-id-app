@@ -150,7 +150,6 @@ export const getThumbBytes = async (
   targetDrive: TargetDrive,
   fileId: string,
   payloadKey: string,
-  authToken: string,
   width: number,
   height: number,
   options: {
@@ -193,7 +192,7 @@ export const getThumbBytes = async (
     fileCache: true,
   })
     .fetch('GET', url, {
-      bx0900: authToken,
+      ...dotYouClient.getHeaders(),
       'X-ODIN-FILE-SYSTEM-TYPE': options?.systemFileType || 'Standard',
     })
     .then(async (res) => {
@@ -232,7 +231,6 @@ export const getPayloadBytes = async (
   targetDrive: TargetDrive,
   fileId: string,
   key: string,
-  authToken: string,
   options?: {
     systemFileType?: SystemFileType;
     lastModified?: number;
@@ -268,7 +266,7 @@ export const getPayloadBytes = async (
     fileCache: true,
   })
     .fetch('GET', url, {
-      bx0900: authToken,
+      ...dotYouClient.getHeaders(),
       'X-ODIN-FILE-SYSTEM-TYPE': options?.systemFileType || 'Standard',
     })
     .then(async (res) => {
@@ -309,7 +307,6 @@ export const getDecryptedImageData = async (
   targetDrive: TargetDrive,
   fileId: string,
   key: string,
-  authToken: string,
   size?: ImageSize,
   systemFileType?: SystemFileType,
   lastModified?: number
@@ -321,7 +318,6 @@ export const getDecryptedImageData = async (
         targetDrive,
         fileId,
         key,
-        authToken,
         size.pixelWidth,
         size.pixelHeight,
         { systemFileType, lastModified }
@@ -332,13 +328,11 @@ export const getDecryptedImageData = async (
     }
   }
 
-  return await getPayloadBytes(dotYouClient, targetDrive, fileId, key, authToken, {
+  return await getPayloadBytes(dotYouClient, targetDrive, fileId, key, {
     systemFileType,
     lastModified,
   });
 };
-
-
 
 // helpers
 interface SharedSecretEncryptedPayload {

@@ -15,7 +15,6 @@ import { AuthorName } from '../components/ui/Name';
 import { HeaderTitle } from '@react-navigation/elements';
 import { Text } from '../components/ui/Text/Text';
 import { formatToTimeAgoWithRelativeDetail } from 'feed-app-common';
-import { IconButton } from '../components/Chat/Chat-app-bar';
 import { Download, ShareNode } from '../components/ui/Icons/icons';
 
 import useImage from '../components/ui/OdinImage/hooks/useImage';
@@ -28,6 +27,7 @@ import { ZOOM_TYPE } from '@likashefqet/react-native-image-zoom';
 import { CarouselRenderItemInfo } from 'react-native-reanimated-carousel/lib/typescript/types';
 import { CameraRoll } from '@react-native-camera-roll/camera-roll';
 import { FeedStackParamList } from '../app/FeedStack';
+import { IconButton } from '../components/ui/Buttons';
 
 export type MediaProp = NativeStackScreenProps<
   ChatStackParamList | FeedStackParamList,
@@ -52,7 +52,10 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
   const { height, width } = useSafeAreaFrame();
   const getImage = useImage().getFromCache;
   const [isVisible, setIsVisible] = useState(true);
-  const autoplay = payloads.length === 1 && payloads[0].contentType?.startsWith('video');
+  const autoplay =
+    payloads.length === 1 &&
+    (payloads[0].contentType?.startsWith('video') ||
+      payloads[0].contentType === 'application/vnd.apple.mpegurl');
 
   const headerTitle = useCallback(() => {
     return (
@@ -86,7 +89,10 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
 
   const renderDownloadButton = useCallback(() => {
     const currPayload = payloads[currIndex];
-    if (currPayload.contentType?.startsWith('video')) {
+    if (
+      currPayload.contentType?.startsWith('video') ||
+      currPayload.contentType === 'application/vnd.apple.mpegurl'
+    ) {
       return;
     }
     const onDownload = async () => {
@@ -148,8 +154,9 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
       headerTitle: headerTitle,
       headerShown: isVisible,
       headerRight: renderDownloadButton,
+      headerTintColor: Colors.white,
       headerStyle: {
-        backgroundColor: 'transparent',
+        backgroundColor: Platform.OS === 'android' ? Colors.black : 'transparent',
       },
     });
   }, [headerTitle, isVisible, navigation, renderDownloadButton]);
@@ -199,7 +206,8 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
       const fileKey = item.key;
       const type = item.contentType;
 
-      const isVideo = type?.startsWith('video') || false;
+      const isVideo =
+        type?.startsWith('video') || type === 'application/vnd.apple.mpegurl' || false;
       return !isVideo ? (
         <View
           style={{
@@ -222,7 +230,7 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
               height: height,
             }}
             targetDrive={targetDrive}
-            previewThumbnail={previewThumbnail}
+            previewThumbnail={item.previewThumbnail || previewThumbnail}
             imageZoomProps={{
               isSingleTapEnabled: true,
               minPanPointers: 1,
@@ -276,7 +284,10 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
     ]
   );
 
-  const hasVideoPayload = payloads.some((item) => item.contentType?.startsWith('video'));
+  const hasVideoPayload = payloads.some(
+    (item) =>
+      item.contentType?.startsWith('video') || item.contentType === 'application/vnd.apple.mpegurl'
+  );
 
   return (
     <BottomSheetModalProvider>
@@ -297,7 +308,7 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
         defaultIndex={initialIndex}
         renderItem={renderItem}
         style={{
-          backgroundColor: Colors.black,
+          backgroundColor: Colors.pink[100],
         }}
       />
 
@@ -312,7 +323,7 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
             flex: 1,
             display: 'flex',
             zIndex: 20,
-            backgroundColor: '#00000060',
+            backgroundColor: '',
             borderTopLeftRadius: 10,
             borderTopRightRadius: 10,
             flexDirection: 'column',
@@ -327,7 +338,10 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
               }}
             >
               {payloads.map((item, index) => {
-                if (item.contentType.startsWith('video')) {
+                if (
+                  item.contentType.startsWith('video') ||
+                  item.contentType === 'application/vnd.apple.mpegurl'
+                ) {
                   return (
                     <VideoWithLoader
                       key={index}
@@ -366,6 +380,7 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
                     targetDrive={targetDrive}
                     globalTransitId={globalTransitId}
                     probablyEncrypted={probablyEncrypted}
+                    previewThumbnail={item.previewThumbnail}
                     odinId={transitOdinId}
                     fit="cover"
                     imageSize={{

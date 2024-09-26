@@ -1,5 +1,4 @@
 import { TargetDrive } from '@homebase-id/js-lib/core';
-import { useAuth } from '../../../../hooks/auth/useAuth';
 import { useDotYouClientContext } from 'feed-app-common';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getPayloadBytes } from '../../../../provider/image/RNImageProvider';
@@ -18,7 +17,6 @@ interface AudioData {
 
 export const useAudio = (props?: OdinAudioProps) => {
   const { fileId, payloadKey, drive, lastModified } = props || {};
-  const { authToken } = useAuth();
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
 
@@ -28,20 +26,39 @@ export const useAudio = (props?: OdinAudioProps) => {
     drive?: TargetDrive,
     lastModified?: number
   ): Promise<AudioData | null> => {
-    if (fileId === undefined || fileId === '' || !drive || !payloadKey || !authToken) {
+    if (fileId === undefined || fileId === '' || !drive || !payloadKey) {
       return null;
     }
+    const cachedAudio = getFromCache(fileId, payloadKey, drive);
+    if (cachedAudio) return cachedAudio;
 
-    const audioBlob = await getPayloadBytes(dotYouClient, drive, fileId, payloadKey, authToken, {
+    const audioBlob = await getPayloadBytes(dotYouClient, drive, fileId, payloadKey, {
       lastModified,
     });
-
     if (!audioBlob) return null;
     return {
       url: audioBlob.uri,
       type: audioBlob.type,
     };
   };
+
+  const getFromCache = (
+    fileId: string,
+    payloadKey: string,
+    drive: TargetDrive
+  ): AudioData | null => {
+    const queryKey = ['audio', drive?.alias, fileId, payloadKey];
+    const cachedEntries = queryClient.getQueryCache().find<AudioData | null>({
+      queryKey,
+      exact: true,
+    });
+
+    if (cachedEntries?.state.status === 'success') {
+      return cachedEntries.state.data || null;
+    }
+    return null;
+  };
+
   return {
     fetch: useQuery({
       queryKey: ['audio', drive?.alias, fileId, payloadKey, lastModified],
@@ -49,13 +66,13 @@ export const useAudio = (props?: OdinAudioProps) => {
       staleTime: 1000 * 60 * 60 * 1, // 1h
       enabled: !!fileId && fileId !== '',
     }),
-    getFromCache: (fileId: string, payloadKey: string, drive: TargetDrive) => {
-      const cachedEntries = queryClient.getQueryCache().find<AudioData | null>({
-        queryKey: ['audio', drive?.alias, fileId, payloadKey],
-        exact: true,
-      });
-
-      return cachedEntries?.state.data;
+    fetchManually: async (fileId: string, payloadKey: string, drive: TargetDrive) => {
+      const cachedAudio = getFromCache(fileId, payloadKey, drive);
+      if (cachedAudio) return cachedAudio;
+      const audio = await fetchAudio(fileId, payloadKey, drive, lastModified);
+      if (audio) {
+        queryClient.setQueryData(['audio', drive?.alias, fileId, payloadKey, lastModified], audio);
+      }
     },
   };
 };

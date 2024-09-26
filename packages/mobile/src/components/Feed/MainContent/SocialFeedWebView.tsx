@@ -73,6 +73,7 @@ export const SocialFeedWebView = memo(() => {
   const [refresherEnabled, setEnableRefresher] = useState(true);
 
   //Code to get scroll position
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleScroll = (event: any) => {
     const yOffset = Number(event.nativeEvent.contentOffset.y);
     if (yOffset === 0) {

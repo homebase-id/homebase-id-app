@@ -69,7 +69,7 @@ export function EditGroupPage(props: EditGroupProp) {
 
   const headerRight = useCallback(() => {
     if (title !== conversationContent?.title && title?.length > 0) {
-      return <TextButton title="Save" style={{ marginRight: 8 }} onPress={save} />;
+      return <TextButton title="Save" unFilledStyle={{ marginRight: 8 }} onPress={save} />;
     }
     if (updateStatus === 'pending') {
       return <ActivityIndicator size={'small'} style={{ marginRight: 8 }} />;

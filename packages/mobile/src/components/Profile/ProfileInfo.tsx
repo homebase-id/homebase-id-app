@@ -48,6 +48,7 @@ export const ProfileInfo = () => {
           imageSize={{ width: 160, height: 160 }}
           style={{ borderRadius: 160 / 2 }}
           onClick={doNavigate}
+          previewThumbnail={profile?.profileImagePreviewThumbnail}
         />
         <Text
           style={{

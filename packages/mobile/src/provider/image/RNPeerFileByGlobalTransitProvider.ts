@@ -35,7 +35,6 @@ export const getPayloadBytesOverPeerByGlobalTransitId = async (
   targetDrive: TargetDrive,
   globalTransitId: string,
   key: string,
-  authToken: string,
   options: {
     systemFileType?: SystemFileType;
     decrypt?: boolean;
@@ -69,7 +68,7 @@ export const getPayloadBytesOverPeerByGlobalTransitId = async (
     fileCache: true,
   })
     .fetch('GET', url, {
-      bx0900: authToken,
+      ...dotYouClient.getHeaders(),
       'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
     })
     .then(async (res) => {
@@ -112,7 +111,6 @@ export const getThumbBytesOverPeerByGlobalTransitId = async (
   targetDrive: TargetDrive,
   globalTransitId: string,
   payloadKey: string,
-  authToken: string,
   width: number,
   height: number,
   options: {
@@ -140,19 +138,20 @@ export const getThumbBytesOverPeerByGlobalTransitId = async (
   if (!ss) throw new Error('Shared secret not found');
 
   const url = await encryptUrl(
-    `${dotYouClient.getEndpoint()}/transit/query/payload_byglobaltransitid?${stringifyToQueryParams({ ...request, width, height, lastModified })}`,
+    `${dotYouClient.getEndpoint()}/transit/query/thumb_byglobaltransitid?${stringifyToQueryParams({ ...request, width, height, lastModified })}`,
     ss
   );
+
   return ReactNativeBlobUtil.config({
     fileCache: true,
   })
     .fetch('GET', url, {
-      bx0900: authToken,
+      ...dotYouClient.getHeaders(),
       'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
     })
     .then(async (res) => {
       if (res.info().status !== 200) {
-        throw new Error(`Failed to fetch payload ${res.info().status}`);
+        throw new Error(`Failed to fetch thumb ${res.info().status}`);
       }
 
       // Android filePaths need to start with file://

@@ -25,7 +25,10 @@ import Toast from 'react-native-toast-message';
 import { ContactTile } from '../../components/Contact/Contact-Tile';
 import { Text } from '../../components/ui/Text/Text';
 import { Colors } from '../../app/Colors';
-import { ListHeaderComponent, maxConnectionsForward } from '../../components/Chat/Chat-Forward';
+import {
+  GroupConversationsComponent,
+  maxConnectionsForward,
+} from '../../components/Chat/Chat-Forward';
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 import { AuthorName } from '../../components/ui/Name';
 import { SendChat } from '../../components/ui/Icons/icons';
@@ -38,12 +41,12 @@ import {
 } from '../../hooks/chat/useConversationsWithRecentMessage';
 import ConversationTile from '../../components/Chat/Conversation-tile';
 import { getNewId } from '@homebase-id/js-lib/helpers';
-import { ConversationTileWithYourself } from '../conversations-page';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ConversationTileWithYourself } from '../../components/Conversation/ConversationTileWithYourself';
 
 export type ShareChatProp = NativeStackScreenProps<ChatStackParamList, 'ShareChat'>;
 export const ShareChatPage = (prop: ShareChatProp) => {
-  const { data, mimeType } = prop.route.params;
+  const sharedData = prop.route.params;
   const { isDarkMode } = useDarkMode();
 
   const { mutateAsync: createConversation } = useConversation().create;
@@ -59,52 +62,60 @@ export const ShareChatPage = (prop: ShareChatProp) => {
   const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
 
   const onShare = useCallback(async () => {
-    if ((selectedContact.length === 0 && selectedConversation.length === 0) || !data) {
+    if ((selectedContact.length === 0 && selectedConversation.length === 0) || !sharedData) {
       navigation.goBack();
     }
     setSending(true);
+
     async function forwardMessages(conversation: HomebaseFile<UnifiedConversation>) {
       let text = '';
       const imageSource: ImageSource[] = [];
-      if (mimeType.startsWith('text')) {
-        text = data;
-      } else if (mimeType.startsWith('image')) {
-        const uri = await fixContentURI(data);
-        let size = {
-          width: 0,
-          height: 0,
-        };
-        await getImageSize(uri).then((res) => {
-          if (res instanceof Error) {
-            size = { width: 500, height: 500 };
-            return;
-          }
-          size = res;
-        });
-        imageSource.push({
-          uri: uri,
-          width: size.width,
-          height: size.height,
-          type: mimeType,
-        });
-      } else if (mimeType.startsWith('video')) {
-        const uri = await fixContentURI(data);
-        imageSource.push({
-          uri: uri,
-          width: 1920,
-          height: 1080,
-          type: mimeType,
-        });
-      } else if (mimeType.startsWith('application/pdf')) {
-        const uri = await fixContentURI(data);
-        imageSource.push({
-          uri: uri,
-          type: mimeType,
-          width: 0,
-          height: 0,
-        });
+      for (const item of sharedData) {
+        const mimeType = item.mimeType;
+        const data = item.data;
+        if (mimeType.startsWith('text')) {
+          text = text + data + '\n';
+        } else if (mimeType.startsWith('image')) {
+          const uri = await fixContentURI(data, mimeType.split('/')[1]);
+          let size = {
+            width: 0,
+            height: 0,
+          };
+          await getImageSize(uri).then((res) => {
+            if (res instanceof Error) {
+              size = { width: 500, height: 500 };
+              return;
+            }
+            size = res;
+          });
+          imageSource.push({
+            uri: uri,
+            width: size.width,
+            height: size.height,
+            type: mimeType,
+          });
+        } else if (
+          mimeType.startsWith('video')
+          // TODO: Add support for HLS || mimeType === 'application/vnd.apple.mpegurl'
+        ) {
+          const uri = await fixContentURI(data, mimeType.split('/')[1]);
+          imageSource.push({
+            uri: uri,
+            width: 1920,
+            height: 1080,
+            type: mimeType,
+          });
+        } else if (mimeType.startsWith('application/pdf')) {
+          const uri = await fixContentURI(data, mimeType.split('/')[1]);
+          imageSource.push({
+            uri: uri,
+            type: mimeType,
+            width: 0,
+            height: 0,
+          });
+        }
       }
-      //TODO: Handle a case where if a conversation doesn't exist and a command needs to be sent
+
       return sendMessage({
         conversation,
         message: text,
@@ -139,7 +150,6 @@ export const ShareChatPage = (prop: ShareChatProp) => {
       if (selectedContact.length === 1) {
         const contact = selectedContact[0];
 
-        // TODO: needs to change to fetch instead of still trying to create
         const conversation = await createConversation({
           recipients: [contact.odinId],
         });
@@ -167,19 +177,18 @@ export const ShareChatPage = (prop: ShareChatProp) => {
     }
     setSending(false);
   }, [
-    data,
-    createConversation,
-    mimeType,
-    navigation,
     selectedContact,
     selectedConversation,
+    sharedData,
+    navigation,
     sendMessage,
+    createConversation,
   ]);
 
   const { bottom } = useSafeAreaInsets();
 
-  const renderFooter = useCallback(
-    () => (
+  const renderFooter = useCallback(() => {
+    return (
       <View
         style={{
           position: 'absolute',
@@ -193,6 +202,7 @@ export const ShareChatPage = (prop: ShareChatProp) => {
       >
         <View style={styles.namesContainer}>
           {selectedConversation.map((group) => {
+            const isSingleConversation = group.fileMetadata.appData.content.recipients.length === 2;
             return (
               <Text
                 key={group.fileId}
@@ -205,7 +215,11 @@ export const ShareChatPage = (prop: ShareChatProp) => {
                   overflow: 'hidden',
                 }}
               >
-                {group.fileMetadata.appData.content.title}
+                {!isSingleConversation ? (
+                  group.fileMetadata.appData.content.title
+                ) : (
+                  <AuthorName odinId={group.fileMetadata.appData.content.recipients[0]} />
+                )}
               </Text>
             );
           })}
@@ -256,9 +270,8 @@ export const ShareChatPage = (prop: ShareChatProp) => {
           )}
         </TouchableHighlight>
       </View>
-    ),
-    [bottom, isDarkMode, onShare, selectedContact, selectedConversation, sending]
-  );
+    );
+  }, [bottom, isDarkMode, onShare, selectedContact, selectedConversation, sending]);
 
   return (
     <SafeAreaView>
@@ -493,7 +506,7 @@ const InnerShareChatPage = memo(
         }
         ListFooterComponent={
           //Actually a Group Component
-          <ListHeaderComponent
+          <GroupConversationsComponent
             selectedGroup={selectedConversation}
             setselectedGroup={setSelectedConversation}
           />

@@ -96,6 +96,7 @@ export const useNotificationSubscriber = (
         }
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [localHandler]);
 
   return isActive;
