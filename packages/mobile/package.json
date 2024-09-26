@@ -13,7 +13,7 @@
     "release:android-codepush": "appcenter codepush release -a odinops/Homebase-Feed -d Staging -c ./codepush -t 0.0.1 && rm -rf codepush",
     "release:ios-codepush": "appcenter codepush release -a odinops/Homebase-Feed-ios -d Staging -c ./codepush -t 0.0.1 && rm -rf codepush",
     "build:splash": "react-native generate-bootsplash src/assets/homebase.svg --platforms=android,ios --background=F5FCFF --logo-width=100 --assets-output=assets/bootsplash --flavor=main",
-    "test": "jest"
+    "test": "node --experimental-vm-modules node_modules/.bin/jest"
   },
   "dependencies": {
     "@bam.tech/react-native-image-resizer": "^3.0.10",
