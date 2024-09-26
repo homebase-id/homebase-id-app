@@ -242,7 +242,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
         const anyRecipientMissingConversation = filteredRecipients.some((recipient) => {
           const latestTransferStatus =
             conversation.serverMetadata?.transferHistory?.recipients[recipient]
-              .latestTransferStatus;
+              ?.latestTransferStatus;
 
           if (!latestTransferStatus) return true;
           return FailedTransferStatuses.includes(latestTransferStatus);
