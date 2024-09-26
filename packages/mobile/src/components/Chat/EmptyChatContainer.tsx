@@ -3,7 +3,7 @@ import { Container } from '../ui/Container/Container';
 import { Text } from '../ui/Text/Text';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { Colors } from '../../app/Colors';
-import { TouchableHighlight, View } from 'react-native';
+import { Platform, TouchableHighlight, View } from 'react-native';
 
 const STARTER_MESSAGES = [
   { text: t('Hello 👋') },
@@ -23,7 +23,17 @@ export const EmptyChatContainer = ({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        transform: [{ scaleY: -1 }], // Weird GiftedChat Style property that flips the empty component upside down
+        transform: [
+          {
+            scaleY: -1,
+          },
+          {
+            scaleX: Platform.select({
+              android: -1,
+              default: 1,
+            }),
+          },
+        ], // Weird GiftedChat Style property that flips the empty component and STUPID REACT NATIVE
       }}
     >
       <Text
