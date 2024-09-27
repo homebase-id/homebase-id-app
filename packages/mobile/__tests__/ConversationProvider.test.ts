@@ -157,7 +157,9 @@ describe('ConversationProvider', () => {
             expect(uploadFileMock).toHaveBeenCalled();
             const args = uploadFileMock.mock.calls[0];
             const payloads = args[3];
+            const thumbnails = args[4];
             expect(payloads).toHaveLength(1);
+            expect(thumbnails.length).toBeGreaterThanOrEqual(1);
         });
     });
 
