@@ -11,7 +11,8 @@
     "postinstall": "patch-package",
     "start": "npm run start:mobile",
     "start:mobile": "npm run start --w packages/mobile",
-    "build:libs": "npm run build --w packages/react-native-gifted-chat"
+    "build:libs": "npm run build --w packages/react-native-gifted-chat",
+    "test": "npm run test --w packages/mobile"
   },
   "dependencies": {
     "@homebase-id/js-lib": "0.0.4-alpha.28",
