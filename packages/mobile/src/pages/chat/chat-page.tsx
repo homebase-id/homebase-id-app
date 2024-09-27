@@ -757,6 +757,7 @@ const EditDialogBox = memo(({ visible, handleDialogClose, selectedMessage }: Edi
 
 const DeleteDialogBox = memo(
   ({ visible, handleDialogClose, selectedMessage }: DeleteDialogBoxProp) => {
+    const identity = useAuth().getIdentity();
     const { isDarkMode } = useDarkMode();
     const [deleteMessageError, setDeleteMessageError] = useState<unknown | undefined>();
 
@@ -770,7 +771,8 @@ const DeleteDialogBox = memo(
 
     // Show this option when the message is sent by you and the conversation is not with yourself
     const showDeleteForEveryone =
-      selectedMessage?.fileMetadata.senderOdinId === '' &&
+      (selectedMessage?.fileMetadata.senderOdinId === '' ||
+        selectedMessage?.fileMetadata.senderOdinId === identity) &&
       !stringGuidsEqual(conversation?.fileMetadata.appData.uniqueId, ConversationWithYourselfId);
 
     const onDelete = async (deleteForEveryone: boolean) => {

@@ -11,6 +11,7 @@ import { calculateScaledDimensions } from '../../utils/utils';
 import { MediaGallery, MediaItem } from '../ui/Media/MediaGallery';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { Colors } from '../../app/Colors';
+import { useAuth } from '../../hooks/auth/useAuth';
 
 const MediaMessage = memo(
   ({
@@ -69,11 +70,14 @@ const InnerMediaMessage = memo(
       message: ChatMessageIMessage
     ) => void;
   }) => {
+    const identity = useAuth().getIdentity();
     const { isDarkMode } = useDarkMode();
     const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
     const { width, height } = Dimensions.get('screen');
     const payloads = currentMessage.fileMetadata.payloads;
-    const isMe = currentMessage.fileMetadata.senderOdinId === '';
+    const isMe =
+      currentMessage.fileMetadata.senderOdinId === '' ||
+      currentMessage.fileMetadata.senderOdinId === identity;
 
     const onClick = useCallback(
       (currIndex?: number) => {
