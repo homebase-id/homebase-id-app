@@ -154,8 +154,10 @@ describe('ConversationProvider', () => {
             const image = { filepath: 'path/to/image', uri: 'uri/to/image', height: 300, width: 300 } as ImageSource;
 
             await uploadConversation(dotYouClientMock, conversation, false, image);
-
             expect(uploadFileMock).toHaveBeenCalled();
+            const args = uploadFileMock.mock.calls[0];
+            const payloads = args[3];
+            expect(payloads).toHaveLength(1);
         });
     });
 
