@@ -1,6 +1,7 @@
 import { ApiType, DotYouClient, getContentFromHeaderOrPayload, getFileHeaderByUniqueId, HomebaseFile, NewHomebaseFile, queryBatch, QueryBatchResponse, SecurityGroupType, uploadFile, uploadHeader } from '@homebase-id/js-lib/core';
 import { CHAT_CONVERSATION_FILE_TYPE, ConversationMetadata, ConversationWithYourself, ConversationWithYourselfId, getConversation, getConversationMetadata, getConversations, UnifiedConversation, updateConversation, uploadConversation, uploadConversationMetadata } from '../src/provider/chat/ConversationProvider';
 import { ImageSource } from '../src/provider/image/RNImageProvider';
+import { getRandom16ByteArray } from '@homebase-id/js-lib/helpers';
 
 
 jest.mock('react-native-inappbrowser-reborn', () => ({
@@ -60,6 +61,8 @@ describe('ConversationProvider', () => {
         headers: {},
         sharedSecret: new Uint8Array(32),
     });
+    const mockGetRandom16Bytes = jest.fn().mockReturnValue(new Uint8Array(16));
+    (getRandom16ByteArray as jest.Mock) = mockGetRandom16Bytes;
 
 
     describe('getConversations', () => {

@@ -14,6 +14,7 @@ import {
 import * as ChatProvider from '../src/provider/chat/ChatProvider';
 import { ChatDrive, UnifiedConversation } from '../src/provider/chat/ConversationProvider';
 import { sendReadReceipt } from '@homebase-id/js-lib/peer';
+import { getRandom16ByteArray } from '@homebase-id/js-lib/helpers';
 
 
 jest.mock('@homebase-id/js-lib/core');
@@ -83,7 +84,8 @@ jest.mock('react-native-fs', () => {
 
 describe('ChatProvider', () => {
     let dotYouClient: DotYouClient;
-
+    const mockGetRandom16Bytes = jest.fn().mockReturnValue(new Uint8Array(16));
+    (getRandom16ByteArray as jest.Mock) = mockGetRandom16Bytes;
     beforeEach(() => {
         dotYouClient = new DotYouClient({
             identity: 'frodobaggins.me',

@@ -4,6 +4,7 @@ import { DotYouClient, NewHomebaseFile, HomebaseFile, ApiType, uploadFile, Secur
 import { createThumbnails } from '../src/provider/image/RNThumbnailProvider';
 import { GetTargetDriveFromChannelId, ReactionContext } from '@homebase-id/js-lib/public';
 import { TransitUploadResult, uploadFileOverPeer } from '@homebase-id/js-lib/peer';
+import { getRandom16ByteArray } from '@homebase-id/js-lib/helpers';
 
 jest.mock('@homebase-id/js-lib/core');
 jest.mock('../src/provider/image/RNThumbnailProvider');
@@ -88,6 +89,8 @@ describe('RNPostReactionProvider', () => {
         sharedSecret: new Uint8Array(32),
     });
     beforeEach(() => {
+        const mockGetRandom16Bytes = jest.fn().mockReturnValue(new Uint8Array(16));
+        (getRandom16ByteArray as jest.Mock) = mockGetRandom16Bytes;
         dotYouClient.getIdentity = jest.fn().mockReturnValue('frodobaggins.me');
         dotYouClient.getSharedSecret = jest.fn().mockReturnValue(new Uint8Array(32));
 
