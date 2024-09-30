@@ -75,7 +75,7 @@ export const CommentBody = memo(
         {content.mediaPayloadKey && context && (
           <CommentMedia
             fileId={commentFileId}
-            postAuthorOdinId={context.authorOdinId}
+            postAuthorOdinId={context.odinId}
             targetDrive={sourceTargetDrive}
             fileKey={content.mediaPayloadKey}
             lastModified={commentLastModifed}

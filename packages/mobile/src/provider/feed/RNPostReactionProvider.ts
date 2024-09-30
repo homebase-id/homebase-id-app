@@ -53,7 +53,7 @@ export const saveComment = async (
     | HomebaseFile<RawReactionContent>
 ): Promise<string> => {
   const encrypt = context.target.isEncrypted;
-  const isLocal = context.authorOdinId === dotYouClient.getIdentity();
+  const isLocal = context.odinId === dotYouClient.getIdentity();
   const targetDrive = GetTargetDriveFromChannelId(context.channelId);
 
   const payloads: PayloadFile[] = [];
@@ -161,7 +161,7 @@ export const saveComment = async (
       remoteTargetDrive: targetDrive,
       schedule: ScheduleOptions.SendLater,
       priority: PriorityOptions.Medium,
-      recipients: [context.authorOdinId],
+      recipients: [context.odinId],
       systemFileType: 'Comment',
     };
 
@@ -175,10 +175,9 @@ export const saveComment = async (
     );
 
     if (
-      TransferUploadStatus.EnqueuedFailed ===
-      result.recipientStatus[context.authorOdinId].toLowerCase()
+      TransferUploadStatus.EnqueuedFailed === result.recipientStatus[context.odinId].toLowerCase()
     ) {
-      throw new Error(result.recipientStatus[context.authorOdinId].toString());
+      throw new Error(result.recipientStatus[context.odinId].toString());
     }
 
     return result.remoteGlobalTransitIdFileIdentifier.globalTransitId;
