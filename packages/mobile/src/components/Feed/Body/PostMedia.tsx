@@ -43,7 +43,7 @@ export const PostMedia = memo(({ post, doubleTapRef }: PostMediaProps) => {
           payload={payload}
           globalTransitId={post.fileMetadata.globalTransitId}
           probablyEncrypted={post.fileMetadata.isEncrypted}
-          odinId={authorOdinId}
+          odinId={odinId}
           targetDrive={getChannelDrive(post.fileMetadata.appData.content.channelId)}
           fit={'cover'}
           previewThumbnail={previewThumbnail}
@@ -81,7 +81,7 @@ export const PostMedia = memo(({ post, doubleTapRef }: PostMediaProps) => {
       targetDrive={getChannelDrive(post.fileMetadata.appData.content.channelId)}
       globalTransitId={post.fileMetadata.globalTransitId}
       payloads={payloads}
-      odinId={authorOdinId}
+      odinId={odinId}
       probablyEncrypted={post.fileMetadata.isEncrypted}
       previewThumbnail={previewThumbnail}
       style={{
