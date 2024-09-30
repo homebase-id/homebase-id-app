@@ -135,6 +135,12 @@ export const PostDetailMainContent = ({
     };
   });
 
+  const onEndReached = useCallback(() => {
+    if (hasNextPage) {
+      fetchNextPage();
+    }
+  }, [fetchNextPage, hasNextPage]);
+
   return (
     <>
       <Animated.FlatList
@@ -159,11 +165,7 @@ export const PostDetailMainContent = ({
         renderItem={renderItem}
         ListFooterComponent={listFooter}
         ListEmptyComponent={EmptyComment}
-        onEndReached={() => {
-          if (hasNextPage) {
-            fetchNextPage();
-          }
-        }}
+        onEndReached={onEndReached}
         onEndReachedThreshold={0.5}
       />
       {isLoading && <CommentsLoader />}
