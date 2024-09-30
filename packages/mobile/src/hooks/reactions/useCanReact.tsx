@@ -89,6 +89,6 @@ export const useCanReact = ({
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     staleTime: Infinity,
-    enabled: isEnabled && securityFetched,
+    enabled: isEnabled && securityFetched && postContent !== undefined,
   });
 };
