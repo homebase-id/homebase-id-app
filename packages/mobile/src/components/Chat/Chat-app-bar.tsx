@@ -122,10 +122,9 @@ export const ChatAppBar = ({
       );
     }
 
-    /// Backward compatibility for messages sent before the originalAuthor field was added
     const isMyMessage =
-      selectedMessage.fileMetadata.originalAuthor === identity ||
-      selectedMessage.fileMetadata.senderOdinId === '';
+      selectedMessage.fileMetadata.senderOdinId === identity ||
+      !selectedMessage.fileMetadata.senderOdinId;
 
     return (
       <View

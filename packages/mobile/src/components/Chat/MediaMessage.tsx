@@ -76,8 +76,8 @@ const InnerMediaMessage = memo(
     const { width, height } = Dimensions.get('screen');
     const payloads = currentMessage.fileMetadata.payloads;
     const isMe =
-      currentMessage.fileMetadata.senderOdinId === '' ||
-      currentMessage.fileMetadata.originalAuthor === identity;
+      !currentMessage.fileMetadata.senderOdinId ||
+      currentMessage.fileMetadata.senderOdinId === identity;
 
     const onClick = useCallback(
       (currIndex?: number) => {
