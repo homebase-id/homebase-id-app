@@ -36,7 +36,7 @@ export const PostInteracts = memo(
   }) => {
     const postContent = postFile.fileMetadata.appData.content;
     const owner = useDotYouClientContext().getIdentity();
-    const authorOdinId = postFile.fileMetadata.senderOdinId || owner;
+    const odinId = postFile.fileMetadata.senderOdinId || owner;
     const postDisabledEmoji =
       postContent.reactAccess !== undefined &&
       (postContent.reactAccess === false || postContent.reactAccess === 'comment');
@@ -46,7 +46,7 @@ export const PostInteracts = memo(
       (postContent.reactAccess === false || postContent.reactAccess === 'emoji');
 
     const { data: canReact } = useCanReact({
-      authorOdinId,
+      odinId,
       channelId: postContent.channelId,
       postContent: postContent,
       isEnabled: true,
@@ -56,7 +56,7 @@ export const PostInteracts = memo(
 
     const reactionContext: ReactionContext = useMemo(() => {
       return {
-        authorOdinId: authorOdinId,
+        odinId: odinId,
         channelId: postContent.channelId,
         target: {
           globalTransitId: postFile.fileMetadata.globalTransitId || '',
@@ -64,7 +64,7 @@ export const PostInteracts = memo(
           isEncrypted: postFile.fileMetadata.isEncrypted || false,
         },
       };
-    }, [authorOdinId, postContent.channelId, postFile]);
+    }, [odinId, postContent.channelId, postFile]);
 
     const onCommentPressHandler = useCallback(() => {
       const context: ReactionContext & CanReactInfo = {
@@ -84,10 +84,10 @@ export const PostInteracts = memo(
 
     const permalink = useMemo(
       () =>
-        `${new DotYouClient({ identity: authorOdinId || undefined, api: ApiType.Guest }).getRoot()}/posts/${postContent.channelId}/${
+        `${new DotYouClient({ identity: odinId || undefined, api: ApiType.Guest }).getRoot()}/posts/${postContent.channelId}/${
           postContent.slug ?? postContent.id
         }`,
-      [authorOdinId, postContent]
+      [odinId, postContent]
     );
 
     const parsedReactionPreview = useMemo(
