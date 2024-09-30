@@ -94,6 +94,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
         updated: Date.now(),
         isEncrypted: true,
         senderOdinId: '',
+        originalAuthor: '',
         appData: {
           ...newConversation.fileMetadata.appData,
           fileType: CHAT_CONVERSATION_FILE_TYPE,

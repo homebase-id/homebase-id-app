@@ -55,7 +55,7 @@ import { Text } from '../../components/ui/Text/Text';
 import { ChatFileOverview } from '../../components/Files/ChatFileOverview';
 import { OfflineState } from '../../components/Platform/OfflineState';
 import { RetryModal } from '../../components/Chat/Reactions/Modal/RetryModal';
-import { t } from 'feed-app-common';
+import { t, useDotYouClientContext } from 'feed-app-common';
 import { useWebSocketContext } from '../../components/WebSocketContext/useWebSocketContext';
 import { LinkPreview } from '@homebase-id/js-lib/media';
 
@@ -759,7 +759,7 @@ const DeleteDialogBox = memo(
   ({ visible, handleDialogClose, selectedMessage }: DeleteDialogBoxProp) => {
     const { isDarkMode } = useDarkMode();
     const [deleteMessageError, setDeleteMessageError] = useState<unknown | undefined>();
-
+    const identity = useDotYouClientContext().getIdentity();
     const { data: conversation } = useConversation({
       conversationId: selectedMessage?.fileMetadata.appData.groupId,
     }).single;
@@ -770,7 +770,8 @@ const DeleteDialogBox = memo(
 
     // Show this option when the message is sent by you and the conversation is not with yourself
     const showDeleteForEveryone =
-      selectedMessage?.fileMetadata.senderOdinId === '' &&
+      (selectedMessage?.fileMetadata.senderOdinId === '' ||
+        selectedMessage?.fileMetadata.originalAuthor === identity) &&
       !stringGuidsEqual(conversation?.fileMetadata.appData.uniqueId, ConversationWithYourselfId);
 
     const onDelete = async (deleteForEveryone: boolean) => {
