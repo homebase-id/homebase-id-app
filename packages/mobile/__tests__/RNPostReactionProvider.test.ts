@@ -108,11 +108,20 @@ describe('RNPostReactionProvider', () => {
                     content: {
                         body: 'Sample Comment',
                         authorOdinId: 'authorOdinId',
+                        attachment: {
+                            height: 1920,
+                            width: 1080,
+                            mimeType: 'image/jpeg',
+                            uri: 'uri',
+                            fileSize: 100,
+                            type: 'image/jpeg',
+                        },
                     },
                     versionTag: 'v1',
                     groupId: 'groupId',
                     uniqueId: 'uniqueId',
                 },
+
             },
             serverMetadata: {
                 accessControlList: {
@@ -186,7 +195,6 @@ describe('RNPostReactionProvider', () => {
     });
 
     it('should save a comment with an attachment', async () => {
-
         const result = await saveComment(dotYouClient, context, comment);
         expect(result).toBeDefined();
     });
@@ -199,8 +207,6 @@ describe('RNPostReactionProvider', () => {
 
     it('should throw an error if upload fails', async () => {
         context.authorOdinId = 'frodobaggins.me';
-
-
         (uploadFile as jest.Mock).mockResolvedValue(null);
         await expect(saveComment(dotYouClient, context, comment)).rejects.toThrow('Upload failed');
     });
