@@ -55,7 +55,6 @@ export const usePostComposer = () => {
           appData: {
             userDate: new Date().getTime(),
             content: {
-              authorOdinId: loggedInIdentity || dotYouClient.getIdentity(),
               type: mediaFiles && mediaFiles.length > 1 ? 'Media' : 'Tweet',
               caption: caption?.trim() || '',
               id: postId,
@@ -69,18 +68,18 @@ export const usePostComposer = () => {
         },
         serverMetadata: overrideAcl
           ? {
-            accessControlList: overrideAcl,
-          }
-          : channel.serverMetadata ||
-          ((channel.fileMetadata.appData.content as CollaborativeChannelDefinition).acl
-            ? {
-              accessControlList: (
-                channel.fileMetadata.appData.content as CollaborativeChannelDefinition
-              ).acl,
+              accessControlList: overrideAcl,
             }
-            : undefined) || {
-            accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
-          },
+          : channel.serverMetadata ||
+            ((channel.fileMetadata.appData.content as CollaborativeChannelDefinition).acl
+              ? {
+                  accessControlList: (
+                    channel.fileMetadata.appData.content as CollaborativeChannelDefinition
+                  ).acl,
+                }
+              : undefined) || {
+              accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
+            },
       };
 
       await savePostFile({

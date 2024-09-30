@@ -18,8 +18,7 @@ export const ChatDeliveryIndicator = ({
 }) => {
   const identity = useDotYouClientContext().getIdentity();
   const content = msg.fileMetadata.appData.content;
-  const authorOdinId =
-    msg.fileMetadata.senderOdinId || msg.fileMetadata.appData.content.authorOdinId;
+  const authorOdinId = msg.fileMetadata.senderOdinId || msg.fileMetadata.originalAuthor;
   const messageFromMe = !authorOdinId || authorOdinId === identity;
 
   if (!messageFromMe) return null;

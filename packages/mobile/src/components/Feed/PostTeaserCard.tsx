@@ -43,7 +43,7 @@ export const PostTeaserCard = memo(
     const identity = useDotYouClientContext().getIdentity();
     const post = postFile.fileMetadata.appData.content;
     const odinId = postFile.fileMetadata.senderOdinId;
-    const authorOdinId = post.authorOdinId || odinId;
+    const authorOdinId = postFile.fileMetadata.originalAuthor || odinId;
     const isExternal = odinId && odinId !== identity;
     const groupPost = authorOdinId !== (odinId || identity) && (odinId || identity) && authorOdinId;
 
@@ -122,7 +122,7 @@ export const InnerPostTeaserCard = memo(
     const { isDarkMode } = useDarkMode();
     const post = postFile.fileMetadata.appData.content;
     const odinId = postFile.fileMetadata.senderOdinId;
-    const authorOdinId = post.authorOdinId || odinId;
+    const authorOdinId = postFile.fileMetadata.originalAuthor || odinId;
 
     const viewStyle = useMemo(() => {
       return {
@@ -154,7 +154,7 @@ export const InnerPostTeaserCard = memo(
                   color: isDarkMode ? Colors.slate[50] : Colors.slate[900],
                 }}
               >
-                <AuthorName odinId={post.authorOdinId} />
+                <AuthorName odinId={authorOdinId} />
               </Text>
               <ToGroupBlock
                 odinId={odinId}

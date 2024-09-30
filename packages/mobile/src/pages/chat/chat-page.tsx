@@ -119,12 +119,12 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
             user: {
               _id:
                 value.fileMetadata.senderOdinId ||
-                value.fileMetadata.appData.content.authorOdinId ||
+                value.fileMetadata.originalAuthor ||
                 identity ||
                 '',
               name:
                 value.fileMetadata.senderOdinId ||
-                value.fileMetadata.appData.content.authorOdinId ||
+                value.fileMetadata.originalAuthor ||
                 identity ||
                 '',
             },
