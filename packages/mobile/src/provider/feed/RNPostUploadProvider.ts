@@ -322,7 +322,6 @@ const uploadPost = async <T extends PostContent>(
       userDate: file.fileMetadata.appData.userDate,
       dataType: postTypeToDataType(file.fileMetadata.appData.content.type),
     },
-    senderOdinId: file.fileMetadata.appData.content.authorOdinId,
     isEncrypted: encrypt,
     accessControlList: file.serverMetadata?.accessControlList,
   };
@@ -461,7 +460,6 @@ const uploadPostHeader = async <T extends PostContent>(
       userDate: file.fileMetadata.appData.userDate,
       dataType: postTypeToDataType(file.fileMetadata.appData.content.type),
     },
-    senderOdinId: file.fileMetadata.appData.content.authorOdinId,
     isEncrypted: file.fileMetadata.isEncrypted ?? false,
     accessControlList: file.serverMetadata?.accessControlList,
   };
@@ -532,10 +530,6 @@ const updatePost = async <T extends PostContent>(
     !file.fileMetadata.appData.content.id
   ) {
     throw new Error('[chat-rn] PostProvider: fileId is required to update a post');
-  }
-
-  if (!file.fileMetadata.appData.content.authorOdinId) {
-    file.fileMetadata.appData.content.authorOdinId = dotYouClient.getIdentity();
   }
 
   let runningVersionTag: string = file.fileMetadata.versionTag;

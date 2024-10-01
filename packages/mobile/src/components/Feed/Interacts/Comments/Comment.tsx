@@ -47,7 +47,8 @@ export const Comment = memo(
 
     const fileId = commentData.fileId;
     const commentContent = commentData.fileMetadata.appData.content;
-    const authorOdinId = commentContent.authorOdinId;
+    const authorOdinId =
+      commentData.fileMetadata.originalAuthor || commentContent.authorOdinId || '';
 
     const threadContext: dirtyReactionContext = useMemo(() => {
       return {

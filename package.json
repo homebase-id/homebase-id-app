@@ -15,7 +15,7 @@
     "test": "npm run test --w packages/mobile"
   },
   "dependencies": {
-    "@homebase-id/js-lib": "0.0.4-alpha.28",
+    "@homebase-id/js-lib": "0.0.5-alpha.3",
     "axios": "1.7.5",
     "patch-package": "8.0.0",
     "react": "18.2.0",

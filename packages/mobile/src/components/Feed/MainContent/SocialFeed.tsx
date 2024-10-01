@@ -134,7 +134,7 @@ const SocialFeedMainContent = memo(() => {
           contentContainerStyle={{ flexGrow: 1 }}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
           showsVerticalScrollIndicator={false}
-          keyExtractor={(item) => item.fileId}
+          keyExtractor={(item) => item.fileMetadata.appData.uniqueId || item.fileId}
           renderItem={renderItem}
           ListEmptyComponent={<EmptyFeed />}
           ListFooterComponent={listFooter}
