@@ -42,7 +42,7 @@ export const useComments = ({ context }: { context?: ReactionContext }) => {
   };
   return {
     fetch: useInfiniteQuery({
-      queryKey: ['comments', context.odinId, context?.channelId, context?.target.globalTransitId],
+      queryKey: ['comments', context?.odinId, context?.channelId, context?.target.globalTransitId],
       initialPageParam: undefined as string | undefined,
       queryFn: ({ pageParam }) => fetch({ context, pageParam }),
       getNextPageParam: (lastPage) =>
