@@ -18,7 +18,7 @@ export const PostMedia = memo(({ post, doubleTapRef }: PostMediaProps) => {
   const fileId = post.fileId;
   const previewThumbnail = post.fileMetadata.appData.previewThumbnail;
   const odinId = post.fileMetadata.senderOdinId;
-  const authorOdinId = post.fileMetadata.appData.content.authorOdinId || odinId;
+  const authorOdinId = post.fileMetadata.originalAuthor || odinId;
   const { width, height } = Dimensions.get('screen');
   const hasContent = !!post.fileMetadata.appData.content.caption;
   const navigation = useNavigation<NavigationProp<FeedStackParamList>>();
@@ -43,7 +43,7 @@ export const PostMedia = memo(({ post, doubleTapRef }: PostMediaProps) => {
           payload={payload}
           globalTransitId={post.fileMetadata.globalTransitId}
           probablyEncrypted={post.fileMetadata.isEncrypted}
-          odinId={authorOdinId}
+          odinId={odinId}
           targetDrive={getChannelDrive(post.fileMetadata.appData.content.channelId)}
           fit={'cover'}
           previewThumbnail={previewThumbnail}
@@ -81,7 +81,7 @@ export const PostMedia = memo(({ post, doubleTapRef }: PostMediaProps) => {
       targetDrive={getChannelDrive(post.fileMetadata.appData.content.channelId)}
       globalTransitId={post.fileMetadata.globalTransitId}
       payloads={payloads}
-      odinId={authorOdinId}
+      odinId={odinId}
       probablyEncrypted={post.fileMetadata.isEncrypted}
       previewThumbnail={previewThumbnail}
       style={{

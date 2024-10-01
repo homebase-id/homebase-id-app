@@ -112,7 +112,7 @@ export const CommentsModal = memo(
             onReply={(commentFile) => {
               setReplyThread({
                 replyThreadId: commentFile.fileMetadata.globalTransitId,
-                authorOdinId: commentFile.fileMetadata.appData.content.authorOdinId,
+                authorOdinId: commentFile.fileMetadata.originalAuthor,
               });
             }}
           />

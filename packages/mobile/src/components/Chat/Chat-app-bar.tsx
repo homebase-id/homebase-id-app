@@ -10,6 +10,7 @@ import { Avatar, GroupAvatar, OwnerAvatar } from '../ui/Avatars/Avatar';
 import { EmbeddedThumb } from '@homebase-id/js-lib/core';
 import { ChatDrive } from '../../provider/chat/ConversationProvider';
 import { IconButton } from '../ui/Buttons';
+import { useDotYouClientContext } from 'feed-app-common';
 
 export type SelectedMessageProp = {
   onReply: () => void;
@@ -50,6 +51,7 @@ export const ChatAppBar = ({
     | undefined;
 }) => {
   const user = useProfile().data;
+  const identity = useDotYouClientContext().getIdentity();
   const { isDarkMode } = useDarkMode();
 
   const headerStyle = useMemo(
@@ -120,6 +122,10 @@ export const ChatAppBar = ({
       );
     }
 
+    const isMyMessage =
+      selectedMessage.fileMetadata.senderOdinId === identity ||
+      !selectedMessage.fileMetadata.senderOdinId;
+
     return (
       <View
         style={{
@@ -130,14 +136,13 @@ export const ChatAppBar = ({
         <IconButton icon={<Reply />} onPress={selectedMessageActions?.onReply} />
         <IconButton icon={<Info />} onPress={selectedMessageActions?.onInfo} />
         <IconButton icon={<Copy />} onPress={selectedMessageActions?.onCopy} />
-        {selectedMessage.fileMetadata.senderOdinId === '' && (
-          <IconButton icon={<Pencil />} onPress={selectedMessageActions?.onEdit} />
-        )}
+        {isMyMessage && <IconButton icon={<Pencil />} onPress={selectedMessageActions?.onEdit} />}
         <IconButton icon={<Trash />} onPress={selectedMessageActions?.onDelete} />
         <IconButton icon={<Forward />} onPress={selectedMessageActions?.onForward} />
       </View>
     );
   }, [
+    identity,
     onMorePress,
     selectedMessage,
     selectedMessageActions?.onCopy,
