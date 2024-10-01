@@ -49,7 +49,7 @@ export const PostDetailMainContent = ({
   const postContent = postFile.fileMetadata.appData.content;
 
   const { data: canReact } = useCanReact({
-    authorOdinId,
+    odinId: authorOdinId,
     channelId: postContent?.channelId,
     postContent: postContent,
     isEnabled: postContent?.channelId ? true : false,
@@ -59,7 +59,7 @@ export const PostDetailMainContent = ({
 
   const reactionContext: ReactionContext | undefined = useMemo(() => {
     return {
-      authorOdinId: authorOdinId,
+      odinId: authorOdinId,
       channelId: postContent.channelId,
       target: {
         globalTransitId: postFile.fileMetadata.globalTransitId || '',
@@ -89,7 +89,10 @@ export const PostDetailMainContent = ({
           onReply={(commentFile) => {
             setReplyThread({
               replyThreadId: commentFile.fileMetadata.globalTransitId,
-              authorOdinId: commentFile.fileMetadata.appData.content.authorOdinId,
+              authorOdinId:
+                commentFile.fileMetadata.originalAuthor ||
+                commentFile.fileMetadata.appData.content.authorOdinId ||
+                '',
             });
           }}
         />
