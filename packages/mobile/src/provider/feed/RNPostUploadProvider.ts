@@ -22,7 +22,6 @@ import {
   UploadResult,
   ImageContentType,
   PriorityOptions,
-  KeyHeader,
 } from '@homebase-id/js-lib/core';
 import {
   toGuidId,
@@ -47,24 +46,31 @@ import { createThumbnails } from '../image/RNThumbnailProvider';
 import { processVideo } from '../video/RNVideoProcessor';
 import { AxiosRequestConfig } from 'axios';
 import { LinkPreview, LinkPreviewDescriptor } from '@homebase-id/js-lib/media';
+import { TransitInstructionSet, TransitUploadResult, uploadFileOverPeer } from '@homebase-id/js-lib/peer';
 
 const POST_MEDIA_PAYLOAD_KEY = 'pst_mdi';
 
 export const savePost = async <T extends PostContent>(
   dotYouClient: DotYouClient,
   file: HomebaseFile<T> | NewHomebaseFile<T>,
+  odinId: string | undefined,
   channelId: string,
   toSaveFiles?: (ImageSource | MediaFile)[] | ImageSource[],
   linkPreviews?: LinkPreview[],
   onVersionConflict?: () => void,
   onUpdate?: (phase: string, progress: number) => void
-): Promise<UploadResult> => {
+): Promise<TransitUploadResult | UploadResult> => {
+  if (odinId && file.fileId) {
+    throw new Error(
+      '[PostUploadProvider] Editing a post to a group channel is not supported (yet)'
+    );
+  }
   if (!file.fileMetadata.appData.content.id) {
     // The content id is set once, and then never updated to keep the permalinks correct at all times; Even when the slug changes
     file.fileMetadata.appData.content.id = file.fileMetadata.appData.content.slug
       ? toGuidId(file.fileMetadata.appData.content.slug)
       : getNewId();
-  } else if (!file.fileId) {
+  } else if (!file.fileId && !odinId) {
     // Check if fileMetadata.appData.content.id exists and with which fileId
     file.fileId =
       (await getPost(dotYouClient, channelId, file.fileMetadata.appData.content.id))?.fileId ??
@@ -72,7 +78,7 @@ export const savePost = async <T extends PostContent>(
   }
 
   if (file.fileId) {
-    return await updatePost(dotYouClient, file as HomebaseFile<T>, channelId, toSaveFiles);
+    return await updatePost(dotYouClient, odinId, file as HomebaseFile<T>, channelId, toSaveFiles);
   } else {
     if (toSaveFiles?.some((file) => 'fileKey' in file)) {
       throw new Error(
@@ -95,7 +101,7 @@ export const savePost = async <T extends PostContent>(
   const encrypt = !(
     file.serverMetadata?.accessControlList?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
     file.serverMetadata?.accessControlList?.requiredSecurityGroup ===
-      SecurityGroupType.Authenticated
+    SecurityGroupType.Authenticated
   );
 
   const targetDrive = GetTargetDriveFromChannelId(channelId);
@@ -122,10 +128,10 @@ export const savePost = async <T extends PostContent>(
 
     const imageSource: ImageSource | undefined = linkPreviewWithImage
       ? {
-          height: linkPreviewWithImage.imageHeight || 0,
-          width: linkPreviewWithImage.imageWidth || 0,
-          uri: linkPreviewWithImage.imageUrl,
-        }
+        height: linkPreviewWithImage.imageHeight || 0,
+        width: linkPreviewWithImage.imageWidth || 0,
+        uri: linkPreviewWithImage.imageUrl,
+      }
       : undefined;
 
     const { tinyThumb } = imageSource
@@ -199,10 +205,10 @@ export const savePost = async <T extends PostContent>(
   if (file.fileMetadata.appData.content.type !== 'Article') {
     file.fileMetadata.appData.content.primaryMediaFile = payloads[0]
       ? {
-          fileId: undefined,
-          fileKey: payloads[0].key,
-          type: payloads[0].payload.type,
-        }
+        fileId: undefined,
+        fileKey: payloads[0].key,
+        type: payloads[0].payload.type,
+      }
       : undefined;
   }
 
@@ -215,6 +221,7 @@ export const savePost = async <T extends PostContent>(
 
   return await uploadPost(
     dotYouClient,
+    odinId,
     file,
     payloads,
     thumbnails,
@@ -233,6 +240,7 @@ export const savePost = async <T extends PostContent>(
 
 const uploadPost = async <T extends PostContent>(
   dotYouClient: DotYouClient,
+  odinId: string | undefined,
   file: HomebaseFile<T> | NewHomebaseFile<T>,
   payloads: PayloadFile[],
   thumbnails: ThumbnailFile[],
@@ -248,7 +256,7 @@ const uploadPost = async <T extends PostContent>(
   const encrypt = !(
     file.serverMetadata?.accessControlList?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
     file.serverMetadata?.accessControlList?.requiredSecurityGroup ===
-      SecurityGroupType.Authenticated
+    SecurityGroupType.Authenticated
   );
 
   const instructionSet: UploadInstructionSet = {
@@ -265,22 +273,22 @@ const uploadPost = async <T extends PostContent>(
     },
   };
 
-  const existingPostWithThisSlug = await getPostBySlug(
-    dotYouClient,
-    channelId,
-    file.fileMetadata.appData.content.slug ?? file.fileMetadata.appData.content.id
-  );
+  if (!odinId) {
+    const existingPostWithThisSlug = await getPostBySlug(
+      dotYouClient,
+      channelId,
+      file.fileMetadata.appData.content.slug ?? file.fileMetadata.appData.content.id
+    );
 
-  if (
-    existingPostWithThisSlug &&
-    !stringGuidsEqual(existingPostWithThisSlug?.fileId, file.fileId)
-  ) {
-    // There is clash with an existing slug
-    file.fileMetadata.appData.content.slug = `${
-      file.fileMetadata.appData.content.slug
-    }-${new Date().getTime()}`;
+    if (
+      existingPostWithThisSlug &&
+      !stringGuidsEqual(existingPostWithThisSlug?.fileId, file.fileId)
+    ) {
+      // There is clash with an existing slug
+      file.fileMetadata.appData.content.slug = `${file.fileMetadata.appData.content.slug
+        }-${new Date().getTime()}`;
+    }
   }
-
   const uniqueId = file.fileMetadata.appData.content.slug
     ? toGuidId(file.fileMetadata.appData.content.slug)
     : file.fileMetadata.appData.content.id;
@@ -304,7 +312,7 @@ const uploadPost = async <T extends PostContent>(
   const isDraft = file.fileMetadata.appData.fileType === BlogConfig.DraftPostFileType;
   const metadata: UploadFileMetadata = {
     versionTag: file?.fileMetadata.versionTag ?? undefined,
-    allowDistribution: !isDraft,
+    allowDistribution: !isDraft || !!odinId,
     appData: {
       tags: [file.fileMetadata.appData.content.id],
       uniqueId: uniqueId,
@@ -351,19 +359,41 @@ const uploadPost = async <T extends PostContent>(
     );
   }
 
-  const result = await uploadFile(
-    dotYouClient,
-    instructionSet,
-    metadata,
-    payloads,
-    thumbnails,
-    encrypt,
-    onVersionConflict,
-    options
-  );
-  if (!result) throw new Error('Upload failed');
+  if (!odinId) {
+    const result = await uploadFile(
+      dotYouClient,
+      instructionSet,
+      metadata,
+      payloads,
+      thumbnails,
+      encrypt,
+      onVersionConflict,
+      options
+    );
+    if (!result) throw new Error('Upload failed');
 
-  return result;
+    return result;
+  } else {
+    const transitInstructionSet: TransitInstructionSet = {
+      transferIv: getRandom16ByteArray(),
+      remoteTargetDrive: targetDrive,
+      schedule: ScheduleOptions.SendLater,
+      priority: PriorityOptions.Medium,
+      recipients: [odinId],
+    };
+
+    const result: TransitUploadResult = await uploadFileOverPeer(
+      dotYouClient,
+      transitInstructionSet,
+      metadata,
+      payloads,
+      thumbnails,
+      encrypt
+    );
+
+    if (!result) throw new Error('Upload over peer failed');
+    return result;
+  }
 };
 
 const uploadPostHeader = async <T extends PostContent>(
@@ -395,12 +425,11 @@ const uploadPostHeader = async <T extends PostContent>(
   if (
     existingPostWithThisSlug &&
     existingPostWithThisSlug?.fileMetadata.appData.content.id !==
-      file.fileMetadata.appData.content.id
+    file.fileMetadata.appData.content.id
   ) {
     // There is clash with an existing slug
-    file.fileMetadata.appData.content.slug = `${
-      file.fileMetadata.appData.content.slug
-    }-${new Date().getTime()}`;
+    file.fileMetadata.appData.content.slug = `${file.fileMetadata.appData.content.slug
+      }-${new Date().getTime()}`;
   }
 
   const uniqueId = file.fileMetadata.appData.content.slug
@@ -484,6 +513,7 @@ const uploadPostHeader = async <T extends PostContent>(
 
 const updatePost = async <T extends PostContent>(
   dotYouClient: DotYouClient,
+  odinId: string | undefined,
   file: HomebaseFile<T>,
   channelId: string,
   existingAndNewMediaFiles?: (ImageSource | MediaFile)[]

@@ -1,4 +1,4 @@
-import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
+import { Pressable, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { PostMedia } from './Body/PostMedia';
 import { Text } from '../ui/Text/Text';
 import { AuthorName } from '../ui/Name';
@@ -23,6 +23,8 @@ import { PostBody } from './Body/PostBody';
 import { IconButton } from '../ui/Buttons';
 import { DoubleTapHeart } from '../ui/DoubleTapHeart';
 import { GestureType } from 'react-native-gesture-handler';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { FeedStackParamList } from '../../app/FeedStack';
 
 export const PostTeaserCard = memo(
   ({
@@ -123,7 +125,7 @@ export const InnerPostTeaserCard = memo(
     const post = postFile.fileMetadata.appData.content;
     const odinId = postFile.fileMetadata.senderOdinId;
     const authorOdinId = post.authorOdinId || odinId;
-
+    const navigation = useNavigation<NavigationProp<FeedStackParamList>>();
     const viewStyle = useMemo(() => {
       return {
         padding: 10,
@@ -142,60 +144,76 @@ export const InnerPostTeaserCard = memo(
 
     return (
       <Animated.View style={viewStyle}>
-        <View style={styles.header}>
-          <Avatar odinId={authorOdinId} imageSize={styles.imageSize} style={styles.imageSize} />
-          <View style={{ flex: 1 }}>
-            <View style={{ flexDirection: 'row' }}>
-              <Text
-                style={{
-                  fontSize: 17,
-                  fontWeight: '400',
-                  opacity: 0.7,
-                  color: isDarkMode ? Colors.slate[50] : Colors.slate[900],
-                }}
-              >
-                <AuthorName odinId={post.authorOdinId} />
-              </Text>
-              <ToGroupBlock
+        <Pressable
+          onPress={() => {
+            navigation.navigate('Post', {
+              postKey: post.slug || post.id,
+              channelKey: post.channelId,
+              odinId: postFile.fileMetadata.senderOdinId,
+              postFile,
+              channel: channel || undefined,
+            });
+          }}
+        >
+          <View style={postTeaserCardStyle.header}>
+            <Avatar
+              odinId={authorOdinId}
+              imageSize={postTeaserCardStyle.imageSize}
+              style={postTeaserCardStyle.imageSize}
+            />
+            <View style={{ flex: 1 }}>
+              <View style={{ flexDirection: 'row' }}>
+                <Text
+                  style={{
+                    fontSize: 17,
+                    fontWeight: '400',
+                    opacity: 0.7,
+                    color: isDarkMode ? Colors.slate[50] : Colors.slate[900],
+                  }}
+                >
+                  <AuthorName odinId={post.authorOdinId} />
+                </Text>
+                <ToGroupBlock
+                  odinId={odinId}
+                  authorOdinId={authorOdinId}
+                  channel={channel || undefined}
+                />
+              </View>
+              <PostMeta
+                postFile={postFile}
+                channel={channel || undefined}
                 odinId={odinId}
                 authorOdinId={authorOdinId}
-                channel={channel || undefined}
               />
             </View>
-            <PostMeta
-              postFile={postFile}
-              channel={channel || undefined}
-              odinId={odinId}
-              authorOdinId={authorOdinId}
-            />
+            <IconButton icon={<Ellipsis />} onPress={onPostActionPress} />
           </View>
-          <IconButton icon={<Ellipsis />} onPress={onPostActionPress} />
-        </View>
-        <PostBody
-          post={post}
-          odinId={odinId}
-          fileId={postFile.fileId}
-          globalTransitId={postFile.fileMetadata.globalTransitId}
-          lastModified={postFile.fileMetadata.updated}
-          payloads={postFile.fileMetadata.payloads}
-        />
-        <DoubleTapHeart doubleTapRef={doubleTapRef} postFile={postFile} odinId={odinId}>
-          <PostMedia post={postFile} doubleTapRef={doubleTapRef} />
-        </DoubleTapHeart>
-        <PostInteracts
-          postFile={postFile}
-          onCommentPress={onCommentPress}
-          onReactionPress={onReactionPress}
-          onSharePress={onSharePress}
-          onEmojiModalOpen={onEmojiModalOpen}
-          isPublic={isPublic}
-        />
+          <PostBody
+            post={post}
+            odinId={odinId}
+            fileId={postFile.fileId}
+            globalTransitId={postFile.fileMetadata.globalTransitId}
+            lastModified={postFile.fileMetadata.updated}
+            payloads={postFile.fileMetadata.payloads}
+          />
+          <DoubleTapHeart doubleTapRef={doubleTapRef} postFile={postFile} odinId={odinId}>
+            <PostMedia post={postFile} doubleTapRef={doubleTapRef} />
+          </DoubleTapHeart>
+          <PostInteracts
+            postFile={postFile}
+            onCommentPress={onCommentPress}
+            onReactionPress={onReactionPress}
+            onSharePress={onSharePress}
+            onEmojiModalOpen={onEmojiModalOpen}
+            isPublic={isPublic}
+          />
+        </Pressable>
       </Animated.View>
     );
   }
 );
 
-const styles = StyleSheet.create({
+export const postTeaserCardStyle = StyleSheet.create({
   header: {
     display: 'flex',
     flexDirection: 'row',
