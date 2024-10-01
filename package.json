@@ -14,7 +14,7 @@
     "build:libs": "npm run build --w packages/react-native-gifted-chat"
   },
   "dependencies": {
-    "@homebase-id/js-lib": "0.0.5-alpha.2",
+    "@homebase-id/js-lib": "0.0.5-alpha.3",
     "axios": "1.7.5",
     "patch-package": "8.0.0",
     "react": "18.2.0",
