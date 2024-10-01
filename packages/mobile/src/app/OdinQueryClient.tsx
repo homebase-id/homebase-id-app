@@ -71,7 +71,7 @@ const INCLUDED_QUERY_KEYS = [
   'security-context',
 ];
 const persistOptions: Omit<PersistQueryClientOptions, 'queryClient'> = {
-  buster: '20240917',
+  buster: '20241001',
   maxAge: Infinity,
   persister: asyncPersist,
   dehydrateOptions: {
