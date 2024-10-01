@@ -45,7 +45,7 @@ Now you can log in with local identities such as `frodo.dotyou.cloud`.
 
 Contributions are highly Welcomed 💙 . Feel free to open PRs for small issues such as typos. For large issues or features, please open an issue and wait for it to be assigned to you.
 
-You can reach out to us on our [Discord](LINK-DISCORD-SERVER) server if you have any questions or need help.
+You can reach out to us on our [Discord](https://id.homebase.id/links) server if you have any questions or need help.
 
 ## Communications
 
@@ -53,7 +53,7 @@ Please use the [issue tracker](https://github.com/YouFoundation/feed-mobile-app/
 
 ## Security Disclosures
 
-If you discover any security issues, please send an email to [security@homebase.id](mailto:info@homebase.id). The email is automatically CCed to the entire team and we'll respond promptly.
+If you discover any security issues, please send an email to info at homebase dot id. The email is automatically CCed to the entire team and we'll respond promptly.
 
 ## License
 
