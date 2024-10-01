@@ -14,10 +14,10 @@ import {
 } from '@homebase-id/js-lib/public';
 import { getNewId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useState } from 'react';
-import { usePost } from './usePost';
 import { useDotYouClientContext } from 'feed-app-common';
 import { ImageSource } from '../../../provider/image/RNImageProvider';
 import { LinkPreview } from '@homebase-id/js-lib/media';
+import { useManagePost } from './useManagePost';
 
 type CollaborativeChannelDefinition = ChannelDefinition & { acl: AccessControlList };
 
@@ -27,7 +27,7 @@ export const usePostComposer = () => {
   >(undefined);
   const dotYouClient = useDotYouClientContext();
   const loggedInIdentity = dotYouClient.getIdentity();
-  const { mutateAsync: savePostFile } = usePost().save;
+  const { mutateAsync: savePostFile } = useManagePost().save;
   const [postError, setPostError] = useState<unknown>();
 
   const savePost = async (

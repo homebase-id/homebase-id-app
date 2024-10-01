@@ -3,7 +3,6 @@ import {
   BottomSheetFooter,
   BottomSheetFooterProps,
   BottomSheetModal,
-  BottomSheetView,
 } from '@gorhom/bottom-sheet';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import {
@@ -29,7 +28,9 @@ import { CommentComposer } from './CommentComposer';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HomebaseFile, ReactionFile } from '@homebase-id/js-lib/core';
 import { t } from 'feed-app-common';
+import { EmptyComment } from './EmptyComment';
 import { useBottomSheetBackHandler } from '../../../../hooks/useBottomSheetBackHandler';
+
 
 export interface CommentModalMethods {
   setContext: (context: ReactionContext & CanReactInfo) => void;
@@ -166,7 +167,7 @@ export const CommentsModal = memo(
                 fetchNextPage();
               }
             }}
-            ListEmptyComponent={EmptyComponent}
+            ListEmptyComponent={EmptyComment}
             onEndReachedThreshold={0.3}
             renderItem={renderItem}
             ListFooterComponent={listFooter}
@@ -178,41 +179,15 @@ export const CommentsModal = memo(
   })
 );
 
-const EmptyComponent = () => {
-  return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text
-        style={{
-          fontSize: 18,
-          fontWeight: '600',
-          marginBottom: 16,
-          textAlign: 'center',
-        }}
-      >
-        {t('No Comments yet')}
-      </Text>
-      <Text
-        style={{
-          fontSize: 14,
-          fontWeight: '400',
-          color: Colors.gray[500],
-        }}
-      >
-        Be the first to comment on this post.
-      </Text>
-    </View>
-  );
-};
-
-const CommentsLoader = () => {
+export const CommentsLoader = () => {
   const { isDarkMode } = useDarkMode();
   return (
-    <BottomSheetView style={styles.container}>
+    <View style={styles.container}>
       <ActivityIndicator
         size="large"
         color={isDarkMode ? Colors.indigo[400] : Colors.indigo[700]}
       />
-    </BottomSheetView>
+    </View>
   );
 };
 

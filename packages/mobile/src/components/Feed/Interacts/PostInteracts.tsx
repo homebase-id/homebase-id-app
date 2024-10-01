@@ -1,15 +1,21 @@
 import { ApiType, DotYouClient, HomebaseFile } from '@homebase-id/js-lib/core';
-import { parseReactionPreview, PostContent, ReactionContext } from '@homebase-id/js-lib/public';
+import {
+  CommentsReactionSummary,
+  parseReactionPreview,
+  PostContent,
+  ReactionContext,
+} from '@homebase-id/js-lib/public';
 import { memo, useCallback, useMemo, useState } from 'react';
 import { GestureResponderEvent, View } from 'react-native';
 import { OpenHeart, Comment, ShareNode } from '../../ui/Icons/icons';
 import {
   CanReactInfo,
   useCanReact,
+  useCommentSummary,
   useMyEmojiReactions,
   useReaction,
 } from '../../../hooks/reactions';
-import { useDotYouClientContext } from 'feed-app-common';
+import { t, useDotYouClientContext } from 'feed-app-common';
 import { EmojiSummary } from './EmojiSummary';
 import { CommentTeaserList } from './CommentsTeaserList';
 import { ShareContext } from './Share/ShareModal';
@@ -17,6 +23,9 @@ import { ErrorNotification } from '../../ui/Alert/ErrorNotification';
 
 import { PostReactionBar } from './Reactions/PostReactionBar';
 import { IconButton } from '../../ui/Buttons';
+import { Text } from '../../ui/Text/Text';
+import { Colors } from '../../../app/Colors';
+import { useDarkMode } from '../../../hooks/useDarkMode';
 
 export const PostInteracts = memo(
   ({
@@ -26,6 +35,8 @@ export const PostInteracts = memo(
     onSharePress,
     onEmojiModalOpen,
     isPublic,
+    showCommentPreview = true,
+    showSummary,
   }: {
     postFile: HomebaseFile<PostContent>;
     isPublic?: boolean;
@@ -33,6 +44,8 @@ export const PostInteracts = memo(
     onReactionPress?: (context: ReactionContext) => void;
     onSharePress?: (context: ShareContext) => void;
     onEmojiModalOpen?: (context: ReactionContext) => void;
+    showCommentPreview?: boolean;
+    showSummary?: boolean;
   }) => {
     const postContent = postFile.fileMetadata.appData.content;
     const owner = useDotYouClientContext().getIdentity();
@@ -133,16 +146,38 @@ export const PostInteracts = memo(
               justifyContent: 'flex-end',
             }}
           >
-            {isPublic && <IconButton icon={<ShareNode />} onPress={onSharePressHandler} />}
-            {!postDisabledComment && (
-              <IconButton icon={<Comment />} onPress={onCommentPressHandler} />
+            {isPublic && (
+              <IconButton
+                icon={<ShareNode />}
+                onPress={onSharePressHandler}
+                touchableProps={{
+                  disabled: !onSharePress,
+                }}
+              />
             )}
+            {!postDisabledComment && (
+              <IconButton
+                icon={<Comment />}
+                onPress={onCommentPressHandler}
+                touchableProps={{
+                  disabled: !onCommentPress,
+                }}
+              />
+            )}
+            {showSummary ? (
+              <CommentSummary
+                context={reactionContext}
+                reactionPreview={parsedReactionPreview.comments}
+              />
+            ) : null}
           </View>
         </View>
-        <CommentTeaserList
-          reactionPreview={parsedReactionPreview.comments}
-          onExpand={onCommentPressHandler}
-        />
+        {showCommentPreview && (
+          <CommentTeaserList
+            reactionPreview={parsedReactionPreview.comments}
+            onExpand={onCommentPressHandler}
+          />
+        )}
       </>
     );
   }
@@ -225,3 +260,41 @@ export const LikeButton = memo(
     );
   }
 );
+
+export const CommentSummary = ({
+  context,
+  reactionPreview,
+}: {
+  context: ReactionContext;
+  reactionPreview?: CommentsReactionSummary;
+}) => {
+  const { data: totalCount } = useCommentSummary({
+    authorOdinId: context.authorOdinId,
+    channelId: context.channelId,
+    postGlobalTransitId: context.target.globalTransitId,
+    reactionPreview: reactionPreview,
+  }).fetch;
+  const { isDarkMode } = useDarkMode();
+
+  return totalCount ? (
+    <>
+      <Text
+        style={{
+          fontSize: 15,
+          opacity: 0.7,
+          fontWeight: '500',
+          alignSelf: 'center',
+        }}
+      >
+        ·{'  '}
+        <Text
+          style={{
+            color: Colors.indigo[isDarkMode ? 200 : 500],
+          }}
+        >
+          {totalCount} {(totalCount || 0) > 1 ? t('comments') : t('comment')}
+        </Text>
+      </Text>
+    </>
+  ) : null;
+};
