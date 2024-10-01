@@ -19,8 +19,8 @@ import {
   VideoUploadResult,
 } from '@homebase-id/js-lib/media';
 import { OdinBlob } from '../../../polyfills/OdinBlob';
-import { ImageSource } from './RNImageProvider';
-import { createThumbnails } from './RNThumbnailProvider';
+import { ImageSource } from '../image/RNImageProvider';
+import { createThumbnails } from '../image/RNThumbnailProvider';
 
 export type VideoContentType = 'video/mp4';
 
@@ -57,11 +57,11 @@ export const uploadVideo = async (
 
   const { tinyThumb, additionalThumbnails } = uploadMeta?.thumb
     ? await createThumbnails(
-        uploadMeta.thumb.payload,
-        DEFAULT_PAYLOAD_KEY,
-        uploadMeta.thumb?.type,
-        [{ quality: 100, width: 250, height: 250 }]
-      )
+      uploadMeta.thumb.payload,
+      DEFAULT_PAYLOAD_KEY,
+      uploadMeta.thumb?.type,
+      [{ quality: 100, width: 250, height: 250 }]
+    )
     : { tinyThumb: undefined, additionalThumbnails: undefined };
 
   // Updating images in place is a rare thing, but if it happens there is often no versionTag, so we need to fetch it first

@@ -88,7 +88,10 @@ export const savePost = async <T extends PostContent>(
   }
   const newMediaFiles = toSaveFiles as ImageSource[];
 
-  if (!file.serverMetadata?.accessControlList) throw 'ACL is required to save a post';
+  if (!file.fileMetadata.appData.content.authorOdinId) {
+    file.fileMetadata.appData.content.authorOdinId = dotYouClient.getIdentity();
+  }
+  if (!file.serverMetadata?.accessControlList) throw new Error('ACL is required to save a post');
 
   // Delete embeddedPost of embeddedPost (we don't want to embed an embed)
   if (file.fileMetadata.appData.content.embeddedPost) {

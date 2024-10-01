@@ -1,30 +1,16 @@
 import {
   DotYouClient,
   TargetDrive,
-  AccessControlList,
-  SecurityGroupType,
-  UploadInstructionSet,
-  getFileHeader,
-  UploadFileMetadata,
-  uploadFile,
   ImageContentType,
-  DEFAULT_PAYLOAD_KEY,
   ImageSize,
   SystemFileType,
   decryptKeyHeader,
 } from '@homebase-id/js-lib/core';
 import {
-  ImageMetadata,
   MediaUploadMeta,
-  ThumbnailInstruction,
-  ImageUploadResult,
-  MediaConfig,
 } from '@homebase-id/js-lib/media';
 import {
-  getRandom16ByteArray,
-  getNewId,
   jsonStringify64,
-  base64ToUint8Array,
   assertIfDefined,
   stringifyToQueryParams,
   stringToUint8Array,
@@ -32,10 +18,8 @@ import {
   uint8ArrayToBase64,
   splitSharedSecretEncryptedKeyHeader,
 } from '@homebase-id/js-lib/helpers';
-import { createThumbnails } from './RNThumbnailProvider';
 import { OdinBlob } from '../../../polyfills/OdinBlob';
 import { AxiosRequestConfig } from 'axios';
-import { readFile } from 'react-native-fs';
 
 import ReactNativeBlobUtil from 'react-native-blob-util';
 
@@ -58,92 +42,7 @@ export interface RNMediaUploadMeta extends MediaUploadMeta {
   type: ImageContentType;
 }
 
-export const uploadImage = async (
-  dotYouClient: DotYouClient,
-  targetDrive: TargetDrive,
-  acl: AccessControlList,
-  photo: ImageSource,
-  fileMetadata?: ImageMetadata,
-  uploadMeta?: RNMediaUploadMeta,
-  thumbsToGenerate?: ThumbnailInstruction[]
-): Promise<ImageUploadResult | undefined> => {
-  if (!targetDrive) throw 'Missing target drive';
-  if (!photo.filepath && !photo.uri) throw 'Missing filepath';
 
-  const encrypt = !(
-    acl.requiredSecurityGroup === SecurityGroupType.Anonymous ||
-    acl.requiredSecurityGroup === SecurityGroupType.Authenticated
-  );
-
-  const instructionSet: UploadInstructionSet = {
-    transferIv: getRandom16ByteArray(),
-    storageOptions: {
-      overwriteFileId: uploadMeta?.fileId,
-      drive: targetDrive,
-    },
-    transitOptions: uploadMeta?.transitOptions,
-  };
-
-  const { tinyThumb, additionalThumbnails } = await createThumbnails(
-    photo,
-    DEFAULT_PAYLOAD_KEY,
-    uploadMeta?.type,
-    thumbsToGenerate
-  );
-
-  // Updating images in place is a rare thing, but if it happens there is often no versionTag, so we need to fetch it first
-  let versionTag = uploadMeta?.versionTag;
-  if (!versionTag && uploadMeta?.fileId) {
-    versionTag = await getFileHeader(dotYouClient, targetDrive, uploadMeta.fileId).then(
-      (header) => header?.fileMetadata.versionTag
-    );
-  }
-
-  const metadata: UploadFileMetadata = {
-    versionTag: versionTag,
-    allowDistribution: uploadMeta?.allowDistribution || false,
-    appData: {
-      tags: uploadMeta?.tag
-        ? [...(Array.isArray(uploadMeta.tag) ? uploadMeta.tag : [uploadMeta.tag])]
-        : [],
-      uniqueId: uploadMeta?.uniqueId ?? getNewId(),
-      fileType: MediaConfig.MediaFileType,
-      content: fileMetadata ? jsonStringify64(fileMetadata) : undefined,
-      previewThumbnail: tinyThumb,
-      userDate: uploadMeta?.userDate,
-      archivalStatus: uploadMeta?.archivalStatus,
-    },
-    isEncrypted: encrypt,
-    accessControlList: acl,
-  };
-
-  // Read payload
-  const imageData = await readFile((photo.filepath || photo.uri) as string, 'base64');
-  const result = await uploadFile(
-    dotYouClient,
-    instructionSet,
-    metadata,
-    [
-      {
-        payload: new OdinBlob([base64ToUint8Array(imageData)], {
-          type: uploadMeta?.type,
-        }) as any as Blob,
-        key: DEFAULT_PAYLOAD_KEY,
-      },
-    ],
-    additionalThumbnails,
-    encrypt
-  );
-
-  if (!result) return undefined;
-
-  return {
-    fileId: result.file.fileId,
-    fileKey: DEFAULT_PAYLOAD_KEY,
-    previewThumbnail: tinyThumb,
-    type: 'image',
-  };
-};
 
 export const getThumbBytes = async (
   dotYouClient: DotYouClient,
@@ -360,9 +259,8 @@ const buildIvFromQueryString = async (querystring: string) => {
   const uniqueQueryKey = (() => {
     // Check if it's a direct file request
     if (searchParams.has('fileId')) {
-      return `${searchParams.get('fileId')} ${
-        searchParams.get('key') || searchParams.get('payloadKey')
-      }-${searchParams.get('height')}x${searchParams.get('width')}`;
+      return `${searchParams.get('fileId')} ${searchParams.get('key') || searchParams.get('payloadKey')
+        }-${searchParams.get('height')}x${searchParams.get('width')}`;
     }
     // Check if it's a query-batch/modifed request; Queries on a single drive (alias)
     else if (searchParams.has('alias')) return querystring;

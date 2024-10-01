@@ -35,7 +35,6 @@ import {
   CHAT_CONVERSATION_LOCAL_METADATA_FILE_TYPE,
   dsrToConversationMetadata,
 } from '../../provider/chat/ConversationProvider';
-import { ChatReactionFileType } from '../../provider/chat/ChatReactionProvider';
 import { insertNewMessage, insertNewMessagesForConversation } from './useChatMessages';
 import { insertNewConversation } from './useConversations';
 import { useWebSocketContext } from '../../components/WebSocketContext/useWebSocketContext';
@@ -202,9 +201,6 @@ const useChatWebsocket = (isEnabled: boolean) => {
         } else {
           setChatMessagesQueue((prev) => [...prev, updatedChatMessage]);
         }
-      } else if (notification.header.fileMetadata.appData.fileType === ChatReactionFileType) {
-        const messageId = notification.header.fileMetadata.appData.groupId;
-        queryClient.invalidateQueries({ queryKey: ['chat-reaction', messageId] });
       } else if (
         notification.header.fileMetadata.appData.fileType === CHAT_CONVERSATION_FILE_TYPE
       ) {

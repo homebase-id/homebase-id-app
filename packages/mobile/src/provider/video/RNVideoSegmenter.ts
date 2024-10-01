@@ -1,4 +1,4 @@
-import { ImageSource } from './RNImageProvider';
+
 import { getNewId, uint8ArrayToBase64 } from '@homebase-id/js-lib/helpers';
 
 import { CachesDirectoryPath, exists, readFile, stat, unlink, writeFile } from 'react-native-fs';
@@ -13,6 +13,7 @@ import {
 } from '@homebase-id/js-lib/media';
 import { OdinBlob } from '../../../polyfills/OdinBlob';
 import { KeyHeader } from '@homebase-id/js-lib/core';
+import { ImageSource } from '../image/RNImageProvider';
 
 const CompressVideo = async (
   video: ImageSource,

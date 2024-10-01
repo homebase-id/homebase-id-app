@@ -12,7 +12,8 @@
     "build:ios-codepush": "rm -rf codepush && mkdir codepush && react-native bundle --platform ios --dev false --entry-file packages/mobile/index.js --bundle-output codepush/index.ios.bundle --assets-dest codepush",
     "release:android-codepush": "appcenter codepush release -a odinops/Homebase-Feed -d Staging -c ./codepush -t 0.0.1 && rm -rf codepush",
     "release:ios-codepush": "appcenter codepush release -a odinops/Homebase-Feed-ios -d Staging -c ./codepush -t 0.0.1 && rm -rf codepush",
-    "build:splash": "react-native generate-bootsplash src/assets/homebase.svg --platforms=android,ios --background=F5FCFF --logo-width=100 --assets-output=assets/bootsplash --flavor=main"
+    "build:splash": "react-native generate-bootsplash src/assets/homebase.svg --platforms=android,ios --background=F5FCFF --logo-width=100 --assets-output=assets/bootsplash --flavor=main",
+    "test": "node --experimental-vm-modules node_modules/.bin/jest"
   },
   "dependencies": {
     "@bam.tech/react-native-image-resizer": "^3.0.10",
@@ -96,23 +97,26 @@
   },
   "devDependencies": {
     "@babel/core": "^7.23.9",
-    "@babel/preset-env": "^7.23.9",
     "@babel/runtime": "^7.23.9",
     "@react-native/babel-preset": "0.73.21",
     "@react-native/metro-config": "^0.73.5",
     "@react-native/typescript-config": "0.74.0",
     "@tsconfig/react-native": "^3.0.3",
     "@types/elliptic": "^6.4.14",
+    "@types/jest": "^29.5.13",
     "@types/lodash-es": "^4.17.7",
     "@types/metro-config": "^0.76.3",
     "@types/react": "^18.0.24",
     "@types/react-native-vector-icons": "^6.4.18",
     "@types/react-native-video": "^5.0.15",
     "@types/react-test-renderer": "^18.0.0",
+    "babel-jest": "^29.7.0",
     "babel-plugin-transform-remove-console": "^6.9.4",
+    "jest": "^29.7.0",
     "metro-react-native-babel-preset": "0.77.0",
     "prettier": "3.3.3",
     "react-test-renderer": "18.2.0",
+    "ts-jest": "^29.2.5",
     "typescript": "5.5.4"
   },
   "engines": {
