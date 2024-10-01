@@ -96,7 +96,7 @@ describe('RNPostReactionProvider', () => {
 
         context = {
             target: { isEncrypted: false, globalTransitId: 'globalTransitId' },
-            authorOdinId: 'authorOdinId',
+            odinId: 'authorOdinId',
             channelId: 'channelId',
         } as ReactionContext;
 
@@ -206,19 +206,19 @@ describe('RNPostReactionProvider', () => {
     });
 
     it('should throw an error if upload fails', async () => {
-        context.authorOdinId = 'frodobaggins.me';
+        context.odinId = 'frodobaggins.me';
         (uploadFile as jest.Mock).mockResolvedValue(null);
         await expect(saveComment(dotYouClient, context, comment)).rejects.toThrow('Upload failed');
     });
 
     it('should handle local comments correctly', async () => {
-        context.authorOdinId = dotYouClient.getIdentity();
+        context.odinId = dotYouClient.getIdentity();
         const result = await saveComment(dotYouClient, context, comment);
         expect(result).toBeDefined();
     });
 
     it('should handle remote comments correctly', async () => {
-        context.authorOdinId = 'authorOdinId';
+        context.odinId = 'authorOdinId';
         const result = await saveComment(dotYouClient, context, comment);
         expect(result).toBeDefined();
     });

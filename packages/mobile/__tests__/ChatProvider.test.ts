@@ -182,6 +182,7 @@ describe('ChatProvider', () => {
             },
             fileMetadata: {
                 globalTransitId: '70980857-d4c6-4719-8261-56d5cd097f8b',
+                originalAuthor: 'samwisegamgee.me',
                 created: 1727271095788,
                 updated: 1727334733545,
                 transitCreated: 1727334732786,
@@ -201,7 +202,6 @@ describe('ChatProvider', () => {
                             'samwisegamgee.me': 30,
                             'frodobaggins.me': 30,
                         },
-                        authorOdinId: '',
                     },
                     archivalStatus: 2,
                 },
@@ -243,6 +243,7 @@ describe('ChatProvider', () => {
             },
             fileMetadata: {
                 globalTransitId: '70980857-d4c6-4719-8261-56d5cd097f8b',
+                originalAuthor: 'samwisegamgee.me',
                 created: 1727271095788,
                 updated: 1727334733545,
                 transitCreated: 1727334732786,
@@ -262,7 +263,7 @@ describe('ChatProvider', () => {
                             'samwisegamgee.me': 30,
                             'frodobaggins.me': 30,
                         },
-                        authorOdinId: '',
+
                     },
                     archivalStatus: 2,
                 },
@@ -302,6 +303,7 @@ describe('ChatProvider', () => {
             },
             fileMetadata: {
                 globalTransitId: '70980857-d4c6-4719-8261-56d5cd097f8b',
+                originalAuthor: 'samwisegamgee.me',
                 created: 1727271095788,
                 updated: 1727334733545,
                 transitCreated: 1727334732786,
@@ -321,7 +323,6 @@ describe('ChatProvider', () => {
                             'samwisegamgee.me': 30,
                             'frodobaggins.me': 30,
                         },
-                        authorOdinId: '',
                     },
                     archivalStatus: 2,
                 },
