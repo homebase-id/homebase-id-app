@@ -599,7 +599,6 @@ export const ChatDetail = memo(
     const renderAvatar = useCallback((props: AvatarProps<IMessage>) => {
       const prop = props as AvatarProps<ChatMessageIMessage>;
       const odinId = prop.currentMessage?.fileMetadata.senderOdinId;
-
       if (!odinId) {
         return (
           <Avatar

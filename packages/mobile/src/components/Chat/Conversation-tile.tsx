@@ -61,8 +61,7 @@ const ConversationTile = memo((props: ConversationTileProps) => {
   const lastMessage = useMemo(() => flatMessages?.[0], [flatMessages]);
   const lastMessageContent = lastMessage?.fileMetadata.appData.content;
   const lastMessageAuthor =
-    lastMessage?.fileMetadata.senderOdinId ||
-    lastMessage?.fileMetadata.appData.content.authorOdinId;
+    lastMessage?.fileMetadata.senderOdinId || lastMessage?.fileMetadata.originalAuthor;
   const { data: conversationMetadata } = useConversationMetadata({
     conversationId: props.conversationId,
   }).single;

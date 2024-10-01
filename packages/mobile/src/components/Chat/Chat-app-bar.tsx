@@ -122,6 +122,10 @@ export const ChatAppBar = ({
       );
     }
 
+    const isMyMessage =
+      selectedMessage.fileMetadata.senderOdinId === identity ||
+      !selectedMessage.fileMetadata.senderOdinId;
+
     return (
       <View
         style={{
@@ -132,10 +136,7 @@ export const ChatAppBar = ({
         <IconButton icon={<Reply />} onPress={selectedMessageActions?.onReply} />
         <IconButton icon={<Info />} onPress={selectedMessageActions?.onInfo} />
         <IconButton icon={<Copy />} onPress={selectedMessageActions?.onCopy} />
-        {selectedMessage.fileMetadata.senderOdinId === '' ||
-          (selectedMessage.fileMetadata.senderOdinId === identity && (
-            <IconButton icon={<Pencil />} onPress={selectedMessageActions?.onEdit} />
-          ))}
+        {isMyMessage && <IconButton icon={<Pencil />} onPress={selectedMessageActions?.onEdit} />}
         <IconButton icon={<Trash />} onPress={selectedMessageActions?.onDelete} />
         <IconButton icon={<Forward />} onPress={selectedMessageActions?.onForward} />
       </View>

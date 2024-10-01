@@ -14,10 +14,10 @@ import {
 } from '@homebase-id/js-lib/public';
 import { getNewId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useState } from 'react';
-import { usePost } from './usePost';
 import { useDotYouClientContext } from 'feed-app-common';
 import { ImageSource } from '../../../provider/image/RNImageProvider';
 import { LinkPreview } from '@homebase-id/js-lib/media';
+import { useManagePost } from './useManagePost';
 
 type CollaborativeChannelDefinition = ChannelDefinition & { acl: AccessControlList };
 
@@ -27,7 +27,7 @@ export const usePostComposer = () => {
   >(undefined);
   const dotYouClient = useDotYouClientContext();
   const loggedInIdentity = dotYouClient.getIdentity();
-  const { mutateAsync: savePostFile } = usePost().save;
+  const { mutateAsync: savePostFile } = useManagePost().save;
   const [postError, setPostError] = useState<unknown>();
 
   const savePost = async (
@@ -55,7 +55,6 @@ export const usePostComposer = () => {
           appData: {
             userDate: new Date().getTime(),
             content: {
-              authorOdinId: loggedInIdentity || dotYouClient.getIdentity(),
               type: mediaFiles && mediaFiles.length > 1 ? 'Media' : 'Tweet',
               caption: caption?.trim() || '',
               id: postId,
@@ -69,18 +68,18 @@ export const usePostComposer = () => {
         },
         serverMetadata: overrideAcl
           ? {
-            accessControlList: overrideAcl,
-          }
-          : channel.serverMetadata ||
-          ((channel.fileMetadata.appData.content as CollaborativeChannelDefinition).acl
-            ? {
-              accessControlList: (
-                channel.fileMetadata.appData.content as CollaborativeChannelDefinition
-              ).acl,
+              accessControlList: overrideAcl,
             }
-            : undefined) || {
-            accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
-          },
+          : channel.serverMetadata ||
+            ((channel.fileMetadata.appData.content as CollaborativeChannelDefinition).acl
+              ? {
+                  accessControlList: (
+                    channel.fileMetadata.appData.content as CollaborativeChannelDefinition
+                  ).acl,
+                }
+              : undefined) || {
+              accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
+            },
       };
 
       await savePostFile({

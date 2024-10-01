@@ -1,4 +1,4 @@
-import { HomebaseFile } from '@homebase-id/js-lib/core';
+import { DEFAULT_PAYLOAD_KEY, HomebaseFile } from '@homebase-id/js-lib/core';
 import { getChannelDrive, PostContent } from '@homebase-id/js-lib/public';
 import { memo } from 'react';
 import { calculateScaledDimensions } from '../../../utils/utils';
@@ -14,11 +14,11 @@ type PostMediaProps = {
 };
 
 export const PostMedia = memo(({ post, doubleTapRef }: PostMediaProps) => {
-  const payloads = post.fileMetadata.payloads;
+  const payloads = post?.fileMetadata.payloads?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY);
   const fileId = post.fileId;
   const previewThumbnail = post.fileMetadata.appData.previewThumbnail;
   const odinId = post.fileMetadata.senderOdinId;
-  const authorOdinId = post.fileMetadata.appData.content.authorOdinId || odinId;
+  const authorOdinId = post.fileMetadata.originalAuthor || odinId;
   const { width, height } = Dimensions.get('screen');
   const hasContent = !!post.fileMetadata.appData.content.caption;
   const navigation = useNavigation<NavigationProp<FeedStackParamList>>();
@@ -43,7 +43,7 @@ export const PostMedia = memo(({ post, doubleTapRef }: PostMediaProps) => {
           payload={payload}
           globalTransitId={post.fileMetadata.globalTransitId}
           probablyEncrypted={post.fileMetadata.isEncrypted}
-          odinId={authorOdinId}
+          odinId={odinId}
           targetDrive={getChannelDrive(post.fileMetadata.appData.content.channelId)}
           fit={'cover'}
           previewThumbnail={previewThumbnail}
@@ -81,7 +81,7 @@ export const PostMedia = memo(({ post, doubleTapRef }: PostMediaProps) => {
       targetDrive={getChannelDrive(post.fileMetadata.appData.content.channelId)}
       globalTransitId={post.fileMetadata.globalTransitId}
       payloads={payloads}
-      odinId={authorOdinId}
+      odinId={odinId}
       probablyEncrypted={post.fileMetadata.isEncrypted}
       previewThumbnail={previewThumbnail}
       style={{

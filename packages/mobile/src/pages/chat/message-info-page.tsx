@@ -186,7 +186,7 @@ const Header = ({ title }: { title: string }) => {
   return <Text style={styles.header}>{title}</Text>;
 };
 
-const AuthorImage = ({ odinId }: { odinId: string }) => {
+const AuthorImage = ({ odinId }: { odinId?: string }) => {
   const identity = useDotYouClientContext().getIdentity();
   const isSelf = !odinId || identity === odinId;
 

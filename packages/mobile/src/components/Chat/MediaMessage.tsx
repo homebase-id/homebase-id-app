@@ -12,6 +12,7 @@ import { MediaGallery, MediaItem } from '../ui/Media/MediaGallery';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { Colors } from '../../app/Colors';
 import { useAuth } from '../../hooks/auth/useAuth';
+import { useDotYouClientContext } from 'feed-app-common';
 
 const MediaMessage = memo(
   ({
@@ -76,7 +77,7 @@ const InnerMediaMessage = memo(
     const { width, height } = Dimensions.get('screen');
     const payloads = currentMessage.fileMetadata.payloads;
     const isMe =
-      currentMessage.fileMetadata.senderOdinId === '' ||
+      !currentMessage.fileMetadata.senderOdinId ||
       currentMessage.fileMetadata.senderOdinId === identity;
 
     const onClick = useCallback(

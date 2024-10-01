@@ -87,7 +87,7 @@ export const PostMeta = memo(
         {channel ? (
           <TouchableOpacity
             onPress={() => channelLink && openURL(channelLink)}
-            style={[styles.pressableContainer, { flex: 1 }]}
+            style={[styles.pressableContainer, { flexShrink: 1 }]}
           >
             {postFile?.fileMetadata.isEncrypted && <Lock size={'xs'} color={Colors.indigo[500]} />}
             <Text style={styles.aclText} numberOfLines={1}>

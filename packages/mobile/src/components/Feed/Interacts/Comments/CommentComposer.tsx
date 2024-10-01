@@ -19,6 +19,7 @@ import { Asset, launchImageLibrary } from 'react-native-image-picker';
 import { IconButton } from '../../../ui/Buttons';
 import { FileOverview } from '../../../Files/FileOverview';
 import TextButton from '../../../ui/Text/Text-Button';
+import { TextInput } from 'react-native-gesture-handler';
 
 export const CommentComposer = memo(
   ({
@@ -27,12 +28,14 @@ export const CommentComposer = memo(
     canReact,
     onReplyCancel,
     replyOdinId,
+    isBottomSheet = true,
   }: {
     context: ReactionContext;
     replyThreadId?: string;
     canReact?: CanReactInfo;
     onReplyCancel?: () => void;
     replyOdinId?: string;
+    isBottomSheet?: boolean;
   }) => {
     const {
       mutateAsync: postComment,
@@ -96,6 +99,7 @@ export const CommentComposer = memo(
         });
       } catch (e) {}
       setComment('');
+      setAssets([]);
       onReplyCancel?.();
     }, [assets, context, identity, comment, onReplyCancel, postComment, postState, replyThreadId]);
 
@@ -171,20 +175,37 @@ export const CommentComposer = memo(
                 alignItems: 'center',
               }}
             >
-              <BottomSheetTextInput
-                value={comment}
-                onChangeText={setComment}
-                placeholder={t('Add a comment...')}
-                style={{
-                  flex: 1,
-                  maxHeight: 80,
-                  paddingVertical: 8,
-                  color: isDarkMode ? Colors.white : Colors.black,
-                }}
-                multiline
-                textAlignVertical="center" // Android only
-                autoCapitalize="sentences"
-              />
+              {isBottomSheet ? (
+                <BottomSheetTextInput
+                  value={comment}
+                  onChangeText={setComment}
+                  placeholder={t('Add a comment...')}
+                  style={{
+                    flex: 1,
+                    maxHeight: 80,
+                    paddingVertical: 8,
+                    color: isDarkMode ? Colors.white : Colors.black,
+                  }}
+                  multiline
+                  textAlignVertical="center" // Android only
+                  autoCapitalize="sentences"
+                />
+              ) : (
+                <TextInput
+                  value={comment}
+                  onChangeText={setComment}
+                  placeholder={t('Add a comment...')}
+                  style={{
+                    flex: 1,
+                    maxHeight: 80,
+                    paddingVertical: 8,
+                    color: isDarkMode ? Colors.white : Colors.black,
+                  }}
+                  multiline
+                  textAlignVertical="center" // Android only
+                  autoCapitalize="sentences"
+                />
+              )}
               <IconButton icon={<Images />} onPress={handleImageIconPress} />
             </View>
           </Animated.View>
