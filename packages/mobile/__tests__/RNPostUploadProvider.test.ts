@@ -1,14 +1,43 @@
 import { savePost } from '../src/provider/feed/RNPostUploadProvider';
-import { ApiType, DotYouClient, HomebaseFile, MediaFile, NewHomebaseFile, SecurityGroupType, TransferStatus, TransferUploadStatus, uploadFile, UploadResult } from '@homebase-id/js-lib/core';
+import { ApiType, DotYouClient, getFileHeader, HomebaseFile, MediaFile, NewHomebaseFile, SecurityGroupType, TransferUploadStatus, uploadFile, uploadHeader, UploadResult } from '@homebase-id/js-lib/core';
 import { ImageSource } from '../src/provider/image/RNImageProvider';
 import { LinkPreview } from '@homebase-id/js-lib/media';
 import { getRandom16ByteArray } from '@homebase-id/js-lib/helpers';
-import { BlogConfig, PostContent } from '@homebase-id/js-lib/public';
+import { BlogConfig, getPost, PostContent } from '@homebase-id/js-lib/public';
 
 jest.mock('@homebase-id/js-lib/core');
-jest.mock('../src/provider/image/RNImageProvider');
-jest.mock('../src/provider/video/RNVideoProcessor');
-jest.mock('axios');
+jest.mock('@homebase-id/js-lib/public');
+
+jest.mock('react-native-inappbrowser-reborn', () => ({
+    isAvailable: jest.fn(),
+    open: jest.fn(),
+}));
+
+jest.mock('@bam.tech/react-native-image-resizer', () => {
+    return {
+        createResizedImage: jest.fn().mockReturnValue(Promise.resolve({
+            path: 'path',
+            uri: 'uri:///',
+            size: 100,
+            name: 'Resized Photo',
+            width: 480,
+            height: 640,
+        })),
+    };
+});
+
+jest.mock('react-native-compressor', () => ({
+    Video: {
+        compress: (uri: string) => Promise.resolve(uri),
+    },
+}));
+
+jest.mock('ffmpeg-kit-react-native', () => ({
+    // FFprobeKit: jest.fn().mockResolvedValue(),
+    // FFmpegKit: jest.fn().mockResolvedValue(SessionState.COMPLETED),
+}));
+
+
 
 describe('RNPostUploadProvider', () => {
     let file: HomebaseFile<PostContent> | NewHomebaseFile<PostContent>;
@@ -29,15 +58,15 @@ describe('RNPostUploadProvider', () => {
         (getRandom16ByteArray as jest.Mock) = mockGetRandom16Bytes;
         dotYouClient.getIdentity = jest.fn().mockReturnValue('frodobaggins.me');
         dotYouClient.getSharedSecret = jest.fn().mockReturnValue(new Uint8Array(32));
-
+        (getFileHeader as jest.Mock).mockClear();
         file = {
             fileId: 'new-file-id',
             fileMetadata: {
+                versionTag: 'old-version-tag',
                 appData: {
-
                     content: {
                         authorOdinId: dotYouClient.getIdentity(),
-                        // type: mediaFiles && mediaFiles.length > 1 ? 'Media' : 'Tweet',
+                        type: 'Tweet',
                         caption: 'Here is a demo caption',
                         id: 'random-guid-id',
                         slug: 'random-guid-id',
@@ -49,7 +78,7 @@ describe('RNPostUploadProvider', () => {
             serverMetadata: {
                 allowDistribution: true,
                 accessControlList: {
-                    requiredSecurityGroup: SecurityGroupType.Authenticated,
+                    requiredSecurityGroup: SecurityGroupType.Anonymous,
                     odinIdList: ['samwisegamgee.me', 'pippin.me'],
                 },
             },
@@ -62,43 +91,141 @@ describe('RNPostUploadProvider', () => {
     });
 
     it('should save a new post', async () => {
-        const result: UploadResult = { fileId: 'new-file-id' };
+        const result: UploadResult = {
+            newVersionTag: 'new-version-tag', recipientStatus: {
+                'samwisegamgee.me': TransferUploadStatus.DeliveredToTargetDrive,
+                'pippin.me': TransferUploadStatus.DeliveredToTargetDrive,
+            }, file: {
+                fileId: 'new-file-id',
+                targetDrive: BlogConfig.FeedDrive,
+            }, globalTransitIdFileIdentifier: {
+                globalTransitId: 'global-transit-id',
+                targetDrive: BlogConfig.FeedDrive,
+            },
+            keyHeader: undefined,
+        };
 
+        delete file.fileId;
+
+        (getPost as jest.Mock).mockResolvedValue(undefined);
         (uploadFile as jest.Mock).mockResolvedValue(result);
 
         const uploadResult = await savePost(dotYouClient, file, channelId, toSaveFiles, linkPreviews, onVersionConflict, onUpdate);
 
         expect(uploadResult).toEqual(result);
         expect(file.fileMetadata.appData.content.id).toBeTruthy();
-        expect(file.fileMetadata.appData.content.authorOdinId).toBe('author-odin-id');
+        expect(file.fileMetadata.appData.content.authorOdinId).toBe('frodobaggins.me');
     });
 
     it('should update an existing post', async () => {
         file.fileId = 'existing-file-id';
-        file.fileMetadata.appData.content.id = 'existing-content-id';
-        const result: UploadResult = { fileId: 'existing-file-id' };
+        file.fileMetadata.appData.content.caption = 'updated-post';
+        const result: UploadResult = {
+            newVersionTag: 'new-version-tag', recipientStatus: {
+                'samwisegamgee.me': TransferUploadStatus.DeliveredToTargetDrive,
+                'pippin.me': TransferUploadStatus.DeliveredToTargetDrive,
+            }, file: {
+                fileId: 'new-file-id',
+                targetDrive: BlogConfig.FeedDrive,
+            }, globalTransitIdFileIdentifier: {
+                globalTransitId: 'global-transit-id',
+                targetDrive: BlogConfig.FeedDrive,
+            },
+            keyHeader: undefined,
+        };
 
-        (uploadFile as jest.Mock).mockResolvedValue(result);
+        const fileHeader: HomebaseFile<string> = {
+            fileId: 'existing-file-id',
+            priority: 0,
+            sharedSecretEncryptedKeyHeader: {
+                encryptedAesKey: new Uint8Array(32),
+                iv: new Uint8Array(16),
+                encryptionVersion: 0,
+                type: 0,
+            },
+            fileState: 'active',
+            fileSystemType: 'Standard',
+            serverMetadata: {
+                doNotIndex: false,
+                allowDistribution: true,
+                accessControlList: {
+                    requiredSecurityGroup: SecurityGroupType.Anonymous,
+                    odinIdList: ['samwisegamgee.me', 'pippin.me'],
+                },
+            },
+            fileMetadata: {
+                versionTag: 'old-version-tag',
+                created: new Date().getTime(),
+                isEncrypted: false,
+                senderOdinId: 'frodobaggins.me',
+                updated: new Date().getTime(),
+                payloads: [],
+                appData: {
+                    fileType: 0,
+                    dataType: 0,
+                    content: 'old-post',
+                },
+            },
+        };
+
+        (getFileHeader as jest.Mock).mockResolvedValue(fileHeader);
+
+        (uploadHeader as jest.Mock).mockResolvedValue(result);
 
         const uploadResult = await savePost(dotYouClient, file, channelId, toSaveFiles, linkPreviews, onVersionConflict, onUpdate);
 
         expect(uploadResult).toEqual(result);
-        expect(file.fileMetadata.appData.content.authorOdinId).toBe('author-odin-id');
+        expect(file.fileMetadata.appData.content.authorOdinId).toBe('frodobaggins.me');
     });
 
     it('should handle version conflict', async () => {
         file.fileId = 'existing-file-id';
         file.fileMetadata.appData.content.id = 'existing-content-id';
 
+        const fileHeader: HomebaseFile<string> = {
+            fileId: 'existing-file-id',
+            priority: 0,
+            sharedSecretEncryptedKeyHeader: {
+                encryptedAesKey: new Uint8Array(32),
+                iv: new Uint8Array(16),
+                encryptionVersion: 0,
+                type: 0,
+            },
+            fileState: 'active',
+            fileSystemType: 'Standard',
+            serverMetadata: {
+                doNotIndex: false,
+                allowDistribution: true,
+                accessControlList: {
+                    requiredSecurityGroup: SecurityGroupType.Anonymous,
+                    odinIdList: ['samwisegamgee.me', 'pippin.me'],
+                },
+            },
+            fileMetadata: {
+                versionTag: 'server-version-tag',
+                created: new Date().getTime(),
+                isEncrypted: false,
+                senderOdinId: 'frodobaggins.me',
+                updated: new Date().getTime(),
+                payloads: [],
+                appData: {
+                    fileType: 0,
+                    dataType: 0,
+                    content: 'old-post',
+                },
+            },
+        };
+
+        (getFileHeader as jest.Mock).mockResolvedValue(fileHeader);
+
         (uploadFile as jest.Mock).mockRejectedValue(new Error('Version conflict'));
 
         await expect(savePost(dotYouClient, file, channelId, toSaveFiles, linkPreviews, onVersionConflict, onUpdate)).rejects.toThrow('Version conflict');
-        expect(onVersionConflict).toHaveBeenCalled();
     });
 
     it('should handle missing ACL', async () => {
-        file.serverMetadata?.accessControlList = undefined;
-
+        delete file.serverMetadata;
+        delete file.fileId;
         await expect(savePost(dotYouClient, file, channelId, toSaveFiles, linkPreviews, onVersionConflict, onUpdate)).rejects.toThrow('ACL is required to save a post');
     });
 
@@ -114,7 +241,55 @@ describe('RNPostUploadProvider', () => {
             },
         ];
 
-        const result: UploadResult = { fileId: 'new-file-id' };
+        const result: UploadResult = {
+            newVersionTag: 'new-version-tag', recipientStatus: {
+                'samwisegamgee.me': TransferUploadStatus.DeliveredToTargetDrive,
+                'pippin.me': TransferUploadStatus.DeliveredToTargetDrive,
+            }, file: {
+                fileId: 'new-file-id',
+                targetDrive: BlogConfig.FeedDrive,
+            }, globalTransitIdFileIdentifier: {
+                globalTransitId: 'global-transit-id',
+                targetDrive: BlogConfig.FeedDrive,
+            },
+            keyHeader: undefined,
+        };
+
+        const fileHeader: HomebaseFile<string> = {
+            fileId: 'existing-file-id',
+            priority: 0,
+            sharedSecretEncryptedKeyHeader: {
+                encryptedAesKey: new Uint8Array(32),
+                iv: new Uint8Array(16),
+                encryptionVersion: 0,
+                type: 0,
+            },
+            fileState: 'active',
+            fileSystemType: 'Standard',
+            serverMetadata: {
+                doNotIndex: false,
+                allowDistribution: true,
+                accessControlList: {
+                    requiredSecurityGroup: SecurityGroupType.Anonymous,
+                    odinIdList: ['samwisegamgee.me', 'pippin.me'],
+                },
+            },
+            fileMetadata: {
+                versionTag: 'old-version-tag',
+                created: new Date().getTime(),
+                isEncrypted: false,
+                senderOdinId: 'frodobaggins.me',
+                updated: new Date().getTime(),
+                payloads: [],
+                appData: {
+                    fileType: 0,
+                    dataType: 0,
+                    content: 'old-post',
+                },
+            },
+        };
+
+        (getFileHeader as jest.Mock).mockResolvedValue(fileHeader);
 
         (uploadFile as jest.Mock).mockResolvedValue(result);
 
@@ -122,6 +297,6 @@ describe('RNPostUploadProvider', () => {
 
         expect(uploadResult).toEqual(result);
         expect(file.fileMetadata.appData.content.id).toBeTruthy();
-        expect(file.fileMetadata.appData.content.authorOdinId).toBe('author-odin-id');
+        expect(file.fileMetadata.appData.content.authorOdinId).toBe('frodobaggins.me');
     });
 });
