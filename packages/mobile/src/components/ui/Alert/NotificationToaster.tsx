@@ -1,7 +1,6 @@
 import { useDotYouClientContext } from 'feed-app-common';
 import { useRouteContext } from '../../RouteContext/RouteContext';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { TabStackParamList } from '../../../app/App';
 import { ChatStackParamList } from '../../../app/ChatStack';
 import { useNotification } from '../../../hooks/notifications/useNotification';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
@@ -17,13 +16,14 @@ import Toast from 'react-native-toast-message';
 import { useCallback, useEffect } from 'react';
 import { getContactByOdinId } from '@homebase-id/js-lib/network';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { FeedStackParamList } from '../../../app/FeedStack';
 
 export const NotificationToaster = () => {
   const { route } = useRouteContext();
   const dotYouClient = useDotYouClientContext();
   const identity = useDotYouClientContext().getIdentity();
   const chatNavigator = useNavigation<NavigationProp<ChatStackParamList>>();
-  const feedNavigator = useNavigation<NavigationProp<TabStackParamList>>();
+  const feedNavigator = useNavigation<NavigationProp<FeedStackParamList>>();
   const isConversationScreen = route?.name === 'Conversation' && !route.params;
   const isChatScreen = route?.name === 'ChatScreen' && route.params;
   const isFeedScreen = route?.name === 'Home';

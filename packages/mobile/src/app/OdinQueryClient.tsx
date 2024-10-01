@@ -14,7 +14,7 @@ import {
   getAddReactionMutationOptions,
   getRemoveReactionMutationOptions,
 } from '../hooks/chat/useChatReaction';
-import { getSavePostMutationOptions } from '../hooks/feed/post/usePost';
+import { getSavePostMutationOptions } from '../hooks/feed/post/useManagePost';
 
 const queryClient = new QueryClient({
   defaultOptions: {

@@ -2,18 +2,18 @@ import messaging from '@react-native-firebase/messaging';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { tryJsonParse } from '@homebase-id/js-lib/helpers';
 import { navigateOnNotification } from '../../components/Dashboard/NotificationsOverview';
-import { TabStackParamList } from '../../app/App';
 import { PushNotification } from '@homebase-id/js-lib/core';
 import { useDotYouClientContext } from 'feed-app-common';
 import { useCallback, useEffect } from 'react';
 import { ChatStackParamList } from '../../app/ChatStack';
 import notifee, { Event, EventType } from '@notifee/react-native';
 import { AppState, Platform } from 'react-native';
+import { FeedStackParamList } from '../../app/FeedStack';
 
 export const useInitialPushNotification = () => {
   const identity = useDotYouClientContext().getIdentity();
   const chatNavigator = useNavigation<NavigationProp<ChatStackParamList>>();
-  const feedNavigator = useNavigation<NavigationProp<TabStackParamList>>();
+  const feedNavigator = useNavigation<NavigationProp<FeedStackParamList>>();
 
   const handleInitialNotification = useCallback(
     async (stringifiedData: string) => {
