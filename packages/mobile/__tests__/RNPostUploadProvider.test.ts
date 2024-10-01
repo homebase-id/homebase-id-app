@@ -110,7 +110,7 @@ describe('RNPostUploadProvider', () => {
         (getPost as jest.Mock).mockResolvedValue(undefined);
         (uploadFile as jest.Mock).mockResolvedValue(result);
 
-        const uploadResult = await savePost(dotYouClient, file, channelId, toSaveFiles, linkPreviews, onVersionConflict, onUpdate);
+        const uploadResult = await savePost(dotYouClient, file, undefined, channelId, toSaveFiles, linkPreviews, onVersionConflict, onUpdate);
 
         expect(uploadResult).toEqual(result);
         expect(file.fileMetadata.appData.content.id).toBeTruthy();
@@ -172,7 +172,7 @@ describe('RNPostUploadProvider', () => {
 
         (uploadHeader as jest.Mock).mockResolvedValue(result);
 
-        const uploadResult = await savePost(dotYouClient, file, channelId, toSaveFiles, linkPreviews, onVersionConflict, onUpdate);
+        const uploadResult = await savePost(dotYouClient, file, undefined, channelId, toSaveFiles, linkPreviews, onVersionConflict, onUpdate);
 
         expect(uploadResult).toEqual(result);
         expect(file.fileMetadata.appData.content.authorOdinId).toBe('frodobaggins.me');
@@ -220,13 +220,13 @@ describe('RNPostUploadProvider', () => {
 
         (uploadFile as jest.Mock).mockRejectedValue(new Error('Version conflict'));
 
-        await expect(savePost(dotYouClient, file, channelId, toSaveFiles, linkPreviews, onVersionConflict, onUpdate)).rejects.toThrow('Version conflict');
+        await expect(savePost(dotYouClient, file, undefined, channelId, toSaveFiles, linkPreviews, onVersionConflict, onUpdate)).rejects.toThrow('Version conflict');
     });
 
     it('should handle missing ACL', async () => {
         delete file.serverMetadata;
         delete file.fileId;
-        await expect(savePost(dotYouClient, file, channelId, toSaveFiles, linkPreviews, onVersionConflict, onUpdate)).rejects.toThrow('ACL is required to save a post');
+        await expect(savePost(dotYouClient, file, undefined, channelId, toSaveFiles, linkPreviews, onVersionConflict, onUpdate)).rejects.toThrow('ACL is required to save a post');
     });
 
     it('should handle link previews without media', async () => {
@@ -293,7 +293,7 @@ describe('RNPostUploadProvider', () => {
 
         (uploadFile as jest.Mock).mockResolvedValue(result);
 
-        const uploadResult = await savePost(dotYouClient, file, channelId, toSaveFiles, linkPreviews, onVersionConflict, onUpdate);
+        const uploadResult = await savePost(dotYouClient, file, undefined, channelId, toSaveFiles, linkPreviews, onVersionConflict, onUpdate);
 
         expect(uploadResult).toEqual(result);
         expect(file.fileMetadata.appData.content.id).toBeTruthy();
