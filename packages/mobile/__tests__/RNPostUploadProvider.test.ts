@@ -154,6 +154,7 @@ describe('RNPostUploadProvider', () => {
                 },
             },
             fileMetadata: {
+                originalAuthor: 'frodobaggins.me',
                 versionTag: 'old-version-tag',
                 created: new Date().getTime(),
                 isEncrypted: false,
@@ -202,6 +203,7 @@ describe('RNPostUploadProvider', () => {
                 },
             },
             fileMetadata: {
+                originalAuthor: 'frodobaggins.me',
                 versionTag: 'server-version-tag',
                 created: new Date().getTime(),
                 isEncrypted: false,
@@ -275,6 +277,7 @@ describe('RNPostUploadProvider', () => {
                 },
             },
             fileMetadata: {
+                originalAuthor: 'frodobaggins.me',
                 versionTag: 'old-version-tag',
                 created: new Date().getTime(),
                 isEncrypted: false,

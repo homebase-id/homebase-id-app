@@ -180,6 +180,7 @@ describe('ConversationProvider', () => {
                 type: 2,
             },
             fileMetadata: {
+                originalAuthor: '',
                 appData: {
                     uniqueId: 'unique-id',
                     content: {
