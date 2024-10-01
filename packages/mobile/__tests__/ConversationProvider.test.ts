@@ -59,7 +59,7 @@ describe('ConversationProvider', () => {
         identity: 'frodobaggins.me',
         api: ApiType.App,
         headers: {},
-        sharedSecret: new Uint8Array(32),
+        sharedSecret: new Uint8Array(16),
     });
     const mockGetRandom16Bytes = jest.fn().mockReturnValue(new Uint8Array(16));
     (getRandom16ByteArray as jest.Mock) = mockGetRandom16Bytes;
