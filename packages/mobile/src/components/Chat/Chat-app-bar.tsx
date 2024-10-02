@@ -10,7 +10,7 @@ import { Avatar, GroupAvatar, OwnerAvatar } from '../ui/Avatars/Avatar';
 import { EmbeddedThumb } from '@homebase-id/js-lib/core';
 import { ChatDrive } from '../../provider/chat/ConversationProvider';
 import { IconButton } from '../ui/Buttons';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useAuth } from '../../hooks/auth/useAuth';
 
 export type SelectedMessageProp = {
   onReply: () => void;
@@ -51,8 +51,8 @@ export const ChatAppBar = ({
     | undefined;
 }) => {
   const user = useProfile().data;
-  const identity = useDotYouClientContext().getIdentity();
   const { isDarkMode } = useDarkMode();
+  const identity = useAuth().getIdentity();
 
   const headerStyle = useMemo(
     () => ({

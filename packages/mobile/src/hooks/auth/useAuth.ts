@@ -42,7 +42,11 @@ export const drives = [
     t: BlogConfig.FeedDrive.type,
     n: '',
     d: '',
-    p: DrivePermissionType.Read + DrivePermissionType.Write + DrivePermissionType.Comment + DrivePermissionType.React,
+    p:
+      DrivePermissionType.Read +
+      DrivePermissionType.Write +
+      DrivePermissionType.Comment +
+      DrivePermissionType.React,
   },
   {
     a: ChatConfig.ChatDrive.alias,
@@ -99,6 +103,7 @@ export const permissions = [
   AppPermissionType.ReceiveDataFromOtherIdentitiesOnMyBehalf,
   AppPermissionType.PublishStaticContent,
   AppPermissionType.SendPushNotifications,
+  AppPermissionType.SendIntroductions,
 ];
 
 export const circleDrives = [
@@ -233,7 +238,8 @@ export const useYouAuthAuthorization = () => {
       [ALL_CONNECTIONS_CIRCLE_ID],
       uint8ArrayToBase64(stringToUint8Array(JSON.stringify(publicKeyJwk))),
       corsHost,
-      `${Platform.OS === 'ios' ? 'iOS' : Platform.OS === 'android' ? 'Android' : Platform.OS} | ${Platform.Version
+      `${Platform.OS === 'ios' ? 'iOS' : Platform.OS === 'android' ? 'Android' : Platform.OS} | ${
+        Platform.Version
       }`
     );
   }, [setPrivateKey]);

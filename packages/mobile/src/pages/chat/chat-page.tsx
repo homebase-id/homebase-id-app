@@ -757,9 +757,9 @@ const EditDialogBox = memo(({ visible, handleDialogClose, selectedMessage }: Edi
 
 const DeleteDialogBox = memo(
   ({ visible, handleDialogClose, selectedMessage }: DeleteDialogBoxProp) => {
+    const identity = useAuth().getIdentity();
     const { isDarkMode } = useDarkMode();
     const [deleteMessageError, setDeleteMessageError] = useState<unknown | undefined>();
-    const identity = useDotYouClientContext().getIdentity();
     const { data: conversation } = useConversation({
       conversationId: selectedMessage?.fileMetadata.appData.groupId,
     }).single;
