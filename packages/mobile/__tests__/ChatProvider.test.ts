@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   ApiType,
   deleteFile,
@@ -27,6 +28,7 @@ import {
 import * as ChatProvider from '../src/provider/chat/ChatProvider';
 import { ChatDrive, UnifiedConversation } from '../src/provider/chat/ConversationProvider';
 import { sendReadReceipt } from '@homebase-id/js-lib/peer';
+import { getRandom16ByteArray } from '@homebase-id/js-lib/helpers';
 
 jest.mock('@homebase-id/js-lib/core');
 jest.mock('@homebase-id/js-lib/peer');
