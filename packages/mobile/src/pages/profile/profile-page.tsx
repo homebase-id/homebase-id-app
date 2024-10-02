@@ -18,7 +18,6 @@ import { Container } from '../../components/ui/Container/Container';
 import {
   AddressBook,
   Download,
-  Gear,
   Logout,
   People,
   RecycleBin,
@@ -353,12 +352,14 @@ export const CheckForUpdates = ({
   return (
     <TouchableOpacity
       onPress={() => doCheckForUpdate()}
-      style={{
-        display: 'flex',
-        flexDirection: 'row',
-        gap: 5,
-        ...(style as any),
-      }}
+      style={[
+        {
+          display: 'flex',
+          flexDirection: 'row',
+          gap: 5,
+        },
+        style,
+      ]}
     >
       {hideIcon ? null : <Download size={'lg'} />}
       <Text

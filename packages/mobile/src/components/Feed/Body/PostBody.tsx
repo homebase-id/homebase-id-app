@@ -13,12 +13,12 @@ const MAX_CHAR_FOR_SUMMARY = 400;
 export const PostBody = memo(
   ({
     post,
-    odinId,
-    hideEmbeddedPostMedia,
-    fileId,
-    globalTransitId,
-    payloads,
-    lastModified,
+    // odinId,
+    // hideEmbeddedPostMedia,
+    // fileId,
+    // globalTransitId,
+    // payloads,
+    // lastModified,
   }: {
     post: PostContent;
     odinId?: string;

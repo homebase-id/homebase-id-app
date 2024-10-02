@@ -64,7 +64,7 @@ export const PublicAvatar = (props: {
             ...styles.tinyLogo,
             ...props.style,
           }}
-          onError={(e) => {
+          onError={() => {
             // console.error('Error loading image', e.nativeEvent.error);
             setIsSvg(true);
           }}

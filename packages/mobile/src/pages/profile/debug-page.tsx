@@ -4,8 +4,8 @@ import { Container } from '../../components/ui/Container/Container';
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 import TextButton from '../../components/ui/Text/Text-Button';
 import Toast from 'react-native-toast-message';
-import { DoubleTapHeart } from '../../components/ui/DoubleTapHeart';
-import { Image } from 'react-native';
+// import { DoubleTapHeart } from '../../components/ui/DoubleTapHeart';
+// import { Image } from 'react-native';
 
 type DebugProp = NativeStackScreenProps<ProfileStackParamList, 'Debug'>;
 

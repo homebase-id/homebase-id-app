@@ -50,7 +50,7 @@ export const useChannels = ({
           } as HomebaseFile<ChannelDefinitionVm>;
         });
       } catch (e) {
-        console.error('failed to fetch dynamic data');
+        console.error('failed to fetch dynamic data', e);
       }
     };
 

@@ -1,4 +1,3 @@
-
 import { getNewId, uint8ArrayToBase64 } from '@homebase-id/js-lib/helpers';
 
 import { CachesDirectoryPath, exists, readFile, stat, unlink, writeFile } from 'react-native-fs';
@@ -56,6 +55,7 @@ const CompressVideo = async (
 
 const toHexString = (byteArray: Uint8Array) => {
   return Array.from(byteArray, function (byte) {
+    // eslint-disable-next-line no-bitwise
     return ('0' + (byte & 0xff).toString(16)).slice(-2);
   }).join('');
 };

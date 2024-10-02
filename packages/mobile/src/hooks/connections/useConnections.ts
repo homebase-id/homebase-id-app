@@ -23,7 +23,7 @@ export const useConnections = (
         cursor: cursor ?? 0,
         count: pageSize,
       });
-    } catch (ex) {
+    } catch {
       return {
         cursor: undefined,
         results: [],

@@ -6,9 +6,7 @@ import {
   SystemFileType,
   decryptKeyHeader,
 } from '@homebase-id/js-lib/core';
-import {
-  MediaUploadMeta,
-} from '@homebase-id/js-lib/media';
+import { MediaUploadMeta } from '@homebase-id/js-lib/media';
 import {
   jsonStringify64,
   assertIfDefined,
@@ -41,8 +39,6 @@ export interface ImageSource {
 export interface RNMediaUploadMeta extends MediaUploadMeta {
   type: ImageContentType;
 }
-
-
 
 export const getThumbBytes = async (
   dotYouClient: DotYouClient,
@@ -222,7 +218,7 @@ export const getDecryptedImageData = async (
         { systemFileType, lastModified }
       );
       if (thumbBytes) return thumbBytes;
-    } catch (ex) {
+    } catch {
       // Failed to get thumb data, try to get payload data
     }
   }
@@ -259,8 +255,9 @@ const buildIvFromQueryString = async (querystring: string) => {
   const uniqueQueryKey = (() => {
     // Check if it's a direct file request
     if (searchParams.has('fileId')) {
-      return `${searchParams.get('fileId')} ${searchParams.get('key') || searchParams.get('payloadKey')
-        }-${searchParams.get('height')}x${searchParams.get('width')}`;
+      return `${searchParams.get('fileId')} ${
+        searchParams.get('key') || searchParams.get('payloadKey')
+      }-${searchParams.get('height')}x${searchParams.get('width')}`;
     }
     // Check if it's a query-batch/modifed request; Queries on a single drive (alias)
     else if (searchParams.has('alias')) return querystring;

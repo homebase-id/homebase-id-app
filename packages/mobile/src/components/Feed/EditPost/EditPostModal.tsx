@@ -2,7 +2,6 @@ import {
   DEFAULT_PAYLOAD_KEY,
   HomebaseFile,
   MediaFile,
-  NewMediaFile,
   SecurityGroupType,
 } from '@homebase-id/js-lib/core';
 import { PostContent } from '@homebase-id/js-lib/public';
