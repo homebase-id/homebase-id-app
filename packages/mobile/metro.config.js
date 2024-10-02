@@ -8,7 +8,7 @@ const config = {
   watchFolders: [path.resolve(__dirname, '../../'), path.resolve(__dirname, '../../packages')],
   resolver: {
     extraNodeModules: {
-      'feed-app-common': path.resolve(__dirname, '../../packages/common'),
+      // 'feed-app-common': path.resolve(__dirname, '../../packages/common'),
       'homebase-id-app-common': path.resolve(__dirname, '../../packages/common'),
       '@react-native-community/netinfo': path.resolve(
         __dirname,
