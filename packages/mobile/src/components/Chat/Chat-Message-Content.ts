@@ -1,7 +1,7 @@
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { ChatDeletedArchivalStaus, ChatMessage } from '../../provider/chat/ChatProvider';
 import { ChatMessageIMessage } from './ChatDetail';
-import { ellipsisAtMaxChar } from 'feed-app-common';
+import { ellipsisAtMaxChar, getPlainTextFromRichText } from 'homebase-id-app-common';
 import { memo } from 'react';
 
 export const ChatMessageContent = memo(
@@ -12,7 +12,7 @@ export const ChatMessageContent = memo(
       return 'This message was deleted';
     }
     if (textMessage?.length > 0) {
-      return ellipsisAtMaxChar(textMessage, 30);
+      return ellipsisAtMaxChar(getPlainTextFromRichText(textMessage), 30);
     } else if (payloads?.length > 1) {
       return '📸 Medias';
     } else {

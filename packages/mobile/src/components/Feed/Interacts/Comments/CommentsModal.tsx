@@ -27,13 +27,11 @@ import { Backdrop } from '../../../ui/Modal/Backdrop';
 import { CommentComposer } from './CommentComposer';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HomebaseFile, ReactionFile } from '@homebase-id/js-lib/core';
-import { t } from 'feed-app-common';
 import { EmptyComment } from './EmptyComment';
 import { useBottomSheetBackHandler } from '../../../../hooks/useBottomSheetBackHandler';
 
-
 export interface CommentModalMethods {
-  setContext: (context: ReactionContext & CanReactInfo) => void;
+  setContext: (context: ReactionContext & Partial<CanReactInfo>) => void;
   dismiss: () => void;
 }
 
@@ -42,7 +40,7 @@ export const CommentsModal = memo(
     const { isDarkMode } = useDarkMode();
     const bottomSheetRef = useRef<BottomSheetModalMethods>(null);
     const { handleSheetPositionChange } = useBottomSheetBackHandler(bottomSheetRef);
-    const [context, setContext] = useState<ReactionContext & CanReactInfo>();
+    const [context, setContext] = useState<ReactionContext & Partial<CanReactInfo>>();
     const [replyTo, setReplyThread] = useState<
       | {
           replyThreadId: string | undefined;
@@ -62,7 +60,7 @@ export const CommentsModal = memo(
 
     useImperativeHandle(ref, () => {
       return {
-        setContext: (context: ReactionContext & CanReactInfo) => {
+        setContext: (context: ReactionContext & Partial<CanReactInfo>) => {
           setContext(context);
           bottomSheetRef.current?.present();
         },
@@ -90,7 +88,7 @@ export const CommentsModal = memo(
           >
             <CommentComposer
               context={context as ReactionContext}
-              canReact={context}
+              canReact={context as CanReactInfo}
               replyThreadId={replyTo?.replyThreadId}
               replyOdinId={replyTo?.authorOdinId}
               onReplyCancel={() => setReplyThread(undefined)}
@@ -108,7 +106,7 @@ export const CommentsModal = memo(
             commentData={item}
             context={context as ReactionContext}
             isThread={false}
-            canReact={context}
+            canReact={context as CanReactInfo}
             onReply={(commentFile) => {
               setReplyThread({
                 replyThreadId: commentFile.fileMetadata.globalTransitId,

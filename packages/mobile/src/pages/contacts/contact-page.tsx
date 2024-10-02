@@ -1,15 +1,9 @@
 import { FlatList } from 'react-native-gesture-handler';
 
-import {
-  ListRenderItemInfo,
-  Platform,
-  RefreshControl,
-  StatusBar,
-  View,
-} from 'react-native';
+import { ListRenderItemInfo, Platform, RefreshControl, StatusBar, View } from 'react-native';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 
-import { useAllConnections } from 'feed-app-common';
+import { useAllConnections } from 'homebase-id-app-common';
 import { ChatStackParamList, NewChatStackParamList } from '../../app/ChatStack';
 import { ContactTile, Tile } from '../../components/Contact/Contact-Tile';
 import { Users } from '../../components/ui/Icons/icons';
@@ -68,15 +62,14 @@ export const ContactPage = memo(
       <SafeAreaView>
         {Platform.OS === 'ios' && <StatusBar barStyle="light-content" />}
 
-          <FlatList
-            data={connections}
-            keyExtractor={(item) => item.odinId}
-            ListHeaderComponent={ListHeaderComponent}
-            ListEmptyComponent={<NoContacts />}
-            renderItem={renderItem}
-            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refetch} />}
-          />
-
+        <FlatList
+          data={connections}
+          keyExtractor={(item) => item.odinId}
+          ListHeaderComponent={ListHeaderComponent}
+          ListEmptyComponent={<NoContacts />}
+          renderItem={renderItem}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refetch} />}
+        />
       </SafeAreaView>
     );
   }

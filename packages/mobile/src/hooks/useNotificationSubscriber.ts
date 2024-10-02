@@ -12,7 +12,7 @@ import { hasDebugFlag } from '@homebase-id/js-lib/helpers';
 
 const isDebug = hasDebugFlag();
 
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 import { useAuth } from './auth/useAuth';
 
 // Wrapper for the notification subscriber within DotYouCore-js to add client side filtering of the notifications

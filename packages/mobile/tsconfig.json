@@ -1,3 +1,4 @@
 {
-  "extends": ["@react-native/typescript-config/tsconfig.json", "../../tsconfig.base.json"]
+  "extends": ["@react-native/typescript-config/tsconfig.json", "../../tsconfig.base.json"],
+  "exclude": ["__mocks__", "__tests__"]
 }

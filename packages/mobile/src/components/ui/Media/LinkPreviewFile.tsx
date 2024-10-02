@@ -6,7 +6,7 @@ import { calculateScaledDimensions, openURL } from '../../../utils/utils';
 import { Text } from '../Text/Text';
 import { useDarkMode } from '../../../hooks/useDarkMode';
 import { Colors } from '../../../app/Colors';
-import { ellipsisAtMaxChar } from 'feed-app-common';
+import { ellipsisAtMaxChar } from 'homebase-id-app-common';
 import { getDomainFromUrl } from '@homebase-id/js-lib/helpers';
 import Animated, { runOnJS } from 'react-native-reanimated';
 import { LinkPreviewDescriptor } from '@homebase-id/js-lib/media';

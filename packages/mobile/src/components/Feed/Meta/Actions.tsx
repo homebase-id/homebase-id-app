@@ -3,7 +3,7 @@ import { Text } from '../../ui/Text/Text';
 import { memo, ReactNode } from 'react';
 import { ChannelDefinition, PostContent } from '@homebase-id/js-lib/public';
 import { ApiType, DotYouClient, HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
-import { t, useDotYouClientContext } from 'feed-app-common';
+import { t, useDotYouClientContext } from 'homebase-id-app-common';
 import { useManageSocialFeed } from '../../../hooks/feed/useManageSocialFeed';
 import { ChannelDefinitionVm } from '../../../hooks/feed/channels/useChannels';
 import { useManagePost } from '../../../hooks/feed/post/useManagePost';

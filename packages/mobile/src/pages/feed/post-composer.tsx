@@ -6,7 +6,7 @@ import {
 } from '@homebase-id/js-lib/core';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { ChannelDefinition, BlogConfig, ReactAccess } from '@homebase-id/js-lib/public';
-import { t, useDotYouClientContext } from 'feed-app-common';
+import { t, useDotYouClientContext } from 'homebase-id-app-common';
 import { useState, useMemo, useCallback, useLayoutEffect, useRef, useEffect, memo } from 'react';
 import { View, TextInput, TouchableOpacity } from 'react-native';
 import { Asset, launchImageLibrary } from 'react-native-image-picker';

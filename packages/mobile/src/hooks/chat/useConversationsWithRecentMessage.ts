@@ -1,7 +1,7 @@
 import { UnifiedConversation } from '../../provider/chat/ConversationProvider';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 import { ChatMessage } from '../../provider/chat/ChatProvider';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { getChatMessageInfiniteQueryOptions } from './useChatMessages';

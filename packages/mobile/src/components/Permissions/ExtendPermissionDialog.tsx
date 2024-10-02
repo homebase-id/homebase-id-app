@@ -1,6 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { AppPermissionType } from '@homebase-id/js-lib/network';
-import { t, useMissingPermissions } from 'feed-app-common';
+import { t, useMissingPermissions } from 'homebase-id-app-common';
 import { useEffect } from 'react';
 import { Alert, Linking } from 'react-native';
 import InAppBrowser from 'react-native-inappbrowser-reborn';

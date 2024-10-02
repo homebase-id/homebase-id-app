@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCircles } from '@homebase-id/js-lib/network';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 
 export const useCircles = (excludeSystemCircles = false) => {
   const dotYouClient = useDotYouClientContext();

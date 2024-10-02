@@ -6,7 +6,7 @@ import { useConnections } from '../../hooks/connections/useConnections';
 import NoItems from '../../components/list/noItems';
 import IdentityItem from '../../components/list/identityItem';
 import { useCallback, useMemo, useState } from 'react';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 import { openURL } from '../../utils/utils';
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 

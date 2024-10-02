@@ -1,5 +1,5 @@
 import { QueryClient, useQuery, useQueryClient } from '@tanstack/react-query';
-import { t } from 'feed-app-common';
+import { t } from 'homebase-id-app-common';
 import {
   OdinErrorDetails,
   getKnownOdinErrorMessages,

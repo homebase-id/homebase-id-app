@@ -1,4 +1,4 @@
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 import { useExternalOdinId } from '../../hooks/connections/useExternalOdinId';
 import { useProfile } from '../../hooks/profile/useProfile';
 import { memo } from 'react';

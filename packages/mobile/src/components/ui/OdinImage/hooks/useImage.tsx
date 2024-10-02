@@ -4,7 +4,7 @@ import { ImageSize, TargetDrive, ImageContentType, SystemFileType } from '@homeb
 import { exists } from 'react-native-fs';
 import { getDecryptedImageData } from '../../../../provider/image/RNImageProvider';
 
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 import {
   getDecryptedMediaDataOverPeerByGlobalTransitId,
   getDecryptedMediaUrlOverPeer,

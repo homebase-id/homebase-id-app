@@ -15,7 +15,7 @@ import {
 } from '../../provider/chat/ChatProvider';
 
 import { DotYouClient, HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 import {
   ConversationWithYourselfId,
   UnifiedConversation,

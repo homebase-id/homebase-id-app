@@ -14,7 +14,7 @@ import { Colors } from '../app/Colors';
 import { AuthorName } from '../components/ui/Name';
 import { HeaderTitle } from '@react-navigation/elements';
 import { Text } from '../components/ui/Text/Text';
-import { formatToTimeAgoWithRelativeDetail } from 'feed-app-common';
+import { formatToTimeAgoWithRelativeDetail } from 'homebase-id-app-common';
 import { Download, ShareNode } from '../components/ui/Icons/icons';
 
 import useImage from '../components/ui/OdinImage/hooks/useImage';

@@ -14,7 +14,7 @@ import {
 } from '@homebase-id/js-lib/public';
 import { getNewId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useState } from 'react';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 import { ImageSource } from '../../../provider/image/RNImageProvider';
 import { LinkPreview } from '@homebase-id/js-lib/media';
 import { useManagePost } from './useManagePost';

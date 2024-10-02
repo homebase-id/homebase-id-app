@@ -9,7 +9,7 @@ import {
 
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { useChannels } from '../channels/useChannels';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 import { useAuth } from '../../auth/useAuth';
 import { getCachedPosts, getCachedRecentPosts } from '../channels/cachedDataHelpers';
 

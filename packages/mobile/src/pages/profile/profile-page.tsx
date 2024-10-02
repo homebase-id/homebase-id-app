@@ -30,7 +30,7 @@ import { openURL } from '../../utils/utils';
 import { useAuthenticatedPushNotification } from '../../hooks/push-notification/useAuthenticatedPushNotification';
 
 import { ProfileInfo } from '../../components/Profile/ProfileInfo';
-import { t } from 'feed-app-common';
+import { t } from 'homebase-id-app-common';
 
 type SettingsProps = NativeStackScreenProps<ProfileStackParamList, 'Overview'>;
 

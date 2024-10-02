@@ -1,6 +1,6 @@
 import { ReactionContext } from '@homebase-id/js-lib/public';
 import { CanReactInfo, useReaction } from '../../../../hooks/reactions';
-import { t, useDotYouClientContext } from 'feed-app-common';
+import { t, useDotYouClientContext } from 'homebase-id-app-common';
 import { ActivityIndicator, Platform, TouchableOpacity, View } from 'react-native';
 import { useDarkMode } from '../../../../hooks/useDarkMode';
 import { BottomSheetTextInput } from '@gorhom/bottom-sheet';

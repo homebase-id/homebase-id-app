@@ -24,16 +24,6 @@ export const getRichTextFromString = (body: string): RichText | undefined => {
   return richText.some((part) => part.type) ? richText : undefined;
 };
 
-export const getTextRootsRecursive = (children: RichText): string[] => {
-  return children
-    .map((child) =>
-      child.children
-        ? getTextRootsRecursive(child.children as RichText).join(' ')
-        : (child.text as string)
-    )
-    .filter((child) => child.length);
-};
-
 export const getReadingTime = (body?: RichText | string): ReadTimeStats | undefined => {
   if (!body) return;
 
@@ -48,3 +38,23 @@ export const getReadingTime = (body?: RichText | string): ReadTimeStats | undefi
     minutes: Math.ceil(wordsCount / 200),
   };
 };
+
+export const getTextRootsRecursive = (children: RichText | string | undefined): string[] => {
+  if (!children) return [];
+  if (!Array.isArray(children)) return [children as string];
+
+  return children
+    .map(
+      (child) =>
+        [
+          child.children ? getTextRootsRecursive(child.children as RichText).join(' ') : undefined,
+          (child.text || child.value || undefined) as string,
+        ]
+          .filter(Boolean)
+          .join(' ') || ''
+    )
+    .filter((child) => child.length);
+};
+
+export const getPlainTextFromRichText = (message: string | RichText | undefined) =>
+  getTextRootsRecursive(message).join(' ');

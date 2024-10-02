@@ -1,6 +1,6 @@
 import { useQueryClient, useQuery, useMutation, QueryClient } from '@tanstack/react-query';
 import { HomebaseFile, NewHomebaseFile, SecurityGroupType } from '@homebase-id/js-lib/core';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 import {
   ConversationMetadata,
   getConversationMetadata,

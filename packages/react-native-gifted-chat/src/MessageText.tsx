@@ -16,7 +16,8 @@ import { LeftRightStyle, IMessage } from './Models';
 import { StylePropType } from './utils';
 import { useChatContext } from './GiftedChatContext';
 import { error } from './logging';
-export { ParseShape };
+import { getPlainTextFromRichText } from 'homebase-id-app-common';
+export type { ParseShape };
 
 const WWW_URL_PATTERN = /^www\./i;
 
@@ -163,7 +164,7 @@ export function MessageText<TMessage extends IMessage = IMessage>({
         ]}
         childrenProps={{ ...textProps }}
       >
-        {currentMessage!.text}
+        {getPlainTextFromRichText(currentMessage!.text)}
       </ParsedText>
     </View>
   );

@@ -17,7 +17,7 @@ import { Colors } from '../../app/Colors';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { ErrorNotification } from '../ui/Alert/ErrorNotification';
 import { SelectedMessageState } from '../../pages/chat/chat-page';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 
 const ChatReaction = memo(
   ({

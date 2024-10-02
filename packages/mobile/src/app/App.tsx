@@ -51,7 +51,7 @@ import BootSplash from 'react-native-bootsplash';
 import BubbleColorProvider from '../components/BubbleContext/BubbleContext';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { ExtendPermissionDialog } from '../components/Permissions/ExtendPermissionDialog';
-import { t } from 'feed-app-common';
+import { t } from 'homebase-id-app-common';
 import { FEED_CHAT_APP_ID } from './constants';
 import { Toast } from '../components/ui/Toast/Toast';
 import { NotificationToaster } from '../components/ui/Alert/NotificationToaster';

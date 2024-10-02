@@ -11,7 +11,7 @@ import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/typ
 import { Backdrop } from '../../../ui/Modal/Backdrop';
 import { ReactionContext } from '@homebase-id/js-lib/public';
 import { useMyEmojiReactions, useReaction } from '../../../../hooks/reactions';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 import { ErrorNotification } from '../../../ui/Alert/ErrorNotification';
 import { useBottomSheetBackHandler } from '../../../../hooks/useBottomSheetBackHandler';
 

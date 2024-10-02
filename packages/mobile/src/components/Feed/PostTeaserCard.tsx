@@ -17,7 +17,7 @@ import { PostMeta, ToGroupBlock } from './Meta/Meta';
 import { ShareContext } from './Interacts/Share/ShareModal';
 import { Ellipsis } from '../ui/Icons/icons';
 import { PostActionProps } from './Interacts/PostActionModal';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 import { useCheckIdentity } from '../../hooks/checkIdentity/useCheckIdentity';
 import { PostBody } from './Body/PostBody';
 import { IconButton } from '../ui/Buttons';
@@ -36,7 +36,7 @@ export const PostTeaserCard = memo(
     onEmojiModalOpen,
   }: {
     postFile: HomebaseFile<PostContent>;
-    onCommentPress: (context: ReactionContext & CanReactInfo) => void;
+    onCommentPress: (context: ReactionContext & Partial<CanReactInfo>) => void;
     onReactionPress: (context: ReactionContext) => void;
     onSharePress?: (context: ShareContext) => void;
     onMorePress?: (context: PostActionProps) => void;
@@ -115,7 +115,7 @@ export const InnerPostTeaserCard = memo(
       | undefined
       | null;
     onPostActionPress: () => void;
-    onCommentPress: (context: ReactionContext & CanReactInfo) => void;
+    onCommentPress: (context: ReactionContext & Partial<CanReactInfo>) => void;
     onReactionPress: (context: ReactionContext) => void;
     onSharePress?: (context: ShareContext) => void;
     onEmojiModalOpen?: (context: ReactionContext) => void;

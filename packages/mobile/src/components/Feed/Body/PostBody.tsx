@@ -5,7 +5,7 @@ import { openURL, URL_PATTERN } from '../../../utils/utils';
 import { useDarkMode } from '../../../hooks/useDarkMode';
 import ParsedText, { ParseShape } from 'react-native-parsed-text';
 import { Colors } from '../../../app/Colors';
-import { ellipsisAtMaxChar, t } from 'feed-app-common';
+import { ellipsisAtMaxChar, t } from 'homebase-id-app-common';
 import TextButton from '../../ui/Text/Text-Button';
 
 const MAX_CHAR_FOR_SUMMARY = 400;

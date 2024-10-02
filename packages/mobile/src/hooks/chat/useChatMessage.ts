@@ -11,11 +11,12 @@ import {
   HomebaseFile,
   NewHomebaseFile,
   NewPayloadDescriptor,
+  RichText,
   SecurityGroupType,
 } from '@homebase-id/js-lib/core';
 import { getNewId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 
-import { t, useDotYouClientContext } from 'feed-app-common';
+import { t, useDotYouClientContext } from 'homebase-id-app-common';
 import {
   ChatDeliveryStatus,
   ChatMessage,
@@ -47,7 +48,7 @@ const sendMessage = async ({
   conversation: HomebaseFile<UnifiedConversation>;
   replyId?: string;
   files?: ImageSource[];
-  message: string;
+  message: string | RichText;
   linkPreviews?: LinkPreview[];
   chatId?: string;
   userDate?: number;
@@ -152,7 +153,7 @@ export const getSendChatMessageMutationOptions: (queryClient: QueryClient) => Us
     conversation: HomebaseFile<UnifiedConversation>;
     replyId?: string;
     files?: ImageSource[];
-    message: string;
+    message: string | RichText;
     linkPreviews?: LinkPreview[];
     userDate?: number;
     chatId?: string;

@@ -9,6 +9,7 @@ const config = {
   resolver: {
     extraNodeModules: {
       'feed-app-common': path.resolve(__dirname, '../../packages/common'),
+      'homebase-id-app-common': path.resolve(__dirname, '../../packages/common'),
       '@react-native-community/netinfo': path.resolve(
         __dirname,
         '../../node_modules/@react-native-community/netinfo'

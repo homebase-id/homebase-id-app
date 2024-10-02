@@ -14,7 +14,7 @@ import {
   ReactionPreview,
   uploadGroupReaction,
 } from '@homebase-id/js-lib/core';
-import { t, useDotYouClientContext } from 'feed-app-common';
+import { t, useDotYouClientContext } from 'homebase-id-app-common';
 import { ChatDrive, UnifiedConversation } from '../../provider/chat/ConversationProvider';
 import { ChatMessage } from '../../provider/chat/ChatProvider';
 import { getSynchronousDotYouClient } from './getSynchronousDotYouClient';

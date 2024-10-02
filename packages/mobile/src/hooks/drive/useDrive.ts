@@ -1,5 +1,5 @@
 import { getDriveStatus, TargetDrive } from '@homebase-id/js-lib/core';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 import { useQuery } from '@tanstack/react-query';
 
 export const useDrive = (drive: TargetDrive) => {

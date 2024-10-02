@@ -1,6 +1,6 @@
 import { View } from 'react-native';
 import { Text } from '../../../ui/Text/Text';
-import { t } from 'feed-app-common';
+import { t } from 'homebase-id-app-common';
 import { Colors } from '../../../../app/Colors';
 
 export const EmptyComment = () => {

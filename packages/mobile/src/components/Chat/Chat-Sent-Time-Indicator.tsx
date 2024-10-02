@@ -2,7 +2,7 @@ import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { ChatMessage } from '../../provider/chat/ChatProvider';
 import { memo, useEffect, useMemo, useState } from 'react';
 import { Text } from 'react-native';
-import { formatToTimeAgoWithRelativeDetail } from 'feed-app-common';
+import { formatToTimeAgoWithRelativeDetail } from 'homebase-id-app-common';
 import { Colors } from '../../app/Colors';
 import { useDarkMode } from '../../hooks/useDarkMode';
 

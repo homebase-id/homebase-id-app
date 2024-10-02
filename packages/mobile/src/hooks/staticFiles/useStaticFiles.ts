@@ -7,7 +7,7 @@ import {
   publishProfileCard,
   publishProfileImage,
 } from '@homebase-id/js-lib/public';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 
 export const useStaticFiles = () => {
   const dotYouClient = useDotYouClientContext();

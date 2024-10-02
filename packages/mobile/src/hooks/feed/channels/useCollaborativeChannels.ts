@@ -11,8 +11,7 @@ import {
   getChannelLinkDefinitions,
 } from '@homebase-id/js-lib/public';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
-import { useDotYouClientContext } from 'feed-app-common/src/hooks/auth/useDotYouClientContext';
-import { useAllContacts } from 'feed-app-common';
+import { useAllContacts, useDotYouClientContext } from 'homebase-id-app-common';
 
 export const useCollaborativeChannels = (enableDiscovery?: boolean) => {
   const { data: alllContacts, isFetched: fetchedAllContacts } = useAllContacts(

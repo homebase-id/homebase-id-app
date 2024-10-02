@@ -12,7 +12,7 @@ import Animated, {
 import { Colors } from '../../../../app/Colors';
 import { ReactionContext } from '@homebase-id/js-lib/public';
 import { CanReactInfo, useMyEmojiReactions, useReaction } from '../../../../hooks/reactions';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 import { useDarkMode } from '../../../../hooks/useDarkMode';
 import { ErrorNotification } from '../../../ui/Alert/ErrorNotification';
 import { CantReactInfo } from '../../CanReactInfo';

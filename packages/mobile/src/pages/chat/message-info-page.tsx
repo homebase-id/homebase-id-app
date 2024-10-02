@@ -8,7 +8,7 @@ import {
   FailedDeliveryDetails,
   InnerDeliveryIndicator,
 } from '../../components/Chat/Chat-Delivery-Indicator';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 import { ChatStackParamList } from '../../app/ChatStack';
 import { Avatar, OwnerAvatar } from '../../components/ui/Avatars/Avatar';
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';

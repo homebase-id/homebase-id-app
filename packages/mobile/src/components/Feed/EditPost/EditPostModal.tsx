@@ -10,11 +10,12 @@ import { memo, useCallback, useEffect, useState } from 'react';
 import { useManagePost } from '../../../hooks/feed/post/useManagePost';
 import { ErrorNotification } from '../../ui/Alert/ErrorNotification';
 import { BottomSheetScrollView, BottomSheetTextInput } from '@gorhom/bottom-sheet';
-import { t } from 'feed-app-common';
+import { t } from 'homebase-id-app-common';
 import { useDarkMode } from '../../../hooks/useDarkMode';
 import { Colors } from '../../../app/Colors';
 import { Platform, View } from 'react-native';
 import TextButton from '../../ui/Text/Text-Button';
+import { ImageSource } from '../../../provider/image/RNImageProvider';
 
 export const EditPostModal = memo(
   ({
@@ -32,7 +33,7 @@ export const EditPostModal = memo(
       update: { mutate: updatePost, error: updatePostError, status: updatePostStatus },
     } = useManagePost();
     const [postFile, setPostFile] = useState<HomebaseFile<PostContent>>({ ...incomingPostFile });
-    const [newMediaFiles, setNewMediaFiles] = useState<(MediaFile | NewMediaFile)[]>(
+    const [newMediaFiles, setNewMediaFiles] = useState<(MediaFile | ImageSource)[]>(
       postFile.fileMetadata.payloads?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY) || []
     );
     const { isDarkMode } = useDarkMode();

@@ -1,4 +1,4 @@
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 import { FC, memo } from 'react';
 import { TouchableOpacity, View } from 'react-native';
 import { openURL } from '../../utils/utils';

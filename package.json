@@ -12,7 +12,8 @@
     "start": "npm run start:mobile",
     "start:mobile": "npm run start --w packages/mobile",
     "build:libs": "npm run build --w packages/react-native-gifted-chat",
-    "test": "npm run test --w packages/mobile"
+    "test": "npm run test -workspaces --if-present",
+    "lint": "npm run lint -workspaces --if-present"
   },
   "dependencies": {
     "@homebase-id/js-lib": "0.0.5-alpha.3",

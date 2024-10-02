@@ -1,5 +1,5 @@
 import { HomebaseFile } from '@homebase-id/js-lib/core';
-import { useDotYouClientContext, useIsConnected } from 'feed-app-common';
+import { useDotYouClientContext, useIsConnected } from 'homebase-id-app-common';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Text } from '../ui/Text/Text';
 import { useDarkMode } from '../../hooks/useDarkMode';

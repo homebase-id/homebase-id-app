@@ -4,7 +4,7 @@ import { View } from 'react-native';
 import TextButton from '../../../ui/Text/Text-Button';
 import { EmojiSummary } from '../EmojiSummary';
 import { ErrorNotification } from '../../../ui/Alert/ErrorNotification';
-import { formatToTimeAgo, t, useDotYouClientContext } from 'feed-app-common';
+import { formatToTimeAgo, t, useDotYouClientContext } from 'homebase-id-app-common';
 import { Text } from '../../../ui/Text/Text';
 import { memo } from 'react';
 import { Colors } from '../../../../app/Colors';

@@ -21,7 +21,7 @@ import { Header, HeaderBackButtonProps } from '@react-navigation/elements';
 import { BackButton } from '../ui/Buttons';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { chatStyles } from '../Chat/ChatDetail';
-import { t } from 'feed-app-common';
+import { t } from 'homebase-id-app-common';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@react-navigation/native';
 import Video from 'react-native-video';

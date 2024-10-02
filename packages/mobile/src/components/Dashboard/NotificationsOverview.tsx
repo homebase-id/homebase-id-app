@@ -3,7 +3,7 @@ import { Dimensions, TouchableOpacity, View } from 'react-native';
 import { usePushNotifications } from '../../hooks/notifications/usePushNotifications';
 import { memo, useMemo, useState } from 'react';
 import { PushNotification } from '@homebase-id/js-lib/core';
-import { formatToTimeAgoWithRelativeDetail, useDotYouClientContext } from 'feed-app-common';
+import { formatToTimeAgoWithRelativeDetail, useDotYouClientContext } from 'homebase-id-app-common';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import {
   CHAT_APP_ID,
