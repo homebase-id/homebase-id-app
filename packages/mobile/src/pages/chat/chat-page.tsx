@@ -233,7 +233,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
 
       if (
         !stringGuidsEqual(route.params.convoId, ConversationWithYourselfId) && // You can't invite yourself
-        !conversation?.fileMetadata.senderOdinId // Only the original creator can invite
+        conversation?.fileMetadata.senderOdinId === identity // Only the original creator can invite
       ) {
         const filteredRecipients = conversation.fileMetadata.appData.content.recipients.filter(
           (recipient) => recipient !== identity
