@@ -71,8 +71,8 @@ const ConversationTile = memo((props: ConversationTileProps) => {
     () =>
       lastReadTime &&
       flatMessages &&
-      (!lastMessage?.fileMetadata.senderOdinId ||
-        lastMessage?.fileMetadata.senderOdinId !== identity)
+      lastMessage?.fileMetadata.senderOdinId &&
+      lastMessage?.fileMetadata.senderOdinId !== identity
         ? flatMessages.filter(
             (msg) =>
               msg.fileMetadata.senderOdinId !== identity &&
