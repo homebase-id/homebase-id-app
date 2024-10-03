@@ -20,7 +20,7 @@ import { ChatDeliveryIndicator } from './Chat-Delivery-Indicator';
 import { ChatMessageContent } from './Chat-Message-Content';
 import { OwnerAvatar, GroupAvatar, Avatar } from '../ui/Avatars/Avatar';
 import { useDraftMessageValue } from '../../hooks/chat/useDraftMessage';
-import { ellipsisAtMaxChar } from 'homebase-id-app-common';
+import { ellipsisAtMaxChar, useDotYouClientContext } from 'homebase-id-app-common';
 import { AuthorName, ConnectionName } from '../ui/Name';
 import { CheckCircle, CircleOutlined } from '../ui/Icons/icons';
 import { ErrorBoundary } from '../ui/ErrorBoundary/ErrorBoundary';
@@ -42,6 +42,7 @@ type ConversationTileProps = {
 };
 
 const ConversationTile = memo((props: ConversationTileProps) => {
+  const identity = useDotYouClientContext().getIdentity();
   const { data: chatMessages } = useChatMessages({
     conversationId: props.conversationId,
   }).all;
@@ -68,14 +69,17 @@ const ConversationTile = memo((props: ConversationTileProps) => {
   const lastReadTime = conversationMetadata?.fileMetadata.appData.content.lastReadTime;
   const unreadCount = useMemo(
     () =>
-      lastReadTime && flatMessages
+      lastReadTime &&
+      flatMessages &&
+      lastMessage?.fileMetadata.senderOdinId &&
+      lastMessage?.fileMetadata.senderOdinId !== identity
         ? flatMessages.filter(
             (msg) =>
-              msg.fileMetadata.senderOdinId &&
+              msg.fileMetadata.senderOdinId !== identity &&
               (msg.fileMetadata.transitCreated || msg.fileMetadata.created) > lastReadTime
           )?.length
         : 0,
-    [flatMessages, lastReadTime]
+    [flatMessages, lastMessage, lastReadTime, identity]
   );
 
   const underlayColor = useMemo(

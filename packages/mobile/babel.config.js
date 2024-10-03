@@ -3,7 +3,10 @@ module.exports = {
   plugins: ['react-native-reanimated/plugin'],
   env: {
     production: {
-      plugins: ['transform-remove-console'],
+      plugins: [
+        'transform-remove-console',
+        ['@babel/plugin-transform-private-methods', { loose: true }],
+      ],
     },
   },
 };

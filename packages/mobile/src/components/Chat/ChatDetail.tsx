@@ -597,16 +597,38 @@ export const ChatDetail = memo(
       [renderComposer, renderSend, inputContainerStyle]
     );
 
-    const renderAvatar = useCallback((props: AvatarProps<IMessage>) => {
-      const prop = props as AvatarProps<ChatMessageIMessage>;
-      const odinId = prop.currentMessage?.fileMetadata.senderOdinId;
-      if (!odinId) {
+    const renderAvatar = useCallback(
+      (props: AvatarProps<IMessage>) => {
+        const prop = props as AvatarProps<ChatMessageIMessage>;
+        const odinId = prop.currentMessage?.fileMetadata.senderOdinId;
+        if (!odinId || odinId === identity) {
+          return (
+            <Avatar
+              {...prop}
+              renderAvatar={(_: Omit<AvatarProps<ChatMessageIMessage>, 'renderAvatar'>) => {
+                return (
+                  <OwnerAvatar
+                    imageSize={{
+                      width: 30,
+                      height: 30,
+                    }}
+                    style={{
+                      width: 30,
+                      height: 30,
+                    }}
+                  />
+                );
+              }}
+            />
+          );
+        }
         return (
           <Avatar
             {...prop}
             renderAvatar={(_: Omit<AvatarProps<ChatMessageIMessage>, 'renderAvatar'>) => {
               return (
-                <OwnerAvatar
+                <AppAvatar
+                  odinId={odinId}
                   imageSize={{
                     width: 30,
                     height: 30,
@@ -614,35 +636,16 @@ export const ChatDetail = memo(
                   style={{
                     width: 30,
                     height: 30,
+                    borderRadius: 15,
                   }}
                 />
               );
             }}
           />
         );
-      }
-      return (
-        <Avatar
-          {...prop}
-          renderAvatar={(_: Omit<AvatarProps<ChatMessageIMessage>, 'renderAvatar'>) => {
-            return (
-              <AppAvatar
-                odinId={odinId}
-                imageSize={{
-                  width: 30,
-                  height: 30,
-                }}
-                style={{
-                  width: 30,
-                  height: 30,
-                  borderRadius: 15,
-                }}
-              />
-            );
-          }}
-        />
-      );
-    }, []);
+      },
+      [identity]
+    );
 
     const scrollToBottomStyle = useMemo(() => {
       return {
