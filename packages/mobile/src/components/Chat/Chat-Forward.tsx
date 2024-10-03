@@ -10,7 +10,7 @@ import { Text } from '../ui/Text/Text';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { Colors } from '../../app/Colors';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
-import { t, useAllConnections } from 'feed-app-common';
+import { t, useAllConnections } from 'homebase-id-app-common';
 import {
   ActivityIndicator,
   SectionListData,

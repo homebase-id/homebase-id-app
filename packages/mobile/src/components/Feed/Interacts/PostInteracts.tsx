@@ -15,7 +15,7 @@ import {
   useMyEmojiReactions,
   useReaction,
 } from '../../../hooks/reactions';
-import { t, useDotYouClientContext } from 'feed-app-common';
+import { t, useDotYouClientContext } from 'homebase-id-app-common';
 import { EmojiSummary } from './EmojiSummary';
 import { CommentTeaserList } from './CommentsTeaserList';
 import { ShareContext } from './Share/ShareModal';
@@ -40,7 +40,7 @@ export const PostInteracts = memo(
   }: {
     postFile: HomebaseFile<PostContent>;
     isPublic?: boolean;
-    onCommentPress?: (context: ReactionContext & CanReactInfo) => void;
+    onCommentPress?: (context: ReactionContext & Partial<CanReactInfo>) => void;
     onReactionPress?: (context: ReactionContext) => void;
     onSharePress?: (context: ShareContext) => void;
     onEmojiModalOpen?: (context: ReactionContext) => void;
@@ -80,7 +80,7 @@ export const PostInteracts = memo(
     }, [odinId, postContent.channelId, postFile]);
 
     const onCommentPressHandler = useCallback(() => {
-      const context: ReactionContext & CanReactInfo = {
+      const context: ReactionContext & Partial<CanReactInfo> = {
         ...reactionContext,
         ...canReact,
       };
@@ -269,7 +269,7 @@ export const CommentSummary = ({
   reactionPreview?: CommentsReactionSummary;
 }) => {
   const { data: totalCount } = useCommentSummary({
-    authorOdinId: context.authorOdinId,
+    authorOdinId: context.odinId,
     channelId: context.channelId,
     postGlobalTransitId: context.target.globalTransitId,
     reactionPreview: reactionPreview,

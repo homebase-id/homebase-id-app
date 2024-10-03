@@ -18,11 +18,11 @@ import {
 import { processInbox } from '@homebase-id/js-lib/peer';
 
 import { useNotificationSubscriber } from '../useNotificationSubscriber';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { getConversationQueryOptions, useConversation } from './useConversation';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 import {
   CHAT_MESSAGE_FILE_TYPE,
   ChatMessage,
@@ -147,7 +147,6 @@ const useChatWebsocket = (isEnabled: boolean) => {
   const queryClient = useQueryClient();
   const { data: subscribedDrives, isFetched } = useDriveSubscriber();
 
-
   const [chatMessagesQueue, setChatMessagesQueue] = useState<HomebaseFile<ChatMessage>[]>([]);
 
   const handler = useCallback(async (notification: TypedConnectionNotification) => {
@@ -264,6 +263,8 @@ const useChatWebsocket = (isEnabled: boolean) => {
         );
       }
     }
+    // Yes, we don't follow the useCallback rules here but we think we know what we're doing
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const chatMessagesQueueTunnel = useRef<HomebaseFile<ChatMessage>[]>([]);
@@ -287,6 +288,8 @@ const useChatWebsocket = (isEnabled: boolean) => {
     }, [] as HomebaseFile<ChatMessage>[]);
 
     await processChatMessagesBatch(dotYouClient, queryClient, filteredMessages);
+    // Yes, we don't follow the useCallback rules here but we think we know what we're doing
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const timeout = useRef<NodeJS.Timeout | null>(null);
@@ -305,8 +308,6 @@ const useChatWebsocket = (isEnabled: boolean) => {
       processQueue(chatMessagesQueue);
     }
   }, [processQueue, chatMessagesQueue]);
-
-
 
   return useNotificationSubscriber(
     isEnabled && isFetched ? handler : undefined,
@@ -389,11 +390,11 @@ const processChatMessagesBatch = async (
           uniqueMessagesPerConversation[updatedConversation].map(async (newMessage) =>
             typeof newMessage.fileMetadata.appData.content === 'string'
               ? await dsrToMessage(
-                dotYouClient,
-                newMessage as HomebaseFile<string>,
-                ChatDrive,
-                true
-              )
+                  dotYouClient,
+                  newMessage as HomebaseFile<string>,
+                  ChatDrive,
+                  true
+                )
               : (newMessage as HomebaseFile<ChatMessage>)
           )
         )

@@ -11,7 +11,7 @@ import {
 import { UseCommentsVal } from './comments/useComments';
 
 import { HomebaseFile, NewHomebaseFile, ReactionFile } from '@homebase-id/js-lib/core';
-import { getRichTextFromString, useDotYouClientContext } from 'feed-app-common';
+import { getRichTextFromString, useDotYouClientContext } from 'homebase-id-app-common';
 import {
   RawReactionContent as RNRawReactionContent,
   saveComment,

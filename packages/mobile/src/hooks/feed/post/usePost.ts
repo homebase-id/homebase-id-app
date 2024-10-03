@@ -10,7 +10,7 @@ import {
   getPostOverPeer,
   RecentsFromConnectionsReturn,
 } from '@homebase-id/js-lib/peer';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 
 type usePostProps = {
   odinId?: string;
@@ -23,7 +23,6 @@ export const usePost = ({ odinId, channelKey, postKey }: usePostProps = {}) => {
     odinId,
     channelKey,
   }).fetch;
-
 
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();

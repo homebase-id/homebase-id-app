@@ -4,7 +4,7 @@ import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 import { Container } from '../../components/ui/Container/Container';
 
 import { TabStackParamList } from '../../app/App';
-import { t } from 'feed-app-common';
+import { t } from 'homebase-id-app-common';
 import { useMemo, useCallback, useRef } from 'react';
 import { View, TouchableOpacity, ListRenderItemInfo, FlatList } from 'react-native';
 import { Dashboard } from '../../components/Dashboard/Dashboard';

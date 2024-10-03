@@ -1,6 +1,6 @@
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { ChatDeliveryStatus, ChatMessage } from '../../provider/chat/ChatProvider';
-import { t, useDotYouClientContext } from 'feed-app-common';
+import { t, useDotYouClientContext } from 'homebase-id-app-common';
 import { Pressable, StyleProp, Text, TextStyle, View, ViewStyle } from 'react-native';
 import { Clock, SubtleCheck, Times } from '../ui/Icons/icons';
 import { Colors } from '../../app/Colors';

@@ -1,7 +1,7 @@
 import { ApiType, DotYouClient, HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
 import { PostContent, ChannelDefinition, EmbeddedPost } from '@homebase-id/js-lib/public';
 import { ChannelDefinitionVm } from '../../../hooks/feed/channels/useChannels';
-import { t, useDotYouClientContext, useIsConnected } from 'feed-app-common';
+import { t, useDotYouClientContext, useIsConnected } from 'homebase-id-app-common';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Text } from '../../ui/Text/Text';
 import { useDarkMode } from '../../../hooks/useDarkMode';

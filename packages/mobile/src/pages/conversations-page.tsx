@@ -25,7 +25,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Text } from '../components/ui/Text/Text';
 import { ScrollView } from 'react-native-gesture-handler';
 import { ContactTile } from '../components/Contact/Contact-Tile';
-import { useAllContacts, useDotYouClientContext } from 'feed-app-common';
+import { useAllContacts, useDotYouClientContext } from 'homebase-id-app-common';
 import { Colors } from '../app/Colors';
 import { useDarkMode } from '../hooks/useDarkMode';
 import { CHAT_APP_ID } from '../app/constants';

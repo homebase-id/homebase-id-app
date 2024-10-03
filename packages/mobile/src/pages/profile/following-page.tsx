@@ -5,7 +5,7 @@ import { FlatList, RefreshControl, TouchableOpacity, View } from 'react-native';
 import { useFollowingInfinite } from '../../hooks/following/useFollowing';
 import NoItems from '../../components/list/noItems';
 import IdentityItem from '../../components/list/identityItem';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 import { ListRenderItemInfo } from 'react-native';
 import { openURL } from '../../utils/utils';
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';

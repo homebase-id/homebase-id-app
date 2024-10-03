@@ -3,7 +3,7 @@ import { Text } from '../../ui/Text/Text';
 import { memo, ReactNode } from 'react';
 import { ChannelDefinition, PostContent } from '@homebase-id/js-lib/public';
 import { ApiType, DotYouClient, HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
-import { t, useDotYouClientContext } from 'feed-app-common';
+import { t, useDotYouClientContext } from 'homebase-id-app-common';
 import { useManageSocialFeed } from '../../../hooks/feed/useManageSocialFeed';
 import { ChannelDefinitionVm } from '../../../hooks/feed/channels/useChannels';
 import { useManagePost } from '../../../hooks/feed/post/useManagePost';
@@ -184,28 +184,26 @@ export const GroupChannelActions = memo(
   }
 );
 
-export const ActionButton = memo(
-  ({ icon, label, onPress, destructive, confirmOptions }: ActionGroupProps) => {
-    return (
-      <TouchableOpacity
+export const ActionButton = memo(({ icon, label, onPress }: ActionGroupProps) => {
+  return (
+    <TouchableOpacity
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 16,
+      }}
+      onPress={onPress}
+    >
+      {icon}
+      <Text
         style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          padding: 16,
+          marginLeft: 16,
+          fontSize: 16,
+          fontWeight: '600',
         }}
-        onPress={onPress}
       >
-        {icon}
-        <Text
-          style={{
-            marginLeft: 16,
-            fontSize: 16,
-            fontWeight: '600',
-          }}
-        >
-          {label}
-        </Text>
-      </TouchableOpacity>
-    );
-  }
-);
+        {label}
+      </Text>
+    </TouchableOpacity>
+  );
+});

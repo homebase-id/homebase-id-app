@@ -14,7 +14,6 @@ import {
 } from '@homebase-id/js-lib/public';
 import { getNewId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useState } from 'react';
-import { useDotYouClientContext } from 'feed-app-common';
 import { ImageSource } from '../../../provider/image/RNImageProvider';
 import { LinkPreview } from '@homebase-id/js-lib/media';
 import { useManagePost } from './useManagePost';
@@ -25,8 +24,6 @@ export const usePostComposer = () => {
   const [processingProgress, setProcessingProgress] = useState<
     { phase: string; progress: number } | undefined
   >(undefined);
-  const dotYouClient = useDotYouClientContext();
-  const loggedInIdentity = dotYouClient.getIdentity();
   const { mutateAsync: savePostFile } = useManagePost().save;
   const [postError, setPostError] = useState<unknown>();
 
@@ -90,6 +87,7 @@ export const usePostComposer = () => {
         onUpdate: (phase, progress) => setProcessingProgress({ phase, progress }),
       });
     } catch (ex) {
+      console.error('Failed to save post', ex);
       setPostError('error');
     }
 

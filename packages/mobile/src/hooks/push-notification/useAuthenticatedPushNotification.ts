@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Platform } from 'react-native';
 import { useMutation } from '@tanstack/react-query';
 import messaging from '@react-native-firebase/messaging';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 import { usePushNotificationPermission } from '../../provider/push-notification/PushNotificationContext';
 
 export const useAuthenticatedPushNotification = () => {
@@ -34,10 +34,14 @@ export const useAuthenticatedPushNotification = () => {
 
   const reRegisterNotifaction = async () => {
     if (notificationPermissionGranted) {
-      const token = await messaging().getToken().catch((error) => {
-        console.error('Error fetching FCM Token:', error);
-      });
-      if (token) { setDeviceToken(token); }
+      const token = await messaging()
+        .getToken()
+        .catch((error) => {
+          console.error('Error fetching FCM Token:', error);
+        });
+      if (token) {
+        setDeviceToken(token);
+      }
     } else {
       throw new Error('Notification permission not granted. Grant Permissions from the settings');
     }
@@ -55,8 +59,9 @@ export const useAuthenticatedPushNotification = () => {
     await client.post('/notify/push/subscribe-firebase', {
       DeviceToken: deviceToken,
       DevicePlatform: Platform.OS,
-      FriendlyName: `${Platform.OS === 'ios' ? 'iOS' : Platform.OS === 'android' ? 'Android' : Platform.OS
-        } | ${Platform.Version}`,
+      FriendlyName: `${
+        Platform.OS === 'ios' ? 'iOS' : Platform.OS === 'android' ? 'Android' : Platform.OS
+      } | ${Platform.Version}`,
     });
   }, [dotYouClient, deviceToken]);
 

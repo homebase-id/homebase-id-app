@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { getSecurityContext, getSecurityContextOverPeer } from '@homebase-id/js-lib/core';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 
 export const useSecurityContext = (odinId?: string, isEnabled?: boolean) => {
   const dotYouClient = useDotYouClientContext();

@@ -20,7 +20,7 @@ import { ChatDeliveryIndicator } from './Chat-Delivery-Indicator';
 import { ChatMessageContent } from './Chat-Message-Content';
 import { OwnerAvatar, GroupAvatar, Avatar } from '../ui/Avatars/Avatar';
 import { useDraftMessageValue } from '../../hooks/chat/useDraftMessage';
-import { ellipsisAtMaxChar } from 'feed-app-common';
+import { ellipsisAtMaxChar } from 'homebase-id-app-common';
 import { AuthorName, ConnectionName } from '../ui/Name';
 import { CheckCircle, CircleOutlined } from '../ui/Icons/icons';
 import { ErrorBoundary } from '../ui/ErrorBoundary/ErrorBoundary';

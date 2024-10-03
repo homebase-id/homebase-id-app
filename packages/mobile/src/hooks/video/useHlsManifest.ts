@@ -10,7 +10,7 @@ import {
 import { getNewId, stringifyToQueryParams, uint8ArrayToBase64 } from '@homebase-id/js-lib/helpers';
 import { getAnonymousDirectImageUrl } from '@homebase-id/js-lib/media';
 import { useVideoMetadata } from './useVideoMetadata';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 import { CachesDirectoryPath, writeFile } from 'react-native-fs';
 import { useLocalWebServer } from './useLocalWebServer';
 import { Platform } from 'react-native';

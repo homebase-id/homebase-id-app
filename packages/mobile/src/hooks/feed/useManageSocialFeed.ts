@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { BlogConfig, PostContent } from '@homebase-id/js-lib/public';
 
 import { ApiType, DotYouClient, HomebaseFile, deleteFile } from '@homebase-id/js-lib/core';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 
 export const useManageSocialFeed = (props?: { odinId: string }) => {
   const odinId = props?.odinId;
@@ -34,7 +34,7 @@ export const useManageSocialFeed = (props?: { odinId: string }) => {
         return data.url;
       })
       .catch(() => {
-        return `https://ravenhosting.cloud/report`;
+        return 'https://ravenhosting.cloud/report';
       });
   };
 

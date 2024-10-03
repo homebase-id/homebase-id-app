@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react';
 import {
   StyleSheet,
   Text,
@@ -6,11 +6,12 @@ import {
   ViewStyle,
   StyleProp,
   TextStyle,
-} from 'react-native'
-import PropTypes from 'prop-types'
-import Color from './Color'
-import { IMessage } from './Models'
-import { StylePropType } from './utils'
+} from 'react-native';
+import PropTypes from 'prop-types';
+import Color from './Color';
+import { IMessage } from './Models';
+import { StylePropType } from './utils';
+import { getPlainTextFromRichText } from 'homebase-id-app-common';
 
 const styles = StyleSheet.create({
   container: {
@@ -26,13 +27,13 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '300',
   },
-})
+});
 
 export interface SystemMessageProps<TMessage extends IMessage> {
-  currentMessage?: TMessage
-  containerStyle?: StyleProp<ViewStyle>
-  wrapperStyle?: StyleProp<ViewStyle>
-  textStyle?: StyleProp<TextStyle>
+  currentMessage?: TMessage;
+  containerStyle?: StyleProp<ViewStyle>;
+  wrapperStyle?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
 }
 
 export function SystemMessage<TMessage extends IMessage = IMessage>({
@@ -42,16 +43,18 @@ export function SystemMessage<TMessage extends IMessage = IMessage>({
   textStyle,
 }: SystemMessageProps<TMessage>) {
   if (currentMessage == null || currentMessage.system == false) {
-    return null
+    return null;
   }
 
   return (
     <View style={[styles.container, containerStyle]}>
       <View style={wrapperStyle}>
-        <Text style={[styles.text, textStyle]}>{currentMessage.text}</Text>
+        <Text style={[styles.text, textStyle]}>
+          {getPlainTextFromRichText(currentMessage.text)}
+        </Text>
       </View>
     </View>
-  )
+  );
 }
 
 SystemMessage.propTypes = {
@@ -59,4 +62,4 @@ SystemMessage.propTypes = {
   containerStyle: StylePropType,
   wrapperStyle: StylePropType,
   textStyle: StylePropType,
-}
+};

@@ -23,7 +23,7 @@ export function EditGroupPage(props: EditGroupProp) {
   const conversation = conversationFile.data;
   const conversationContent = conversation?.fileMetadata.appData.content;
   const [title, setTitle] = useState<string>(conversationContent?.title || '');
-  const [asset, setAsset] = useState<ImageSource | undefined>();
+  const [, setAsset] = useState<ImageSource | undefined>();
 
   const save = useCallback(() => {
     if (conversationContent && conversation) {

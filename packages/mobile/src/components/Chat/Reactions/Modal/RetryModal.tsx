@@ -7,7 +7,7 @@ import { ChatMessageIMessage } from '../../ChatDetail';
 import { Colors } from '../../../../app/Colors';
 import { ConnectionName } from '../../../ui/Name';
 import { Text } from '../../../ui/Text/Text';
-import { t } from 'feed-app-common';
+import { t } from 'homebase-id-app-common';
 import { Container } from '../../../ui/Container/Container';
 import { StyleSheet } from 'react-native';
 import { TouchableHighlight } from 'react-native-gesture-handler';

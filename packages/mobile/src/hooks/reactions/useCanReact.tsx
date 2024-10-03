@@ -3,7 +3,7 @@ import { DrivePermissionType } from '@homebase-id/js-lib/core';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 
 import { useQuery } from '@tanstack/react-query';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 import { useSecurityContext } from '../securityContext/useSecurityContext';
 
 interface UseCanReactProps {

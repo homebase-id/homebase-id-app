@@ -18,7 +18,7 @@ import { postTeaserCardStyle } from '../PostTeaserCard';
 import { Colors } from '../../../app/Colors';
 import { Avatar } from '../../ui/Avatars/Avatar';
 import { PostActionProps } from '../Interacts/PostActionModal';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 
 export const PostDetailCard = memo(
   ({

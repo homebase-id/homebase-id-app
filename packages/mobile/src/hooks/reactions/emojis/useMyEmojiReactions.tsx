@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { getMyReactions, ReactionContext } from '@homebase-id/js-lib/public';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 
 const PAGE_SIZE = 10;
 

@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { TargetDrive } from '@homebase-id/js-lib/core';
 import { getDecryptedImageUrl } from '@homebase-id/js-lib/media';
 import { getDecryptedImageUrlOverPeer } from '@homebase-id/js-lib/peer';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 
 export const useCommentMedia = ({
   odinId,

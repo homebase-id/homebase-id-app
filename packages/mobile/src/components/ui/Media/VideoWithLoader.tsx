@@ -7,7 +7,7 @@ import { OdinImage } from '../OdinImage/OdinImage';
 import { useVideo } from '../../../hooks/video/useVideo';
 import { useHlsManifest } from '../../../hooks/video/useHlsManifest';
 import Video from 'react-native-video';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 import { useVideoMetadata } from '../../../hooks/video/useVideoMetadata';
 import { GestureType } from 'react-native-gesture-handler';
 

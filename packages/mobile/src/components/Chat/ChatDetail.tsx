@@ -82,6 +82,7 @@ import { LinkPreviewBar } from './Link-Preview-Bar';
 import { LinkPreview } from '@homebase-id/js-lib/media';
 import { tryJsonParse } from '@homebase-id/js-lib/helpers';
 import { EmptyChatContainer } from './EmptyChatContainer';
+import { getPlainTextFromRichText } from 'homebase-id-app-common';
 
 export type ChatMessageIMessage = IMessage & HomebaseFile<ChatMessage>;
 
@@ -843,9 +844,9 @@ const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
   const deleted = message?.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus;
 
   const content = message?.fileMetadata.appData.content;
+  const plainMessage = getPlainTextFromRichText(content.message);
   const isEmojiOnly =
-    (content?.message?.match(/^\p{Extended_Pictographic}/u) &&
-      !content.message?.match(/[0-9a-zA-Z]/)) ??
+    (plainMessage?.match(/^\p{Extended_Pictographic}/u) && !plainMessage?.match(/[0-9a-zA-Z]/)) ??
     false;
 
   /**
@@ -916,13 +917,15 @@ const RenderBubble = memo(
       onRetryClick: (message: ChatMessageIMessage) => void;
     } & Readonly<BubbleProps<IMessage>>
   ) => {
-    const message = props.currentMessage as ChatMessageIMessage;
-    const content = message?.fileMetadata.appData.content;
     const { bubbleColor } = useBubbleContext();
     const { isDarkMode } = useDarkMode();
+
+    const message = props.currentMessage as ChatMessageIMessage;
+    const content = message?.fileMetadata.appData.content;
+
+    const plainMessage = getPlainTextFromRichText(content.message);
     const isEmojiOnly =
-      (content?.message?.match(/^\p{Extended_Pictographic}/u) &&
-        !content.message?.match(/[0-9a-zA-Z]/)) ??
+      (plainMessage?.match(/^\p{Extended_Pictographic}/u) && !plainMessage?.match(/[0-9a-zA-Z]/)) ??
       false;
     const isReply = !!content?.replyId;
     const showBackground = !isEmojiOnly || isReply;

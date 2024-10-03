@@ -1,4 +1,4 @@
-import { t, useDotYouClientContext } from 'feed-app-common';
+import { t, useDotYouClientContext } from 'homebase-id-app-common';
 import { Block, Ellipsis, Pencil, Times } from '../../../ui/Icons/icons';
 import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 import { View } from 'react-native';

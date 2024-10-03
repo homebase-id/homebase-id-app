@@ -47,7 +47,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
                 ? (this.state.details as object).toString()
                 : '',
           ].join();
-        } catch (e) {
+        } catch {
           return 'Unknown error';
         }
       })();

@@ -1,5 +1,5 @@
 import { TargetDrive } from '@homebase-id/js-lib/core';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getPayloadBytes } from '../../../../provider/image/RNImageProvider';
 

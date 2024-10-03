@@ -16,7 +16,7 @@ import { PostReactionModal, ReactionModalMethods } from '../Interacts/Reactions/
 import { ShareContext, ShareModal, ShareModalMethods } from '../Interacts/Share/ShareModal';
 import { PostActionMethods, PostActionProps, PostModalAction } from '../Interacts/PostActionModal';
 import { Host } from 'react-native-portalize';
-import { t } from 'feed-app-common';
+import { t } from 'homebase-id-app-common';
 import { useScrollToTop } from '@react-navigation/native';
 import {
   PostEmojiPickerModal,
@@ -63,7 +63,7 @@ const SocialFeedMainContent = memo(() => {
     shareRef.current?.setShareContext(context);
   }, []);
 
-  const onCommentPress = useCallback((context: ReactionContext & CanReactInfo) => {
+  const onCommentPress = useCallback((context: ReactionContext & Partial<CanReactInfo>) => {
     commentRef.current?.setContext(context);
   }, []);
 

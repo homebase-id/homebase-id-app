@@ -1,6 +1,6 @@
 import { Pressable, View } from 'react-native';
 import { Divider } from '../../ui/Divider';
-import { t } from 'feed-app-common';
+import { t } from 'homebase-id-app-common';
 import { Text } from '../../ui/Text/Text';
 import { CommentTeaser } from './Comments/Comment';
 import { Colors } from '../../../app/Colors';

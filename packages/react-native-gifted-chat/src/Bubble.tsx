@@ -33,6 +33,8 @@ import {
   MessageAudioProps,
 } from './Models';
 
+import { getPlainTextFromRichText } from 'homebase-id-app-common';
+
 const styles = {
   left: StyleSheet.create({
     container: {
@@ -325,7 +327,9 @@ export default class Bubble<
         (buttonIndex: number) => {
           switch (buttonIndex) {
             case 0:
-              Clipboard.setString(currentMessage.text);
+              Clipboard.setString(
+                getPlainTextFromRichText(currentMessage.text),
+              );
               break;
             default:
               break;

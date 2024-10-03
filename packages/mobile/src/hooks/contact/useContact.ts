@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import { ContactFile, getContactByOdinId } from '@homebase-id/js-lib/network';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 
 const useContact = (odinId?: string) => {
   const dotYouClient = useDotYouClientContext();

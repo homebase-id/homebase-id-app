@@ -3,7 +3,7 @@ import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { tryJsonParse } from '@homebase-id/js-lib/helpers';
 import { navigateOnNotification } from '../../components/Dashboard/NotificationsOverview';
 import { PushNotification } from '@homebase-id/js-lib/core';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 import { useCallback, useEffect } from 'react';
 import { ChatStackParamList } from '../../app/ChatStack';
 import notifee, { Event, EventType } from '@notifee/react-native';

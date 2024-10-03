@@ -21,7 +21,7 @@ import { ChatDrive } from '../../../provider/chat/ConversationProvider';
 import { useDarkMode } from '../../../hooks/useDarkMode';
 import { CHAT_LINKS_PAYLOAD_KEY } from '../../../provider/chat/ChatProvider';
 import { OdinBlob } from '../../../../polyfills/OdinBlob';
-import { t } from 'feed-app-common';
+import { t } from 'homebase-id-app-common';
 import { VideoWithLoader } from './VideoWithLoader';
 import { OdinAudio } from '../OdinAudio/OdinAudio';
 import { LinkPreviewFile } from './LinkPreviewFile';

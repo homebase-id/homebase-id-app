@@ -10,7 +10,7 @@ import { StyleSheet, View } from 'react-native';
 import { Avatar } from '../../../ui/Avatars/Avatar';
 import { Text } from '../../../ui/Text/Text';
 import { AuthorName } from '../../../ui/Name';
-import { ellipsisAtMaxChar, t } from 'feed-app-common';
+import { ellipsisAtMaxChar, t } from 'homebase-id-app-common';
 import { useDarkMode } from '../../../../hooks/useDarkMode';
 import { Colors } from '../../../../app/Colors';
 import { ErrorNotification } from '../../../ui/Alert/ErrorNotification';

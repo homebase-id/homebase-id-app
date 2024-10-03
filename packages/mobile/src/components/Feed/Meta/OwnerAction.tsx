@@ -4,7 +4,7 @@ import { useChannel } from '../../../hooks/feed/channels/useChannel';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { PostContent } from '@homebase-id/js-lib/public';
 import { Copy, Pencil, Trash } from '../../ui/Icons/icons';
-import { t, useDotYouClientContext } from 'feed-app-common';
+import { t, useDotYouClientContext } from 'homebase-id-app-common';
 import { openURL } from '../../../utils/utils';
 import { ErrorNotification } from '../../ui/Alert/ErrorNotification';
 import { ActionButton, ActionGroupProps } from './Actions';

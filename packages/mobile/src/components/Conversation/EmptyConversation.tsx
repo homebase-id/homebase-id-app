@@ -1,4 +1,4 @@
-import { t, useAllContacts } from 'feed-app-common';
+import { t, useAllContacts } from 'homebase-id-app-common';
 import { memo, useState } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { Text } from '../ui/Text/Text';
@@ -9,9 +9,8 @@ import { NoContacts } from '../Contact/NoContacts';
 
 export const EmptyConversation = memo(
   ({ conversationsFetched }: { conversationsFetched: boolean }) => {
-
-    const { data: contacts, refetch,isLoading } = useAllContacts(conversationsFetched);
-    const noContacts = !isLoading &&  (!contacts || contacts.length === 0);
+    const { data: contacts, refetch, isLoading } = useAllContacts(conversationsFetched);
+    const noContacts = !isLoading && (!contacts || contacts.length === 0);
     const [refreshing, setRefreshing] = useState(false);
 
     const doRefresh = async () => {
@@ -27,7 +26,7 @@ export const EmptyConversation = memo(
       >
         <ConversationTileWithYourself />
         {noContacts ? (
-         <NoContacts />
+          <NoContacts />
         ) : (
           <View style={{ padding: 16 }}>
             <Text style={{ color: Colors.gray[400], fontStyle: 'italic' }}>

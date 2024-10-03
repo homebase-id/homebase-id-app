@@ -23,7 +23,7 @@ import {
 import { formatGuidId, getNewId, getNewXorId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { ChatConversationsReturn } from './useConversations';
 
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 import { deleteAllChatMessages } from '../../provider/chat/ChatProvider';
 import { ImageSource } from '../../provider/image/RNImageProvider';
 

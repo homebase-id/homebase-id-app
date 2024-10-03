@@ -1,5 +1,5 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { FailedTransferStatuses, HomebaseFile } from '@homebase-id/js-lib/core';
+import { FailedTransferStatuses, HomebaseFile, RichText } from '@homebase-id/js-lib/core';
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -55,7 +55,7 @@ import { Text } from '../../components/ui/Text/Text';
 import { ChatFileOverview } from '../../components/Files/ChatFileOverview';
 import { OfflineState } from '../../components/Platform/OfflineState';
 import { RetryModal } from '../../components/Chat/Reactions/Modal/RetryModal';
-import { t, useDotYouClientContext } from 'feed-app-common';
+import { getPlainTextFromRichText, t, useDotYouClientContext } from 'homebase-id-app-common';
 import { useWebSocketContext } from '../../components/WebSocketContext/useWebSocketContext';
 import { LinkPreview } from '@homebase-id/js-lib/media';
 
@@ -228,7 +228,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
   }, []);
 
   const doSend = useCallback(
-    (message: { text: string }[]) => {
+    (message: { text: string | RichText }[]) => {
       if (!conversation) return;
 
       if (
@@ -364,7 +364,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
         if (selectedMessage) {
           const message = selectedMessage.selectedMessage?.text;
           if (message) {
-            Clipboard.setString(message);
+            Clipboard.setString(getPlainTextFromRichText(message));
             Toast.show({
               text1: 'Copied to Clipboard',
               type: 'success',
@@ -689,7 +689,7 @@ const EditDialogBox = memo(({ visible, handleDialogClose, selectedMessage }: Edi
   const { data: conversation } = useConversation({
     conversationId: selectedMessage?.fileMetadata.appData.groupId,
   }).single;
-  const [value, setValue] = useState<string | undefined>();
+  const [value, setValue] = useState<string | RichText | undefined>();
 
   useLayoutEffect(() => {
     if (selectedMessage) {
@@ -742,7 +742,7 @@ const EditDialogBox = memo(({ visible, handleDialogClose, selectedMessage }: Edi
       >
         <Dialog.Title>Edit Message</Dialog.Title>
         <Dialog.Input
-          value={value}
+          value={value ? getPlainTextFromRichText(value) : undefined}
           onChangeText={(text) => {
             setValue(text);
           }}

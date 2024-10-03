@@ -1,4 +1,4 @@
-import { t } from 'feed-app-common';
+import { t } from 'homebase-id-app-common';
 import { CanReactInfo, CantReact } from '../../hooks/reactions';
 import { Text } from '../ui/Text/Text';
 import { ActivityIndicator, View } from 'react-native';

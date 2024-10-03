@@ -5,7 +5,7 @@ import { FlatList, ListRenderItemInfo, RefreshControl, TouchableOpacity, View } 
 import { useFollowerInfinite } from '../../hooks/followers/useFollowers';
 import NoItems from '../../components/list/noItems';
 import IdentityItem from '../../components/list/identityItem';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 import { openURL } from '../../utils/utils';
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 

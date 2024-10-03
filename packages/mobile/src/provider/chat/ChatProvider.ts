@@ -31,6 +31,7 @@ import {
   RecipientTransferHistory,
   TransferStatus,
   deleteFile,
+  RichText,
 } from '@homebase-id/js-lib/core';
 import { ChatDrive, UnifiedConversation } from './ConversationProvider';
 import {
@@ -78,7 +79,7 @@ export interface ChatMessage {
   replyId?: string;
 
   /// Content of the message
-  message: string;
+  message: string | RichText;
 
   /// DeliveryStatus of the message. Indicates if the message is sent, delivered or read
   deliveryStatus: ChatDeliveryStatus;

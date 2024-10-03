@@ -7,7 +7,7 @@ import {
 
 import { fetchCachedPublicChannels } from './cachedDataHelpers';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 export interface ChannelDefinitionVm extends ChannelDefinition {
   template: ChannelTemplate;
 }
@@ -50,7 +50,7 @@ export const useChannels = ({
           } as HomebaseFile<ChannelDefinitionVm>;
         });
       } catch (e) {
-        console.error('failed to fetch dynamic data');
+        console.error('failed to fetch dynamic data', e);
       }
     };
 

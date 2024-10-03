@@ -1,4 +1,4 @@
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 import { useRouteContext } from '../../RouteContext/RouteContext';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { ChatStackParamList } from '../../../app/ChatStack';

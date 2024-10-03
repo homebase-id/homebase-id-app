@@ -11,7 +11,7 @@ import { PostDetailCard } from '../Detail/PostDetailCard';
 import { CommentsLoader } from '../Interacts/Comments/CommentsModal';
 import { ShareContext } from '../Interacts/Share/ShareModal';
 import { useCallback, useMemo, useState } from 'react';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 import { useCanReact, useComments } from '../../../hooks/reactions';
 import { ListRenderItemInfo, Platform } from 'react-native';
 import { Comment } from '../Interacts/Comments/Comment';

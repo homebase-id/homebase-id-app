@@ -64,7 +64,8 @@
     "react-native-reanimated": "^3.12.1",
     "react-native-typing-animation": "0.1.7",
     "react-native-haptic-feedback": "^2.2.0",
-    "uuid": "3.4.0"
+    "uuid": "3.4.0",
+    "homebase-id-app-common": "*"
   },
   "peerDependencies": {
     "react": "*",

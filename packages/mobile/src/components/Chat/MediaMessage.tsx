@@ -11,7 +11,7 @@ import { calculateScaledDimensions } from '../../utils/utils';
 import { MediaGallery, MediaItem } from '../ui/Media/MediaGallery';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { Colors } from '../../app/Colors';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 
 const MediaMessage = memo(
   ({

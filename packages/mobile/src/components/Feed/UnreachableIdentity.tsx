@@ -1,7 +1,6 @@
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { PostContent } from '@homebase-id/js-lib/public';
-import { t, useDotYouClientContext } from 'feed-app-common';
-import { useManageSocialFeed } from '../../hooks/feed/useManageSocialFeed';
+import { t } from 'homebase-id-app-common';
 import { Text } from '../ui/Text/Text';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { View } from 'react-native';
@@ -14,13 +13,12 @@ interface UnreachableIdentityProps {
 }
 
 //TODO: UI improvs
-export const UnreachableIdentity = memo(({ postFile, odinId }: UnreachableIdentityProps) => {
-  const host = useDotYouClientContext().getRoot();
+export const UnreachableIdentity = memo((_props: UnreachableIdentityProps) => {
   const { isDarkMode } = useDarkMode();
 
-  const {
-    removeFromFeed: { mutateAsync: removeFromMyFeed },
-  } = useManageSocialFeed({ odinId });
+  // const {
+  //   removeFromFeed: { mutateAsync: removeFromMyFeed },
+  // } = useManageSocialFeed({ odinId });
 
   return (
     <View

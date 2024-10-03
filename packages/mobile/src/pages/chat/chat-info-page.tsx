@@ -11,7 +11,6 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import { Colors } from '../../app/Colors';
 import { useAuth } from '../../hooks/auth/useAuth';
 import { Header, HeaderBackButton } from '@react-navigation/elements';
-import TextButton from '../../components/ui/Text/Text-Button';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { useProfile } from '../../hooks/profile/useProfile';
 import { ConnectionName } from '../../components/ui/Name';
@@ -58,21 +57,21 @@ export const ChatInfoPage = memo((prop: ChatInfoProp) => {
     [isDarkMode, prop.navigation.goBack]
   );
 
-  const headerRight = useCallback(
-    () =>
-      (conversationContent as any).version ? (
-        <TextButton
-          title="Edit"
-          unFilledStyle={{ marginRight: 8 }}
-          onPress={() => {
-            prop.navigation.navigate('EditGroup', {
-              convoId: conversationId,
-            });
-          }}
-        />
-      ) : null,
-    [conversationContent, conversationId, prop.navigation]
-  );
+  // const headerRight = useCallback(
+  //   () =>
+  //     conversationContent && 'version' in conversationContent && conversationContent.version ? (
+  //       <TextButton
+  //         title="Edit"
+  //         unFilledStyle={{ marginRight: 8 }}
+  //         onPress={() => {
+  //           prop.navigation.navigate('EditGroup', {
+  //             convoId: conversationId,
+  //           });
+  //         }}
+  //       />
+  //     ) : null,
+  //   [conversationContent, conversationId, prop.navigation]
+  // );
 
   const colorStyle = useMemo(() => {
     return {

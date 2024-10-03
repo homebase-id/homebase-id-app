@@ -10,7 +10,7 @@ import {
   getFileHeaderBytesOverPeerByGlobalTransitId,
   getFileHeaderOverPeer,
 } from '@homebase-id/js-lib/peer';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 
 export const useVideoMetadata = (
   odinId?: string,

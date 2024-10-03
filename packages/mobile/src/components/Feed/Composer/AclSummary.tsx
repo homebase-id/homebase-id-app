@@ -1,6 +1,6 @@
 import { AccessControlList, SecurityGroupType } from '@homebase-id/js-lib/core';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
-import { t, ellipsisAtMaxChar } from 'feed-app-common';
+import { t, ellipsisAtMaxChar } from 'homebase-id-app-common';
 import { useCircles } from '../../../hooks/circles/useCircles';
 import { IconProps, OpenLock, Lock } from '../../ui/Icons/icons';
 import { memo, useMemo } from 'react';
