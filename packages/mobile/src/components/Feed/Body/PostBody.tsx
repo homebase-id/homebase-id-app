@@ -7,13 +7,14 @@ import ParsedText, { ParseShape } from 'react-native-parsed-text';
 import { Colors } from '../../../app/Colors';
 import { ellipsisAtMaxChar, t } from 'homebase-id-app-common';
 import TextButton from '../../ui/Text/Text-Button';
+import { RichTextRenderer } from '../../ui/Text/RichTextRenderer';
 
 const MAX_CHAR_FOR_SUMMARY = 400;
 
 export const PostBody = memo(
   ({
     post,
-    // odinId,
+    odinId,
     // hideEmbeddedPostMedia,
     // fileId,
     // globalTransitId,
@@ -52,7 +53,11 @@ export const PostBody = memo(
           parse={parse}
         >
           {isExpanded || post.caption.length <= MAX_CHAR_FOR_SUMMARY ? (
-            post.caption
+            post.captionAsRichText ? (
+              <RichTextRenderer body={post.captionAsRichText} odinId={odinId} />
+            ) : (
+              post.caption
+            )
           ) : (
             <>
               {ellipsisAtMaxChar(post.caption, MAX_CHAR_FOR_SUMMARY)}
