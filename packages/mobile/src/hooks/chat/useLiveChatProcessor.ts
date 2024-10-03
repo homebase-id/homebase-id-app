@@ -138,6 +138,7 @@ const useInboxProcessor = (connected?: boolean) => {
 
 const useChatWebsocket = (isEnabled: boolean) => {
   const dotYouClient = useDotYouClientContext();
+  const identity = dotYouClient.getIdentity();
 
   // Added to ensure we have the conversation query available
   const {
@@ -194,7 +195,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
           return;
         }
 
-        if (updatedChatMessage.fileMetadata.senderOdinId !== '') {
+        if (updatedChatMessage.fileMetadata.senderOdinId !== identity) {
           // Messages from others are processed immediately
           insertNewMessage(queryClient, updatedChatMessage);
         } else {

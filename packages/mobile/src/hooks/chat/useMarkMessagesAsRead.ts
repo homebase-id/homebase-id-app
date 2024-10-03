@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { UnifiedConversation } from '../../provider/chat/ConversationProvider';
 import { ChatMessage } from '../../provider/chat/ChatProvider';
 import { useConversationMetadata } from './useConversationMetadata';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 
 export const useMarkMessagesAsRead = ({
   conversation,
@@ -14,6 +15,7 @@ export const useMarkMessagesAsRead = ({
   conversation: HomebaseFile<UnifiedConversation> | undefined;
   messages: HomebaseFile<ChatMessage>[] | undefined;
 }) => {
+  const identity = useDotYouClientContext().getIdentity();
   const { mutateAsync: markAsRead } = useChatMessages({
     conversationId: conversation?.fileMetadata.appData.uniqueId,
   }).markAsRead;
@@ -34,7 +36,7 @@ export const useMarkMessagesAsRead = ({
         (msg) =>
           (msg?.fileMetadata.transitCreated || msg?.fileMetadata.created) >
             (conversationMetadata.fileMetadata.appData.content.lastReadTime || 0) &&
-          msg.fileMetadata.senderOdinId
+          msg.fileMetadata.senderOdinId !== identity
       );
 
       const newestMessageCreated = unreadMessages.reduce((acc, msg) => {
@@ -63,7 +65,7 @@ export const useMarkMessagesAsRead = ({
         isProcessing.current = false;
       }
     })();
-  }, [messages, conversationMetadata, conversation, markAsRead]);
+  }, [messages, conversationMetadata, conversation, markAsRead, identity]);
 
   useEffect(() => {
     if (!conversationMetadata || !messages || !pendingReadTime) return;

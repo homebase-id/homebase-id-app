@@ -14,7 +14,7 @@ import { Colors } from '../app/Colors';
 import { AuthorName } from '../components/ui/Name';
 import { HeaderTitle } from '@react-navigation/elements';
 import { Text } from '../components/ui/Text/Text';
-import { formatToTimeAgoWithRelativeDetail } from 'homebase-id-app-common';
+import { formatToTimeAgoWithRelativeDetail, useDotYouClientContext } from 'homebase-id-app-common';
 import { Download, ShareNode } from '../components/ui/Icons/icons';
 
 import useImage from '../components/ui/OdinImage/hooks/useImage';
@@ -35,6 +35,7 @@ export type MediaProp = NativeStackScreenProps<
 >;
 
 export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
+  const identity = useDotYouClientContext().getIdentity();
   const {
     fileId,
     globalTransitId,
@@ -65,7 +66,7 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
           alignItems: Platform.OS === 'ios' ? 'center' : 'flex-start',
         }}
       >
-        {senderOdinId && (
+        {senderOdinId && senderOdinId !== identity && (
           <HeaderTitle
             style={{
               color: Colors.white,
@@ -85,7 +86,7 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
         )}
       </Animated.View>
     );
-  }, [createdAt, senderOdinId]);
+  }, [createdAt, senderOdinId, identity]);
 
   const renderDownloadButton = useCallback(() => {
     const currPayload = payloads[currIndex];
