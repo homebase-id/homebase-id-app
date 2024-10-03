@@ -349,7 +349,7 @@ export const navigateOnNotification = (
     // if([FEED_NEW_COMMENT_TYPE_ID,FEED_NEW_REACTION_TYPE_ID].includes(notification.options.typeId)){
     //   feedNavigator.navigate('Post', { postGlobalTransitId : notification.options. });
     // }
-    feedNavigator.navigate('Home');
+    feedNavigator.navigate('Posts');
   } else if (notification.options.appId === COMMUNITY_APP_ID) {
     openURL(`https://${identity}/apps/community/${notification.options.typeId}`);
   } else {

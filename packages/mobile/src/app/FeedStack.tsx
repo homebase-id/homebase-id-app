@@ -22,7 +22,7 @@ import { PostDetailPage } from '../pages/feed/post-detail-page';
 import { ChannelDefinition, PostContent } from '@homebase-id/js-lib/public';
 
 export type FeedStackParamList = {
-  Home: undefined;
+  Posts: undefined;
   Post: {
     postKey: string;
     channelKey: string;
@@ -70,7 +70,7 @@ export const FeedStack = (_props: NativeStackScreenProps<TabStackParamList, 'Fee
 
   return (
     <StackFeed.Navigator screenOptions={screenOptions}>
-      <StackFeed.Screen name="Home" component={FeedPage} />
+      <StackFeed.Screen name="Posts" component={FeedPage} />
       <StackFeed.Screen
         name="PreviewMedia"
         component={PreviewMedia}

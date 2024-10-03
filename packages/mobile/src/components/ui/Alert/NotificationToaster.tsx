@@ -26,7 +26,7 @@ export const NotificationToaster = () => {
   const feedNavigator = useNavigation<NavigationProp<FeedStackParamList>>();
   const isConversationScreen = route?.name === 'Conversation' && !route.params;
   const isChatScreen = route?.name === 'ChatScreen' && route.params;
-  const isFeedScreen = route?.name === 'Home';
+  const isFeedScreen = route?.name === 'Posts';
   const { top } = useSafeAreaInsets();
   const {
     fetch: { data: notifications },
