@@ -69,14 +69,17 @@ const ConversationTile = memo((props: ConversationTileProps) => {
   const lastReadTime = conversationMetadata?.fileMetadata.appData.content.lastReadTime;
   const unreadCount = useMemo(
     () =>
-      lastReadTime && flatMessages && flatMessages?.[0]?.fileMetadata.senderOdinId !== identity
+      lastReadTime &&
+      flatMessages &&
+      (!lastMessage?.fileMetadata.senderOdinId ||
+        lastMessage?.fileMetadata.senderOdinId !== identity)
         ? flatMessages.filter(
             (msg) =>
               msg.fileMetadata.senderOdinId !== identity &&
               (msg.fileMetadata.transitCreated || msg.fileMetadata.created) > lastReadTime
           )?.length
         : 0,
-    [flatMessages, lastReadTime, identity]
+    [flatMessages, lastMessage, lastReadTime, identity]
   );
 
   const underlayColor = useMemo(
