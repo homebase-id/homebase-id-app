@@ -211,6 +211,7 @@ export const RichTextRenderer = memo(
     );
 
     const render = useCallback(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (node: any): ReactNode => {
         if ('text' in node && (!('type' in node) || node.type === 'text')) {
           return renderLeaf(node, node.text, {});
@@ -220,7 +221,7 @@ export const RichTextRenderer = memo(
             { type, attributes },
             node.children ? (
               <>
-                {node.children.map((childNode: any, index: number) => (
+                {node.children.map((childNode: unknown, index: number) => (
                   <React.Fragment key={index}>{render(childNode)}</React.Fragment>
                 ))}
               </>
