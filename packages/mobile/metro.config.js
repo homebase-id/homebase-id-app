@@ -3,7 +3,6 @@ const path = require('path');
 
 // console.log('metro.config.js', path.resolve(__dirname, '../../node_modules'));
 const config = {
-  projectRoot: path.resolve(__dirname, '../../'),
   projectRoot: __dirname,
   watchFolders: [path.resolve(__dirname, '../../'), path.resolve(__dirname, '../../packages')],
   resolver: {
