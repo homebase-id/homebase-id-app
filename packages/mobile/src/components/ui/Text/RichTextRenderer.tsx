@@ -133,7 +133,10 @@ export const RichTextRenderer = memo(
           case 'a':
             return (
               <Text
-                style={styles.link}
+                style={{
+                  ...styles.link,
+                  color: isDarkMode ? Colors.indigo[200] : Colors.indigo[500],
+                }}
                 onPress={() => {
                   const url = attributes?.url as string;
                   if (url) openURL(url);
@@ -170,7 +173,14 @@ export const RichTextRenderer = memo(
                   onPress={() => openURL(attributes.linkTarget as string)}
                   style={styles.actionLink}
                 >
-                  <Text style={styles.actionLinkText}>{attributes.linkText as string}</Text>
+                  <Text
+                    style={{
+                      ...styles.actionLinkText,
+                      color: isDarkMode ? Colors.indigo[200] : Colors.indigo[500],
+                    }}
+                  >
+                    {attributes.linkText as string}
+                  </Text>
                 </TouchableOpacity>
               );
             }
@@ -181,7 +191,13 @@ export const RichTextRenderer = memo(
           case 'mention':
             if (attributes && 'value' in attributes && typeof attributes.value === 'string') {
               return (
-                <Text style={styles.link} onPress={() => openURL(`https://${attributes.value}`)}>
+                <Text
+                  style={{
+                    ...styles.link,
+                    color: isDarkMode ? Colors.indigo[200] : Colors.indigo[500],
+                  }}
+                  onPress={() => openURL(`https://${attributes.value}`)}
+                >
                   @<AuthorName odinId={attributes.value} />
                 </Text>
               );
@@ -294,7 +310,6 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   link: {
-    color: '#1e90ff',
     textDecorationLine: 'underline',
   },
   imagePlaceholder: {
@@ -306,7 +321,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   actionLinkText: {
-    color: '#1e90ff',
     textDecorationLine: 'underline',
   },
   leaf: {
