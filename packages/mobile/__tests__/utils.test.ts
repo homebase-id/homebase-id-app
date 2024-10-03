@@ -1,7 +1,7 @@
 
 import InAppBrowser from 'react-native-inappbrowser-reborn';
 import { Linking } from 'react-native';
-import { calculateScaledDimensions, extractUrls, millisToMinutesAndSeconds, openURL } from '../src/utils/utils';
+import { calculateScaledDimensions, cleanString, extractUrls, millisToMinutesAndSeconds, openURL } from '../src/utils/utils';
 
 jest.mock('react-native-inappbrowser-reborn', () => ({
     isAvailable: jest.fn(),
@@ -75,4 +75,26 @@ describe('utils.ts', () => {
             expect(dimensions).toEqual({ width: 500, height: 250 });
         });
     });
+
+    describe('clean Strings', () => {
+        it('should remove special characters', () => {
+            const text = 'â€Ž â€Ž â€Ž â€Žâ€Ž â€Ž  â€Ž â€Ž â€Ž â€Ž Frodo Baggins';
+            const cleanedText = cleanString(text);
+            expect(cleanedText).toEqual('Frodo Baggins');
+        });
+
+        it('should return the original string if no special characters are found', () => {
+            const text = 'Frodo Baggins';
+            const cleanedText = cleanString(text);
+            expect(cleanedText).toEqual('Frodo Baggins');
+        }
+        );
+        it('if empty string passed, should return empty string', () => {
+            const text = '';
+            const cleanedText = cleanString(text);
+            expect(cleanedText).toEqual('');
+        });
+    });
+
+
 });

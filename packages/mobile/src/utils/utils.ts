@@ -144,3 +144,17 @@ export function isBase64ImageURI(url: string): boolean {
 export const URL_PATTERN = new RegExp(
     /((http|https|ftp):\/\/)?(([a-zA-Z0-9\-_]+\.)+[a-zA-Z]{2,})(:\d+)?(\/[^\s]*)?/gi
 );
+
+// Function to clean special characters
+export function cleanString(input: string): string {
+    // Regex to match and remove:
+    // 1. Control characters from \u0000 to \u001F and \u007F to \u009F
+    // 2. Unicode invisible characters like zero-width space, non-joiner, joiner, etc.
+    const cleanedString = input
+        // eslint-disable-next-line no-control-regex
+        .replace(/[\u0000-\u001F\u007F-\u009F\u200B-\u200D\uFEFF]/g, '') // Remove control and invisible characters
+        .replace(/[^\x20-\x7E]/g, '') // Optionally remove non-ASCII characters if desired
+        .trim(); // Remove leading/trailing whitespace
+
+    return cleanedString;
+}
