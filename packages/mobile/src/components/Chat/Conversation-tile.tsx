@@ -25,6 +25,7 @@ import { AuthorName, ConnectionName } from '../ui/Name';
 import { CheckCircle, CircleOutlined } from '../ui/Icons/icons';
 import { ErrorBoundary } from '../ui/ErrorBoundary/ErrorBoundary';
 import { useConversationMetadata } from '../../hooks/chat/useConversationMetadata';
+import { cleanString } from '../../utils/utils';
 
 type ConversationTileProps = {
   onPress?: (conversationId: string) => void;
@@ -123,7 +124,7 @@ const ConversationTile = memo((props: ConversationTileProps) => {
               }}
             >
               {isGroup || props.isSelf
-                ? props.conversation.title
+                ? cleanString(props.conversation.title)
                 : ((connectionDetails?.name?.displayName || connectionDetails?.name?.givenName) ?? (
                     <ConnectionName odinId={props.odinId} />
                   ))}
