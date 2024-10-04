@@ -62,9 +62,9 @@
 			<key>NSLocationWhenInUseUsageDescription</key>
 			<string></string>
 			<key>NSMicrophoneUsageDescription</key>
-			<string>$(PRODUCT_NAME) would like access to microphone to record audio</string>
+			<string>Allow acces to your microphone to record a message and send it securely over chat</string>
 			<key>NSPhotoLibraryUsageDescription</key>
-			<string>${PRODUCT_NAME} would like to access gallery</string>
+			<string>Allow access to your gallery so you can select photos and videos and share them within ${PRODUCT_NAME}</string>
 			<key>UILaunchStoryboardName</key>
 			<string>LaunchScreen</string>
 			<key>UIRequiredDeviceCapabilities</key>
@@ -85,15 +85,15 @@
 			<string>INSendMessageIntent</string>
 		</array>
 		<key>NSAppleMusicUsageDescription</key>
-		<string>${PRODUCT_NAME} would like to access audio to share it into the app</string>
+		<string>${PRODUCT_NAME} would like to access audio to send them securely over chat</string>
 		<key>NSCameraUsageDescription</key>
-		<string>$(PRODUCT_NAME) would like access to your camera to take secure photos and video.</string>
+		<string>Allow access to your camera to take secure photos and video and send them securely over chat</string>
 		<key>NSLocationWhenInUseUsageDescription</key>
 		<string></string>
 		<key>NSMicrophoneUsageDescription</key>
-		<string>$(PRODUCT_NAME) would like access to microphone to record audio</string>
+		<string>Allow acces to your microphone to record a message and send it securely over chat</string>
 		<key>NSPhotoLibraryUsageDescription</key>
-		<string>${PRODUCT_NAME} would like to access gallery</string>
+		<string>Allow access to your gallery so you can select photos and videos and share them within ${PRODUCT_NAME}</string>
 		<key>UIBackgroundModes</key>
 		<array>
 			<string>fetch</string>
