@@ -153,7 +153,6 @@ export function cleanString(input: string): string {
     const cleanedString = input
         // eslint-disable-next-line no-control-regex
         .replace(/[\u0000-\u001F\u007F-\u009F\u200B-\u200D\uFEFF]/g, '') // Remove control and invisible characters
-        .replace(/[^\x20-\x7E]/g, '') // Optionally remove non-ASCII characters if desired
         .trim(); // Remove leading/trailing whitespace
 
     return cleanedString;

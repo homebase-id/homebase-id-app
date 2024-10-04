@@ -80,7 +80,7 @@ describe('utils.ts', () => {
         it('should remove special characters', () => {
             const text = 'â€Ž â€Ž â€Ž â€Žâ€Ž â€Ž  â€Ž â€Ž â€Ž â€Ž Frodo Baggins';
             const cleanedText = cleanString(text);
-            expect(cleanedText).toEqual('Frodo Baggins');
+            expect(cleanedText).toEqual(text);
         });
 
         it('should return the original string if no special characters are found', () => {
@@ -94,6 +94,24 @@ describe('utils.ts', () => {
             const cleanedText = cleanString(text);
             expect(cleanedText).toEqual('');
         });
+
+        it('should handle devnagri characters', () => {
+            const text = 'आपको नमन करना';
+            const cleanedText = cleanString(text);
+            expect(cleanedText).toEqual(text);
+        });
+
+        it('should handle non ascii characters', () => {
+            const text = '你好';
+            const cleanedText = cleanString(text);
+            expect(cleanedText).toEqual(text);
+
+            const text2 = 'ãƒ†ã‚¹ãƒˆ';
+            const cleanedText2 = cleanString(text2);
+            expect(cleanedText2).toEqual(text2);
+
+        });
+
     });
 
 
