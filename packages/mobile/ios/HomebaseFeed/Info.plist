@@ -58,8 +58,7 @@
 			<key>NSAllowsLocalNetworking</key>
 			<true/>
 			<key>NSCameraUsageDescription</key>
-			<string>$(PRODUCT_NAME) would like access to your camera to take secure photos and
-		video.</string>
+			<string>Allow access to your camera to take secure photos and video and send them securely over chat</string>
 			<key>NSLocationWhenInUseUsageDescription</key>
 			<string></string>
 			<key>NSMicrophoneUsageDescription</key>
