@@ -35,16 +35,22 @@ import { ShareChatPage } from '../pages/chat/share-chat-page';
 import { ContactPage } from '../pages/contacts/contact-page';
 import { GroupCreationPage } from '../pages/contacts/group-creation-page';
 import { DotYouProfile } from '@homebase-id/js-lib/network';
+import { ChatFileOverview } from '../components/Files/ChatFileOverview';
+import { ImageSource } from '../provider/image/RNImageProvider';
 
 export type ChatStackParamList = {
   Conversation: undefined;
   New: undefined;
 
-  ChatScreen: { convoId: string };
+  ChatScreen: { convoId: string; initialText?: string };
   ChatInfo: { convoId: string };
   MessageInfo: {
     message: HomebaseFile<ChatMessage>;
     conversation: HomebaseFile<UnifiedConversation>;
+  };
+  ChatFileOverview: {
+    initialAssets: ImageSource[];
+    recipients: HomebaseFile<UnifiedConversation>[];
   };
   EditGroup: { convoId: string };
   ShareChat: SharedItem[];
@@ -175,7 +181,13 @@ export const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Cha
           },
         }}
       />
-
+      <StackChat.Screen
+        name="ChatFileOverview"
+        component={ChatFileOverview}
+        options={{
+          animation: 'slide_from_bottom',
+        }}
+      />
       <StackChat.Group
         screenOptions={{
           presentation: 'modal',

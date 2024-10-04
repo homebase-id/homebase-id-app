@@ -45,7 +45,7 @@ import {
   Times,
 } from '../../components/ui/Icons/icons';
 import MediaMessage from './MediaMessage';
-import { Asset, launchCamera, launchImageLibrary } from 'react-native-image-picker';
+import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { useAuth } from '../../hooks/auth/useAuth';
 import { useChatMessage } from '../../hooks/chat/useChatMessage';
 import { ChatDrive } from '../../provider/chat/ConversationProvider';
@@ -83,11 +83,13 @@ import { LinkPreview } from '@homebase-id/js-lib/media';
 import { tryJsonParse } from '@homebase-id/js-lib/helpers';
 import { EmptyChatContainer } from './EmptyChatContainer';
 import { getPlainTextFromRichText } from 'homebase-id-app-common';
+import { ImageSource } from '../../provider/image/RNImageProvider';
 
 export type ChatMessageIMessage = IMessage & HomebaseFile<ChatMessage>;
 
 export const ChatDetail = memo(
   ({
+    initialMessage,
     isGroup,
     messages,
     doSend,
@@ -97,15 +99,16 @@ export const ChatDetail = memo(
     doOpenRetryModal,
     replyMessage,
     setReplyMessage,
-    assets,
-    setAssets,
     onPaste,
     hasMoreMessages,
     fetchMoreMessages,
     conversationId,
     onLinkData,
     onDismissLinkPreview,
+    onAudioRecord,
+    onAssetsAdded,
   }: {
+    initialMessage?: string;
     isGroup: boolean;
     messages: ChatMessageIMessage[];
     doSend: (message: ChatMessageIMessage[]) => void;
@@ -123,19 +126,19 @@ export const ChatDetail = memo(
     conversationId: string;
     replyMessage: ChatMessageIMessage | null;
     setReplyMessage: (message: ChatMessageIMessage | null) => void;
-    assets: Asset[];
-    setAssets: (assets: Asset[]) => void;
     hasMoreMessages: boolean;
     fetchMoreMessages: () => void;
     onLinkData: (linkPreview: LinkPreview) => void;
     onDismissLinkPreview: () => void;
+    onAudioRecord: (audioPath: string) => void;
+    onAssetsAdded: (assets: ImageSource[]) => void;
   }) => {
     const { isDarkMode } = useDarkMode();
     const identity = useAuth().getIdentity();
 
     const textRef = useRef<TextInput>(null);
 
-    const [draftMessage, setdraftMessage] = useState<string | undefined>();
+    const [draftMessage, setdraftMessage] = useState<string | undefined>(initialMessage);
 
     const _doSend = useCallback(
       (message: ChatMessageIMessage[]) => {
@@ -263,21 +266,9 @@ export const ChatDetail = memo(
     const onStopRecording = useCallback(() => {
       requestAnimationFrame(async () => {
         const audioPath = await stop();
-        setAssets([
-          {
-            uri: audioPath,
-            type: 'audio/mp3',
-            fileName: 'recording',
-            fileSize: 0,
-            height: 0,
-            width: 0,
-            originalPath: audioPath,
-            timestamp: new Date().toUTCString(),
-            id: 'audio',
-          },
-        ] as Asset[]);
+        onAudioRecord(audioPath);
       });
-    }, [setAssets, stop]);
+    }, [onAudioRecord, stop]);
 
     const handleRecordButtonAction = useCallback(() => {
       requestAnimationFrame(async () => {
@@ -299,9 +290,21 @@ export const ChatDetail = memo(
           presentationStyle: 'overFullScreen',
         });
         if (media.didCancel) return;
-        setAssets(media.assets ?? []);
+        const assets: ImageSource[] =
+          media.assets?.map((asset) => ({
+            uri: asset.uri,
+            type: asset.type && asset.type === 'image/jpg' ? 'image/jpeg' : asset.type,
+            height: asset.height || 0,
+            width: asset.width || 0,
+            fileName: asset.fileName,
+            fileSize: asset.fileSize,
+            originalPath: asset.uri,
+            timestamp: asset.timestamp,
+            id: asset.fileName,
+          })) || [];
+        onAssetsAdded(assets);
       });
-    }, [setAssets]);
+    }, [onAssetsAdded]);
 
     const handleAttachmentButtonAction = useCallback(() => {
       requestAnimationFrame(async () => {
@@ -311,20 +314,19 @@ export const ChatDetail = memo(
           mode: 'open',
         });
         document.fileCopyUri = fixDocumentURI(document.fileCopyUri || document.uri);
-        const asset: Asset = {
+        const asset: ImageSource = {
           uri: document.fileCopyUri,
           type: document.type || 'application/pdf',
-          fileName: document.name || 'file',
           fileSize: document.size || 0,
-          originalPath: document.fileCopyUri,
-          timestamp: new Date().toUTCString(),
+          filepath: document.uri,
+          height: 0,
+          width: 0,
           id: document.name || 'file',
         };
-
-        setAssets([asset]);
+        onAssetsAdded([asset]);
         setBottomContainerVisible(false);
       });
-    }, [setAssets]);
+    }, [onAssetsAdded]);
 
     const [bottomContainerVisible, setBottomContainerVisible] = useState(false);
 
@@ -341,11 +343,22 @@ export const ChatDetail = memo(
         includeExtra: true,
       });
       if (medias.didCancel) return;
+      const assets: ImageSource[] =
+        medias.assets?.map((asset) => ({
+          uri: asset.uri,
+          type: asset.type && asset.type === 'image/jpg' ? 'image/jpeg' : asset.type,
+          height: asset.height || 0,
+          width: asset.width || 0,
+          fileName: asset.fileName,
+          fileSize: asset.fileSize,
+          originalPath: asset.uri,
+          timestamp: asset.timestamp,
+          id: asset.fileName,
+        })) || [];
 
-      // Keep assets without a type out of it.. We're never sure what it is...
-      setAssets(medias.assets?.filter((asset) => asset.type) ?? []);
+      onAssetsAdded(assets);
       setBottomContainerVisible(false);
-    }, [setAssets]);
+    }, [onAssetsAdded]);
 
     const inputStyle = useMemo(
       () =>
@@ -505,7 +518,7 @@ export const ChatDetail = memo(
               onSend={
                 isRecording
                   ? async (_) => onStopRecording()
-                  : !hasText && assets?.length === 0
+                  : !hasText
                     ? handlePlusIconPress
                     : props.onSend
               }
@@ -516,7 +529,7 @@ export const ChatDetail = memo(
                   transform: [
                     {
                       rotate:
-                        hasText || assets.length !== 0 || isRecording
+                        hasText || isRecording
                           ? '50deg'
                           : bottomContainerVisible
                             ? '45deg'
@@ -525,7 +538,7 @@ export const ChatDetail = memo(
                   ],
                 }}
               >
-                {hasText || assets.length !== 0 || isRecording ? (
+                {hasText || isRecording ? (
                   <SendChat size={'md'} color={Colors.white} />
                 ) : (
                   <Plus color={Colors.white} />
@@ -536,7 +549,6 @@ export const ChatDetail = memo(
         );
       },
       [
-        assets.length,
         bottomContainerVisible,
         crossIcon,
         draftMessage,

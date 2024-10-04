@@ -5,7 +5,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Alert,
   Dimensions,
-  Image,
   Keyboard,
   Platform,
   Pressable,
@@ -52,12 +51,12 @@ import { PastedFile } from '@mattermost/react-native-paste-input';
 import { Colors } from '../../app/Colors';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { Text } from '../../components/ui/Text/Text';
-import { ChatFileOverview } from '../../components/Files/ChatFileOverview';
 import { OfflineState } from '../../components/Platform/OfflineState';
 import { RetryModal } from '../../components/Chat/Reactions/Modal/RetryModal';
 import { getPlainTextFromRichText, t, useDotYouClientContext } from 'homebase-id-app-common';
 import { useWebSocketContext } from '../../components/WebSocketContext/useWebSocketContext';
 import { LinkPreview } from '@homebase-id/js-lib/media';
+import { getImageSize } from '../../utils/utils';
 
 export type SelectedMessageState = {
   messageCordinates: { x: number; y: number };
@@ -74,7 +73,8 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
 
   const { isOnline } = useWebSocketContext();
 
-  const [assets, setAssets] = useState<Asset[]>([]);
+  const initialString = route.params.initialText;
+
   // Messages
   const {
     all: { data: chatMessages, hasNextPage: hasMoreMessages, fetchNextPage: fetchMoreMessages },
@@ -228,7 +228,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
   }, []);
 
   const doSend = useCallback(
-    (message: { text: string | RichText }[]) => {
+    (message: { text: string | RichText }[], assets?: Asset[]) => {
       if (!conversation) return;
 
       if (
@@ -257,7 +257,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
         conversation: conversation,
         message: message[0]?.text,
         replyId: replyMessage?.fileMetadata.appData.uniqueId,
-        files: assets.map<ImageSource>((value) => {
+        files: assets?.map<ImageSource>((value) => {
           return {
             height: value.height || 0,
             width: value.width || 0,
@@ -275,7 +275,6 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
         chatId: getNewId(),
         userDate: new Date().getTime(),
       });
-      setAssets([]);
       setLinkPreviews(null);
       setReplyMessage(null);
     },
@@ -284,18 +283,31 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
       route.params.convoId,
       sendMessage,
       replyMessage?.fileMetadata.appData.uniqueId,
-      assets,
       linkPreviews,
       identity,
       inviteRecipient,
     ]
   );
 
+  const onAudioRecord = useCallback(
+    (audioPath: string) => {
+      const audio: Asset = {
+        uri: audioPath,
+        type: 'audio/mp3',
+        fileName: 'recording',
+        fileSize: 0,
+        height: 0,
+        width: 0,
+        originalPath: audioPath,
+        timestamp: new Date().toUTCString(),
+        id: 'audio',
+      };
+      doSend([], [audio]);
+    },
+    [doSend]
+  );
+
   useEffect(() => {
-    // Send Audio after Recording
-    if (assets.length === 1 && assets[0].type?.startsWith('audio/')) {
-      doSend([]);
-    }
     if (sendMessageState === 'pending') resetState();
   }, [
     conversation,
@@ -303,7 +315,6 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
     messages.length,
     sendMessageState,
     resetState,
-    assets,
     doSend,
     route.params.convoId,
   ]);
@@ -414,32 +425,44 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
     setSelectedMessage(initalSelectedMessageState);
   }, [initalSelectedMessageState]);
 
-  const onPaste = useCallback(async (error: string | null | undefined, files: PastedFile[]) => {
-    if (error) {
-      console.error('Error while pasting:', error);
-      return;
-    }
-    const pastedItems: Asset[] = await Promise.all(
-      files
-        .map(async (file) => {
-          if (!file.type.startsWith('image')) return {};
-          const { width, height } = await new Promise<{
-            width: number;
-            height: number;
-          }>((resolve) => Image.getSize(file.uri, (width, height) => resolve({ width, height })));
-          return {
-            uri: file.uri,
-            type: file.type,
-            fileName: file.fileName,
-            fileSize: file.fileSize,
-            height: height,
-            width: width,
-          };
-        })
-        .filter((value) => Object.keys(value).length > 0)
-    );
-    setAssets((old) => [...old, ...pastedItems]);
-  }, []);
+  const onAssetsAdded = useCallback(
+    (assets: ImageSource[]) => {
+      if (!conversation) return;
+      navigation.navigate('ChatFileOverview', {
+        initialAssets: assets,
+        recipients: [conversation],
+      });
+    },
+    [conversation, navigation]
+  );
+
+  const onPaste = useCallback(
+    async (error: string | null | undefined, files: PastedFile[]) => {
+      if (error) {
+        console.error('Error while pasting:', error);
+        return;
+      }
+      //TODO: Open ChatFileOverview Route
+      const pastedItems: ImageSource[] = await Promise.all(
+        files
+          .map(async (file) => {
+            if (!file.type.startsWith('image')) return;
+            const { width, height } = await getImageSize(file.uri);
+            return {
+              uri: file.uri,
+              type: file.type,
+              fileName: file.fileName,
+              fileSize: file.fileSize,
+              height: height,
+              width: width,
+            } as ImageSource;
+          })
+          .filter(Boolean) as Promise<ImageSource>[]
+      );
+      onAssetsAdded(pastedItems);
+    },
+    [onAssetsAdded]
+  );
   const [isOpen, setIsOpen] = useState(false);
   const { isDarkMode } = useDarkMode();
 
@@ -507,11 +530,6 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
   if (!conversation) {
     if (isLoadingConversation) return null;
     return <NoConversationHeader title="No conversation found" goBack={doReturnToConversations} />;
-  }
-
-  // If there are assets, show the file overview; Not when it's audio only, as we send that directly
-  if (assets?.length && !(assets.length === 1 && assets[0].type?.startsWith('audio/'))) {
-    return <ChatFileOverview title={title} assets={assets} setAssets={setAssets} doSend={doSend} />;
   }
 
   return (
@@ -600,6 +618,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
             >
               <ErrorBoundary>
                 <ChatDetail
+                  initialMessage={initialString}
                   isGroup={!!isGroupChat}
                   messages={messages}
                   doSend={doSend}
@@ -609,14 +628,14 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
                   doOpenRetryModal={openRetryModal}
                   replyMessage={replyMessage}
                   setReplyMessage={setReplyMessage}
-                  assets={assets}
                   onPaste={onPaste}
-                  setAssets={setAssets}
                   hasMoreMessages={hasMoreMessages}
                   fetchMoreMessages={fetchMoreMessages}
                   conversationId={route.params.convoId}
                   onDismissLinkPreview={onDismissLinkPreview}
                   onLinkData={onLinkData}
+                  onAudioRecord={onAudioRecord}
+                  onAssetsAdded={onAssetsAdded}
                 />
               </ErrorBoundary>
             </Pressable>

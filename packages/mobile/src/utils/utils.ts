@@ -104,12 +104,15 @@ export async function fixContentURI(url: string, format?: string): Promise<strin
 }
 
 // Utility function to convert Image.getSize to a promise
-export const getImageSize = (uri: string): Promise<{ width: number, height: number } | Error> => {
-    return new Promise((resolve, reject) => {
+export const getImageSize = (uri: string): Promise<{ width: number, height: number }> => {
+    return new Promise((resolve) => {
         Image.getSize(
             uri,
             (width, height) => resolve({ width, height }),
-            (error) => reject(error)
+            (error) => {
+                console.error('Error getting image size', error);
+                resolve({ width: 500, height: 500 });
+            }
         );
     });
 };

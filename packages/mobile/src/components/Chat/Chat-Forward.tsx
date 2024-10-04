@@ -121,13 +121,7 @@ export const ChatForwardModal = memo(
               if (image?.imageData) {
                 // If the image size is undefined, fetch the image size
                 if (imageSize.width === 0 || imageSize.height === 0) {
-                  await getImageSize(image.imageData.url).then((res) => {
-                    if (res instanceof Error) {
-                      imageSize = { width: 500, height: 500 };
-                      return;
-                    }
-                    imageSize = res;
-                  });
+                  imageSize = await getImageSize(image.imageData.url);
                 }
                 messagePayloads.push({
                   uri: image.imageData.url,

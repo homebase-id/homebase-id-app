@@ -12,7 +12,6 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { t, useAllConnections } from 'homebase-id-app-common';
 import { useConversation } from '../../hooks/chat/useConversation';
-import { useChatMessage } from '../../hooks/chat/useChatMessage';
 import { memo, useCallback, useMemo, useState } from 'react';
 import { DotYouProfile } from '@homebase-id/js-lib/network';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
@@ -32,7 +31,6 @@ import {
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 import { AuthorName } from '../../components/ui/Name';
 import { SendChat } from '../../components/ui/Icons/icons';
-import { ErrorNotification } from '../../components/ui/Alert/ErrorNotification';
 import { ImageSource } from '../../provider/image/RNImageProvider';
 import { fixContentURI, getImageSize } from '../../utils/utils';
 import {
@@ -40,7 +38,6 @@ import {
   useConversationsWithRecentMessage,
 } from '../../hooks/chat/useConversationsWithRecentMessage';
 import ConversationTile from '../../components/Chat/Conversation-tile';
-import { getNewId } from '@homebase-id/js-lib/helpers';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ConversationTileWithYourself } from '../../components/Conversation/ConversationTileWithYourself';
 
@@ -48,9 +45,7 @@ export type ShareChatProp = NativeStackScreenProps<ChatStackParamList, 'ShareCha
 export const ShareChatPage = (prop: ShareChatProp) => {
   const sharedData = prop.route.params;
   const { isDarkMode } = useDarkMode();
-
   const { mutateAsync: createConversation } = useConversation().create;
-  const { mutate: sendMessage, error } = useChatMessage().send;
   const [sending, setSending] = useState(false);
   const { data: connections } = useAllConnections(true);
   const { data: allConversations } = useConversationsWithRecentMessage().all;
@@ -66,28 +61,42 @@ export const ShareChatPage = (prop: ShareChatProp) => {
       navigation.goBack();
     }
     setSending(true);
+    if (sharedData.find((item) => item.mimeType.startsWith('text'))) {
+      const selectedContacts = selectedContact.length;
+      const selectedConversations = selectedConversation.length;
+      if (selectedContacts + selectedConversations === 1) {
+        if (selectedContact.length === 1) {
+          const contact = selectedContact[0];
+          const conversation = await createConversation({
+            recipients: [contact.odinId],
+          });
+          navigation.dispatch(
+            StackActions.replace('ChatScreen', {
+              convoId: conversation.fileMetadata.appData.uniqueId as string,
+              initialText: sharedData.find((item) => item.mimeType.startsWith('text/'))?.data,
+            })
+          );
+        } else {
+          const group = selectedConversation[0];
+          navigation.dispatch(
+            StackActions.replace('ChatScreen', {
+              convoId: group.fileMetadata.appData.uniqueId as string,
+              initialText: sharedData.find((item) => item.mimeType.startsWith('text/'))?.data,
+            })
+          );
+        }
+      }
+    }
 
-    async function forwardMessages(conversation: HomebaseFile<UnifiedConversation>) {
-      let text = '';
+    async function getMediaSourceData() {
       const imageSource: ImageSource[] = [];
       for (const item of sharedData) {
         const mimeType = item.mimeType;
         const data = item.data;
-        if (mimeType.startsWith('text')) {
-          text = text + data + '\n';
-        } else if (mimeType.startsWith('image')) {
+        if (mimeType.startsWith('image')) {
           const uri = await fixContentURI(data, mimeType.split('/')[1]);
-          let size = {
-            width: 0,
-            height: 0,
-          };
-          await getImageSize(uri).then((res) => {
-            if (res instanceof Error) {
-              size = { width: 500, height: 500 };
-              return;
-            }
-            size = res;
-          });
+
+          const size = await getImageSize(uri);
           imageSource.push({
             uri: uri,
             width: size.width,
@@ -116,74 +125,29 @@ export const ShareChatPage = (prop: ShareChatProp) => {
         }
       }
 
-      return sendMessage({
-        conversation,
-        message: text,
-        files: imageSource,
-        chatId: getNewId(),
-        userDate: new Date().getTime(),
-      });
+      return imageSource;
     }
-    const promises: Promise<void>[] = [];
-    if (selectedContact.length > 0) {
-      promises.push(
-        ...selectedContact.flatMap(async (contact) => {
+
+    const medias = await getMediaSourceData();
+    if (medias.length > 0) {
+      const conversations = selectedConversation;
+      if (selectedContact.length > 0) {
+        for (const contact in selectedContact) {
           const conversation = await createConversation({
-            recipients: [contact.odinId],
+            recipients: [contact],
           });
-
-          return forwardMessages(conversation);
+          conversations.push(conversation);
+        }
+      }
+      navigation.dispatch(
+        StackActions.replace('ChatFileOverview', {
+          initialAssets: medias,
+          recipients: conversations,
         })
       );
-    }
-
-    if (selectedConversation.length > 0) {
-      promises.push(
-        ...selectedConversation.flatMap((conversation) => {
-          return forwardMessages(conversation);
-        })
-      );
-    }
-
-    await Promise.all(promises);
-    if (promises.length === 1) {
-      if (selectedContact.length === 1) {
-        const contact = selectedContact[0];
-
-        const conversation = await createConversation({
-          recipients: [contact.odinId],
-        });
-        navigation.dispatch(
-          StackActions.replace('ChatScreen', {
-            convoId: conversation.fileMetadata.appData.uniqueId as string,
-          })
-        );
-      }
-      if (selectedConversation.length === 1) {
-        const group = selectedConversation[0];
-        navigation.dispatch(
-          StackActions.replace('ChatScreen', {
-            convoId: group.fileMetadata.appData.uniqueId as string,
-          })
-        );
-      }
-    } else {
-      Toast.show({
-        type: 'success',
-        text1: 'Message sent successfully',
-        position: 'bottom',
-      });
-      navigation.goBack();
     }
     setSending(false);
-  }, [
-    selectedContact,
-    selectedConversation,
-    sharedData,
-    navigation,
-    sendMessage,
-    createConversation,
-  ]);
+  }, [selectedContact, selectedConversation, sharedData, navigation, createConversation]);
 
   const { bottom } = useSafeAreaInsets();
 
@@ -275,7 +239,6 @@ export const ShareChatPage = (prop: ShareChatProp) => {
 
   return (
     <SafeAreaView>
-      <ErrorNotification error={error} />
       <InnerShareChatPage
         connections={connections}
         allConversations={allConversations}
@@ -294,10 +257,8 @@ const InnerShareChatPage = memo(
   (props: {
     connections: DotYouProfile[] | undefined;
     allConversations: ConversationWithRecentMessage[] | undefined;
-
     selectedContact: DotYouProfile[];
     setSelectedContact: React.Dispatch<React.SetStateAction<DotYouProfile[]>>;
-
     selectedConversation: HomebaseFile<UnifiedConversation>[];
     setSelectedConversation: React.Dispatch<
       React.SetStateAction<HomebaseFile<UnifiedConversation>[]>
