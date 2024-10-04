@@ -52,6 +52,7 @@
     "typescript": "5.5.4"
   },
   "dependencies": {
+    "homebase-id-app-common": "*",
     "@expo/react-native-action-sheet": "4.0.1",
     "@mattermost/react-native-paste-input": "0.8.0",
     "dayjs": "1.8.26",
@@ -64,8 +65,7 @@
     "react-native-reanimated": "^3.12.1",
     "react-native-typing-animation": "0.1.7",
     "react-native-haptic-feedback": "^2.2.0",
-    "uuid": "3.4.0",
-    "homebase-id-app-common": "*"
+    "uuid": "3.4.0"
   },
   "peerDependencies": {
     "react": "*",
