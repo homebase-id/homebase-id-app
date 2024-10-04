@@ -75,6 +75,4 @@ describe('utils.ts', () => {
             expect(dimensions).toEqual({ width: 500, height: 250 });
         });
     });
-
-
 });

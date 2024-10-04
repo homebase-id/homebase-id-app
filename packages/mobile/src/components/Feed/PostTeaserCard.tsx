@@ -1,4 +1,4 @@
-import { Pressable, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
+import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { PostMedia } from './Body/PostMedia';
 import { Text } from '../ui/Text/Text';
 import { AuthorName } from '../ui/Name';
@@ -22,7 +22,7 @@ import { useCheckIdentity } from '../../hooks/checkIdentity/useCheckIdentity';
 import { PostBody } from './Body/PostBody';
 import { IconButton } from '../ui/Buttons';
 import { DoubleTapHeart } from '../ui/DoubleTapHeart';
-import { GestureType } from 'react-native-gesture-handler';
+import { GestureType, TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { FeedStackParamList } from '../../app/FeedStack';
 
@@ -144,7 +144,7 @@ export const InnerPostTeaserCard = memo(
 
     return (
       <Animated.View style={viewStyle}>
-        <Pressable
+        <TouchableWithoutFeedback
           onPress={() => {
             navigation.navigate('Post', {
               postKey: post.slug || post.id,
@@ -199,15 +199,16 @@ export const InnerPostTeaserCard = memo(
           <DoubleTapHeart doubleTapRef={doubleTapRef} postFile={postFile} odinId={odinId}>
             <PostMedia post={postFile} doubleTapRef={doubleTapRef} />
           </DoubleTapHeart>
-          <PostInteracts
-            postFile={postFile}
-            onCommentPress={onCommentPress}
-            onReactionPress={onReactionPress}
-            onSharePress={onSharePress}
-            onEmojiModalOpen={onEmojiModalOpen}
-            isPublic={isPublic}
-          />
-        </Pressable>
+        </TouchableWithoutFeedback>
+
+        <PostInteracts
+          postFile={postFile}
+          onCommentPress={onCommentPress}
+          onReactionPress={onReactionPress}
+          onSharePress={onSharePress}
+          onEmojiModalOpen={onEmojiModalOpen}
+          isPublic={isPublic}
+        />
       </Animated.View>
     );
   }
