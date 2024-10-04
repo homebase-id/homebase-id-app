@@ -37,6 +37,7 @@ import { GroupCreationPage } from '../pages/contacts/group-creation-page';
 import { DotYouProfile } from '@homebase-id/js-lib/network';
 import { ChatFileOverview } from '../components/Files/ChatFileOverview';
 import { ImageSource } from '../provider/image/RNImageProvider';
+import { ShareEditorPage } from '../pages/chat/share-editor-page';
 
 export type ChatStackParamList = {
   Conversation: undefined;
@@ -54,6 +55,10 @@ export type ChatStackParamList = {
   };
   EditGroup: { convoId: string };
   ShareChat: SharedItem[];
+  ShareEditor: {
+    text: string;
+    recipients: HomebaseFile<UnifiedConversation>[];
+  };
   PreviewMedia: {
     fileId: string;
     globalTransitId?: string;
@@ -205,15 +210,31 @@ export const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Cha
           gestureEnabled: true,
         }}
       />
-      <StackChat.Screen
-        name="ShareChat"
-        component={ShareChatPage}
-        options={{
-          headerShown: true,
-          gestureEnabled: true,
-          title: 'Share',
+      <StackChat.Group
+        screenOptions={{
+          presentation: Platform.OS === 'ios' ? 'modal' : 'card',
         }}
-      />
+      >
+        <StackChat.Screen
+          name="ShareChat"
+          component={ShareChatPage}
+          options={{
+            headerShown: true,
+            gestureEnabled: true,
+            title: 'Share',
+          }}
+        />
+        <StackChat.Screen
+          name="ShareEditor"
+          component={ShareEditorPage}
+          options={{
+            headerShown: true,
+            gestureEnabled: true,
+            title: 'Share',
+          }}
+        />
+      </StackChat.Group>
+
       <StackChat.Screen
         name="PreviewMedia"
         component={PreviewMedia}

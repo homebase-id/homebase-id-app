@@ -85,6 +85,20 @@ export const ShareChatPage = (prop: ShareChatProp) => {
             })
           );
         }
+        return;
+      } else {
+        const recipients = selectedConversation;
+        for (const contact of selectedContact) {
+          recipients.push(
+            await createConversation({
+              recipients: [contact.odinId],
+            })
+          );
+        }
+        navigation.navigate('ShareEditor', {
+          text: sharedData.find((item) => item.mimeType.startsWith('text/'))?.data as string,
+          recipients: recipients,
+        });
       }
     }
 
