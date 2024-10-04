@@ -158,8 +158,12 @@ export function MessageText<TMessage extends IMessage = IMessage>({
           customTextStyle,
         ]}
         parse={[
+          {
+            pattern: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+.[A-Z|a-z]{2,}\b/,
+            style: linkStyle,
+            onPress: onEmailPress,
+          },
           ...parsePatterns!(linkStyle),
-          { type: 'email', style: linkStyle, onPress: onEmailPress },
           { type: 'phone', style: linkStyle, onPress: onPhonePress },
         ]}
         childrenProps={{ ...textProps }}

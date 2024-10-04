@@ -860,7 +860,7 @@ const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
    * @returns An array of parse patterns.
    */
   const parsePatterns = useCallback((linkStyle: StyleProp<TextStyle>): ParseShape[] => {
-    const pattern = /@[a-zA-Z0-9._-]+/;
+    const pattern = /(^|\s)@[a-zA-Z0-9._-]+(?!@)/;
     return [
       {
         pattern: pattern,
