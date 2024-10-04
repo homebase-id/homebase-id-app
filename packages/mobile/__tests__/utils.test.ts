@@ -1,7 +1,7 @@
 
 import InAppBrowser from 'react-native-inappbrowser-reborn';
 import { Linking } from 'react-native';
-import { calculateScaledDimensions, cleanString, extractUrls, millisToMinutesAndSeconds, openURL } from '../src/utils/utils';
+import { calculateScaledDimensions, extractUrls, millisToMinutesAndSeconds, openURL } from '../src/utils/utils';
 
 jest.mock('react-native-inappbrowser-reborn', () => ({
     isAvailable: jest.fn(),
@@ -74,44 +74,6 @@ describe('utils.ts', () => {
             const dimensions = calculateScaledDimensions(2000, 1000, { width: 500, height: 500 });
             expect(dimensions).toEqual({ width: 500, height: 250 });
         });
-    });
-
-    describe('clean Strings', () => {
-        it('should remove special characters', () => {
-            const text = 'â€Ž â€Ž â€Ž â€Žâ€Ž â€Ž  â€Ž â€Ž â€Ž â€Ž Frodo Baggins';
-            const cleanedText = cleanString(text);
-            expect(cleanedText).toEqual(text);
-        });
-
-        it('should return the original string if no special characters are found', () => {
-            const text = 'Frodo Baggins';
-            const cleanedText = cleanString(text);
-            expect(cleanedText).toEqual('Frodo Baggins');
-        }
-        );
-        it('if empty string passed, should return empty string', () => {
-            const text = '';
-            const cleanedText = cleanString(text);
-            expect(cleanedText).toEqual('');
-        });
-
-        it('should handle devnagri characters', () => {
-            const text = 'आपको नमन करना';
-            const cleanedText = cleanString(text);
-            expect(cleanedText).toEqual(text);
-        });
-
-        it('should handle non ascii characters', () => {
-            const text = '你好';
-            const cleanedText = cleanString(text);
-            expect(cleanedText).toEqual(text);
-
-            const text2 = 'ãƒ†ã‚¹ãƒˆ';
-            const cleanedText2 = cleanString(text2);
-            expect(cleanedText2).toEqual(text2);
-
-        });
-
     });
 
 

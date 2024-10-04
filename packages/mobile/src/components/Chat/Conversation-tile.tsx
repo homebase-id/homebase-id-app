@@ -124,7 +124,7 @@ const ConversationTile = memo((props: ConversationTileProps) => {
               }}
             >
               {isGroup || props.isSelf
-                ? cleanString(props.conversation.title)
+                ? props.conversation.title.trim()
                 : ((connectionDetails?.name?.displayName || connectionDetails?.name?.givenName) ?? (
                     <ConnectionName odinId={props.odinId} />
                   ))}
