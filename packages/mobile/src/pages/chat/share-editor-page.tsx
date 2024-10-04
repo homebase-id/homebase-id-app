@@ -35,7 +35,7 @@ export const ShareEditorPage = ({ navigation, route }: ShareChatProp) => {
         userDate: new Date().getTime(),
       });
     }
-    navigation.dispatch(StackActions.replace('Conversation'));
+    navigation.dispatch(StackActions.pop(2));
   }, [linkData, navigation, recipients, sendMessage, text]);
 
   return (
