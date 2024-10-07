@@ -146,9 +146,9 @@ export const ShareChatPage = (prop: ShareChatProp) => {
     if (medias.length > 0) {
       const conversations = selectedConversation;
       if (selectedContact.length > 0) {
-        for (const contact in selectedContact) {
+        for (const contact of selectedContact) {
           const conversation = await createConversation({
-            recipients: [contact],
+            recipients: [contact.odinId],
           });
           conversations.push(conversation);
         }
