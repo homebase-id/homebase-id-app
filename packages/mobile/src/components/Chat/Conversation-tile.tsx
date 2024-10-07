@@ -25,7 +25,6 @@ import { AuthorName, ConnectionName } from '../ui/Name';
 import { CheckCircle, CircleOutlined } from '../ui/Icons/icons';
 import { ErrorBoundary } from '../ui/ErrorBoundary/ErrorBoundary';
 import { useConversationMetadata } from '../../hooks/chat/useConversationMetadata';
-import { cleanString } from '../../utils/utils';
 
 type ConversationTileProps = {
   onPress?: (conversationId: string) => void;

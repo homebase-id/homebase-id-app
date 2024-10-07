@@ -442,7 +442,6 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
         console.error('Error while pasting:', error);
         return;
       }
-      //TODO: Open ChatFileOverview Route
       const pastedItems: ImageSource[] = await Promise.all(
         files
           .map(async (file) => {

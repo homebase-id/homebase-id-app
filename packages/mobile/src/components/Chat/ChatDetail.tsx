@@ -236,7 +236,7 @@ export const ChatDetail = memo(
               />
             )}
             <LinkPreviewBar
-              textToSearchIn={text || ''}
+              textToSearchIn={text || draftMessage || ''}
               onDismiss={onDismissLinkPreview}
               onLinkData={onLinkData}
             />
@@ -250,6 +250,7 @@ export const ChatDetail = memo(
         isDarkMode,
         isGroup,
         conversationId,
+        draftMessage,
         onDismissLinkPreview,
         onLinkData,
         replyMessage,
