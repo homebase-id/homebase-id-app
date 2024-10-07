@@ -225,7 +225,6 @@ export const ChatFileOverview = memo(
           fileSize: value.fileSize,
         })) || [];
 
-      // Keep assets without a type out of it.. We're never sure what it is...
       setAssets((assets) => [...assets, ...newAssets]);
     }, [setAssets]);
 
