@@ -33,6 +33,7 @@ import { useChatMessage } from '../../hooks/chat/useChatMessage';
 import { getNewId } from '@homebase-id/js-lib/helpers';
 import Toast from 'react-native-toast-message';
 import { AuthorName } from '../ui/Name';
+import { assetsToImageSource } from '../../utils/utils';
 
 const FilePreview = ({
   asset,
@@ -211,19 +212,7 @@ export const ChatFileOverview = memo(
       });
       if (medias.didCancel) return;
 
-      const newAssets: ImageSource[] =
-        medias.assets?.map((value) => ({
-          height: value.height || 0,
-          width: value.width || 0,
-          name: value.fileName,
-          type: value.type && value.type === 'image/jpg' ? 'image/jpeg' : value.type,
-          uri: value.uri,
-          filename: value.fileName,
-          date: Date.parse(value.timestamp || new Date().toUTCString()),
-          filepath: value.originalPath,
-          id: value.id,
-          fileSize: value.fileSize,
-        })) || [];
+      const newAssets: ImageSource[] = medias.assets ? assetsToImageSource(medias.assets) : [];
 
       setAssets((assets) => [...assets, ...newAssets]);
     }, [setAssets]);

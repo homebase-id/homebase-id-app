@@ -2,7 +2,9 @@ import { getNewId } from '@homebase-id/js-lib/helpers';
 import { InfiniteData } from '@tanstack/react-query';
 import { Image, Linking } from 'react-native';
 import { CachesDirectoryPath, copyFile } from 'react-native-fs';
+import { Asset } from 'react-native-image-picker';
 import InAppBrowser from 'react-native-inappbrowser-reborn';
+import { ImageSource } from '../provider/image/RNImageProvider';
 
 //https://stackoverflow.com/a/21294619/15538463
 export function millisToMinutesAndSeconds(millis: number | undefined): string {
@@ -159,4 +161,22 @@ export function cleanString(input: string): string {
         .trim(); // Remove leading/trailing whitespace
 
     return cleanedString;
+}
+
+
+export function assetsToImageSource(assets: Asset[]): ImageSource[] {
+    return assets.map((value) => {
+        return {
+            height: value.height || 0,
+            width: value.width || 0,
+            name: value.fileName,
+            type: value.type && value.type === 'image/jpg' ? 'image/jpeg' : value.type,
+            uri: value.uri,
+            filename: value.fileName,
+            date: Date.parse(value.timestamp || new Date().toUTCString()),
+            filepath: value.originalPath,
+            id: value.id,
+            fileSize: value.fileSize,
+        };
+    });
 }

@@ -61,7 +61,13 @@ import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { ChatDeletedArchivalStaus, ChatMessage } from '../../provider/chat/ChatProvider';
 import { useAudioRecorder } from '../../hooks/audio/useAudioRecorderPlayer';
 import { Text } from '../ui/Text/Text';
-import { fixDocumentURI, millisToMinutesAndSeconds, openURL, URL_PATTERN } from '../../utils/utils';
+import {
+  assetsToImageSource,
+  fixDocumentURI,
+  millisToMinutesAndSeconds,
+  openURL,
+  URL_PATTERN,
+} from '../../utils/utils';
 import { SafeAreaView } from '../ui/SafeAreaView/SafeAreaView';
 import Document from 'react-native-document-picker';
 import { getLocales, uses24HourClock } from 'react-native-localize';
@@ -291,18 +297,7 @@ export const ChatDetail = memo(
           presentationStyle: 'overFullScreen',
         });
         if (media.didCancel) return;
-        const assets: ImageSource[] =
-          media.assets?.map((asset) => ({
-            uri: asset.uri,
-            type: asset.type && asset.type === 'image/jpg' ? 'image/jpeg' : asset.type,
-            height: asset.height || 0,
-            width: asset.width || 0,
-            fileName: asset.fileName,
-            fileSize: asset.fileSize,
-            originalPath: asset.uri,
-            timestamp: asset.timestamp,
-            id: asset.fileName,
-          })) || [];
+        const assets: ImageSource[] = media.assets ? assetsToImageSource(media.assets) : [];
         onAssetsAdded(assets);
       });
     }, [onAssetsAdded]);
@@ -344,18 +339,7 @@ export const ChatDetail = memo(
         includeExtra: true,
       });
       if (medias.didCancel) return;
-      const assets: ImageSource[] =
-        medias.assets?.map((asset) => ({
-          uri: asset.uri,
-          type: asset.type && asset.type === 'image/jpg' ? 'image/jpeg' : asset.type,
-          height: asset.height || 0,
-          width: asset.width || 0,
-          fileName: asset.fileName,
-          fileSize: asset.fileSize,
-          originalPath: asset.uri,
-          timestamp: asset.timestamp,
-          id: asset.fileName,
-        })) || [];
+      const assets: ImageSource[] = medias.assets ? assetsToImageSource(medias.assets) : [];
 
       onAssetsAdded(assets);
       setBottomContainerVisible(false);
