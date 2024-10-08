@@ -1,5 +1,11 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { FailedTransferStatuses, HomebaseFile, RichText } from '@homebase-id/js-lib/core';
+import {
+  ApiType,
+  DotYouClient,
+  FailedTransferStatuses,
+  HomebaseFile,
+  RichText,
+} from '@homebase-id/js-lib/core';
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -58,6 +64,7 @@ import { RetryModal } from '../../components/Chat/Reactions/Modal/RetryModal';
 import { getPlainTextFromRichText, t, useDotYouClientContext } from 'homebase-id-app-common';
 import { useWebSocketContext } from '../../components/WebSocketContext/useWebSocketContext';
 import { LinkPreview } from '@homebase-id/js-lib/media';
+import { openURL } from '../../utils/utils';
 
 export type SelectedMessageState = {
   messageCordinates: { x: number; y: number };
@@ -443,6 +450,10 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
   const [isOpen, setIsOpen] = useState(false);
   const { isDarkMode } = useDarkMode();
 
+  const host = new DotYouClient({
+    api: ApiType.Guest,
+    identity: identity || undefined,
+  }).getRoot();
   const chatOptions: {
     label: string;
     onPress: () => void;
@@ -496,12 +507,33 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
               },
             }
           : undefined,
+        {
+          label: `${t('Report')}`,
+          onPress: async () => {
+            //TODO: Update to use the report endpoint
+            openURL('https://ravenhosting.cloud/report/content');
+          },
+        },
+        {
+          label: `${t('Block this user')}`,
+          onPress: () => {
+            openURL(`${host}/owner/connections/${filteredRecipients?.[0]}/block`);
+          },
+        },
       ].filter(Boolean) as {
         label: string;
         onPress: () => void;
       }[],
 
-    [clearChat, conversation, deleteChat, navigation, route.params.convoId]
+    [
+      clearChat,
+      conversation,
+      deleteChat,
+      filteredRecipients,
+      host,
+      navigation,
+      route.params.convoId,
+    ]
   );
 
   if (!conversation) {
