@@ -19,8 +19,8 @@
     "@homebase-id/js-lib": "0.0.5-alpha.3",
     "axios": "1.7.5",
     "patch-package": "8.0.0",
-    "react": "18.2.0",
-    "react-native": "0.73.6"
+    "react": "18.3.1",
+    "react-native": "0.75.4"
   },
   "overrides": {
     "browserify-sign": "4.2.2",

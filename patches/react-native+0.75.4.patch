@@ -1,0 +1,43 @@
+diff --git a/node_modules/react-native/Libraries/Network/FormData.js b/node_modules/react-native/Libraries/Network/FormData.js
+index 91735c6..2aa8148 100644
+--- a/node_modules/react-native/Libraries/Network/FormData.js
++++ b/node_modules/react-native/Libraries/Network/FormData.js
+@@ -55,13 +55,13 @@ class FormData {
+     this._parts = [];
+   }
+ 
+-  append(key: string, value: FormDataValue) {
++  append(key: string, value: FormDataValue, filename?: string) {
+     // The XMLHttpRequest spec doesn't specify if duplicate keys are allowed.
+     // MDN says that any new values should be appended to existing values.
+     // In any case, major browsers allow duplicate keys, so that's what we'll do
+     // too. They'll simply get appended as additional form data parts in the
+     // request body, leaving the server to deal with them.
+-    this._parts.push([key, value]);
++    this._parts.push([key, value, filename]);
+   }
+ 
+   getAll(key: string): Array<FormDataValue> {
+@@ -71,7 +71,7 @@ class FormData {
+   }
+ 
+   getParts(): Array<FormDataPart> {
+-    return this._parts.map(([name, value]) => {
++    return this._parts.map(([name, value, filename]) => {
+       const contentDisposition = 'form-data; name="' + name + '"';
+ 
+       const headers: Headers = {'content-disposition': contentDisposition};
+@@ -83,11 +83,11 @@ class FormData {
+       if (typeof value === 'object' && !Array.isArray(value) && value) {
+         if (typeof value.name === 'string') {
+           headers['content-disposition'] += `; filename="${
+-            value.name
++            filename || value.name
+           }"; filename*=utf-8''${encodeURI(value.name)}`;
+         }
+         if (typeof value.type === 'string') {
+-          headers['content-type'] = value.type;
++          headers['content-type'] = value.type && typeof value.type === 'string' ? value.type : 'application/octet-stream';
+         }
+         return {...value, headers, fieldName: name};
+       }

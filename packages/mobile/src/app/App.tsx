@@ -77,7 +77,7 @@ export type HomeStackParamList = {
 let App = () => {
   return (
     <OdinQueryClient>
-      <GestureHandlerRootView style={{ flex: 1 }}>
+      <GestureHandlerRootView>
         <PushNotificationProvider>
           <RouteContextProvider>
             <RootStack />

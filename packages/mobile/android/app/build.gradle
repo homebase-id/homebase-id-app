@@ -54,6 +54,10 @@ react {
     // https://github.com/microsoft/react-native-code-push/issues/1887
     // CodePush fix for the monorepo structure
     project.ext.nodeModulesPath = "../../../../node_modules"
+
+
+    /* Autolinking */
+    autolinkLibrariesWithApp()
 }
 
 /**
@@ -153,6 +157,3 @@ dependencies {
         implementation jscFlavor
     }
 }
-
-apply from: file("../../../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesAppBuildGradle(project)
-apply from: "../../../../node_modules/react-native-code-push/android/codepush.gradle"

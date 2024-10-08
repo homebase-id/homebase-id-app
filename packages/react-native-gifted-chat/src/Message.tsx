@@ -18,7 +18,11 @@ import { IMessage, User, LeftRightStyle } from './Models';
 import ReactNativeHapticFeedback, {
   HapticFeedbackTypes,
 } from 'react-native-haptic-feedback';
-import { Swipeable, SwipeableProps } from 'react-native-gesture-handler';
+import Swipeable, {
+  SwipeableMethods,
+  SwipeableProps,
+} from 'react-native-gesture-handler/ReanimatedSwipeable';
+import { interpolate, SharedValue } from 'react-native-reanimated';
 
 const styles = {
   left: StyleSheet.create({
@@ -89,7 +93,7 @@ export interface MessageProps<TMessage extends IMessage> {
 }
 
 export default class Message<
-  TMessage extends IMessage = IMessage
+  TMessage extends IMessage = IMessage,
 > extends React.Component<MessageProps<TMessage>> {
   static defaultProps = {
     renderAvatar: undefined,
@@ -221,17 +225,18 @@ export default class Message<
     isSameUser(this.props.currentMessage, this.props.nextMessage) &&
     isSameDay(this.props.currentMessage, this.props.nextMessage);
 
-  renderRightAction = (
-    progressAnimatedValue: Animated.AnimatedInterpolation<number>,
-  ) => {
-    const size = progressAnimatedValue.interpolate({
-      inputRange: [0, 1, 100],
-      outputRange: [0, 1, 1],
-    });
-    const trans = progressAnimatedValue.interpolate({
-      inputRange: [0, 1, 2],
-      outputRange: [0, -12, -20],
-    });
+  renderRightAction = (progressAnimatedValue: SharedValue<number>) => {
+    const size = interpolate(
+      progressAnimatedValue.value,
+      [0, 1, 100],
+      [0, 1, 1],
+    );
+    const trans = interpolate(
+      progressAnimatedValue.value,
+      [0, 1, 2],
+      [0, -12, -20],
+    );
+
     const { renderLeftIcon } = this.props;
 
     return (
@@ -259,17 +264,17 @@ export default class Message<
       </Animated.View>
     );
   };
-  renderLeftAction = (
-    progressAnimatedValue: Animated.AnimatedInterpolation<number>,
-  ): React.ReactNode => {
-    const size = progressAnimatedValue.interpolate({
-      inputRange: [0, 1, 100],
-      outputRange: [0, 1, 1],
-    });
-    const trans = progressAnimatedValue.interpolate({
-      inputRange: [0, 1, 2],
-      outputRange: [0, -12, -20],
-    });
+  renderLeftAction = (progressAnimatedValue: SharedValue<number>) => {
+    const size = interpolate(
+      progressAnimatedValue.value,
+      [0, 1, 100],
+      [0, 1, 1],
+    );
+    const trans = interpolate(
+      progressAnimatedValue.value,
+      [0, 1, 2],
+      [0, -12, -20],
+    );
 
     return (
       <Animated.View
@@ -297,7 +302,10 @@ export default class Message<
     );
   };
 
-  onSwipeOpenAction = (direction: 'left' | 'right', swipeable: Swipeable) => {
+  onSwipeOpenAction = (
+    direction: 'left' | 'right',
+    swipeable: SwipeableMethods,
+  ) => {
     ReactNativeHapticFeedback.trigger(HapticFeedbackTypes.impactMedium, {
       enableVibrateFallback: true,
     });

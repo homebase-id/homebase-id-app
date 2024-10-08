@@ -195,9 +195,10 @@ export const ChatDetail = memo(
     );
 
     const renderMessageBox = useCallback(
-      (props: MessageProps<ChatMessageIMessage>) => {
+      ({ key, ...props }: MessageProps<ChatMessageIMessage>) => {
         return (
           <ChatMessageBox
+            key={key}
             {...props}
             setReplyOnSwipeOpen={setReplyMessage}
             onLeftSwipeOpen={onLeftSwipe}

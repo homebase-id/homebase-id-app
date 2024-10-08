@@ -65,6 +65,7 @@ import { getPlainTextFromRichText, t, useDotYouClientContext } from 'homebase-id
 import { useWebSocketContext } from '../../components/WebSocketContext/useWebSocketContext';
 import { LinkPreview } from '@homebase-id/js-lib/media';
 import { openURL } from '../../utils/utils';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export type SelectedMessageState = {
   messageCordinates: { x: number; y: number };
@@ -579,156 +580,158 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
 
   return (
     <BottomSheetModalProvider>
-      <ErrorNotification error={clearChatError || deleteChatError} />
-      <View
-        style={{
-          paddingBottom:
-            Platform.OS === 'ios' && (replyMessage || Keyboard.isVisible()) ? 0 : insets.bottom,
-          flex: 1,
-          // Force the height on iOS to better support the keyboard handling
-          minHeight: Platform.OS === 'ios' ? Dimensions.get('window').height : undefined,
-          backgroundColor: isDarkMode ? Colors.slate[900] : Colors.slate[50],
-        }}
-      >
-        <ErrorBoundary>
-          <ChatAppBar
-            title={title || ''}
-            group={!!isGroupChat}
-            odinId={
-              stringGuidsEqual(route.params.convoId, ConversationWithYourselfId)
-                ? identity || ''
-                : (filteredRecipients?.length === 1 && filteredRecipients[0]) || ''
-            }
-            goBack={
-              selectedMessage.selectedMessage ? dismissSelectedMessage : doReturnToConversations
-            }
-            onPress={() => navigation.navigate('ChatInfo', { convoId: route.params.convoId })}
-            onMorePress={() => setIsOpen(!isOpen)}
-            isSelf={stringGuidsEqual(route.params.convoId, ConversationWithYourselfId)}
-            selectedMessage={selectedMessage?.selectedMessage}
-            selectedMessageActions={selectedMessageActions}
-            groupAvatarProp={
-              isGroupChat
-                ? {
-                    fileId: conversation.fileId,
-                    fileKey: conversation.fileMetadata.payloads?.[0]?.key,
-                    previewThumbnail: conversation.fileMetadata.appData.previewThumbnail,
-                  }
-                : undefined
-            }
-          />
-          {isOpen ? (
-            <View
-              style={{
-                position: 'absolute',
-                top: Platform.select({ ios: 90, android: 56 }),
-                minWidth: 180,
-                right: 4,
-                backgroundColor: isDarkMode ? Colors.black : Colors.white,
-                zIndex: 20,
-                elevation: 20,
-                borderWidth: 1,
-                borderColor: isDarkMode ? Colors.slate[700] : Colors.gray[200],
-                borderRadius: 4,
-              }}
-            >
-              {chatOptions.map((child, index) => (
-                <TouchableOpacity
-                  key={index}
-                  onPress={() => {
-                    setIsOpen(false);
-                    child.onPress();
-                  }}
-                  style={{
-                    paddingHorizontal: 8,
-                    paddingVertical: 4,
-                    backgroundColor: isDarkMode ? Colors.black : Colors.white,
-                    flexDirection: 'row',
-                    gap: 6,
-                    alignItems: 'center',
-                  }}
-                >
-                  <Text>{child.label}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          ) : null}
-          <ChatConnectedState {...conversation} />
-          <OfflineState isConnected={isOnline} />
-          <Host>
-            <Pressable
-              onPress={dismissSelectedMessage}
-              disabled={selectedMessage.selectedMessage === undefined}
-              style={{ flex: 1 }}
-            >
-              <ErrorBoundary>
-                <ChatDetail
-                  isGroup={!!isGroupChat}
-                  messages={slicedMessages}
-                  doSend={doSend}
-                  doSelectMessage={doSelectMessage}
-                  doOpenMessageInfo={doOpenMessageInfo}
-                  doOpenReactionModal={openReactionModal}
-                  doOpenRetryModal={openRetryModal}
-                  replyMessage={replyMessage}
-                  setReplyMessage={setReplyMessage}
-                  assets={assets}
-                  onPaste={onPaste}
-                  setAssets={setAssets}
-                  hasMoreMessages={hasMoreMessages}
-                  fetchMoreMessages={fetchMoreMessages}
-                  conversationId={route.params.convoId}
-                  onDismissLinkPreview={onDismissLinkPreview}
-                  onLinkData={onLinkData}
-                />
-              </ErrorBoundary>
-            </Pressable>
-
-            <ChatReaction
-              selectedMessage={selectedMessage}
-              afterSendReaction={dismissReaction}
-              openEmojiPicker={openEmojiModal}
+      <GestureHandlerRootView>
+        <ErrorNotification error={clearChatError || deleteChatError} />
+        <View
+          style={{
+            paddingBottom:
+              Platform.OS === 'ios' && (replyMessage || Keyboard.isVisible()) ? 0 : insets.bottom,
+            flex: 1,
+            // Force the height on iOS to better support the keyboard handling
+            minHeight: Platform.OS === 'ios' ? Dimensions.get('window').height : undefined,
+            backgroundColor: isDarkMode ? Colors.slate[900] : Colors.slate[50],
+          }}
+        >
+          <ErrorBoundary>
+            <ChatAppBar
+              title={title || ''}
+              group={!!isGroupChat}
+              odinId={
+                stringGuidsEqual(route.params.convoId, ConversationWithYourselfId)
+                  ? identity || ''
+                  : (filteredRecipients?.length === 1 && filteredRecipients[0]) || ''
+              }
+              goBack={
+                selectedMessage.selectedMessage ? dismissSelectedMessage : doReturnToConversations
+              }
+              onPress={() => navigation.navigate('ChatInfo', { convoId: route.params.convoId })}
+              onMorePress={() => setIsOpen(!isOpen)}
+              isSelf={stringGuidsEqual(route.params.convoId, ConversationWithYourselfId)}
+              selectedMessage={selectedMessage?.selectedMessage}
+              selectedMessageActions={selectedMessageActions}
+              groupAvatarProp={
+                isGroupChat
+                  ? {
+                      fileId: conversation.fileId,
+                      fileKey: conversation.fileMetadata.payloads?.[0]?.key,
+                      previewThumbnail: conversation.fileMetadata.appData.previewThumbnail,
+                    }
+                  : undefined
+              }
             />
-          </Host>
-        </ErrorBoundary>
-      </View>
-      <EmojiPickerModal
-        ref={emojiPickerSheetModalRef}
-        selectedMessage={selectedMessage.selectedMessage}
-        onDismiss={dismissSelectedMessage}
-      />
-      <ReactionsModal
-        ref={reactionModalRef}
-        message={selectedReactionMessage}
-        onClose={() => {
-          setSelectedReactionMessage(undefined);
-        }}
-      />
-      <ChatForwardModal
-        ref={forwardModalRef}
-        onClose={dismissSelectedMessage}
-        selectedMessage={selectedMessage.selectedMessage}
-      />
-      <RetryModal
-        ref={retryModelRef}
-        message={selectedRetryMessage}
-        conversation={conversation}
-        onClose={() => {
-          retryModelRef.current?.dismiss();
-          setSelectedRetryMessage(undefined);
-        }}
-      />
+            {isOpen ? (
+              <View
+                style={{
+                  position: 'absolute',
+                  top: Platform.select({ ios: 90, android: 56 }),
+                  minWidth: 180,
+                  right: 4,
+                  backgroundColor: isDarkMode ? Colors.black : Colors.white,
+                  zIndex: 20,
+                  elevation: 20,
+                  borderWidth: 1,
+                  borderColor: isDarkMode ? Colors.slate[700] : Colors.gray[200],
+                  borderRadius: 4,
+                }}
+              >
+                {chatOptions.map((child, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    onPress={() => {
+                      setIsOpen(false);
+                      child.onPress();
+                    }}
+                    style={{
+                      paddingHorizontal: 8,
+                      paddingVertical: 4,
+                      backgroundColor: isDarkMode ? Colors.black : Colors.white,
+                      flexDirection: 'row',
+                      gap: 6,
+                      alignItems: 'center',
+                    }}
+                  >
+                    <Text>{child.label}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            ) : null}
+            <ChatConnectedState {...conversation} />
+            <OfflineState isConnected={isOnline} />
+            <Host>
+              <Pressable
+                onPress={dismissSelectedMessage}
+                disabled={selectedMessage.selectedMessage === undefined}
+                style={{ flex: 1 }}
+              >
+                <ErrorBoundary>
+                  <ChatDetail
+                    isGroup={!!isGroupChat}
+                    messages={slicedMessages}
+                    doSend={doSend}
+                    doSelectMessage={doSelectMessage}
+                    doOpenMessageInfo={doOpenMessageInfo}
+                    doOpenReactionModal={openReactionModal}
+                    doOpenRetryModal={openRetryModal}
+                    replyMessage={replyMessage}
+                    setReplyMessage={setReplyMessage}
+                    assets={assets}
+                    onPaste={onPaste}
+                    setAssets={setAssets}
+                    hasMoreMessages={hasMoreMessages}
+                    fetchMoreMessages={fetchMoreMessages}
+                    conversationId={route.params.convoId}
+                    onDismissLinkPreview={onDismissLinkPreview}
+                    onLinkData={onLinkData}
+                  />
+                </ErrorBoundary>
+              </Pressable>
 
-      <EditDialogBox
-        visible={editDialogVisible}
-        handleDialogClose={handleDialogClose}
-        selectedMessage={selectedMessage.selectedMessage}
-      />
-      <DeleteDialogBox
-        visible={deleteDialogVisible}
-        handleDialogClose={handleDialogClose}
-        selectedMessage={selectedMessage.selectedMessage}
-      />
+              <ChatReaction
+                selectedMessage={selectedMessage}
+                afterSendReaction={dismissReaction}
+                openEmojiPicker={openEmojiModal}
+              />
+            </Host>
+          </ErrorBoundary>
+        </View>
+        <EmojiPickerModal
+          ref={emojiPickerSheetModalRef}
+          selectedMessage={selectedMessage.selectedMessage}
+          onDismiss={dismissSelectedMessage}
+        />
+        <ReactionsModal
+          ref={reactionModalRef}
+          message={selectedReactionMessage}
+          onClose={() => {
+            setSelectedReactionMessage(undefined);
+          }}
+        />
+        <ChatForwardModal
+          ref={forwardModalRef}
+          onClose={dismissSelectedMessage}
+          selectedMessage={selectedMessage.selectedMessage}
+        />
+        <RetryModal
+          ref={retryModelRef}
+          message={selectedRetryMessage}
+          conversation={conversation}
+          onClose={() => {
+            retryModelRef.current?.dismiss();
+            setSelectedRetryMessage(undefined);
+          }}
+        />
+
+        <EditDialogBox
+          visible={editDialogVisible}
+          handleDialogClose={handleDialogClose}
+          selectedMessage={selectedMessage.selectedMessage}
+        />
+        <DeleteDialogBox
+          visible={deleteDialogVisible}
+          handleDialogClose={handleDialogClose}
+          selectedMessage={selectedMessage.selectedMessage}
+        />
+      </GestureHandlerRootView>
     </BottomSheetModalProvider>
   );
 });

@@ -1,15 +1,15 @@
-import PropTypes from 'prop-types'
-import React, { ReactNode } from 'react'
+import PropTypes from 'prop-types';
+import React, { ReactNode } from 'react';
 import {
   StyleSheet,
   View,
   ImageStyle,
   TextStyle,
   ViewStyle,
-} from 'react-native'
-import GiftedAvatar from './GiftedAvatar'
-import { StylePropType, isSameUser, isSameDay } from './utils'
-import { Omit, IMessage, User, LeftRightStyle } from './Models'
+} from 'react-native';
+import GiftedAvatar from './GiftedAvatar';
+import { StylePropType, isSameUser, isSameDay } from './utils';
+import { Omit, IMessage, User, LeftRightStyle } from './Models';
 
 const styles = {
   left: StyleSheet.create({
@@ -40,21 +40,21 @@ const styles = {
       borderRadius: 18,
     },
   }),
-}
+};
 
 export interface AvatarProps<TMessage extends IMessage> {
-  currentMessage?: TMessage
-  previousMessage?: TMessage
-  nextMessage?: TMessage
-  position: 'left' | 'right'
-  renderAvatarOnTop?: boolean
-  showAvatarForEveryMessage?: boolean
-  imageStyle?: LeftRightStyle<ImageStyle>
-  containerStyle?: LeftRightStyle<ViewStyle>
-  textStyle?: TextStyle
-  renderAvatar?(props: Omit<AvatarProps<TMessage>, 'renderAvatar'>): ReactNode
-  onPressAvatar?(user: User): void
-  onLongPressAvatar?(user: User): void
+  currentMessage?: TMessage;
+  previousMessage?: TMessage;
+  nextMessage?: TMessage;
+  position: 'left' | 'right';
+  renderAvatarOnTop?: boolean;
+  showAvatarForEveryMessage?: boolean;
+  imageStyle?: LeftRightStyle<ImageStyle>;
+  containerStyle?: LeftRightStyle<ViewStyle>;
+  textStyle?: TextStyle;
+  renderAvatar?(props: Omit<AvatarProps<TMessage>, 'renderAvatar'>): ReactNode;
+  onPressAvatar?(user: User): void;
+  onLongPressAvatar?(user: User): void;
 }
 
 export function Avatar<TMessage extends IMessage = IMessage>(
@@ -70,12 +70,12 @@ export function Avatar<TMessage extends IMessage = IMessage>(
     previousMessage,
     nextMessage,
     imageStyle,
-  } = props
-  const messageToCompare = renderAvatarOnTop ? previousMessage : nextMessage
-  const computedStyle = renderAvatarOnTop ? 'onTop' : 'onBottom'
+  } = props;
+  const messageToCompare = renderAvatarOnTop ? previousMessage : nextMessage;
+  const computedStyle = renderAvatarOnTop ? 'onTop' : 'onBottom';
 
   if (renderAvatar === null) {
-    return null
+    return null;
   }
 
   if (
@@ -101,13 +101,13 @@ export function Avatar<TMessage extends IMessage = IMessage>(
           }
         />
       </View>
-    )
+    );
   }
 
   const renderAvatarComponent = () => {
     if (props.renderAvatar) {
-      const { renderAvatar, ...avatarProps } = props
-      return props.renderAvatar(avatarProps)
+      const { renderAvatar, ...avatarProps } = props;
+      return props.renderAvatar(avatarProps);
     }
 
     if (props.currentMessage) {
@@ -125,11 +125,11 @@ export function Avatar<TMessage extends IMessage = IMessage>(
             props.onLongPressAvatar?.(props.currentMessage!.user)
           }
         />
-      )
+      );
     }
 
-    return null
-  }
+    return null;
+  };
 
   return (
     <View
@@ -141,23 +141,23 @@ export function Avatar<TMessage extends IMessage = IMessage>(
     >
       {renderAvatarComponent()}
     </View>
-  )
+  );
 }
 
-Avatar.defaultProps = {
-  renderAvatarOnTop: false,
-  showAvatarForEveryMessage: false,
-  position: 'left',
-  currentMessage: {
-    user: null,
-  },
-  previousMessage: {},
-  nextMessage: {},
-  containerStyle: {},
-  imageStyle: {},
-  onPressAvatar: () => {},
-  onLongPressAvatar: () => {},
-}
+// Avatar.defaultProps = {
+//   renderAvatarOnTop: false,
+//   showAvatarForEveryMessage: false,
+//   position: 'left',
+//   currentMessage: {
+//     user: null,
+//   },
+//   previousMessage: {},
+//   nextMessage: {},
+//   containerStyle: {},
+//   imageStyle: {},
+//   onPressAvatar: () => {},
+//   onLongPressAvatar: () => {},
+// }
 
 Avatar.propTypes = {
   renderAvatarOnTop: PropTypes.bool,
@@ -177,4 +177,4 @@ Avatar.propTypes = {
     left: StylePropType,
     right: StylePropType,
   }),
-}
+};
