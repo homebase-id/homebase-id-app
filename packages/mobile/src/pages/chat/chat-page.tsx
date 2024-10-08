@@ -266,7 +266,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
   }, []);
 
   const doSend = useCallback(
-    (message: { text: string | RichText }[], assets?: Asset[]) => {
+    (message: { text: string | RichText }[], assets?: ImageSource[]) => {
       if (!conversation) return;
 
       if (
@@ -295,20 +295,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
         conversation: conversation,
         message: message[0]?.text,
         replyId: replyMessage?.fileMetadata.appData.uniqueId,
-        files: assets?.map<ImageSource>((value) => {
-          return {
-            height: value.height || 0,
-            width: value.width || 0,
-            name: value.fileName,
-            type: value.type && value.type === 'image/jpg' ? 'image/jpeg' : value.type,
-            uri: value.uri,
-            filename: value.fileName,
-            date: Date.parse(value.timestamp || new Date().toUTCString()),
-            filepath: value.originalPath,
-            id: value.id,
-            fileSize: value.fileSize,
-          };
-        }),
+        files: assets,
         linkPreviews: linkPreviews ? [linkPreviews] : [],
         chatId: getNewId(),
         userDate: new Date().getTime(),
@@ -325,24 +312,6 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
       identity,
       inviteRecipient,
     ]
-  );
-
-  const onAudioRecord = useCallback(
-    (audioPath: string) => {
-      const audio: Asset = {
-        uri: audioPath,
-        type: 'audio/mp3',
-        fileName: 'recording',
-        fileSize: 0,
-        height: 0,
-        width: 0,
-        originalPath: audioPath,
-        timestamp: new Date().toUTCString(),
-        id: 'audio',
-      };
-      doSend([], [audio]);
-    },
-    [doSend]
   );
 
   useEffect(() => {
@@ -465,13 +434,17 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
 
   const onAssetsAdded = useCallback(
     (assets: ImageSource[]) => {
-      if (!conversation) return;
+      if (!conversation || !assets.length) return;
+      if (assets.length === 1 && assets[0].type?.startsWith('audio')) {
+        doSend([], assets);
+        return;
+      }
       navigation.navigate('ChatFileOverview', {
         initialAssets: assets,
         recipients: [conversation],
       });
     },
-    [conversation, navigation]
+    [conversation, doSend, navigation]
   );
 
   const onPaste = useCallback(
@@ -696,7 +669,6 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
                   conversationId={route.params.convoId}
                   onDismissLinkPreview={onDismissLinkPreview}
                   onLinkData={onLinkData}
-                  onAudioRecord={onAudioRecord}
                   onAssetsAdded={onAssetsAdded}
                 />
               </ErrorBoundary>

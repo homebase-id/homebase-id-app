@@ -111,7 +111,6 @@ export const ChatDetail = memo(
     conversationId,
     onLinkData,
     onDismissLinkPreview,
-    onAudioRecord,
     onAssetsAdded,
   }: {
     initialMessage?: string;
@@ -136,7 +135,7 @@ export const ChatDetail = memo(
     fetchMoreMessages: () => void;
     onLinkData: (linkPreview: LinkPreview) => void;
     onDismissLinkPreview: () => void;
-    onAudioRecord: (audioPath: string) => void;
+
     onAssetsAdded: (assets: ImageSource[]) => void;
   }) => {
     const { isDarkMode } = useDarkMode();
@@ -273,9 +272,19 @@ export const ChatDetail = memo(
     const onStopRecording = useCallback(() => {
       requestAnimationFrame(async () => {
         const audioPath = await stop();
-        onAudioRecord(audioPath);
+        const audio: ImageSource = {
+          uri: audioPath,
+          type: 'audio/mp3',
+          filename: 'recording',
+          fileSize: 0,
+          height: 0,
+          width: 0,
+          date: Date.parse(new Date().toUTCString()),
+          id: 'audio',
+        };
+        onAssetsAdded([audio]);
       });
-    }, [onAudioRecord, stop]);
+    }, [onAssetsAdded, stop]);
 
     const handleRecordButtonAction = useCallback(() => {
       requestAnimationFrame(async () => {
