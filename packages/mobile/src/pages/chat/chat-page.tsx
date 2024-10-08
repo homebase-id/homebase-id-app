@@ -71,6 +71,7 @@ export type SelectedMessageState = {
   showChatReactionPopup: boolean;
 };
 
+const RENDERED_PAGE_SIZE = 50;
 export type ChatProp = NativeStackScreenProps<ChatStackParamList, 'ChatScreen'>;
 const ChatPage = memo(({ route, navigation }: ChatProp) => {
   const insets = useSafeAreaInsets();
@@ -83,8 +84,13 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
   const initialString = route.params.initialText;
 
   // Messages
+  const [loadedPages, setLoadedPages] = useState(1);
   const {
-    all: { data: chatMessages, hasNextPage: hasMoreMessages, fetchNextPage: fetchMoreMessages },
+    all: {
+      data: chatMessages,
+      hasNextPage: hasMoreMessagesOnServer,
+      fetchNextPage: fetchMoreMessagesFromServer,
+    },
   } = useChatMessages({
     conversationId: route.params.convoId,
   });
@@ -146,6 +152,31 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
           };
         }) || [],
     [chatMessages, identity]
+  );
+
+  const hasMoreMessages = useMemo(() => {
+    if (messages.length > loadedPages * RENDERED_PAGE_SIZE) {
+      return true;
+    }
+
+    return hasMoreMessagesOnServer;
+  }, [hasMoreMessagesOnServer, loadedPages, messages.length]);
+
+  const fetchMoreMessages = useCallback(() => {
+    if (messages.length > loadedPages * RENDERED_PAGE_SIZE) {
+      setLoadedPages((prev) => prev + 1);
+      return;
+    }
+
+    if (hasMoreMessagesOnServer) {
+      fetchMoreMessagesFromServer();
+      setLoadedPages((prev) => prev + 1);
+    }
+  }, [fetchMoreMessagesFromServer, hasMoreMessagesOnServer, loadedPages, messages.length]);
+
+  const slicedMessages = useMemo(
+    () => messages.slice(0, loadedPages * RENDERED_PAGE_SIZE),
+    [loadedPages, messages]
   );
 
   // Conversation & Contact
@@ -651,7 +682,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
                 <ChatDetail
                   initialMessage={initialString}
                   isGroup={!!isGroupChat}
-                  messages={messages}
+                  messages={slicedMessages}
                   doSend={doSend}
                   doSelectMessage={doSelectMessage}
                   doOpenMessageInfo={doOpenMessageInfo}
