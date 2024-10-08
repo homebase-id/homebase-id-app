@@ -525,7 +525,15 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
         onPress: () => void;
       }[],
 
-    [clearChat, conversation, deleteChat, navigation, route.params.convoId]
+    [
+      clearChat,
+      conversation,
+      deleteChat,
+      filteredRecipients,
+      host,
+      navigation,
+      route.params.convoId,
+    ]
   );
 
   if (!conversation) {
