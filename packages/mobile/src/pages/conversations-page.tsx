@@ -114,6 +114,7 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
     queries.forEach(([key]) => {
       if (Object.values(key) && Object.values(key) !== null) {
         queryClient.setQueryData(key, (data: InfiniteData<unknown, unknown>) => {
+          if (data?.pages?.length === 0) return data;
           return {
             pages: data?.pages?.slice(0, 1) ?? [],
             pageParams: data?.pageParams?.slice(0, 1) || [undefined],
