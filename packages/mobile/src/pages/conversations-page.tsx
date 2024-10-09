@@ -200,7 +200,7 @@ const RemoveNotifications = memo(() => {
   return null;
 });
 
-const SearchConversationResults = memo(
+export const SearchConversationResults = memo(
   ({
     query,
     conversations,
