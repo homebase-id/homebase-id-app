@@ -181,7 +181,7 @@ const TabStack = memo(() => {
     'Posts',
     // ChatStack
     'Conversation',
-    'NewChat',
+    'New',
     'NewGroup',
     // ProfileStack
     'Overview',
