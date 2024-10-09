@@ -54,9 +54,12 @@ public class RNShareIntent extends ReactContextBaseJavaModule implements Activit
             final WritableMap intentData = Arguments.createMap();
             intentData.putString(MIME_TYPE_KEY, type);
             if ("text/plain".equals(type)) {
-                intentData.putString(DATA_KEY, intent.getStringExtra(Intent.EXTRA_TEXT));
-                data.pushMap(intentData);
-                return data;
+                final var textData = intent.getStringExtra(Intent.EXTRA_TEXT);
+                if(textData != null) {
+                    intentData.putString(DATA_KEY, textData);
+                    data.pushMap(intentData);
+                    return data;
+                }
             }
 
             Uri fileUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
@@ -185,7 +188,7 @@ public class RNShareIntent extends ReactContextBaseJavaModule implements Activit
         dispatchEvent(shared);
 
         // Update intent in case the user calls `getSharedText` again
-        currentActivity.setIntent(intent);
+//        currentActivity.setIntent(intent);
     }
 
 }

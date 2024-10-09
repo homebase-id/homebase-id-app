@@ -13,7 +13,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { Asset, launchImageLibrary } from 'react-native-image-picker';
+import { launchImageLibrary } from 'react-native-image-picker';
 import { Pdf, Play, Plus, SendChat, SubtleCheck, Trash } from '../ui/Icons/icons';
 import { memo, useCallback, useState } from 'react';
 import { Colors } from '../../app/Colors';
@@ -26,6 +26,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@react-navigation/native';
 import Video from 'react-native-video';
 import Animated, { SlideInDown, SlideOutDown } from 'react-native-reanimated';
+import { ChatStackParamList } from '../../app/ChatStack';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { ImageSource } from '../../provider/image/RNImageProvider';
+import { useChatMessage } from '../../hooks/chat/useChatMessage';
+import { getNewId } from '@homebase-id/js-lib/helpers';
+import Toast from 'react-native-toast-message';
+import { AuthorName } from '../ui/Name';
+import { assetsToImageSource } from '../../utils/utils';
 
 const FilePreview = ({
   asset,
@@ -35,7 +43,7 @@ const FilePreview = ({
   children,
   preview = false,
 }: {
-  asset: Asset;
+  asset: ImageSource;
   style?: StyleProp<ViewStyle>;
   imageStyle?: ImageStyle;
   size?: { width: DimensionValue; height: DimensionValue };
@@ -57,7 +65,7 @@ const FilePreview = ({
           ]}
         >
           <Video
-            source={{ uri: asset.uri || asset.originalPath }}
+            source={{ uri: asset.uri || asset.filepath || undefined }}
             style={[
               size,
               {
@@ -96,7 +104,10 @@ const FilePreview = ({
             },
           ]}
         >
-          <Image source={{ uri: asset.uri || asset.originalPath }} style={[size, imageStyle]} />
+          <Image
+            source={{ uri: asset.uri || asset.filepath || undefined }}
+            style={[size, imageStyle]}
+          />
           <View
             style={[
               {
@@ -124,45 +135,72 @@ const FilePreview = ({
         </View>
       ) : (
         <View style={[style]}>
-          <Image source={{ uri: asset.uri || asset.originalPath }} style={[size, imageStyle]} />
+          <Image
+            source={{ uri: asset.uri || asset.filepath || undefined }}
+            style={[size, imageStyle]}
+          />
           {children}
         </View>
       )}
     </>
   );
 };
+export type ChatFileOverviewProp = NativeStackScreenProps<ChatStackParamList, 'ChatFileOverview'>;
 
-// TODO: Perhaps convert this to a route
 export const ChatFileOverview = memo(
   ({
-    title,
-    assets,
-    setAssets,
-    doSend,
-  }: {
-    title?: string;
-    assets: Asset[];
-    setAssets: React.Dispatch<React.SetStateAction<Asset[]>>;
-    doSend: (message: { text: string }[]) => void;
-  }) => {
+    navigation,
+    route: {
+      params: { initialAssets, recipients, title },
+    },
+  }: ChatFileOverviewProp) => {
     const [messageInput, setIsMessageInput] = useState(false);
     const [message, setMessage] = useState('');
     const { isDarkMode } = useDarkMode();
+    const [assets, setAssets] = useState(initialAssets);
     const [currentIndex, setCurrentIndex] = useState(0);
     const currentAsset = assets[currentIndex];
     const { bottom: bottomInsets } = useSafeAreaInsets();
     const { colors } = useTheme();
+    const { mutate: sendMessage } = useChatMessage().send;
+
+    const onSend = useCallback(() => {
+      recipients.forEach((recipient) => {
+        sendMessage({
+          conversation: recipient,
+          message: message,
+          files: assets,
+          chatId: getNewId(),
+          userDate: new Date().getTime(),
+        });
+      });
+
+      if (recipients.length > 1) {
+        navigation.pop();
+        Toast.show({
+          type: 'info',
+          text1: 'Sending Messages',
+          position: 'bottom',
+        });
+        return;
+      } else {
+        navigation.navigate('ChatScreen', {
+          convoId: recipients[0].fileMetadata.appData.uniqueId as string,
+        });
+        return;
+      }
+    }, [assets, message, navigation, recipients, sendMessage]);
 
     const headerLeft = useCallback(
       (props: HeaderBackButtonProps) => {
         return BackButton({
-          onPress: () => setAssets([]),
+          onPress: () => navigation.goBack(),
           prop: props,
           showArrow: true,
           label: ' ',
         });
       },
-      [setAssets]
+      [navigation]
     );
 
     const doAppendAssets = useCallback(async () => {
@@ -174,8 +212,9 @@ export const ChatFileOverview = memo(
       });
       if (medias.didCancel) return;
 
-      // Keep assets without a type out of it.. We're never sure what it is...
-      setAssets((assets) => [...assets, ...(medias.assets?.filter((asset) => asset.type) ?? [])]);
+      const newAssets: ImageSource[] = medias.assets ? assetsToImageSource(medias.assets) : [];
+
+      setAssets((assets) => [...assets, ...newAssets]);
     }, [setAssets]);
 
     return (
@@ -192,7 +231,7 @@ export const ChatFileOverview = memo(
             backgroundColor: 'pink',
           }}
         >
-          <Header title={title || ''} headerLeft={headerLeft} />
+          <Header title={title || 'Share'} headerLeft={headerLeft} />
           <FilePreview
             asset={currentAsset}
             style={{
@@ -339,9 +378,49 @@ export const ChatFileOverview = memo(
             </TouchableOpacity>
 
             <View
-              style={{ flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 7 }}
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'flex-end',
+                paddingHorizontal: 7,
+              }}
             >
-              <TouchableOpacity onPress={() => doSend([{ text: message }])} style={chatStyles.send}>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'flex-start',
+                  alignItems: 'center',
+                  gap: 5,
+                  flex: 1,
+                  marginLeft: 12,
+                  overflow: 'hidden',
+                  flexWrap: 'wrap',
+                }}
+              >
+                {recipients.map((group) => {
+                  const isSingleConversation =
+                    group.fileMetadata.appData.content.recipients.length === 2;
+                  return (
+                    <Text
+                      key={group.fileId}
+                      style={{
+                        fontSize: 14,
+                        fontWeight: '500',
+                        borderRadius: 15,
+                        backgroundColor: isDarkMode ? Colors.slate[800] : Colors.slate[100],
+                        padding: 10,
+                        overflow: 'hidden',
+                      }}
+                    >
+                      {!isSingleConversation ? (
+                        group.fileMetadata.appData.content.title
+                      ) : (
+                        <AuthorName odinId={group.fileMetadata.appData.content.recipients[0]} />
+                      )}
+                    </Text>
+                  );
+                })}
+              </View>
+              <TouchableOpacity onPress={onSend} style={chatStyles.send}>
                 <View
                   style={{
                     transform: [

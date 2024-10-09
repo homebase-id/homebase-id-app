@@ -144,6 +144,39 @@ export const InnerPostTeaserCard = memo(
 
     return (
       <Animated.View style={viewStyle}>
+        <View style={postTeaserCardStyle.header}>
+          <Avatar
+            odinId={authorOdinId}
+            imageSize={postTeaserCardStyle.imageSize}
+            style={postTeaserCardStyle.imageSize}
+          />
+          <View style={{ flex: 1, zIndex: 100 }}>
+            <View style={{ flexDirection: 'row' }}>
+              <Text
+                style={{
+                  fontSize: 17,
+                  fontWeight: '400',
+                  opacity: 0.7,
+                  color: isDarkMode ? Colors.slate[50] : Colors.slate[900],
+                }}
+              >
+                <AuthorName odinId={authorOdinId} />
+              </Text>
+              <ToGroupBlock
+                odinId={odinId}
+                authorOdinId={authorOdinId}
+                channel={channel || undefined}
+              />
+            </View>
+            <PostMeta
+              postFile={postFile}
+              channel={channel || undefined}
+              odinId={odinId}
+              authorOdinId={authorOdinId}
+            />
+          </View>
+          <IconButton icon={<Ellipsis />} onPress={onPostActionPress} />
+        </View>
         <TouchableWithoutFeedback
           onPress={() => {
             navigation.navigate('Post', {
@@ -155,39 +188,6 @@ export const InnerPostTeaserCard = memo(
             });
           }}
         >
-          <View style={postTeaserCardStyle.header}>
-            <Avatar
-              odinId={authorOdinId}
-              imageSize={postTeaserCardStyle.imageSize}
-              style={postTeaserCardStyle.imageSize}
-            />
-            <View style={{ flex: 1 }}>
-              <View style={{ flexDirection: 'row' }}>
-                <Text
-                  style={{
-                    fontSize: 17,
-                    fontWeight: '400',
-                    opacity: 0.7,
-                    color: isDarkMode ? Colors.slate[50] : Colors.slate[900],
-                  }}
-                >
-                  <AuthorName odinId={authorOdinId} />
-                </Text>
-                <ToGroupBlock
-                  odinId={odinId}
-                  authorOdinId={authorOdinId}
-                  channel={channel || undefined}
-                />
-              </View>
-              <PostMeta
-                postFile={postFile}
-                channel={channel || undefined}
-                odinId={odinId}
-                authorOdinId={authorOdinId}
-              />
-            </View>
-            <IconButton icon={<Ellipsis />} onPress={onPostActionPress} />
-          </View>
           <PostBody
             post={post}
             odinId={odinId}

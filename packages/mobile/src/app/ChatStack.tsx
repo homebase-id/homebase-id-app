@@ -35,19 +35,31 @@ import { ShareChatPage } from '../pages/chat/share-chat-page';
 import { ContactPage } from '../pages/contacts/contact-page';
 import { GroupCreationPage } from '../pages/contacts/group-creation-page';
 import { DotYouProfile } from '@homebase-id/js-lib/network';
+import { ChatFileOverview } from '../components/Files/ChatFileOverview';
+import { ImageSource } from '../provider/image/RNImageProvider';
+import { ShareEditorPage } from '../pages/chat/share-editor-page';
 
 export type ChatStackParamList = {
   Conversation: undefined;
   New: undefined;
 
-  ChatScreen: { convoId: string };
+  ChatScreen: { convoId: string; initialText?: string };
   ChatInfo: { convoId: string };
   MessageInfo: {
     message: HomebaseFile<ChatMessage>;
     conversation: HomebaseFile<UnifiedConversation>;
   };
+  ChatFileOverview: {
+    initialAssets: ImageSource[];
+    recipients: HomebaseFile<UnifiedConversation>[];
+    title?: string;
+  };
   EditGroup: { convoId: string };
   ShareChat: SharedItem[];
+  ShareEditor: {
+    text: string;
+    recipients: HomebaseFile<UnifiedConversation>[];
+  };
   PreviewMedia: {
     fileId: string;
     globalTransitId?: string;
@@ -175,7 +187,13 @@ export const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Cha
           },
         }}
       />
-
+      <StackChat.Screen
+        name="ChatFileOverview"
+        component={ChatFileOverview}
+        options={{
+          animation: 'slide_from_bottom',
+        }}
+      />
       <StackChat.Group
         screenOptions={{
           presentation: 'modal',
@@ -193,15 +211,31 @@ export const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Cha
           gestureEnabled: true,
         }}
       />
-      <StackChat.Screen
-        name="ShareChat"
-        component={ShareChatPage}
-        options={{
-          headerShown: true,
-          gestureEnabled: true,
-          title: 'Share',
+      <StackChat.Group
+        screenOptions={{
+          presentation: Platform.OS === 'ios' ? 'modal' : 'card',
         }}
-      />
+      >
+        <StackChat.Screen
+          name="ShareChat"
+          component={ShareChatPage}
+          options={{
+            headerShown: true,
+            gestureEnabled: true,
+            title: 'Share',
+          }}
+        />
+        <StackChat.Screen
+          name="ShareEditor"
+          component={ShareEditorPage}
+          options={{
+            headerShown: true,
+            gestureEnabled: true,
+            title: 'Share',
+          }}
+        />
+      </StackChat.Group>
+
       <StackChat.Screen
         name="PreviewMedia"
         component={PreviewMedia}
