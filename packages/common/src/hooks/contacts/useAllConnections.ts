@@ -21,7 +21,8 @@ export const useAllConnections = (enabled: boolean) => {
       return connections.results;
     };
 
-    return internalGetConnections(undefined, CHUNKSIZE);
+    const allConnections = await internalGetConnections(undefined, CHUNKSIZE);
+    return allConnections.sort((a, b) => a.odinId.localeCompare(b.odinId));
   };
 
   // TODO: needs to get merged with useConnections

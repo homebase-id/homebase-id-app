@@ -587,15 +587,22 @@ export const GroupConversationsComponent = memo(
     setselectedGroup: (group: HomebaseFile<UnifiedConversation>[]) => void;
   }) => {
     const { data: conversations } = useConversations().all;
-    const flatConversations =
-      (conversations?.pages
-        .flatMap((page) => page?.searchResults)
-        .filter(
-          (convo) =>
-            convo &&
-            [0, undefined].includes(convo.fileMetadata.appData.archivalStatus) &&
-            convo.fileMetadata.appData.content.recipients.length > 2
-        ) as HomebaseFile<UnifiedConversation>[]) || [];
+    const flatConversations = useMemo(
+      () =>
+        (
+          conversations?.pages
+            .flatMap((page) => page?.searchResults)
+            .filter(
+              (convo) =>
+                convo &&
+                [0, undefined].includes(convo.fileMetadata.appData.archivalStatus) &&
+                convo.fileMetadata.appData.content.recipients.length > 2
+            ) as HomebaseFile<UnifiedConversation>[]
+        ).sort((a, b) =>
+          a?.fileMetadata.appData.content.title.localeCompare(b?.fileMetadata.appData.content.title)
+        ) || [],
+      [conversations]
+    );
 
     const onSelect = useCallback(
       (group: HomebaseFile<UnifiedConversation>) => {
