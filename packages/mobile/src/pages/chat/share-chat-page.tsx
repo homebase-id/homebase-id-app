@@ -41,7 +41,7 @@ import ConversationTile from '../../components/Chat/Conversation-tile';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ConversationTileWithYourself } from '../../components/Conversation/ConversationTileWithYourself';
 import { ErrorBoundary } from '../../components/ui/ErrorBoundary/ErrorBoundary';
-import { SearchConversationResults } from '../conversations-page';
+import { SearchConversationResults } from '../../components/Chat/SearchConversationsResults';
 
 export type ShareChatProp = NativeStackScreenProps<ChatStackParamList, 'ShareChat'>;
 export const ShareChatPage = (prop: ShareChatProp) => {

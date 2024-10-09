@@ -14,8 +14,8 @@ import { NoContacts } from '../../components/Contact/NoContacts';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { Colors } from '../../app/Colors';
 import { ErrorBoundary } from '../../components/ui/ErrorBoundary/ErrorBoundary';
-import { SearchConversationResults } from '../conversations-page';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { SearchConversationResults } from '../../components/Chat/SearchConversationsResults';
 
 const ListHeaderComponent = memo(() => {
   const navigation = useNavigation<NavigationProp<NewChatStackParamList>>();
@@ -98,7 +98,6 @@ export const ContactPage = memo(({ navigation }: ContactPageProp) => {
   return (
     <SafeAreaView>
       {Platform.OS === 'ios' && <StatusBar barStyle="light-content" />}
-
       <FlatList
         data={connections}
         keyExtractor={(item) => item.odinId}
