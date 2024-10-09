@@ -57,11 +57,11 @@ export const uploadVideo = async (
 
   const { tinyThumb, additionalThumbnails } = uploadMeta?.thumb
     ? await createThumbnails(
-      uploadMeta.thumb.payload,
-      DEFAULT_PAYLOAD_KEY,
-      uploadMeta.thumb?.type,
-      [{ quality: 100, width: 250, height: 250 }]
-    )
+        uploadMeta.thumb.payload,
+        DEFAULT_PAYLOAD_KEY,
+        uploadMeta.thumb?.type,
+        [{ quality: 100, width: 250, height: 250 }]
+      )
     : { tinyThumb: undefined, additionalThumbnails: undefined };
 
   // Updating images in place is a rare thing, but if it happens there is often no versionTag, so we need to fetch it first
@@ -92,7 +92,7 @@ export const uploadVideo = async (
   // Custom blob to avoid reading and writing the file to disk again
   const payloadBlob = new OdinBlob((video.filepath || video.uri) as string, {
     type: uploadMeta?.type,
-  }) as any as Blob;
+  }) as unknown as Blob;
 
   const result = await uploadFile(
     dotYouClient,

@@ -18,7 +18,7 @@ import {
 import { processInbox } from '@homebase-id/js-lib/peer';
 
 import { useNotificationSubscriber } from '../useNotificationSubscriber';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { getConversationQueryOptions, useConversation } from './useConversation';
@@ -138,6 +138,7 @@ const useInboxProcessor = (connected?: boolean) => {
 
 const useChatWebsocket = (isEnabled: boolean) => {
   const dotYouClient = useDotYouClientContext();
+  const identity = dotYouClient.getIdentity();
 
   // Added to ensure we have the conversation query available
   const {
@@ -194,7 +195,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
           return;
         }
 
-        if (updatedChatMessage.fileMetadata.senderOdinId !== '') {
+        if (updatedChatMessage.fileMetadata.senderOdinId !== identity) {
           // Messages from others are processed immediately
           insertNewMessage(queryClient, updatedChatMessage);
         } else {
@@ -263,6 +264,8 @@ const useChatWebsocket = (isEnabled: boolean) => {
         );
       }
     }
+    // Yes, we don't follow the useCallback rules here but we think we know what we're doing
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const chatMessagesQueueTunnel = useRef<HomebaseFile<ChatMessage>[]>([]);
@@ -286,6 +289,8 @@ const useChatWebsocket = (isEnabled: boolean) => {
     }, [] as HomebaseFile<ChatMessage>[]);
 
     await processChatMessagesBatch(dotYouClient, queryClient, filteredMessages);
+    // Yes, we don't follow the useCallback rules here but we think we know what we're doing
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const timeout = useRef<NodeJS.Timeout | null>(null);

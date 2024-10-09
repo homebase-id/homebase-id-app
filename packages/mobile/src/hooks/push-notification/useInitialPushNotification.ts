@@ -9,6 +9,7 @@ import { ChatStackParamList } from '../../app/ChatStack';
 import notifee, { Event, EventType } from '@notifee/react-native';
 import { AppState, Platform } from 'react-native';
 import { FeedStackParamList } from '../../app/FeedStack';
+const handledNotifications: unknown[] = [];
 
 export const useInitialPushNotification = () => {
   const identity = useDotYouClientContext().getIdentity();
@@ -38,6 +39,8 @@ export const useInitialPushNotification = () => {
         initialNotification.data?.data &&
         typeof initialNotification.data.data === 'string'
       ) {
+        if (handledNotifications.includes(initialNotification.data.data)) return;
+        handledNotifications.push(initialNotification.data.data);
         handleInitialNotification(initialNotification.data.data);
       }
     })();

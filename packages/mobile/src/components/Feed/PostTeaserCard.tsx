@@ -1,4 +1,4 @@
-import { Pressable, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
+import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { PostMedia } from './Body/PostMedia';
 import { Text } from '../ui/Text/Text';
 import { AuthorName } from '../ui/Name';
@@ -22,7 +22,7 @@ import { useCheckIdentity } from '../../hooks/checkIdentity/useCheckIdentity';
 import { PostBody } from './Body/PostBody';
 import { IconButton } from '../ui/Buttons';
 import { DoubleTapHeart } from '../ui/DoubleTapHeart';
-import { GestureType } from 'react-native-gesture-handler';
+import { GestureType, TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { FeedStackParamList } from '../../app/FeedStack';
 
@@ -144,7 +144,40 @@ export const InnerPostTeaserCard = memo(
 
     return (
       <Animated.View style={viewStyle}>
-        <Pressable
+        <View style={postTeaserCardStyle.header}>
+          <Avatar
+            odinId={authorOdinId}
+            imageSize={postTeaserCardStyle.imageSize}
+            style={postTeaserCardStyle.imageSize}
+          />
+          <View style={{ flex: 1, zIndex: 100 }}>
+            <View style={{ flexDirection: 'row' }}>
+              <Text
+                style={{
+                  fontSize: 17,
+                  fontWeight: '400',
+                  opacity: 0.7,
+                  color: isDarkMode ? Colors.slate[50] : Colors.slate[900],
+                }}
+              >
+                <AuthorName odinId={authorOdinId} />
+              </Text>
+              <ToGroupBlock
+                odinId={odinId}
+                authorOdinId={authorOdinId}
+                channel={channel || undefined}
+              />
+            </View>
+            <PostMeta
+              postFile={postFile}
+              channel={channel || undefined}
+              odinId={odinId}
+              authorOdinId={authorOdinId}
+            />
+          </View>
+          <IconButton icon={<Ellipsis />} onPress={onPostActionPress} />
+        </View>
+        <TouchableWithoutFeedback
           onPress={() => {
             navigation.navigate('Post', {
               postKey: post.slug || post.id,
@@ -155,39 +188,6 @@ export const InnerPostTeaserCard = memo(
             });
           }}
         >
-          <View style={postTeaserCardStyle.header}>
-            <Avatar
-              odinId={authorOdinId}
-              imageSize={postTeaserCardStyle.imageSize}
-              style={postTeaserCardStyle.imageSize}
-            />
-            <View style={{ flex: 1 }}>
-              <View style={{ flexDirection: 'row' }}>
-                <Text
-                  style={{
-                    fontSize: 17,
-                    fontWeight: '400',
-                    opacity: 0.7,
-                    color: isDarkMode ? Colors.slate[50] : Colors.slate[900],
-                  }}
-                >
-                  <AuthorName odinId={authorOdinId} />
-                </Text>
-                <ToGroupBlock
-                  odinId={odinId}
-                  authorOdinId={authorOdinId}
-                  channel={channel || undefined}
-                />
-              </View>
-              <PostMeta
-                postFile={postFile}
-                channel={channel || undefined}
-                odinId={odinId}
-                authorOdinId={authorOdinId}
-              />
-            </View>
-            <IconButton icon={<Ellipsis />} onPress={onPostActionPress} />
-          </View>
           <PostBody
             post={post}
             odinId={odinId}
@@ -199,15 +199,16 @@ export const InnerPostTeaserCard = memo(
           <DoubleTapHeart doubleTapRef={doubleTapRef} postFile={postFile} odinId={odinId}>
             <PostMedia post={postFile} doubleTapRef={doubleTapRef} />
           </DoubleTapHeart>
-          <PostInteracts
-            postFile={postFile}
-            onCommentPress={onCommentPress}
-            onReactionPress={onReactionPress}
-            onSharePress={onSharePress}
-            onEmojiModalOpen={onEmojiModalOpen}
-            isPublic={isPublic}
-          />
-        </Pressable>
+        </TouchableWithoutFeedback>
+
+        <PostInteracts
+          postFile={postFile}
+          onCommentPress={onCommentPress}
+          onReactionPress={onReactionPress}
+          onSharePress={onSharePress}
+          onEmojiModalOpen={onEmojiModalOpen}
+          isPublic={isPublic}
+        />
       </Animated.View>
     );
   }

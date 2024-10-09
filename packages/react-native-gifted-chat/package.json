@@ -41,7 +41,7 @@
     "eslint-config-prettier": "8.5.0",
     "flow-bin": "0.125.0",
     "husky": "4.2.5",
-    "json": "9.0.6",
+    "json": "11.0.0",
     "metro-react-native-babel-preset": "0.70.1",
     "prettier": "3.3.3",
     "react": "18.2.0",
@@ -52,6 +52,7 @@
     "typescript": "5.5.4"
   },
   "dependencies": {
+    "homebase-id-app-common": "*",
     "@expo/react-native-action-sheet": "4.0.1",
     "@mattermost/react-native-paste-input": "0.8.0",
     "dayjs": "1.8.26",
@@ -64,8 +65,7 @@
     "react-native-reanimated": "^3.12.1",
     "react-native-typing-animation": "0.1.7",
     "react-native-haptic-feedback": "^2.2.0",
-    "uuid": "3.4.0",
-    "homebase-id-app-common": "*"
+    "uuid": "3.4.0"
   },
   "peerDependencies": {
     "react": "*",

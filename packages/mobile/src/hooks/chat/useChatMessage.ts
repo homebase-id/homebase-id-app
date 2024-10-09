@@ -132,6 +132,11 @@ const sendMessage = async ({
     recipients,
     files,
     linkPreviews,
+    recipients.length > 1
+      ? conversationContent.title
+        ? `${identity} sent a message to ${conversationContent.title}`
+        : `${identity} sent a message in a group chat`
+      : undefined,
     undefined,
     onUpdate
   );

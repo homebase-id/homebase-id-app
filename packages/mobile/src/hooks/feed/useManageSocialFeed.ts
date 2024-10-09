@@ -34,7 +34,7 @@ export const useManageSocialFeed = (props?: { odinId: string }) => {
         return data.url;
       })
       .catch(() => {
-        return `https://ravenhosting.cloud/report`;
+        return 'https://ravenhosting.cloud/report';
       });
   };
 

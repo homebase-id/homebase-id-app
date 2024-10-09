@@ -97,7 +97,7 @@ export const CommentComposer = memo(
             },
           },
         });
-      } catch (e) {}
+      } catch {}
       setComment('');
       setAssets([]);
       onReplyCancel?.();

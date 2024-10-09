@@ -70,7 +70,7 @@ export const ExtendPermissionDialog = ({
         ]
       );
     }
-  }, [appName, extendPermissionUrl]);
+  }, [appName, extendPermissionUrl, queryClient]);
 
   return null;
 };

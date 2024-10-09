@@ -261,40 +261,42 @@ export const LikeButton = memo(
   }
 );
 
-export const CommentSummary = ({
-  context,
-  reactionPreview,
-}: {
-  context: ReactionContext;
-  reactionPreview?: CommentsReactionSummary;
-}) => {
-  const { data: totalCount } = useCommentSummary({
-    authorOdinId: context.odinId,
-    channelId: context.channelId,
-    postGlobalTransitId: context.target.globalTransitId,
-    reactionPreview: reactionPreview,
-  }).fetch;
-  const { isDarkMode } = useDarkMode();
+export const CommentSummary = memo(
+  ({
+    context,
+    reactionPreview,
+  }: {
+    context: ReactionContext;
+    reactionPreview?: CommentsReactionSummary;
+  }) => {
+    const { data: totalCount } = useCommentSummary({
+      authorOdinId: context.odinId,
+      channelId: context.channelId,
+      postGlobalTransitId: context.target.globalTransitId,
+      reactionPreview: reactionPreview,
+    }).fetch;
+    const { isDarkMode } = useDarkMode();
 
-  return totalCount ? (
-    <>
-      <Text
-        style={{
-          fontSize: 15,
-          opacity: 0.7,
-          fontWeight: '500',
-          alignSelf: 'center',
-        }}
-      >
-        ·{'  '}
+    return totalCount ? (
+      <>
         <Text
           style={{
-            color: Colors.indigo[isDarkMode ? 200 : 500],
+            fontSize: 15,
+            opacity: 0.7,
+            fontWeight: '500',
+            alignSelf: 'center',
           }}
         >
-          {totalCount} {(totalCount || 0) > 1 ? t('comments') : t('comment')}
+          ·{'  '}
+          <Text
+            style={{
+              color: Colors.indigo[isDarkMode ? 200 : 500],
+            }}
+          >
+            {totalCount} {(totalCount || 0) > 1 ? t('comments') : t('comment')}
+          </Text>
         </Text>
-      </Text>
-    </>
-  ) : null;
-};
+      </>
+    ) : null;
+  }
+);

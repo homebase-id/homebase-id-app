@@ -49,6 +49,7 @@ export const useNotificationSubscriber = (
       if (types?.length >= 1 && !types.includes(notification.notificationType)) return;
       subscriber && subscriber(notification);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [subscriber]
   );
 
