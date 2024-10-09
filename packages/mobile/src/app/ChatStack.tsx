@@ -52,6 +52,7 @@ export type ChatStackParamList = {
   ChatFileOverview: {
     initialAssets: ImageSource[];
     recipients: HomebaseFile<UnifiedConversation>[];
+    title?: string;
   };
   EditGroup: { convoId: string };
   ShareChat: SharedItem[];

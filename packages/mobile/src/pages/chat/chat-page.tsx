@@ -442,9 +442,10 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
       navigation.navigate('ChatFileOverview', {
         initialAssets: assets,
         recipients: [conversation],
+        title: title,
       });
     },
-    [conversation, doSend, navigation]
+    [conversation, doSend, navigation, title]
   );
 
   const onPaste = useCallback(

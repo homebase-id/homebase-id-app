@@ -151,7 +151,7 @@ export const ChatFileOverview = memo(
   ({
     navigation,
     route: {
-      params: { initialAssets, recipients },
+      params: { initialAssets, recipients, title },
     },
   }: ChatFileOverviewProp) => {
     const [messageInput, setIsMessageInput] = useState(false);
@@ -231,7 +231,7 @@ export const ChatFileOverview = memo(
             backgroundColor: 'pink',
           }}
         >
-          <Header title={'Send Message'} headerLeft={headerLeft} />
+          <Header title={title || 'Share'} headerLeft={headerLeft} />
           <FilePreview
             asset={currentAsset}
             style={{
