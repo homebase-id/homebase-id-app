@@ -38,6 +38,11 @@ export const ShareEditorPage = ({ navigation, route }: ShareChatProp) => {
     navigation.dispatch(StackActions.pop(2));
   }, [linkData, navigation, recipients, sendMessage, text]);
 
+  const onChangeText = useCallback((e: string) => {
+    console.log(e);
+    setText(e);
+  }, []);
+
   return (
     <SafeAreaView>
       <View
@@ -53,8 +58,8 @@ export const ShareEditorPage = ({ navigation, route }: ShareChatProp) => {
         <Input
           multiline
           placeholder="Type your message here"
-          value={initialText}
-          onChangeText={(e) => setText(e)}
+          defaultValue={initialText}
+          onChangeText={onChangeText}
           autoFocus
         />
       </View>

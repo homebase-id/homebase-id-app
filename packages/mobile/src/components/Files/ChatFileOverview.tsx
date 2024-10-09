@@ -178,8 +178,8 @@ export const ChatFileOverview = memo(
       if (recipients.length > 1) {
         navigation.pop();
         Toast.show({
-          type: 'success',
-          text1: 'Message sent successfully',
+          type: 'info',
+          text1: 'Sending Messages',
           position: 'bottom',
         });
         return;
