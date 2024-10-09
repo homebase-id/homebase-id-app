@@ -49,9 +49,9 @@ export const ContactPage = memo(({ navigation }: ContactPageProp) => {
   useLayoutEffect(() => {
     navigation.setOptions({
       headerSearchBarOptions: {
-        hideWhenScrolling: true,
+        hideWhenScrolling: false,
         headerIconColor: isDarkMode ? Colors.white : Colors.black,
-        placeholder: 'Search people',
+        placeholder: 'Search contacts',
         hideNavigationBar: true,
         autoCapitalize: 'none',
         onChangeText: (event) => {
