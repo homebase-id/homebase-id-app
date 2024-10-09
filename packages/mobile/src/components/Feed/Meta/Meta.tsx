@@ -2,7 +2,7 @@ import { ApiType, DotYouClient, HomebaseFile, NewHomebaseFile } from '@homebase-
 import { PostContent, ChannelDefinition, EmbeddedPost } from '@homebase-id/js-lib/public';
 import { ChannelDefinitionVm } from '../../../hooks/feed/channels/useChannels';
 import { t, useDotYouClientContext, useIsConnected } from 'homebase-id-app-common';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { Text } from '../../ui/Text/Text';
 import { useDarkMode } from '../../../hooks/useDarkMode';
 import { Colors } from '../../../app/Colors';
@@ -11,6 +11,7 @@ import { Lock, Users } from '../../ui/Icons/icons';
 import { aclEqual } from '@homebase-id/js-lib/helpers';
 import { AclSummary } from '../Composer/AclSummary';
 import { memo, useMemo } from 'react';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
 interface PostMetaWithPostFileProps {
   odinId?: string;

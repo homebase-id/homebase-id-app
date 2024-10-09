@@ -46,7 +46,6 @@ export const RichTextRenderer = memo(
         attributes: Record<string, unknown>
       ) => {
         let children: ReactNode = highlightQuery(text, options?.query);
-        console.log('children', children);
         if (leaf.bold) {
           children = <Text style={styles.bold}>{children}</Text>;
         }
@@ -115,7 +114,6 @@ export const RichTextRenderer = memo(
             );
           }
           case 'ul': {
-            console.log(React.Children.count(children));
             return (
               <View style={styles.unorderedList}>
                 {/* {React.Children.map(children, (child, index) => (

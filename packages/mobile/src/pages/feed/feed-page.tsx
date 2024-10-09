@@ -16,7 +16,7 @@ import { View } from 'react-native';
 import { Text } from '../../components/ui/Text/Text';
 import { useDarkMode } from '../../hooks/useDarkMode';
 
-type FeedProps = NativeStackScreenProps<FeedStackParamList, 'Home'>;
+type FeedProps = NativeStackScreenProps<FeedStackParamList, 'Posts'>;
 
 export const FeedPage = memo((_: FeedProps) => {
   const isFocused = useIsFocused();
