@@ -18,7 +18,7 @@ type LinkPreviewFileProps = {
   fileId: string;
   odinId?: string;
   payloadKey: string;
-  descriptorContent: LinkPreviewDescriptor;
+  descriptorContent?: LinkPreviewDescriptor;
   position: string;
   previewThumbnail?: EmbeddedThumb;
   doubleTapRef?: React.RefObject<GestureType | undefined>;
@@ -44,20 +44,21 @@ export const LinkPreviewFile = memo(
       odinId,
     });
     const { isDarkMode } = useDarkMode();
-    const { hasImage, url } = descriptorContent;
+    const hasImage = descriptorContent?.hasImage || false;
+    const url = descriptorContent?.url;
     const embeddedThumbUrl = useMemo(() => {
       if (!previewThumbnail) return;
       return `data:${previewThumbnail.contentType};base64,${previewThumbnail.content}`;
     }, [previewThumbnail]);
     const tapGesture = useMemo(() => {
       const gesture = Gesture.Tap().onStart(() => {
-        runOnJS(openURL)(url);
+        runOnJS(openURL)(url || data?.[0]?.url || '');
       });
       if (doubleTapRef) {
         gesture.requireExternalGestureToFail(doubleTapRef);
       }
       return gesture;
-    }, [doubleTapRef, url]);
+    }, [data, doubleTapRef, url]);
     if (data === null) {
       return;
     }
