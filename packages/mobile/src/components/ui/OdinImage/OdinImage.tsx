@@ -226,7 +226,9 @@ const InnerImage = memo(
               width={imageSize?.width}
               height={imageSize?.height}
               uri={uri || null}
-              style={{ overflow: 'hidden', ...style }}
+              // Don't set style at the moment, as it's not supported on Android
+              // SEE: https://github.com/software-mansion/react-native-svg/pull/2415
+              style={{ overflow: 'hidden' }}
               onLoad={onLoad}
               onError={
                 imageMeta
