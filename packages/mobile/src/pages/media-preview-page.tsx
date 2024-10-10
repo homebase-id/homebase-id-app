@@ -8,7 +8,7 @@ import { ChatStackParamList } from '../app/ChatStack';
 import { PayloadDescriptor } from '@homebase-id/js-lib/core';
 
 import Share from 'react-native-share';
-import { useSafeAreaFrame } from 'react-native-safe-area-context';
+import { useSafeAreaFrame, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Platform, View } from 'react-native';
 import { Colors } from '../app/Colors';
 import { AuthorName } from '../components/ui/Name';
@@ -19,7 +19,6 @@ import { Download, ShareNode } from '../components/ui/Icons/icons';
 
 import useImage from '../components/ui/OdinImage/hooks/useImage';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
-import { SafeAreaView } from '../components/ui/SafeAreaView/SafeAreaView';
 import Toast from 'react-native-toast-message';
 import Clipboard from '@react-native-clipboard/clipboard';
 import Animated from 'react-native-reanimated';
@@ -51,6 +50,7 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
   const [currIndex, setCurrIndex] = useState(initialIndex);
   const ref = useRef<ICarouselInstance>(null);
   const { height, width } = useSafeAreaFrame();
+  const { bottom: bottomInsets } = useSafeAreaInsets();
   const getImage = useImage().getFromCache;
   const [isVisible, setIsVisible] = useState(true);
   const autoplay =
@@ -314,18 +314,19 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
       />
 
       {isVisible && (
-        <SafeAreaView
+        <View
           style={{
             position: 'absolute',
-            bottom: 0,
+            bottom: bottomInsets,
             padding: 5,
             right: 0,
             left: 0,
+
             zIndex: 20,
             backgroundColor: '',
             borderTopLeftRadius: 10,
             borderTopRightRadius: 10,
-            flexDirection: 'column-reverse',
+            flexDirection: 'column',
           }}
         >
           {payloads.length > 1 && (
@@ -419,7 +420,7 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
               />
             </View>
           )}
-        </SafeAreaView>
+        </View>
       )}
     </BottomSheetModalProvider>
   );
