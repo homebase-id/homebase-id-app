@@ -321,7 +321,6 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
             padding: 5,
             right: 0,
             left: 0,
-            display: 'flex',
             zIndex: 20,
             backgroundColor: '',
             borderTopLeftRadius: 10,
@@ -407,8 +406,6 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
           {!hasVideoPayload && (
             <View
               style={{
-                display: 'flex',
-                flex: 1,
                 flexDirection: 'row',
                 justifyContent: 'space-between',
               }}
