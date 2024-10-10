@@ -321,13 +321,12 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
             padding: 5,
             right: 0,
             left: 0,
-            flex: 1,
             display: 'flex',
             zIndex: 20,
             backgroundColor: '',
             borderTopLeftRadius: 10,
             borderTopRightRadius: 10,
-            flexDirection: 'column',
+            flexDirection: 'column-reverse',
           }}
         >
           {payloads.length > 1 && (
