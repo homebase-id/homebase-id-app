@@ -77,6 +77,7 @@ jest.mock('react-native-fs', () => {
     stat: jest.fn().mockResolvedValue({ size: 100 }),
     readFile: jest.fn().mockReturnValue(Promise.resolve('')),
     copyFile: jest.fn(),
+    unlink: jest.fn(),
     MainBundlePath: jest.fn(),
     CachesDirectoryPath: jest.fn(),
     DocumentDirectoryPath: jest.fn(),
