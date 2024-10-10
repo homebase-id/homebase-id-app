@@ -1,4 +1,4 @@
-# Homebase Feed Mobile
+# Homebase.id app
 
 Homebase feed and chat app powered by Odin.
 
