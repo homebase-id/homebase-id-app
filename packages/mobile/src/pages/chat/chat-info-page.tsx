@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
     width: 81,
     height: 81,
     borderRadius: 50,
-    margin: 16,
+    marginVertical: 16,
   },
   largeAvatarSize: {
     width: 81,

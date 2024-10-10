@@ -214,10 +214,8 @@ const InnerImage = memo(
         {contentType === 'image/svg+xml' ? (
           <Animated.View
             style={[
-              {
-                ...imageSize,
-                ...style,
-              },
+              imageSize,
+              { overflow: 'hidden' },
               // SVGs styling are not supported on Android
               Platform.OS === 'android' ? style : undefined,
             ]}
@@ -226,7 +224,7 @@ const InnerImage = memo(
               width={imageSize?.width}
               height={imageSize?.height}
               uri={uri || null}
-              style={{ overflow: 'hidden', ...style }}
+              style={[{ overflow: 'hidden' }, Platform.OS === 'android' ? undefined : style]}
               onLoad={onLoad}
               onError={
                 imageMeta

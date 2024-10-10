@@ -110,16 +110,18 @@ export const InnerDeliveryIndicator = ({
         {isFailed ? (
           <Times size={'sm'} color={Colors.red[500]} />
         ) : isDelivered ? (
-          <View style={{ position: 'relative', display: 'flex', flexDirection: 'row', gap: -9 }}>
+          <>
             <SubtleCheck
               size={'sm'}
               color={isRead ? (showDefault ? Colors.indigo[400] : Colors.white) : Colors.gray[400]}
+              style={{ position: 'relative', left: -2 }}
             />
             <SubtleCheck
               size={'sm'}
               color={isRead ? (showDefault ? Colors.indigo[400] : Colors.white) : Colors.gray[400]}
+              style={{ position: 'absolute', left: -11 }}
             />
-          </View>
+          </>
         ) : isSent ? (
           <SubtleCheck
             size={'sm'}

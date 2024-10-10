@@ -1,5 +1,5 @@
 diff --git a/node_modules/react-native/Libraries/Network/FormData.js b/node_modules/react-native/Libraries/Network/FormData.js
-index d1ec811..b06706f 100644
+index 91735c6..2425692 100644
 --- a/node_modules/react-native/Libraries/Network/FormData.js
 +++ b/node_modules/react-native/Libraries/Network/FormData.js
 @@ -55,13 +55,13 @@ class FormData {
@@ -18,7 +18,7 @@ index d1ec811..b06706f 100644
    }
 
    getAll(key: string): Array<FormDataValue> {
-@@ -71,26 +71,26 @@ class FormData {
+@@ -71,7 +71,7 @@ class FormData {
    }
 
    getParts(): Array<FormDataPart> {
@@ -26,32 +26,28 @@ index d1ec811..b06706f 100644
 +    return this._parts.map(([name, value, filename]) => {
        const contentDisposition = 'form-data; name="' + name + '"';
 
--      const headers: Headers = {'content-disposition': contentDisposition};
-+      const headers: Headers = { 'content-disposition': contentDisposition };
-
-       // The body part is a "blob", which in React Native just means
-       // an object with a `uri` attribute. Optionally, it can also
+       const headers: Headers = {'content-disposition': contentDisposition};
+@@ -81,16 +81,17 @@ class FormData {
        // have a `name` and `type` attribute to specify filename and
        // content type (cf. web Blob interface.)
        if (typeof value === 'object' && !Array.isArray(value) && value) {
 -        if (typeof value.name === 'string') {
--          headers['content-disposition'] += '; filename="' + value.name + '"';
++        if (typeof filename === 'string' || typeof value.name === 'string') {
+           headers['content-disposition'] += `; filename="${
+-            value.name
+-          }"; filename*=utf-8''${encodeURI(value.name)}`;
 -        }
 -        if (typeof value.type === 'string') {
 -          headers['content-type'] = value.type;
--        }
--        return {...value, headers, fieldName: name};
-+        if (typeof filename === 'string' || typeof value.name === 'string')
-+          headers['content-disposition'] +=
-+            '; filename="' + (filename || value.name) + '"';
++            filename || value.name
++          }"; filename*=utf-8''${encodeURI(filename || value.name)}`;
+         }
 +
 +        headers['content-type'] = value.type && typeof value.type === 'string' ? value.type : 'application/octet-stream';
 +
-+        return { ...value, headers, fieldName: name };
+         return {...value, headers, fieldName: name};
        }
++
        // Convert non-object values to strings as per FormData.append() spec
--      return {string: String(value), headers, fieldName: name};
-+      return { string: String(value), headers, fieldName: name };
+       return {string: String(value), headers, fieldName: name};
      });
-   }
- }

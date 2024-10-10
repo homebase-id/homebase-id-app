@@ -1,6 +1,6 @@
 import { Circle, Path, Svg } from 'react-native-svg';
 import { ReactNode } from 'react';
-import { View } from 'react-native';
+import { StyleProp, View, ViewStyle } from 'react-native';
 import { useDarkMode } from '../../../hooks/useDarkMode';
 
 const sizes = {
@@ -75,7 +75,7 @@ export const ChatIcon = (props: IconProps) => {
   );
 };
 
-export const SubtleCheck = (props: IconProps) => {
+export const SubtleCheck = (props: IconProps & { style?: StyleProp<ViewStyle> }) => {
   const { isDarkMode } = useDarkMode();
   return (
     <Center>
@@ -83,6 +83,7 @@ export const SubtleCheck = (props: IconProps) => {
         {...getSize(props.size || 'md')}
         color={props.color || (isDarkMode ? 'white' : 'black')}
         viewBox="0 0 512 512"
+        style={props.style}
       >
         <Path
           fill="currentColor"

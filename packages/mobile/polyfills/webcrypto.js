@@ -11,6 +11,7 @@
 // TODO: Find a better way to get webcrypto support...
 
 'use strict';
+import { Buffer } from 'buffer';
 import core from 'webcrypto-core';
 import crypto from 'react-native-quick-crypto';
 const process = { version: 'dev' };
