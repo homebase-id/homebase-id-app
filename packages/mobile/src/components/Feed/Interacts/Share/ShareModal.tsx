@@ -25,7 +25,6 @@ import {
   SectionListRenderItemInfo,
   Share,
   StyleSheet,
-  TextInput,
   TouchableHighlight,
   View,
 } from 'react-native';
@@ -129,15 +128,19 @@ const ShareModalListWrapper = memo(
         bottomSheetRef.current?.dismiss();
       }, []);
 
-      useImperativeHandle(ref, () => {
-        return {
-          setShareContext: (context: ShareContext) => {
-            setContext(context);
-            bottomSheetRef.current?.present();
-          },
-          dismiss: onClose,
-        };
-      }, [onClose]);
+      useImperativeHandle(
+        ref,
+        () => {
+          return {
+            setShareContext: (context: ShareContext) => {
+              setContext(context);
+              bottomSheetRef.current?.present();
+            },
+            dismiss: onClose,
+          };
+        },
+        [onClose]
+      );
 
       const renderFooter = useCallback(
         (props: BottomSheetFooterProps) => {
