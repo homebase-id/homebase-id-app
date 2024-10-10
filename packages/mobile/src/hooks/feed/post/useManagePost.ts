@@ -21,6 +21,7 @@ import { getRichTextFromString, t, useDotYouClientContext } from 'homebase-id-ap
 import { ImageSource } from '../../../provider/image/RNImageProvider';
 import { getSynchronousDotYouClient } from '../../chat/getSynchronousDotYouClient';
 import { addError } from '../../errors/useErrors';
+import { OdinBlob } from '../../../../polyfills/OdinBlob';
 
 const savePost = async ({
   postFile,
@@ -97,13 +98,6 @@ export const getSavePostMutationOptions: (queryClient: QueryClient) => MutationO
     onUpdate?: (phase: string, progress: number) => void;
   },
   {
-    newPost: {
-      postFile: NewHomebaseFile<PostContent> | HomebaseFile<PostContent>;
-      channelId: string;
-      mediaFiles?: (ImageSource | MediaFile)[] | undefined;
-      linkPreviews?: LinkPreview[] | undefined;
-      onUpdate?: ((phase: string, progress: number) => void) | undefined;
-    };
     previousFeed:
       | InfiniteData<MultiRequestCursoredResult<HomebaseFile<PostContent>[]>, unknown>
       | undefined;
@@ -158,7 +152,7 @@ export const getSavePostMutationOptions: (queryClient: QueryClient) => MutationO
       queryClient.setQueryData(['social-feeds'], newFeed);
     }
   },
-  onMutate: async (newPost) => {
+  onMutate: async (variables) => {
     await queryClient.cancelQueries({ queryKey: ['social-feeds'] });
 
     // Update section attributes
@@ -166,31 +160,41 @@ export const getSavePostMutationOptions: (queryClient: QueryClient) => MutationO
       | InfiniteData<MultiRequestCursoredResult<HomebaseFile<PostContent>[]>>
       | undefined = queryClient.getQueryData(['social-feeds']);
 
-    if (previousFeed) {
-      const newPostFile: HomebaseFile<PostContent> = {
-        ...newPost.postFile,
+    if (previousFeed && !variables.postFile.fileId) {
+      const newPostFile: NewHomebaseFile<PostContent> = {
+        ...variables.postFile,
         fileMetadata: {
-          ...newPost.postFile.fileMetadata,
+          ...variables.postFile.fileMetadata,
           appData: {
-            ...newPost.postFile.fileMetadata.appData,
+            ...variables.postFile.fileMetadata.appData,
             content: {
-              ...newPost.postFile.fileMetadata.appData.content,
-
-              primaryMediaFile: {
-                fileKey: (newPost.mediaFiles?.[0] as MediaFile)?.key,
-                type: (newPost.mediaFiles?.[0] as MediaFile)?.contentType,
-              },
+              ...variables.postFile.fileMetadata.appData.content,
+              primaryMediaFile: undefined,
             },
           },
+          payloads: (variables?.mediaFiles?.filter((file) => 'type' in file) as ImageSource[])?.map(
+            (file) => ({
+              contentType: file.type || undefined,
+              pendingFile:
+                file.filepath || file.uri
+                  ? (new OdinBlob((file.uri || file.filepath) as string, {
+                      type: file.type || undefined,
+                    }) as unknown as Blob)
+                  : undefined,
+            })
+          ),
         },
-      } as HomebaseFile<PostContent>;
+      };
 
       const newFeed: InfiniteData<MultiRequestCursoredResult<HomebaseFile<PostContent>[]>> = {
         ...previousFeed,
         pages: previousFeed.pages.map((page, index) => {
           return {
             ...page,
-            results: [...(index === 0 ? [newPostFile] : []), ...page.results],
+            results: [
+              ...(index === 0 ? [newPostFile as HomebaseFile<PostContent>] : []),
+              ...page.results,
+            ],
           };
         }),
       };
@@ -198,7 +202,7 @@ export const getSavePostMutationOptions: (queryClient: QueryClient) => MutationO
       queryClient.setQueryData(['social-feeds'], newFeed);
     }
 
-    return { newPost, previousFeed };
+    return { previousFeed };
   },
   onError: (err, _newCircle, context) => {
     addError(queryClient, err, t('Failed to save post'));
