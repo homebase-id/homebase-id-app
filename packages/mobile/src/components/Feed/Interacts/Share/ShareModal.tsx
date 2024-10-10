@@ -3,6 +3,7 @@ import {
   BottomSheetFooterProps,
   BottomSheetModal,
   BottomSheetSectionList,
+  BottomSheetTextInput,
 } from '@gorhom/bottom-sheet';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import React, {
@@ -68,6 +69,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ConversationTileWithYourself } from '../../../Conversation/ConversationTileWithYourself';
 import { IconButton } from '../../../ui/Buttons';
 import { useBottomSheetBackHandler } from '../../../../hooks/useBottomSheetBackHandler';
+import { SearchConversationWithSelectionResults } from '../../../Chat/SearchConversationsResults';
 
 export type ShareModalMethods = {
   setShareContext: (context: ShareContext) => void;
@@ -115,24 +117,30 @@ const ShareModalListWrapper = memo(
       const [selectedConversation, setSelectedConversation] = useState<
         HomebaseFile<UnifiedConversation>[]
       >([]);
+      const [query, setQuery] = useState<string | undefined>(undefined);
       const { handleSheetPositionChange } = useBottomSheetBackHandler(bottomSheetRef);
 
       const onClose = useCallback(() => {
         setContext(undefined);
         setselectedContact([]);
         setSelectedConversation([]);
+        setQuery(undefined);
         bottomSheetRef.current?.dismiss();
       }, []);
 
-      useImperativeHandle(ref, () => {
-        return {
-          setShareContext: (context: ShareContext) => {
-            setContext(context);
-            bottomSheetRef.current?.present();
-          },
-          dismiss: onClose,
-        };
-      }, [onClose]);
+      useImperativeHandle(
+        ref,
+        () => {
+          return {
+            setShareContext: (context: ShareContext) => {
+              setContext(context);
+              bottomSheetRef.current?.present();
+            },
+            dismiss: onClose,
+          };
+        },
+        [onClose]
+      );
 
       const renderFooter = useCallback(
         (props: BottomSheetFooterProps) => {
@@ -153,6 +161,7 @@ const ShareModalListWrapper = memo(
       );
 
       const { isDarkMode } = useDarkMode();
+      const isQueryActive = useMemo(() => !!(query && query.length >= 1), [query]);
 
       return (
         <BottomSheetModal
@@ -163,6 +172,9 @@ const ShareModalListWrapper = memo(
           enableDismissOnClose
           enablePanDownToClose
           snapPoints={['60%', '80%']}
+          keyboardBehavior={Platform.OS === 'ios' ? 'extend' : 'interactive'}
+          keyboardBlurBehavior={'restore'}
+          android_keyboardInputMode="adjustResize"
           footerComponent={renderFooter}
           backgroundStyle={{
             backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
@@ -179,8 +191,32 @@ const ShareModalListWrapper = memo(
           >
             <Text style={styles.headerText}>Share</Text>
           </View>
+          <BottomSheetTextInput
+            placeholder="Search..."
+            style={{
+              backgroundColor: isDarkMode ? `${Colors.indigo[700]}3A` : `${Colors.indigo[300]}3C`,
+              borderRadius: 20,
+              paddingVertical: Platform.OS === 'ios' ? 16 : undefined,
+              marginHorizontal: 12,
+              marginVertical: 12,
+              paddingLeft: 12,
+              fontSize: 16,
+              color: isDarkMode ? Colors.white : Colors.black,
+            }}
+            onChangeText={setQuery}
+          />
           {/* They should be defined once they are loaded, but they can be empty */}
-          {!connections || !allConversations ? null : (
+
+          {isQueryActive ? (
+            <SearchConversationWithSelectionResults
+              query={query}
+              allConversations={allConversations || []}
+              selectedContact={selectedContact}
+              setSelectedContact={setselectedContact}
+              selectedConversation={selectedConversation}
+              setSelectedConversation={setSelectedConversation}
+            />
+          ) : !connections || !allConversations ? null : (
             <ShareModalList
               connections={connections}
               allConversations={allConversations}

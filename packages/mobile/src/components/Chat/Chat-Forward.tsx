@@ -3,6 +3,7 @@ import {
   BottomSheetFooterProps,
   BottomSheetModal,
   BottomSheetSectionList,
+  BottomSheetTextInput,
   TouchableHighlight,
 } from '@gorhom/bottom-sheet';
 import { forwardRef, memo, useCallback, useMemo, useState } from 'react';
@@ -13,6 +14,7 @@ import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/typ
 import { t, useAllConnections } from 'homebase-id-app-common';
 import {
   ActivityIndicator,
+  Platform,
   SectionListData,
   SectionListRenderItemInfo,
   StyleSheet,
@@ -53,6 +55,7 @@ import {
 } from '../../hooks/chat/useConversationsWithRecentMessage';
 import ConversationTile from './Conversation-tile';
 import { ConversationTileWithYourself } from '../Conversation/ConversationTileWithYourself';
+import { SearchConversationWithSelectionResults } from './SearchConversationsResults';
 
 export type ChatForwardModalProps = {
   onClose: () => void;
@@ -78,6 +81,7 @@ export const ChatForwardModal = memo(
     const { bottom } = useSafeAreaInsets();
     const [isLoading, setIsLoading] = useState(false);
     const { add } = useErrors();
+    const [query, setQuery] = useState<string | undefined>(undefined);
 
     const getAudio = useAudio().fetchManually;
     const { getFromCache } = useImage();
@@ -318,7 +322,7 @@ export const ChatForwardModal = memo(
       ),
       [bottom, isDarkMode, isLoading, onForward, selectedContact, selectedConversation]
     );
-
+    const isQueryActive = useMemo(() => !!(query && query.length >= 1), [query]);
     return (
       <BottomSheetModal
         ref={ref}
@@ -328,6 +332,9 @@ export const ChatForwardModal = memo(
         backdropComponent={Backdrop}
         enablePanDownToClose
         index={0}
+        keyboardBehavior={Platform.OS === 'ios' ? 'extend' : 'interactive'}
+        keyboardBlurBehavior={'restore'}
+        android_keyboardInputMode="adjustResize"
         backgroundStyle={{
           backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
         }}
@@ -340,14 +347,39 @@ export const ChatForwardModal = memo(
       >
         <ErrorNotification error={error} />
         <Text style={styles.headerText}>Forward To</Text>
-        <InnerForwardListPage
-          connections={connections}
-          allConversations={allConversations}
-          selectedContact={selectedContact}
-          setSelectedContact={setselectedContact}
-          selectedConversation={selectedConversation}
-          setSelectedConversation={setSelectedConversation}
+        <BottomSheetTextInput
+          placeholder="Search..."
+          style={{
+            backgroundColor: isDarkMode ? `${Colors.indigo[700]}3A` : `${Colors.indigo[300]}3C`,
+            borderRadius: 20,
+            paddingVertical: Platform.OS === 'ios' ? 16 : undefined,
+            marginHorizontal: 12,
+            marginVertical: 12,
+            paddingLeft: 12,
+            fontSize: 16,
+            color: isDarkMode ? Colors.white : Colors.black,
+          }}
+          onChangeText={setQuery}
         />
+        {isQueryActive ? (
+          <SearchConversationWithSelectionResults
+            query={query}
+            allConversations={allConversations || []}
+            selectedContact={selectedContact}
+            setSelectedContact={setselectedContact}
+            selectedConversation={selectedConversation}
+            setSelectedConversation={setSelectedConversation}
+          />
+        ) : (
+          <InnerForwardListPage
+            connections={connections}
+            allConversations={allConversations}
+            selectedContact={selectedContact}
+            setSelectedContact={setselectedContact}
+            selectedConversation={selectedConversation}
+            setSelectedConversation={setSelectedConversation}
+          />
+        )}
       </BottomSheetModal>
     );
   })
@@ -587,15 +619,22 @@ export const GroupConversationsComponent = memo(
     setselectedGroup: (group: HomebaseFile<UnifiedConversation>[]) => void;
   }) => {
     const { data: conversations } = useConversations().all;
-    const flatConversations =
-      (conversations?.pages
-        .flatMap((page) => page?.searchResults)
-        .filter(
-          (convo) =>
-            convo &&
-            [0, undefined].includes(convo.fileMetadata.appData.archivalStatus) &&
-            convo.fileMetadata.appData.content.recipients.length > 2
-        ) as HomebaseFile<UnifiedConversation>[]) || [];
+    const flatConversations = useMemo(
+      () =>
+        (
+          conversations?.pages
+            .flatMap((page) => page?.searchResults)
+            .filter(
+              (convo) =>
+                convo &&
+                [0, undefined].includes(convo.fileMetadata.appData.archivalStatus) &&
+                convo.fileMetadata.appData.content.recipients.length > 2
+            ) as HomebaseFile<UnifiedConversation>[]
+        ).sort((a, b) =>
+          a?.fileMetadata.appData.content.title.localeCompare(b?.fileMetadata.appData.content.title)
+        ) || [],
+      [conversations]
+    );
 
     const onSelect = useCallback(
       (group: HomebaseFile<UnifiedConversation>) => {

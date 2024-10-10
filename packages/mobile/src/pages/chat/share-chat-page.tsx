@@ -12,7 +12,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { t, useAllConnections } from 'homebase-id-app-common';
 import { useConversation } from '../../hooks/chat/useConversation';
-import { memo, useCallback, useMemo, useState } from 'react';
+import { memo, useCallback, useLayoutEffect, useMemo, useState } from 'react';
 import { DotYouProfile } from '@homebase-id/js-lib/network';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import {
@@ -40,6 +40,7 @@ import {
 import ConversationTile from '../../components/Chat/Conversation-tile';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ConversationTileWithYourself } from '../../components/Conversation/ConversationTileWithYourself';
+import { SearchConversationWithSelectionResults } from '../../components/Chat/SearchConversationsResults';
 
 export type ShareChatProp = NativeStackScreenProps<ChatStackParamList, 'ShareChat'>;
 export const ShareChatPage = (prop: ShareChatProp) => {
@@ -49,6 +50,28 @@ export const ShareChatPage = (prop: ShareChatProp) => {
   const [sending, setSending] = useState(false);
   const { data: connections } = useAllConnections(true);
   const { data: allConversations } = useConversationsWithRecentMessage().all;
+  const [query, setQuery] = useState<string | undefined>(undefined);
+
+  useLayoutEffect(() => {
+    prop.navigation.setOptions({
+      headerSearchBarOptions: {
+        hideWhenScrolling: true,
+        headerIconColor: isDarkMode ? Colors.white : Colors.black,
+        placeholder: 'Search people',
+        hideNavigationBar: true,
+        autoCapitalize: 'none',
+        onChangeText: (event) => {
+          setQuery(event.nativeEvent.text);
+        },
+        onCancelButtonPress: () => {
+          setQuery(undefined);
+        },
+        onClose: () => {
+          setQuery(undefined);
+        },
+      },
+    });
+  }, [isDarkMode, prop.navigation]);
 
   const [selectedContact, setSelectedContact] = useState<DotYouProfile[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<
@@ -251,16 +274,29 @@ export const ShareChatPage = (prop: ShareChatProp) => {
     );
   }, [bottom, isDarkMode, onShare, selectedContact, selectedConversation, sending]);
 
+  const isQueryActive = useMemo(() => !!(query && query.length >= 1), [query]);
+
   return (
     <SafeAreaView>
-      <InnerShareChatPage
-        connections={connections}
-        allConversations={allConversations}
-        selectedContact={selectedContact}
-        setSelectedContact={setSelectedContact}
-        selectedConversation={selectedConversation}
-        setSelectedConversation={setSelectedConversation}
-      />
+      {isQueryActive ? (
+        <SearchConversationWithSelectionResults
+          query={query}
+          allConversations={allConversations || []}
+          selectedContact={selectedContact}
+          setSelectedContact={setSelectedContact}
+          selectedConversation={selectedConversation}
+          setSelectedConversation={setSelectedConversation}
+        />
+      ) : (
+        <InnerShareChatPage
+          connections={connections}
+          allConversations={allConversations}
+          selectedContact={selectedContact}
+          setSelectedContact={setSelectedContact}
+          selectedConversation={selectedConversation}
+          setSelectedConversation={setSelectedConversation}
+        />
+      )}
       {selectedContact.length > 0 || selectedConversation.length > 0 ? renderFooter() : undefined}
     </SafeAreaView>
   );
