@@ -214,10 +214,8 @@ const InnerImage = memo(
         {contentType === 'image/svg+xml' ? (
           <Animated.View
             style={[
-              {
-                ...imageSize,
-                ...style,
-              },
+              imageSize,
+              { overflow: 'hidden' },
               // SVGs styling are not supported on Android
               Platform.OS === 'android' ? style : undefined,
             ]}
@@ -226,9 +224,7 @@ const InnerImage = memo(
               width={imageSize?.width}
               height={imageSize?.height}
               uri={uri || null}
-              // Don't set style at the moment, as it's not supported on Android
-              // SEE: https://github.com/software-mansion/react-native-svg/pull/2415
-              style={{ overflow: 'hidden' }}
+              style={[{ overflow: 'hidden' }, Platform.OS === 'android' ? undefined : style]}
               onLoad={onLoad}
               onError={
                 imageMeta
