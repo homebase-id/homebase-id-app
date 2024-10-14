@@ -541,12 +541,14 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
             openURL('https://ravenhosting.cloud/report/content');
           },
         },
-        {
-          label: `${t('Block this user')}`,
-          onPress: () => {
-            openURL(`${host}/owner/connections/${filteredRecipients?.[0]}/block`);
-          },
-        },
+        isGroupChat
+          ? undefined
+          : {
+              label: `${t('Block this user')}`,
+              onPress: () => {
+                openURL(`${host}/owner/connections/${filteredRecipients?.[0]}/block`);
+              },
+            },
       ].filter(Boolean) as {
         label: string;
         onPress: () => void;
@@ -558,6 +560,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
       deleteChat,
       filteredRecipients,
       host,
+      isGroupChat,
       navigation,
       route.params.convoId,
     ]
