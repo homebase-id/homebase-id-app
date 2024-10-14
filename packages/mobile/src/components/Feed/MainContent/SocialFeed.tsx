@@ -122,6 +122,10 @@ const SocialFeedMainContent = memo(() => {
     () => hasMorePosts && fetchNextPage(),
     [hasMorePosts, fetchNextPage]
   );
+  const keyExtractor = useCallback(
+    (item: HomebaseFile<PostContent>) => item.fileMetadata.appData.uniqueId || item.fileId,
+    []
+  );
 
   if (postsLoading) return <FeedLoader />;
 
@@ -134,7 +138,7 @@ const SocialFeedMainContent = memo(() => {
           contentContainerStyle={{ flexGrow: 1 }}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
           showsVerticalScrollIndicator={false}
-          keyExtractor={(item) => item.fileMetadata.appData.uniqueId || item.fileId}
+          keyExtractor={keyExtractor}
           renderItem={renderItem}
           ListEmptyComponent={<EmptyFeed />}
           ListFooterComponent={listFooter}
