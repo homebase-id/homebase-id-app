@@ -118,7 +118,7 @@ export const PostDetailCard = memo(
           postFile={postFile}
           odinId={postFile.fileMetadata.senderOdinId}
         >
-          <PostMedia post={postFile} doubleTapRef={doubleTapRef} />
+          <PostMedia post={postFile} gestureRefs={[doubleTapRef]} />
         </DoubleTapHeart>
         <PostInteracts
           postFile={postFile}
