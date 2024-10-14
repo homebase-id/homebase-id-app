@@ -23,6 +23,8 @@ import {
   PostEmojiPickerModalMethods,
 } from '../Interacts/Reactions/PostEmojiPickerModal';
 
+import { ErrorNotification } from '../../ui/Alert/ErrorNotification';
+
 const PAGE_SIZE = 10;
 
 const SocialFeedMainContent = memo(() => {
@@ -33,6 +35,7 @@ const SocialFeedMainContent = memo(() => {
     fetchNextPage,
     isFetchingNextPage,
     refetch: refreshFeed,
+    error,
   } = useSocialFeed({ pageSize: PAGE_SIZE }).fetchAll;
 
   // Flatten all pages, sorted descending and slice on the max number expected
@@ -127,6 +130,7 @@ const SocialFeedMainContent = memo(() => {
 
   return (
     <>
+      <ErrorNotification error={error} />
       <Host>
         <Animated.FlatList
           ref={scrollRef}

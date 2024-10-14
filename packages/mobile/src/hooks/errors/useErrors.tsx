@@ -5,6 +5,7 @@ import {
   getKnownOdinErrorMessages,
   getOdinErrorDetails,
 } from '@homebase-id/js-lib/core';
+import { addLogs } from '../../provider/log/logger';
 
 export interface Error {
   type: 'warning' | 'critical';
@@ -17,7 +18,8 @@ export const addError = (
   queryClient: QueryClient,
   error: unknown,
   title?: string,
-  message?: string
+  message?: string,
+  onlyLogging?: boolean
 ) => {
   const currentErrors = queryClient.getQueryData<Error[]>(['errors']);
   const knownErrorMessage = getKnownOdinErrorMessages(error);
@@ -35,6 +37,8 @@ export const addError = (
     details,
   };
 
+  addLogs(newError);
+  if (onlyLogging) return;
   const updatedErrors = [...(currentErrors || []), newError];
   queryClient.setQueryData(['errors'], updatedErrors);
 };
@@ -46,12 +50,11 @@ export const useErrors = () => {
     fetch: useQuery({
       queryKey: ['errors'],
       queryFn: () => [] as Error[],
-
       gcTime: Infinity,
       staleTime: Infinity,
     }),
-    add: (error: unknown, title?: string, message?: string) =>
-      addError(queryClient, error, title, message),
+    add: (error: unknown, title?: string, message?: string, onlyLogging?: boolean) =>
+      addError(queryClient, error, title, message, onlyLogging),
     dismiss: (error: Error) => {
       const currentErrors = queryClient.getQueryData<Error[]>(['errors']);
       const updatedErrors = currentErrors?.filter((e) => e !== error);

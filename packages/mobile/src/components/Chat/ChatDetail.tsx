@@ -90,6 +90,7 @@ import { tryJsonParse } from '@homebase-id/js-lib/helpers';
 import { EmptyChatContainer } from './EmptyChatContainer';
 import { getPlainTextFromRichText } from 'homebase-id-app-common';
 import { ImageSource } from '../../provider/image/RNImageProvider';
+import { ErrorNotification } from '../ui/Alert/ErrorNotification';
 
 export type ChatMessageIMessage = IMessage & HomebaseFile<ChatMessage>;
 
@@ -1138,7 +1139,7 @@ const RenderBubble = memo(
 );
 
 const RenderReplyMessageView = memo((props: BubbleProps<ChatMessageIMessage>) => {
-  const { data: replyMessage } = useChatMessage({
+  const { data: replyMessage, error } = useChatMessage({
     conversationId: props.currentMessage?.fileMetadata.appData.groupId,
     messageId: props.currentMessage?.fileMetadata.appData.content.replyId,
   }).get;
@@ -1160,6 +1161,7 @@ const RenderReplyMessageView = memo((props: BubbleProps<ChatMessageIMessage>) =>
           },
         ]}
       >
+        <ErrorNotification error={error} onlyLogging={true} />
         <View style={chatStyles.replyText}>
           {replyMessage ? (
             <>

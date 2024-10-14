@@ -111,8 +111,8 @@ export const useSocialFeed = ({ pageSize = 10 }: { pageSize: number }) => {
       queryFn: ({ pageParam }) => fetchAll({ pageParam }),
       getNextPageParam: (lastPage) =>
         lastPage &&
-        lastPage?.results?.length >= 1 &&
-        (lastPage?.cursorState || lastPage?.ownerCursorState)
+          lastPage?.results?.length >= 1 &&
+          (lastPage?.cursorState || lastPage?.ownerCursorState)
           ? { cursorState: lastPage.cursorState, ownerCursorState: lastPage.ownerCursorState }
           : undefined,
       refetchOnMount: false,
