@@ -407,6 +407,7 @@ export const ChatFileOverview = memo(
                         fontWeight: '500',
                         borderRadius: 15,
                         backgroundColor: isDarkMode ? Colors.slate[800] : Colors.slate[100],
+                        color: isDarkMode ? Colors.white : Colors.black,
                         padding: 10,
                         overflow: 'hidden',
                       }}
