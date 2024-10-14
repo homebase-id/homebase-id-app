@@ -29,7 +29,6 @@ import {
   ViewStyle,
 } from 'react-native';
 import { LightboxProps } from 'react-native-lightbox-v2';
-import uuid from 'uuid';
 import { Actions, ActionsProps } from './Actions';
 import { Avatar, AvatarProps } from './Avatar';
 import Bubble from './Bubble';
@@ -66,6 +65,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
+import { v4 } from 'uuid';
 
 dayjs.extend(localizedFormat);
 
@@ -258,7 +258,7 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
     messages = [],
     initialText = '',
     isTyping,
-    messageIdGenerator = () => uuid.v4(),
+    messageIdGenerator = () => v4(),
     user = {},
     onSend = () => {},
     locale = 'en',
