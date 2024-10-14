@@ -27,7 +27,7 @@ export interface OdinImageProps {
   imageZoomProps?: ImageZoomProps;
   probablyEncrypted?: boolean;
   systemFileType?: SystemFileType;
-  doubleTapRef?: React.RefObject<GestureType | undefined>;
+  gestureRefs?: React.RefObject<GestureType | undefined>[];
 }
 
 const thumblessContentTypes = ['image/svg+xml', 'image/gif'];
@@ -52,7 +52,7 @@ export const OdinImage = memo(
     globalTransitId,
     probablyEncrypted,
     systemFileType,
-    doubleTapRef,
+    gestureRefs,
   }: OdinImageProps) => {
     // Don't set load size if it's a thumbnessLessContentType; As they don't have a thumb
     const loadSize = useMemo(
@@ -135,7 +135,7 @@ export const OdinImage = memo(
           blurRadius={!imageData ? 2 : 0}
           onPress={onClick}
           onLongPress={onLongPress}
-          doubleTapRef={doubleTapRef}
+          gestureRefs={gestureRefs}
         />
       </>
     );
@@ -155,7 +155,7 @@ const InnerImage = memo(
     onLongPress,
     contentType,
     imageMeta,
-    doubleTapRef,
+    gestureRefs,
   }: {
     uri: string | undefined;
     imageSize?: { width: number; height: number };
@@ -166,7 +166,7 @@ const InnerImage = memo(
     onLoad?: () => void;
     onLongPress?: (coords: { x: number; y: number; absoluteX: number; absoluteY: number }) => void;
     onPress?: () => void;
-    doubleTapRef?: React.RefObject<GestureType | undefined>;
+    gestureRefs?: React.RefObject<GestureType | undefined>[];
     imageMeta?: {
       odinId: string | undefined;
       imageFileId: string | undefined;
@@ -184,11 +184,11 @@ const InnerImage = memo(
           runOnJS(onPress)();
         }
       });
-      if (doubleTapRef) {
-        tap.requireExternalGestureToFail(doubleTapRef);
+      if (gestureRefs) {
+        tap.requireExternalGestureToFail(...gestureRefs);
       }
       return tap;
-    }, [doubleTapRef, onPress]);
+    }, [gestureRefs, onPress]);
 
     const longPressGesture = useMemo(
       () =>

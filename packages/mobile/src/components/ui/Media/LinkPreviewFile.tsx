@@ -21,7 +21,7 @@ type LinkPreviewFileProps = {
   descriptorContent?: LinkPreviewDescriptor;
   position: string;
   previewThumbnail?: EmbeddedThumb;
-  doubleTapRef?: React.RefObject<GestureType | undefined>;
+  gestureRefs?: React.RefObject<GestureType | undefined>[];
 };
 
 export const LinkPreviewFile = memo(
@@ -34,7 +34,7 @@ export const LinkPreviewFile = memo(
     odinId,
     previewThumbnail,
     descriptorContent,
-    doubleTapRef,
+    gestureRefs,
   }: LinkPreviewFileProps) => {
     const { data, isLoading } = useLinkMetadata({
       targetDrive,
@@ -54,11 +54,11 @@ export const LinkPreviewFile = memo(
       const gesture = Gesture.Tap().onStart(() => {
         runOnJS(openURL)(url || data?.[0]?.url || '');
       });
-      if (doubleTapRef) {
-        gesture.requireExternalGestureToFail(doubleTapRef);
+      if (gestureRefs) {
+        gesture.requireExternalGestureToFail(...gestureRefs);
       }
       return gesture;
-    }, [data, doubleTapRef, url]);
+    }, [data, gestureRefs, url]);
     if (data === null) {
       return;
     }

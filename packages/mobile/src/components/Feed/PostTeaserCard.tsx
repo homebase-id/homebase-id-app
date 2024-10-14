@@ -4,7 +4,7 @@ import { Text } from '../ui/Text/Text';
 import { AuthorName } from '../ui/Name';
 import { Avatar } from '../ui/Avatars/Avatar';
 import { UnreachableIdentity } from './UnreachableIdentity';
-import Animated from 'react-native-reanimated';
+import Animated, { runOnJS } from 'react-native-reanimated';
 import { memo, useCallback, useMemo, useRef } from 'react';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { HomebaseFile, NewHomebaseFile, SecurityGroupType } from '@homebase-id/js-lib/core';
@@ -22,7 +22,7 @@ import { useCheckIdentity } from '../../hooks/checkIdentity/useCheckIdentity';
 import { PostBody } from './Body/PostBody';
 import { IconButton } from '../ui/Buttons';
 import { DoubleTapHeart } from '../ui/DoubleTapHeart';
-import { GestureType, TouchableWithoutFeedback } from 'react-native-gesture-handler';
+import { Gesture, GestureDetector, GestureType } from 'react-native-gesture-handler';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { FeedStackParamList } from '../../app/FeedStack';
 
@@ -141,6 +141,22 @@ export const InnerPostTeaserCard = memo(
     // to trigger the double tap animation from the parent component and avoid triggering single Tap
     // or any other gesture until this fails
     const doubleTapRef = useRef<GestureType>();
+    const singleTapRef = useRef<GestureType>();
+    const onNaviationPress = useCallback(() => {
+      navigation.navigate('Post', {
+        postKey: post.slug || post.id,
+        channelKey: post.channelId,
+        odinId: postFile.fileMetadata.senderOdinId,
+        postFile,
+        channel: channel || undefined,
+      });
+    }, [navigation, post, postFile, channel]);
+
+    const tapGesture = Gesture.Tap()
+      .onStart(() => {
+        runOnJS(onNaviationPress)();
+      })
+      .withRef(singleTapRef);
 
     return (
       <Animated.View style={viewStyle}>
@@ -177,29 +193,21 @@ export const InnerPostTeaserCard = memo(
           </View>
           <IconButton icon={<Ellipsis />} onPress={onPostActionPress} />
         </View>
-        <TouchableWithoutFeedback
-          onPress={() => {
-            navigation.navigate('Post', {
-              postKey: post.slug || post.id,
-              channelKey: post.channelId,
-              odinId: postFile.fileMetadata.senderOdinId,
-              postFile,
-              channel: channel || undefined,
-            });
-          }}
-        >
-          <PostBody
-            post={post}
-            odinId={odinId}
-            fileId={postFile.fileId}
-            globalTransitId={postFile.fileMetadata.globalTransitId}
-            lastModified={postFile.fileMetadata.updated}
-            payloads={postFile.fileMetadata.payloads}
-          />
-          <DoubleTapHeart doubleTapRef={doubleTapRef} postFile={postFile} odinId={odinId}>
-            <PostMedia post={postFile} doubleTapRef={doubleTapRef} />
-          </DoubleTapHeart>
-        </TouchableWithoutFeedback>
+        <GestureDetector gesture={tapGesture}>
+          <>
+            <PostBody
+              post={post}
+              odinId={odinId}
+              fileId={postFile.fileId}
+              globalTransitId={postFile.fileMetadata.globalTransitId}
+              lastModified={postFile.fileMetadata.updated}
+              payloads={postFile.fileMetadata.payloads}
+            />
+            <DoubleTapHeart doubleTapRef={doubleTapRef} postFile={postFile} odinId={odinId}>
+              <PostMedia post={postFile} gestureRefs={[doubleTapRef, singleTapRef]} />
+            </DoubleTapHeart>
+          </>
+        </GestureDetector>
 
         <PostInteracts
           postFile={postFile}
