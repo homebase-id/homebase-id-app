@@ -4,14 +4,24 @@ import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Text } from '../ui/Text/Text';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { Colors } from '../../app/Colors';
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 import { openURL } from '../../utils/utils';
 import { UnifiedConversation } from '../../provider/chat/ConversationProvider';
+import Animated, {
+  FadeOut,
+  FadeOutLeft,
+  LinearTransition,
+  SlideInDown,
+  SlideOutDown,
+  SlideOutLeft,
+  SlideOutUp,
+} from 'react-native-reanimated';
+import TextButton from '../ui/Text/Text-Button';
 
 export const ChatConnectedState = (conversation: HomebaseFile<UnifiedConversation> | undefined) => {
   const { isDarkMode } = useDarkMode();
   const identity = useDotYouClientContext().getIdentity();
-
+  const [expanded, setExpanded] = useState(false);
   if (!conversation) return null;
   const recipients = conversation.fileMetadata.appData.content.recipients;
   if (!recipients || recipients.length <= 2) return null;
@@ -21,14 +31,31 @@ export const ChatConnectedState = (conversation: HomebaseFile<UnifiedConversatio
       return <RecipientConnectedState recipient={recipient} key={recipient} />;
     });
   return (
-    <View
+    <Animated.View
       style={{
         backgroundColor: isDarkMode ? Colors.slate[800] : Colors.slate[100],
         ...styles.header,
       }}
+      collapsable={false}
+      entering={SlideInDown.withInitialValues({ originY: -100 })}
+      layout={LinearTransition}
     >
-      {recipientConnectedState}
-    </View>
+      {recipientConnectedState.slice(0, expanded ? recipientConnectedState.length : 1)}
+      {recipientConnectedState.length > 1 && (
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'flex-end',
+            marginBottom: 8,
+          }}
+        >
+          <TextButton
+            title={expanded ? 'Collapse' : 'Expand'}
+            onPress={() => setExpanded(!expanded)}
+          />
+        </View>
+      )}
+    </Animated.View>
   );
 };
 
@@ -38,13 +65,15 @@ const RecipientConnectedState = ({ recipient }: { recipient: string }) => {
 
   if (isConnected === null || isConnected || !isFetched) return null;
   return (
-    <View
+    <Animated.View
       style={{
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
         paddingVertical: 3,
       }}
+      entering={SlideInDown.withInitialValues({ originY: 0 })}
+      exiting={FadeOut}
     >
       <Text
         style={{
@@ -81,15 +110,15 @@ const RecipientConnectedState = ({ recipient }: { recipient: string }) => {
           Connect
         </Text>
       </Button>
-    </View>
+    </Animated.View>
   );
 };
 
 const styles = StyleSheet.create({
   header: {
     display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
+    // flexDirection: 'row',
+    // alignItems: 'center',
     paddingHorizontal: 8,
     zIndex: 10,
   },
