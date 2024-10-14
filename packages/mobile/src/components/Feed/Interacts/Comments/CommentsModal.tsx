@@ -1,5 +1,5 @@
 import {
-  BottomSheetFlatList,
+  BottomSheetFlashList,
   BottomSheetFooter,
   BottomSheetFooterProps,
   BottomSheetModal,
@@ -16,7 +16,7 @@ import {
 } from 'react';
 import { useDarkMode } from '../../../../hooks/useDarkMode';
 import { Colors } from '../../../../app/Colors';
-import { ActivityIndicator, ListRenderItemInfo, Platform, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Platform, StyleSheet, View } from 'react-native';
 import { Text } from '../../../ui/Text/Text';
 
 import { ReactionContext } from '@homebase-id/js-lib/public';
@@ -29,6 +29,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HomebaseFile, ReactionFile } from '@homebase-id/js-lib/core';
 import { EmptyComment } from './EmptyComment';
 import { useBottomSheetBackHandler } from '../../../../hooks/useBottomSheetBackHandler';
+import { ListRenderItemInfo } from '@shopify/flash-list';
 
 export interface CommentModalMethods {
   setContext: (context: ReactionContext & Partial<CanReactInfo>) => void;
@@ -118,6 +119,7 @@ export const CommentsModal = memo(
       },
       [context]
     );
+    const keyExtractor = useCallback((item: HomebaseFile<ReactionFile>) => item.fileId, []);
 
     const listFooter = useMemo(() => {
       if (isFetchingNextPage) return <CommentsLoader />;
@@ -137,6 +139,7 @@ export const CommentsModal = memo(
         android_keyboardInputMode="adjustResize"
         onChange={handleSheetPositionChange}
         index={0}
+        enableDynamicSizing={false}
         backgroundStyle={{
           backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
         }}
@@ -157,9 +160,10 @@ export const CommentsModal = memo(
         {isLoading ? (
           <CommentsLoader />
         ) : (
-          <BottomSheetFlatList
+          <BottomSheetFlashList
             data={flattenedComments}
-            contentContainerStyle={{ flexGrow: 1 }}
+            keyExtractor={keyExtractor}
+            estimatedItemSize={92}
             onEndReached={() => {
               if (hasNextPage) {
                 fetchNextPage();

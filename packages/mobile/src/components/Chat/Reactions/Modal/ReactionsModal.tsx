@@ -1,4 +1,4 @@
-import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet';
+import { BottomSheetModal, BottomSheetScrollView, BottomSheetView } from '@gorhom/bottom-sheet';
 import { forwardRef, memo } from 'react';
 import { ActivityIndicator, Text, View } from 'react-native';
 import { Colors } from '../../../../app/Colors';
@@ -32,6 +32,7 @@ export const ReactionsModal = memo(
           onDismiss={onClose}
           enableDismissOnClose={true}
           enablePanDownToClose
+          enableDynamicSizing={false}
           index={0}
           backgroundStyle={{
             backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
@@ -40,7 +41,7 @@ export const ReactionsModal = memo(
             backgroundColor: isDarkMode ? Colors.gray[100] : Colors.gray[500],
           }}
         >
-          <View
+          <BottomSheetView
             style={{
               paddingHorizontal: 10,
               flex: 1,
@@ -76,7 +77,7 @@ export const ReactionsModal = memo(
                 ))}
               </BottomSheetScrollView>
             )}
-          </View>
+          </BottomSheetView>
         </BottomSheetModal>
       );
     }

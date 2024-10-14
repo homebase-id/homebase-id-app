@@ -58,6 +58,7 @@ export const EmojiPickerModal = forwardRef(
         snapPoints={['70%', '90%']}
         backdropComponent={Backdrop}
         onDismiss={onDismiss}
+        enableDynamicSizing={false}
         backgroundStyle={{
           backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
         }}
