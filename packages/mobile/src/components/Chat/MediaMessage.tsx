@@ -93,7 +93,9 @@ const InnerMediaMessage = memo(
       },
       [currentMessage, navigation, payloads]
     );
-    const previewThumbnail = currentMessage.fileMetadata.appData.previewThumbnail;
+    const previewThumbnail =
+      (payloads.length === 1 ? payloads[0]?.previewThumbnail : undefined) ||
+      currentMessage.fileMetadata.appData.previewThumbnail;
 
     const aspectRatio = useMemo(
       () => (previewThumbnail?.pixelWidth || 1) / (previewThumbnail?.pixelHeight || 1),
@@ -113,6 +115,7 @@ const InnerMediaMessage = memo(
     if (payloads.length === 1) {
       return (
         <MediaItem
+          key={`${currentMessage.fileMetadata.appData.content}_${payloads[0].key}`}
           payload={payloads[0]}
           targetDrive={ChatDrive}
           fileId={currentMessage.fileId}
