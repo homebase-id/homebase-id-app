@@ -56,6 +56,7 @@ export const CommentsModal = memo(
       fetchNextPage,
       isFetchingNextPage,
       isLoading,
+      error,
     } = useComments({ context }).fetch;
     const flattenedComments = comments?.pages.flatMap((page) => page.comments).reverse();
 
@@ -120,7 +121,6 @@ export const CommentsModal = memo(
       [context]
     );
     const keyExtractor = useCallback((item: HomebaseFile<ReactionFile>) => item.fileId, []);
-
     const listFooter = useMemo(() => {
       if (isFetchingNextPage) return <CommentsLoader />;
       return <></>;
@@ -157,7 +157,9 @@ export const CommentsModal = memo(
           <Text style={styles.headerText}>Comments</Text>
         </View>
 
-        {isLoading ? (
+        {error ? (
+          <ErrorLoadingComments />
+        ) : isLoading ? (
           <CommentsLoader />
         ) : (
           <BottomSheetFlashList
@@ -189,6 +191,14 @@ export const CommentsLoader = () => {
         size="large"
         color={isDarkMode ? Colors.indigo[400] : Colors.indigo[700]}
       />
+    </View>
+  );
+};
+
+export const ErrorLoadingComments = () => {
+  return (
+    <View style={styles.container}>
+      <Text style={{ textAlign: 'center' }}>Error loading comments</Text>
     </View>
   );
 };
