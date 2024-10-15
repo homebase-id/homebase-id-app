@@ -131,13 +131,13 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
                 : value.fileMetadata.appData.content.message,
             user: {
               _id:
-                value.fileMetadata.senderOdinId ||
                 value.fileMetadata.originalAuthor ||
+                value.fileMetadata.senderOdinId ||
                 identity ||
                 '',
               name:
-                value.fileMetadata.senderOdinId ||
                 value.fileMetadata.originalAuthor ||
+                value.fileMetadata.senderOdinId ||
                 identity ||
                 '',
             },
