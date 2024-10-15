@@ -8,7 +8,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { PostDetailCard } from '../Detail/PostDetailCard';
-import { CommentsLoader } from '../Interacts/Comments/CommentsModal';
+import { CommentsLoader, ErrorLoadingComments } from '../Interacts/Comments/CommentsModal';
 import { ShareContext } from '../Interacts/Share/ShareModal';
 import { useCallback, useMemo, useState } from 'react';
 import { useDotYouClientContext } from 'homebase-id-app-common';
@@ -75,6 +75,7 @@ export const PostDetailMainContent = ({
     fetchNextPage,
     isFetchingNextPage,
     isLoading,
+    error,
   } = useComments({ context: reactionContext }).fetch;
   const flattenedComments = comments?.pages.flatMap((page) => page.comments).reverse();
 
@@ -167,7 +168,7 @@ export const PostDetailMainContent = ({
         keyExtractor={(item) => item.fileId}
         renderItem={renderItem}
         ListFooterComponent={listFooter}
-        ListEmptyComponent={EmptyComment}
+        ListEmptyComponent={error ? ErrorLoadingComments : EmptyComment}
         onEndReached={onEndReached}
         onEndReachedThreshold={0.5}
       />
