@@ -237,7 +237,7 @@ export const MediaItem = memo(
     const isAudio = payload.contentType?.startsWith('audio');
     const isImage = payload.contentType?.startsWith('image');
     const isLink = payload.key === CHAT_LINKS_PAYLOAD_KEY || payload.key === POST_LINKS_PAYLOAD_KEY;
-    if (!payload.contentType || !payload.key || !fileId) {
+    if (!fileId || (isImage && !!(payload as NewPayloadDescriptor).pendingFile)) {
       if (isImage && (payload as NewPayloadDescriptor).pendingFile) {
         return (
           <Image

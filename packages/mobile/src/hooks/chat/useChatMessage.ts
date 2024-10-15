@@ -147,6 +147,16 @@ const sendMessage = async ({
   newChat.fileMetadata.appData.previewThumbnail = uploadResult.previewThumbnail;
   newChat.fileMetadata.appData.content.deliveryStatus =
     uploadResult.chatDeliveryStatus || ChatDeliveryStatus.Sent;
+  newChat.fileMetadata.payloads = files?.map((file, index) => ({
+    key: `chat_mbl${index}`,
+    contentType: file.type || undefined,
+    pendingFile:
+      file.filepath || file.uri
+        ? (new OdinBlob((file.uri || file.filepath) as string, {
+            type: file.type || undefined,
+          }) as unknown as Blob)
+        : undefined,
+  }));
 
   return newChat;
 };
@@ -197,7 +207,8 @@ export const getSendChatMessageMutationOptions: (queryClient: QueryClient) => Us
                 }
               : undefined,
         },
-        payloads: files?.map((file) => ({
+        payloads: files?.map((file, index) => ({
+          key: `chat_mbl${index}`,
           contentType: file.type || undefined,
           pendingFile:
             file.filepath || file.uri
