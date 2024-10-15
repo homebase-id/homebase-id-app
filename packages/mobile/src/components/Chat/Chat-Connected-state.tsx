@@ -1,6 +1,6 @@
 import { HomebaseFile } from '@homebase-id/js-lib/core';
-import { useDotYouClientContext, useIsConnected } from 'homebase-id-app-common';
-import { StyleSheet, TouchableOpacity, View, ViewProps, ViewStyle } from 'react-native';
+import { t, useDotYouClientContext, useIsConnected } from 'homebase-id-app-common';
+import { StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 import { Text } from '../ui/Text/Text';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { Colors } from '../../app/Colors';
@@ -8,12 +8,10 @@ import { ReactNode, useEffect, useState } from 'react';
 import { openURL } from '../../utils/utils';
 import { UnifiedConversation } from '../../provider/chat/ConversationProvider';
 import Animated, {
-  AnimatedProps,
   AnimatedStyle,
   FadeOut,
   LinearTransition,
   SlideInDown,
-  useAnimatedProps,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
@@ -129,6 +127,8 @@ const RecipientConnectedState = ({
           flexDirection: 'row',
           alignItems: 'center',
           paddingVertical: 3,
+          borderBottomWidth: 0.5,
+          borderBottomColor: Colors.slate[500],
         },
         animatedProps,
       ]}
@@ -138,11 +138,16 @@ const RecipientConnectedState = ({
       <Text
         style={{
           flex: 1,
-          textAlign: 'justify',
+          // textAlign: 'justify',
           marginRight: 16,
         }}
+        adjustsFontSizeToFit
+        allowFontScaling
+        dynamicTypeRamp="body"
+        textBreakStrategy="simple"
+        lineBreakMode="clip"
       >
-        You can only chat with connected identities, messages will not be delivered to{' '}
+        {t('You can only chat with connected identities, messages will not be delivered to')}{' '}
         <Text
           onPress={async () => {
             await openURL(`https://${recipient}`);
