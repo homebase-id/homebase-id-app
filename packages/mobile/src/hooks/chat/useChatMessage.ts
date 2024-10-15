@@ -36,7 +36,7 @@ import { getSynchronousDotYouClient } from './getSynchronousDotYouClient';
 import { useErrors, addError } from '../errors/useErrors';
 import { LinkPreview } from '@homebase-id/js-lib/media';
 import { insertNewMessage } from './useChatMessages';
-import { ImageData } from '../../components/ui/OdinImage/hooks/useImage';
+import { ImageData, insertImageIntoCache } from '../../components/ui/OdinImage/hooks/useImage';
 import { copyFileIntoCache } from '../../utils/utils';
 
 const sendMessage = async ({
@@ -175,8 +175,13 @@ const sendMessage = async ({
             file.type
           );
 
-          queryClient.setQueryData<ImageData>(
-            ['image', '', ChatDrive.alias, newChat.fileId?.replaceAll('-', ''), key],
+          insertImageIntoCache(
+            queryClient,
+            undefined,
+            uploadResult.file.fileId,
+            key,
+            ChatDrive,
+            undefined,
             {
               url: cachedImagePath,
               type: (file.type as ImageContentType) || undefined,
