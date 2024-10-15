@@ -1,12 +1,14 @@
 import { UnifiedConversation } from '../../provider/chat/ConversationProvider';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
-import { useDotYouClientContext } from 'homebase-id-app-common';
+import { t, useDotYouClientContext } from 'homebase-id-app-common';
 import { ChatMessage } from '../../provider/chat/ChatProvider';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { getChatMessageInfiniteQueryOptions } from './useChatMessages';
 import { useFocusEffect } from '@react-navigation/native';
 import { useConversations } from './useConversations';
+import { generateClientError } from '../errors/useErrors';
+import { addLogs } from '../../provider/log/logger';
 
 export type ConversationWithRecentMessage = HomebaseFile<UnifiedConversation> & {
   lastMessage: HomebaseFile<ChatMessage> | null;
@@ -67,6 +69,11 @@ export const useConversationsWithRecentMessage = () => {
     all: useQuery({
       queryKey: ['conversations-with-recent-message'],
       queryFn: () => [] as ConversationWithRecentMessage[],
+      throwOnError: (error, _) => {
+        const newError = generateClientError(error, t('Failed to get conversations with recent message'));
+        addLogs(newError);
+        return false;
+      },
       staleTime: Infinity,
       refetchOnMount: false,
       refetchOnReconnect: false,

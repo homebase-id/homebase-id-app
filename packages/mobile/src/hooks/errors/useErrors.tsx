@@ -14,18 +14,11 @@ export interface Error {
   details?: OdinErrorDetails;
 }
 
-export const addError = (
-  queryClient: QueryClient,
-  error: unknown,
-  title?: string,
-  message?: string,
-  onlyLogging?: boolean
-) => {
-  const currentErrors = queryClient.getQueryData<Error[]>(['errors']);
+export const generateClientError = (error: unknown, title?: string, message?: string): Error => {
   const knownErrorMessage = getKnownOdinErrorMessages(error);
   const details = getOdinErrorDetails(error);
 
-  const newError: Error = {
+  return {
     type: knownErrorMessage ? 'warning' : 'critical',
     title,
     message:
@@ -36,9 +29,18 @@ export const addError = (
         : t('Something went wrong, please try again later')),
     details,
   };
+};
+
+export const addError = (
+  queryClient: QueryClient,
+  error: unknown,
+  title?: string,
+  message?: string
+) => {
+  const currentErrors = queryClient.getQueryData<Error[]>(['errors']);
+  const newError = generateClientError(error, title, message);
 
   addLogs(newError);
-  if (onlyLogging) return;
   const updatedErrors = [...(currentErrors || []), newError];
   queryClient.setQueryData(['errors'], updatedErrors);
 };
@@ -53,8 +55,8 @@ export const useErrors = () => {
       gcTime: Infinity,
       staleTime: Infinity,
     }),
-    add: (error: unknown, title?: string, message?: string, onlyLogging?: boolean) =>
-      addError(queryClient, error, title, message, onlyLogging),
+    add: (error: unknown, title?: string, message?: string) =>
+      addError(queryClient, error, title, message),
     dismiss: (error: Error) => {
       const currentErrors = queryClient.getQueryData<Error[]>(['errors']);
       const updatedErrors = currentErrors?.filter((e) => e !== error);

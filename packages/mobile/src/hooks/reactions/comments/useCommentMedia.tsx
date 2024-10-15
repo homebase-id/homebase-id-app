@@ -2,7 +2,9 @@ import { useQuery } from '@tanstack/react-query';
 import { TargetDrive } from '@homebase-id/js-lib/core';
 import { getDecryptedImageUrl } from '@homebase-id/js-lib/media';
 import { getDecryptedImageUrlOverPeer } from '@homebase-id/js-lib/peer';
-import { useDotYouClientContext } from 'homebase-id-app-common';
+import { t, useDotYouClientContext } from 'homebase-id-app-common';
+import { addLogs } from '../../../provider/log/logger';
+import { generateClientError } from '../../errors/useErrors';
 
 export const useCommentMedia = ({
   odinId,
@@ -65,6 +67,11 @@ export const useCommentMedia = ({
       refetchOnMount: false,
       refetchOnWindowFocus: false,
       enabled: !!odinId && !!targetDrive && !!fileId,
+      throwOnError: (error, _) => {
+        const newError = generateClientError(error, t('Failed to get the comment media'));
+        addLogs(newError);
+        return false;
+      },
     }),
   };
 };

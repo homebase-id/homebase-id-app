@@ -23,9 +23,10 @@ import {
 import { formatGuidId, getNewId, getNewXorId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { ChatConversationsReturn } from './useConversations';
 
-import { useDotYouClientContext } from 'homebase-id-app-common';
+import { t, useDotYouClientContext } from 'homebase-id-app-common';
 import { deleteAllChatMessages } from '../../provider/chat/ChatProvider';
 import { ImageSource } from '../../provider/image/RNImageProvider';
+import { useErrors } from '../errors/useErrors';
 
 export const getSingleConversation = async (
   dotYouClient: DotYouClient,
@@ -39,6 +40,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
   const identity = useDotYouClientContext().getIdentity();
+  const addErrors = useErrors().add;
 
   const createConversation = async ({
     recipients,
@@ -199,6 +201,9 @@ export const useConversation = (props?: { conversationId?: string | undefined })
         });
         queryClient.invalidateQueries({ queryKey: ['conversations'] });
       },
+      onError: (error) => {
+        addErrors(error, t('Failed to create the conversation'));
+      },
     }),
     inviteRecipient: useMutation({
       mutationFn: sendJoinCommand,
@@ -207,6 +212,9 @@ export const useConversation = (props?: { conversationId?: string | undefined })
           queryKey: ['conversation', variables.conversation.fileMetadata.appData.uniqueId],
         });
         queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      },
+      onError: (error) => {
+        addErrors(error, t('Failed to invite the recipient'));
       },
     }),
     update: useMutation({
@@ -237,6 +245,9 @@ export const useConversation = (props?: { conversationId?: string | undefined })
           queryClient.setQueryData(['conversations'], newConversations);
         }
       },
+      onError: (error) => {
+        addErrors(error, t('Failed to update the conversation'));
+      },
       onSettled: async (_data, _error, variables) => {
         queryClient.invalidateQueries({ queryKey: ['conversations'] });
         queryClient.invalidateQueries({
@@ -246,7 +257,9 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     }),
     clearChat: useMutation({
       mutationFn: clearChat,
-
+      onError: (error) => {
+        addErrors(error, t('Failed to clear the chat'));
+      },
       onSettled: async (_data, _error, variables) => {
         queryClient.invalidateQueries({
           queryKey: ['conversation', variables.conversation.fileMetadata.appData.uniqueId],
@@ -258,7 +271,9 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     }),
     deleteChat: useMutation({
       mutationFn: deleteChat,
-
+      onError: (error) => {
+        addErrors(error, t('Failed to delete Chats'));
+      },
       onSettled: async (_data, _error, variables) => {
         queryClient.invalidateQueries({
           queryKey: ['conversations'],
@@ -273,7 +288,9 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     }),
     restoreChat: useMutation({
       mutationFn: restoreChat,
-
+      onError: (error) => {
+        addErrors(error, t('Failed to restore Chats'));
+      },
       onSettled: async (_data, _error, variables) => {
         queryClient.invalidateQueries({
           queryKey: ['conversations'],
