@@ -44,7 +44,7 @@ export const PostDetailCard = memo(
 
     if (!postFile) return <ActivityIndicator />;
     const post = postFile.fileMetadata.appData.content;
-    const authorOdinId = post.authorOdinId || odinId;
+    const authorOdinId = postFile.fileMetadata.originalAuthor || odinId;
     const isPublic =
       channel?.serverMetadata?.accessControlList?.requiredSecurityGroup ===
         SecurityGroupType.Anonymous ||
