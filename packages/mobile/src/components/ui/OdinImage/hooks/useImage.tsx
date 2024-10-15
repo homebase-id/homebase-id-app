@@ -148,9 +148,6 @@ const useImage = (props?: {
     }
 
     const fetchImageFromServer = async (): Promise<ImageData | null> => {
-      if (imageFileKey === 'chat_mbl0') {
-        console.log('Fetching from server');
-      }
       if (odinId && odinId !== localHost) {
         if (imageGlobalTransitId) {
           const imageBlob = await getDecryptedMediaDataOverPeerByGlobalTransitId(
