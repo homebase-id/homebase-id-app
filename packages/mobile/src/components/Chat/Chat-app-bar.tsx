@@ -5,7 +5,16 @@ import { Colors } from '../../app/Colors';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { ChatMessageIMessage } from './ChatDetail';
 import { useCallback, useMemo } from 'react';
-import { Copy, EllipsisVertical, Forward, Info, Pencil, Reply, Trash } from '../ui/Icons/icons';
+import {
+  Copy,
+  EllipsisVertical,
+  Forward,
+  Info,
+  Pencil,
+  Reply,
+  Trash,
+  TriangleExclamation,
+} from '../ui/Icons/icons';
 import { Avatar, GroupAvatar, OwnerAvatar } from '../ui/Avatars/Avatar';
 import { EmbeddedThumb } from '@homebase-id/js-lib/core';
 import { ChatDrive } from '../../provider/chat/ConversationProvider';
@@ -19,6 +28,7 @@ export type SelectedMessageProp = {
   onDelete: () => void;
   onForward: () => void;
   onEdit: () => void;
+  onReport: () => void;
 };
 
 export const ChatAppBar = ({
@@ -135,6 +145,9 @@ export const ChatAppBar = ({
       >
         <IconButton icon={<Reply />} onPress={selectedMessageActions?.onReply} />
         <IconButton icon={<Info />} onPress={selectedMessageActions?.onInfo} />
+        {!isMyMessage && (
+          <IconButton icon={<TriangleExclamation />} onPress={selectedMessageActions?.onReport} />
+        )}
         <IconButton icon={<Copy />} onPress={selectedMessageActions?.onCopy} />
         {isMyMessage && <IconButton icon={<Pencil />} onPress={selectedMessageActions?.onEdit} />}
         <IconButton icon={<Trash />} onPress={selectedMessageActions?.onDelete} />
@@ -151,6 +164,7 @@ export const ChatAppBar = ({
     selectedMessageActions?.onForward,
     selectedMessageActions?.onInfo,
     selectedMessageActions?.onReply,
+    selectedMessageActions?.onReport,
   ]);
   return (
     <Pressable onPress={onPress}>
