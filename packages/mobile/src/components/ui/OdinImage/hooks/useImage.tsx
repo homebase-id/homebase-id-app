@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { QueryClient, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { ImageSize, TargetDrive, ImageContentType, SystemFileType } from '@homebase-id/js-lib/core';
 import { exists } from 'react-native-fs';
@@ -10,11 +10,40 @@ import {
   getDecryptedMediaUrlOverPeer,
 } from '../../../../provider/image/RNExternalMediaProvider';
 
-interface ImageData {
+export interface ImageData {
   url: string;
   naturalSize?: ImageSize;
   type?: ImageContentType;
 }
+
+const roundToNearest25 = (value: number) => Math.round(value / 25) * 25;
+const queryKeyBuilder = (
+  odinId: string | undefined,
+  imageFileId: string | undefined,
+  imageFileKey: string | undefined,
+  imageDrive: TargetDrive | undefined,
+  size?: ImageSize,
+  lastModified?: number
+) => {
+  const queryKey = [
+    'image',
+    odinId || '',
+    imageDrive?.alias,
+    imageFileId?.replaceAll('-', ''),
+    imageFileKey,
+  ];
+
+  if (size) {
+    // We round the size to the nearest 25 to avoid having too many different sizes in cache
+    queryKey.push(`${roundToNearest25(size.pixelHeight)}x${roundToNearest25(size?.pixelWidth)}`);
+  }
+
+  if (lastModified) {
+    queryKey.push(lastModified + '');
+  }
+
+  return queryKey;
+};
 
 const useImage = (props?: {
   odinId?: string;
@@ -44,35 +73,6 @@ const useImage = (props?: {
   const queryClient = useQueryClient();
 
   const localHost = dotYouClient.getIdentity(); // This is the identity of the user
-
-  const roundToNearest25 = (value: number) => Math.round(value / 25) * 25;
-  const queryKeyBuilder = (
-    odinId: string | undefined,
-    imageFileId: string | undefined,
-    imageFileKey: string | undefined,
-    imageDrive: TargetDrive | undefined,
-    size?: ImageSize,
-    lastModified?: number
-  ) => {
-    const queryKey = [
-      'image',
-      odinId || '',
-      imageDrive?.alias,
-      imageFileId?.replaceAll('-', ''),
-      imageFileKey,
-    ];
-
-    if (size) {
-      // We round the size to the nearest 25 to avoid having too many different sizes in cache
-      queryKey.push(`${roundToNearest25(size.pixelHeight)}x${roundToNearest25(size?.pixelWidth)}`);
-    }
-
-    if (lastModified) {
-      queryKey.push(lastModified + '');
-    }
-
-    return queryKey;
-  };
 
   const getCachedImages = (
     odinId: string | undefined,
@@ -365,6 +365,19 @@ const useImage = (props?: {
       queryClient.invalidateQueries({ queryKey, exact: true });
     },
   };
+};
+
+export const insertImageIntoCache = (
+  queryClient: QueryClient,
+  odinId: string | undefined,
+  imageFileId: string,
+  imageFileKey: string,
+  imageDrive: TargetDrive,
+  size: ImageSize | undefined,
+  imageData: ImageData
+) => {
+  const queryKey = queryKeyBuilder(odinId, imageFileId, imageFileKey, imageDrive, size);
+  queryClient.setQueryData<ImageData>(queryKey, imageData);
 };
 
 export default useImage;
