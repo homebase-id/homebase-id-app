@@ -9,6 +9,7 @@ import {
 
 import {
   HomebaseFile,
+  ImageContentType,
   NewHomebaseFile,
   NewPayloadDescriptor,
   RichText,
@@ -26,6 +27,7 @@ import {
 } from '../../provider/chat/ChatProvider';
 import { ImageSource } from '../../provider/image/RNImageProvider';
 import {
+  ChatDrive,
   ConversationWithYourselfId,
   UnifiedConversation,
 } from '../../provider/chat/ConversationProvider';
@@ -34,6 +36,8 @@ import { getSynchronousDotYouClient } from './getSynchronousDotYouClient';
 import { useErrors, addError } from '../errors/useErrors';
 import { LinkPreview } from '@homebase-id/js-lib/media';
 import { insertNewMessage } from './useChatMessages';
+import { ImageData } from '../../components/ui/OdinImage/hooks/useImage';
+import { copyFileIntoCache } from '../../utils/utils';
 
 const sendMessage = async ({
   conversation,
@@ -126,11 +130,22 @@ const sendMessage = async ({
     );
   };
 
+  const pendingFiles = await Promise.all(
+    (files || [])?.map(async (file) => {
+      const newFilePath = await copyFileIntoCache(
+        file.uri || (file.filepath as string),
+        file.type || undefined
+      );
+
+      return { ...file, filepath: newFilePath, uri: newFilePath };
+    })
+  );
+
   const uploadResult = await uploadChatMessage(
     dotYouClient,
     newChat,
     recipients,
-    files,
+    pendingFiles,
     linkPreviews,
     recipients.length > 1
       ? conversationContent.title
@@ -147,17 +162,47 @@ const sendMessage = async ({
   newChat.fileMetadata.appData.previewThumbnail = uploadResult.previewThumbnail;
   newChat.fileMetadata.appData.content.deliveryStatus =
     uploadResult.chatDeliveryStatus || ChatDeliveryStatus.Sent;
-  newChat.fileMetadata.payloads = files?.map((file, index) => ({
-    key: `chat_mbl${index}`,
-    contentType: file.type || undefined,
-    pendingFile:
-      file.filepath || file.uri
-        ? (new OdinBlob((file.uri || file.filepath) as string, {
-            type: file.type || undefined,
-          }) as unknown as Blob)
-        : undefined,
-  }));
 
+  // Insert images into useImage cache:
+  const fileMetadataPayloads: NewPayloadDescriptor[] = await Promise.all(
+    (files || [])?.map(async (file, index) => {
+      const key = `chat_mbl${index}`;
+
+      try {
+        if (file.type?.startsWith('image/')) {
+          const cachedImagePath = await copyFileIntoCache(
+            file.uri || file.filepath || '',
+            file.type
+          );
+
+          queryClient.setQueryData<ImageData>(
+            ['image', '', ChatDrive.alias, newChat.fileId?.replaceAll('-', ''), key],
+            {
+              url: cachedImagePath,
+              type: (file.type as ImageContentType) || undefined,
+              naturalSize: {
+                pixelWidth: file.width,
+                pixelHeight: file.height,
+              },
+            }
+          );
+        }
+      } catch {}
+
+      return {
+        key,
+        contentType: file.type || undefined,
+        pendingFile:
+          file.filepath || file.uri
+            ? (new OdinBlob((file.uri || file.filepath) as string, {
+                type: file.type || undefined,
+              }) as unknown as Blob)
+            : undefined,
+      };
+    })
+  );
+
+  newChat.fileMetadata.payloads = fileMetadataPayloads;
   return newChat;
 };
 

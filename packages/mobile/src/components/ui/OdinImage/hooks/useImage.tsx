@@ -10,7 +10,7 @@ import {
   getDecryptedMediaUrlOverPeer,
 } from '../../../../provider/image/RNExternalMediaProvider';
 
-interface ImageData {
+export interface ImageData {
   url: string;
   naturalSize?: ImageSize;
   type?: ImageContentType;
@@ -148,6 +148,9 @@ const useImage = (props?: {
     }
 
     const fetchImageFromServer = async (): Promise<ImageData | null> => {
+      if (imageFileKey === 'chat_mbl0') {
+        console.log('Fetching from server');
+      }
       if (odinId && odinId !== localHost) {
         if (imageGlobalTransitId) {
           const imageBlob = await getDecryptedMediaDataOverPeerByGlobalTransitId(

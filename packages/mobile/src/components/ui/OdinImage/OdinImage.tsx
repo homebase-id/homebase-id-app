@@ -109,6 +109,7 @@ export const OdinImage = memo(
     if (enableZoom) {
       return (
         <ZoomableImage
+          key={`${fileId || globalTransitId}_${fileKey}_${imageData ? '1' : '0'}`}
           uri={uri}
           imageSize={imageSize}
           alt={alt || title}
@@ -123,21 +124,19 @@ export const OdinImage = memo(
     }
 
     return (
-      <>
-        <InnerImage
-          uri={uri}
-          contentType={imageData?.type || previewThumbnail?.contentType}
-          style={style}
-          alt={alt || title}
-          imageMeta={imageMeta}
-          imageSize={imageSize}
-          fit={fit}
-          blurRadius={!imageData ? 2 : 0}
-          onPress={onClick}
-          onLongPress={onLongPress}
-          gestureRefs={gestureRefs}
-        />
-      </>
+      <InnerImage
+        key={`${fileId || globalTransitId}_${fileKey}_${imageData ? '1' : '0'}`}
+        uri={uri}
+        contentType={imageData?.type || previewThumbnail?.contentType}
+        style={style}
+        alt={alt || title}
+        imageMeta={imageMeta}
+        imageSize={imageSize}
+        fit={fit}
+        blurRadius={!imageData ? 2 : 0}
+        onPress={onClick}
+        onLongPress={onLongPress}
+      />
     );
   }
 );
