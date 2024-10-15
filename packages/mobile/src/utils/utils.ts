@@ -5,7 +5,6 @@ import { CachesDirectoryPath, copyFile } from 'react-native-fs';
 import { Asset } from 'react-native-image-picker';
 import InAppBrowser from 'react-native-inappbrowser-reborn';
 import { ImageSource } from '../provider/image/RNImageProvider';
-import { getExtensionForMimeType } from '../../polyfills/OdinBlob';
 
 //https://stackoverflow.com/a/21294619/15538463
 export function millisToMinutesAndSeconds(millis: number | undefined): string {
@@ -189,3 +188,16 @@ export function assetsToImageSource(assets: Asset[]): ImageSource[] {
     };
   });
 }
+
+export const getExtensionForMimeType = (mimeType: string | undefined | null) => {
+  if (!mimeType) return 'bin';
+  return mimeType === 'audio/mpeg'
+    ? 'mp3'
+    : mimeType === 'image/svg+xml'
+      ? 'svg'
+      : mimeType === 'application/vnd.apple.mpegurl'
+        ? 'm3u8'
+        : mimeType === 'video/mp2t'
+          ? 'ts'
+          : mimeType.split('/')[1];
+};

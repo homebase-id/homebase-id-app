@@ -10,8 +10,8 @@ import { Platform } from 'react-native';
 import { CachesDirectoryPath, copyFile, readFile, stat, unlink } from 'react-native-fs';
 import ImageResizer, { ResizeFormat } from '@bam.tech/react-native-image-resizer';
 import { ImageSource } from './RNImageProvider';
-import { getExtensionForMimeType, OdinBlob } from '../../../polyfills/OdinBlob';
-import { isBase64ImageURI } from '../../utils/utils';
+import { OdinBlob } from '../../../polyfills/OdinBlob';
+import { isBase64ImageURI, getExtensionForMimeType } from '../../utils/utils';
 
 export const baseThumbSizes: ThumbnailInstruction[] = [
   { quality: 75, width: 250, height: 250 },
