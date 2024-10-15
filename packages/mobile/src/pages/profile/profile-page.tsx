@@ -4,6 +4,7 @@ import {
   ActivityIndicator,
   Alert,
   ScrollView,
+  Share,
   StyleProp,
   TouchableOpacity,
   ViewStyle,
@@ -18,6 +19,7 @@ import { Container } from '../../components/ui/Container/Container';
 import {
   AddressBook,
   Download,
+  Gear,
   Logout,
   People,
   RecycleBin,
@@ -30,6 +32,8 @@ import { useAuthenticatedPushNotification } from '../../hooks/push-notification/
 
 import { ProfileInfo } from '../../components/Profile/ProfileInfo';
 import { t } from 'homebase-id-app-common';
+import { getLogs } from '../../provider/log/logger';
+import Toast from 'react-native-toast-message';
 
 type SettingsProps = NativeStackScreenProps<ProfileStackParamList, 'Overview'>;
 
@@ -211,6 +215,38 @@ export const ProfilePage = (_props: SettingsProps) => {
               Logout
             </Text>
             {logoutPending ? <ActivityIndicator style={{ marginLeft: 'auto' }} /> : null}
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={async () => {
+              const path = await getLogs();
+              if (!path) {
+                Toast.show({
+                  type: 'info',
+                  text1: 'No Logs recorded',
+                  position: 'bottom',
+                });
+                return;
+              }
+              Share.share({
+                url: path,
+              });
+            }}
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+              paddingVertical: 12,
+              width: '100%',
+            }}
+          >
+            <Gear size={'lg'} />
+            <Text
+              style={{
+                marginLeft: 16,
+              }}
+            >
+              Share Debug Logs
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => {
