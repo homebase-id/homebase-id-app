@@ -3,8 +3,10 @@ import { DrivePermissionType } from '@homebase-id/js-lib/core';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 
 import { useQuery } from '@tanstack/react-query';
-import { useDotYouClientContext } from 'homebase-id-app-common';
+import { t, useDotYouClientContext } from 'homebase-id-app-common';
 import { useSecurityContext } from '../securityContext/useSecurityContext';
+import { addLogs } from '../../provider/log/logger';
+import { generateClientError } from '../errors/useErrors';
 
 interface UseCanReactProps {
   odinId: string;
@@ -90,5 +92,10 @@ export const useCanReact = ({
     refetchOnWindowFocus: false,
     staleTime: Infinity,
     enabled: isEnabled && securityFetched && postContent !== undefined,
+    throwOnError: (error, _) => {
+      const newError = generateClientError(error, t('Failed to get reaction data'));
+      addLogs(newError);
+      return false;
+    },
   });
 };

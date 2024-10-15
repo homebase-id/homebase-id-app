@@ -33,11 +33,12 @@ import {
 } from '../../provider/chat/ConversationProvider';
 import { OdinBlob } from '../../../polyfills/OdinBlob';
 import { getSynchronousDotYouClient } from './getSynchronousDotYouClient';
-import { useErrors, addError } from '../errors/useErrors';
+import { useErrors, addError, generateClientError } from '../errors/useErrors';
 import { LinkPreview } from '@homebase-id/js-lib/media';
 import { insertNewMessage } from './useChatMessages';
-import { ImageData, insertImageIntoCache } from '../../components/ui/OdinImage/hooks/useImage';
+import { insertImageIntoCache } from '../../components/ui/OdinImage/hooks/useImage';
 import { copyFileIntoCache } from '../../utils/utils';
+import { addLogs } from '../../provider/log/logger';
 
 const sendMessage = async ({
   conversation,
@@ -432,6 +433,11 @@ export const useChatMessage = (props?: {
       enabled: !!props?.messageId,
       refetchOnMount: false,
       refetchOnWindowFocus: false,
+      throwOnError: (error, _) => {
+        const newError = generateClientError(error, t('Failed to get the chat message'));
+        addLogs(newError);
+        return false;
+      },
     }),
     send: useMutation({
       ...getSendChatMessageMutationOptions(queryClient),

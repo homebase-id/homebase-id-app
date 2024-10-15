@@ -5,6 +5,7 @@ import {
   getKnownOdinErrorMessages,
   getOdinErrorDetails,
 } from '@homebase-id/js-lib/core';
+import { addLogs } from '../../provider/log/logger';
 
 export interface Error {
   type: 'warning' | 'critical';
@@ -13,17 +14,11 @@ export interface Error {
   details?: OdinErrorDetails;
 }
 
-export const addError = (
-  queryClient: QueryClient,
-  error: unknown,
-  title?: string,
-  message?: string
-) => {
-  const currentErrors = queryClient.getQueryData<Error[]>(['errors']);
+export const generateClientError = (error: unknown, title?: string, message?: string): Error => {
   const knownErrorMessage = getKnownOdinErrorMessages(error);
   const details = getOdinErrorDetails(error);
 
-  const newError: Error = {
+  return {
     type: knownErrorMessage ? 'warning' : 'critical',
     title,
     message:
@@ -34,7 +29,18 @@ export const addError = (
         : t('Something went wrong, please try again later')),
     details,
   };
+};
 
+export const addError = (
+  queryClient: QueryClient,
+  error: unknown,
+  title?: string,
+  message?: string
+) => {
+  const currentErrors = queryClient.getQueryData<Error[]>(['errors']);
+  const newError = generateClientError(error, title, message);
+
+  addLogs(newError);
   const updatedErrors = [...(currentErrors || []), newError];
   queryClient.setQueryData(['errors'], updatedErrors);
 };
@@ -46,7 +52,6 @@ export const useErrors = () => {
     fetch: useQuery({
       queryKey: ['errors'],
       queryFn: () => [] as Error[],
-
       gcTime: Infinity,
       staleTime: Infinity,
     }),

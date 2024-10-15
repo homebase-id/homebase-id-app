@@ -22,7 +22,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { getConversationQueryOptions, useConversation } from './useConversation';
-import { useDotYouClientContext } from 'homebase-id-app-common';
+import { t, useDotYouClientContext } from 'homebase-id-app-common';
 import {
   CHAT_MESSAGE_FILE_TYPE,
   ChatMessage,
@@ -46,6 +46,8 @@ import {
 import { insertNewReaction, removeReaction } from './useChatReaction';
 import { useNotification } from '../notifications/useNotification';
 import { useDriveSubscriber } from '../drive/useDriveSubscriber';
+import { generateClientError } from '../errors/useErrors';
+import { addLogs } from '../../provider/log/logger';
 
 const MINUTE_IN_MS = 60000;
 const isDebug = false; // The babel plugin to remove console logs would remove any if they get to production
@@ -131,6 +133,11 @@ const useInboxProcessor = (connected?: boolean) => {
   return useQuery({
     queryKey: ['process-inbox'],
     queryFn: fetchData,
+    throwOnError: (error, _) => {
+      const newError = generateClientError(error, t('Something went wrong while processing inbox'));
+      addLogs(newError);
+      return false;
+    },
     enabled: connected,
     staleTime: 500, // 500ms
   });
@@ -404,11 +411,11 @@ const processChatMessagesBatch = async (
           uniqueMessagesPerConversation[updatedConversation].map(async (newMessage) =>
             typeof newMessage.fileMetadata.appData.content === 'string'
               ? await dsrToMessage(
-                  dotYouClient,
-                  newMessage as HomebaseFile<string>,
-                  ChatDrive,
-                  true
-                )
+                dotYouClient,
+                newMessage as HomebaseFile<string>,
+                ChatDrive,
+                true
+              )
               : (newMessage as HomebaseFile<ChatMessage>)
           )
         )

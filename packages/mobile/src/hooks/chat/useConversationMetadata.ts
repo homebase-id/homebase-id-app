@@ -6,6 +6,8 @@ import {
   getConversationMetadata,
   uploadConversationMetadata,
 } from '../../provider/chat/ConversationProvider';
+import { generateClientError } from '../errors/useErrors';
+import { addLogs } from '../../provider/log/logger';
 
 export const useConversationMetadata = (props?: { conversationId?: string | undefined }) => {
   const { conversationId } = props || {};
@@ -80,6 +82,8 @@ export const useConversationMetadata = (props?: { conversationId?: string | unde
       },
       onError: (error) => {
         console.error('Error saving conversation metadata', error);
+        const newError = generateClientError(error, 'Failed to save conversation metadata');
+        addLogs(newError);
       },
     }),
   };

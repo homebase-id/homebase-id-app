@@ -1,11 +1,13 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useDotYouClientContext } from 'homebase-id-app-common';
+import { t, useDotYouClientContext } from 'homebase-id-app-common';
 import { getPayloadBytes } from '../../provider/image/RNImageProvider';
 import { TargetDrive } from '@homebase-id/js-lib/core';
 import {
   getDecryptedMediaDataOverPeerByGlobalTransitId,
   getDecryptedMediaUrlOverPeer,
 } from '../../provider/image/RNExternalMediaProvider';
+import { addLogs } from '../../provider/log/logger';
+import { generateClientError } from '../errors/useErrors';
 
 export type VideoData = {
   uri: string;
@@ -98,6 +100,11 @@ export const useVideo = ({
     fetch: useQuery({
       queryKey: ['video', fileId, targetDrive.alias, payloadKey, videoGlobalTransitId, odinId],
       queryFn: () => fetchVideo({ payloadKey }),
+      throwOnError: (error, _) => {
+        const newError = generateClientError(error, t('Failed to get the video file'));
+        addLogs(newError);
+        return false;
+      },
     }),
     fetchManually: async (payloadKey: string) => {
       const queryKey = [
