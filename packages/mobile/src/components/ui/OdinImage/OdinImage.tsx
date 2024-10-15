@@ -136,6 +136,7 @@ export const OdinImage = memo(
         blurRadius={!imageData ? 2 : 0}
         onPress={onClick}
         onLongPress={onLongPress}
+        gestureRefs={gestureRefs}
       />
     );
   }
