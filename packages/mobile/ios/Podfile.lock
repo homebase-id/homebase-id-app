@@ -1510,7 +1510,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-video (6.5.0):
+  - react-native-video (6.6.4):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1523,7 +1523,7 @@ PODS:
     - React-featureflags
     - React-graphics
     - React-ImageManager
-    - react-native-video/Video (= 6.5.0)
+    - react-native-video/Video (= 6.6.4)
     - React-NativeModulesApple
     - React-RCTFabric
     - React-rendererdebug
@@ -1532,7 +1532,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-video/Video (6.5.0):
+  - react-native-video/Video (6.6.4):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1839,7 +1839,7 @@ PODS:
     - ZIPFoundation
   - RNAudioRecorderPlayer (3.6.11):
     - React-Core
-  - RNBootSplash (5.5.3):
+  - RNBootSplash (6.2.0):
     - React-Core
   - RNCAsyncStorage (2.0.0):
     - React-Core
@@ -1860,6 +1860,27 @@ PODS:
     - FirebaseCoreExtension
     - React-Core
     - RNFBApp
+  - RNFlashList (1.7.1):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.01.01.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - RNFS (2.20.0):
     - React-Core
   - RNGestureHandler (2.20.0):
@@ -1887,10 +1908,10 @@ PODS:
     - React-Core
   - RNLocalize (3.2.1):
     - React-Core
-  - RNNotifee (7.9.0):
+  - RNNotifee (9.1.1):
     - React-Core
-    - RNNotifee/NotifeeCore (= 7.9.0)
-  - RNNotifee/NotifeeCore (7.9.0):
+    - RNNotifee/NotifeeCore (= 9.1.1)
+  - RNNotifee/NotifeeCore (9.1.1):
     - React-Core
   - RNPermissions (4.1.5):
     - React-Core
@@ -1915,7 +1936,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNReanimated (3.15.4):
+  - RNReanimated (3.15.5):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1935,10 +1956,10 @@ PODS:
     - ReactCodegen
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
-    - RNReanimated/reanimated (= 3.15.4)
-    - RNReanimated/worklets (= 3.15.4)
+    - RNReanimated/reanimated (= 3.15.5)
+    - RNReanimated/worklets (= 3.15.5)
     - Yoga
-  - RNReanimated/reanimated (3.15.4):
+  - RNReanimated/reanimated (3.15.5):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1959,7 +1980,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNReanimated/worklets (3.15.4):
+  - RNReanimated/worklets (3.15.5):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2063,13 +2084,13 @@ DEPENDENCIES:
   - react-native-http-bridge-refurbished (from `../../../node_modules/react-native-http-bridge-refurbished`)
   - react-native-image-picker (from `../../../node_modules/react-native-image-picker`)
   - "react-native-image-resizer (from `../../../node_modules/@bam.tech/react-native-image-resizer`)"
-  - react-native-mmkv-storage (from `../node_modules/react-native-mmkv-storage`)
+  - react-native-mmkv-storage (from `../../../node_modules/react-native-mmkv-storage`)
   - "react-native-netinfo (from `../../../node_modules/@react-native-community/netinfo`)"
   - "react-native-paste-input (from `../../../node_modules/@mattermost/react-native-paste-input`)"
   - react-native-quick-crypto (from `../../../node_modules/react-native-quick-crypto`)
   - react-native-safe-area-context (from `../../../node_modules/react-native-safe-area-context`)
   - "react-native-slider (from `../../../node_modules/@react-native-community/slider`)"
-  - react-native-video (from `../node_modules/react-native-video`)
+  - react-native-video (from `../../../node_modules/react-native-video`)
   - react-native-webview (from `../../../node_modules/react-native-webview`)
   - React-nativeconfig (from `../../../node_modules/react-native/ReactCommon`)
   - React-NativeModulesApple (from `../../../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios`)
@@ -2107,6 +2128,7 @@ DEPENDENCIES:
   - RNDeviceInfo (from `../../../node_modules/react-native-device-info`)
   - "RNFBApp (from `../../../node_modules/@react-native-firebase/app`)"
   - "RNFBMessaging (from `../../../node_modules/@react-native-firebase/messaging`)"
+  - "RNFlashList (from `../../../node_modules/@shopify/flash-list`)"
   - RNFS (from `../../../node_modules/react-native-fs`)
   - RNGestureHandler (from `../../../node_modules/react-native-gesture-handler`)
   - RNInAppBrowser (from `../../../node_modules/react-native-inappbrowser-reborn`)
@@ -2241,7 +2263,7 @@ EXTERNAL SOURCES:
   react-native-image-resizer:
     :path: "../../../node_modules/@bam.tech/react-native-image-resizer"
   react-native-mmkv-storage:
-    :path: "../node_modules/react-native-mmkv-storage"
+    :path: "../../../node_modules/react-native-mmkv-storage"
   react-native-netinfo:
     :path: "../../../node_modules/@react-native-community/netinfo"
   react-native-paste-input:
@@ -2253,7 +2275,7 @@ EXTERNAL SOURCES:
   react-native-slider:
     :path: "../../../node_modules/@react-native-community/slider"
   react-native-video:
-    :path: "../node_modules/react-native-video"
+    :path: "../../../node_modules/react-native-video"
   react-native-webview:
     :path: "../../../node_modules/react-native-webview"
   React-nativeconfig:
@@ -2328,6 +2350,8 @@ EXTERNAL SOURCES:
     :path: "../../../node_modules/@react-native-firebase/app"
   RNFBMessaging:
     :path: "../../../node_modules/@react-native-firebase/messaging"
+  RNFlashList:
+    :path: "../../../node_modules/@shopify/flash-list"
   RNFS:
     :path: "../../../node_modules/react-native-fs"
   RNGestureHandler:
@@ -2427,7 +2451,7 @@ SPEC CHECKSUMS:
   react-native-quick-crypto: b781b80216e0b21379349daaa43679926881f916
   react-native-safe-area-context: 851c62c48dce80ccaa5637b6aa5991a1bc36eca9
   react-native-slider: 5103fdf2444d1038fb614d6992aae8a65c0d1596
-  react-native-video: 2640734eb5f60984458936289aaf703e3e6cf9fe
+  react-native-video: 23bd57a8f23531418cf1bef5fe022c56451dab4c
   react-native-webview: d9a8bad8f501ca1b282165123ff7b3c16cd970df
   React-nativeconfig: 31072ab0146e643594f6959c7f970a04b6c9ddd0
   React-NativeModulesApple: f49bb0befd8650ac3ff8fc2684072b16c09bf478
@@ -2457,7 +2481,7 @@ SPEC CHECKSUMS:
   ReactCommon: 1007c09a406a451ddbd874e51511aa541d6034f6
   ReactNativeFileAccess: 863c8952c05c0ea5f592ef3101169baaf66777bd
   RNAudioRecorderPlayer: 0208ee1f2e19ec027552bea44b1ae682f187ed54
-  RNBootSplash: e025d4ee98d942ee6c8b495a6fe66339a6b5f6dd
+  RNBootSplash: b44d3d1ca8f1db772ccf5ffc00a226f94eb01988
   RNCAsyncStorage: d35c79ffba52c1013013e16b1fc295aec2feabb6
   RNCCheckbox: a3ca9978cb0846b981d28da4e9914bd437403d77
   RNCClipboard: 5e503962f0719ace8f7fdfe9c60282b526305c85
@@ -2465,14 +2489,15 @@ SPEC CHECKSUMS:
   RNDeviceInfo: 59344c19152c4b2b32283005f9737c5c64b42fba
   RNFBApp: de81f7eb68c1e6107574f2b102b0dee92a9862fa
   RNFBMessaging: bcceb47d52080700672f4a46aa9096d9754a988f
+  RNFlashList: 997257a094906e3e254183ef90fcf7a5a6a2612d
   RNFS: 4ac0f0ea233904cb798630b3c077808c06931688
   RNGestureHandler: b1bde7ef45d1472a8145a143efc097df8a9173a4
   RNInAppBrowser: e36d6935517101ccba0e875bac8ad7b0cb655364
   RNLocalize: 4f22418187ecd5ca693231093ff1d912d1b3c9bc
-  RNNotifee: 935f3ea8c134c88cbf8b13ea0c97c72c09ad2116
+  RNNotifee: 35b5f984d11083b02d7f2990b3408cd99a0aeeac
   RNPermissions: 2ee1472892d0346d1db3f31abf2fbe5d399a4ba8
   RNReactNativeHapticFeedback: 293365e4df1faef21be8b8efe22c7b217c5e695a
-  RNReanimated: 84ffb322594b5c0d6b39a9a93379e994f0b562d3
+  RNReanimated: 2f8142da39e7cab6a62b044b6c242f7a7cc214ac
   RNScreens: de55b9d7de8a017d1588dcb70415492d0b0597c2
   RNShare: 0fad69ae2d71de9d1f7b9a43acf876886a6cb99c
   RNShareMenu: cb9dac548c8bf147d06f0bf07296ad51ea9f5fc3

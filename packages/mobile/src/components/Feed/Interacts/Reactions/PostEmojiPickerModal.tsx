@@ -77,6 +77,7 @@ export const PostEmojiPickerModal = forwardRef(
         onChange={handleSheetPositionChange}
         snapPoints={['70%', '90%']}
         backdropComponent={Backdrop}
+        enableDynamicSizing={false}
         onDismiss={onDismiss}
         backgroundStyle={{
           backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],

@@ -234,7 +234,6 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
             previewThumbnail={item.previewThumbnail || previewThumbnail}
             imageZoomProps={{
               isSingleTapEnabled: true,
-              minPanPointers: 1,
               onSingleTap: () => {
                 setIsVisible(!isVisible);
               },
