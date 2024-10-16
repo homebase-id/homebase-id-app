@@ -5,7 +5,7 @@ import { ChannelDefinitionVm } from '../../../hooks/feed/channels/useChannels';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import { useDarkMode } from '../../../hooks/useDarkMode';
 import { Backdrop } from '../../ui/Modal/Backdrop';
-import { BottomSheetModal, BottomSheetScrollView, BottomSheetView } from '@gorhom/bottom-sheet';
+import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 import { Colors } from '../../../app/Colors';
 import { Platform } from 'react-native';
 import { OwnerActions } from '../Meta/OwnerAction';
