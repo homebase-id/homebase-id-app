@@ -7,7 +7,7 @@ import {
 } from '@homebase-id/js-lib/public';
 import { memo, useCallback, useMemo, useState } from 'react';
 import { GestureResponderEvent, View } from 'react-native';
-import { OpenHeart, Comment, ShareNode } from '../../ui/Icons/icons';
+import { OpenHeart, Comment, Share } from '../../ui/Icons/icons';
 import {
   CanReactInfo,
   useCanReact,
@@ -148,7 +148,7 @@ export const PostInteracts = memo(
           >
             {isPublic && (
               <IconButton
-                icon={<ShareNode />}
+                icon={<Share />}
                 onPress={onSharePressHandler}
                 touchableProps={{
                   disabled: !onSharePress,
