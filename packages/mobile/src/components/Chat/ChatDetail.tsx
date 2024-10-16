@@ -90,7 +90,6 @@ import { tryJsonParse } from '@homebase-id/js-lib/helpers';
 import { EmptyChatContainer } from './EmptyChatContainer';
 import { getPlainTextFromRichText } from 'homebase-id-app-common';
 import { ImageSource } from '../../provider/image/RNImageProvider';
-import { ErrorNotification } from '../ui/Alert/ErrorNotification';
 
 export type ChatMessageIMessage = IMessage & HomebaseFile<ChatMessage>;
 

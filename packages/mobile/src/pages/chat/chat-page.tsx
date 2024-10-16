@@ -64,6 +64,7 @@ import { LinkPreview } from '@homebase-id/js-lib/media';
 import { getImageSize } from '../../utils/utils';
 import { openURL } from '../../utils/utils';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { ReportModal } from '../../components/Chat/Reactions/Modal/ReportModal';
 
 export type SelectedMessageState = {
   messageCordinates: { x: number; y: number };
@@ -131,13 +132,13 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
                 : value.fileMetadata.appData.content.message,
             user: {
               _id:
-                value.fileMetadata.senderOdinId ||
                 value.fileMetadata.originalAuthor ||
+                value.fileMetadata.senderOdinId ||
                 identity ||
                 '',
               name:
-                value.fileMetadata.senderOdinId ||
                 value.fileMetadata.originalAuthor ||
+                value.fileMetadata.senderOdinId ||
                 identity ||
                 '',
             },
@@ -330,6 +331,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
   const emojiPickerSheetModalRef = useRef<BottomSheetModal>(null);
   const reactionModalRef = useRef<BottomSheetModal>(null);
   const forwardModalRef = useRef<BottomSheetModal>(null);
+  const reportModalRef = useRef<BottomSheetModal>(null);
   const retryModelRef = useRef<BottomSheetModal>(null);
 
   const openEmojiModal = useCallback(() => {
@@ -359,6 +361,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
     reactionModalRef.current?.dismiss();
     forwardModalRef.current?.dismiss();
     retryModelRef.current?.dismiss();
+    reportModalRef.current?.dismiss();
     if (selectedMessage !== initalSelectedMessageState) {
       setSelectedMessage(initalSelectedMessageState);
     }
@@ -422,6 +425,10 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
       onEdit: () => {
         setEditDialogVisible(true);
         setSelectedMessage({ ...selectedMessage, showChatReactionPopup: false });
+      },
+      onReport: () => {
+        setSelectedMessage({ ...selectedMessage, showChatReactionPopup: false });
+        reportModalRef.current?.present();
       },
     };
   }, [conversation, doOpenMessageInfo, initalSelectedMessageState, selectedMessage]);
@@ -712,6 +719,11 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
             retryModelRef.current?.dismiss();
             setSelectedRetryMessage(undefined);
           }}
+        />
+        <ReportModal
+          ref={reportModalRef}
+          message={selectedMessage.selectedMessage}
+          onClose={dismissSelectedMessage}
         />
 
         <EditDialogBox
