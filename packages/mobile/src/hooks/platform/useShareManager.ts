@@ -2,6 +2,7 @@ import { NavigationProp, useFocusEffect, useNavigation } from '@react-navigation
 import { useCallback, useEffect } from 'react';
 import { NativeEventEmitter, NativeModules } from 'react-native';
 import { ChatStackParamList } from '../../app/ChatStack';
+import { addLogs } from '../../provider/log/logger';
 
 
 const { ShareMenu } = NativeModules;
@@ -23,12 +24,25 @@ export const useShareManager = () => {
       if (!item) {
         return;
       }
+      addLogs({
+        message: 'useShareManager: handleShare',
+        type: 'warning',
+        title: 'useShareManager',
+        details: {
+          stackTrace: item.toString(),
+        },
+      });
       navigation.navigate('ShareChat', item);
     },
     [navigation]
   );
 
   const handleInitialShare = useCallback(() => {
+    addLogs({
+      message: 'useShareManager: handleInitialShare',
+      type: 'warning',
+      title: 'useShareManager',
+    });
     ShareMenu.getSharedText(handleShare);
   }, [handleShare]);
 
