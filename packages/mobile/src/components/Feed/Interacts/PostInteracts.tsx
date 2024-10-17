@@ -7,7 +7,7 @@ import {
 } from '@homebase-id/js-lib/public';
 import { memo, useCallback, useMemo, useState } from 'react';
 import { GestureResponderEvent, View } from 'react-native';
-import { OpenHeart, Comment, Share } from '../../ui/Icons/icons';
+import { OpenHeart, Comment, Share, SolidHeart } from '../../ui/Icons/icons';
 import {
   CanReactInfo,
   useCanReact,
@@ -241,7 +241,7 @@ export const LikeButton = memo(
       <>
         <ErrorNotification error={postEmojiError || removeEmojiError} />
         <IconButton
-          icon={<OpenHeart />}
+          icon={isLiked ? <SolidHeart color={Colors.red[500]} /> : <OpenHeart />}
           onPress={isLiked ? doUnlike : doLike}
           touchableProps={{
             onLongPress: onLongPress,
