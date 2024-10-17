@@ -2,7 +2,12 @@ import { EmbeddedThumb, TargetDrive } from '@homebase-id/js-lib/core';
 import { memo, useMemo } from 'react';
 import { ActivityIndicator, Dimensions, ImageBackground, View } from 'react-native';
 import { useLinkMetadata } from '../../../hooks/links/useLinkPreview';
-import { calculateScaledDimensions, openURL } from '../../../utils/utils';
+import {
+  calculateScaledDimensions,
+  extractVideoId,
+  isYoutubeURL,
+  openURL,
+} from '../../../utils/utils';
 import { Text } from '../Text/Text';
 import { useDarkMode } from '../../../hooks/useDarkMode';
 import { Colors } from '../../../app/Colors';
@@ -11,6 +16,8 @@ import { getDomainFromUrl } from '@homebase-id/js-lib/helpers';
 import Animated, { runOnJS } from 'react-native-reanimated';
 import { LinkPreviewDescriptor } from '@homebase-id/js-lib/media';
 import { Gesture, GestureDetector, GestureType } from 'react-native-gesture-handler';
+import YoutubePlayer from 'react-native-youtube-iframe';
+import { Portal } from 'react-native-portalize';
 
 type LinkPreviewFileProps = {
   targetDrive: TargetDrive;
@@ -23,6 +30,13 @@ type LinkPreviewFileProps = {
   previewThumbnail?: EmbeddedThumb;
   gestureRefs?: React.RefObject<GestureType | undefined>[];
 };
+
+export const YoutubePlayerComponent = memo(({ url }: { url: string | undefined }) => {
+  if (!url) return null;
+  const videoId = extractVideoId(url);
+  if (!videoId) return null;
+  return <YoutubePlayer videoId={videoId} height={200} />;
+});
 
 export const LinkPreviewFile = memo(
   ({
@@ -44,8 +58,8 @@ export const LinkPreviewFile = memo(
       odinId,
     });
     const { isDarkMode } = useDarkMode();
-    const hasImage = descriptorContent?.hasImage || false;
     const url = descriptorContent?.url;
+    const hasImage = descriptorContent?.hasImage || !isYoutubeURL(url || '');
     const embeddedThumbUrl = useMemo(() => {
       if (!previewThumbnail) return;
       return `data:${previewThumbnail.contentType};base64,${previewThumbnail.content}`;
@@ -81,6 +95,7 @@ export const LinkPreviewFile = memo(
             borderRadius: 15,
           }}
         >
+          <YoutubePlayerComponent url={url} />
           {hasImage && (
             <ImageBackground
               style={{

@@ -1,7 +1,7 @@
 
 import InAppBrowser from 'react-native-inappbrowser-reborn';
 import { Linking } from 'react-native';
-import { calculateScaledDimensions, extractUrls, millisToMinutesAndSeconds, openURL } from '../src/utils/utils';
+import { calculateScaledDimensions, extractUrls, extractVideoId, millisToMinutesAndSeconds, openURL } from '../src/utils/utils';
 
 jest.mock('react-native-inappbrowser-reborn', () => ({
     isAvailable: jest.fn(),
@@ -73,6 +73,23 @@ describe('utils.ts', () => {
         it('should maintain aspect ratio when scaling down', () => {
             const dimensions = calculateScaledDimensions(2000, 1000, { width: 500, height: 500 });
             expect(dimensions).toEqual({ width: 500, height: 250 });
+        });
+    });
+    describe('extractVideoId', () => {
+        it('should return the video ID from a youtube.com URL', () => {
+            const url = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
+            const videoId = extractVideoId(url);
+            expect(videoId).toBe('dQw4w9WgXcQ');
+        });
+        it('should return the video ID from a youtu.be URL', () => {
+            const url = 'https://youtu.be/dQw4w9WgXcQ';
+            const videoId = extractVideoId(url);
+            expect(videoId).toBe('dQw4w9WgXcQ');
+        });
+        it('should return null if the URL is invalid', () => {
+            const url = 'https://example.com';
+            const videoId = extractVideoId(url);
+            expect(videoId).toBeNull();
         });
     });
 });
