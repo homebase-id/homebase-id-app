@@ -55,6 +55,7 @@ const ReactionsModal = memo(
         onDismiss={onClose}
         enableDismissOnClose={true}
         enablePanDownToClose
+        enableDynamicSizing={false}
         index={0}
         backgroundStyle={{
           backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
