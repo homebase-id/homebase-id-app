@@ -131,9 +131,9 @@ export const getImageSize = (uri: string): Promise<{ width: number; height: numb
 export const flattenInfinteData = <T>(
   rawData:
     | InfiniteData<{
-        results: T[];
-        cursorState: unknown;
-      }>
+      results: T[];
+      cursorState: unknown;
+    }>
     | undefined,
   pageSize?: number,
   sortFn?: (a: T, b: T) => number
@@ -201,3 +201,23 @@ export const getExtensionForMimeType = (mimeType: string | undefined | null) => 
           ? 'ts'
           : mimeType.split('/')[1];
 };
+
+
+/*
+Extract VideoId from the given youtube url
+*/
+export function extractVideoId(url: string): string | null | undefined {
+  if (!url) return;
+  if (url.includes('youtube.com') || url.includes('youtu.be')) {
+    const uri = new URL(url);
+    if (uri.hostname === 'youtu.be') {
+      return uri.pathname.substring(1);
+    }
+    return uri.searchParams.get('v');
+  }
+  return null;
+}
+
+export function isYoutubeURL(url: string): boolean {
+  return url.includes('youtube.com') || url.includes('youtu.be');
+}
