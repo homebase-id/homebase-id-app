@@ -86,7 +86,7 @@ const useImage = (props?: {
         queryKey: queryKeyBuilder(odinId, imageFileId, imageFileKey, imageDrive),
         exact: false,
       })
-      .filter((query) => query.state.status !== 'error');
+      .filter((query) => query.state.status === 'success');
 
     const cachedEntriesWithSize = cachedEntries.map((entry) => {
       const sizeParts = (entry.queryKey[5] as string)?.split('x');
