@@ -1,7 +1,7 @@
 
 import InAppBrowser from 'react-native-inappbrowser-reborn';
 import { Linking } from 'react-native';
-import { calculateScaledDimensions, extractUrls, extractVideoId, millisToMinutesAndSeconds, openURL } from '../src/utils/utils';
+import { calculateScaledDimensions, extractUrls, extractVideoId, isEmojiOnly, millisToMinutesAndSeconds, openURL } from '../src/utils/utils';
 
 jest.mock('react-native-inappbrowser-reborn', () => ({
     isAvailable: jest.fn(),
@@ -91,5 +91,25 @@ describe('utils.ts', () => {
             const videoId = extractVideoId(url);
             expect(videoId).toBeNull();
         });
+
+    });
+    describe('Emojis only', () => {
+        it('text should only contain emojis', () => {
+            const text = '😀😀😀';
+            const hasEmojis = isEmojiOnly(text);
+            expect(hasEmojis).toBeTruthy();
+        });
+        it('should recognize flags as emojis', () => {
+            const text = '🇺🇸🇺🇸🇺🇸';
+            const hasEmojis = isEmojiOnly(text);
+            expect(hasEmojis).toBeTruthy();
+        });
+        it('should return false if text contains non-emoji characters', () => {
+            const text = 'Hello 😃';
+            const hasEmojis = isEmojiOnly(text);
+            expect(hasEmojis).toBeFalsy();
+        }
+        );
+
     });
 });
