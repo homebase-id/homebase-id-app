@@ -64,6 +64,7 @@ import { Text } from '../ui/Text/Text';
 import {
   assetsToImageSource,
   fixDocumentURI,
+  isEmojiOnly,
   millisToMinutesAndSeconds,
   openURL,
   URL_PATTERN,
@@ -855,10 +856,8 @@ const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
 
   const content = message?.fileMetadata.appData.content;
   const plainMessage = getPlainTextFromRichText(content.message);
-  const isEmojiOnly =
-    (plainMessage?.match(/^\p{Extended_Pictographic}/u) && !plainMessage?.match(/[0-9a-zA-Z]/)) ??
-    false;
-
+  const onlyEmojis = isEmojiOnly(plainMessage);
+  console.log('plainMessage', plainMessage, onlyEmojis);
   /**
    * An array of parse patterns used for parsing text in the chat detail component.
    * Each pattern consists of a regular expression pattern, a style to apply to the matched text,
@@ -904,7 +903,7 @@ const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
         },
       }}
       customTextStyle={
-        isEmojiOnly
+        onlyEmojis
           ? {
               fontSize: 48,
               lineHeight: 60,
@@ -934,11 +933,9 @@ const RenderBubble = memo(
     const content = message?.fileMetadata.appData.content;
 
     const plainMessage = getPlainTextFromRichText(content.message);
-    const isEmojiOnly =
-      (plainMessage?.match(/^\p{Extended_Pictographic}/u) && !plainMessage?.match(/[0-9a-zA-Z]/)) ??
-      false;
+    const onlyEmojis = isEmojiOnly(plainMessage);
     const isReply = !!content?.replyId;
-    const showBackground = !isEmojiOnly || isReply;
+    const showBackground = !onlyEmojis || isReply;
 
     const onRetryOpen = useCallback(() => {
       props.onRetryClick(message);

@@ -221,3 +221,9 @@ export function extractVideoId(url: string): string | null | undefined {
 export function isYoutubeURL(url: string): boolean {
   return url.includes('youtube.com') || url.includes('youtu.be');
 }
+
+export function isEmojiOnly(text: string | undefined): boolean {
+  return ((text?.match(/^\p{Extended_Pictographic}/u) || text?.match(/^\p{RI}{2}/u)) &&
+    !text?.match(/[0-9a-zA-Z]/)) ??
+    false;
+}
