@@ -17,6 +17,7 @@ import { ConnectQrPage } from '../pages/profile/connect-qr-page';
 import { AppearancePage } from '../pages/profile/appearance/Appearance-Page';
 import { ChatColorSettings } from '../pages/profile/appearance/ChatColorSettings';
 import { DebugPage } from '../pages/profile/debug-page';
+import { ChatSettingsPage } from '../pages/profile/chat-settings.page';
 
 export type ProfileStackParamList = {
   Overview: undefined;
@@ -29,6 +30,7 @@ export type ProfileStackParamList = {
   DriveStatus: undefined;
   ConnectQr: undefined;
   Debug: undefined;
+  ChatSettings: undefined;
 };
 
 const StackProfile = createNativeStackNavigator<ProfileStackParamList>();
@@ -79,6 +81,13 @@ export const ProfileStack = () => {
       <StackProfile.Screen name="Following" component={FollowingPage} />
       <StackProfile.Screen name="DriveStatus" component={DriveStatusPage} />
       <StackProfile.Screen name="Debug" component={DebugPage} />
+      <StackProfile.Screen
+        name="ChatSettings"
+        options={{
+          title: 'Chat Settings',
+        }}
+        component={ChatSettingsPage}
+      />
     </StackProfile.Navigator>
   );
 };
