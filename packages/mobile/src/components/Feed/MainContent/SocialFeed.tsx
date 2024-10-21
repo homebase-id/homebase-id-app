@@ -31,6 +31,7 @@ import {
 
 import { ErrorNotification } from '../../ui/Alert/ErrorNotification';
 import { FeedStackParamList } from '../../../app/FeedStack';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 
 const PAGE_SIZE = 10;
 
@@ -60,8 +61,8 @@ const SocialFeedMainContent = memo(() => {
 
   useEffect(() => {
     if (!params || !flattenedPosts) return;
-    const post = flattenedPosts.find(
-      (post) => post.fileMetadata.globalTransitId === params.postKey
+    const post = flattenedPosts.find((post) =>
+      stringGuidsEqual(post.fileMetadata.globalTransitId, params.postKey)
     );
     if (post) {
       const postContent = post.fileMetadata.appData.content;
