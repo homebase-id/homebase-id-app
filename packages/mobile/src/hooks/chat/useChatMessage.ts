@@ -178,8 +178,6 @@ const sendMessage = async ({
             file.type
           );
 
-          console.log('locally inserted cache', cachedImagePath);
-
           insertImageIntoCache(
             queryClient,
             undefined,
@@ -216,11 +214,8 @@ const sendMessage = async ({
   await Promise.all(
     (files || [])?.map(async (file) => {
       try {
-        console.log('unlinking', file.uri || file.filepath || '');
         await unlink(file.uri || file.filepath || '');
-      } catch {
-        console.error('Failed to unlink', file.uri || file.filepath || '');
-      }
+      } catch {}
     })
   );
 

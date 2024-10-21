@@ -22,6 +22,7 @@ import { ImageSource } from '../../../provider/image/RNImageProvider';
 import { getSynchronousDotYouClient } from '../../chat/getSynchronousDotYouClient';
 import { addError } from '../../errors/useErrors';
 import { OdinBlob } from '../../../../polyfills/OdinBlob';
+import { unlink } from 'react-native-fs';
 
 const savePost = async ({
   postFile,
@@ -75,7 +76,7 @@ const savePost = async ({
   postFile.fileMetadata.appData.content.captionAsRichText = getRichTextFromString(
     postFile.fileMetadata.appData.content.caption.trim()
   );
-  return savePostFile(
+  const uploadResult = savePostFile(
     dotYouClient,
     postFile,
     odinId,
@@ -85,6 +86,21 @@ const savePost = async ({
     onVersionConflict,
     onUpdate
   );
+
+  if (!uploadResult) return;
+
+  // Cleanup as much files as possible
+  await Promise.all(
+    (mediaFiles || [])?.map(async (file) => {
+      if ('uri' in file || 'filepath' in file) {
+        try {
+          await unlink(file.uri || file.filepath || '');
+        } catch {}
+      }
+    })
+  );
+
+  return uploadResult;
 };
 
 export const getSavePostMutationOptions: (queryClient: QueryClient) => MutationOptions<
