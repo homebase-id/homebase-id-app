@@ -17,7 +17,7 @@ import Animated, { runOnJS } from 'react-native-reanimated';
 import { LinkPreviewDescriptor } from '@homebase-id/js-lib/media';
 import { Gesture, GestureDetector, GestureType } from 'react-native-gesture-handler';
 import YoutubePlayer from 'react-native-youtube-iframe';
-import { Portal } from 'react-native-portalize';
+import { useChatSettingsContext } from '../../Settings/useChatSettingsContext';
 
 type LinkPreviewFileProps = {
   targetDrive: TargetDrive;
@@ -58,8 +58,10 @@ export const LinkPreviewFile = memo(
       odinId,
     });
     const { isDarkMode } = useDarkMode();
+    const { allowYoutubePlayback } = useChatSettingsContext();
     const url = descriptorContent?.url;
-    const hasImage = descriptorContent?.hasImage || !isYoutubeURL(url || '');
+    const showImage =
+      descriptorContent?.hasImage && !(isYoutubeURL(url || '') && allowYoutubePlayback);
     const embeddedThumbUrl = useMemo(() => {
       if (!previewThumbnail) return;
       return `data:${previewThumbnail.contentType};base64,${previewThumbnail.content}`;
@@ -95,8 +97,8 @@ export const LinkPreviewFile = memo(
             borderRadius: 15,
           }}
         >
-          <YoutubePlayerComponent url={url} />
-          {hasImage && (
+          {allowYoutubePlayback && <YoutubePlayerComponent url={url} />}
+          {showImage && (
             <ImageBackground
               style={{
                 height: scaledHeight,

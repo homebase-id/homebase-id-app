@@ -39,6 +39,7 @@ import { insertNewMessage } from './useChatMessages';
 import { insertImageIntoCache } from '../../components/ui/OdinImage/hooks/useImage';
 import { copyFileIntoCache } from '../../utils/utils';
 import { addLogs } from '../../provider/log/logger';
+import { unlink } from 'react-native-fs';
 
 const sendMessage = async ({
   conversation,
@@ -131,6 +132,7 @@ const sendMessage = async ({
     );
   };
 
+  // We copy into pendingFiles as the upload will unlink
   const pendingFiles = await Promise.all(
     (files || [])?.map(async (file) => {
       const newFilePath = await copyFileIntoCache(
@@ -205,6 +207,15 @@ const sendMessage = async ({
               }) as unknown as Blob)
             : undefined,
       };
+    })
+  );
+
+  // Cleanup as much files as possible
+  await Promise.all(
+    (files || [])?.map(async (file) => {
+      try {
+        await unlink(file.uri || file.filepath || '');
+      } catch {}
     })
   );
 
