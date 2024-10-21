@@ -68,7 +68,7 @@ export type AuthStackParamList = {
 export type TabStackParamList = {
   Home: undefined;
   Feed: NavigatorScreenParams<FeedStackParamList>;
-  Profile: NavigatorScreenParams<ProfileStackParamList>;
+  Profile: NavigatorScreenParams<ProfileStackParamList> | undefined;
   Chat: NavigatorScreenParams<ChatStackParamList>;
 };
 
