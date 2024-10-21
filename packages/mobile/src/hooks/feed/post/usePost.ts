@@ -160,6 +160,5 @@ export const getPostQueryOptions: (
     fetchBlog({ dotYouClient, queryClient, odinId, channel, postKey: postKey as string }),
   refetchOnMount: false,
   enabled: !!channel && !!postKey,
-  gcTime: 10 * 60 * 1000,
   staleTime: 10 * 60 * 1000,
 });
