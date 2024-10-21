@@ -27,6 +27,7 @@ import {
 import { PostDetailMainContent } from '../../components/Feed/MainContent/PostDetailMainContent';
 
 import { useReferencedPost } from '../../hooks/feed/useReferencedPost';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 
 type PostDetailPageProps = NativeStackScreenProps<FeedStackParamList, 'Post'>;
 
@@ -37,8 +38,11 @@ export const PostDetailPage = ({ route: { params } }: PostDetailPageProps) => {
   const postActionRef = useRef<PostActionMethods>(null);
   const postEmojiPickerRef = useRef<PostEmojiPickerModalMethods>(null);
   const referencedPost = useReferencedPost(!postFile ? postKey : undefined);
+  const identity = useDotYouClientContext().getIdentity();
 
   const post = postFile || referencedPost;
+  const odinId = post?.fileMetadata.senderOdinId;
+  const isExternal = odinId && odinId !== identity;
   const channelKey = post?.fileMetadata.appData.content.channelId;
 
   const onSharePress = useCallback((context: ShareContext) => {
@@ -58,8 +62,10 @@ export const PostDetailPage = ({ route: { params } }: PostDetailPageProps) => {
   }, []);
 
   // We don't call them if we have postFile and channel with us
-  const { data: channelData } = useChannel({ channelKey: !channel ? channelKey : undefined }).fetch;
-  const odinId = post?.fileMetadata.senderOdinId;
+  const { data: channelData } = useChannel({
+    channelKey: !channel ? channelKey : undefined,
+    odinId: isExternal ? odinId : undefined,
+  }).fetch;
 
   if (!post) {
     return (
