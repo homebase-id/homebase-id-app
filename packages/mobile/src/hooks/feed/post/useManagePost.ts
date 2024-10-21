@@ -87,8 +87,6 @@ const savePost = async ({
     onUpdate
   );
 
-  if (!uploadResult) return;
-
   // Cleanup as much files as possible
   await Promise.all(
     (mediaFiles || [])?.map(async (file) => {
