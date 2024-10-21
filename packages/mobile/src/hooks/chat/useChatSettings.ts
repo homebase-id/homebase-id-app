@@ -14,13 +14,10 @@ export const useChatSettings = () => {
         })();
     }, []);
 
-    // When state changes, save to AsyncStorage
-    useEffect(() => {
-        (async () => {
-            if (!allowYoutubePlayback) return;
-            await AsyncStorage.setItem(ALLOW_YOUTUBE_PLAYBACK, allowYoutubePlayback ? 'true' : 'false');
-        })();
-    }, [allowYoutubePlayback]);
+    const setYoutubePlayback = async (allow: boolean) => {
+        setAllowYoutubePlayback(allow);
+        await AsyncStorage.setItem(ALLOW_YOUTUBE_PLAYBACK, allow ? 'true' : 'false');
+    };
 
-    return { allowYoutubePlayback: allowYoutubePlayback, setAllowYoutubePlayback };
+    return { allowYoutubePlayback: allowYoutubePlayback, setYoutubePlayback };
 };

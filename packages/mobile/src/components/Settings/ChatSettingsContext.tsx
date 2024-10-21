@@ -7,10 +7,12 @@ export const ChatSettingsContext = createContext<{
 } | null>(null);
 
 const ChatSettingsProvider = memo(({ children }: { children: ReactNode }) => {
-  const { allowYoutubePlayback, setAllowYoutubePlayback } = useChatSettings();
+  const { allowYoutubePlayback, setYoutubePlayback } = useChatSettings();
 
   return (
-    <ChatSettingsContext.Provider value={{ allowYoutubePlayback, setAllowYoutubePlayback }}>
+    <ChatSettingsContext.Provider
+      value={{ allowYoutubePlayback, setAllowYoutubePlayback: setYoutubePlayback }}
+    >
       {children}
     </ChatSettingsContext.Provider>
   );
