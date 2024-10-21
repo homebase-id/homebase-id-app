@@ -857,7 +857,6 @@ const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
   const content = message?.fileMetadata.appData.content;
   const plainMessage = getPlainTextFromRichText(content.message);
   const onlyEmojis = isEmojiOnly(plainMessage);
-  console.log('plainMessage', plainMessage, onlyEmojis);
   /**
    * An array of parse patterns used for parsing text in the chat detail component.
    * Each pattern consists of a regular expression pattern, a style to apply to the matched text,

@@ -223,7 +223,7 @@ export function isYoutubeURL(url: string): boolean {
 }
 
 export function isEmojiOnly(text: string | undefined): boolean {
-  return ((text?.match(/^\p{Extended_Pictographic}/u) || text?.match(/^\p{RI}{2}/u)) &&
+  return ((text?.match(/^\p{Extended_Pictographic}/u) || text?.match(/^\p{Emoji_Component}/u)) &&
     !text?.match(/[0-9a-zA-Z]/)) ??
     false;
 }
