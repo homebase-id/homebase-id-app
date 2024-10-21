@@ -56,6 +56,7 @@ import { FEED_CHAT_APP_ID } from './constants';
 import { Toast } from '../components/ui/Toast/Toast';
 import { NotificationToaster } from '../components/ui/Alert/NotificationToaster';
 import { FeedStack } from './FeedStack';
+import ChatSettingsProvider from '../components/Settings/ChatSettingsContext';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -138,18 +139,20 @@ const AuthenticatedRoot = memo(() => {
       <AudioContextProvider>
         <WebSocketContextProvider>
           <BubbleColorProvider>
-            <ErrorBoundary>
-              <ExtendPermissionDialog
-                appName={t('Homebase Feed & Chat')}
-                appId={FEED_CHAT_APP_ID}
-                drives={drives}
-                circleDrives={circleDrives}
-                permissions={permissions}
-                // needsAllConnected={true}
-              />
-              <NotificationToaster />
-              <AppStackScreen />
-            </ErrorBoundary>
+            <ChatSettingsProvider>
+              <ErrorBoundary>
+                <ExtendPermissionDialog
+                  appName={t('Homebase Feed & Chat')}
+                  appId={FEED_CHAT_APP_ID}
+                  drives={drives}
+                  circleDrives={circleDrives}
+                  permissions={permissions}
+                  // needsAllConnected={true}
+                />
+                <NotificationToaster />
+                <AppStackScreen />
+              </ErrorBoundary>
+            </ChatSettingsProvider>
           </BubbleColorProvider>
         </WebSocketContextProvider>
       </AudioContextProvider>
