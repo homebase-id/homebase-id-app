@@ -1,10 +1,8 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { FeedStackParamList } from '../../app/FeedStack';
-import { Text } from '../../components/ui/Text/Text';
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 import { useChannel } from '../../hooks/feed/channels/useChannel';
-import { usePost } from '../../hooks/feed/post/usePost';
-import { PostContent, ReactionContext } from '@homebase-id/js-lib/public';
+import { ReactionContext } from '@homebase-id/js-lib/public';
 import { ActivityIndicator } from 'react-native';
 import { Host } from 'react-native-portalize';
 import { useCallback, useRef } from 'react';
@@ -27,17 +25,21 @@ import {
   PostEmojiPickerModalMethods,
 } from '../../components/Feed/Interacts/Reactions/PostEmojiPickerModal';
 import { PostDetailMainContent } from '../../components/Feed/MainContent/PostDetailMainContent';
-import { HomebaseFile } from '@homebase-id/js-lib/core';
+
+import { useReferencedPost } from '../../hooks/feed/useReferencedPost';
 
 type PostDetailPageProps = NativeStackScreenProps<FeedStackParamList, 'Post'>;
 
 export const PostDetailPage = ({ route: { params } }: PostDetailPageProps) => {
-  const { postKey, channelKey, odinId, postFile, channel } = params;
-
+  const { postKey, postFile, channel } = params;
   const reactionRef = useRef<ReactionModalMethods>(null);
   const shareRef = useRef<ShareModalMethods>(null);
   const postActionRef = useRef<PostActionMethods>(null);
   const postEmojiPickerRef = useRef<PostEmojiPickerModalMethods>(null);
+  const referencedPost = useReferencedPost(!postFile ? postKey : undefined);
+
+  const post = postFile || referencedPost;
+  const channelKey = post?.fileMetadata.appData.content.channelId;
 
   const onSharePress = useCallback((context: ShareContext) => {
     shareRef.current?.setShareContext(context);
@@ -57,13 +59,9 @@ export const PostDetailPage = ({ route: { params } }: PostDetailPageProps) => {
 
   // We don't call them if we have postFile and channel with us
   const { data: channelData } = useChannel({ channelKey: !channel ? channelKey : undefined }).fetch;
-  const { data: postData, isLoading: postDataLoading } = usePost({
-    channelKey: !channel ? channelKey : undefined,
-    postKey: !postFile ? postKey : undefined,
-    odinId,
-  });
+  const odinId = post?.fileMetadata.senderOdinId;
 
-  if (postDataLoading) {
+  if (!post) {
     return (
       <SafeAreaView
         style={{
@@ -76,28 +74,26 @@ export const PostDetailPage = ({ route: { params } }: PostDetailPageProps) => {
     );
   }
 
-  if ((!postFile && !postData) || postData === null) {
-    return (
-      <SafeAreaView
-        style={{
-          flex: 1,
-          justifyContent: 'center',
-        }}
-      >
-        <Text
-          style={{
-            fontSize: 16,
-            fontWeight: '500',
-            textAlign: 'center',
-          }}
-        >
-          Post not found
-        </Text>
-      </SafeAreaView>
-    );
-  }
-
-  const post = (postFile || postData) as HomebaseFile<PostContent>;
+  // if ((!postFile && !postData) || postData === null) {
+  //   return (
+  //     <SafeAreaView
+  //       style={{
+  //         flex: 1,
+  //         justifyContent: 'center',
+  //       }}
+  //     >
+  //       <Text
+  //         style={{
+  //           fontSize: 16,
+  //           fontWeight: '500',
+  //           textAlign: 'center',
+  //         }}
+  //       >
+  //         Post not found
+  //       </Text>
+  //     </SafeAreaView>
+  //   );
+  // }
 
   return (
     <SafeAreaView>

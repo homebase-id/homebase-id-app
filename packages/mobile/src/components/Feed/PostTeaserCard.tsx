@@ -145,8 +145,6 @@ export const InnerPostTeaserCard = memo(
     const onNaviationPress = useCallback(() => {
       navigation.navigate('Post', {
         postKey: post.slug || post.id,
-        channelKey: post.channelId,
-        odinId: postFile.fileMetadata.senderOdinId,
         postFile,
         channel: channel || undefined,
       });

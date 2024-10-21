@@ -1,7 +1,7 @@
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { useSocialFeed } from '../../../hooks/feed/useSocialFeed';
 import { PostContent, ReactionContext } from '@homebase-id/js-lib/public';
-import { memo, useCallback, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { flattenInfinteData } from '../../../utils/utils';
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
 import { EmptyFeed } from './EmptyFeed';
@@ -17,13 +17,20 @@ import { ShareContext, ShareModal, ShareModalMethods } from '../Interacts/Share/
 import { PostActionMethods, PostActionProps, PostModalAction } from '../Interacts/PostActionModal';
 import { Host } from 'react-native-portalize';
 import { t } from 'homebase-id-app-common';
-import { useScrollToTop } from '@react-navigation/native';
+import {
+  NavigationProp,
+  RouteProp,
+  useNavigation,
+  useRoute,
+  useScrollToTop,
+} from '@react-navigation/native';
 import {
   PostEmojiPickerModal,
   PostEmojiPickerModalMethods,
 } from '../Interacts/Reactions/PostEmojiPickerModal';
 
 import { ErrorNotification } from '../../ui/Alert/ErrorNotification';
+import { FeedStackParamList } from '../../../app/FeedStack';
 
 const PAGE_SIZE = 10;
 
@@ -37,7 +44,8 @@ const SocialFeedMainContent = memo(() => {
     refetch: refreshFeed,
     error,
   } = useSocialFeed({ pageSize: PAGE_SIZE }).fetchAll;
-
+  const { params } = useRoute<RouteProp<FeedStackParamList, 'Posts'>>();
+  const navigation = useNavigation<NavigationProp<FeedStackParamList, 'Posts'>>();
   // Flatten all pages, sorted descending and slice on the max number expected
   const flattenedPosts = useMemo(() => {
     if (!posts) return [];
@@ -49,6 +57,20 @@ const SocialFeedMainContent = memo(() => {
         (a.fileMetadata.appData.userDate || a.fileMetadata.created)
     );
   }, [hasMorePosts, posts]);
+
+  useEffect(() => {
+    if (!params || !flattenedPosts) return;
+    const post = flattenedPosts.find(
+      (post) => post.fileMetadata.globalTransitId === params.postKey
+    );
+    if (post) {
+      const postContent = post.fileMetadata.appData.content;
+      navigation.navigate('Post', {
+        postFile: post,
+        postKey: postContent.slug || postContent.id,
+      });
+    }
+  }, [flattenedPosts, navigation, params]);
 
   const [refreshing, setRefreshing] = useState(false);
 

@@ -12,7 +12,7 @@ import {
 } from '@react-navigation/native-stack';
 import { TabStackParamList } from './App';
 import { useDarkMode } from '../hooks/useDarkMode';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { Platform } from 'react-native';
 import { Colors } from './Colors';
 import { FeedPage } from '../pages/feed/feed-page';
@@ -20,13 +20,16 @@ import { PreviewMedia } from '../pages/media-preview-page';
 import { PostComposer } from '../pages/feed/post-composer';
 import { PostDetailPage } from '../pages/feed/post-detail-page';
 import { ChannelDefinition, PostContent } from '@homebase-id/js-lib/public';
+import { BackButton } from '../components/ui/Buttons';
 
 export type FeedStackParamList = {
-  Posts: undefined;
+  Posts:
+    | {
+        postKey?: string;
+      }
+    | undefined;
   Post: {
     postKey: string;
-    channelKey: string;
-    odinId: string;
     postFile?: HomebaseFile<PostContent>;
     channel?: HomebaseFile<ChannelDefinition> | NewHomebaseFile<ChannelDefinition>;
   };
@@ -46,7 +49,7 @@ export type FeedStackParamList = {
 };
 
 const StackFeed = createNativeStackNavigator<FeedStackParamList>();
-export const FeedStack = (_props: NativeStackScreenProps<TabStackParamList, 'Feed'>) => {
+export const FeedStack = ({ navigation }: NativeStackScreenProps<TabStackParamList, 'Feed'>) => {
   const { isDarkMode } = useDarkMode();
   const screenOptions = useMemo(
     () =>
@@ -66,6 +69,22 @@ export const FeedStack = (_props: NativeStackScreenProps<TabStackParamList, 'Fee
         headerBackTitleVisible: false,
       }) as NativeStackNavigationOptions,
     [isDarkMode]
+  );
+
+  const backButton = useCallback(
+    () => (
+      <BackButton
+        label=" "
+        showArrow
+        onPress={() => {
+          if (navigation.canGoBack()) {
+            navigation.goBack();
+          }
+          return navigation.navigate('Feed', { screen: 'Posts' });
+        }}
+      />
+    ),
+    [navigation]
   );
 
   return (
@@ -91,6 +110,7 @@ export const FeedStack = (_props: NativeStackScreenProps<TabStackParamList, 'Fee
         options={{
           headerShown: true,
           animation: 'slide_from_right',
+          headerLeft: backButton,
         }}
       />
     </StackFeed.Navigator>

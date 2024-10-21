@@ -51,6 +51,7 @@ export const BackButton = (props: {
         },
         props.style,
       ]}
+      tintColor={isDarkMode ? Colors.white : Colors.black}
     />
   );
 };
