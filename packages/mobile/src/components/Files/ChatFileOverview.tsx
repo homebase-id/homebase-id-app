@@ -12,10 +12,11 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { Pdf, Play, Plus, SendChat, SubtleCheck, Trash } from '../ui/Icons/icons';
-import { memo, useCallback, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { Colors } from '../../app/Colors';
 import { Header, HeaderBackButtonProps } from '@react-navigation/elements';
 import { BackButton } from '../ui/Buttons';
@@ -34,6 +35,7 @@ import { getNewId } from '@homebase-id/js-lib/helpers';
 import Toast from 'react-native-toast-message';
 import { AuthorName } from '../ui/Name';
 import { assetsToImageSource } from '../../utils/utils';
+import { grabThumbnail } from '../../provider/video/RNVideoSegmenter';
 
 const FilePreview = ({
   asset,
@@ -64,33 +66,7 @@ const FilePreview = ({
             size,
           ]}
         >
-          <Video
-            source={{ uri: asset.uri || asset.filepath || undefined }}
-            style={[
-              size,
-              {
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                bottom: 0,
-                right: 0,
-              },
-            ]}
-            onError={(error) => console.error(error)}
-            resizeMode={preview ? 'cover' : 'contain'}
-            controls={!preview}
-            paused
-          />
-          {preview && (
-            <View
-              style={{
-                marginTop: 'auto',
-                marginBottom: 'auto',
-              }}
-            >
-              <Play size={'md'} />
-            </View>
-          )}
+          <VideoPreview asset={asset} preview={preview} />
           {children}
         </View>
       ) : isDocument ? (
@@ -145,6 +121,105 @@ const FilePreview = ({
     </>
   );
 };
+
+export const VideoPreview = ({
+  asset,
+  size,
+  preview,
+}: {
+  asset: ImageSource;
+  size?: { width: DimensionValue; height: DimensionValue };
+  preview?: boolean;
+}) => {
+  const isSmallEnough = useMemo(
+    () => asset.fileSize && asset.fileSize < 10000000,
+    [asset.fileSize]
+  );
+  const [thumbnailUrl, setThumbnailUrl] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    if (isSmallEnough) return;
+    grabThumbnail(asset).then((thumb) => {
+      setThumbnailUrl(thumb?.uri);
+    });
+  }, [asset, isSmallEnough]);
+
+  return (
+    <>
+      {thumbnailUrl ? (
+        <>
+          <Image
+            source={{ uri: thumbnailUrl }}
+            style={[
+              {
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                bottom: 0,
+                right: 0,
+                objectFit: !preview ? 'contain' : 'cover',
+              },
+            ]}
+          />
+          {!preview ? (
+            <View
+              style={{
+                margin: 'auto',
+                zIndex: 100,
+                position: 'relative',
+              }}
+            >
+              <Play size={'5xl'} color={Colors.white} />
+            </View>
+          ) : null}
+        </>
+      ) : !isSmallEnough ? (
+        <View
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            bottom: 0,
+            right: 0,
+          }}
+        >
+          <ActivityIndicator size="large" color={Colors.white} style={{ margin: 'auto' }} />
+        </View>
+      ) : (
+        <Video
+          source={{ uri: asset.uri || asset.filepath || undefined }}
+          style={[
+            size,
+            {
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              bottom: 0,
+              right: 0,
+            },
+          ]}
+          onError={(error) => console.error(error)}
+          resizeMode={preview ? 'cover' : 'contain'}
+          controls={!preview}
+          paused
+        />
+      )}
+
+      {preview && (
+        <View
+          style={{
+            marginVertical: 'auto',
+            zIndex: 100,
+            position: 'relative',
+          }}
+        >
+          <Play size={'md'} color={Colors.white} />
+        </View>
+      )}
+    </>
+  );
+};
+
 export type ChatFileOverviewProp = NativeStackScreenProps<ChatStackParamList, 'ChatFileOverview'>;
 
 export const ChatFileOverview = memo(

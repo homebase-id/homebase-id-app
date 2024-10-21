@@ -57,6 +57,7 @@ import { Toast } from '../components/ui/Toast/Toast';
 import { NotificationToaster } from '../components/ui/Alert/NotificationToaster';
 import { FeedStack } from './FeedStack';
 import ChatSettingsProvider from '../components/Settings/ChatSettingsContext';
+import { useCacheCleanup } from '../hooks/file/useCacheCleanup';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -168,6 +169,7 @@ const AppStackScreen = memo(() => {
   useAuthenticatedPushNotification();
   useInitialPushNotification();
   useShareManager();
+  useCacheCleanup();
 
   return <TabStack />;
 });
