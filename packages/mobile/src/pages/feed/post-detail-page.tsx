@@ -32,6 +32,7 @@ import { useDotYouClientContext } from 'homebase-id-app-common';
 type PostDetailPageProps = NativeStackScreenProps<FeedStackParamList, 'Post'>;
 
 export const PostDetailPage = ({ route: { params } }: PostDetailPageProps) => {
+  // FIXME(2002bishwajeet): Refactor to use hooks instead of passsing objects
   const { postKey, postFile, channel } = params;
   const reactionRef = useRef<ReactionModalMethods>(null);
   const shareRef = useRef<ShareModalMethods>(null);
