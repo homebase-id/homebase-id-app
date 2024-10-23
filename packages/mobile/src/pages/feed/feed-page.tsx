@@ -15,6 +15,7 @@ import { OfflineProfileAvatar, ProfileAvatar } from '../../app/ChatStack';
 import { View } from 'react-native';
 import { Text } from '../../components/ui/Text/Text';
 import { useDarkMode } from '../../hooks/useDarkMode';
+import { OfflineState } from '../../components/Platform/OfflineState';
 
 type FeedProps = NativeStackScreenProps<FeedStackParamList, 'Posts'>;
 
@@ -26,6 +27,7 @@ export const FeedPage = memo((_: FeedProps) => {
     <SafeAreaView>
       {/* <SocialFeedWebView /> */}
       <FeedHeader />
+      <OfflineState />
       <SocialFeedMainContent />
 
       <FloatingActionButton />
