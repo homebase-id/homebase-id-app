@@ -1,10 +1,4 @@
-import {
-  EmbeddedThumb,
-  HomebaseFile,
-  NewHomebaseFile,
-  PayloadDescriptor,
-  TargetDrive,
-} from '@homebase-id/js-lib/core';
+import { EmbeddedThumb, PayloadDescriptor, TargetDrive } from '@homebase-id/js-lib/core';
 import {
   createNativeStackNavigator,
   NativeStackNavigationOptions,
@@ -19,7 +13,6 @@ import { FeedPage } from '../pages/feed/feed-page';
 import { PreviewMedia } from '../pages/media-preview-page';
 import { PostComposer } from '../pages/feed/post-composer';
 import { PostDetailPage } from '../pages/feed/post-detail-page';
-import { ChannelDefinition, PostContent } from '@homebase-id/js-lib/public';
 import { BackButton } from '../components/ui/Buttons';
 
 export type FeedStackParamList = {
@@ -30,8 +23,8 @@ export type FeedStackParamList = {
     | undefined;
   Post: {
     postKey: string;
-    postFile?: HomebaseFile<PostContent>;
-    channel?: HomebaseFile<ChannelDefinition> | NewHomebaseFile<ChannelDefinition>;
+    channelKey?: string;
+    odinId?: string;
   };
   Compose: undefined;
   PreviewMedia: {
