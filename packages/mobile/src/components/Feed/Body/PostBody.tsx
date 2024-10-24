@@ -1,6 +1,6 @@
 import { PayloadDescriptor } from '@homebase-id/js-lib/core';
 import { Article, getChannelDrive, PostContent } from '@homebase-id/js-lib/public';
-import { memo, ReactNode, useMemo, useState } from 'react';
+import { memo, useMemo, useState } from 'react';
 import { openURL, URL_PATTERN } from '../../../utils/utils';
 import { useDarkMode } from '../../../hooks/useDarkMode';
 import ParsedText, { ParseShape } from 'react-native-parsed-text';
@@ -9,6 +9,7 @@ import { ellipsisAtMaxChar, t } from 'homebase-id-app-common';
 import TextButton from '../../ui/Text/Text-Button';
 import { RichTextRenderer } from '../../ui/Text/RichTextRenderer';
 import { Text } from '../../ui/Text/Text';
+import { Expander } from '../../ui/Container/Expander';
 
 const MAX_CHAR_FOR_SUMMARY = 400;
 
@@ -120,51 +121,3 @@ export const PostBody = memo(
     );
   }
 );
-
-const Expander = ({
-  abstract,
-  children,
-  allowExpand,
-}: {
-  abstract: ReactNode;
-  children: ReactNode;
-  allowExpand: boolean;
-}) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-
-  return (
-    <>
-      {!isExpanded ? (
-        <>
-          {abstract}
-          {allowExpand ? (
-            <>
-              <TextButton
-                unFilledStyle={{
-                  marginLeft: 4,
-                  alignItems: 'flex-start',
-                }}
-                textStyle={{ color: Colors.purple[500], fontSize: 16 }}
-                title={t('More')}
-                onPress={() => setIsExpanded(true)}
-              />
-            </>
-          ) : null}
-        </>
-      ) : (
-        <>
-          {children}
-          <TextButton
-            unFilledStyle={{
-              marginLeft: 4,
-              alignItems: 'flex-start',
-            }}
-            textStyle={{ color: Colors.purple[500], fontSize: 16 }}
-            title={t('Less')}
-            onPress={() => setIsExpanded(false)}
-          />
-        </>
-      )}
-    </>
-  );
-};
