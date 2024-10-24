@@ -28,23 +28,29 @@ import { PostDetailMainContent } from '../../components/Feed/MainContent/PostDet
 
 import { useReferencedPost } from '../../hooks/feed/useReferencedPost';
 import { useDotYouClientContext } from 'homebase-id-app-common';
+import { usePost } from '../../hooks/feed/post/usePost';
+import { Text } from '../../components/ui/Text/Text';
 
 type PostDetailPageProps = NativeStackScreenProps<FeedStackParamList, 'Post'>;
 
 export const PostDetailPage = ({ route: { params } }: PostDetailPageProps) => {
-  // FIXME(2002bishwajeet): Refactor to use hooks instead of passsing objects
-  const { postKey, postFile, channel } = params;
+  const { postKey, channelKey, odinId } = params;
   const reactionRef = useRef<ReactionModalMethods>(null);
   const shareRef = useRef<ShareModalMethods>(null);
   const postActionRef = useRef<PostActionMethods>(null);
   const postEmojiPickerRef = useRef<PostEmojiPickerModalMethods>(null);
+  const { data: postFile, isLoading } = usePost({
+    postKey: postKey,
+    channelKey: channelKey,
+    odinId,
+  });
+
   const referencedPost = useReferencedPost(!postFile ? postKey : undefined);
   const identity = useDotYouClientContext().getIdentity();
 
-  const post = postFile || referencedPost;
-  const odinId = post?.fileMetadata.senderOdinId;
+  const post = referencedPost || postFile;
+  const postOdinId = odinId || post?.fileMetadata.senderOdinId;
   const isExternal = odinId && odinId !== identity;
-  const channelKey = post?.fileMetadata.appData.content.channelId;
 
   const onSharePress = useCallback((context: ShareContext) => {
     shareRef.current?.setShareContext(context);
@@ -64,11 +70,11 @@ export const PostDetailPage = ({ route: { params } }: PostDetailPageProps) => {
 
   // We don't call them if we have postFile and channel with us
   const { data: channelData } = useChannel({
-    channelKey: !channel ? channelKey : undefined,
-    odinId: isExternal ? odinId : undefined,
+    channelKey: channelKey || post?.fileMetadata.appData.content.channelId,
+    odinId: isExternal ? postOdinId : undefined,
   }).fetch;
 
-  if (!post) {
+  if (isLoading) {
     return (
       <SafeAreaView
         style={{
@@ -81,33 +87,33 @@ export const PostDetailPage = ({ route: { params } }: PostDetailPageProps) => {
     );
   }
 
-  // if ((!postFile && !postData) || postData === null) {
-  //   return (
-  //     <SafeAreaView
-  //       style={{
-  //         flex: 1,
-  //         justifyContent: 'center',
-  //       }}
-  //     >
-  //       <Text
-  //         style={{
-  //           fontSize: 16,
-  //           fontWeight: '500',
-  //           textAlign: 'center',
-  //         }}
-  //       >
-  //         Post not found
-  //       </Text>
-  //     </SafeAreaView>
-  //   );
-  // }
+  if (!post) {
+    return (
+      <SafeAreaView
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+        }}
+      >
+        <Text
+          style={{
+            fontSize: 16,
+            fontWeight: '500',
+            textAlign: 'center',
+          }}
+        >
+          Post not found
+        </Text>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView>
       <Host>
         <PostDetailMainContent
           postFile={post}
-          channel={channel || channelData || undefined}
+          channel={channelData || undefined}
           odinId={odinId}
           onEmojiModalOpen={onEmojiModalOpen}
           onMorePress={onMorePress}
