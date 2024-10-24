@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { ReactNode } from 'react';
 import {
   Linking,
   StyleSheet,
@@ -69,6 +69,7 @@ export interface MessageTextProps<TMessage extends IMessage> {
   textProps?: TextProps;
   customTextStyle?: StyleProp<TextStyle>;
   parsePatterns?(linkStyle: StyleProp<TextStyle>): ParseShape[];
+  customChild?: ReactNode;
 }
 
 export function MessageText<TMessage extends IMessage = IMessage>({
@@ -81,6 +82,7 @@ export function MessageText<TMessage extends IMessage = IMessage>({
   customTextStyle,
   parsePatterns = _ => [],
   textProps,
+  customChild,
 }: MessageTextProps<TMessage>) {
   const { actionSheet } = useChatContext();
 
@@ -151,25 +153,29 @@ export function MessageText<TMessage extends IMessage = IMessage>({
         containerStyle && containerStyle[position],
       ]}
     >
-      <ParsedText
-        style={[
-          styles[position].text,
-          textStyle && textStyle[position],
-          customTextStyle,
-        ]}
-        parse={[
-          {
-            pattern: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+.[A-Z|a-z]{2,}\b/,
-            style: linkStyle,
-            onPress: onEmailPress,
-          },
-          ...parsePatterns!(linkStyle),
-          { type: 'phone', style: linkStyle, onPress: onPhonePress },
-        ]}
-        childrenProps={{ ...textProps }}
-      >
-        {getPlainTextFromRichText(currentMessage!.text)}
-      </ParsedText>
+      {customChild ? (
+        (customChild as React.ReactElement)
+      ) : (
+        <ParsedText
+          style={[
+            styles[position].text,
+            textStyle && textStyle[position],
+            customTextStyle,
+          ]}
+          parse={[
+            {
+              pattern: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+.[A-Z|a-z]{2,}\b/,
+              style: linkStyle,
+              onPress: onEmailPress,
+            },
+            ...parsePatterns!(linkStyle),
+            { type: 'phone', style: linkStyle, onPress: onPhonePress },
+          ]}
+          childrenProps={{ ...textProps }}
+        >
+          {getPlainTextFromRichText(currentMessage!.text)}
+        </ParsedText>
+      )}
     </View>
   );
 }

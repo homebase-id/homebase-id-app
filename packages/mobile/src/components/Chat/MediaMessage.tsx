@@ -12,6 +12,7 @@ import { MediaGallery, MediaItem } from '../ui/Media/MediaGallery';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { Colors } from '../../app/Colors';
 import { useDotYouClientContext } from 'homebase-id-app-common';
+import { DEFAULT_PAYLOAD_KEY } from '@homebase-id/js-lib/core';
 
 const MediaMessage = memo(
   ({
@@ -41,7 +42,13 @@ const MediaMessage = memo(
       ) => onLongPress?.(coords, message),
       [onLongPress]
     );
-    if (!props.currentMessage || !props.currentMessage.fileMetadata.payloads?.length) return null;
+    if (
+      !props.currentMessage ||
+      !props.currentMessage.fileMetadata.payloads?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY)
+        .length
+    ) {
+      return null;
+    }
     return (
       <InnerMediaMessage
         currentMessage={props.currentMessage}
@@ -74,7 +81,10 @@ const InnerMediaMessage = memo(
     const identity = useDotYouClientContext().getIdentity();
     const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
     const { width, height } = Dimensions.get('screen');
-    const payloads = currentMessage.fileMetadata.payloads;
+
+    const payloads = currentMessage.fileMetadata.payloads?.filter(
+      (p) => p.key !== DEFAULT_PAYLOAD_KEY
+    );
     const isMe =
       !currentMessage.fileMetadata.senderOdinId ||
       currentMessage.fileMetadata.senderOdinId === identity;
