@@ -48,7 +48,8 @@ import { createThumbnails } from '../image/RNThumbnailProvider';
 import { processVideo } from '../video/RNVideoProcessor';
 import { LinkPreview, LinkPreviewDescriptor } from '@homebase-id/js-lib/media';
 import { sendReadReceipt } from '@homebase-id/js-lib/peer';
-import { ellipsisAtMaxChar } from 'homebase-id-app-common';
+import { ellipsisAtMaxChar, getPlainTextFromRichText } from 'homebase-id-app-common';
+
 
 const CHAT_APP_ID = '2d781401-3804-4b57-b4aa-d8e4e2ef39f4';
 
@@ -89,6 +90,7 @@ export interface ChatMessage {
 }
 
 const CHAT_MESSAGE_PAYLOAD_KEY = 'chat_mbl';
+export const CHAT_TEXT_MESSAGE_PAYLOAD_KEY = 'chat_txt';
 export const CHAT_LINKS_PAYLOAD_KEY = 'chat_links';
 
 export const getChatMessages = async (
@@ -273,20 +275,21 @@ export const uploadChatMessage = async (
   const aesKey: Uint8Array | undefined = getRandom16ByteArray();
 
   const jsonContent: string = jsonStringify64({ ...messageContent });
-  const payloadBytes = stringToUint8Array(jsonContent);
+  const payloadBytes = stringToUint8Array(jsonStringify64({ message: messageContent.message }));
 
   // Set max of 3kb for content so enough room is left for metadata
   const shouldEmbedContent = payloadBytes.length < 3000;
   const content = shouldEmbedContent
     ? jsonContent
-    : undefined; // We only embed the content if it's less than 3kb
+    : jsonStringify64({ message: ellipsisAtMaxChar(getPlainTextFromRichText(messageContent.message), 400), replyId: messageContent.replyId, deliveryDetails: messageContent.deliveryDetails, deliveryStatus: messageContent.deliveryStatus }); // We only embed the content if it's less than 3kb
 
   if (!shouldEmbedContent) {
     payloads.push({
-      key: DEFAULT_PAYLOAD_KEY,
+      key: CHAT_TEXT_MESSAGE_PAYLOAD_KEY,
       payload: new OdinBlob([payloadBytes], { type: 'application/json' }) as unknown as Blob,
     });
   }
+
   const uploadMetadata: UploadFileMetadata = {
     versionTag: message?.fileMetadata.versionTag,
     allowDistribution: distribute,

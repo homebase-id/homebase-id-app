@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import React, { ReactNode } from 'react';
+import React from 'react';
 import {
   Linking,
   StyleSheet,
@@ -8,6 +8,8 @@ import {
   StyleProp,
   ViewStyle,
   TextStyle,
+  Text,
+  TouchableOpacity,
 } from 'react-native';
 
 // @ts-ignore
@@ -69,7 +71,8 @@ export interface MessageTextProps<TMessage extends IMessage> {
   textProps?: TextProps;
   customTextStyle?: StyleProp<TextStyle>;
   parsePatterns?(linkStyle: StyleProp<TextStyle>): ParseShape[];
-  customChild?: ReactNode;
+  allowExpand?: boolean;
+  onExpandPress?(): void;
 }
 
 export function MessageText<TMessage extends IMessage = IMessage>({
@@ -82,10 +85,11 @@ export function MessageText<TMessage extends IMessage = IMessage>({
   customTextStyle,
   parsePatterns = _ => [],
   textProps,
-  customChild,
+  onExpandPress,
+  allowExpand,
 }: MessageTextProps<TMessage>) {
   const { actionSheet } = useChatContext();
-
+  const [expanded, setExpanded] = React.useState(false);
   // TODO: React.memo
   // const shouldComponentUpdate = (nextProps: MessageTextProps<TMessage>) => {
   //   return (
@@ -142,6 +146,11 @@ export function MessageText<TMessage extends IMessage = IMessage>({
       error(e, 'No handler for mailto'),
     );
 
+  const onInternalExpandPress = React.useCallback(() => {
+    setExpanded(true);
+    onExpandPress && onExpandPress();
+  }, []);
+
   const linkStyle = [
     styles[position].link,
     linkStyleProp && linkStyleProp[position],
@@ -153,32 +162,64 @@ export function MessageText<TMessage extends IMessage = IMessage>({
         containerStyle && containerStyle[position],
       ]}
     >
-      {customChild ? (
-        (customChild as React.ReactElement)
-      ) : (
-        <ParsedText
-          style={[
-            styles[position].text,
-            textStyle && textStyle[position],
-            customTextStyle,
-          ]}
-          parse={[
-            {
-              pattern: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+.[A-Z|a-z]{2,}\b/,
-              style: linkStyle,
-              onPress: onEmailPress,
-            },
-            ...parsePatterns!(linkStyle),
-            { type: 'phone', style: linkStyle, onPress: onPhonePress },
-          ]}
-          childrenProps={{ ...textProps }}
-        >
-          {getPlainTextFromRichText(currentMessage!.text)}
-        </ParsedText>
+      <ParsedText
+        style={[
+          styles[position].text,
+          textStyle && textStyle[position],
+          customTextStyle,
+        ]}
+        parse={[
+          {
+            pattern: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+.[A-Z|a-z]{2,}\b/,
+            style: linkStyle,
+            onPress: onEmailPress,
+          },
+          ...parsePatterns!(linkStyle),
+          { type: 'phone', style: linkStyle, onPress: onPhonePress },
+        ]}
+        childrenProps={{ ...textProps }}
+      >
+        {getPlainTextFromRichText(currentMessage!.text)}
+      </ParsedText>
+      {allowExpand && !expanded && (
+        <TextButton onPress={onInternalExpandPress} title={'More'} />
       )}
     </View>
   );
 }
+
+const TextButton = ({
+  onPress,
+  title,
+  style,
+}: {
+  onPress: () => void;
+  title: string;
+  style?: StyleProp<ViewStyle>;
+}) => {
+  return (
+    <TouchableOpacity
+      style={[
+        {
+          marginLeft: 10,
+          marginRight: 10,
+        },
+        style,
+      ]}
+      onPress={onPress}
+    >
+      <Text
+        style={{
+          fontSize: 16,
+          fontWeight: '600',
+          color: '#a855f7',
+        }}
+      >
+        {title}
+      </Text>
+    </TouchableOpacity>
+  );
+};
 
 MessageText.propTypes = {
   position: PropTypes.oneOf(['left', 'right']),
