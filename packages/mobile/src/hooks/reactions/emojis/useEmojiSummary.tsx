@@ -10,13 +10,14 @@ export const useEmojiSummary = ({
   context,
   reactionPreview,
 }: {
-  context: ReactionContext;
+  context?: ReactionContext;
   reactionPreview?: EmojiReactionSummary;
 }) => {
   const dotYouClient = useDotYouClientContext();
 
-  const fetch = async (context: ReactionContext): Promise<EmojiReactionSummary> => {
+  const fetch = async (context: ReactionContext | undefined): Promise<EmojiReactionSummary> => {
     if (
+      !context ||
       !context.odinId ||
       !context.channelId ||
       (!context.target.globalTransitId && !context.target.fileId)
@@ -31,10 +32,10 @@ export const useEmojiSummary = ({
     fetch: useQuery({
       queryKey: [
         'emojis-summary',
-        context.odinId,
-        context.channelId,
-        context.target.fileId,
-        context.target.globalTransitId,
+        context?.odinId,
+        context?.channelId,
+        context?.target.fileId,
+        context?.target.globalTransitId,
       ],
       queryFn: () => fetch(context),
       refetchOnMount: false,
@@ -44,6 +45,7 @@ export const useEmojiSummary = ({
       initialData: reactionPreview,
       // By default, initialData is treated as totally fresh, as if it were just fetched. This also means that it will affect how it is interpreted by the staleTime option.
       enabled:
+        context &&
         !!context.odinId &&
         !!context.channelId &&
         (!!context.target.globalTransitId || !!context.target.fileId),
