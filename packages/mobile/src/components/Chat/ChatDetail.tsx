@@ -857,14 +857,16 @@ const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
   const { isDarkMode } = useDarkMode();
   const message = props.currentMessage as ChatMessageIMessage;
   const deleted = message?.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus;
-  const allowExpand = message?.fileMetadata.payloads.some(
+  const hasMoreTextContent = message?.fileMetadata.payloads.some(
     (e) => e.key === CHAT_TEXT_MESSAGE_PAYLOAD_KEY
   );
   const { data: completeMessage } = useChatMessage({
     messageId: undefined,
     fileId: message.fileId,
-    payloadKey: allowExpand ? CHAT_TEXT_MESSAGE_PAYLOAD_KEY : undefined,
+    payloadKey: hasMoreTextContent ? CHAT_TEXT_MESSAGE_PAYLOAD_KEY : undefined,
   }).getExpanded;
+
+  const allowExpand = hasMoreTextContent && !!completeMessage;
   const content = message?.fileMetadata.appData.content;
   const plainMessage = getPlainTextFromRichText(content.message);
   const onlyEmojis = isEmojiOnly(plainMessage);
@@ -901,12 +903,12 @@ const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
   }, []);
 
   const onExpand = useCallback(() => {
-    if (!allowExpand || !completeMessage) return;
+    if (!hasMoreTextContent || !completeMessage) return;
     const message = props.currentMessage as ChatMessageIMessage;
     message.text = completeMessage.message;
     props.currentMessage = message;
     setIndex((prev) => prev + 1);
-  }, [allowExpand, completeMessage, props]);
+  }, [hasMoreTextContent, completeMessage, props]);
 
   return (
     <MessageText

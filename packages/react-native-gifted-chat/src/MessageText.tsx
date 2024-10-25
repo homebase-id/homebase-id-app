@@ -45,6 +45,11 @@ const styles = {
       color: 'black',
       textDecorationLine: 'underline',
     },
+    button: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: '#a855f7',
+    },
   }),
   right: StyleSheet.create({
     container: {},
@@ -55,6 +60,11 @@ const styles = {
     link: {
       color: 'white',
       textDecorationLine: 'underline',
+    },
+    button: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: '#d8b4fe',
     },
   }),
 };
@@ -146,10 +156,10 @@ export function MessageText<TMessage extends IMessage = IMessage>({
       error(e, 'No handler for mailto'),
     );
 
-  const onInternalExpandPress = React.useCallback(() => {
+  const onInternalExpandPress = () => {
     setExpanded(true);
-    onExpandPress && onExpandPress();
-  }, []);
+    onExpandPress?.();
+  };
 
   const linkStyle = [
     styles[position].link,
@@ -182,7 +192,11 @@ export function MessageText<TMessage extends IMessage = IMessage>({
         {getPlainTextFromRichText(currentMessage!.text)}
       </ParsedText>
       {allowExpand && !expanded && (
-        <TextButton onPress={onInternalExpandPress} title={'More'} />
+        <TextButton
+          textStyle={styles[position].button}
+          onPress={onInternalExpandPress}
+          title={'More'}
+        />
       )}
     </View>
   );
@@ -191,11 +205,11 @@ export function MessageText<TMessage extends IMessage = IMessage>({
 const TextButton = ({
   onPress,
   title,
-  style,
+  textStyle,
 }: {
   onPress: () => void;
   title: string;
-  style?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
 }) => {
   return (
     <TouchableOpacity
@@ -204,19 +218,10 @@ const TextButton = ({
           marginLeft: 10,
           marginRight: 10,
         },
-        style,
       ]}
       onPress={onPress}
     >
-      <Text
-        style={{
-          fontSize: 16,
-          fontWeight: '600',
-          color: '#a855f7',
-        }}
-      >
-        {title}
-      </Text>
+      <Text style={textStyle}>{title}</Text>
     </TouchableOpacity>
   );
 };
