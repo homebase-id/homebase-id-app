@@ -49,7 +49,6 @@ export const PostDetailPage = ({ route: { params } }: PostDetailPageProps) => {
   const identity = useDotYouClientContext().getIdentity();
 
   const post = referencedPost || postFile;
-  console.log('post', post);
   const postOdinId = odinId || post?.fileMetadata.senderOdinId;
   const isExternal = odinId && odinId !== identity;
 
