@@ -40,9 +40,9 @@ export const useAllConnections = (enabled: boolean) => {
       const b = contactB?.fileMetadata.appData.content;
       if (!a || !b) return 0;
       return a.name?.displayName.localeCompare(b.name?.displayName || '') || 0;
-    }).map((contact) => ({
-      odinId: contact.fileMetadata.appData.content.odinId
-    }));
+    }).map((contact) => {
+      return allConnections.find((connection) => connection.odinId === contact.fileMetadata.appData.content.odinId) as DotYouProfile;
+    });
 
   };
 
