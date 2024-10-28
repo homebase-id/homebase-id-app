@@ -1,11 +1,13 @@
-import { DotYouProfile, getConnections } from '@homebase-id/js-lib/network';
+import { ContactFile, DotYouProfile, getConnections, getContactByOdinId } from '@homebase-id/js-lib/network';
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 
 const CHUNKSIZE = 200;
 export const useAllConnections = (enabled: boolean) => {
   const dotYouClient = useDotYouClientContext();
+  const queryClient = useQueryClient();
 
   const fetchConnections = async () => {
     // self invoking function that fetches the contacts in blocks of a CHUNKSIZE untill there are no more contacts to fetch
@@ -22,7 +24,26 @@ export const useAllConnections = (enabled: boolean) => {
     };
 
     const allConnections = await internalGetConnections(undefined, CHUNKSIZE);
-    return allConnections.sort((a, b) => a.odinId.localeCompare(b.odinId));
+
+    const getContactDataAndUpdateCache = async (connection: DotYouProfile) => {
+      const contact = await getContactByOdinId(dotYouClient, connection.odinId);
+      if (!contact) {
+        return;
+      }
+      queryClient.setQueryData(['contact', connection.odinId], contact);
+      return contact;
+    }
+    const allContactsData = (await Promise.all(allConnections.map(getContactDataAndUpdateCache))).filter(Boolean) as HomebaseFile<ContactFile>[];
+
+    return allContactsData.sort((contacta, contactB) => {
+      const a = contacta?.fileMetadata.appData.content;
+      const b = contactB?.fileMetadata.appData.content;
+      if (!a || !b) return 0;
+      return a.name?.displayName.localeCompare(b.name?.displayName || '') || 0;
+    }).map((contact) => ({
+      odinId: contact.fileMetadata.appData.content.odinId
+    }));
+
   };
 
   // TODO: needs to get merged with useConnections
