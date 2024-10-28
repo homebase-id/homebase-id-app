@@ -26,11 +26,11 @@ export const useAllConnections = (enabled: boolean) => {
     const allConnections = await internalGetConnections(undefined, CHUNKSIZE);
 
     const getContactDataAndUpdateCache = async (connection: DotYouProfile) => {
-      const contact = await getContactByOdinId(dotYouClient, connection.odinId);
+      const contact = await queryClient.fetchQuery({ queryKey: ["contact", connection.odinId], queryFn: () => getContactByOdinId(dotYouClient, connection.odinId) });
       if (!contact) {
         return;
       }
-      queryClient.setQueryData(['contact', connection.odinId], contact);
+
       return contact;
     }
     const allContactsData = (await Promise.all(allConnections.map(getContactDataAndUpdateCache))).filter(Boolean) as HomebaseFile<ContactFile>[];
