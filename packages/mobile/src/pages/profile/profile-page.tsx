@@ -345,8 +345,10 @@ const ShareLogsModal = ({ visible, onDismiss }: { visible: boolean; onDismiss: (
             borderEndStartRadius: 12,
             borderEndEndRadius: 12,
             paddingLeft: 16,
+            paddingRight: 16,
           }}
           title={t('Copy to Clipboard')}
+          showLoader
           icon={Copy}
           onPress={copyLogs}
         />
