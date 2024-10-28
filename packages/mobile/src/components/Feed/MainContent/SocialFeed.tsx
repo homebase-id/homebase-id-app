@@ -67,8 +67,9 @@ const SocialFeedMainContent = memo(() => {
     if (post) {
       const postContent = post.fileMetadata.appData.content;
       navigation.navigate('Post', {
-        postFile: post,
+        odinId: post.fileMetadata.senderOdinId,
         postKey: postContent.slug || postContent.id,
+        channelKey: postContent.channelId,
       });
     }
   }, [flattenedPosts, navigation, params]);

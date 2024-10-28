@@ -145,10 +145,10 @@ export const InnerPostTeaserCard = memo(
     const onNaviationPress = useCallback(() => {
       navigation.navigate('Post', {
         postKey: post.slug || post.id,
-        postFile,
-        channel: channel || undefined,
+        odinId: postFile.fileMetadata.senderOdinId,
+        channelKey: post.channelId,
       });
-    }, [navigation, post, postFile, channel]);
+    }, [navigation, post, postFile]);
 
     const tapGesture = Gesture.Tap()
       .onStart(() => {
