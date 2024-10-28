@@ -408,23 +408,10 @@ export const getUpdateChatMessageMutationOptions: (queryClient: QueryClient) => 
 export const useChatMessage = (props?: {
   conversationId?: string | undefined; // Optional: if we have it we can use the cache
   messageId: string | undefined;
-  fileId?: string | undefined;
-  payloadKey?: string | undefined;
 }) => {
   const queryClient = useQueryClient();
   const dotYouClient = useDotYouClientContext();
   const addError = useErrors().add;
-
-  const getExpandedMessage = async (fileId: string | undefined, payloadKey: string | undefined) => {
-    if (!fileId || !payloadKey) { return null; }
-    const extendedMessage = await getPayloadAsJson<{
-      message: string | RichText;
-    }>(dotYouClient, ChatDrive, fileId, payloadKey);
-    if (!extendedMessage) {
-      return null;
-    }
-    return extendedMessage;
-  };
 
   const getMessageByUniqueId = async (conversationId: string | undefined, messageId: string) => {
     const extistingMessages = conversationId
@@ -460,18 +447,6 @@ export const useChatMessage = (props?: {
       refetchOnWindowFocus: false,
       throwOnError: (error, _) => {
         const newError = generateClientError(error, t('Failed to get the chat message'));
-        addLogs(newError);
-        return false;
-      },
-    }),
-    getExpanded: useQuery({
-      queryKey: ['chat-message-expanded', props?.fileId, props?.payloadKey],
-      queryFn: () => getExpandedMessage(props?.fileId as string, props?.payloadKey as string),
-      enabled: !!props?.fileId && !!props?.payloadKey,
-      refetchOnMount: false,
-      refetchOnWindowFocus: false,
-      throwOnError: (error, _) => {
-        const newError = generateClientError(error, t('Failed to get the chat message payload extended Message'));
         addLogs(newError);
         return false;
       },

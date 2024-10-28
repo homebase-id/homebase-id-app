@@ -95,6 +95,7 @@ import { tryJsonParse } from '@homebase-id/js-lib/helpers';
 import { EmptyChatContainer } from './EmptyChatContainer';
 import { getPlainTextFromRichText } from 'homebase-id-app-common';
 import { ImageSource } from '../../provider/image/RNImageProvider';
+import { useChatMessagePayload } from '../../hooks/chat/useChatMessagePayload';
 
 export type ChatMessageIMessage = IMessage & HomebaseFile<ChatMessage>;
 
@@ -860,8 +861,7 @@ const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
   const hasMoreTextContent = message?.fileMetadata.payloads.some(
     (e) => e.key === CHAT_TEXT_MESSAGE_PAYLOAD_KEY
   );
-  const { data: completeMessage } = useChatMessage({
-    messageId: undefined,
+  const { data: completeMessage } = useChatMessagePayload({
     fileId: message.fileId,
     payloadKey: hasMoreTextContent ? CHAT_TEXT_MESSAGE_PAYLOAD_KEY : undefined,
   }).getExpanded;
