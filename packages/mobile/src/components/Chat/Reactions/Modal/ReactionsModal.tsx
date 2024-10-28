@@ -1,6 +1,6 @@
-import { BottomSheetModal, BottomSheetScrollView, BottomSheetView } from '@gorhom/bottom-sheet';
-import { forwardRef, memo } from 'react';
-import { ActivityIndicator, Text, View } from 'react-native';
+import { BottomSheetFlatList, BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
+import { forwardRef, memo, useCallback, useMemo, useState } from 'react';
+import { ActivityIndicator, ListRenderItemInfo, ScrollView, Text, View } from 'react-native';
 import { Colors } from '../../../../app/Colors';
 import { useDarkMode } from '../../../../hooks/useDarkMode';
 
@@ -11,6 +11,9 @@ import { AuthorName } from '../../../ui/Name';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import { Backdrop } from '../../../ui/Modal/Backdrop';
 import { openURL } from '../../../../utils/utils';
+import TextButton from '../../../ui/Text/Text-Button';
+import { ReactionFile } from '@homebase-id/js-lib/core';
+import { t } from 'homebase-id-app-common';
 
 export const ReactionsModal = memo(
   forwardRef(
@@ -23,6 +26,70 @@ export const ReactionsModal = memo(
         messageFileId: message?.fileId,
         messageGlobalTransitId: message?.fileMetadata.globalTransitId,
       }).get;
+      const [activeEmoji, setActiveEmoji] = useState<string>('all');
+
+      const filteredEmojis = useMemo(() => {
+        const pureEmojis = reactions?.map((reaction) => reaction.body.trim());
+        return Array.from(new Set(pureEmojis));
+      }, [reactions]);
+
+      const renderHeader = useCallback(() => {
+        if (!filteredEmojis) return null;
+        return (
+          <ScrollView
+            horizontal
+            style={{
+              flexDirection: 'row',
+              gap: 10,
+            }}
+          >
+            {filteredEmojis.length > 1 ? (
+              <TextButton
+                unFilledStyle={{
+                  backgroundColor:
+                    activeEmoji === 'all'
+                      ? isDarkMode
+                        ? Colors.violet[900]
+                        : Colors.violet[200]
+                      : undefined,
+                  borderRadius: 8,
+                  padding: 8,
+                }}
+                key={'all'}
+                title={`${t('All')} ${reactions?.length}`}
+                onPress={() => setActiveEmoji('all')}
+              />
+            ) : null}
+            {filteredEmojis.map((reaction) => {
+              const count = reactions?.filter((emoji) => emoji.body === reaction).length;
+              return (
+                <TextButton
+                  unFilledStyle={{
+                    backgroundColor:
+                      activeEmoji === reaction || filteredEmojis?.length === 1
+                        ? isDarkMode
+                          ? Colors.violet[900]
+                          : Colors.violet[200]
+                        : undefined,
+                    borderRadius: 8,
+                    padding: 8,
+                  }}
+                  key={reaction}
+                  title={`${reaction} ${count}`}
+                  onPress={() => setActiveEmoji(reaction)}
+                />
+              );
+            })}
+          </ScrollView>
+        );
+      }, [activeEmoji, filteredEmojis, isDarkMode, reactions]);
+
+      const renderItem = useCallback(
+        ({ item }: ListRenderItemInfo<ReactionFile>) => (
+          <ReactionTile key={item.authorOdinId + item.body} reaction={item.body} {...item} />
+        ),
+        []
+      );
 
       return (
         <BottomSheetModal
@@ -44,7 +111,6 @@ export const ReactionsModal = memo(
           <BottomSheetView
             style={{
               paddingHorizontal: 10,
-              flex: 1,
             }}
           >
             <Text
@@ -67,15 +133,16 @@ export const ReactionsModal = memo(
                 }}
               />
             ) : (
-              <BottomSheetScrollView>
-                {reactions?.map((prop) => (
-                  <ReactionTile
-                    key={prop.authorOdinId + prop.body}
-                    reaction={prop.body}
-                    {...prop}
-                  />
-                ))}
-              </BottomSheetScrollView>
+              <>
+                {renderHeader()}
+                <BottomSheetFlatList
+                  data={reactions?.filter(
+                    (reaction) => reaction.body === activeEmoji || activeEmoji === 'all'
+                  )}
+                  keyExtractor={(item) => item.authorOdinId + item.body}
+                  renderItem={renderItem}
+                />
+              </>
             )}
           </BottomSheetView>
         </BottomSheetModal>
