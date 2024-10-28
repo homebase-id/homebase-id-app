@@ -1,6 +1,6 @@
 import { FC, useState } from 'react';
 import { IconProps } from './Icons/icons';
-import { ActivityIndicator, TouchableOpacity } from 'react-native';
+import { ActivityIndicator, StyleProp, TouchableOpacity, ViewStyle } from 'react-native';
 import { Text } from './Text/Text';
 
 export const ListTile = ({
@@ -8,11 +8,13 @@ export const ListTile = ({
   title,
   onPress,
   showLoader,
+  style,
 }: {
   icon: FC<IconProps>;
   title: string;
   onPress: () => void | Promise<void>;
   showLoader?: boolean;
+  style?: StyleProp<ViewStyle>;
 }) => {
   const [pending, setPending] = useState(false);
   const onClick = async () => {
@@ -24,12 +26,15 @@ export const ListTile = ({
   return (
     <TouchableOpacity
       onPress={() => onClick()}
-      style={{
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingVertical: 12,
-      }}
+      style={[
+        {
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          paddingVertical: 12,
+        },
+        style,
+      ]}
     >
       {icon({ size: 'lg' })}
       <Text
