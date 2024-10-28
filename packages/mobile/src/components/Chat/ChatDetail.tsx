@@ -855,7 +855,7 @@ const MediaPickerComponent = ({
 
 const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
   const { isDarkMode } = useDarkMode();
-  const message = props.currentMessage as ChatMessageIMessage;
+  const [message, setMessage] = useState(props.currentMessage as ChatMessageIMessage);
   const deleted = message?.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus;
   const hasMoreTextContent = message?.fileMetadata.payloads.some(
     (e) => e.key === CHAT_TEXT_MESSAGE_PAYLOAD_KEY
@@ -870,7 +870,6 @@ const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
   const content = message?.fileMetadata.appData.content;
   const plainMessage = getPlainTextFromRichText(content.message);
   const onlyEmojis = isEmojiOnly(plainMessage);
-  const [_, setIndex] = useState(0); // Just to update the component when the onExpand called
   /**
    * An array of parse patterns used for parsing text in the chat detail component.
    * Each pattern consists of a regular expression pattern, a style to apply to the matched text,
@@ -906,13 +905,13 @@ const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
     if (!hasMoreTextContent || !completeMessage) return;
     const message = props.currentMessage as ChatMessageIMessage;
     message.text = completeMessage.message;
-    props.currentMessage = message;
-    setIndex((prev) => prev + 1);
+    setMessage(message);
   }, [hasMoreTextContent, completeMessage, props]);
 
   return (
     <MessageText
       {...props}
+      currentMessage={message}
       parsePatterns={parsePatterns}
       linkStyle={{
         left: {
