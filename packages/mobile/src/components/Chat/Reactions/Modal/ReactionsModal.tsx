@@ -41,7 +41,6 @@ export const ReactionsModal = memo(
             style={{
               flexDirection: 'row',
               gap: 10,
-              marginBottom: 10,
             }}
           >
             {filteredEmojis.length > 1 ? (
@@ -112,7 +111,6 @@ export const ReactionsModal = memo(
           <BottomSheetView
             style={{
               paddingHorizontal: 10,
-              flex: 1,
             }}
           >
             <Text
@@ -135,14 +133,16 @@ export const ReactionsModal = memo(
                 }}
               />
             ) : (
-              <BottomSheetFlatList
-                data={reactions?.filter(
-                  (reaction) => reaction.body === activeEmoji || activeEmoji === 'all'
-                )}
-                keyExtractor={(item) => item.authorOdinId + item.body}
-                ListHeaderComponent={renderHeader}
-                renderItem={renderItem}
-              />
+              <>
+                {renderHeader()}
+                <BottomSheetFlatList
+                  data={reactions?.filter(
+                    (reaction) => reaction.body === activeEmoji || activeEmoji === 'all'
+                  )}
+                  keyExtractor={(item) => item.authorOdinId + item.body}
+                  renderItem={renderItem}
+                />
+              </>
             )}
           </BottomSheetView>
         </BottomSheetModal>
