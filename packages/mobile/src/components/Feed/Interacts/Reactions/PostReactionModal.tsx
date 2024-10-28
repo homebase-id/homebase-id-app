@@ -1,10 +1,18 @@
 import { BottomSheetFlatList, BottomSheetModal } from '@gorhom/bottom-sheet';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
-import { forwardRef, memo, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import {
+  forwardRef,
+  memo,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from 'react';
 import { Backdrop } from '../../../ui/Modal/Backdrop';
 import { Colors } from '../../../../app/Colors';
 import { Text } from '../../../ui/Text/Text';
-import { View } from 'react-native';
+import { ListRenderItemInfo, View } from 'react-native';
 import { useDarkMode } from '../../../../hooks/useDarkMode';
 import { ReactionContext } from '@homebase-id/js-lib/public';
 import { useEmojiReactions, useEmojiSummary } from '../../../../hooks/reactions';
@@ -60,6 +68,12 @@ const ReactionsModal = memo(
     const onClose = () => {
       setContext(undefined);
     };
+    const renderItem = useCallback(
+      ({ item }: ListRenderItemInfo<ReactionFile>) => (
+        <ReactionTile key={item.authorOdinId + item.body} reaction={item.body} {...item} />
+      ),
+      []
+    );
 
     useEffect(() => {
       if (filteredEmojis?.length && !activeEmoji) {
@@ -130,9 +144,7 @@ const ReactionsModal = memo(
           </View>
           <BottomSheetFlatList
             data={flattenedReactions?.filter((reaction) => reaction.body === activeEmoji)}
-            renderItem={({ item }) => (
-              <ReactionTile reaction={item.body} authorOdinId={item.authorOdinId} />
-            )}
+            renderItem={renderItem}
             onEndReached={() => hasNextPage && fetchNextPage()}
             onEndReachedThreshold={0.3}
           />
