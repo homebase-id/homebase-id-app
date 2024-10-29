@@ -53,16 +53,16 @@ jobs:
         working-directory: packages/mobile/ios
 
       - name: Build IOS App
-        uses: yukiarrr/ios-build-action@v1.11.0
+        uses: yukiarrr/ios-build-action@v1.12.0
         with:
           project-path: packages/mobile/ios/HomebaseFeed.xcodeproj
-          p12-base64: ${{ secrets.IOS_P12_BASE64 }}
+          p12-base64: ${{ secrets.IOS_FEED_P12_BASE64 }}
           mobileprovision-base64: |
             ${{ secrets.FEED_IOS_MOBILE_PROVISION_BASE64 }}
             ${{ secrets.FEED_APP_GROUP_IOS_MOBILE_PROVISION_BASE64 }}
-          code-signing-identity: 'iPhone Distribution'
+          code-signing-identity: 'Apple Distribution'
           team-id: ${{ secrets.IOS_TEAM_ID }}
-          certificate-password: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
+          certificate-password: ${{ secrets.IOS_FEED_CERTIFICATE_PASSWORD }}
           workspace-path: packages/mobile/ios/HomebaseFeed.xcworkspace
           scheme: HomebaseFeed
           export-options: packages/mobile/ios/options.plist
