@@ -57,12 +57,8 @@ import { useDarkMode } from '../../hooks/useDarkMode';
 import { ChatDeliveryIndicator } from '../../components/Chat/Chat-Delivery-Indicator';
 import { Avatar as AppAvatar, OwnerAvatar } from '../../components/ui/Avatars/Avatar';
 import { AuthorName, ConnectionName } from '../../components/ui/Name';
-import { HomebaseFile } from '@homebase-id/js-lib/core';
-import {
-  CHAT_TEXT_MESSAGE_PAYLOAD_KEY,
-  ChatDeletedArchivalStaus,
-  ChatMessage,
-} from '../../provider/chat/ChatProvider';
+import { DEFAULT_PAYLOAD_KEY, HomebaseFile } from '@homebase-id/js-lib/core';
+import { ChatDeletedArchivalStaus, ChatMessage } from '../../provider/chat/ChatProvider';
 import { useAudioRecorder } from '../../hooks/audio/useAudioRecorderPlayer';
 import { Text } from '../ui/Text/Text';
 import {
@@ -863,7 +859,7 @@ const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
   );
   const { data: completeMessage } = useChatMessagePayload({
     fileId: message.fileId,
-    payloadKey: hasMoreTextContent ? CHAT_TEXT_MESSAGE_PAYLOAD_KEY : undefined,
+    payloadKey: hasMoreTextContent ? DEFAULT_PAYLOAD_KEY : undefined,
   }).getExpanded;
 
   const allowExpand = hasMoreTextContent && !!completeMessage;

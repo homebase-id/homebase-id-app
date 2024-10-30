@@ -19,7 +19,6 @@ import {
   UploadInstructionSet,
   deleteFilesByGroupId,
   deletePayload,
-  getContentFromHeaderOrPayload,
   getFileHeaderByUniqueId,
   queryBatch,
   uploadFile,
@@ -32,11 +31,11 @@ import {
   TransferStatus,
   deleteFile,
   RichText,
-  DEFAULT_PAYLOAD_KEY,
   decryptKeyHeader,
   EncryptedKeyHeader,
   decryptJsonContent,
   getFileHeader,
+  DEFAULT_PAYLOAD_KEY,
 } from '@homebase-id/js-lib/core';
 import { ChatDrive, UnifiedConversation } from './ConversationProvider';
 import {
@@ -95,7 +94,6 @@ export interface ChatMessage {
 }
 
 const CHAT_MESSAGE_PAYLOAD_KEY = 'chat_mbl';
-export const CHAT_TEXT_MESSAGE_PAYLOAD_KEY = 'chat_txt';
 export const CHAT_LINKS_PAYLOAD_KEY = 'chat_links';
 
 export const getChatMessages = async (
@@ -307,7 +305,7 @@ export const uploadChatMessage = async (
 
   if (!shouldEmbedContent) {
     payloads.push({
-      key: CHAT_TEXT_MESSAGE_PAYLOAD_KEY,
+      key: DEFAULT_PAYLOAD_KEY,
       payload: new OdinBlob([payloadBytes], { type: 'application/json' }) as unknown as Blob,
     });
   }
