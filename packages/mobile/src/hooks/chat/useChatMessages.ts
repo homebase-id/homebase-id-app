@@ -229,6 +229,11 @@ export const internalInsertNewMessage = (
     return extistingMessages;
   }
 
+  if (!newMessage.fileMetadata.appData.content) {
+    console.error('Attempted to insert an empty message', newMessage);
+    return extistingMessages;
+  }
+
   const isNewFile = !extistingMessages.pages.some((page) =>
     page.searchResults.some(
       (msg) =>

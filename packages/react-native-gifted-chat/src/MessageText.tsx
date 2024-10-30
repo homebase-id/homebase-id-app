@@ -8,6 +8,8 @@ import {
   StyleProp,
   ViewStyle,
   TextStyle,
+  Text,
+  TouchableOpacity,
 } from 'react-native';
 
 // @ts-ignore
@@ -43,6 +45,11 @@ const styles = {
       color: 'black',
       textDecorationLine: 'underline',
     },
+    button: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: '#a855f7',
+    },
   }),
   right: StyleSheet.create({
     container: {},
@@ -53,6 +60,11 @@ const styles = {
     link: {
       color: 'white',
       textDecorationLine: 'underline',
+    },
+    button: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: '#d8b4fe',
     },
   }),
 };
@@ -69,6 +81,8 @@ export interface MessageTextProps<TMessage extends IMessage> {
   textProps?: TextProps;
   customTextStyle?: StyleProp<TextStyle>;
   parsePatterns?(linkStyle: StyleProp<TextStyle>): ParseShape[];
+  allowExpand?: boolean;
+  onExpandPress?(): void;
 }
 
 export function MessageText<TMessage extends IMessage = IMessage>({
@@ -81,9 +95,11 @@ export function MessageText<TMessage extends IMessage = IMessage>({
   customTextStyle,
   parsePatterns = _ => [],
   textProps,
+  onExpandPress,
+  allowExpand,
 }: MessageTextProps<TMessage>) {
   const { actionSheet } = useChatContext();
-
+  const [expanded, setExpanded] = React.useState(false);
   // TODO: React.memo
   // const shouldComponentUpdate = (nextProps: MessageTextProps<TMessage>) => {
   //   return (
@@ -140,6 +156,11 @@ export function MessageText<TMessage extends IMessage = IMessage>({
       error(e, 'No handler for mailto'),
     );
 
+  const onInternalExpandPress = () => {
+    setExpanded(true);
+    onExpandPress?.();
+  };
+
   const linkStyle = [
     styles[position].link,
     linkStyleProp && linkStyleProp[position],
@@ -170,9 +191,40 @@ export function MessageText<TMessage extends IMessage = IMessage>({
       >
         {getPlainTextFromRichText(currentMessage!.text)}
       </ParsedText>
+      {allowExpand && !expanded && (
+        <TextButton
+          textStyle={styles[position].button}
+          onPress={onInternalExpandPress}
+          title={'More'}
+        />
+      )}
     </View>
   );
 }
+
+const TextButton = ({
+  onPress,
+  title,
+  textStyle,
+}: {
+  onPress: () => void;
+  title: string;
+  textStyle?: StyleProp<TextStyle>;
+}) => {
+  return (
+    <TouchableOpacity
+      style={[
+        {
+          marginLeft: 10,
+          marginRight: 10,
+        },
+      ]}
+      onPress={onPress}
+    >
+      <Text style={textStyle}>{title}</Text>
+    </TouchableOpacity>
+  );
+};
 
 MessageText.propTypes = {
   position: PropTypes.oneOf(['left', 'right']),
