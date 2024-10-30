@@ -57,7 +57,7 @@ import { useDarkMode } from '../../hooks/useDarkMode';
 import { ChatDeliveryIndicator } from '../../components/Chat/Chat-Delivery-Indicator';
 import { Avatar as AppAvatar, OwnerAvatar } from '../../components/ui/Avatars/Avatar';
 import { AuthorName, ConnectionName } from '../../components/ui/Name';
-import { HomebaseFile } from '@homebase-id/js-lib/core';
+import { DEFAULT_PAYLOAD_KEY, HomebaseFile } from '@homebase-id/js-lib/core';
 import { ChatDeletedArchivalStaus, ChatMessage } from '../../provider/chat/ChatProvider';
 import { useAudioRecorder } from '../../hooks/audio/useAudioRecorderPlayer';
 import { Text } from '../ui/Text/Text';
@@ -91,6 +91,7 @@ import { tryJsonParse } from '@homebase-id/js-lib/helpers';
 import { EmptyChatContainer } from './EmptyChatContainer';
 import { getPlainTextFromRichText } from 'homebase-id-app-common';
 import { ImageSource } from '../../provider/image/RNImageProvider';
+import { useChatMessagePayload } from '../../hooks/chat/useChatMessagePayload';
 
 export type ChatMessageIMessage = IMessage & HomebaseFile<ChatMessage>;
 
@@ -851,9 +852,17 @@ const MediaPickerComponent = ({
 
 const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
   const { isDarkMode } = useDarkMode();
-  const message = props.currentMessage as ChatMessageIMessage;
+  const [message, setMessage] = useState(props.currentMessage as ChatMessageIMessage);
   const deleted = message?.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus;
+  const hasMoreTextContent = message?.fileMetadata.payloads.some(
+    (e) => e.key === DEFAULT_PAYLOAD_KEY
+  );
+  const { data: completeMessage } = useChatMessagePayload({
+    fileId: message.fileId,
+    payloadKey: hasMoreTextContent ? DEFAULT_PAYLOAD_KEY : undefined,
+  }).getExpanded;
 
+  const allowExpand = hasMoreTextContent && !!completeMessage;
   const content = message?.fileMetadata.appData.content;
   const plainMessage = getPlainTextFromRichText(content.message);
   const onlyEmojis = isEmojiOnly(plainMessage);
@@ -888,9 +897,17 @@ const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
     ];
   }, []);
 
+  const onExpand = useCallback(() => {
+    if (!hasMoreTextContent || !completeMessage) return;
+    const message = props.currentMessage as ChatMessageIMessage;
+    message.text = completeMessage.message;
+    setMessage(message);
+  }, [hasMoreTextContent, completeMessage, props]);
+
   return (
     <MessageText
       {...props}
+      currentMessage={message}
       parsePatterns={parsePatterns}
       linkStyle={{
         left: {
@@ -901,6 +918,8 @@ const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
           fontWeight: '500',
         },
       }}
+      allowExpand={allowExpand}
+      onExpandPress={onExpand}
       customTextStyle={
         onlyEmojis
           ? {

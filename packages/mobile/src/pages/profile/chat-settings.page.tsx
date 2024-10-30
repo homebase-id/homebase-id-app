@@ -19,8 +19,8 @@ export const ChatSettingsPage = (_: ChatSettingsPageProp) => {
       <View
         style={{
           backgroundColor: isDarkMode ? Colors.indigo[900] : Colors.indigo[100],
-          marginTop: 8,
-          marginHorizontal: 6,
+          marginTop: 16,
+          marginHorizontal: 16,
           paddingHorizontal: 16,
           paddingVertical: 16,
           borderRadius: 16,
@@ -42,6 +42,21 @@ export const ChatSettingsPage = (_: ChatSettingsPageProp) => {
           value={allowYoutubePlayback}
           onValueChange={(val) => setAllowYoutubePlayback(val)}
         />
+      </View>
+      <View
+        style={{
+          marginHorizontal: 22,
+          marginTop: 12,
+        }}
+      >
+        <Text
+          style={{
+            color: isDarkMode ? Colors.slate[400] : Colors.slate[600],
+            fontWeight: '300',
+          }}
+        >
+          {t('This setting will allow you to play youtube videos inside the chat directly.')}
+        </Text>
       </View>
     </SafeAreaView>
   );

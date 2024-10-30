@@ -1,16 +1,25 @@
 import { BottomSheetFlatList, BottomSheetModal } from '@gorhom/bottom-sheet';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
-import { forwardRef, memo, useImperativeHandle, useRef, useState } from 'react';
+import {
+  forwardRef,
+  memo,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from 'react';
 import { Backdrop } from '../../../ui/Modal/Backdrop';
 import { Colors } from '../../../../app/Colors';
 import { Text } from '../../../ui/Text/Text';
-import { View } from 'react-native';
+import { ListRenderItemInfo, View } from 'react-native';
 import { useDarkMode } from '../../../../hooks/useDarkMode';
 import { ReactionContext } from '@homebase-id/js-lib/public';
-import { useEmojiReactions } from '../../../../hooks/reactions';
+import { useEmojiReactions, useEmojiSummary } from '../../../../hooks/reactions';
 import { ReactionFile } from '@homebase-id/js-lib/core';
 import { ReactionTile } from '../../../Chat/Reactions/Modal/ReactionsModal';
 import { useBottomSheetBackHandler } from '../../../../hooks/useBottomSheetBackHandler';
+import TextButton from '../../../ui/Text/Text-Button';
 
 export interface ReactionModalMethods {
   setContext: (context: ReactionContext) => void;
@@ -22,12 +31,26 @@ const ReactionsModal = memo(
     const { isDarkMode } = useDarkMode();
     const bottomSheetRef = useRef<BottomSheetModalMethods>(null);
     const [context, setContext] = useState<ReactionContext>();
-    const { data: reactionDetails, hasNextPage, fetchNextPage } = useEmojiReactions(context).fetch;
+    const {
+      data: reactionDetails,
+      hasNextPage,
+      fetchNextPage,
+      isFetchedAfterMount: reactionsDetailsLoaded,
+    } = useEmojiReactions(context).fetch;
+    const { data: reactionSummary, isFetchedAfterMount: reactionSummaryLoaded } = useEmojiSummary({
+      context,
+    }).fetch;
+    const [activeEmoji, setActiveEmoji] = useState<string>();
+
     const { handleSheetPositionChange } = useBottomSheetBackHandler(bottomSheetRef);
 
     const flattenedReactions = reactionDetails?.pages
       .flatMap((page) => page?.reactions)
       .filter(Boolean) as ReactionFile[];
+
+    const filteredEmojis = reactionSummary?.reactions?.filter((reaction) =>
+      flattenedReactions?.some((reactionFile) => reactionFile.body === reaction.emoji)
+    );
 
     useImperativeHandle(ref, () => {
       return {
@@ -45,6 +68,18 @@ const ReactionsModal = memo(
     const onClose = () => {
       setContext(undefined);
     };
+    const renderItem = useCallback(
+      ({ item }: ListRenderItemInfo<ReactionFile>) => (
+        <ReactionTile key={item.authorOdinId + item.body} reaction={item.body} {...item} />
+      ),
+      []
+    );
+
+    useEffect(() => {
+      if (filteredEmojis?.length && !activeEmoji) {
+        setActiveEmoji(filteredEmojis?.[0].emoji);
+      }
+    }, [activeEmoji, filteredEmojis, reactionSummaryLoaded, reactionsDetailsLoaded]);
 
     return (
       <BottomSheetModal
@@ -54,6 +89,7 @@ const ReactionsModal = memo(
         backdropComponent={Backdrop}
         onDismiss={onClose}
         enableDismissOnClose={true}
+        enableDynamicSizing={false}
         enablePanDownToClose
         index={0}
         backgroundStyle={{
@@ -79,11 +115,36 @@ const ReactionsModal = memo(
           >
             Reactions
           </Text>
+          <View
+            style={{
+              flexDirection: 'row',
+              gap: 10,
+              marginBottom: 10,
+            }}
+          >
+            {filteredEmojis?.map((reaction, index) => {
+              return (
+                <TextButton
+                  unFilledStyle={{
+                    backgroundColor:
+                      activeEmoji === reaction.emoji
+                        ? isDarkMode
+                          ? Colors.violet[900]
+                          : Colors.violet[200]
+                        : undefined,
+                    borderRadius: 8,
+                    padding: 8,
+                  }}
+                  key={index}
+                  title={`${reaction.emoji} ${reaction.count}`}
+                  onPress={() => setActiveEmoji(reaction.emoji)}
+                />
+              );
+            })}
+          </View>
           <BottomSheetFlatList
-            data={flattenedReactions}
-            renderItem={({ item }) => (
-              <ReactionTile reaction={item.body} authorOdinId={item.authorOdinId} />
-            )}
+            data={flattenedReactions?.filter((reaction) => reaction.body === activeEmoji)}
+            renderItem={renderItem}
             onEndReached={() => hasNextPage && fetchNextPage()}
             onEndReachedThreshold={0.3}
           />
