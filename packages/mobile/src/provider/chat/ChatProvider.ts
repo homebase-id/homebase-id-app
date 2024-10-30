@@ -33,6 +33,10 @@ import {
   deleteFile,
   RichText,
   DEFAULT_PAYLOAD_KEY,
+  decryptKeyHeader,
+  EncryptedKeyHeader,
+  decryptJsonContent,
+  getFileHeader,
 } from '@homebase-id/js-lib/core';
 import { ChatDrive, UnifiedConversation } from './ConversationProvider';
 import {
@@ -41,6 +45,7 @@ import {
   getRandom16ByteArray,
   jsonStringify64,
   stringToUint8Array,
+  tryJsonParse,
 } from '@homebase-id/js-lib/helpers';
 import { OdinBlob } from '../../../polyfills/OdinBlob';
 import { ImageSource } from '../image/RNImageProvider';
@@ -147,12 +152,29 @@ export const dsrToMessage = async (
   includeMetadataHeader: boolean
 ): Promise<HomebaseFile<ChatMessage> | null> => {
   try {
-    const msgContent = await getContentFromHeaderOrPayload<ChatMessage>(
-      dotYouClient,
-      targetDrive,
-      dsr,
-      includeMetadataHeader
-    );
+    const msgContent = await (async () => {
+      const { fileId, fileMetadata, sharedSecretEncryptedKeyHeader } = dsr;
+      if (!fileId || !fileMetadata) {
+        throw new Error('[chat-provider] dsrToMessage: fileId or fileMetadata is undefined');
+      }
+      if (fileMetadata.isEncrypted && !sharedSecretEncryptedKeyHeader) return null;
+
+      const keyHeader = fileMetadata.isEncrypted
+        ? await decryptKeyHeader(dotYouClient, sharedSecretEncryptedKeyHeader as EncryptedKeyHeader)
+        : undefined;
+      let decryptedJsonContent: string | null = null;
+      if (includeMetadataHeader) {
+        decryptedJsonContent = await decryptJsonContent(fileMetadata, keyHeader);
+      } else {
+        // When contentIsComplete but includeMetadataHeader == false the query before was done without including the content; So we just get and parse
+        const fileHeader = await getFileHeader(dotYouClient, targetDrive, fileId,);
+        if (!fileHeader) return null;
+        decryptedJsonContent = await decryptJsonContent(fileHeader.fileMetadata, keyHeader);
+      }
+      return tryJsonParse<ChatMessage>(decryptedJsonContent);
+    })();
+
+
     if (!msgContent) return null;
 
     if (
