@@ -206,16 +206,24 @@ export const getExtensionForMimeType = (mimeType: string | undefined | null) => 
 /*
 Extract VideoId from the given youtube url
 */
-export function extractVideoId(url: string): string | null | undefined {
+export function extractVideoParams(url: string): {
+  videoId: string | null | undefined;
+  start?: string | null | undefined;
+  end?: string | null | undefined;
+} | undefined {
   if (!url) return;
   if (url.includes('youtube.com') || url.includes('youtu.be')) {
     const uri = new URL(url);
     if (uri.hostname === 'youtu.be') {
-      return uri.pathname.substring(1);
+      return { videoId: uri.pathname.substring(1), start: uri.searchParams.get('t') };
     }
-    return uri.searchParams.get('v');
+    return {
+      videoId: uri.searchParams.get('v'),
+      start: uri.searchParams.get('t'),
+      end: uri.searchParams.get('end'),
+    };
   }
-  return null;
+  return;
 }
 
 export function isYoutubeURL(url: string): boolean {
