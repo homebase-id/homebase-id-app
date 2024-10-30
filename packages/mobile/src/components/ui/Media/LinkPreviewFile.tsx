@@ -4,8 +4,8 @@ import { ActivityIndicator, Dimensions, ImageBackground, View } from 'react-nati
 import { useLinkMetadata } from '../../../hooks/links/useLinkPreview';
 import {
   calculateScaledDimensions,
-  extractVideoId,
   isYoutubeURL,
+  extractVideoParams,
   openURL,
 } from '../../../utils/utils';
 import { Text } from '../Text/Text';
@@ -33,9 +33,18 @@ type LinkPreviewFileProps = {
 
 export const YoutubePlayerComponent = memo(({ url }: { url: string | undefined }) => {
   if (!url) return null;
-  const videoId = extractVideoId(url);
-  if (!videoId) return null;
-  return <YoutubePlayer videoId={videoId} height={200} />;
+  const videoProps = extractVideoParams(url);
+  if (!videoProps || !videoProps.videoId) return null;
+  const { videoId, start } = videoProps;
+  return (
+    <YoutubePlayer
+      videoId={videoId}
+      height={200}
+      initialPlayerParams={{
+        start: start ? parseInt(start) : 0,
+      }}
+    />
+  );
 });
 
 export const LinkPreviewFile = memo(
