@@ -12,7 +12,7 @@ import { MediaGallery, MediaItem } from '../ui/Media/MediaGallery';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { Colors } from '../../app/Colors';
 import { useDotYouClientContext } from 'homebase-id-app-common';
-import { CHAT_TEXT_MESSAGE_PAYLOAD_KEY } from '../../provider/chat/ChatProvider';
+import { DEFAULT_PAYLOAD_KEY } from '@homebase-id/js-lib/core';
 
 const MediaMessage = memo(
   ({
@@ -44,9 +44,8 @@ const MediaMessage = memo(
     );
     if (
       !props.currentMessage ||
-      !props.currentMessage.fileMetadata.payloads?.filter(
-        (p) => p.key !== CHAT_TEXT_MESSAGE_PAYLOAD_KEY
-      ).length
+      !props.currentMessage.fileMetadata.payloads?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY)
+        .length
     ) {
       return null;
     }
@@ -84,7 +83,7 @@ const InnerMediaMessage = memo(
     const { width, height } = Dimensions.get('screen');
 
     const payloads = currentMessage.fileMetadata.payloads?.filter(
-      (p) => p.key !== CHAT_TEXT_MESSAGE_PAYLOAD_KEY
+      (p) => p.key !== DEFAULT_PAYLOAD_KEY
     );
     const isMe =
       !currentMessage.fileMetadata.senderOdinId ||
