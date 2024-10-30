@@ -34,13 +34,14 @@ export const useAllConnections = (enabled: boolean) => {
       return contact;
     }
     const allContactsData = (await Promise.all(allConnections.map(getContactDataAndUpdateCache))).filter(Boolean) as HomebaseFile<ContactFile>[];
-
     return allContactsData.sort((contacta, contactB) => {
+
       const a = contacta?.fileMetadata.appData.content;
       const b = contactB?.fileMetadata.appData.content;
       if (!a || !b) return 0;
-      return a.name?.displayName.localeCompare(b.name?.displayName || '') || 0;
+      return (a.name?.displayName || a.odinId || '').localeCompare(b.name?.displayName || b.odinId || '') || 0;
     }).map((contact) => {
+      console.log('contact', contact.fileMetadata.appData.content);
       return allConnections.find((connection) => connection.odinId === contact.fileMetadata.appData.content.odinId) as DotYouProfile;
     });
 
