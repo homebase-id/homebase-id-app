@@ -855,7 +855,7 @@ const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
   const [message, setMessage] = useState(props.currentMessage as ChatMessageIMessage);
   const deleted = message?.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus;
   const hasMoreTextContent = message?.fileMetadata.payloads.some(
-    (e) => e.key === CHAT_TEXT_MESSAGE_PAYLOAD_KEY
+    (e) => e.key === DEFAULT_PAYLOAD_KEY
   );
   const { data: completeMessage } = useChatMessagePayload({
     fileId: message.fileId,
