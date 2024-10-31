@@ -1,7 +1,7 @@
 
 import InAppBrowser from 'react-native-inappbrowser-reborn';
 import { Linking } from 'react-native';
-import { calculateScaledDimensions, extractUrls, extractVideoId, isEmojiOnly, millisToMinutesAndSeconds, openURL } from '../src/utils/utils';
+import { calculateScaledDimensions, extractUrls, extractVideoParams, isEmojiOnly, millisToMinutesAndSeconds, openURL } from '../src/utils/utils';
 
 jest.mock('react-native-inappbrowser-reborn', () => ({
     isAvailable: jest.fn(),
@@ -78,18 +78,18 @@ describe('utils.ts', () => {
     describe('extractVideoId', () => {
         it('should return the video ID from a youtube.com URL', () => {
             const url = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
-            const videoId = extractVideoId(url);
-            expect(videoId).toBe('dQw4w9WgXcQ');
+            const videoId = extractVideoParams(url);
+            expect(videoId?.videoId).toBe('dQw4w9WgXcQ');
         });
         it('should return the video ID from a youtu.be URL', () => {
             const url = 'https://youtu.be/dQw4w9WgXcQ';
-            const videoId = extractVideoId(url);
-            expect(videoId).toBe('dQw4w9WgXcQ');
+            const videoId = extractVideoParams(url);
+            expect(videoId?.videoId).toBe('dQw4w9WgXcQ');
         });
         it('should return null if the URL is invalid', () => {
             const url = 'https://example.com';
-            const videoId = extractVideoId(url);
-            expect(videoId).toBeNull();
+            const videoId = extractVideoParams(url);
+            expect(videoId).toBeUndefined();
         });
 
     });
