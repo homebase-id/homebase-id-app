@@ -5,9 +5,9 @@ import { ChannelDefinitionVm } from '../../../hooks/feed/channels/useChannels';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import { useDarkMode } from '../../../hooks/useDarkMode';
 import { Backdrop } from '../../ui/Modal/Backdrop';
-import { BottomSheetModal } from '@gorhom/bottom-sheet';
+import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 import { Colors } from '../../../app/Colors';
-import { Platform, View } from 'react-native';
+import { Platform } from 'react-native';
 import { OwnerActions } from '../Meta/OwnerAction';
 import { ExternalActions, GroupChannelActions } from '../Meta/Actions';
 import { EditPostModal } from '../EditPost/EditPostModal';
@@ -36,7 +36,7 @@ export const PostModalAction = memo(
     const { isDarkMode } = useDarkMode();
     const bottomSheetRef = useRef<BottomSheetModalMethods>(null);
     const [context, setContext] = useState<PostActionProps>();
-    const [isEditOpen, setIsEditOpen] = useState(false); // TODO: Setup edit post modal
+    const [isEditOpen, setIsEditOpen] = useState(false);
     const snapPoints = useSharedValue(['50%', '70%']);
     const onClose = useCallback(() => {
       setContext(undefined);
@@ -76,6 +76,7 @@ export const PostModalAction = memo(
         keyboardBehavior={Platform.OS === 'ios' ? 'extend' : 'interactive'}
         android_keyboardInputMode="adjustResize"
         index={0}
+        enableDynamicSizing={false}
         backgroundStyle={{
           backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
         }}
@@ -83,11 +84,7 @@ export const PostModalAction = memo(
           backgroundColor: isDarkMode ? Colors.gray[100] : Colors.gray[500],
         }}
       >
-        <View
-          style={{
-            flex: 1,
-          }}
-        >
+        <BottomSheetView>
           {context &&
             (isEditOpen ? (
               <EditPostModal onCancel={onClose} onConfirm={onClose} postFile={context.postFile} />
@@ -108,7 +105,7 @@ export const PostModalAction = memo(
                 />
               )
             ))}
-        </View>
+        </BottomSheetView>
       </BottomSheetModal>
     );
   })

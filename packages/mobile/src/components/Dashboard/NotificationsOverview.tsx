@@ -3,7 +3,7 @@ import { Dimensions, TouchableOpacity, View } from 'react-native';
 import { usePushNotifications } from '../../hooks/notifications/usePushNotifications';
 import { memo, useMemo, useState } from 'react';
 import { PushNotification } from '@homebase-id/js-lib/core';
-import { formatToTimeAgoWithRelativeDetail, useDotYouClientContext } from 'feed-app-common';
+import { formatToTimeAgoWithRelativeDetail, useDotYouClientContext } from 'homebase-id-app-common';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import {
   CHAT_APP_ID,
@@ -24,7 +24,7 @@ import { Text } from '../ui/Text/Text';
 import Toast from 'react-native-toast-message';
 import Clipboard from '@react-native-clipboard/clipboard';
 import { Avatar } from '../ui/Avatars/Avatar';
-import { FeedStackParamList } from '../../app/FeedStack';
+import { TabStackParamList } from '../../app/App';
 
 export const NotificationDay = memo(
   ({ day, notifications }: { day: Date; notifications: PushNotification[] }) => {
@@ -116,7 +116,7 @@ const NotificationGroup = ({
 
   const identity = useDotYouClientContext().getIdentity();
   const chatNavigator = useNavigation<NavigationProp<ChatStackParamList>>();
-  const feedNavigator = useNavigation<NavigationProp<FeedStackParamList>>();
+  const tabNavigator = useNavigation<NavigationProp<TabStackParamList>>();
 
   return (
     <View
@@ -154,7 +154,7 @@ const NotificationGroup = ({
               onOpen={() =>
                 canExpand && !isExpanded
                   ? setExpanded(true)
-                  : navigateOnNotification(notification, identity, chatNavigator, feedNavigator)
+                  : navigateOnNotification(notification, identity, chatNavigator, tabNavigator)
               }
               groupCount={isExpanded ? 0 : groupCount}
               appName={appName}
@@ -327,7 +327,7 @@ export const navigateOnNotification = (
   notification: PushNotification,
   identity: string,
   chatNavigator: NavigationProp<ChatStackParamList>,
-  feedNavigator: NavigationProp<FeedStackParamList>
+  tabNavigator: NavigationProp<TabStackParamList>
 ) => {
   if (notification.options.appId === OWNER_APP_ID) {
     // Based on type, we show different messages
@@ -338,23 +338,40 @@ export const navigateOnNotification = (
         OWNER_CONNECTION_ACCEPTED_TYPE_ID,
       ].includes(notification.options.typeId)
     ) {
-      openURL(`https://${identity}/owner/connections/${notification.senderId}`);
+      return openURL(`https://${identity}/owner/connections/${notification.senderId}`);
     }
   } else if (notification.options.appId === CHAT_APP_ID) {
     chatNavigator.navigate('ChatScreen', { convoId: notification.options.typeId });
   } else if (notification.options.appId === MAIL_APP_ID) {
     // Navigate to owner console:
-    openURL(`https://${identity}/apps/mail/inbox/${notification.options.typeId}`);
+    return openURL(`https://${identity}/apps/mail/inbox/${notification.options.typeId}`);
   } else if (notification.options.appId === FEED_APP_ID) {
-    // if([FEED_NEW_COMMENT_TYPE_ID,FEED_NEW_REACTION_TYPE_ID].includes(notification.options.typeId)){
-    //   feedNavigator.navigate('Post', { postGlobalTransitId : notification.options. });
-    // }
-    feedNavigator.navigate('Home');
+    if (notification.options.typeId === FEED_NEW_CONTENT_TYPE_ID) {
+      return tabNavigator.navigate('Feed', {
+        screen: 'Posts',
+        params: {
+          postKey: notification.options.tagId,
+        },
+      });
+    }
+    if (
+      [FEED_NEW_COMMENT_TYPE_ID, FEED_NEW_REACTION_TYPE_ID].includes(notification.options.typeId)
+    ) {
+      return tabNavigator.navigate('Feed', {
+        screen: 'Post',
+        params: {
+          postKey: notification.options.tagId,
+        },
+      });
+    }
+    return tabNavigator.navigate('Feed', {
+      screen: 'Posts',
+    });
   } else if (notification.options.appId === COMMUNITY_APP_ID) {
-    openURL(`https://${identity}/apps/community/${notification.options.typeId}`);
+    return openURL(`https://${identity}/apps/community/${notification.options.typeId}`);
   } else {
     // You shouldn't come here
-    Toast.show({
+    return Toast.show({
       type: 'error',
       text1: `Error Navigating to ${notification.options.appId}  `,
       text2: 'Blame the developer for not handling this case properly',

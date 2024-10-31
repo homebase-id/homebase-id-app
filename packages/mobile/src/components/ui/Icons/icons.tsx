@@ -1,6 +1,6 @@
 import { Circle, Path, Svg } from 'react-native-svg';
 import { ReactNode } from 'react';
-import { View } from 'react-native';
+import { StyleProp, View, ViewStyle } from 'react-native';
 import { useDarkMode } from '../../../hooks/useDarkMode';
 
 const sizes = {
@@ -75,7 +75,7 @@ export const ChatIcon = (props: IconProps) => {
   );
 };
 
-export const SubtleCheck = (props: IconProps) => {
+export const SubtleCheck = (props: IconProps & { style?: StyleProp<ViewStyle> }) => {
   const { isDarkMode } = useDarkMode();
   return (
     <Center>
@@ -83,6 +83,7 @@ export const SubtleCheck = (props: IconProps) => {
         {...getSize(props.size || 'md')}
         color={props.color || (isDarkMode ? 'white' : 'black')}
         viewBox="0 0 512 512"
+        style={props.style}
       >
         <Path
           fill="currentColor"
@@ -522,6 +523,24 @@ export const Forward = (props: IconProps) => {
         <Path
           fill="currentColor"
           d="M307 34.8c-11.5 5.1-19 16.6-19 29.2v64H176C78.8 128 0 206.8 0 304C0 417.3 81.5 467.9 100.2 478.1c2.5 1.4 5.3 1.9 8.1 1.9c10.9 0 19.7-8.9 19.7-19.7c0-7.5-4.3-14.4-9.8-19.5C108.8 431.9 96 414.4 96 384c0-53 43-96 96-96h96v64c0 12.6 7.4 24.1 19 29.2s25 3 34.4-5.4l160-144c6.7-6.1 10.6-14.7 10.6-23.8s-3.8-17.7-10.6-23.8l-160-144c-9.4-8.5-22.9-10.6-34.4-5.4z"
+        />
+      </Svg>
+    </Center>
+  );
+};
+
+export const TriangleExclamation = (props: IconProps) => {
+  const { isDarkMode } = useDarkMode();
+  return (
+    <Center>
+      <Svg
+        {...getSize(props.size || 'md')}
+        color={props.color || (isDarkMode ? 'white' : 'black')}
+        viewBox="0 0 512 512"
+      >
+        <Path
+          fill="currentColor"
+          d="M256 32c14.2 0 27.3 7.5 34.5 19.8l216 368c7.3 12.4 7.3 27.7 .2 40.1S486.3 480 472 480L40 480c-14.3 0-27.6-7.7-34.7-20.1s-7-27.8 .2-40.1l216-368C228.7 39.5 241.8 32 256 32zm0 128c-13.3 0-24 10.7-24 24l0 112c0 13.3 10.7 24 24 24s24-10.7 24-24l0-112c0-13.3-10.7-24-24-24zm32 224a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"
         />
       </Svg>
     </Center>
@@ -1283,6 +1302,25 @@ export const Block = (props: IconProps) => {
       <Path
         fill="currentColor"
         d="M367.2 412.5L99.5 144.8C77.1 176.1 64 214.5 64 256c0 106 86 192 192 192c41.5 0 79.9-13.1 111.2-35.5zm45.3-45.3C434.9 335.9 448 297.5 448 256c0-106-86-192-192-192c-41.5 0-79.9 13.1-111.2 35.5L412.5 367.2zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256z"
+      />
+    </Svg>
+  );
+};
+
+export const Share = (props: IconProps) => {
+  const { isDarkMode } = useDarkMode();
+  return (
+    <Svg
+      {...getSize(props.size || 'md')}
+      color={props.color || (isDarkMode ? 'white' : 'black')}
+      viewBox="0 0 512 449"
+    >
+      <Path
+        d="M315.311 21.56C315.356 21.5399 315.401 21.5197 315.446 21.4993C319.513 19.6603 324.298 20.3938 327.651 23.4255L327.686 23.4577L487.686 167.458L487.711 167.48C490.141 169.66 491.5 172.696 491.5 176.02C491.5 179.197 490.148 182.324 487.632 184.631C487.621 184.641 487.61 184.651 487.599 184.662L327.74 328.534C327.734 328.54 327.728 328.545 327.721 328.551C324.359 331.543 319.545 332.342 315.251 330.454C311.18 328.664 308.5 324.583 308.5 320.02V256.02C308.5 244.698 299.322 235.52 288 235.52H192C127.678 235.52 75.5 287.698 75.5 352.02C75.5 389.02 91.3771 411.655 104.106 423.706C104.157 423.755 104.209 423.804 104.261 423.852C105.041 424.575 105.675 425.283 106.17 425.934C84.3724 413.039 20.5 367.293 20.5 272.02C20.5 186.142 90.1218 116.52 176 116.52H288C299.322 116.52 308.5 107.342 308.5 96.0201V32.0201C308.5 27.5426 311.208 23.3794 315.311 21.56ZM107.503 428.393C107.503 428.394 107.503 428.39 107.502 428.382C107.503 428.389 107.503 428.392 107.503 428.393Z"
+        stroke="currentColor"
+        strokeWidth="41"
+        strokeLinejoin="round"
+        fill="none"
       />
     </Svg>
   );

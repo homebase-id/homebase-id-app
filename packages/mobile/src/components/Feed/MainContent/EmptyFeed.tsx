@@ -1,4 +1,4 @@
-import { t } from 'feed-app-common';
+import { t } from 'homebase-id-app-common';
 import { Text } from '../../ui/Text/Text';
 import { View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';

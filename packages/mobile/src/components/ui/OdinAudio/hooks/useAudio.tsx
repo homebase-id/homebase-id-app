@@ -1,7 +1,9 @@
 import { TargetDrive } from '@homebase-id/js-lib/core';
-import { useDotYouClientContext } from 'feed-app-common';
+import { t, useDotYouClientContext } from 'homebase-id-app-common';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getPayloadBytes } from '../../../../provider/image/RNImageProvider';
+import { generateClientError } from '../../../../hooks/errors/useErrors';
+import { addLogs } from '../../../../provider/log/logger';
 
 export interface OdinAudioProps {
   fileId?: string;
@@ -65,6 +67,11 @@ export const useAudio = (props?: OdinAudioProps) => {
       queryFn: () => fetchAudio(fileId, payloadKey, drive, lastModified),
       staleTime: 1000 * 60 * 60 * 1, // 1h
       enabled: !!fileId && fileId !== '',
+      throwOnError: (error, _) => {
+        const newError = generateClientError(error, t('Failed to get the audio file'));
+        addLogs(newError);
+        return false;
+      },
     }),
     fetchManually: async (fileId: string, payloadKey: string, drive: TargetDrive) => {
       const cachedAudio = getFromCache(fileId, payloadKey, drive);

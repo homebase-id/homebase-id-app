@@ -3,7 +3,7 @@ import { useErrors } from '../../../hooks/errors/useErrors';
 import Toast from 'react-native-toast-message';
 import { useEffect } from 'react';
 import { Alert } from 'react-native';
-import { t } from 'feed-app-common';
+import { t } from 'homebase-id-app-common';
 
 export const ErrorToaster = () => {
   const {

@@ -1,10 +1,4 @@
-import {
-  EmbeddedThumb,
-  HomebaseFile,
-  NewHomebaseFile,
-  PayloadDescriptor,
-  TargetDrive,
-} from '@homebase-id/js-lib/core';
+import { EmbeddedThumb, PayloadDescriptor, TargetDrive } from '@homebase-id/js-lib/core';
 import {
   createNativeStackNavigator,
   NativeStackNavigationOptions,
@@ -12,23 +6,25 @@ import {
 } from '@react-navigation/native-stack';
 import { TabStackParamList } from './App';
 import { useDarkMode } from '../hooks/useDarkMode';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { Platform } from 'react-native';
 import { Colors } from './Colors';
 import { FeedPage } from '../pages/feed/feed-page';
 import { PreviewMedia } from '../pages/media-preview-page';
 import { PostComposer } from '../pages/feed/post-composer';
 import { PostDetailPage } from '../pages/feed/post-detail-page';
-import { ChannelDefinition, PostContent } from '@homebase-id/js-lib/public';
+import { BackButton } from '../components/ui/Buttons';
 
 export type FeedStackParamList = {
-  Home: undefined;
+  Posts:
+    | {
+        postKey?: string;
+      }
+    | undefined;
   Post: {
     postKey: string;
-    channelKey: string;
-    odinId: string;
-    postFile?: HomebaseFile<PostContent>;
-    channel?: HomebaseFile<ChannelDefinition> | NewHomebaseFile<ChannelDefinition>;
+    channelKey?: string;
+    odinId?: string;
   };
   Compose: undefined;
   PreviewMedia: {
@@ -46,7 +42,7 @@ export type FeedStackParamList = {
 };
 
 const StackFeed = createNativeStackNavigator<FeedStackParamList>();
-export const FeedStack = (_props: NativeStackScreenProps<TabStackParamList, 'Feed'>) => {
+export const FeedStack = ({ navigation }: NativeStackScreenProps<TabStackParamList, 'Feed'>) => {
   const { isDarkMode } = useDarkMode();
   const screenOptions = useMemo(
     () =>
@@ -68,9 +64,25 @@ export const FeedStack = (_props: NativeStackScreenProps<TabStackParamList, 'Fee
     [isDarkMode]
   );
 
+  const backButton = useCallback(
+    () => (
+      <BackButton
+        label=" "
+        showArrow
+        onPress={() => {
+          if (navigation.canGoBack()) {
+            navigation.goBack();
+          }
+          return navigation.navigate('Feed', { screen: 'Posts' });
+        }}
+      />
+    ),
+    [navigation]
+  );
+
   return (
     <StackFeed.Navigator screenOptions={screenOptions}>
-      <StackFeed.Screen name="Home" component={FeedPage} />
+      <StackFeed.Screen name="Posts" component={FeedPage} />
       <StackFeed.Screen
         name="PreviewMedia"
         component={PreviewMedia}
@@ -91,6 +103,7 @@ export const FeedStack = (_props: NativeStackScreenProps<TabStackParamList, 'Fee
         options={{
           headerShown: true,
           animation: 'slide_from_right',
+          headerLeft: backButton,
         }}
       />
     </StackFeed.Navigator>

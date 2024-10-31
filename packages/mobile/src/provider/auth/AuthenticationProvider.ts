@@ -1,3 +1,4 @@
+import { Buffer } from 'buffer';
 import {
   AppAuthorizationParams,
   YouAuthorizationParams,
@@ -9,6 +10,7 @@ import { DotYouClient, ApiType } from '@homebase-id/js-lib/core';
 import { base64ToUint8Array, uint8ArrayToBase64, cbcDecrypt } from '@homebase-id/js-lib/helpers';
 
 import crypto from 'react-native-quick-crypto';
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 (globalThis as any).crypto.getRandomValues = crypto.getRandomValues;
 import hkdf from 'js-crypto-hkdf'; // for npm
 import elliptic from 'elliptic';
@@ -89,9 +91,9 @@ export const finalizeAuthentication = async (
 
   const curve = new elliptic.ec('p384');
   const remotePublicKey = curve.keyFromPublic({
-    x: Buffer.from(base64ToUint8Array(publicKeyJwk.x.replace(/-/g, '+').replace(/_/g, '/'))) as any,
-    y: Buffer.from(base64ToUint8Array(publicKeyJwk.y.replace(/-/g, '+').replace(/_/g, '/'))) as any,
-  });
+    x: Buffer.from(base64ToUint8Array(publicKeyJwk.x.replace(/-/g, '+').replace(/_/g, '/'))),
+    y: Buffer.from(base64ToUint8Array(publicKeyJwk.y.replace(/-/g, '+').replace(/_/g, '/'))),
+  } as unknown as elliptic.ec.KeyPair);
 
   const derivedBits = privateKey.derive(remotePublicKey.getPublic()).toArray();
 

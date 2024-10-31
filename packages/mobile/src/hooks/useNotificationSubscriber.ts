@@ -12,7 +12,7 @@ import { hasDebugFlag } from '@homebase-id/js-lib/helpers';
 
 const isDebug = hasDebugFlag();
 
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 import { useAuth } from './auth/useAuth';
 
 // Wrapper for the notification subscriber within DotYouCore-js to add client side filtering of the notifications
@@ -49,6 +49,7 @@ export const useNotificationSubscriber = (
       if (types?.length >= 1 && !types.includes(notification.notificationType)) return;
       subscriber && subscriber(notification);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [subscriber]
   );
 

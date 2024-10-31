@@ -3,27 +3,28 @@ import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { tryJsonParse } from '@homebase-id/js-lib/helpers';
 import { navigateOnNotification } from '../../components/Dashboard/NotificationsOverview';
 import { PushNotification } from '@homebase-id/js-lib/core';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 import { useCallback, useEffect } from 'react';
 import { ChatStackParamList } from '../../app/ChatStack';
 import notifee, { Event, EventType } from '@notifee/react-native';
 import { AppState, Platform } from 'react-native';
-import { FeedStackParamList } from '../../app/FeedStack';
+import { TabStackParamList } from '../../app/App';
+const handledNotifications: unknown[] = [];
 
 export const useInitialPushNotification = () => {
   const identity = useDotYouClientContext().getIdentity();
   const chatNavigator = useNavigation<NavigationProp<ChatStackParamList>>();
-  const feedNavigator = useNavigation<NavigationProp<FeedStackParamList>>();
+  const tabNavigator = useNavigation<NavigationProp<TabStackParamList>>();
 
   const handleInitialNotification = useCallback(
     async (stringifiedData: string) => {
       const notification: PushNotification = tryJsonParse<PushNotification>(stringifiedData);
       if (notification) {
         await notifee.decrementBadgeCount();
-        navigateOnNotification(notification, identity, chatNavigator, feedNavigator);
+        navigateOnNotification(notification, identity, chatNavigator, tabNavigator);
       }
     },
-    [chatNavigator, feedNavigator, identity]
+    [chatNavigator, tabNavigator, identity]
   );
 
   const getInitialNotification = useCallback(() => {
@@ -38,6 +39,8 @@ export const useInitialPushNotification = () => {
         initialNotification.data?.data &&
         typeof initialNotification.data.data === 'string'
       ) {
+        if (handledNotifications.includes(initialNotification.data.data)) return;
+        handledNotifications.push(initialNotification.data.data);
         handleInitialNotification(initialNotification.data.data);
       }
     })();

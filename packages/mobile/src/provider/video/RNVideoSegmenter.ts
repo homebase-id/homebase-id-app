@@ -1,5 +1,4 @@
-import { ImageSource } from './RNImageProvider';
-import { getNewId, uint8ArrayToBase64 } from '@homebase-id/js-lib/helpers';
+import { getNewId, toGuidId, uint8ArrayToBase64 } from '@homebase-id/js-lib/helpers';
 
 import { CachesDirectoryPath, exists, readFile, stat, unlink, writeFile } from 'react-native-fs';
 import { Video } from 'react-native-compressor';
@@ -13,6 +12,7 @@ import {
 } from '@homebase-id/js-lib/media';
 import { OdinBlob } from '../../../polyfills/OdinBlob';
 import { KeyHeader } from '@homebase-id/js-lib/core';
+import { ImageSource } from '../image/RNImageProvider';
 
 const CompressVideo = async (
   video: ImageSource,
@@ -55,6 +55,7 @@ const CompressVideo = async (
 
 const toHexString = (byteArray: Uint8Array) => {
   return Array.from(byteArray, function (byte) {
+    // eslint-disable-next-line no-bitwise
     return ('0' + (byte & 0xff).toString(16)).slice(-2);
   }).join('');
 };
@@ -102,8 +103,6 @@ const segmentVideo = async (
       throw new Error(`File not found: ${source}`);
     }
 
-    // We disbled the segmentation for now, as we only want to support playback on web of HLS;
-    // We can re-enable it when we have confirmed HLS is good
     const sourceFileSize = await stat(source).then((stats) => stats.size);
     if (sourceFileSize < 5 * MB) {
       return {
@@ -149,9 +148,6 @@ const segmentVideo = async (
       const session = await FFmpegKit.execute(command);
       const state = await session.getState();
       const returnCode = await session.getReturnCode();
-      // const failStackTrace = await session.getFailStackTrace();
-      // const output = await session.getOutput();
-      // console.log('FFmpeg output:', output);
 
       if (state === SessionState.FAILED || !returnCode.isValueSuccess()) {
         throw new Error(`FFmpeg process failed with state: ${state} and rc: ${returnCode}.`);
@@ -159,9 +155,15 @@ const segmentVideo = async (
 
       const segmentsUri = playlistUri.replace('.m3u8', '.ts');
 
-      pathsToClean?.forEach(async (path) => {
-        unlink(path);
-      });
+      try {
+        pathsToClean?.forEach(async (path) => {
+          unlink(path);
+        });
+
+        unlink(source);
+      } catch (error) {
+        console.warn(`Failed to clean up video files: ${error}`);
+      }
 
       return {
         playlist: {
@@ -187,6 +189,12 @@ const segmentVideo = async (
   }
 };
 
+export const getUniqueId = (video: ImageSource) => {
+  return video.id
+    ? toGuidId(video.id as string)
+    : toGuidId(`${video.filename}_${video.width}x${video.height}`);
+};
+
 export const grabThumbnail = async (video: ImageSource) => {
   const source = video.filepath || video.uri;
 
@@ -198,13 +206,17 @@ export const grabThumbnail = async (video: ImageSource) => {
   const dirPath = CachesDirectoryPath;
   const destinationPrefix = Platform.OS === 'ios' ? '' : 'file://';
 
-  const newId = getNewId();
+  const newId = getUniqueId(video);
 
   const commandFileName = `thumb%04d-${newId}.png`;
   const commandDestinationUri = `${destinationPrefix}${dirPath}/${commandFileName}`;
 
   const resultFileName = `thumb0001-${newId}.png`;
   const destinationUri = `${destinationPrefix}${dirPath}/${resultFileName}`;
+
+  if (await exists(destinationUri)) {
+    return new OdinBlob(destinationUri, { type: 'image/png' });
+  }
 
   // MDN docs (https://developer.mozilla.org/en-US/docs/Web/API/Media_Source_Extensions_API/Transcoding_assets_for_MSE#fragmenting)
   // FFMPEG fragmenting: https://ffmpeg.org/ffmpeg-formats.html#Fragmentation

@@ -6,7 +6,7 @@ import {
 } from '@homebase-id/js-lib/core';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { ChannelDefinition, BlogConfig, ReactAccess } from '@homebase-id/js-lib/public';
-import { t, useDotYouClientContext } from 'feed-app-common';
+import { t, useDotYouClientContext } from 'homebase-id-app-common';
 import { useState, useMemo, useCallback, useLayoutEffect, useRef, useEffect, memo } from 'react';
 import { View, TextInput, TouchableOpacity } from 'react-native';
 import { Asset, launchImageLibrary } from 'react-native-image-picker';
@@ -22,7 +22,7 @@ import { Select, Option } from '../../components/ui/Form/Select';
 import { AclIcon, AclSummary } from '../../components/Feed/Composer/AclSummary';
 import { Colors } from '../../app/Colors';
 import { ImageSource } from '../../provider/image/RNImageProvider';
-import { BottomSheetModal } from '@gorhom/bottom-sheet';
+import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 import { useCircles } from '../../hooks/circles/useCircles';
 import { ScrollView } from 'react-native-gesture-handler';
 import { Text } from '../../components/ui/Text/Text';
@@ -34,6 +34,7 @@ import { FeedStackParamList } from '../../app/FeedStack';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { LinkPreviewBar } from '../../components/Chat/Link-Preview-Bar';
 import { LinkPreview } from '@homebase-id/js-lib/media';
+import { Backdrop } from '../../components/ui/Modal/Backdrop';
 
 type PostComposerProps = NativeStackScreenProps<FeedStackParamList, 'Compose'>;
 
@@ -459,6 +460,8 @@ const AclDialog = memo(
       }
     }, [isOpen]);
 
+    const insets = useSafeAreaInsets();
+
     if (!isOpen) {
       return null;
     }
@@ -467,6 +470,9 @@ const AclDialog = memo(
       <BottomSheetModal
         ref={bottomSheetRef}
         snapPoints={['95%']}
+        backdropComponent={Backdrop}
+        bottomInset={insets.bottom}
+        // enableDynamicSizing={false}
         backgroundStyle={{
           backgroundColor: isDarkMode ? Colors.gray[900] : Colors.white,
         }}
@@ -480,22 +486,30 @@ const AclDialog = memo(
           elevation: 20,
         }}
       >
-        <ScrollView
+        <BottomSheetView
           style={{
-            flex: 1,
             paddingHorizontal: 16,
           }}
         >
-          <Text
+          <View
             style={{
-              marginBottom: 12,
-              fontSize: 20,
+              borderBottomWidth: 1,
+              borderBottomColor: isDarkMode ? Colors.gray[800] : Colors.gray[100],
             }}
           >
-            {title}
-          </Text>
-          <AclWizard acl={acl} onConfirm={onConfirm} onCancel={onCancel} />
-        </ScrollView>
+            <Text
+              style={{
+                marginBottom: 12,
+                fontSize: 20,
+              }}
+            >
+              {title}
+            </Text>
+          </View>
+          <ScrollView>
+            <AclWizard acl={acl} onConfirm={onConfirm} onCancel={onCancel} />
+          </ScrollView>
+        </BottomSheetView>
       </BottomSheetModal>
     );
   }

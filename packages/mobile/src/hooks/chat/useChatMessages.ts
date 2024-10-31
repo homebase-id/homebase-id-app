@@ -15,7 +15,7 @@ import {
 } from '../../provider/chat/ChatProvider';
 
 import { DotYouClient, HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 import {
   ConversationWithYourselfId,
   UnifiedConversation,
@@ -226,6 +226,11 @@ export const internalInsertNewMessage = (
 ) => {
   if (!newMessage.fileMetadata.appData.uniqueId || !newMessage.fileMetadata.appData.groupId) {
     console.warn('Message does not have uniqueId or groupId', newMessage);
+    return extistingMessages;
+  }
+
+  if (!newMessage.fileMetadata.appData.content) {
+    console.error('Attempted to insert an empty message', newMessage);
     return extistingMessages;
   }
 

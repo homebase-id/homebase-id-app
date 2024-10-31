@@ -15,7 +15,7 @@ import { PostContent, ReactionContext } from '@homebase-id/js-lib/public';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { useMyEmojiReactions, useReaction } from '../../hooks/reactions';
 import { ErrorNotification } from './Alert/ErrorNotification';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 
 type DoubleTapHeartProps = {
   children: ReactNode;

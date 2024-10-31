@@ -7,7 +7,7 @@ import { OdinImage } from '../OdinImage/OdinImage';
 import { useVideo } from '../../../hooks/video/useVideo';
 import { useHlsManifest } from '../../../hooks/video/useHlsManifest';
 import Video from 'react-native-video';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 import { useVideoMetadata } from '../../../hooks/video/useVideoMetadata';
 import { GestureType } from 'react-native-gesture-handler';
 
@@ -20,7 +20,7 @@ interface VideoProps extends LocalVideoProps {
   onClick?: () => void;
   onLongPress?: (coords: { x: number; y: number; absoluteX: number; absoluteY: number }) => void;
   style?: ImageStyle;
-  doubleTapRef?: React.RefObject<GestureType | undefined>;
+  gestureRefs?: React.RefObject<GestureType | undefined>[];
   autoPlay?: boolean;
 }
 
@@ -41,7 +41,7 @@ export const VideoWithLoader = memo(
     autoPlay,
     probablyEncrypted,
     lastModified,
-    doubleTapRef,
+    gestureRefs,
   }: VideoProps) => {
     const [loadVideo, setLoadVideo] = useState(autoPlay);
     const doLoadVideo = useCallback(() => setLoadVideo(true), []);
@@ -71,7 +71,7 @@ export const VideoWithLoader = memo(
             avoidPayload={true}
             style={style}
             onLongPress={onLongPress}
-            doubleTapRef={doubleTapRef}
+            gestureRefs={gestureRefs}
           />
           <View
             style={{

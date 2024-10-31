@@ -12,20 +12,30 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
-import { Asset, launchImageLibrary } from 'react-native-image-picker';
+import { launchImageLibrary } from 'react-native-image-picker';
 import { Pdf, Play, Plus, SendChat, SubtleCheck, Trash } from '../ui/Icons/icons';
-import { memo, useCallback, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { Colors } from '../../app/Colors';
 import { Header, HeaderBackButtonProps } from '@react-navigation/elements';
 import { BackButton } from '../ui/Buttons';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { chatStyles } from '../Chat/ChatDetail';
-import { t } from 'feed-app-common';
+import { t } from 'homebase-id-app-common';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@react-navigation/native';
 import Video from 'react-native-video';
 import Animated, { SlideInDown, SlideOutDown } from 'react-native-reanimated';
+import { ChatStackParamList } from '../../app/ChatStack';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { ImageSource } from '../../provider/image/RNImageProvider';
+import { useChatMessage } from '../../hooks/chat/useChatMessage';
+import { getNewId } from '@homebase-id/js-lib/helpers';
+import Toast from 'react-native-toast-message';
+import { AuthorName } from '../ui/Name';
+import { assetsToImageSource } from '../../utils/utils';
+import { grabThumbnail } from '../../provider/video/RNVideoSegmenter';
 
 const FilePreview = ({
   asset,
@@ -35,7 +45,7 @@ const FilePreview = ({
   children,
   preview = false,
 }: {
-  asset: Asset;
+  asset: ImageSource;
   style?: StyleProp<ViewStyle>;
   imageStyle?: ImageStyle;
   size?: { width: DimensionValue; height: DimensionValue };
@@ -56,33 +66,7 @@ const FilePreview = ({
             size,
           ]}
         >
-          <Video
-            source={{ uri: asset.uri || asset.originalPath }}
-            style={[
-              size,
-              {
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                bottom: 0,
-                right: 0,
-              },
-            ]}
-            onError={(error) => console.error(error)}
-            resizeMode={preview ? 'cover' : 'contain'}
-            controls={!preview}
-            paused
-          />
-          {preview && (
-            <View
-              style={{
-                marginTop: 'auto',
-                marginBottom: 'auto',
-              }}
-            >
-              <Play size={'md'} />
-            </View>
-          )}
+          <VideoPreview asset={asset} preview={preview} />
           {children}
         </View>
       ) : isDocument ? (
@@ -96,7 +80,10 @@ const FilePreview = ({
             },
           ]}
         >
-          <Image source={{ uri: asset.uri || asset.originalPath }} style={[size, imageStyle]} />
+          <Image
+            source={{ uri: asset.uri || asset.filepath || undefined }}
+            style={[size, imageStyle]}
+          />
           <View
             style={[
               {
@@ -124,7 +111,10 @@ const FilePreview = ({
         </View>
       ) : (
         <View style={[style]}>
-          <Image source={{ uri: asset.uri || asset.originalPath }} style={[size, imageStyle]} />
+          <Image
+            source={{ uri: asset.uri || asset.filepath || undefined }}
+            style={[size, imageStyle]}
+          />
           {children}
         </View>
       )}
@@ -132,37 +122,160 @@ const FilePreview = ({
   );
 };
 
-// TODO: Perhaps convert this to a route
+export const VideoPreview = ({
+  asset,
+  size,
+  preview,
+}: {
+  asset: ImageSource;
+  size?: { width: DimensionValue; height: DimensionValue };
+  preview?: boolean;
+}) => {
+  const isSmallEnough = useMemo(
+    () => asset.fileSize && asset.fileSize < 10000000,
+    [asset.fileSize]
+  );
+  const [thumbnailUrl, setThumbnailUrl] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    if (isSmallEnough) return;
+    grabThumbnail(asset).then((thumb) => {
+      setThumbnailUrl(thumb?.uri);
+    });
+  }, [asset, isSmallEnough]);
+
+  return (
+    <>
+      {thumbnailUrl ? (
+        <>
+          <Image
+            source={{ uri: thumbnailUrl }}
+            style={[
+              {
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                bottom: 0,
+                right: 0,
+                objectFit: !preview ? 'contain' : 'cover',
+              },
+            ]}
+          />
+          {!preview ? (
+            <View
+              style={{
+                margin: 'auto',
+                zIndex: 100,
+                position: 'relative',
+              }}
+            >
+              <Play size={'5xl'} color={Colors.white} />
+            </View>
+          ) : null}
+        </>
+      ) : !isSmallEnough ? (
+        <View
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            bottom: 0,
+            right: 0,
+          }}
+        >
+          <ActivityIndicator size="large" color={Colors.white} style={{ margin: 'auto' }} />
+        </View>
+      ) : (
+        <Video
+          source={{ uri: asset.uri || asset.filepath || undefined }}
+          style={[
+            size,
+            {
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              bottom: 0,
+              right: 0,
+            },
+          ]}
+          onError={(error) => console.error(error)}
+          resizeMode={preview ? 'cover' : 'contain'}
+          controls={!preview}
+          paused
+        />
+      )}
+
+      {preview && (
+        <View
+          style={{
+            marginVertical: 'auto',
+            zIndex: 100,
+            position: 'relative',
+          }}
+        >
+          <Play size={'md'} color={Colors.white} />
+        </View>
+      )}
+    </>
+  );
+};
+
+export type ChatFileOverviewProp = NativeStackScreenProps<ChatStackParamList, 'ChatFileOverview'>;
+
 export const ChatFileOverview = memo(
   ({
-    title,
-    assets,
-    setAssets,
-    doSend,
-  }: {
-    title?: string;
-    assets: Asset[];
-    setAssets: React.Dispatch<React.SetStateAction<Asset[]>>;
-    doSend: (message: { text: string }[]) => void;
-  }) => {
+    navigation,
+    route: {
+      params: { initialAssets, recipients, title },
+    },
+  }: ChatFileOverviewProp) => {
     const [messageInput, setIsMessageInput] = useState(false);
     const [message, setMessage] = useState('');
     const { isDarkMode } = useDarkMode();
+    const [assets, setAssets] = useState(initialAssets);
     const [currentIndex, setCurrentIndex] = useState(0);
     const currentAsset = assets[currentIndex];
     const { bottom: bottomInsets } = useSafeAreaInsets();
     const { colors } = useTheme();
+    const { mutate: sendMessage } = useChatMessage().send;
+
+    const onSend = useCallback(() => {
+      recipients.forEach((recipient) => {
+        sendMessage({
+          conversation: recipient,
+          message: message,
+          files: assets,
+          chatId: getNewId(),
+          userDate: new Date().getTime(),
+        });
+      });
+
+      if (recipients.length > 1) {
+        navigation.pop();
+        Toast.show({
+          type: 'info',
+          text1: 'Sending Messages',
+          position: 'bottom',
+        });
+        return;
+      } else {
+        navigation.navigate('ChatScreen', {
+          convoId: recipients[0].fileMetadata.appData.uniqueId as string,
+        });
+        return;
+      }
+    }, [assets, message, navigation, recipients, sendMessage]);
 
     const headerLeft = useCallback(
       (props: HeaderBackButtonProps) => {
         return BackButton({
-          onPress: () => setAssets([]),
+          onPress: () => navigation.goBack(),
           prop: props,
           showArrow: true,
           label: ' ',
         });
       },
-      [setAssets]
+      [navigation]
     );
 
     const doAppendAssets = useCallback(async () => {
@@ -174,8 +287,9 @@ export const ChatFileOverview = memo(
       });
       if (medias.didCancel) return;
 
-      // Keep assets without a type out of it.. We're never sure what it is...
-      setAssets((assets) => [...assets, ...(medias.assets?.filter((asset) => asset.type) ?? [])]);
+      const newAssets: ImageSource[] = medias.assets ? assetsToImageSource(medias.assets) : [];
+
+      setAssets((assets) => [...assets, ...newAssets]);
     }, [setAssets]);
 
     return (
@@ -192,7 +306,7 @@ export const ChatFileOverview = memo(
             backgroundColor: 'pink',
           }}
         >
-          <Header title={title || ''} headerLeft={headerLeft} />
+          <Header title={title || 'Share'} headerLeft={headerLeft} />
           <FilePreview
             asset={currentAsset}
             style={{
@@ -339,9 +453,50 @@ export const ChatFileOverview = memo(
             </TouchableOpacity>
 
             <View
-              style={{ flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 7 }}
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'flex-end',
+                paddingHorizontal: 7,
+              }}
             >
-              <TouchableOpacity onPress={() => doSend([{ text: message }])} style={chatStyles.send}>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'flex-start',
+                  alignItems: 'center',
+                  gap: 5,
+                  flex: 1,
+                  marginLeft: 12,
+                  overflow: 'hidden',
+                  flexWrap: 'wrap',
+                }}
+              >
+                {recipients.map((group) => {
+                  const isSingleConversation =
+                    group.fileMetadata.appData.content.recipients.length === 2;
+                  return (
+                    <Text
+                      key={group.fileId}
+                      style={{
+                        fontSize: 14,
+                        fontWeight: '500',
+                        borderRadius: 15,
+                        backgroundColor: isDarkMode ? Colors.slate[800] : Colors.slate[100],
+                        color: isDarkMode ? Colors.white : Colors.black,
+                        padding: 10,
+                        overflow: 'hidden',
+                      }}
+                    >
+                      {!isSingleConversation ? (
+                        group.fileMetadata.appData.content.title
+                      ) : (
+                        <AuthorName odinId={group.fileMetadata.appData.content.recipients[0]} />
+                      )}
+                    </Text>
+                  );
+                })}
+              </View>
+              <TouchableOpacity onPress={onSend} style={chatStyles.send}>
                 <View
                   style={{
                     transform: [

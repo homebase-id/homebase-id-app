@@ -2,7 +2,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ProfileStackParamList } from '../../app/ProfileStack';
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 import QRCode from 'react-native-qrcode-svg';
-import { t, useDotYouClientContext } from 'feed-app-common';
+import { t, useDotYouClientContext } from 'homebase-id-app-common';
 import { Dimensions, View } from 'react-native';
 import { Text } from '../../components/ui/Text/Text';
 

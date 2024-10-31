@@ -1,24 +1,23 @@
 import { FlatList } from 'react-native-gesture-handler';
 
-import {
-  ListRenderItemInfo,
-  Platform,
-  RefreshControl,
-  StatusBar,
-  View,
-} from 'react-native';
+import { ListRenderItemInfo, Platform, RefreshControl, StatusBar, View } from 'react-native';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 
-import { useAllConnections } from 'feed-app-common';
+import { useAllConnections } from 'homebase-id-app-common';
 import { ChatStackParamList, NewChatStackParamList } from '../../app/ChatStack';
 import { ContactTile, Tile } from '../../components/Contact/Contact-Tile';
 import { Users } from '../../components/ui/Icons/icons';
-import { memo, useCallback, useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { DotYouProfile } from '@homebase-id/js-lib/network';
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 import { NoContacts } from '../../components/Contact/NoContacts';
+import { useDarkMode } from '../../hooks/useDarkMode';
+import { Colors } from '../../app/Colors';
+import { ErrorBoundary } from '../../components/ui/ErrorBoundary/ErrorBoundary';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { SearchConversationResults } from '../../components/Chat/SearchConversationsResults';
 
-const ListHeaderComponent = () => {
+const ListHeaderComponent = memo(() => {
   const navigation = useNavigation<NavigationProp<NewChatStackParamList>>();
   return (
     <View style={{ marginTop: 3 }}>
@@ -31,53 +30,82 @@ const ListHeaderComponent = () => {
       />
     </View>
   );
-};
+});
 
-export const ContactPage = memo(
-  ({ navigation }: { navigation: NavigationProp<NewChatStackParamList, 'NewChat'> }) => {
-    const { data: connections, refetch, status } = useAllConnections(true);
-    const [refreshing, setRefreshing] = useState(false);
-    const nav = useNavigation<NavigationProp<ChatStackParamList>>();
+type ContactPageProp = NativeStackScreenProps<NewChatStackParamList, 'NewChat'>;
 
-    useEffect(() => {
-      if (status === 'success') {
-        setRefreshing(false);
-      }
-    }, [status]);
+export const ContactPage = memo(({ navigation }: ContactPageProp) => {
+  const { data: connections, refetch, status } = useAllConnections(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [query, setQuery] = useState<string | undefined>(undefined);
+  const nav = useNavigation<NavigationProp<ChatStackParamList>>();
+  const { isDarkMode } = useDarkMode();
+  useEffect(() => {
+    if (status === 'success') {
+      setRefreshing(false);
+    }
+  }, [status]);
 
-    const renderItem = useCallback(
-      ({ item }: ListRenderItemInfo<DotYouProfile>) => (
-        <ContactTile
-          item={item}
-          onOpen={(conversationId) => {
-            navigation.goBack();
-            setTimeout(() => {
-              nav.navigate('ChatScreen', {
-                convoId: conversationId,
-              });
-            }, 100);
-          }}
-        />
-      ),
-      [nav, navigation]
-    );
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerSearchBarOptions: {
+        hideWhenScrolling: false,
+        headerIconColor: isDarkMode ? Colors.white : Colors.black,
+        placeholder: 'Search contacts',
+        hideNavigationBar: true,
+        autoCapitalize: 'none',
+        onChangeText: (event) => {
+          setQuery(event.nativeEvent.text);
+        },
+        onCancelButtonPress: () => {
+          setQuery(undefined);
+        },
+        onClose: () => {
+          setQuery(undefined);
+        },
+      },
+    });
+  }, [isDarkMode, navigation]);
 
-    if (!connections) return null;
+  const renderItem = useCallback(
+    ({ item }: ListRenderItemInfo<DotYouProfile>) => (
+      <ContactTile
+        item={item}
+        onOpen={(conversationId) => {
+          navigation.goBack();
+          setTimeout(() => {
+            nav.navigate('ChatScreen', {
+              convoId: conversationId,
+            });
+          }, 100);
+        }}
+      />
+    ),
+    [nav, navigation]
+  );
+  const isQueryActive = useMemo(() => !!(query && query.length >= 1), [query]);
 
+  if (!connections) return null;
+
+  if (isQueryActive) {
     return (
-      <SafeAreaView>
-        {Platform.OS === 'ios' && <StatusBar barStyle="light-content" />}
-
-          <FlatList
-            data={connections}
-            keyExtractor={(item) => item.odinId}
-            ListHeaderComponent={ListHeaderComponent}
-            ListEmptyComponent={<NoContacts />}
-            renderItem={renderItem}
-            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refetch} />}
-          />
-
-      </SafeAreaView>
+      <ErrorBoundary>
+        <SearchConversationResults query={query} conversations={[]} />
+      </ErrorBoundary>
     );
   }
-);
+
+  return (
+    <SafeAreaView>
+      {Platform.OS === 'ios' && <StatusBar barStyle="light-content" />}
+      <FlatList
+        data={connections}
+        keyExtractor={(item) => item.odinId}
+        ListHeaderComponent={ListHeaderComponent}
+        ListEmptyComponent={<NoContacts />}
+        renderItem={renderItem}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refetch} />}
+      />
+    </SafeAreaView>
+  );
+});

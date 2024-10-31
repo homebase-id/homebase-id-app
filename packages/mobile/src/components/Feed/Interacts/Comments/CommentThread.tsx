@@ -2,7 +2,7 @@ import { ReactionContext } from '@homebase-id/js-lib/public';
 import { CanReactInfo, useComments } from '../../../../hooks/reactions';
 import { Comment } from './Comment';
 import TextButton from '../../../ui/Text/Text-Button';
-import { t } from 'feed-app-common';
+import { t } from 'homebase-id-app-common';
 import { memo, useMemo } from 'react';
 
 export const CommentThread = memo(

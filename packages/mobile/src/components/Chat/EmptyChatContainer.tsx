@@ -1,4 +1,4 @@
-import { t } from 'feed-app-common';
+import { t } from 'homebase-id-app-common';
 import { Container } from '../ui/Container/Container';
 import { Text } from '../ui/Text/Text';
 import { useDarkMode } from '../../hooks/useDarkMode';

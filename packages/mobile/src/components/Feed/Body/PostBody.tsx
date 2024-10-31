@@ -1,12 +1,15 @@
 import { PayloadDescriptor } from '@homebase-id/js-lib/core';
-import { PostContent } from '@homebase-id/js-lib/public';
+import { Article, getChannelDrive, PostContent } from '@homebase-id/js-lib/public';
 import { memo, useMemo, useState } from 'react';
 import { openURL, URL_PATTERN } from '../../../utils/utils';
 import { useDarkMode } from '../../../hooks/useDarkMode';
 import ParsedText, { ParseShape } from 'react-native-parsed-text';
 import { Colors } from '../../../app/Colors';
-import { ellipsisAtMaxChar, t } from 'feed-app-common';
+import { ellipsisAtMaxChar, t } from 'homebase-id-app-common';
 import TextButton from '../../ui/Text/Text-Button';
+import { RichTextRenderer } from '../../ui/Text/RichTextRenderer';
+import { Text } from '../../ui/Text/Text';
+import { Expander } from '../../ui/Container/Expander';
 
 const MAX_CHAR_FOR_SUMMARY = 400;
 
@@ -14,7 +17,7 @@ export const PostBody = memo(
   ({
     post,
     odinId,
-    hideEmbeddedPostMedia,
+    // hideEmbeddedPostMedia,
     fileId,
     globalTransitId,
     payloads,
@@ -42,6 +45,48 @@ export const PostBody = memo(
       ],
       [isDarkMode]
     );
+
+    if (post.type === 'Article') {
+      const articlePost = post as Article;
+
+      const hasBody = !!articlePost.body;
+      const hasAbstract = !!articlePost.abstract;
+      const allowExpand = hasBody || (hasAbstract && articlePost.abstract?.length > 400);
+      return (
+        <>
+          <Text
+            style={{
+              fontSize: 20,
+              fontWeight: '500',
+              marginBottom: 6,
+            }}
+          >
+            {post.caption}
+          </Text>
+          <Expander
+            abstract={<Text>{ellipsisAtMaxChar(articlePost.abstract, MAX_CHAR_FOR_SUMMARY)}</Text>}
+            allowExpand={allowExpand}
+          >
+            <RichTextRenderer
+              body={articlePost?.body}
+              options={
+                fileId
+                  ? {
+                      imageDrive: getChannelDrive(post.channelId),
+                      defaultFileId: fileId,
+                      defaultGlobalTransitId: globalTransitId,
+                      lastModified: lastModified,
+                      previewThumbnails: payloads,
+                    }
+                  : undefined
+              }
+              odinId={odinId}
+            />
+          </Expander>
+        </>
+      );
+    }
+
     return (
       <>
         <ParsedText
@@ -52,7 +97,11 @@ export const PostBody = memo(
           parse={parse}
         >
           {isExpanded || post.caption.length <= MAX_CHAR_FOR_SUMMARY ? (
-            post.caption
+            post.captionAsRichText ? (
+              <RichTextRenderer body={post.captionAsRichText} odinId={odinId} />
+            ) : (
+              post.caption
+            )
           ) : (
             <>
               {ellipsisAtMaxChar(post.caption, MAX_CHAR_FOR_SUMMARY)}

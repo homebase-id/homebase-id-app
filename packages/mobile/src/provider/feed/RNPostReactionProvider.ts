@@ -56,8 +56,8 @@ export const saveComment = async (
   const isLocal = context.odinId === dotYouClient.getIdentity();
   const targetDrive = GetTargetDriveFromChannelId(context.channelId);
 
-  const payloads: PayloadFile[] = [];
-  const thumbnails: ThumbnailFile[] = [];
+  let payloads: PayloadFile[] = [];
+  let thumbnails: ThumbnailFile[] = [];
   let previewThumbnail: EmbeddedThumb | undefined;
 
   if (comment.fileMetadata.appData.content.attachment) {
@@ -89,10 +89,8 @@ export const saveComment = async (
   // Set max of 3kb for content so enough room is left for metadata
   const shouldEmbedContent = payloadBytes.length < 3000;
   const metadata: UploadFileMetadata = {
-    // allowDistribution: true, // Disable
     versionTag: comment.fileMetadata.versionTag,
     allowDistribution: false,
-    senderOdinId: comment.fileMetadata.appData.content.authorOdinId,
     referencedFile: {
       targetDrive,
       globalTransitId: comment.fileMetadata.appData.groupId || context.target.globalTransitId,
@@ -116,6 +114,38 @@ export const saveComment = async (
       payload: new OdinBlob([payloadBytes], { type: 'application/json' }) as unknown as Blob,
       key: DEFAULT_PAYLOAD_KEY,
     });
+  }
+
+  // Extensions and paths need fixing when not encrypted; It only needs to be good when
+  //   it's passed into the axios upload; And when encrypting it happens by default;
+  if (!encrypt) {
+    payloads = await Promise.all(
+      payloads.map(async (payload) => {
+        if (!('fixExtension' in payload.payload)) {
+          return payload;
+        }
+
+        const newBlob = await (payload.payload as unknown as OdinBlob).fixExtension();
+        return {
+          ...payload,
+          payload: newBlob as unknown as Blob,
+        };
+      })
+    );
+
+    thumbnails = await Promise.all(
+      thumbnails.map(async (thumb) => {
+        if (!('fixExtension' in thumb.payload)) {
+          return thumb;
+        }
+
+        const newBlob = await (thumb.payload as unknown as OdinBlob).fixExtension();
+        return {
+          ...thumb,
+          payload: newBlob as unknown as Blob,
+        };
+      })
+    );
   }
 
   if (isLocal) {

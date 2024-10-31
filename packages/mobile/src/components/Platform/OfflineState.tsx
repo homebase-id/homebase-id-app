@@ -1,6 +1,6 @@
 import { Text, TouchableOpacity, View } from 'react-native';
 import { Colors } from '../../app/Colors';
-import { t } from 'feed-app-common';
+import { t } from 'homebase-id-app-common';
 import { onlineManager } from '@tanstack/react-query';
 import { fetch } from '@react-native-community/netinfo';
 import { useEffect, useState } from 'react';

@@ -12,7 +12,7 @@ type TextButtonProps = {
   title: string;
   lightColor?: string;
   darkColor?: string;
-  onPress: () => Promise<any> | void;
+  onPress: () => Promise<void | unknown> | void;
   filled?: boolean;
   underlayColor?: string;
   showLoaderOnPress?: boolean;

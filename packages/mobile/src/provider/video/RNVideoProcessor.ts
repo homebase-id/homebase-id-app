@@ -13,6 +13,7 @@ import {
 } from '@homebase-id/js-lib/core';
 import { createThumbnails } from '../image/RNThumbnailProvider';
 import { grabThumbnail, compressAndSegmentVideo } from './RNVideoSegmenter';
+import { unlink } from 'react-native-fs';
 
 export const processVideo = async (
   video: ImageSource,
@@ -50,6 +51,13 @@ export const processVideo = async (
 
   if (additionalThumbnails) {
     thumbnails.push(...additionalThumbnails);
+  }
+
+  // Cleanup thumb
+  if (thumbnail) {
+    try {
+      await unlink(thumbnail.uri);
+    } catch {}
   }
 
   // Compress and segment video

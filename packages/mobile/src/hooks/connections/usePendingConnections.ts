@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { getPendingRequests } from '@homebase-id/js-lib/network';
 import { PagingOptions } from '@homebase-id/js-lib/core';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 
 interface useConnectionsProps {
   pageSize: number;

@@ -6,7 +6,7 @@ import { useCallback } from 'react';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useChannels } from './channels/useChannels';
 import { useChannelDrives } from './channels/useChannelDrives';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 import { useNotificationSubscriber } from '../useNotificationSubscriber';
 import { useDriveSubscriber } from '../drive/useDriveSubscriber';
 
@@ -44,14 +44,22 @@ const useFeedWebsocket = (isEnabled: boolean) => {
   const queryClient = useQueryClient();
   const { data: subscribedDrives, isFetched } = useDriveSubscriber();
 
-
   const handler = useCallback(
     (notification: TypedConnectionNotification) => {
       if (
-        (notification.notificationType === 'fileAdded' ||
-          notification.notificationType === 'fileModified')
+        notification.notificationType === 'fileAdded' ||
+        notification.notificationType === 'fileModified'
       ) {
-        if (subscribedDrives && subscribedDrives.slice(1).some((drive) => stringGuidsEqual(drive.alias, notification.targetDrive?.alias) && stringGuidsEqual(drive.type, notification.targetDrive?.type))) {
+        if (
+          subscribedDrives &&
+          subscribedDrives
+            .slice(1)
+            .some(
+              (drive) =>
+                stringGuidsEqual(drive.alias, notification.targetDrive?.alias) &&
+                stringGuidsEqual(drive.type, notification.targetDrive?.type)
+            )
+        ) {
           queryClient.invalidateQueries({ queryKey: ['social-feeds'] });
         }
       }

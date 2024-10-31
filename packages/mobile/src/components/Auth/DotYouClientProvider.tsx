@@ -1,4 +1,4 @@
-import { DotYouClientContext } from 'feed-app-common';
+import { DotYouClientContext } from 'homebase-id-app-common';
 import { ReactNode, useMemo } from 'react';
 import { useAuth } from '../../hooks/auth/useAuth';
 

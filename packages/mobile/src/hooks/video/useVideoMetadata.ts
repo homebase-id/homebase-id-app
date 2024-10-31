@@ -10,7 +10,9 @@ import {
   getFileHeaderBytesOverPeerByGlobalTransitId,
   getFileHeaderOverPeer,
 } from '@homebase-id/js-lib/peer';
-import { useDotYouClientContext } from 'feed-app-common';
+import { t, useDotYouClientContext } from 'homebase-id-app-common';
+import { addLogs } from '../../provider/log/logger';
+import { generateClientError } from '../errors/useErrors';
 
 export const useVideoMetadata = (
   odinId?: string,
@@ -54,11 +56,11 @@ export const useVideoMetadata = (
         odinId !== identity
           ? videoGlobalTransitId
             ? await getFileHeaderBytesOverPeerByGlobalTransitId(
-                dotYouClient,
-                odinId,
-                videoDrive,
-                videoGlobalTransitId
-              )
+              dotYouClient,
+              odinId,
+              videoDrive,
+              videoGlobalTransitId
+            )
             : await getFileHeaderOverPeer(dotYouClient, odinId, videoDrive, videoFileId)
           : await getFileHeader(dotYouClient, videoDrive, videoFileId);
 
@@ -91,6 +93,11 @@ export const useVideoMetadata = (
       refetchOnMount: false,
       refetchOnWindowFocus: false,
       enabled: !!videoFileId && videoFileId !== '',
+      throwOnError: (error, _) => {
+        const newError = generateClientError(error, t('Failed to get the video metadata'));
+        addLogs(newError);
+        return false;
+      },
     }),
   };
 };

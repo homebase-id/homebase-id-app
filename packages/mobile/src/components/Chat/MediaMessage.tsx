@@ -12,7 +12,7 @@ import { MediaGallery, MediaItem } from '../ui/Media/MediaGallery';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { Colors } from '../../app/Colors';
 import { useAuth } from '../../hooks/auth/useAuth';
-import { useDotYouClientContext } from 'feed-app-common';
+import { DEFAULT_PAYLOAD_KEY } from '@homebase-id/js-lib/core';
 
 const MediaMessage = memo(
   ({
@@ -42,7 +42,13 @@ const MediaMessage = memo(
       ) => onLongPress?.(coords, message),
       [onLongPress]
     );
-    if (!props.currentMessage || !props.currentMessage.fileMetadata.payloads?.length) return null;
+    if (
+      !props.currentMessage ||
+      !props.currentMessage.fileMetadata.payloads?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY)
+        .length
+    ) {
+      return null;
+    }
     return (
       <InnerMediaMessage
         currentMessage={props.currentMessage}
@@ -75,7 +81,10 @@ const InnerMediaMessage = memo(
     const { isDarkMode } = useDarkMode();
     const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
     const { width, height } = Dimensions.get('screen');
-    const payloads = currentMessage.fileMetadata.payloads;
+
+    const payloads = currentMessage.fileMetadata.payloads?.filter(
+      (p) => p.key !== DEFAULT_PAYLOAD_KEY
+    );
     const isMe =
       !currentMessage.fileMetadata.senderOdinId ||
       currentMessage.fileMetadata.senderOdinId === identity;
@@ -94,7 +103,9 @@ const InnerMediaMessage = memo(
       },
       [currentMessage, navigation, payloads]
     );
-    const previewThumbnail = currentMessage.fileMetadata.appData.previewThumbnail;
+    const previewThumbnail =
+      (payloads.length === 1 ? payloads[0]?.previewThumbnail : undefined) ||
+      currentMessage.fileMetadata.appData.previewThumbnail;
 
     const aspectRatio = useMemo(
       () => (previewThumbnail?.pixelWidth || 1) / (previewThumbnail?.pixelHeight || 1),
@@ -114,6 +125,7 @@ const InnerMediaMessage = memo(
     if (payloads.length === 1) {
       return (
         <MediaItem
+          key={`${currentMessage.fileMetadata.appData.content}_${payloads[0].key}`}
           payload={payloads[0]}
           targetDrive={ChatDrive}
           fileId={currentMessage.fileId}

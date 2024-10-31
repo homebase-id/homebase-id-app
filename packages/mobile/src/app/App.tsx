@@ -2,6 +2,7 @@ import {
   DarkTheme,
   DefaultTheme,
   NavigationContainer,
+  NavigatorScreenParams,
   createNavigationContainerRef,
 } from '@react-navigation/native';
 
@@ -45,17 +46,19 @@ import { ErrorBoundary } from '../components/ui/ErrorBoundary/ErrorBoundary';
 import { RouteContextProvider, useRouteContext } from '../components/RouteContext/RouteContext';
 import { useShareManager } from '../hooks/platform/useShareManager';
 import { OdinQueryClient } from './OdinQueryClient';
-import { ChatStack } from './ChatStack';
-import { ProfileStack } from './ProfileStack';
+import { ChatStack, ChatStackParamList } from './ChatStack';
+import { ProfileStack, ProfileStackParamList } from './ProfileStack';
 import BootSplash from 'react-native-bootsplash';
 import BubbleColorProvider from '../components/BubbleContext/BubbleContext';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { ExtendPermissionDialog } from '../components/Permissions/ExtendPermissionDialog';
-import { t } from 'feed-app-common';
+import { t } from 'homebase-id-app-common';
 import { FEED_CHAT_APP_ID } from './constants';
 import { Toast } from '../components/ui/Toast/Toast';
 import { NotificationToaster } from '../components/ui/Alert/NotificationToaster';
-import { FeedStack } from './FeedStack';
+import { FeedStack, FeedStackParamList } from './FeedStack';
+import ChatSettingsProvider from '../components/Settings/ChatSettingsContext';
+import { useCacheCleanup } from '../hooks/file/useCacheCleanup';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -64,9 +67,9 @@ export type AuthStackParamList = {
 
 export type TabStackParamList = {
   Home: undefined;
-  Feed: undefined;
-  Profile: undefined;
-  Chat: undefined;
+  Feed: NavigatorScreenParams<FeedStackParamList>;
+  Profile: NavigatorScreenParams<ProfileStackParamList> | undefined;
+  Chat: NavigatorScreenParams<ChatStackParamList>;
 };
 
 export type HomeStackParamList = {
@@ -77,7 +80,7 @@ export type HomeStackParamList = {
 let App = () => {
   return (
     <OdinQueryClient>
-      <GestureHandlerRootView style={{ flex: 1 }}>
+      <GestureHandlerRootView>
         <PushNotificationProvider>
           <RouteContextProvider>
             <RootStack />
@@ -138,18 +141,20 @@ const AuthenticatedRoot = memo(() => {
       <AudioContextProvider>
         <WebSocketContextProvider>
           <BubbleColorProvider>
-            <ErrorBoundary>
-              <ExtendPermissionDialog
-                appName={t('Homebase Feed & Chat')}
-                appId={FEED_CHAT_APP_ID}
-                drives={drives}
-                circleDrives={circleDrives}
-                permissions={permissions}
-                // needsAllConnected={true}
-              />
-              <NotificationToaster />
-              <AppStackScreen />
-            </ErrorBoundary>
+            <ChatSettingsProvider>
+              <ErrorBoundary>
+                <ExtendPermissionDialog
+                  appName={t('Homebase Feed & Chat')}
+                  appId={FEED_CHAT_APP_ID}
+                  drives={drives}
+                  circleDrives={circleDrives}
+                  permissions={permissions}
+                  // needsAllConnected={true}
+                />
+                <NotificationToaster />
+                <AppStackScreen />
+              </ErrorBoundary>
+            </ChatSettingsProvider>
           </BubbleColorProvider>
         </WebSocketContextProvider>
       </AudioContextProvider>
@@ -165,6 +170,7 @@ const AppStackScreen = memo(() => {
   useAuthenticatedPushNotification();
   useInitialPushNotification();
   useShareManager();
+  useCacheCleanup();
 
   return <TabStack />;
 });
@@ -178,9 +184,10 @@ const TabStack = memo(() => {
     'Feed',
     'Chat',
     'Profile',
+    'Posts',
     // ChatStack
     'Conversation',
-    'NewChat',
+    'New',
     'NewGroup',
     // ProfileStack
     'Overview',

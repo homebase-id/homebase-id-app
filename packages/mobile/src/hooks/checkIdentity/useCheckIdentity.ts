@@ -1,6 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { getDomainFromUrl } from '@homebase-id/js-lib/helpers';
 import axios from 'axios';
+import { t } from 'homebase-id-app-common';
+import { addLogs } from '../../provider/log/logger';
+import { generateClientError } from '../errors/useErrors';
 
 const MINUTE_IN_MS = 60000;
 
@@ -8,6 +11,11 @@ export const useCheckIdentity = (odinId?: string) => {
   return useQuery({
     queryKey: ['check-identity', odinId],
     queryFn: () => doCheckIdentity(odinId),
+    throwOnError: (error, _) => {
+      const newError = generateClientError(error, t('Something went wrong while checking identity'));
+      addLogs(newError);
+      return false;
+    },
     staleTime: MINUTE_IN_MS,
     refetchOnMount: false,
     refetchOnReconnect: false,

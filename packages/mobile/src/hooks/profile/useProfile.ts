@@ -5,7 +5,7 @@ import {
   BuiltInProfiles,
   getProfileAttributes,
 } from '@homebase-id/js-lib/profile';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 
 export const useProfile = () => {
   const dotYouClient = useDotYouClientContext();

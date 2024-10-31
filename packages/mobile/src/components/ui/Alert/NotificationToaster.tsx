@@ -1,4 +1,4 @@
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 import { useRouteContext } from '../../RouteContext/RouteContext';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { ChatStackParamList } from '../../../app/ChatStack';
@@ -16,17 +16,17 @@ import Toast from 'react-native-toast-message';
 import { useCallback, useEffect } from 'react';
 import { getContactByOdinId } from '@homebase-id/js-lib/network';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { FeedStackParamList } from '../../../app/FeedStack';
+import { TabStackParamList } from '../../../app/App';
 
 export const NotificationToaster = () => {
   const { route } = useRouteContext();
   const dotYouClient = useDotYouClientContext();
   const identity = useDotYouClientContext().getIdentity();
   const chatNavigator = useNavigation<NavigationProp<ChatStackParamList>>();
-  const feedNavigator = useNavigation<NavigationProp<FeedStackParamList>>();
+  const tabNavigator = useNavigation<NavigationProp<TabStackParamList>>();
   const isConversationScreen = route?.name === 'Conversation' && !route.params;
   const isChatScreen = route?.name === 'ChatScreen' && route.params;
-  const isFeedScreen = route?.name === 'Home';
+  const isFeedScreen = route?.name === 'Posts';
   const { top } = useSafeAreaInsets();
   const {
     fetch: { data: notifications },
@@ -56,7 +56,6 @@ export const NotificationToaster = () => {
       const isFeedNotification = stringGuidsEqual(appId, FEED_APP_ID);
       if (isChatNotification) {
         // if in conversation screen, don't show notification
-
         if (isConversationScreen) {
           dismissNotification(notification);
           return;
@@ -87,7 +86,7 @@ export const NotificationToaster = () => {
         visibilityTime: 4000,
         topOffset: top,
         onPress: () => {
-          navigateOnNotification(notification, identity, chatNavigator, feedNavigator);
+          navigateOnNotification(notification, identity, chatNavigator, tabNavigator);
           Toast.hide();
         },
         onHide: () => dismissNotification(notification),
@@ -100,7 +99,7 @@ export const NotificationToaster = () => {
     chatNavigator,
     dismissNotification,
     dotYouClient,
-    feedNavigator,
+    tabNavigator,
     identity,
     isChatScreen,
     isConversationScreen,

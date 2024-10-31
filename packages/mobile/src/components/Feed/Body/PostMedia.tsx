@@ -10,10 +10,10 @@ import { GestureType } from 'react-native-gesture-handler';
 
 type PostMediaProps = {
   post: HomebaseFile<PostContent>;
-  doubleTapRef?: React.RefObject<GestureType | undefined>;
+  gestureRefs?: React.RefObject<GestureType | undefined>[];
 };
 
-export const PostMedia = memo(({ post, doubleTapRef }: PostMediaProps) => {
+export const PostMedia = memo(({ post, gestureRefs }: PostMediaProps) => {
   const payloads = post?.fileMetadata.payloads?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY);
   const fileId = post.fileId;
   const previewThumbnail = post.fileMetadata.appData.previewThumbnail;
@@ -54,7 +54,7 @@ export const PostMedia = memo(({ post, doubleTapRef }: PostMediaProps) => {
           style={{
             aspectRatio,
           }}
-          doubleTapRef={doubleTapRef}
+          gestureRefs={gestureRefs}
           onClick={() => {
             navigation.navigate('PreviewMedia', {
               fileId: fileId,
@@ -87,7 +87,7 @@ export const PostMedia = memo(({ post, doubleTapRef }: PostMediaProps) => {
       style={{
         marginTop: hasContent ? 10 : 0,
       }}
-      doubleTapRef={doubleTapRef}
+      gestureRefs={gestureRefs}
       onClick={(index) => {
         navigation.navigate('PreviewMedia', {
           fileId: fileId,

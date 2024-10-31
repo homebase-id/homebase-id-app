@@ -1,6 +1,6 @@
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { ChatDeliveryStatus, ChatMessage } from '../../provider/chat/ChatProvider';
-import { t, useDotYouClientContext } from 'feed-app-common';
+import { t, useDotYouClientContext } from 'homebase-id-app-common';
 import { Pressable, StyleProp, Text, TextStyle, View, ViewStyle } from 'react-native';
 import { Clock, SubtleCheck, Times } from '../ui/Icons/icons';
 import { Colors } from '../../app/Colors';
@@ -110,16 +110,18 @@ export const InnerDeliveryIndicator = ({
         {isFailed ? (
           <Times size={'sm'} color={Colors.red[500]} />
         ) : isDelivered ? (
-          <View style={{ position: 'relative', display: 'flex', flexDirection: 'row', gap: -9 }}>
+          <>
             <SubtleCheck
               size={'sm'}
               color={isRead ? (showDefault ? Colors.indigo[400] : Colors.white) : Colors.gray[400]}
+              style={{ position: 'relative', left: -2 }}
             />
             <SubtleCheck
               size={'sm'}
               color={isRead ? (showDefault ? Colors.indigo[400] : Colors.white) : Colors.gray[400]}
+              style={{ position: 'absolute', left: -11 }}
             />
-          </View>
+          </>
         ) : isSent ? (
           <SubtleCheck
             size={'sm'}

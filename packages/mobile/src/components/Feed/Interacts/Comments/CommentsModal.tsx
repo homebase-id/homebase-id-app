@@ -1,5 +1,5 @@
 import {
-  BottomSheetFlatList,
+  BottomSheetFlashList,
   BottomSheetFooter,
   BottomSheetFooterProps,
   BottomSheetModal,
@@ -16,7 +16,7 @@ import {
 } from 'react';
 import { useDarkMode } from '../../../../hooks/useDarkMode';
 import { Colors } from '../../../../app/Colors';
-import { ActivityIndicator, ListRenderItemInfo, Platform, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Platform, StyleSheet, View } from 'react-native';
 import { Text } from '../../../ui/Text/Text';
 
 import { ReactionContext } from '@homebase-id/js-lib/public';
@@ -27,13 +27,12 @@ import { Backdrop } from '../../../ui/Modal/Backdrop';
 import { CommentComposer } from './CommentComposer';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HomebaseFile, ReactionFile } from '@homebase-id/js-lib/core';
-import { t } from 'feed-app-common';
 import { EmptyComment } from './EmptyComment';
 import { useBottomSheetBackHandler } from '../../../../hooks/useBottomSheetBackHandler';
-
+import { ListRenderItemInfo } from '@shopify/flash-list';
 
 export interface CommentModalMethods {
-  setContext: (context: ReactionContext & CanReactInfo) => void;
+  setContext: (context: ReactionContext & Partial<CanReactInfo>) => void;
   dismiss: () => void;
 }
 
@@ -42,7 +41,7 @@ export const CommentsModal = memo(
     const { isDarkMode } = useDarkMode();
     const bottomSheetRef = useRef<BottomSheetModalMethods>(null);
     const { handleSheetPositionChange } = useBottomSheetBackHandler(bottomSheetRef);
-    const [context, setContext] = useState<ReactionContext & CanReactInfo>();
+    const [context, setContext] = useState<ReactionContext & Partial<CanReactInfo>>();
     const [replyTo, setReplyThread] = useState<
       | {
           replyThreadId: string | undefined;
@@ -57,12 +56,13 @@ export const CommentsModal = memo(
       fetchNextPage,
       isFetchingNextPage,
       isLoading,
+      error,
     } = useComments({ context }).fetch;
     const flattenedComments = comments?.pages.flatMap((page) => page.comments).reverse();
 
     useImperativeHandle(ref, () => {
       return {
-        setContext: (context: ReactionContext & CanReactInfo) => {
+        setContext: (context: ReactionContext & Partial<CanReactInfo>) => {
           setContext(context);
           bottomSheetRef.current?.present();
         },
@@ -90,7 +90,7 @@ export const CommentsModal = memo(
           >
             <CommentComposer
               context={context as ReactionContext}
-              canReact={context}
+              canReact={context as CanReactInfo}
               replyThreadId={replyTo?.replyThreadId}
               replyOdinId={replyTo?.authorOdinId}
               onReplyCancel={() => setReplyThread(undefined)}
@@ -108,7 +108,7 @@ export const CommentsModal = memo(
             commentData={item}
             context={context as ReactionContext}
             isThread={false}
-            canReact={context}
+            canReact={context as CanReactInfo}
             onReply={(commentFile) => {
               setReplyThread({
                 replyThreadId: commentFile.fileMetadata.globalTransitId,
@@ -120,7 +120,7 @@ export const CommentsModal = memo(
       },
       [context]
     );
-
+    const keyExtractor = useCallback((item: HomebaseFile<ReactionFile>) => item.fileId, []);
     const listFooter = useMemo(() => {
       if (isFetchingNextPage) return <CommentsLoader />;
       return <></>;
@@ -139,6 +139,7 @@ export const CommentsModal = memo(
         android_keyboardInputMode="adjustResize"
         onChange={handleSheetPositionChange}
         index={0}
+        enableDynamicSizing={false}
         backgroundStyle={{
           backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
         }}
@@ -156,12 +157,15 @@ export const CommentsModal = memo(
           <Text style={styles.headerText}>Comments</Text>
         </View>
 
-        {isLoading ? (
+        {error ? (
+          <ErrorLoadingComments />
+        ) : isLoading ? (
           <CommentsLoader />
         ) : (
-          <BottomSheetFlatList
+          <BottomSheetFlashList
             data={flattenedComments}
-            contentContainerStyle={{ flexGrow: 1 }}
+            keyExtractor={keyExtractor}
+            estimatedItemSize={92}
             onEndReached={() => {
               if (hasNextPage) {
                 fetchNextPage();
@@ -187,6 +191,14 @@ export const CommentsLoader = () => {
         size="large"
         color={isDarkMode ? Colors.indigo[400] : Colors.indigo[700]}
       />
+    </View>
+  );
+};
+
+export const ErrorLoadingComments = () => {
+  return (
+    <View style={styles.container}>
+      <Text style={{ textAlign: 'center' }}>Error loading comments</Text>
     </View>
   );
 };

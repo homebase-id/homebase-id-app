@@ -2,15 +2,22 @@ import { EmbeddedThumb, TargetDrive } from '@homebase-id/js-lib/core';
 import { memo, useMemo } from 'react';
 import { ActivityIndicator, Dimensions, ImageBackground, View } from 'react-native';
 import { useLinkMetadata } from '../../../hooks/links/useLinkPreview';
-import { calculateScaledDimensions, openURL } from '../../../utils/utils';
+import {
+  calculateScaledDimensions,
+  isYoutubeURL,
+  extractVideoParams,
+  openURL,
+} from '../../../utils/utils';
 import { Text } from '../Text/Text';
 import { useDarkMode } from '../../../hooks/useDarkMode';
 import { Colors } from '../../../app/Colors';
-import { ellipsisAtMaxChar } from 'feed-app-common';
+import { ellipsisAtMaxChar } from 'homebase-id-app-common';
 import { getDomainFromUrl } from '@homebase-id/js-lib/helpers';
 import Animated, { runOnJS } from 'react-native-reanimated';
 import { LinkPreviewDescriptor } from '@homebase-id/js-lib/media';
 import { Gesture, GestureDetector, GestureType } from 'react-native-gesture-handler';
+import YoutubePlayer from 'react-native-youtube-iframe';
+import { useChatSettingsContext } from '../../Settings/useChatSettingsContext';
 
 type LinkPreviewFileProps = {
   targetDrive: TargetDrive;
@@ -18,11 +25,27 @@ type LinkPreviewFileProps = {
   fileId: string;
   odinId?: string;
   payloadKey: string;
-  descriptorContent: LinkPreviewDescriptor;
+  descriptorContent?: LinkPreviewDescriptor;
   position: string;
   previewThumbnail?: EmbeddedThumb;
-  doubleTapRef?: React.RefObject<GestureType | undefined>;
+  gestureRefs?: React.RefObject<GestureType | undefined>[];
 };
+
+export const YoutubePlayerComponent = memo(({ url }: { url: string | undefined }) => {
+  if (!url) return null;
+  const videoProps = extractVideoParams(url);
+  if (!videoProps || !videoProps.videoId) return null;
+  const { videoId, start } = videoProps;
+  return (
+    <YoutubePlayer
+      videoId={videoId}
+      height={200}
+      initialPlayerParams={{
+        start: start ? parseInt(start) : 0,
+      }}
+    />
+  );
+});
 
 export const LinkPreviewFile = memo(
   ({
@@ -34,7 +57,7 @@ export const LinkPreviewFile = memo(
     odinId,
     previewThumbnail,
     descriptorContent,
-    doubleTapRef,
+    gestureRefs,
   }: LinkPreviewFileProps) => {
     const { data, isLoading } = useLinkMetadata({
       targetDrive,
@@ -44,20 +67,23 @@ export const LinkPreviewFile = memo(
       odinId,
     });
     const { isDarkMode } = useDarkMode();
-    const { hasImage, url } = descriptorContent;
+    const { allowYoutubePlayback } = useChatSettingsContext();
+    const url = descriptorContent?.url;
+    const showImage =
+      descriptorContent?.hasImage && !(isYoutubeURL(url || '') && allowYoutubePlayback);
     const embeddedThumbUrl = useMemo(() => {
       if (!previewThumbnail) return;
       return `data:${previewThumbnail.contentType};base64,${previewThumbnail.content}`;
     }, [previewThumbnail]);
     const tapGesture = useMemo(() => {
       const gesture = Gesture.Tap().onStart(() => {
-        runOnJS(openURL)(url);
+        runOnJS(openURL)(url || data?.[0]?.url || '');
       });
-      if (doubleTapRef) {
-        gesture.requireExternalGestureToFail(doubleTapRef);
+      if (gestureRefs) {
+        gesture.requireExternalGestureToFail(...gestureRefs);
       }
       return gesture;
-    }, [doubleTapRef, url]);
+    }, [data, gestureRefs, url]);
     if (data === null) {
       return;
     }
@@ -80,7 +106,8 @@ export const LinkPreviewFile = memo(
             borderRadius: 15,
           }}
         >
-          {hasImage && (
+          {allowYoutubePlayback && <YoutubePlayerComponent url={url} />}
+          {showImage && (
             <ImageBackground
               style={{
                 height: scaledHeight,

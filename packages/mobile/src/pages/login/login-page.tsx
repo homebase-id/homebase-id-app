@@ -29,7 +29,7 @@ import { useDarkMode } from '../../hooks/useDarkMode';
 import { Divider } from '../../components/ui/Divider';
 import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 import TextButton from '../../components/ui/Text/Text-Button';
-import { t } from 'feed-app-common';
+import { t } from 'homebase-id-app-common';
 
 type LoginProps = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 
@@ -137,6 +137,7 @@ const useFinalize = () => {
           setState(success ? 'success' : 'error');
         }
       } catch (e) {
+        console.error('Failed to finalize the authorization flow', e);
         setState('error');
         setUrl(null);
       }
@@ -194,7 +195,7 @@ const LoginComponent = () => {
     }
 
     const url = `https://${odinId || lastIdentity}/api/owner/v1/youauth/authorize?${stringifyToQueryParams(
-      authParams as any
+      authParams as unknown
     )}`;
     if (await InAppBrowser.isAvailable()) {
       const result = await InAppBrowser.openAuth(url, '', {

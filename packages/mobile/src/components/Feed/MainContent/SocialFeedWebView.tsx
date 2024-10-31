@@ -4,7 +4,7 @@ import { useDarkMode } from '../../../hooks/useDarkMode';
 import { uint8ArrayToBase64 } from '@homebase-id/js-lib/helpers';
 import { Text } from '../../ui/Text/Text';
 import { Linking, RefreshControl, ScrollView, View } from 'react-native';
-import { t } from 'feed-app-common';
+import { t } from 'homebase-id-app-common';
 import WebView from 'react-native-webview';
 import { useErrors } from '../../../hooks/errors/useErrors';
 import { Colors } from '../../../app/Colors';

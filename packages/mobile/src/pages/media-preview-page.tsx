@@ -8,18 +8,17 @@ import { ChatStackParamList } from '../app/ChatStack';
 import { PayloadDescriptor } from '@homebase-id/js-lib/core';
 
 import Share from 'react-native-share';
-import { useSafeAreaFrame } from 'react-native-safe-area-context';
+import { useSafeAreaFrame, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Platform, View } from 'react-native';
 import { Colors } from '../app/Colors';
 import { AuthorName } from '../components/ui/Name';
 import { HeaderTitle } from '@react-navigation/elements';
 import { Text } from '../components/ui/Text/Text';
-import { formatToTimeAgoWithRelativeDetail } from 'feed-app-common';
+import { formatToTimeAgoWithRelativeDetail, useDotYouClientContext } from 'homebase-id-app-common';
 import { Download, ShareNode } from '../components/ui/Icons/icons';
 
 import useImage from '../components/ui/OdinImage/hooks/useImage';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
-import { SafeAreaView } from '../components/ui/SafeAreaView/SafeAreaView';
 import Toast from 'react-native-toast-message';
 import Clipboard from '@react-native-clipboard/clipboard';
 import Animated from 'react-native-reanimated';
@@ -35,6 +34,7 @@ export type MediaProp = NativeStackScreenProps<
 >;
 
 export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
+  const identity = useDotYouClientContext().getIdentity();
   const {
     fileId,
     globalTransitId,
@@ -50,6 +50,7 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
   const [currIndex, setCurrIndex] = useState(initialIndex);
   const ref = useRef<ICarouselInstance>(null);
   const { height, width } = useSafeAreaFrame();
+  const { bottom: bottomInsets } = useSafeAreaInsets();
   const getImage = useImage().getFromCache;
   const [isVisible, setIsVisible] = useState(true);
   const autoplay =
@@ -65,7 +66,7 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
           alignItems: Platform.OS === 'ios' ? 'center' : 'flex-start',
         }}
       >
-        {senderOdinId && (
+        {senderOdinId && senderOdinId !== identity && (
           <HeaderTitle
             style={{
               color: Colors.white,
@@ -85,7 +86,7 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
         )}
       </Animated.View>
     );
-  }, [createdAt, senderOdinId]);
+  }, [createdAt, senderOdinId, identity]);
 
   const renderDownloadButton = useCallback(() => {
     const currPayload = payloads[currIndex];
@@ -233,7 +234,6 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
             previewThumbnail={item.previewThumbnail || previewThumbnail}
             imageZoomProps={{
               isSingleTapEnabled: true,
-              minPanPointers: 1,
               onSingleTap: () => {
                 setIsVisible(!isVisible);
               },
@@ -313,15 +313,14 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
       />
 
       {isVisible && (
-        <SafeAreaView
+        <View
           style={{
             position: 'absolute',
-            bottom: 0,
+            bottom: bottomInsets,
             padding: 5,
             right: 0,
             left: 0,
-            flex: 1,
-            display: 'flex',
+
             zIndex: 20,
             backgroundColor: '',
             borderTopLeftRadius: 10,
@@ -407,8 +406,6 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
           {!hasVideoPayload && (
             <View
               style={{
-                display: 'flex',
-                flex: 1,
                 flexDirection: 'row',
                 justifyContent: 'space-between',
               }}
@@ -422,7 +419,7 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
               />
             </View>
           )}
-        </SafeAreaView>
+        </View>
       )}
     </BottomSheetModalProvider>
   );

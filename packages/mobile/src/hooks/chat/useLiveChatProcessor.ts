@@ -18,11 +18,11 @@ import {
 import { processInbox } from '@homebase-id/js-lib/peer';
 
 import { useNotificationSubscriber } from '../useNotificationSubscriber';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { getConversationQueryOptions, useConversation } from './useConversation';
-import { useDotYouClientContext } from 'feed-app-common';
+import { t, useDotYouClientContext } from 'homebase-id-app-common';
 import {
   CHAT_MESSAGE_FILE_TYPE,
   ChatMessage,
@@ -35,7 +35,6 @@ import {
   CHAT_CONVERSATION_LOCAL_METADATA_FILE_TYPE,
   dsrToConversationMetadata,
 } from '../../provider/chat/ConversationProvider';
-import { ChatReactionFileType } from '../../provider/chat/ChatReactionProvider';
 import { insertNewMessage, insertNewMessagesForConversation } from './useChatMessages';
 import { insertNewConversation } from './useConversations';
 import { useWebSocketContext } from '../../components/WebSocketContext/useWebSocketContext';
@@ -47,6 +46,8 @@ import {
 import { insertNewReaction, removeReaction } from './useChatReaction';
 import { useNotification } from '../notifications/useNotification';
 import { useDriveSubscriber } from '../drive/useDriveSubscriber';
+import { generateClientError } from '../errors/useErrors';
+import { addLogs } from '../../provider/log/logger';
 
 const MINUTE_IN_MS = 60000;
 const isDebug = false; // The babel plugin to remove console logs would remove any if they get to production
@@ -91,7 +92,22 @@ const useInboxProcessor = (connected?: boolean) => {
         }
       );
       isDebug && console.debug('[InboxProcessor] new messages', updatedMessages.length);
-      await processChatMessagesBatch(dotYouClient, queryClient, updatedMessages);
+      if (updatedMessages.length > 0) {
+        const fullMessages = (
+          await Promise.all(
+            updatedMessages.map(
+              async (msg) =>
+                await dsrToMessage(
+                  dotYouClient,
+                  msg as unknown as HomebaseFile<string>,
+                  ChatDrive,
+                  false
+                )
+            )
+          )
+        ).filter(Boolean) as HomebaseFile<ChatMessage>[];
+        await processChatMessagesBatch(dotYouClient, queryClient, fullMessages);
+      }
 
       const updatedConversations = await findChangesSinceTimestamp(
         dotYouClient,
@@ -132,6 +148,11 @@ const useInboxProcessor = (connected?: boolean) => {
   return useQuery({
     queryKey: ['process-inbox'],
     queryFn: fetchData,
+    throwOnError: (error, _) => {
+      const newError = generateClientError(error, t('Something went wrong while processing inbox'));
+      addLogs(newError);
+      return false;
+    },
     enabled: connected,
     staleTime: 500, // 500ms
   });
@@ -139,6 +160,7 @@ const useInboxProcessor = (connected?: boolean) => {
 
 const useChatWebsocket = (isEnabled: boolean) => {
   const dotYouClient = useDotYouClientContext();
+  const identity = dotYouClient.getIdentity();
 
   // Added to ensure we have the conversation query available
   const {
@@ -147,7 +169,6 @@ const useChatWebsocket = (isEnabled: boolean) => {
   const { add } = useNotification();
   const queryClient = useQueryClient();
   const { data: subscribedDrives, isFetched } = useDriveSubscriber();
-
 
   const [chatMessagesQueue, setChatMessagesQueue] = useState<HomebaseFile<ChatMessage>[]>([]);
 
@@ -196,15 +217,12 @@ const useChatWebsocket = (isEnabled: boolean) => {
           return;
         }
 
-        if (updatedChatMessage.fileMetadata.senderOdinId !== '') {
+        if (updatedChatMessage.fileMetadata.senderOdinId !== identity) {
           // Messages from others are processed immediately
           insertNewMessage(queryClient, updatedChatMessage);
         } else {
           setChatMessagesQueue((prev) => [...prev, updatedChatMessage]);
         }
-      } else if (notification.header.fileMetadata.appData.fileType === ChatReactionFileType) {
-        const messageId = notification.header.fileMetadata.appData.groupId;
-        queryClient.invalidateQueries({ queryKey: ['chat-reaction', messageId] });
       } else if (
         notification.header.fileMetadata.appData.fileType === CHAT_CONVERSATION_FILE_TYPE
       ) {
@@ -268,6 +286,8 @@ const useChatWebsocket = (isEnabled: boolean) => {
         );
       }
     }
+    // Yes, we don't follow the useCallback rules here but we think we know what we're doing
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const chatMessagesQueueTunnel = useRef<HomebaseFile<ChatMessage>[]>([]);
@@ -279,8 +299,21 @@ const useChatWebsocket = (isEnabled: boolean) => {
       timeout.current = null;
     }
 
-    // Filter out duplicate messages and selec the one with the latest updated property
-    const filteredMessages = queuedMessages.reduce((acc, message) => {
+    const queuedMessagesWithLastUpdated = queuedMessages.map((m) => ({
+      ...m,
+      fileMetadata: {
+        ...m.fileMetadata,
+        updated:
+          Object.values(m.serverMetadata?.transferHistory?.recipients || []).reduce((acc, cur) => {
+            return Math.max(acc, cur.lastUpdated || 0);
+          }, 0) ||
+          m.fileMetadata.updated ||
+          0,
+      },
+    }));
+
+    // Filter out duplicate messages and select the one with the latest updated property
+    const filteredMessages = queuedMessagesWithLastUpdated.reduce((acc, message) => {
       const existingMessage = acc.find((m) => stringGuidsEqual(m.fileId, message.fileId));
       if (!existingMessage) {
         acc.push(message);
@@ -291,6 +324,8 @@ const useChatWebsocket = (isEnabled: boolean) => {
     }, [] as HomebaseFile<ChatMessage>[]);
 
     await processChatMessagesBatch(dotYouClient, queryClient, filteredMessages);
+    // Yes, we don't follow the useCallback rules here but we think we know what we're doing
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const timeout = useRef<NodeJS.Timeout | null>(null);
@@ -309,8 +344,6 @@ const useChatWebsocket = (isEnabled: boolean) => {
       processQueue(chatMessagesQueue);
     }
   }, [processQueue, chatMessagesQueue]);
-
-
 
   return useNotificationSubscriber(
     isEnabled && isFetched ? handler : undefined,
@@ -393,11 +426,11 @@ const processChatMessagesBatch = async (
           uniqueMessagesPerConversation[updatedConversation].map(async (newMessage) =>
             typeof newMessage.fileMetadata.appData.content === 'string'
               ? await dsrToMessage(
-                dotYouClient,
-                newMessage as HomebaseFile<string>,
-                ChatDrive,
-                true
-              )
+                  dotYouClient,
+                  newMessage as HomebaseFile<string>,
+                  ChatDrive,
+                  true
+                )
               : (newMessage as HomebaseFile<ChatMessage>)
           )
         )

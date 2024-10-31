@@ -1,7 +1,7 @@
 import { UnifiedConversation, getConversations } from '../../provider/chat/ConversationProvider';
 import { InfiniteData, QueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 
 export interface ChatConversationsReturn {

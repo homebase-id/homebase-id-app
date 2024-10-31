@@ -1,5 +1,5 @@
 import { TargetDrive } from '@homebase-id/js-lib/core';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 import { getPayloadFile } from '../../provider/files/RNFileProvider';
 import { CachesDirectoryPath, exists } from 'react-native-fs';
 import { OdinBlob } from '../../../polyfills/OdinBlob';

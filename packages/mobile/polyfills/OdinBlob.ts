@@ -249,7 +249,7 @@ class Blob {
   }
 }
 
-export const getExtensionForMimeType = (mimeType: string | undefined | null) => {
+const getExtensionForMimeType = (mimeType: string | undefined | null) => {
   if (!mimeType) return 'bin';
   return mimeType === 'audio/mpeg'
     ? 'mp3'

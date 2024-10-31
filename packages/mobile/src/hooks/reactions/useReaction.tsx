@@ -11,7 +11,7 @@ import {
 import { UseCommentsVal } from './comments/useComments';
 
 import { HomebaseFile, NewHomebaseFile, ReactionFile } from '@homebase-id/js-lib/core';
-import { useDotYouClientContext } from 'feed-app-common';
+import { getRichTextFromString, useDotYouClientContext } from 'homebase-id-app-common';
 import {
   RawReactionContent as RNRawReactionContent,
   saveComment,
@@ -38,8 +38,7 @@ export const useReaction = () => {
           ...commentData.fileMetadata.appData,
           content: {
             ...commentData.fileMetadata.appData.content,
-            // bodyAsRichText:
-            //   commentData.fileMetadata.appData.content.body.trim(),
+            bodyAsRichText: getRichTextFromString(commentData.fileMetadata.appData.content.body),
           },
         },
       },

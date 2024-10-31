@@ -8,14 +8,17 @@ import {
 } from '@tanstack/react-query';
 
 import {
+  getPayloadAsJson,
   HomebaseFile,
+  ImageContentType,
   NewHomebaseFile,
   NewPayloadDescriptor,
+  RichText,
   SecurityGroupType,
 } from '@homebase-id/js-lib/core';
 import { getNewId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 
-import { t, useDotYouClientContext } from 'feed-app-common';
+import { t, useDotYouClientContext } from 'homebase-id-app-common';
 import {
   ChatDeliveryStatus,
   ChatMessage,
@@ -25,14 +28,19 @@ import {
 } from '../../provider/chat/ChatProvider';
 import { ImageSource } from '../../provider/image/RNImageProvider';
 import {
+  ChatDrive,
   ConversationWithYourselfId,
   UnifiedConversation,
 } from '../../provider/chat/ConversationProvider';
 import { OdinBlob } from '../../../polyfills/OdinBlob';
 import { getSynchronousDotYouClient } from './getSynchronousDotYouClient';
-import { useErrors, addError } from '../errors/useErrors';
+import { useErrors, addError, generateClientError } from '../errors/useErrors';
 import { LinkPreview } from '@homebase-id/js-lib/media';
 import { insertNewMessage } from './useChatMessages';
+import { insertImageIntoCache } from '../../components/ui/OdinImage/hooks/useImage';
+import { copyFileIntoCache } from '../../utils/utils';
+import { addLogs } from '../../provider/log/logger';
+import { unlink } from 'react-native-fs';
 
 const sendMessage = async ({
   conversation,
@@ -47,7 +55,7 @@ const sendMessage = async ({
   conversation: HomebaseFile<UnifiedConversation>;
   replyId?: string;
   files?: ImageSource[];
-  message: string;
+  message: string | RichText;
   linkPreviews?: LinkPreview[];
   chatId?: string;
   userDate?: number;
@@ -105,15 +113,15 @@ const sendMessage = async ({
             newChat.fileMetadata.appData.uniqueId
           )
             ? ({
-                ...msg,
-                fileMetadata: {
-                  ...msg?.fileMetadata,
-                  payloads: (msg?.fileMetadata.payloads?.map((payload) => ({
-                    ...payload,
-                    uploadProgress: { phase, progress },
-                  })) || []) as NewPayloadDescriptor,
-                },
-              } as HomebaseFile<ChatMessage>)
+              ...msg,
+              fileMetadata: {
+                ...msg?.fileMetadata,
+                payloads: (msg?.fileMetadata.payloads?.map((payload) => ({
+                  ...payload,
+                  uploadProgress: { phase, progress },
+                })) || []) as NewPayloadDescriptor,
+              },
+            } as HomebaseFile<ChatMessage>)
             : msg
         ),
       })),
@@ -125,12 +133,29 @@ const sendMessage = async ({
     );
   };
 
+  // We copy into pendingFiles as the upload will unlink
+  const pendingFiles = await Promise.all(
+    (files || [])?.map(async (file) => {
+      const newFilePath = await copyFileIntoCache(
+        file.uri || (file.filepath as string),
+        file.type || undefined
+      );
+
+      return { ...file, filepath: newFilePath, uri: newFilePath };
+    })
+  );
+
   const uploadResult = await uploadChatMessage(
     dotYouClient,
     newChat,
     recipients,
-    files,
+    pendingFiles,
     linkPreviews,
+    recipients.length > 1
+      ? conversationContent.title
+        ? `${identity} sent a message to ${conversationContent.title}`
+        : `${identity} sent a message in a group chat`
+      : undefined,
     undefined,
     onUpdate
   );
@@ -142,6 +167,60 @@ const sendMessage = async ({
   newChat.fileMetadata.appData.content.deliveryStatus =
     uploadResult.chatDeliveryStatus || ChatDeliveryStatus.Sent;
 
+  // Insert images into useImage cache:
+  const fileMetadataPayloads: NewPayloadDescriptor[] = await Promise.all(
+    (files || [])?.map(async (file, index) => {
+      const key = `chat_mbl${index}`;
+
+      try {
+        if (file.type?.startsWith('image/')) {
+          const cachedImagePath = await copyFileIntoCache(
+            file.uri || file.filepath || '',
+            file.type
+          );
+
+          insertImageIntoCache(
+            queryClient,
+            undefined,
+            uploadResult.file.fileId,
+            key,
+            ChatDrive,
+            undefined,
+            {
+              url: cachedImagePath,
+              type: (file.type as ImageContentType) || undefined,
+              naturalSize: {
+                pixelWidth: file.width,
+                pixelHeight: file.height,
+              },
+            }
+          );
+        }
+      } catch { }
+
+      return {
+        key,
+        contentType: file.type || undefined,
+        pendingFile:
+          file.filepath || file.uri
+            ? (new OdinBlob((file.uri || file.filepath) as string, {
+              type: file.type || undefined,
+            }) as unknown as Blob)
+            : undefined,
+      };
+    })
+  );
+
+  // Cleanup as much files as possible
+  await Promise.all(
+    (files || [])?.map(async (file) => {
+      try {
+        await unlink(file.uri || file.filepath || '');
+      } catch { }
+    })
+  );
+
+  newChat.fileMetadata.payloads = fileMetadataPayloads;
   return newChat;
 };
 
@@ -152,7 +231,7 @@ export const getSendChatMessageMutationOptions: (queryClient: QueryClient) => Us
     conversation: HomebaseFile<UnifiedConversation>;
     replyId?: string;
     files?: ImageSource[];
-    message: string;
+    message: string | RichText;
     linkPreviews?: LinkPreview[];
     userDate?: number;
     chatId?: string;
@@ -184,20 +263,21 @@ export const getSendChatMessageMutationOptions: (queryClient: QueryClient) => Us
           previewThumbnail:
             files && files.length === 1
               ? {
-                  contentType: files[0].type as string,
-                  content: files[0].uri || files[0].filepath || '',
-                  pixelWidth: files[0].width,
-                  pixelHeight: files[0].height,
-                }
+                contentType: files[0].type as string,
+                content: files[0].uri || files[0].filepath || '',
+                pixelWidth: files[0].width,
+                pixelHeight: files[0].height,
+              }
               : undefined,
         },
-        payloads: files?.map((file) => ({
+        payloads: files?.map((file, index) => ({
+          key: `chat_mbl${index}`,
           contentType: file.type || undefined,
           pendingFile:
             file.filepath || file.uri
               ? (new OdinBlob((file.uri || file.filepath) as string, {
-                  type: file.type || undefined,
-                }) as unknown as Blob)
+                type: file.type || undefined,
+              }) as unknown as Blob)
               : undefined,
         })),
       },
@@ -252,16 +332,16 @@ export const getUpdateChatMessageMutationOptions: (queryClient: QueryClient) => 
   },
   {
     extistingMessages:
-      | InfiniteData<
-          {
-            searchResults: (HomebaseFile<ChatMessage> | null)[];
-            cursorState: string;
-            queryTime: number;
-            includeMetadataHeader: boolean;
-          },
-          unknown
-        >
-      | undefined;
+    | InfiniteData<
+      {
+        searchResults: (HomebaseFile<ChatMessage> | null)[];
+        cursorState: string;
+        queryTime: number;
+        includeMetadataHeader: boolean;
+      },
+      unknown
+    >
+    | undefined;
     existingMessage: HomebaseFile<ChatMessage> | undefined;
   }
 > = (queryClient) => ({
@@ -336,13 +416,13 @@ export const useChatMessage = (props?: {
   const getMessageByUniqueId = async (conversationId: string | undefined, messageId: string) => {
     const extistingMessages = conversationId
       ? queryClient.getQueryData<
-          InfiniteData<{
-            searchResults: (HomebaseFile<ChatMessage> | null)[];
-            cursorState: string;
-            queryTime: number;
-            includeMetadataHeader: boolean;
-          }>
-        >(['chat-messages', conversationId])
+        InfiniteData<{
+          searchResults: (HomebaseFile<ChatMessage> | null)[];
+          cursorState: string;
+          queryTime: number;
+          includeMetadataHeader: boolean;
+        }>
+      >(['chat-messages', conversationId])
       : undefined;
 
     if (extistingMessages) {
@@ -365,6 +445,11 @@ export const useChatMessage = (props?: {
       enabled: !!props?.messageId,
       refetchOnMount: false,
       refetchOnWindowFocus: false,
+      throwOnError: (error, _) => {
+        const newError = generateClientError(error, t('Failed to get the chat message'));
+        addLogs(newError);
+        return false;
+      },
     }),
     send: useMutation({
       ...getSendChatMessageMutationOptions(queryClient),

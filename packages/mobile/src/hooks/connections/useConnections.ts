@@ -1,6 +1,6 @@
 import { getConnections } from '@homebase-id/js-lib/network';
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 
 interface useConnectionsProps {
   pageSize?: number;
@@ -23,7 +23,7 @@ export const useConnections = (
         cursor: cursor ?? 0,
         count: pageSize,
       });
-    } catch (ex) {
+    } catch {
       return {
         cursor: undefined,
         results: [],

@@ -1,6 +1,6 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { fetchFollowing } from '@homebase-id/js-lib/network';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 
 type useFollowingInfiniteProps = {
   pageSize?: number;

@@ -18,7 +18,7 @@ import { postTeaserCardStyle } from '../PostTeaserCard';
 import { Colors } from '../../../app/Colors';
 import { Avatar } from '../../ui/Avatars/Avatar';
 import { PostActionProps } from '../Interacts/PostActionModal';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 
 export const PostDetailCard = memo(
   ({
@@ -44,7 +44,7 @@ export const PostDetailCard = memo(
 
     if (!postFile) return <ActivityIndicator />;
     const post = postFile.fileMetadata.appData.content;
-    const authorOdinId = post.authorOdinId || odinId;
+    const authorOdinId = postFile.fileMetadata.originalAuthor || odinId;
     const isPublic =
       channel?.serverMetadata?.accessControlList?.requiredSecurityGroup ===
         SecurityGroupType.Anonymous ||
@@ -118,7 +118,7 @@ export const PostDetailCard = memo(
           postFile={postFile}
           odinId={postFile.fileMetadata.senderOdinId}
         >
-          <PostMedia post={postFile} doubleTapRef={doubleTapRef} />
+          <PostMedia post={postFile} gestureRefs={[doubleTapRef]} />
         </DoubleTapHeart>
         <PostInteracts
           postFile={postFile}

@@ -10,10 +10,9 @@ import {
 import { ChatStackParamList } from '../../app/ChatStack';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useDarkMode } from '../../hooks/useDarkMode';
-import { t, useAllConnections } from 'feed-app-common';
+import { t, useAllConnections } from 'homebase-id-app-common';
 import { useConversation } from '../../hooks/chat/useConversation';
-import { useChatMessage } from '../../hooks/chat/useChatMessage';
-import { memo, useCallback, useMemo, useState } from 'react';
+import { memo, useCallback, useLayoutEffect, useMemo, useState } from 'react';
 import { DotYouProfile } from '@homebase-id/js-lib/network';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import {
@@ -32,7 +31,6 @@ import {
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 import { AuthorName } from '../../components/ui/Name';
 import { SendChat } from '../../components/ui/Icons/icons';
-import { ErrorNotification } from '../../components/ui/Alert/ErrorNotification';
 import { ImageSource } from '../../provider/image/RNImageProvider';
 import { fixContentURI, getImageSize } from '../../utils/utils';
 import {
@@ -40,20 +38,40 @@ import {
   useConversationsWithRecentMessage,
 } from '../../hooks/chat/useConversationsWithRecentMessage';
 import ConversationTile from '../../components/Chat/Conversation-tile';
-import { getNewId } from '@homebase-id/js-lib/helpers';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ConversationTileWithYourself } from '../../components/Conversation/ConversationTileWithYourself';
+import { SearchConversationWithSelectionResults } from '../../components/Chat/SearchConversationsResults';
 
 export type ShareChatProp = NativeStackScreenProps<ChatStackParamList, 'ShareChat'>;
 export const ShareChatPage = (prop: ShareChatProp) => {
   const sharedData = prop.route.params;
   const { isDarkMode } = useDarkMode();
-
   const { mutateAsync: createConversation } = useConversation().create;
-  const { mutate: sendMessage, error } = useChatMessage().send;
   const [sending, setSending] = useState(false);
   const { data: connections } = useAllConnections(true);
   const { data: allConversations } = useConversationsWithRecentMessage().all;
+  const [query, setQuery] = useState<string | undefined>(undefined);
+
+  useLayoutEffect(() => {
+    prop.navigation.setOptions({
+      headerSearchBarOptions: {
+        hideWhenScrolling: true,
+        headerIconColor: isDarkMode ? Colors.white : Colors.black,
+        placeholder: 'Search people',
+        hideNavigationBar: true,
+        autoCapitalize: 'none',
+        onChangeText: (event) => {
+          setQuery(event.nativeEvent.text);
+        },
+        onCancelButtonPress: () => {
+          setQuery(undefined);
+        },
+        onClose: () => {
+          setQuery(undefined);
+        },
+      },
+    });
+  }, [isDarkMode, prop.navigation]);
 
   const [selectedContact, setSelectedContact] = useState<DotYouProfile[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<
@@ -66,28 +84,56 @@ export const ShareChatPage = (prop: ShareChatProp) => {
       navigation.goBack();
     }
     setSending(true);
+    if (sharedData.find((item) => item.mimeType.startsWith('text'))) {
+      const selectedContacts = selectedContact.length;
+      const selectedConversations = selectedConversation.length;
+      if (selectedContacts + selectedConversations === 1) {
+        if (selectedContact.length === 1) {
+          const contact = selectedContact[0];
+          const conversation = await createConversation({
+            recipients: [contact.odinId],
+          });
+          navigation.dispatch(
+            StackActions.replace('ChatScreen', {
+              convoId: conversation.fileMetadata.appData.uniqueId as string,
+              initialText: sharedData.find((item) => item.mimeType.startsWith('text/'))?.data,
+            })
+          );
+        } else {
+          const group = selectedConversation[0];
+          navigation.dispatch(
+            StackActions.replace('ChatScreen', {
+              convoId: group.fileMetadata.appData.uniqueId as string,
+              initialText: sharedData.find((item) => item.mimeType.startsWith('text/'))?.data,
+            })
+          );
+        }
+        return;
+      } else {
+        const recipients = selectedConversation;
+        for (const contact of selectedContact) {
+          recipients.push(
+            await createConversation({
+              recipients: [contact.odinId],
+            })
+          );
+        }
+        navigation.navigate('ShareEditor', {
+          text: sharedData.find((item) => item.mimeType.startsWith('text/'))?.data as string,
+          recipients: recipients,
+        });
+      }
+    }
 
-    async function forwardMessages(conversation: HomebaseFile<UnifiedConversation>) {
-      let text = '';
+    async function getMediaSourceData() {
       const imageSource: ImageSource[] = [];
       for (const item of sharedData) {
         const mimeType = item.mimeType;
         const data = item.data;
-        if (mimeType.startsWith('text')) {
-          text = text + data + '\n';
-        } else if (mimeType.startsWith('image')) {
+        if (mimeType.startsWith('image')) {
           const uri = await fixContentURI(data, mimeType.split('/')[1]);
-          let size = {
-            width: 0,
-            height: 0,
-          };
-          await getImageSize(uri).then((res) => {
-            if (res instanceof Error) {
-              size = { width: 500, height: 500 };
-              return;
-            }
-            size = res;
-          });
+
+          const size = await getImageSize(uri);
           imageSource.push({
             uri: uri,
             width: size.width,
@@ -116,74 +162,29 @@ export const ShareChatPage = (prop: ShareChatProp) => {
         }
       }
 
-      return sendMessage({
-        conversation,
-        message: text,
-        files: imageSource,
-        chatId: getNewId(),
-        userDate: new Date().getTime(),
-      });
+      return imageSource;
     }
-    const promises: Promise<void>[] = [];
-    if (selectedContact.length > 0) {
-      promises.push(
-        ...selectedContact.flatMap(async (contact) => {
+
+    const medias = await getMediaSourceData();
+    if (medias.length > 0) {
+      const conversations = selectedConversation;
+      if (selectedContact.length > 0) {
+        for (const contact of selectedContact) {
           const conversation = await createConversation({
             recipients: [contact.odinId],
           });
-
-          return forwardMessages(conversation);
+          conversations.push(conversation);
+        }
+      }
+      navigation.dispatch(
+        StackActions.replace('ChatFileOverview', {
+          initialAssets: medias,
+          recipients: conversations,
         })
       );
-    }
-
-    if (selectedConversation.length > 0) {
-      promises.push(
-        ...selectedConversation.flatMap((conversation) => {
-          return forwardMessages(conversation);
-        })
-      );
-    }
-
-    await Promise.all(promises);
-    if (promises.length === 1) {
-      if (selectedContact.length === 1) {
-        const contact = selectedContact[0];
-
-        const conversation = await createConversation({
-          recipients: [contact.odinId],
-        });
-        navigation.dispatch(
-          StackActions.replace('ChatScreen', {
-            convoId: conversation.fileMetadata.appData.uniqueId as string,
-          })
-        );
-      }
-      if (selectedConversation.length === 1) {
-        const group = selectedConversation[0];
-        navigation.dispatch(
-          StackActions.replace('ChatScreen', {
-            convoId: group.fileMetadata.appData.uniqueId as string,
-          })
-        );
-      }
-    } else {
-      Toast.show({
-        type: 'success',
-        text1: 'Message sent successfully',
-        position: 'bottom',
-      });
-      navigation.goBack();
     }
     setSending(false);
-  }, [
-    selectedContact,
-    selectedConversation,
-    sharedData,
-    navigation,
-    sendMessage,
-    createConversation,
-  ]);
+  }, [selectedContact, selectedConversation, sharedData, navigation, createConversation]);
 
   const { bottom } = useSafeAreaInsets();
 
@@ -273,17 +274,29 @@ export const ShareChatPage = (prop: ShareChatProp) => {
     );
   }, [bottom, isDarkMode, onShare, selectedContact, selectedConversation, sending]);
 
+  const isQueryActive = useMemo(() => !!(query && query.length >= 1), [query]);
+
   return (
     <SafeAreaView>
-      <ErrorNotification error={error} />
-      <InnerShareChatPage
-        connections={connections}
-        allConversations={allConversations}
-        selectedContact={selectedContact}
-        setSelectedContact={setSelectedContact}
-        selectedConversation={selectedConversation}
-        setSelectedConversation={setSelectedConversation}
-      />
+      {isQueryActive ? (
+        <SearchConversationWithSelectionResults
+          query={query}
+          allConversations={allConversations || []}
+          selectedContact={selectedContact}
+          setSelectedContact={setSelectedContact}
+          selectedConversation={selectedConversation}
+          setSelectedConversation={setSelectedConversation}
+        />
+      ) : (
+        <InnerShareChatPage
+          connections={connections}
+          allConversations={allConversations}
+          selectedContact={selectedContact}
+          setSelectedContact={setSelectedContact}
+          selectedConversation={selectedConversation}
+          setSelectedConversation={setSelectedConversation}
+        />
+      )}
       {selectedContact.length > 0 || selectedConversation.length > 0 ? renderFooter() : undefined}
     </SafeAreaView>
   );
@@ -294,10 +307,8 @@ const InnerShareChatPage = memo(
   (props: {
     connections: DotYouProfile[] | undefined;
     allConversations: ConversationWithRecentMessage[] | undefined;
-
     selectedContact: DotYouProfile[];
     setSelectedContact: React.Dispatch<React.SetStateAction<DotYouProfile[]>>;
-
     selectedConversation: HomebaseFile<UnifiedConversation>[];
     setSelectedConversation: React.Dispatch<
       React.SetStateAction<HomebaseFile<UnifiedConversation>[]>

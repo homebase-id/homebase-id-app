@@ -16,7 +16,7 @@ import {
   markAllNotificationsOfAppAsRead,
 } from '@homebase-id/js-lib/core';
 import { useEffect } from 'react';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 
 const PAGE_SIZE = 10;
 export const usePushNotifications = () => {

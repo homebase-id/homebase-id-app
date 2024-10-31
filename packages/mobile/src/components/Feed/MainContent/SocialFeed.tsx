@@ -1,7 +1,7 @@
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { useSocialFeed } from '../../../hooks/feed/useSocialFeed';
 import { PostContent, ReactionContext } from '@homebase-id/js-lib/public';
-import { memo, useCallback, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { flattenInfinteData } from '../../../utils/utils';
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
 import { EmptyFeed } from './EmptyFeed';
@@ -16,12 +16,22 @@ import { PostReactionModal, ReactionModalMethods } from '../Interacts/Reactions/
 import { ShareContext, ShareModal, ShareModalMethods } from '../Interacts/Share/ShareModal';
 import { PostActionMethods, PostActionProps, PostModalAction } from '../Interacts/PostActionModal';
 import { Host } from 'react-native-portalize';
-import { t } from 'feed-app-common';
-import { useScrollToTop } from '@react-navigation/native';
+import { t } from 'homebase-id-app-common';
+import {
+  NavigationProp,
+  RouteProp,
+  useNavigation,
+  useRoute,
+  useScrollToTop,
+} from '@react-navigation/native';
 import {
   PostEmojiPickerModal,
   PostEmojiPickerModalMethods,
 } from '../Interacts/Reactions/PostEmojiPickerModal';
+
+import { ErrorNotification } from '../../ui/Alert/ErrorNotification';
+import { FeedStackParamList } from '../../../app/FeedStack';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 
 const PAGE_SIZE = 10;
 
@@ -33,8 +43,10 @@ const SocialFeedMainContent = memo(() => {
     fetchNextPage,
     isFetchingNextPage,
     refetch: refreshFeed,
+    error,
   } = useSocialFeed({ pageSize: PAGE_SIZE }).fetchAll;
-
+  const { params } = useRoute<RouteProp<FeedStackParamList, 'Posts'>>();
+  const navigation = useNavigation<NavigationProp<FeedStackParamList, 'Posts'>>();
   // Flatten all pages, sorted descending and slice on the max number expected
   const flattenedPosts = useMemo(() => {
     if (!posts) return [];
@@ -46,6 +58,21 @@ const SocialFeedMainContent = memo(() => {
         (a.fileMetadata.appData.userDate || a.fileMetadata.created)
     );
   }, [hasMorePosts, posts]);
+
+  useEffect(() => {
+    if (!params || !flattenedPosts) return;
+    const post = flattenedPosts.find((post) =>
+      stringGuidsEqual(post.fileMetadata.globalTransitId, params.postKey)
+    );
+    if (post) {
+      const postContent = post.fileMetadata.appData.content;
+      navigation.navigate('Post', {
+        odinId: post.fileMetadata.senderOdinId,
+        postKey: postContent.slug || postContent.id,
+        channelKey: postContent.channelId,
+      });
+    }
+  }, [flattenedPosts, navigation, params]);
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -63,7 +90,7 @@ const SocialFeedMainContent = memo(() => {
     shareRef.current?.setShareContext(context);
   }, []);
 
-  const onCommentPress = useCallback((context: ReactionContext & CanReactInfo) => {
+  const onCommentPress = useCallback((context: ReactionContext & Partial<CanReactInfo>) => {
     commentRef.current?.setContext(context);
   }, []);
 
@@ -122,11 +149,16 @@ const SocialFeedMainContent = memo(() => {
     () => hasMorePosts && fetchNextPage(),
     [hasMorePosts, fetchNextPage]
   );
+  const keyExtractor = useCallback(
+    (item: HomebaseFile<PostContent>) => item.fileMetadata.appData.uniqueId || item.fileId,
+    []
+  );
 
   if (postsLoading) return <FeedLoader />;
 
   return (
     <>
+      <ErrorNotification error={error} />
       <Host>
         <Animated.FlatList
           ref={scrollRef}
@@ -134,7 +166,7 @@ const SocialFeedMainContent = memo(() => {
           contentContainerStyle={{ flexGrow: 1 }}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
           showsVerticalScrollIndicator={false}
-          keyExtractor={(item) => item.fileMetadata.appData.uniqueId || item.fileId}
+          keyExtractor={keyExtractor}
           renderItem={renderItem}
           ListEmptyComponent={<EmptyFeed />}
           ListFooterComponent={listFooter}

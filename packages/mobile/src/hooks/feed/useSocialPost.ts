@@ -1,6 +1,6 @@
 import { InfiniteData, useQuery, useQueryClient } from '@tanstack/react-query';
 import { RecentsFromConnectionsReturn, getPostOverPeer } from '@homebase-id/js-lib/peer';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 
 interface useSocialPostProps {
   odinId?: string;

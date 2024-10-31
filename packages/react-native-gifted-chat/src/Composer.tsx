@@ -37,81 +37,80 @@ export interface ComposerProps {
   onPaste: PasteInputProps['onPaste'];
 }
 
-export const Composer = memo(
-  (props: ComposerProps): React.ReactElement => {
-    const {
-      composerHeight = MIN_COMPOSER_HEIGHT,
-      disableComposer = false,
-      keyboardAppearance = 'default',
-      multiline = true,
-      onInputSizeChanged = () => {},
-      onTextChanged = () => {},
-      placeholder = DEFAULT_PLACEHOLDER,
-      placeholderTextColor = Color.defaultColor,
-      defaultValue = '',
-      value,
-      textInputAutoFocus = false,
-      textInputProps = {},
-      textInputStyle,
-      onPaste,
-    } = props;
+export const Composer = memo((props: ComposerProps): React.ReactElement => {
+  const {
+    composerHeight = MIN_COMPOSER_HEIGHT,
+    disableComposer = false,
+    keyboardAppearance = 'default',
+    multiline = true,
+    onInputSizeChanged = () => {},
+    onTextChanged = () => {},
+    placeholder = DEFAULT_PLACEHOLDER,
+    placeholderTextColor = Color.defaultColor,
+    defaultValue = '',
+    value,
+    textInputAutoFocus = false,
+    textInputProps = {},
+    textInputStyle,
+    onPaste,
+  } = props;
 
-    const dimensionsRef = useRef<{ width: number; height: number }>();
-    const determineInputSizeChange = useCallback(
-      (dimensions: { width: number; height: number }) => {
-        // Support earlier versions of React Native on Android.
-        if (!dimensions) {
-          return;
-        }
+  const dimensionsRef = useRef<{ width: number; height: number }>();
+  const determineInputSizeChange = useCallback(
+    (dimensions: { width: number; height: number }) => {
+      // Support earlier versions of React Native on Android.
+      if (!dimensions) {
+        return;
+      }
 
-        if (
-          !dimensionsRef ||
-          !dimensionsRef.current ||
-          (dimensionsRef.current &&
-            (dimensionsRef.current.width !== dimensions.width ||
-              dimensionsRef.current.height !== dimensions.height))
-        ) {
-          dimensionsRef.current = dimensions;
-          onInputSizeChanged(dimensions);
-        }
-      },
-      [onInputSizeChanged],
-    );
-    const handleContentSizeChange = ({
-      nativeEvent: { contentSize },
-    }: NativeSyntheticEvent<TextInputContentSizeChangeEventData>) =>
-      determineInputSizeChange(contentSize);
-    return (
-      <View
-        style={[
-          styles.container,
-          {
-            minHeight: composerHeight,
-          },
-          props.containerStyle,
-        ]}
-      >
-        <PasteInput
-          testID={placeholder}
-          accessible
-          accessibilityLabel={placeholder}
-          placeholder={placeholder}
-          placeholderTextColor={placeholderTextColor}
-          multiline={multiline}
-          editable={!disableComposer}
-          onPaste={onPaste}
-          onContentSizeChange={handleContentSizeChange}
-          onChangeText={onTextChanged}
-          style={[styles.textInput, textInputStyle]}
-          autoFocus={textInputAutoFocus}
-          enablesReturnKeyAutomatically
-          underlineColorAndroid='transparent'
-          keyboardAppearance={keyboardAppearance}
-          value={value || defaultValue}
-          {...textInputProps}
-        />
-        {props.children}
-      </View>
-    );
-  },
-);
+      if (
+        !dimensionsRef ||
+        !dimensionsRef.current ||
+        (dimensionsRef.current &&
+          (dimensionsRef.current.width !== dimensions.width ||
+            dimensionsRef.current.height !== dimensions.height))
+      ) {
+        dimensionsRef.current = dimensions;
+        onInputSizeChanged(dimensions);
+      }
+    },
+    [onInputSizeChanged],
+  );
+  const handleContentSizeChange = ({
+    nativeEvent: { contentSize },
+  }: NativeSyntheticEvent<TextInputContentSizeChangeEventData>) =>
+    determineInputSizeChange(contentSize);
+  return (
+    <View
+      style={[
+        styles.container,
+        {
+          minHeight: composerHeight,
+        },
+        props.containerStyle,
+      ]}
+    >
+      <PasteInput
+        testID={placeholder}
+        accessible
+        accessibilityLabel={placeholder}
+        placeholder={placeholder}
+        placeholderTextColor={placeholderTextColor}
+        multiline={multiline}
+        editable={!disableComposer}
+        onPaste={onPaste}
+        onContentSizeChange={handleContentSizeChange}
+        onChangeText={onTextChanged}
+        style={[styles.textInput, textInputStyle]}
+        autoFocus={textInputAutoFocus}
+        enablesReturnKeyAutomatically
+        underlineColorAndroid='transparent'
+        keyboardAppearance={keyboardAppearance}
+        autoCapitalize='sentences'
+        value={value || defaultValue}
+        {...textInputProps}
+      />
+      {props.children}
+    </View>
+  );
+});

@@ -7,7 +7,7 @@ import {
 } from '@homebase-id/js-lib/public';
 import { memo, useCallback, useMemo, useState } from 'react';
 import { GestureResponderEvent, View } from 'react-native';
-import { OpenHeart, Comment, ShareNode } from '../../ui/Icons/icons';
+import { OpenHeart, Comment, Share } from '../../ui/Icons/icons';
 import {
   CanReactInfo,
   useCanReact,
@@ -15,7 +15,7 @@ import {
   useMyEmojiReactions,
   useReaction,
 } from '../../../hooks/reactions';
-import { t, useDotYouClientContext } from 'feed-app-common';
+import { t, useDotYouClientContext } from 'homebase-id-app-common';
 import { EmojiSummary } from './EmojiSummary';
 import { CommentTeaserList } from './CommentsTeaserList';
 import { ShareContext } from './Share/ShareModal';
@@ -40,7 +40,7 @@ export const PostInteracts = memo(
   }: {
     postFile: HomebaseFile<PostContent>;
     isPublic?: boolean;
-    onCommentPress?: (context: ReactionContext & CanReactInfo) => void;
+    onCommentPress?: (context: ReactionContext & Partial<CanReactInfo>) => void;
     onReactionPress?: (context: ReactionContext) => void;
     onSharePress?: (context: ShareContext) => void;
     onEmojiModalOpen?: (context: ReactionContext) => void;
@@ -80,7 +80,7 @@ export const PostInteracts = memo(
     }, [odinId, postContent.channelId, postFile]);
 
     const onCommentPressHandler = useCallback(() => {
-      const context: ReactionContext & CanReactInfo = {
+      const context: ReactionContext & Partial<CanReactInfo> = {
         ...reactionContext,
         ...canReact,
       };
@@ -148,7 +148,7 @@ export const PostInteracts = memo(
           >
             {isPublic && (
               <IconButton
-                icon={<ShareNode />}
+                icon={<Share />}
                 onPress={onSharePressHandler}
                 touchableProps={{
                   disabled: !onSharePress,
@@ -261,40 +261,42 @@ export const LikeButton = memo(
   }
 );
 
-export const CommentSummary = ({
-  context,
-  reactionPreview,
-}: {
-  context: ReactionContext;
-  reactionPreview?: CommentsReactionSummary;
-}) => {
-  const { data: totalCount } = useCommentSummary({
-    authorOdinId: context.authorOdinId,
-    channelId: context.channelId,
-    postGlobalTransitId: context.target.globalTransitId,
-    reactionPreview: reactionPreview,
-  }).fetch;
-  const { isDarkMode } = useDarkMode();
+export const CommentSummary = memo(
+  ({
+    context,
+    reactionPreview,
+  }: {
+    context: ReactionContext;
+    reactionPreview?: CommentsReactionSummary;
+  }) => {
+    const { data: totalCount } = useCommentSummary({
+      authorOdinId: context.odinId,
+      channelId: context.channelId,
+      postGlobalTransitId: context.target.globalTransitId,
+      reactionPreview: reactionPreview,
+    }).fetch;
+    const { isDarkMode } = useDarkMode();
 
-  return totalCount ? (
-    <>
-      <Text
-        style={{
-          fontSize: 15,
-          opacity: 0.7,
-          fontWeight: '500',
-          alignSelf: 'center',
-        }}
-      >
-        ·{'  '}
+    return totalCount ? (
+      <>
         <Text
           style={{
-            color: Colors.indigo[isDarkMode ? 200 : 500],
+            fontSize: 15,
+            opacity: 0.7,
+            fontWeight: '500',
+            alignSelf: 'center',
           }}
         >
-          {totalCount} {(totalCount || 0) > 1 ? t('comments') : t('comment')}
+          ·{'  '}
+          <Text
+            style={{
+              color: Colors.indigo[isDarkMode ? 200 : 500],
+            }}
+          >
+            {totalCount} {(totalCount || 0) > 1 ? t('comments') : t('comment')}
+          </Text>
         </Text>
-      </Text>
-    </>
-  ) : null;
-};
+      </>
+    ) : null;
+  }
+);

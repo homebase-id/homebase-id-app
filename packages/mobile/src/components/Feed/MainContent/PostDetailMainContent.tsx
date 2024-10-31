@@ -8,10 +8,10 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { PostDetailCard } from '../Detail/PostDetailCard';
-import { CommentsLoader } from '../Interacts/Comments/CommentsModal';
+import { CommentsLoader, ErrorLoadingComments } from '../Interacts/Comments/CommentsModal';
 import { ShareContext } from '../Interacts/Share/ShareModal';
 import { useCallback, useMemo, useState } from 'react';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 import { useCanReact, useComments } from '../../../hooks/reactions';
 import { ListRenderItemInfo, Platform } from 'react-native';
 import { Comment } from '../Interacts/Comments/Comment';
@@ -49,7 +49,7 @@ export const PostDetailMainContent = ({
   const postContent = postFile.fileMetadata.appData.content;
 
   const { data: canReact } = useCanReact({
-    authorOdinId,
+    odinId: authorOdinId,
     channelId: postContent?.channelId,
     postContent: postContent,
     isEnabled: postContent?.channelId ? true : false,
@@ -59,7 +59,7 @@ export const PostDetailMainContent = ({
 
   const reactionContext: ReactionContext | undefined = useMemo(() => {
     return {
-      authorOdinId: authorOdinId,
+      odinId: authorOdinId,
       channelId: postContent.channelId,
       target: {
         globalTransitId: postFile.fileMetadata.globalTransitId || '',
@@ -75,6 +75,7 @@ export const PostDetailMainContent = ({
     fetchNextPage,
     isFetchingNextPage,
     isLoading,
+    error,
   } = useComments({ context: reactionContext }).fetch;
   const flattenedComments = comments?.pages.flatMap((page) => page.comments).reverse();
 
@@ -89,7 +90,10 @@ export const PostDetailMainContent = ({
           onReply={(commentFile) => {
             setReplyThread({
               replyThreadId: commentFile.fileMetadata.globalTransitId,
-              authorOdinId: commentFile.fileMetadata.appData.content.authorOdinId,
+              authorOdinId:
+                commentFile.fileMetadata.originalAuthor ||
+                commentFile.fileMetadata.appData.content.authorOdinId ||
+                '',
             });
           }}
         />
@@ -164,7 +168,7 @@ export const PostDetailMainContent = ({
         keyExtractor={(item) => item.fileId}
         renderItem={renderItem}
         ListFooterComponent={listFooter}
-        ListEmptyComponent={EmptyComment}
+        ListEmptyComponent={error ? ErrorLoadingComments : EmptyComment}
         onEndReached={onEndReached}
         onEndReachedThreshold={0.5}
       />

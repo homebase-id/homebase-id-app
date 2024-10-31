@@ -21,7 +21,7 @@ import { ChatDrive } from '../../../provider/chat/ConversationProvider';
 import { useDarkMode } from '../../../hooks/useDarkMode';
 import { CHAT_LINKS_PAYLOAD_KEY } from '../../../provider/chat/ChatProvider';
 import { OdinBlob } from '../../../../polyfills/OdinBlob';
-import { t } from 'feed-app-common';
+import { t } from 'homebase-id-app-common';
 import { VideoWithLoader } from './VideoWithLoader';
 import { OdinAudio } from '../OdinAudio/OdinAudio';
 import { LinkPreviewFile } from './LinkPreviewFile';
@@ -45,7 +45,7 @@ export const MediaGallery = memo(
     odinId,
     globalTransitId,
     style,
-    doubleTapRef,
+    gestureRefs,
   }: {
     fileId: string;
     globalTransitId?: string;
@@ -57,7 +57,7 @@ export const MediaGallery = memo(
     payloads: PayloadDescriptor[];
     onClick?: (currIndex: number) => void;
     style?: StyleProp<ViewStyle>;
-    doubleTapRef?: React.RefObject<GestureType | undefined>;
+    gestureRefs?: React.RefObject<GestureType | undefined>[];
   }) => {
     const maxVisible = 4;
     const countExcludedFromView = payloads?.length - maxVisible;
@@ -119,7 +119,7 @@ export const MediaGallery = memo(
               odinId={odinId}
               previewThumbnail={item.previewThumbnail}
               targetDrive={targetDrive}
-              doubleTapRef={doubleTapRef}
+              gestureRefs={gestureRefs}
               imageSize={size}
               containerStyle={{
                 flexGrow: 1,
@@ -204,7 +204,7 @@ export const MediaItem = memo(
     probablyEncrypted,
     globalTransitId,
     odinId,
-    doubleTapRef,
+    gestureRefs,
   }: {
     payload: PayloadDescriptor | NewPayloadDescriptor;
     containerStyle?: StyleProp<ViewStyle>;
@@ -227,7 +227,7 @@ export const MediaItem = memo(
       | ((coords: { x: number; y: number; absoluteX: number; absoluteY: number }) => void)
       | undefined;
     onClick: () => void;
-    doubleTapRef?: React.RefObject<GestureType | undefined>;
+    gestureRefs?: React.RefObject<GestureType | undefined>[];
   }) => {
     const { isDarkMode } = useDarkMode();
 
@@ -237,7 +237,12 @@ export const MediaItem = memo(
     const isAudio = payload.contentType?.startsWith('audio');
     const isImage = payload.contentType?.startsWith('image');
     const isLink = payload.key === CHAT_LINKS_PAYLOAD_KEY || payload.key === POST_LINKS_PAYLOAD_KEY;
-    if (!payload.contentType || !payload.key || !fileId) {
+    if (
+      !fileId ||
+      !payload.contentType ||
+      !payload.key ||
+      (isImage && !!(payload as NewPayloadDescriptor).pendingFile)
+    ) {
       if (isImage && (payload as NewPayloadDescriptor).pendingFile) {
         return (
           <Image
@@ -298,7 +303,7 @@ export const MediaItem = memo(
             }
             onLongPress={onLongPress}
             onClick={onClick}
-            doubleTapRef={doubleTapRef}
+            gestureRefs={gestureRefs}
           />
         </View>
       );
@@ -318,7 +323,7 @@ export const MediaItem = memo(
           descriptorContent={
             tryJsonParse<LinkPreviewDescriptor[]>(payload.descriptorContent as string)[0]
           }
-          doubleTapRef={doubleTapRef}
+          gestureRefs={gestureRefs}
           position={position as string}
         />
       );
@@ -347,7 +352,7 @@ export const MediaItem = memo(
             previewThumbnail={previewThumbnail}
             globalTransitId={globalTransitId}
             imageSize={imageSize}
-            doubleTapRef={doubleTapRef}
+            gestureRefs={gestureRefs}
             style={
               style || {
                 borderRadius: 10,

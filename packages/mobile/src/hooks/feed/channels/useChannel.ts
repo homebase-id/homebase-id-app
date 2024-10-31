@@ -10,7 +10,7 @@ import { ChannelDefinitionVm, parseChannelTemplate } from './useChannels';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { getChannelOverPeer } from '@homebase-id/js-lib/peer';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 
 type useChannelsProps = {
   odinId?: string;

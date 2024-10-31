@@ -1,10 +1,10 @@
-import { Pressable, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
+import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { PostMedia } from './Body/PostMedia';
 import { Text } from '../ui/Text/Text';
 import { AuthorName } from '../ui/Name';
 import { Avatar } from '../ui/Avatars/Avatar';
 import { UnreachableIdentity } from './UnreachableIdentity';
-import Animated from 'react-native-reanimated';
+import Animated, { runOnJS } from 'react-native-reanimated';
 import { memo, useCallback, useMemo, useRef } from 'react';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { HomebaseFile, NewHomebaseFile, SecurityGroupType } from '@homebase-id/js-lib/core';
@@ -17,12 +17,12 @@ import { PostMeta, ToGroupBlock } from './Meta/Meta';
 import { ShareContext } from './Interacts/Share/ShareModal';
 import { Ellipsis } from '../ui/Icons/icons';
 import { PostActionProps } from './Interacts/PostActionModal';
-import { useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 import { useCheckIdentity } from '../../hooks/checkIdentity/useCheckIdentity';
 import { PostBody } from './Body/PostBody';
 import { IconButton } from '../ui/Buttons';
 import { DoubleTapHeart } from '../ui/DoubleTapHeart';
-import { GestureType } from 'react-native-gesture-handler';
+import { Gesture, GestureDetector, GestureType } from 'react-native-gesture-handler';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { FeedStackParamList } from '../../app/FeedStack';
 
@@ -36,7 +36,7 @@ export const PostTeaserCard = memo(
     onEmojiModalOpen,
   }: {
     postFile: HomebaseFile<PostContent>;
-    onCommentPress: (context: ReactionContext & CanReactInfo) => void;
+    onCommentPress: (context: ReactionContext & Partial<CanReactInfo>) => void;
     onReactionPress: (context: ReactionContext) => void;
     onSharePress?: (context: ShareContext) => void;
     onMorePress?: (context: PostActionProps) => void;
@@ -115,7 +115,7 @@ export const InnerPostTeaserCard = memo(
       | undefined
       | null;
     onPostActionPress: () => void;
-    onCommentPress: (context: ReactionContext & CanReactInfo) => void;
+    onCommentPress: (context: ReactionContext & Partial<CanReactInfo>) => void;
     onReactionPress: (context: ReactionContext) => void;
     onSharePress?: (context: ShareContext) => void;
     onEmojiModalOpen?: (context: ReactionContext) => void;
@@ -141,73 +141,80 @@ export const InnerPostTeaserCard = memo(
     // to trigger the double tap animation from the parent component and avoid triggering single Tap
     // or any other gesture until this fails
     const doubleTapRef = useRef<GestureType>();
+    const singleTapRef = useRef<GestureType>();
+    const onNaviationPress = useCallback(() => {
+      navigation.navigate('Post', {
+        postKey: post.slug || post.id,
+        odinId: postFile.fileMetadata.senderOdinId,
+        channelKey: post.channelId,
+      });
+    }, [navigation, post, postFile]);
+
+    const tapGesture = Gesture.Tap()
+      .onStart(() => {
+        runOnJS(onNaviationPress)();
+      })
+      .withRef(singleTapRef);
 
     return (
       <Animated.View style={viewStyle}>
-        <Pressable
-          onPress={() => {
-            navigation.navigate('Post', {
-              postKey: post.slug || post.id,
-              channelKey: post.channelId,
-              odinId: postFile.fileMetadata.senderOdinId,
-              postFile,
-              channel: channel || undefined,
-            });
-          }}
-        >
-          <View style={postTeaserCardStyle.header}>
-            <Avatar
-              odinId={authorOdinId}
-              imageSize={postTeaserCardStyle.imageSize}
-              style={postTeaserCardStyle.imageSize}
-            />
-            <View style={{ flex: 1 }}>
-              <View style={{ flexDirection: 'row' }}>
-                <Text
-                  style={{
-                    fontSize: 17,
-                    fontWeight: '400',
-                    opacity: 0.7,
-                    color: isDarkMode ? Colors.slate[50] : Colors.slate[900],
-                  }}
-                >
-                  <AuthorName odinId={authorOdinId} />
-                </Text>
-                <ToGroupBlock
-                  odinId={odinId}
-                  authorOdinId={authorOdinId}
-                  channel={channel || undefined}
-                />
-              </View>
-              <PostMeta
-                postFile={postFile}
-                channel={channel || undefined}
+        <View style={postTeaserCardStyle.header}>
+          <Avatar
+            odinId={authorOdinId}
+            imageSize={postTeaserCardStyle.imageSize}
+            style={postTeaserCardStyle.imageSize}
+          />
+          <View style={{ flex: 1, zIndex: 100 }}>
+            <View style={{ flexDirection: 'row' }}>
+              <Text
+                style={{
+                  fontSize: 17,
+                  fontWeight: '400',
+                  opacity: 0.7,
+                  color: isDarkMode ? Colors.slate[50] : Colors.slate[900],
+                }}
+              >
+                <AuthorName odinId={authorOdinId} />
+              </Text>
+              <ToGroupBlock
                 odinId={odinId}
                 authorOdinId={authorOdinId}
+                channel={channel || undefined}
               />
             </View>
-            <IconButton icon={<Ellipsis />} onPress={onPostActionPress} />
+            <PostMeta
+              postFile={postFile}
+              channel={channel || undefined}
+              odinId={odinId}
+              authorOdinId={authorOdinId}
+            />
           </View>
-          <PostBody
-            post={post}
-            odinId={odinId}
-            fileId={postFile.fileId}
-            globalTransitId={postFile.fileMetadata.globalTransitId}
-            lastModified={postFile.fileMetadata.updated}
-            payloads={postFile.fileMetadata.payloads}
-          />
-          <DoubleTapHeart doubleTapRef={doubleTapRef} postFile={postFile} odinId={odinId}>
-            <PostMedia post={postFile} doubleTapRef={doubleTapRef} />
-          </DoubleTapHeart>
-          <PostInteracts
-            postFile={postFile}
-            onCommentPress={onCommentPress}
-            onReactionPress={onReactionPress}
-            onSharePress={onSharePress}
-            onEmojiModalOpen={onEmojiModalOpen}
-            isPublic={isPublic}
-          />
-        </Pressable>
+          <IconButton icon={<Ellipsis />} onPress={onPostActionPress} />
+        </View>
+        <GestureDetector gesture={tapGesture}>
+          <>
+            <PostBody
+              post={post}
+              odinId={odinId}
+              fileId={postFile.fileId}
+              globalTransitId={postFile.fileMetadata.globalTransitId}
+              lastModified={postFile.fileMetadata.updated}
+              payloads={postFile.fileMetadata.payloads}
+            />
+            <DoubleTapHeart doubleTapRef={doubleTapRef} postFile={postFile} odinId={odinId}>
+              <PostMedia post={postFile} gestureRefs={[doubleTapRef, singleTapRef]} />
+            </DoubleTapHeart>
+          </>
+        </GestureDetector>
+
+        <PostInteracts
+          postFile={postFile}
+          onCommentPress={onCommentPress}
+          onReactionPress={onReactionPress}
+          onSharePress={onSharePress}
+          onEmojiModalOpen={onEmojiModalOpen}
+          isPublic={isPublic}
+        />
       </Animated.View>
     );
   }

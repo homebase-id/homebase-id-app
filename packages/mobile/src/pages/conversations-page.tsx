@@ -1,11 +1,4 @@
-import {
-  FlatList,
-  ListRenderItemInfo,
-  Platform,
-  RefreshControl,
-  StyleSheet,
-  View,
-} from 'react-native';
+import { FlatList, ListRenderItemInfo, Platform, RefreshControl, View } from 'react-native';
 import ConversationTile from '../components/Chat/Conversation-tile';
 
 import {
@@ -22,10 +15,7 @@ import {
 import { memo, useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useRemoveNotifications } from '../hooks/notifications/usePushNotifications';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Text } from '../components/ui/Text/Text';
-import { ScrollView } from 'react-native-gesture-handler';
-import { ContactTile } from '../components/Contact/Contact-Tile';
-import { useAllContacts, useDotYouClientContext } from 'feed-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 import { Colors } from '../app/Colors';
 import { useDarkMode } from '../hooks/useDarkMode';
 import { CHAT_APP_ID } from '../app/constants';
@@ -38,6 +28,7 @@ import { OfflineState } from '../components/Platform/OfflineState';
 import { ConversationTileWithYourself } from '../components/Conversation/ConversationTileWithYourself';
 import { EmptyConversation } from '../components/Conversation/EmptyConversation';
 import Animated, { LinearTransition } from 'react-native-reanimated';
+import { SearchConversationResults } from '../components/Chat/SearchConversationsResults';
 
 type ConversationProp = NativeStackScreenProps<ChatStackParamList, 'Conversation'>;
 
@@ -114,6 +105,7 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
     queries.forEach(([key]) => {
       if (Object.values(key) && Object.values(key) !== null) {
         queryClient.setQueryData(key, (data: InfiniteData<unknown, unknown>) => {
+          if (data?.pages?.length === 0) return data;
           return {
             pages: data?.pages?.slice(0, 1) ?? [],
             pageParams: data?.pageParams?.slice(0, 1) || [undefined],
@@ -197,137 +189,4 @@ const RemoveNotifications = memo(() => {
   const isFocused = useIsFocused();
   useRemoveNotifications({ appId: CHAT_APP_ID, disabled: !isFocused });
   return null;
-});
-
-const SearchConversationResults = memo(
-  ({
-    query,
-    conversations,
-  }: {
-    query: string | undefined;
-    conversations: ConversationWithRecentMessage[];
-  }) => {
-    const isActive = useMemo(() => !!(query && query.length >= 1), [query]);
-    const { data: contacts } = useAllContacts(isActive);
-    query = query?.trim().toLowerCase();
-    const identity = useDotYouClientContext().getIdentity();
-    const conversationResults = useMemo(
-      () =>
-        query && conversations
-          ? conversations.filter((conversation) => {
-              const content = conversation.fileMetadata.appData.content;
-              return (
-                content.recipients?.some((recipient) => recipient?.toLowerCase().includes(query)) ||
-                content.title?.toLowerCase().includes(query)
-              );
-            })
-          : [],
-      [conversations, query]
-    );
-
-    const contactResults = useMemo(
-      () =>
-        query && contacts
-          ? contacts
-              .map((contact) => contact.fileMetadata.appData.content)
-              .filter((contact) => {
-                return (
-                  contact.odinId &&
-                  (contact.odinId?.includes(query) ||
-                    contact.name?.displayName?.toLowerCase().includes(query) ||
-                    contact.name?.givenName?.toLowerCase().includes(query) ||
-                    contact.name?.surname?.toLowerCase().includes(query))
-                );
-              })
-          : [],
-      [contacts, query]
-    );
-
-    const contactsWithoutAConversation = useMemo(
-      () =>
-        contactResults.filter((contact) => {
-          // filter conversations which have should not have more than 1 recipient
-          const singleConversations = conversationResults.filter((conversation) => {
-            const content = conversation.fileMetadata.appData.content;
-            return content.recipients.length === 2;
-          });
-          return (
-            contact.odinId &&
-            !singleConversations.some((conversation) => {
-              const content = conversation.fileMetadata.appData.content;
-              return content.recipients.includes(contact.odinId as string);
-            })
-          );
-        }),
-      [contactResults, conversationResults]
-    );
-    const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
-    const onPress = useCallback(
-      (convoId: string) => {
-        navigation.navigate('ChatScreen', {
-          convoId: convoId,
-        });
-      },
-      [navigation]
-    );
-
-    if (!isActive) return null;
-
-    return (
-      <SafeAreaView>
-        {!conversationResults?.length && !contactsWithoutAConversation?.length ? (
-          <Text
-            style={{
-              fontSize: 16,
-              fontWeight: '600',
-              display: 'flex',
-              marginTop: 'auto',
-              marginBottom: 'auto',
-              alignSelf: 'center',
-            }}
-          >
-            No Contacts Found
-          </Text>
-        ) : (
-          <ScrollView contentInsetAdjustmentBehavior="automatic">
-            {conversationResults?.length ? <Text style={styles.title}>Chats</Text> : null}
-            {conversationResults.map((item) => (
-              <ConversationTile
-                key={item.fileId}
-                conversation={item.fileMetadata.appData.content}
-                conversationId={item.fileMetadata.appData.uniqueId}
-                onPress={onPress}
-                odinId={
-                  item.fileMetadata.appData.content.recipients.filter(
-                    (recipient) => recipient !== identity
-                  )[0]
-                }
-              />
-            ))}
-            {contactsWithoutAConversation?.length ? (
-              <Text style={styles.title}>Contacts</Text>
-            ) : null}
-            {contactsWithoutAConversation.map((item) => (
-              <ContactTile
-                key={item.odinId}
-                item={{
-                  odinId: item.odinId as string,
-                }}
-                onOpen={onPress}
-              />
-            ))}
-          </ScrollView>
-        )}
-      </SafeAreaView>
-    );
-  }
-);
-
-const styles = StyleSheet.create({
-  title: {
-    fontSize: 24,
-    fontWeight: '600',
-    marginLeft: 8,
-    marginTop: 4,
-  },
 });

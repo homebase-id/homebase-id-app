@@ -19,8 +19,8 @@ import {
   VideoUploadResult,
 } from '@homebase-id/js-lib/media';
 import { OdinBlob } from '../../../polyfills/OdinBlob';
-import { ImageSource } from './RNImageProvider';
-import { createThumbnails } from './RNThumbnailProvider';
+import { ImageSource } from '../image/RNImageProvider';
+import { createThumbnails } from '../image/RNThumbnailProvider';
 
 export type VideoContentType = 'video/mp4';
 
@@ -92,7 +92,7 @@ export const uploadVideo = async (
   // Custom blob to avoid reading and writing the file to disk again
   const payloadBlob = new OdinBlob((video.filepath || video.uri) as string, {
     type: uploadMeta?.type,
-  }) as any as Blob;
+  }) as unknown as Blob;
 
   const result = await uploadFile(
     dotYouClient,

@@ -1,6 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCircles } from '@homebase-id/js-lib/network';
-import { useDotYouClientContext } from 'feed-app-common';
+import { t, useDotYouClientContext } from 'homebase-id-app-common';
+import { addLogs } from '../../provider/log/logger';
+import { generateClientError } from '../errors/useErrors';
 
 export const useCircles = (excludeSystemCircles = false) => {
   const dotYouClient = useDotYouClientContext();
@@ -13,6 +15,11 @@ export const useCircles = (excludeSystemCircles = false) => {
   return {
     fetch: useQuery({
       queryKey: ['circles', excludeSystemCircles],
+      throwOnError: (error, _) => {
+        const newError = generateClientError(error, t('Something went wrong fetching circles'));
+        addLogs(newError);
+        return false;
+      },
       queryFn: () => fetchAll(),
       refetchOnWindowFocus: false,
     }),

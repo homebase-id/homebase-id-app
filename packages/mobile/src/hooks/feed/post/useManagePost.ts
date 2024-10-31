@@ -1,9 +1,11 @@
-import { InfiniteData, MutationOptions, QueryClient, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  PostContent,
-  getPost,
-  removePost,
-} from '@homebase-id/js-lib/public';
+  InfiniteData,
+  MutationOptions,
+  QueryClient,
+  useMutation,
+  useQueryClient,
+} from '@tanstack/react-query';
+import { PostContent, getPost, removePost } from '@homebase-id/js-lib/public';
 import { savePost as savePostFile } from '../../../provider/feed/RNPostUploadProvider';
 import {
   HomebaseFile,
@@ -15,10 +17,12 @@ import {
 
 import { TransitUploadResult } from '@homebase-id/js-lib/peer';
 import { LinkPreview } from '@homebase-id/js-lib/media';
-import { getRichTextFromString, t, useDotYouClientContext } from 'feed-app-common';
+import { getRichTextFromString, t, useDotYouClientContext } from 'homebase-id-app-common';
 import { ImageSource } from '../../../provider/image/RNImageProvider';
 import { getSynchronousDotYouClient } from '../../chat/getSynchronousDotYouClient';
 import { addError } from '../../errors/useErrors';
+import { OdinBlob } from '../../../../polyfills/OdinBlob';
+import { unlink } from 'react-native-fs';
 
 const savePost = async ({
   postFile,
@@ -36,33 +40,65 @@ const savePost = async ({
   onUpdate?: (phase: string, progress: number) => void;
 }) => {
   const dotYouClient = await getSynchronousDotYouClient();
-  const onVersionConflict = odinId ? undefined : async (): Promise<UploadResult | TransitUploadResult | undefined> => {
-    const serverPost = await getPost<PostContent>(
-      dotYouClient,
-      channelId,
-      postFile.fileMetadata.appData.content.id
-    );
-    if (!serverPost) return;
+  const onVersionConflict = odinId
+    ? undefined
+    : async (): Promise<UploadResult | TransitUploadResult | undefined> => {
+        const serverPost = await getPost<PostContent>(
+          dotYouClient,
+          channelId,
+          postFile.fileMetadata.appData.content.id
+        );
+        if (!serverPost) return;
 
-    const newPost: HomebaseFile<PostContent> = {
-      ...serverPost,
-      fileMetadata: {
-        ...serverPost.fileMetadata,
-        appData: {
-          ...serverPost.fileMetadata.appData,
-          content: {
-            ...serverPost.fileMetadata.appData.content,
-            ...postFile.fileMetadata.appData.content,
+        const newPost: HomebaseFile<PostContent> = {
+          ...serverPost,
+          fileMetadata: {
+            ...serverPost.fileMetadata,
+            appData: {
+              ...serverPost.fileMetadata.appData,
+              content: {
+                ...serverPost.fileMetadata.appData.content,
+                ...postFile.fileMetadata.appData.content,
+              },
+            },
           },
-        },
-      },
-    };
-    return savePostFile(dotYouClient, newPost, odinId, channelId, mediaFiles, linkPreviews, onVersionConflict);
-  };
+        };
+        return savePostFile(
+          dotYouClient,
+          newPost,
+          odinId,
+          channelId,
+          mediaFiles,
+          linkPreviews,
+          onVersionConflict
+        );
+      };
   postFile.fileMetadata.appData.content.captionAsRichText = getRichTextFromString(
     postFile.fileMetadata.appData.content.caption.trim()
   );
-  return savePostFile(dotYouClient, postFile, odinId, channelId, mediaFiles, linkPreviews, onVersionConflict, onUpdate);
+  const uploadResult = savePostFile(
+    dotYouClient,
+    postFile,
+    odinId,
+    channelId,
+    mediaFiles,
+    linkPreviews,
+    onVersionConflict,
+    onUpdate
+  );
+
+  // Cleanup as much files as possible
+  await Promise.all(
+    (mediaFiles || [])?.map(async (file) => {
+      if ('uri' in file || 'filepath' in file) {
+        try {
+          await unlink(file.uri || file.filepath || '');
+        } catch {}
+      }
+    })
+  );
+
+  return uploadResult;
 };
 
 export const getSavePostMutationOptions: (queryClient: QueryClient) => MutationOptions<
@@ -76,16 +112,9 @@ export const getSavePostMutationOptions: (queryClient: QueryClient) => MutationO
     onUpdate?: (phase: string, progress: number) => void;
   },
   {
-    newPost: {
-      postFile: NewHomebaseFile<PostContent> | HomebaseFile<PostContent>;
-      channelId: string;
-      mediaFiles?: (ImageSource | MediaFile)[] | undefined;
-      linkPreviews?: LinkPreview[] | undefined;
-      onUpdate?: ((phase: string, progress: number) => void) | undefined;
-    };
     previousFeed:
-    | InfiniteData<MultiRequestCursoredResult<HomebaseFile<PostContent>[]>, unknown>
-    | undefined;
+      | InfiniteData<MultiRequestCursoredResult<HomebaseFile<PostContent>[]>, unknown>
+      | undefined;
   }
 > = (queryClient) => ({
   mutationKey: ['save-post'],
@@ -125,19 +154,19 @@ export const getSavePostMutationOptions: (queryClient: QueryClient) => MutationO
       newFeed.pages[0].results = newFeed.pages[0].results.map((post) =>
         post.fileMetadata.appData.content.id === variables.postFile.fileMetadata.appData.content.id
           ? {
-            ...post,
-            fileMetadata: {
-              ...post.fileMetadata,
-              versionTag: (_data as UploadResult).newVersionTag || post.fileMetadata.versionTag,
-            },
-          }
+              ...post,
+              fileMetadata: {
+                ...post.fileMetadata,
+                versionTag: (_data as UploadResult).newVersionTag || post.fileMetadata.versionTag,
+              },
+            }
           : post
       );
 
       queryClient.setQueryData(['social-feeds'], newFeed);
     }
   },
-  onMutate: async (newPost) => {
+  onMutate: async (variables) => {
     await queryClient.cancelQueries({ queryKey: ['social-feeds'] });
 
     // Update section attributes
@@ -145,31 +174,41 @@ export const getSavePostMutationOptions: (queryClient: QueryClient) => MutationO
       | InfiniteData<MultiRequestCursoredResult<HomebaseFile<PostContent>[]>>
       | undefined = queryClient.getQueryData(['social-feeds']);
 
-    if (previousFeed) {
-      const newPostFile: HomebaseFile<PostContent> = {
-        ...newPost.postFile,
+    if (previousFeed && !variables.postFile.fileId) {
+      const newPostFile: NewHomebaseFile<PostContent> = {
+        ...variables.postFile,
         fileMetadata: {
-          ...newPost.postFile.fileMetadata,
+          ...variables.postFile.fileMetadata,
           appData: {
-            ...newPost.postFile.fileMetadata.appData,
+            ...variables.postFile.fileMetadata.appData,
             content: {
-              ...newPost.postFile.fileMetadata.appData.content,
-
-              primaryMediaFile: {
-                fileKey: (newPost.mediaFiles?.[0] as MediaFile)?.key,
-                type: (newPost.mediaFiles?.[0] as MediaFile)?.contentType,
-              },
+              ...variables.postFile.fileMetadata.appData.content,
+              primaryMediaFile: undefined,
             },
           },
+          payloads: (variables?.mediaFiles?.filter((file) => 'type' in file) as ImageSource[])?.map(
+            (file) => ({
+              contentType: file.type || undefined,
+              pendingFile:
+                file.filepath || file.uri
+                  ? (new OdinBlob((file.uri || file.filepath) as string, {
+                      type: file.type || undefined,
+                    }) as unknown as Blob)
+                  : undefined,
+            })
+          ),
         },
-      } as HomebaseFile<PostContent>;
+      };
 
       const newFeed: InfiniteData<MultiRequestCursoredResult<HomebaseFile<PostContent>[]>> = {
         ...previousFeed,
         pages: previousFeed.pages.map((page, index) => {
           return {
             ...page,
-            results: [...(index === 0 ? [newPostFile] : []), ...page.results],
+            results: [
+              ...(index === 0 ? [newPostFile as HomebaseFile<PostContent>] : []),
+              ...page.results,
+            ],
           };
         }),
       };
@@ -177,7 +216,7 @@ export const getSavePostMutationOptions: (queryClient: QueryClient) => MutationO
       queryClient.setQueryData(['social-feeds'], newFeed);
     }
 
-    return { newPost, previousFeed };
+    return { previousFeed };
   },
   onError: (err, _newCircle, context) => {
     addError(queryClient, err, t('Failed to save post'));
@@ -197,8 +236,6 @@ export const getSavePostMutationOptions: (queryClient: QueryClient) => MutationO
 export const useManagePost = () => {
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
-
-
 
   // const duplicatePost = async ({
   //     toDuplicatePostFile,
@@ -320,15 +357,15 @@ export const useManagePost = () => {
           const newFeed = { ...previousFeed };
           newFeed.pages[0].results = newFeed.pages[0].results.map((post) =>
             post.fileMetadata.appData.content.id ===
-              variables.postFile.fileMetadata.appData.content.id
+            variables.postFile.fileMetadata.appData.content.id
               ? {
-                ...post,
-                fileMetadata: {
-                  ...post.fileMetadata,
-                  versionTag:
-                    (_data as UploadResult).newVersionTag || post.fileMetadata.versionTag,
-                },
-              }
+                  ...post,
+                  fileMetadata: {
+                    ...post.fileMetadata,
+                    versionTag:
+                      (_data as UploadResult).newVersionTag || post.fileMetadata.versionTag,
+                  },
+                }
               : post
           );
 
@@ -355,9 +392,9 @@ export const useManagePost = () => {
                   ...newPost.postFile.fileMetadata.appData.content,
                   primaryMediaFile: newPost.mediaFiles?.[0]
                     ? {
-                      fileKey: newPost.mediaFiles?.[0].key,
-                      type: (newPost.mediaFiles?.[0] as MediaFile)?.contentType,
-                    }
+                        fileKey: newPost.mediaFiles?.[0].key,
+                        type: (newPost.mediaFiles?.[0] as MediaFile)?.contentType,
+                      }
                     : undefined,
                 },
               },
@@ -435,15 +472,15 @@ export const useManagePost = () => {
           const newFeed = { ...previousFeed };
           newFeed.pages[0].results = newFeed.pages[0].results.map((post) =>
             post.fileMetadata.appData.content.id ===
-              variables.postFile.fileMetadata.appData.content.id
+            variables.postFile.fileMetadata.appData.content.id
               ? {
-                ...post,
-                fileMetadata: {
-                  ...post.fileMetadata,
-                  versionTag:
-                    (_data as UploadResult).newVersionTag || post.fileMetadata.versionTag,
-                },
-              }
+                  ...post,
+                  fileMetadata: {
+                    ...post.fileMetadata,
+                    versionTag:
+                      (_data as UploadResult).newVersionTag || post.fileMetadata.versionTag,
+                  },
+                }
               : post
           );
 

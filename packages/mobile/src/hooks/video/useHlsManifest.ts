@@ -10,10 +10,12 @@ import {
 import { getNewId, stringifyToQueryParams, uint8ArrayToBase64 } from '@homebase-id/js-lib/helpers';
 import { getAnonymousDirectImageUrl } from '@homebase-id/js-lib/media';
 import { useVideoMetadata } from './useVideoMetadata';
-import { useDotYouClientContext } from 'feed-app-common';
+import { t, useDotYouClientContext } from 'homebase-id-app-common';
 import { CachesDirectoryPath, writeFile } from 'react-native-fs';
 import { useLocalWebServer } from './useLocalWebServer';
 import { Platform } from 'react-native';
+import { addLogs } from '../../provider/log/logger';
+import { generateClientError } from '../errors/useErrors';
 
 export const useHlsManifest = (
   odinId?: string,
@@ -104,6 +106,11 @@ export const useHlsManifest = (
       refetchOnMount: false,
       refetchOnWindowFocus: false,
       enabled: !!videoFileId && videoFileId !== '' && videoFileDataFetched,
+      throwOnError: (error, _) => {
+        const newError = generateClientError(error, t('Failed to hls video data'));
+        addLogs(newError);
+        return false;
+      },
     }),
   };
 };
