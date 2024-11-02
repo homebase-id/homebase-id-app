@@ -30,6 +30,7 @@ import { HomebaseFile, ReactionFile } from '@homebase-id/js-lib/core';
 import { EmptyComment } from './EmptyComment';
 import { useBottomSheetBackHandler } from '../../../../hooks/useBottomSheetBackHandler';
 import { ListRenderItemInfo } from '@shopify/flash-list';
+import { getNewId } from '@homebase-id/js-lib/helpers';
 
 export interface CommentModalMethods {
   setContext: (context: ReactionContext & Partial<CanReactInfo>) => void;
@@ -120,7 +121,10 @@ export const CommentsModal = memo(
       },
       [context]
     );
-    const keyExtractor = useCallback((item: HomebaseFile<ReactionFile>) => item.fileId, []);
+    const keyExtractor = useCallback(
+      (item: HomebaseFile<ReactionFile>) => item.fileId || getNewId(), // if no fileID, then it means it under sending process
+      []
+    );
     const listFooter = useMemo(() => {
       if (isFetchingNextPage) return <CommentsLoader />;
       return <></>;
