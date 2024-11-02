@@ -1,6 +1,6 @@
 import { ChannelDefinition, PostContent, ReactionContext } from '@homebase-id/js-lib/public';
 import { PostActionProps } from '../Interacts/PostActionModal';
-import { HomebaseFile, NewHomebaseFile, ReactionFile } from '@homebase-id/js-lib/core';
+import { HomebaseFile, NewHomebaseFile, CommentReaction } from '@homebase-id/js-lib/core';
 import Animated, {
   KeyboardState,
   useAnimatedKeyboard,
@@ -80,19 +80,19 @@ export const PostDetailMainContent = ({
   const flattenedComments = comments?.pages.flatMap((page) => page.comments).reverse();
 
   const renderItem = useCallback(
-    ({ item }: ListRenderItemInfo<HomebaseFile<ReactionFile>>) => {
+    ({ item }: ListRenderItemInfo<HomebaseFile<CommentReaction>>) => {
       return (
         <Comment
           commentData={item}
           context={reactionContext as ReactionContext}
           isThread={false}
           canReact={canReact}
-          onReply={(commentFile) => {
+          onReply={(CommentReaction) => {
             setReplyThread({
-              replyThreadId: commentFile.fileMetadata.globalTransitId,
+              replyThreadId: CommentReaction.fileMetadata.globalTransitId,
               authorOdinId:
-                commentFile.fileMetadata.originalAuthor ||
-                commentFile.fileMetadata.appData.content.authorOdinId ||
+                CommentReaction.fileMetadata.originalAuthor ||
+                CommentReaction.fileMetadata.appData.content.authorOdinId ||
                 '',
             });
           }}

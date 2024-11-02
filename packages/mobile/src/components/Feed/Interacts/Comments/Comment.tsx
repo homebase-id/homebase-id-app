@@ -4,7 +4,7 @@ import {
   ReactionContext,
 } from '@homebase-id/js-lib/public';
 import { CanReactInfo, useReaction } from '../../../../hooks/reactions';
-import { HomebaseFile, NewHomebaseFile, ReactionFile } from '@homebase-id/js-lib/core';
+import { HomebaseFile, NewHomebaseFile, CommentReaction } from '@homebase-id/js-lib/core';
 import { memo, useCallback, useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Avatar } from '../../../ui/Avatars/Avatar';
@@ -23,9 +23,9 @@ import { Asset } from 'react-native-image-picker';
 export interface CommentProps {
   context: ReactionContext;
   canReact?: CanReactInfo;
-  commentData: HomebaseFile<ReactionFile> | NewHomebaseFile<RawReactionContent>;
+  commentData: HomebaseFile<CommentReaction> | NewHomebaseFile<RawReactionContent>;
   isThread: boolean;
-  onReply?: (replyComment: HomebaseFile<ReactionFile>) => void;
+  onReply?: (replyComment: HomebaseFile<CommentReaction>) => void;
 }
 
 export interface dirtyReactionContext extends Omit<ReactionContext, 'target'> {
@@ -55,9 +55,10 @@ export const Comment = memo(
         ...context,
         target: {
           fileId: commentData.fileId,
-          globalTransitId: (commentData as HomebaseFile<ReactionFile>).fileMetadata.globalTransitId,
+          globalTransitId: (commentData as HomebaseFile<CommentReaction>).fileMetadata
+            .globalTransitId,
           isEncrypted:
-            (commentData as HomebaseFile<ReactionFile>).fileMetadata.isEncrypted || false,
+            (commentData as HomebaseFile<CommentReaction>).fileMetadata.isEncrypted || false,
         },
       };
     }, [commentData, context]);
@@ -116,7 +117,7 @@ export const Comment = memo(
                 ? () =>
                     removeComment({
                       context,
-                      commentFile: commentData as HomebaseFile<ReactionFile>,
+                      commentFile: commentData as HomebaseFile<CommentReaction>,
                     })
                 : undefined
             }
@@ -126,7 +127,7 @@ export const Comment = memo(
             content={commentContent}
             previewThumbnail={commentData.fileMetadata.appData.previewThumbnail}
             commentFileId={fileId}
-            commentLastModifed={(commentData as HomebaseFile<ReactionFile>).fileMetadata.updated}
+            commentLastModifed={(commentData as HomebaseFile<CommentReaction>).fileMetadata.updated}
             updateState={postState}
             isEdit={isEdit}
             onUpdate={doUpdate}
@@ -136,10 +137,10 @@ export const Comment = memo(
             <CommentMeta
               canReact={canReact}
               threadContext={threadContext as ReactionContext}
-              created={(commentData as HomebaseFile<ReactionFile>).fileMetadata.created}
-              updated={(commentData as HomebaseFile<ReactionFile>).fileMetadata.updated}
+              created={(commentData as HomebaseFile<CommentReaction>).fileMetadata.created}
+              updated={(commentData as HomebaseFile<CommentReaction>).fileMetadata.updated}
               onReply={
-                isThread ? undefined : () => onReply?.(commentData as HomebaseFile<ReactionFile>)
+                isThread ? undefined : () => onReply?.(commentData as HomebaseFile<CommentReaction>)
               }
             />
           ) : null}

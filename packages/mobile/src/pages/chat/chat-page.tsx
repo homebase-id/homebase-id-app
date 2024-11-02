@@ -58,7 +58,7 @@ import { useDarkMode } from '../../hooks/useDarkMode';
 import { Text } from '../../components/ui/Text/Text';
 import { OfflineState } from '../../components/Platform/OfflineState';
 import { RetryModal } from '../../components/Chat/Reactions/Modal/RetryModal';
-import { getPlainTextFromRichText, t, useDotYouClientContext } from 'homebase-id-app-common';
+import { getPlainTextFromRichText, t } from 'homebase-id-app-common';
 import { useWebSocketContext } from '../../components/WebSocketContext/useWebSocketContext';
 import { LinkPreview } from '@homebase-id/js-lib/media';
 import { getImageSize } from '../../utils/utils';

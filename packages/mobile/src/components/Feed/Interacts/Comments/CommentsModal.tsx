@@ -26,7 +26,7 @@ import { Comment } from './Comment';
 import { Backdrop } from '../../../ui/Modal/Backdrop';
 import { CommentComposer } from './CommentComposer';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { HomebaseFile, ReactionFile } from '@homebase-id/js-lib/core';
+import { HomebaseFile, CommentReaction } from '@homebase-id/js-lib/core';
 import { EmptyComment } from './EmptyComment';
 import { useBottomSheetBackHandler } from '../../../../hooks/useBottomSheetBackHandler';
 import { ListRenderItemInfo } from '@shopify/flash-list';
@@ -102,7 +102,7 @@ export const CommentsModal = memo(
     );
 
     const renderItem = useCallback(
-      ({ item }: ListRenderItemInfo<HomebaseFile<ReactionFile>>) => {
+      ({ item }: ListRenderItemInfo<HomebaseFile<CommentReaction>>) => {
         return (
           <Comment
             commentData={item}
@@ -120,7 +120,7 @@ export const CommentsModal = memo(
       },
       [context]
     );
-    const keyExtractor = useCallback((item: HomebaseFile<ReactionFile>) => item.fileId, []);
+    const keyExtractor = useCallback((item: HomebaseFile<CommentReaction>) => item.fileId, []);
     const listFooter = useMemo(() => {
       if (isFetchingNextPage) return <CommentsLoader />;
       return <></>;
