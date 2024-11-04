@@ -176,9 +176,6 @@ const RecipientConnectedState = ({
     odinId: recipient,
   }).isUnconfirmedAutoConnected;
 
-  console.log('isConnected', isConnected);
-  console.log('isUnconfirmed', isUnconfirmed);
-
   const identity = useDotYouClientContext().getIdentity();
 
   useEffect(() => {
@@ -188,7 +185,7 @@ const RecipientConnectedState = ({
     if (isUnconfirmed) {
       onValidRecipientStateChange(recipient);
     }
-  }, [isConnected, isFetchedConnected, onValidRecipientStateChange, recipient]);
+  }, [isConnected, isFetchedConnected, isUnconfirmed, onValidRecipientStateChange, recipient]);
 
   if (!isConnected && isFetchedConnected) {
     return (
