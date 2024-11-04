@@ -3,6 +3,7 @@ import { InfiniteData, QueryClient, useInfiniteQuery } from '@tanstack/react-que
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { useDotYouClientContext } from 'homebase-id-app-common';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import logger from '../../provider/log/logger';
 
 export interface ChatConversationsReturn {
   searchResults: HomebaseFile<UnifiedConversation>[];
@@ -17,8 +18,11 @@ export const useConversations = () => {
 
   const fetchConversations = async (
     cursorState: string | undefined
-  ): Promise<ChatConversationsReturn | null> =>
-    await getConversations(dotYouClient, cursorState, PAGE_SIZE);
+  ): Promise<ChatConversationsReturn | null> => {
+    logger.Log('[PERF-DEBUG] fetching conversations');
+    console.log('[PERF-DEBUG] fetching conversations');
+    return await getConversations(dotYouClient, cursorState, PAGE_SIZE);
+  };
 
   return {
     all: useInfiniteQuery({

@@ -22,6 +22,7 @@ import {
 } from '../../provider/chat/ConversationProvider';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { SendReadReceiptResponseRecipientStatus } from '@homebase-id/js-lib/peer';
+import logger from '../../provider/log/logger';
 
 const FIRST_PAGE_SIZE = 15;
 const PAGE_SIZE = 100;
@@ -115,6 +116,8 @@ const fetchMessages = async (
   conversationId: string,
   cursorState: string | undefined
 ) => {
+  logger.Log('[PERF-DEBUG] fetching messages', conversationId);
+  console.log('[PERF-DEBUG] fetching messages', conversationId);
   return await getChatMessages(
     dotYouClient,
     conversationId,

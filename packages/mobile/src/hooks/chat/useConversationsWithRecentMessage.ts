@@ -7,8 +7,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { getChatMessageInfiniteQueryOptions } from './useChatMessages';
 import { useFocusEffect } from '@react-navigation/native';
 import { useConversations } from './useConversations';
-import { generateClientError } from '../errors/useErrors';
-import { addLogs } from '../../provider/log/logger';
+import logger, { addLogs } from '../../provider/log/logger';
 
 export type ConversationWithRecentMessage = HomebaseFile<UnifiedConversation> & {
   lastMessage: HomebaseFile<ChatMessage> | null;
@@ -34,6 +33,9 @@ export const useConversationsWithRecentMessage = () => {
       return;
     }
 
+    logger.Log('[PERF-DEBUG] building conversations with recent message');
+    console.log('[PERF-DEBUG] building conversations with recent message');
+
     const convoWithMessage: ConversationWithRecentMessage[] = await Promise.all(
       (flatConversations.filter(Boolean) as HomebaseFile<UnifiedConversation>[]).map(
         async (convo) => {
@@ -55,24 +57,35 @@ export const useConversationsWithRecentMessage = () => {
       return b.lastMessage.fileMetadata.created - a.lastMessage.fileMetadata.created;
     });
 
-    queryClient.setQueryData(['conversations-with-recent-message'], convoWithMessage);
+    queryClient.setQueryData(['conversations-with-recent-message'], convoWithMessage, {
+      updatedAt: Date.now(),
+    });
   }, [flatConversations, dotYouClient, queryClient]);
 
   const { lastUpdate } = useLastUpdatedChatMessages();
   useEffect(() => {
     if (lastUpdate === null) return;
+
+    const currentCacheUpdate = queryClient.getQueryState(['conversations-with-recent-message']);
+    if (
+      currentCacheUpdate?.dataUpdatedAt &&
+      lastUpdate !== 0 &&
+      lastUpdate <= currentCacheUpdate?.dataUpdatedAt
+    ) {
+      return;
+    }
+
     buildConversationsWithRecent();
-  }, [lastUpdate, buildConversationsWithRecent]);
+  }, [lastUpdate, buildConversationsWithRecent, queryClient]);
 
   return {
     // We only setup a cache entry that we will fill up with the setQueryData later; So we can cache the data for offline and faster startup;
     all: useQuery({
       queryKey: ['conversations-with-recent-message'],
-      queryFn: () => [] as ConversationWithRecentMessage[],
-      throwOnError: (error, _) => {
-        const newError = generateClientError(error, t('Failed to get conversations with recent message'));
-        addLogs(newError);
-        return false;
+      queryFn: () => {
+        logger.Log('[PERF-DEBUG] !! First time fetching conversations with recent message');
+        console.log('[PERF-DEBUG] !! First time fetching conversations with recent message');
+        return [] as ConversationWithRecentMessage[];
       },
       staleTime: Infinity,
       refetchOnMount: false,
@@ -91,6 +104,13 @@ const useLastUpdatedChatMessages = () => {
       .getQueryCache()
       .findAll({ queryKey: ['chat-messages'], exact: false })
       .map((query) => query.state.dataUpdatedAt);
+
+    logger.Log('[PERF-DEBUG] lastUpdates', lastUpdates.length);
+    console.log('[PERF-DEBUG] lastUpdates', lastUpdates.length);
+
+    if (!lastUpdates || !lastUpdates.length) {
+      return;
+    }
 
     setLastUpdate(
       lastUpdates.reduce((acc, val) => {

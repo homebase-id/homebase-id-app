@@ -1,4 +1,11 @@
-import { FlatList, ListRenderItemInfo, Platform, RefreshControl, View } from 'react-native';
+import {
+  ActivityIndicator,
+  FlatList,
+  ListRenderItemInfo,
+  Platform,
+  RefreshControl,
+  View,
+} from 'react-native';
 import ConversationTile from '../components/Chat/Conversation-tile';
 
 import {
@@ -29,12 +36,19 @@ import { ConversationTileWithYourself } from '../components/Conversation/Convers
 import { EmptyConversation } from '../components/Conversation/EmptyConversation';
 import Animated, { LinearTransition } from 'react-native-reanimated';
 import { SearchConversationResults } from '../components/Chat/SearchConversationsResults';
+import logger from '../provider/log/logger';
 
 type ConversationProp = NativeStackScreenProps<ChatStackParamList, 'Conversation'>;
 
 export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
-  const { data: conversations, isFetched: conversationsFetched } =
-    useConversationsWithRecentMessage().all;
+  const {
+    data: conversations,
+    isFetched: conversationsFetched,
+    isLoading: conversationsFetching,
+  } = useConversationsWithRecentMessage().all;
+
+  logger.Log('[PERF-DEBUG] rendering conversations', conversations?.length);
+  console.log('[PERF-DEBUG] rendering conversations', conversations?.length);
 
   const [query, setQuery] = useState<string | undefined>(undefined);
   const { isDarkMode } = useDarkMode();
@@ -119,6 +133,7 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
 
     setRefreshing(false);
   }, [queryClient]);
+
   const isQueryActive = useMemo(() => !!(query && query.length >= 1), [query]);
   if (isQueryActive) {
     return (
@@ -146,9 +161,11 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
             renderItem={renderItem}
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={doRefresh} />}
           />
-        ) : (
+        ) : conversationsFetched ? (
           <EmptyConversation conversationsFetched={conversationsFetched} />
-        )}
+        ) : conversationsFetching ? (
+          <ActivityIndicator />
+        ) : null}
       </SafeAreaView>
     </ErrorBoundary>
   );
