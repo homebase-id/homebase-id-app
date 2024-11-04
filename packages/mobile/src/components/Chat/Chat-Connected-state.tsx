@@ -17,6 +17,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import TextButton from '../ui/Text/Text-Button';
+import { useAutoConnection } from '../../hooks/connections/useAutoConnection';
 
 export const ChatConnectedState = (conversation: HomebaseFile<UnifiedConversation> | undefined) => {
   const { isDarkMode } = useDarkMode();
@@ -55,7 +56,7 @@ export const ChatConnectedState = (conversation: HomebaseFile<UnifiedConversatio
   });
   if (!conversation) return null;
   const recipients = conversation.fileMetadata.appData.content.recipients;
-  if (!recipients || recipients.length <= 2) return null;
+  if (!recipients) return null;
 
   return (
     <Animated.View
@@ -101,24 +102,17 @@ export const ChatConnectedState = (conversation: HomebaseFile<UnifiedConversatio
   );
 };
 
-const RecipientConnectedState = ({
-  recipient,
-  onValidRecipientStateChange,
+const StateWrapper = ({
+  linkText,
+  linkTarget,
+  children,
   animatedProps,
 }: {
-  recipient: string;
-  onValidRecipientStateChange: (value: string) => void;
+  linkText: string;
+  linkTarget: string;
+  children: ReactNode;
   animatedProps?: AnimatedStyle<ViewStyle>;
 }) => {
-  const { data: isConnected, isFetched } = useIsConnected(recipient);
-  const identity = useDotYouClientContext().getIdentity();
-
-  useEffect(() => {
-    if (isConnected === null || isConnected || !isFetched) return;
-    onValidRecipientStateChange(recipient);
-  }, [isConnected, isFetched, onValidRecipientStateChange, recipient]);
-
-  if (isConnected === null || isConnected || !isFetched) return null;
   return (
     <Animated.View
       style={[
@@ -147,6 +141,62 @@ const RecipientConnectedState = ({
         textBreakStrategy="simple"
         lineBreakMode="clip"
       >
+        {children}
+      </Text>
+      <Button
+        onPress={async () => {
+          await openURL(linkTarget);
+        }}
+      >
+        <Text
+          style={{
+            color: Colors.white,
+            fontWeight: '500',
+            textAlign: 'center',
+          }}
+        >
+          {linkText}
+        </Text>
+      </Button>
+    </Animated.View>
+  );
+};
+
+const RecipientConnectedState = ({
+  recipient,
+  onValidRecipientStateChange,
+  animatedProps,
+}: {
+  recipient: string;
+  onValidRecipientStateChange: (value: string) => void;
+  animatedProps?: AnimatedStyle<ViewStyle>;
+}) => {
+  const { data: isConnected, isFetched: isFetchedConnected } = useIsConnected(recipient);
+  const { data: isUnconfirmed } = useAutoConnection({
+    odinId: recipient,
+  }).isUnconfirmedAutoConnected;
+
+  console.log('isConnected', isConnected);
+  console.log('isUnconfirmed', isUnconfirmed);
+
+  const identity = useDotYouClientContext().getIdentity();
+
+  useEffect(() => {
+    if (!isConnected && isFetchedConnected) {
+      onValidRecipientStateChange(recipient);
+    }
+    if (isUnconfirmed) {
+      onValidRecipientStateChange(recipient);
+    }
+  }, [isConnected, isFetchedConnected, onValidRecipientStateChange, recipient]);
+
+  if (!isConnected && isFetchedConnected) {
+    return (
+      <StateWrapper
+        linkText={t('Connect')}
+        linkTarget={`https://${identity}/owner/connections/${recipient}/connect`}
+        animatedProps={animatedProps}
+      >
         {t('You can only chat with connected identities, messages will not be delivered to')}{' '}
         <Text
           onPress={async () => {
@@ -159,24 +209,35 @@ const RecipientConnectedState = ({
         >
           {recipient}
         </Text>
-      </Text>
-      <Button
-        onPress={async () => {
-          await openURL(`https://${identity}/owner/connections/${recipient}/connect`);
-        }}
+      </StateWrapper>
+    );
+  }
+
+  if (isUnconfirmed) {
+    return (
+      <StateWrapper
+        linkText={t('Confirm')}
+        linkTarget={`https://${identity}/owner/connections/${recipient}`}
+        animatedProps={animatedProps}
       >
+        {t('You were automatically connected to')}{' '}
         <Text
+          onPress={async () => {
+            await openURL(`https://${recipient}`);
+          }}
           style={{
-            color: Colors.white,
+            textDecorationLine: 'underline',
             fontWeight: '500',
-            textAlign: 'center',
           }}
         >
-          Connect
-        </Text>
-      </Button>
-    </Animated.View>
-  );
+          {recipient}
+        </Text>{' '}
+        {t('because of an introduction. Would you like to confirm this connection?')}
+      </StateWrapper>
+    );
+  }
+
+  return null;
 };
 
 const styles = StyleSheet.create({

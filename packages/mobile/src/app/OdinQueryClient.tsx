@@ -61,6 +61,7 @@ const INCLUDED_QUERY_KEYS = [
   'following',
   'connections', // TODO: 'connections' and 'active-connections' should be merged
   'active-connections',
+  'connection-info',
   'pending-connections',
   'conversations-with-recent-message',
   'image',
