@@ -1,4 +1,4 @@
-import { EmbeddedThumb, ReactionFile } from '@homebase-id/js-lib/core';
+import { EmbeddedThumb, CommentReaction } from '@homebase-id/js-lib/core';
 import {
   GetTargetDriveFromChannelId,
   RawReactionContent,
@@ -28,7 +28,7 @@ export const CommentBody = memo(
     context?: ReactionContext;
     commentFileId?: string;
     commentLastModifed?: number;
-    content: RawReactionContent | ReactionFile;
+    content: RawReactionContent | CommentReaction;
     previewThumbnail?: EmbeddedThumb;
     isEdit?: boolean;
     updateState: 'pending' | 'loading' | 'success' | 'error' | 'idle';

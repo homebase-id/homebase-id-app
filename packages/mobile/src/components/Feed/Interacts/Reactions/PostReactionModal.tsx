@@ -16,7 +16,7 @@ import { ListRenderItemInfo, View } from 'react-native';
 import { useDarkMode } from '../../../../hooks/useDarkMode';
 import { ReactionContext } from '@homebase-id/js-lib/public';
 import { useEmojiReactions, useEmojiSummary } from '../../../../hooks/reactions';
-import { ReactionFile } from '@homebase-id/js-lib/core';
+import { EmojiReaction } from '@homebase-id/js-lib/core';
 import { ReactionTile } from '../../../Chat/Reactions/Modal/ReactionsModal';
 import { useBottomSheetBackHandler } from '../../../../hooks/useBottomSheetBackHandler';
 import TextButton from '../../../ui/Text/Text-Button';
@@ -46,10 +46,10 @@ const ReactionsModal = memo(
 
     const flattenedReactions = reactionDetails?.pages
       .flatMap((page) => page?.reactions)
-      .filter(Boolean) as ReactionFile[];
+      .filter(Boolean) as EmojiReaction[];
 
     const filteredEmojis = reactionSummary?.reactions?.filter((reaction) =>
-      flattenedReactions?.some((reactionFile) => reactionFile.body === reaction.emoji)
+      flattenedReactions?.some((EmojiReaction) => EmojiReaction.body === reaction.emoji)
     );
 
     useImperativeHandle(ref, () => {
@@ -69,7 +69,7 @@ const ReactionsModal = memo(
       setContext(undefined);
     };
     const renderItem = useCallback(
-      ({ item }: ListRenderItemInfo<ReactionFile>) => (
+      ({ item }: ListRenderItemInfo<EmojiReaction>) => (
         <ReactionTile key={item.authorOdinId + item.body} reaction={item.body} {...item} />
       ),
       []

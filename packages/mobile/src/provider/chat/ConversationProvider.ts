@@ -22,6 +22,7 @@ import {
   ThumbnailFile,
   EmbeddedThumb,
   ImageContentType,
+  UpdateHeaderInstructionSet,
 } from '@homebase-id/js-lib/core';
 import { jsonStringify64, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { ImageSource } from '../image/RNImageProvider';
@@ -289,7 +290,7 @@ export const updateConversation = async (
   ignoreConflict = false
 ): Promise<UploadResult | void> => {
   const identity = dotYouClient.getIdentity();
-  const uploadInstructions: UploadInstructionSet = {
+  const uploadInstructions: UpdateHeaderInstructionSet = {
     storageOptions: {
       drive: ChatDrive,
       overwriteFileId: conversation.fileId,
@@ -304,6 +305,7 @@ export const updateConversation = async (
           sendContents: SendContents.All,
         }
       : undefined,
+    storageIntent: 'header',
   };
 
   const conversationContent = conversation.fileMetadata.appData.content;

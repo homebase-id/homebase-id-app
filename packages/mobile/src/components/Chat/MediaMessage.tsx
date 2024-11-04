@@ -11,7 +11,7 @@ import { calculateScaledDimensions } from '../../utils/utils';
 import { MediaGallery, MediaItem } from '../ui/Media/MediaGallery';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { Colors } from '../../app/Colors';
-import { useDotYouClientContext } from 'homebase-id-app-common';
+import { useAuth } from '../../hooks/auth/useAuth';
 import { DEFAULT_PAYLOAD_KEY } from '@homebase-id/js-lib/core';
 
 const MediaMessage = memo(
@@ -77,8 +77,8 @@ const InnerMediaMessage = memo(
       message: ChatMessageIMessage
     ) => void;
   }) => {
+    const identity = useAuth().getIdentity();
     const { isDarkMode } = useDarkMode();
-    const identity = useDotYouClientContext().getIdentity();
     const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
     const { width, height } = Dimensions.get('screen');
 

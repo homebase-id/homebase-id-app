@@ -12,7 +12,7 @@ import { useDotYouClientContext } from 'homebase-id-app-common';
 import { ChatStackParamList } from '../../app/ChatStack';
 import { Avatar, OwnerAvatar } from '../../components/ui/Avatars/Avatar';
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
-import { ReactionFile } from '@homebase-id/js-lib/core';
+import { EmojiReaction } from '@homebase-id/js-lib/core';
 
 export type MessageInfoProp = NativeStackScreenProps<ChatStackParamList, 'MessageInfo'>;
 
@@ -125,7 +125,7 @@ export const MessageInfoPage = ({ route }: MessageInfoProp) => {
     return (
       <View>
         <Header title="Reactions" />
-        {reactions.map((reaction: ReactionFile, index: number) => {
+        {reactions.map((reaction: EmojiReaction, index: number) => {
           return (
             <View
               key={index}

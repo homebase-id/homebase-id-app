@@ -3,7 +3,6 @@ import {
   DotYouClient,
   HomebaseFile,
   EmbeddedThumb,
-  FileMetadata,
   FileQueryParams,
   GetBatchQueryResultOptions,
   ImageContentType,
@@ -36,6 +35,7 @@ import {
   decryptJsonContent,
   getFileHeader,
   DEFAULT_PAYLOAD_KEY,
+  UpdateHeaderInstructionSet,
 } from '@homebase-id/js-lib/core';
 import { ChatDrive, UnifiedConversation } from './ConversationProvider';
 import {
@@ -53,7 +53,6 @@ import { processVideo } from '../video/RNVideoProcessor';
 import { LinkPreview, LinkPreviewDescriptor } from '@homebase-id/js-lib/media';
 import { sendReadReceipt } from '@homebase-id/js-lib/peer';
 import { ellipsisAtMaxChar, getPlainTextFromRichText } from 'homebase-id-app-common';
-
 
 const CHAT_APP_ID = '2d781401-3804-4b57-b4aa-d8e4e2ef39f4';
 
@@ -165,13 +164,12 @@ export const dsrToMessage = async (
         decryptedJsonContent = await decryptJsonContent(fileMetadata, keyHeader);
       } else {
         // When contentIsComplete but includeMetadataHeader == false the query before was done without including the content; So we just get and parse
-        const fileHeader = await getFileHeader(dotYouClient, targetDrive, fileId,);
+        const fileHeader = await getFileHeader(dotYouClient, targetDrive, fileId);
         if (!fileHeader) return null;
         decryptedJsonContent = await decryptJsonContent(fileHeader.fileMetadata, keyHeader);
       }
       return tryJsonParse<ChatMessage>(decryptedJsonContent);
     })();
-
 
     if (!msgContent) return null;
 
@@ -273,19 +271,19 @@ export const uploadChatMessage = async (
     },
     transitOptions: distribute
       ? {
-        recipients: [...recipients],
-        schedule: ScheduleOptions.SendLater,
-        priority: PriorityOptions.High,
-        sendContents: SendContents.All,
-        useAppNotification: true,
-        appNotificationOptions: {
-          appId: CHAT_APP_ID,
-          typeId: message.fileMetadata.appData.groupId || getNewId(),
-          tagId: message.fileMetadata.appData.uniqueId || getNewId(),
-          silent: false,
-          unEncryptedMessage: notificationBody,
-        },
-      }
+          recipients: [...recipients],
+          schedule: ScheduleOptions.SendLater,
+          priority: PriorityOptions.High,
+          sendContents: SendContents.All,
+          useAppNotification: true,
+          appNotificationOptions: {
+            appId: CHAT_APP_ID,
+            typeId: message.fileMetadata.appData.groupId || getNewId(),
+            tagId: message.fileMetadata.appData.uniqueId || getNewId(),
+            silent: false,
+            unEncryptedMessage: notificationBody,
+          },
+        }
       : undefined,
   };
 
@@ -301,7 +299,12 @@ export const uploadChatMessage = async (
   const shouldEmbedContent = payloadBytes.length < 3000;
   const content = shouldEmbedContent
     ? jsonContent
-    : jsonStringify64({ message: ellipsisAtMaxChar(getPlainTextFromRichText(messageContent.message), 400), replyId: messageContent.replyId, deliveryDetails: messageContent.deliveryDetails, deliveryStatus: messageContent.deliveryStatus }); // We only embed the content if it's less than 3kb
+    : jsonStringify64({
+        message: ellipsisAtMaxChar(getPlainTextFromRichText(messageContent.message), 400),
+        replyId: messageContent.replyId,
+        deliveryDetails: messageContent.deliveryDetails,
+        deliveryStatus: messageContent.deliveryStatus,
+      }); // We only embed the content if it's less than 3kb
 
   if (!shouldEmbedContent) {
     payloads.push({
@@ -326,8 +329,6 @@ export const uploadChatMessage = async (
     },
   };
 
-
-
   if (!files?.length && linkPreviews?.length) {
     // We only support link previews when there is no media
     const descriptorContent = JSON.stringify(
@@ -345,10 +346,10 @@ export const uploadChatMessage = async (
 
     const imageSource: ImageSource | undefined = linkPreviewWithImage
       ? {
-        height: linkPreviewWithImage.imageHeight || 0,
-        width: linkPreviewWithImage.imageWidth || 0,
-        uri: linkPreviewWithImage.imageUrl,
-      }
+          height: linkPreviewWithImage.imageHeight || 0,
+          width: linkPreviewWithImage.imageWidth || 0,
+          uri: linkPreviewWithImage.imageUrl,
+        }
       : undefined;
 
     const { tinyThumb } = imageSource
@@ -458,7 +459,7 @@ export const uploadChatMessage = async (
     for (const recipient of recipients) {
       message.fileMetadata.appData.content.deliveryDetails[recipient] =
         uploadResult.recipientStatus?.[recipient].toLowerCase() ===
-          TransferUploadStatus.EnqueuedFailed
+        TransferUploadStatus.EnqueuedFailed
           ? ChatDeliveryStatus.Failed
           : ChatDeliveryStatus.Delivered;
     }
@@ -496,19 +497,20 @@ export const updateChatMessage = async (
   const messageContent = message.fileMetadata.appData.content;
   const distribute = recipients?.length > 0;
 
-  const uploadInstructions: UploadInstructionSet = {
+  const uploadInstructions: UpdateHeaderInstructionSet = {
     storageOptions: {
       drive: ChatDrive,
       overwriteFileId: message.fileId,
     },
     transitOptions: distribute
       ? {
-        recipients: [...recipients],
-        schedule: ScheduleOptions.SendLater,
-        priority: PriorityOptions.High,
-        sendContents: SendContents.All,
-      }
+          recipients: [...recipients],
+          schedule: ScheduleOptions.SendLater,
+          priority: PriorityOptions.High,
+          sendContents: SendContents.All,
+        }
       : undefined,
+    storageIntent: 'header',
   };
 
   const payloadJson: string = jsonStringify64({ ...messageContent });
@@ -523,7 +525,6 @@ export const updateChatMessage = async (
       fileType: CHAT_MESSAGE_FILE_TYPE,
       content: payloadJson,
     },
-    senderOdinId: (message.fileMetadata as FileMetadata<ChatMessage>).senderOdinId,
     isEncrypted: true,
     accessControlList: message.serverMetadata?.accessControlList || {
       requiredSecurityGroup: SecurityGroupType.Connected,

@@ -58,7 +58,7 @@ import { useDarkMode } from '../../hooks/useDarkMode';
 import { Text } from '../../components/ui/Text/Text';
 import { OfflineState } from '../../components/Platform/OfflineState';
 import { RetryModal } from '../../components/Chat/Reactions/Modal/RetryModal';
-import { getPlainTextFromRichText, t, useDotYouClientContext } from 'homebase-id-app-common';
+import { getPlainTextFromRichText, t } from 'homebase-id-app-common';
 import { useWebSocketContext } from '../../components/WebSocketContext/useWebSocketContext';
 import { LinkPreview } from '@homebase-id/js-lib/media';
 import { getImageSize } from '../../utils/utils';
@@ -268,11 +268,14 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
 
   const doSend = useCallback(
     (message: { text: string | RichText }[], assets?: ImageSource[]) => {
+      const firstOfSeptember2024 = new Date('2024-08-01').getTime();
+
       if (!conversation) return;
 
       if (
         !stringGuidsEqual(route.params.convoId, ConversationWithYourselfId) && // You can't invite yourself
-        conversation?.fileMetadata.senderOdinId === identity // Only the original creator can invite
+        conversation?.fileMetadata.senderOdinId === identity && // Only the original creator can invite
+        conversation?.fileMetadata.created >= firstOfSeptember2024 // Only conversations created after September 2024 (new format)
       ) {
         const filteredRecipients = conversation.fileMetadata.appData.content.recipients.filter(
           (recipient) => recipient !== identity
@@ -828,9 +831,9 @@ const EditDialogBox = memo(({ visible, handleDialogClose, selectedMessage }: Edi
 
 const DeleteDialogBox = memo(
   ({ visible, handleDialogClose, selectedMessage }: DeleteDialogBoxProp) => {
+    const identity = useAuth().getIdentity();
     const { isDarkMode } = useDarkMode();
     const [deleteMessageError, setDeleteMessageError] = useState<unknown | undefined>();
-    const identity = useDotYouClientContext().getIdentity();
     const { data: conversation } = useConversation({
       conversationId: selectedMessage?.fileMetadata.appData.groupId,
     }).single;
