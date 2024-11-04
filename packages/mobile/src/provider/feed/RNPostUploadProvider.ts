@@ -22,6 +22,7 @@ import {
   UploadResult,
   ImageContentType,
   PriorityOptions,
+  UpdateHeaderInstructionSet,
 } from '@homebase-id/js-lib/core';
 import {
   toGuidId,
@@ -46,7 +47,11 @@ import { createThumbnails } from '../image/RNThumbnailProvider';
 import { processVideo } from '../video/RNVideoProcessor';
 import { AxiosRequestConfig } from 'axios';
 import { LinkPreview, LinkPreviewDescriptor } from '@homebase-id/js-lib/media';
-import { TransitInstructionSet, TransitUploadResult, uploadFileOverPeer } from '@homebase-id/js-lib/peer';
+import {
+  TransitInstructionSet,
+  TransitUploadResult,
+  uploadFileOverPeer,
+} from '@homebase-id/js-lib/peer';
 
 const POST_MEDIA_PAYLOAD_KEY = 'pst_mdi';
 
@@ -101,7 +106,7 @@ export const savePost = async <T extends PostContent>(
   const encrypt = !(
     file.serverMetadata?.accessControlList?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
     file.serverMetadata?.accessControlList?.requiredSecurityGroup ===
-    SecurityGroupType.Authenticated
+      SecurityGroupType.Authenticated
   );
 
   const targetDrive = GetTargetDriveFromChannelId(channelId);
@@ -128,10 +133,10 @@ export const savePost = async <T extends PostContent>(
 
     const imageSource: ImageSource | undefined = linkPreviewWithImage
       ? {
-        height: linkPreviewWithImage.imageHeight || 0,
-        width: linkPreviewWithImage.imageWidth || 0,
-        uri: linkPreviewWithImage.imageUrl,
-      }
+          height: linkPreviewWithImage.imageHeight || 0,
+          width: linkPreviewWithImage.imageWidth || 0,
+          uri: linkPreviewWithImage.imageUrl,
+        }
       : undefined;
 
     const { tinyThumb } = imageSource
@@ -205,10 +210,10 @@ export const savePost = async <T extends PostContent>(
   if (file.fileMetadata.appData.content.type !== 'Article') {
     file.fileMetadata.appData.content.primaryMediaFile = payloads[0]
       ? {
-        fileId: undefined,
-        fileKey: payloads[0].key,
-        type: payloads[0].payload.type,
-      }
+          fileId: undefined,
+          fileKey: payloads[0].key,
+          type: payloads[0].payload.type,
+        }
       : undefined;
   }
 
@@ -256,7 +261,7 @@ const uploadPost = async <T extends PostContent>(
   const encrypt = !(
     file.serverMetadata?.accessControlList?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
     file.serverMetadata?.accessControlList?.requiredSecurityGroup ===
-    SecurityGroupType.Authenticated
+      SecurityGroupType.Authenticated
   );
 
   const instructionSet: UploadInstructionSet = {
@@ -285,8 +290,9 @@ const uploadPost = async <T extends PostContent>(
       !stringGuidsEqual(existingPostWithThisSlug?.fileId, file.fileId)
     ) {
       // There is clash with an existing slug
-      file.fileMetadata.appData.content.slug = `${file.fileMetadata.appData.content.slug
-        }-${new Date().getTime()}`;
+      file.fileMetadata.appData.content.slug = `${
+        file.fileMetadata.appData.content.slug
+      }-${new Date().getTime()}`;
     }
   }
   const uniqueId = file.fileMetadata.appData.content.slug
@@ -401,7 +407,7 @@ const uploadPostHeader = async <T extends PostContent>(
   channelId: string,
   targetDrive: TargetDrive
 ) => {
-  const instructionSet: UploadInstructionSet = {
+  const instructionSet: UpdateHeaderInstructionSet = {
     transferIv: getRandom16ByteArray(),
     storageOptions: {
       overwriteFileId: file?.fileId ?? '',
@@ -413,6 +419,7 @@ const uploadPostHeader = async <T extends PostContent>(
       priority: PriorityOptions.Medium,
       sendContents: SendContents.All, // TODO: Should this be header only?
     },
+    storageIntent: 'header',
   };
 
   const existingPostWithThisSlug = await getPostBySlug(
@@ -424,11 +431,12 @@ const uploadPostHeader = async <T extends PostContent>(
   if (
     existingPostWithThisSlug &&
     existingPostWithThisSlug?.fileMetadata.appData.content.id !==
-    file.fileMetadata.appData.content.id
+      file.fileMetadata.appData.content.id
   ) {
     // There is clash with an existing slug
-    file.fileMetadata.appData.content.slug = `${file.fileMetadata.appData.content.slug
-      }-${new Date().getTime()}`;
+    file.fileMetadata.appData.content.slug = `${
+      file.fileMetadata.appData.content.slug
+    }-${new Date().getTime()}`;
   }
 
   const uniqueId = file.fileMetadata.appData.content.slug
@@ -477,6 +485,7 @@ const uploadPostHeader = async <T extends PostContent>(
             targetDrive: targetDrive,
           },
           versionTag: file.fileMetadata.versionTag,
+          storageIntent: 'append',
         },
         [
           {
@@ -610,6 +619,7 @@ const updatePost = async <T extends PostContent>(
         targetDrive: targetDrive,
       },
       versionTag: runningVersionTag,
+      storageIntent: 'append',
     };
 
     runningVersionTag =

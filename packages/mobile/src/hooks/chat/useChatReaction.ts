@@ -10,7 +10,7 @@ import {
   getGroupReactions,
   GroupEmojiReaction,
   HomebaseFile,
-  ReactionFile,
+  EmojiReaction,
   ReactionPreview,
   uploadGroupReaction,
 } from '@homebase-id/js-lib/core';
@@ -63,9 +63,9 @@ export const getAddReactionMutationOptions: (queryClient: QueryClient) => UseMut
   onMutate: async ({ message, reaction }) => {
     // Update the reaction overview
     const previousReactions =
-      queryClient.getQueryData<ReactionFile[]>(['chat-reaction', message.fileId]) || [];
+      queryClient.getQueryData<EmojiReaction[]>(['chat-reaction', message.fileId]) || [];
 
-    const newReaction: ReactionFile = {
+    const newReaction: EmojiReaction = {
       authorOdinId: (await getSynchronousDotYouClient()).getIdentity(),
       body: reaction,
     };
@@ -114,7 +114,7 @@ const removeReactionOnServer = async ({
 }: {
   conversation: HomebaseFile<UnifiedConversation>;
   message: HomebaseFile<ChatMessage>;
-  reaction: ReactionFile;
+  reaction: EmojiReaction;
 }) => {
   const dotYouClient = await getSynchronousDotYouClient();
   const conversationContent = conversation.fileMetadata.appData.content;
@@ -138,7 +138,7 @@ export const getRemoveReactionMutationOptions: (queryClient: QueryClient) => Use
   {
     conversation: HomebaseFile<UnifiedConversation>;
     message: HomebaseFile<ChatMessage>;
-    reaction: ReactionFile;
+    reaction: EmojiReaction;
   }
 > = (queryClient) => ({
   mutationKey: ['remove-reaction'],
@@ -146,7 +146,7 @@ export const getRemoveReactionMutationOptions: (queryClient: QueryClient) => Use
   onMutate: async (variables) => {
     // Update the reaction overview
     const { message, reaction } = variables;
-    const previousReactions = queryClient.getQueryData<ReactionFile[] | undefined>([
+    const previousReactions = queryClient.getQueryData<EmojiReaction[] | undefined>([
       'chat-reaction',
       message.fileId,
     ]);
@@ -245,7 +245,7 @@ export const insertNewReaction = (
   messageLocalFileId: string,
   newReaction: GroupEmojiReaction
 ) => {
-  const currentReactions = queryClient.getQueryData<ReactionFile[] | undefined>([
+  const currentReactions = queryClient.getQueryData<EmojiReaction[] | undefined>([
     'chat-reaction',
     messageLocalFileId,
   ]);
@@ -255,20 +255,20 @@ export const insertNewReaction = (
     return;
   }
 
-  const reactionAsReactionFile: ReactionFile = {
+  const reactionAsEmojiReaction: EmojiReaction = {
     authorOdinId: newReaction.odinId,
     body: tryJsonParse<{ emoji: string }>(newReaction.reactionContent).emoji,
   };
 
-  queryClient.setQueryData<ReactionFile[]>(
+  queryClient.setQueryData<EmojiReaction[]>(
     ['chat-reaction', messageLocalFileId],
     [
       ...currentReactions.filter(
         (reaction) =>
-          reaction.authorOdinId !== reactionAsReactionFile.authorOdinId ||
-          reaction.body !== reactionAsReactionFile.body
+          reaction.authorOdinId !== reactionAsEmojiReaction.authorOdinId ||
+          reaction.body !== reactionAsEmojiReaction.body
       ),
-      reactionAsReactionFile,
+      reactionAsEmojiReaction,
     ]
   );
 };
@@ -278,7 +278,7 @@ export const removeReaction = (
   messageLocalFileId: string,
   removedReaction: GroupEmojiReaction
 ) => {
-  const currentReactions = queryClient.getQueryData<ReactionFile[] | undefined>([
+  const currentReactions = queryClient.getQueryData<EmojiReaction[] | undefined>([
     'chat-reaction',
     messageLocalFileId,
   ]);
@@ -288,17 +288,17 @@ export const removeReaction = (
     return;
   }
 
-  const reactionAsReactionFile: ReactionFile = {
+  const reactionAsEmojiReaction: EmojiReaction = {
     authorOdinId: removedReaction.odinId,
     body: tryJsonParse<{ emoji: string }>(removedReaction.reactionContent).emoji,
   };
 
-  queryClient.setQueryData<ReactionFile[]>(
+  queryClient.setQueryData<EmojiReaction[]>(
     ['chat-reaction', messageLocalFileId],
     currentReactions.filter(
       (reaction) =>
-        reaction.authorOdinId !== reactionAsReactionFile.authorOdinId ||
-        reaction.body !== reactionAsReactionFile.body
+        reaction.authorOdinId !== reactionAsEmojiReaction.authorOdinId ||
+        reaction.body !== reactionAsEmojiReaction.body
     )
   );
 };

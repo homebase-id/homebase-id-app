@@ -1,4 +1,5 @@
 import {
+  CommentReaction,
   DEFAULT_PAYLOAD_KEY,
   DotYouClient,
   EmbeddedThumb,
@@ -7,7 +8,6 @@ import {
   NewHomebaseFile,
   PayloadFile,
   PriorityOptions,
-  ReactionFile,
   ScheduleOptions,
   SecurityGroupType,
   SendContents,
@@ -40,7 +40,7 @@ import { ImageSource } from '../image/RNImageProvider';
 
 const COMMENT_MEDIA_PAYLOAD = 'cmmnt_md';
 
-export interface RawReactionContent extends Omit<ReactionFile, 'attachments'> {
+export interface RawReactionContent extends Omit<CommentReaction, 'attachments'> {
   attachment?: ImageSource;
 }
 
@@ -186,7 +186,7 @@ export const saveComment = async (
 
     const instructionSet: TransitInstructionSet = {
       transferIv: getRandom16ByteArray(),
-      overwriteGlobalTransitFileId: (comment as HomebaseFile<ReactionFile>).fileMetadata
+      overwriteGlobalTransitFileId: (comment as HomebaseFile<CommentReaction>).fileMetadata
         .globalTransitId,
       remoteTargetDrive: targetDrive,
       schedule: ScheduleOptions.SendLater,

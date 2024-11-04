@@ -12,7 +12,7 @@ import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/typ
 import { Backdrop } from '../../../ui/Modal/Backdrop';
 import { openURL } from '../../../../utils/utils';
 import TextButton from '../../../ui/Text/Text-Button';
-import { ReactionFile } from '@homebase-id/js-lib/core';
+import { EmojiReaction } from '@homebase-id/js-lib/core';
 import { t } from 'homebase-id-app-common';
 
 export const ReactionsModal = memo(
@@ -85,7 +85,7 @@ export const ReactionsModal = memo(
       }, [activeEmoji, filteredEmojis, isDarkMode, reactions]);
 
       const renderItem = useCallback(
-        ({ item }: ListRenderItemInfo<ReactionFile>) => (
+        ({ item }: ListRenderItemInfo<EmojiReaction>) => (
           <ReactionTile key={item.authorOdinId + item.body} reaction={item.body} {...item} />
         ),
         []

@@ -17,9 +17,10 @@ import { useEncrtypedStorage } from './useEncryptedStorage';
 import { Platform } from 'react-native';
 import { DrivePermissionType } from '@homebase-id/js-lib/core';
 import {
-  ALL_CONNECTIONS_CIRCLE_ID,
   AppPermissionType,
   ContactConfig,
+  CONFIRMED_CONNECTIONS_CIRCLE_ID,
+  AUTO_CONNECTIONS_CIRCLE_ID,
 } from '@homebase-id/js-lib/network';
 import { BlogConfig, HomePageConfig } from '@homebase-id/js-lib/public';
 import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@homebase-id/js-lib/profile';
@@ -42,7 +43,11 @@ export const drives = [
     t: BlogConfig.FeedDrive.type,
     n: '',
     d: '',
-    p: DrivePermissionType.Read + DrivePermissionType.Write + DrivePermissionType.Comment + DrivePermissionType.React,
+    p:
+      DrivePermissionType.Read +
+      DrivePermissionType.Write +
+      DrivePermissionType.Comment +
+      DrivePermissionType.React,
   },
   {
     a: ChatConfig.ChatDrive.alias,
@@ -99,6 +104,7 @@ export const permissions = [
   AppPermissionType.ReceiveDataFromOtherIdentitiesOnMyBehalf,
   AppPermissionType.PublishStaticContent,
   AppPermissionType.SendPushNotifications,
+  AppPermissionType.SendIntroductions,
 ];
 
 export const circleDrives = [
@@ -230,10 +236,11 @@ export const useYouAuthAuthorization = () => {
       undefined,
       drives,
       circleDrives,
-      [ALL_CONNECTIONS_CIRCLE_ID],
+      [CONFIRMED_CONNECTIONS_CIRCLE_ID, AUTO_CONNECTIONS_CIRCLE_ID],
       uint8ArrayToBase64(stringToUint8Array(JSON.stringify(publicKeyJwk))),
       corsHost,
-      `${Platform.OS === 'ios' ? 'iOS' : Platform.OS === 'android' ? 'Android' : Platform.OS} | ${Platform.Version
+      `${Platform.OS === 'ios' ? 'iOS' : Platform.OS === 'android' ? 'Android' : Platform.OS} | ${
+        Platform.Version
       }`
     );
   }, [setPrivateKey]);
