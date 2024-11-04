@@ -70,6 +70,7 @@ const INCLUDED_QUERY_KEYS = [
   'channel',
   'social-feeds',
   'security-context',
+  'pending-upgrade',
 ];
 const persistOptions: Omit<PersistQueryClientOptions, 'queryClient'> = {
   buster: '20241001',

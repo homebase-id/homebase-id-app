@@ -59,6 +59,7 @@ import { NotificationToaster } from '../components/ui/Alert/NotificationToaster'
 import { FeedStack, FeedStackParamList } from './FeedStack';
 import ChatSettingsProvider from '../components/Settings/ChatSettingsContext';
 import { useCacheCleanup } from '../hooks/file/useCacheCleanup';
+import { PendingUpgradeDialog } from '../components/PendingUpgrad/PendingUpgrade';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -151,6 +152,7 @@ const AuthenticatedRoot = memo(() => {
                   permissions={permissions}
                   // needsAllConnected={true}
                 />
+                <PendingUpgradeDialog />
                 <NotificationToaster />
                 <AppStackScreen />
               </ErrorBoundary>
