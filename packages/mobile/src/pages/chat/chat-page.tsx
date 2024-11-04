@@ -268,11 +268,14 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
 
   const doSend = useCallback(
     (message: { text: string | RichText }[], assets?: ImageSource[]) => {
+      const firstOfSeptember2024 = new Date('2024-08-01').getTime();
+
       if (!conversation) return;
 
       if (
         !stringGuidsEqual(route.params.convoId, ConversationWithYourselfId) && // You can't invite yourself
-        conversation?.fileMetadata.senderOdinId === identity // Only the original creator can invite
+        conversation?.fileMetadata.senderOdinId === identity && // Only the original creator can invite
+        conversation?.fileMetadata.created >= firstOfSeptember2024 // Only conversations created after September 2024 (new format)
       ) {
         const filteredRecipients = conversation.fileMetadata.appData.content.recipients.filter(
           (recipient) => recipient !== identity
