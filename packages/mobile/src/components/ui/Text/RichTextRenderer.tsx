@@ -40,6 +40,7 @@ export const RichTextRenderer = memo(
           bold?: boolean;
           italic?: boolean;
           underline?: boolean;
+          strikethrough?: boolean;
           code?: boolean;
         },
         text: string,
@@ -60,6 +61,10 @@ export const RichTextRenderer = memo(
 
         if (leaf.underline) {
           children = <Text style={styles.underline}>{children}</Text>;
+        }
+
+        if (leaf.strikethrough) {
+          children = <Text style={styles.strikethrough}>{children}</Text>;
         }
 
         return (
@@ -252,6 +257,9 @@ const styles = StyleSheet.create({
   },
   underline: {
     textDecorationLine: 'underline',
+  },
+  strikethrough: {
+    textDecorationLine: 'line-through',
   },
   orderedList: {
     marginBottom: 10,
