@@ -105,22 +105,21 @@ const useLastUpdatedChatMessages = () => {
       .findAll({ queryKey: ['chat-messages'], exact: false })
       .map((query) => query.state.dataUpdatedAt);
 
-    logger.Log('[PERF-DEBUG] lastUpdates', lastUpdates.length);
-    console.log('[PERF-DEBUG] lastUpdates', lastUpdates.length);
-
     if (!lastUpdates || !lastUpdates.length) {
       return;
     }
 
-    setLastUpdate(
-      lastUpdates.reduce((acc, val) => {
-        if (val > acc) {
-          return val;
-        }
+    const newLastUpdate = lastUpdates.reduce((acc, val) => {
+      if (val > acc) {
+        return val;
+      }
 
-        return acc;
-      }, 0)
-    );
+      return acc;
+    }, 0);
+    setLastUpdate(newLastUpdate);
+
+    logger.Log('[PERF-DEBUG] latestUpdate', newLastUpdate);
+    console.log('[PERF-DEBUG] latestUpdate', newLastUpdate);
   });
 
   return {
