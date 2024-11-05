@@ -21,7 +21,7 @@ const cleanupCache = async () => {
       await unlink(file.path);
       continue;
     }
-    const time = file.ctime || file.mtime;
+    const time = file.ctime;
     if (time && time.getTime() >= thresholdDate) {
       cleanedUpCount++;
       await unlink(file.path);

@@ -27,7 +27,9 @@ export const Avatar = memo(
     onPress?: () => void;
     imageSize?: { width: number; height: number };
   }) => {
-    const { data: contact } = useContact(props.odinId).fetch;
+    const { data: contact, isFetching } = useContact(props.odinId).fetch;
+    if (isFetching) return null;
+
     if (contact?.fileMetadata.payloads.some((p) => p.key === CONTACT_PROFILE_IMAGE_KEY)) {
       return (
         <View style={{ ...styles.tinyLogo, ...props.style }}>
