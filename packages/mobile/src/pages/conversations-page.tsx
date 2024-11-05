@@ -38,15 +38,14 @@ import { EmptyConversation } from '../components/Conversation/EmptyConversation'
 import Animated, { LinearTransition } from 'react-native-reanimated';
 import { SearchConversationResults } from '../components/Chat/SearchConversationsResults';
 import logger from '../provider/log/logger';
+import { useConversations } from '../hooks/chat/useConversations';
 
 type ConversationProp = NativeStackScreenProps<ChatStackParamList, 'Conversation'>;
 
 export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
-  const {
-    data: conversations,
-    isFetched: conversationsFetched,
-    isLoading: conversationsFetching,
-  } = useConversationsWithRecentMessage().all;
+  const { isFetched: conversationsFetched, isLoading: conversationsFetching } =
+    useConversations().all;
+  const { data: conversations } = useConversationsWithRecentMessage().all;
 
   logger.Log('[PERF-DEBUG] rendering conversations', conversations?.length);
   console.log('[PERF-DEBUG] rendering conversations', conversations?.length);
@@ -112,7 +111,8 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
   );
 
   const keyExtractor = useCallback(
-    (item: ConversationWithRecentMessage) => item?.fileId || item?.fileMetadata?.appData?.uniqueId,
+    (item: ConversationWithRecentMessage) =>
+      item?.fileId || item?.fileMetadata?.appData?.uniqueId || '',
     []
   );
 
@@ -157,20 +157,22 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
         <FloatingActionButton />
         <OfflineState />
         {conversations && conversations?.length ? (
-          <Animated.FlatList
-            ref={scrollRef}
-            itemLayoutAnimation={LinearTransition}
-            data={conversations}
-            showsVerticalScrollIndicator={false}
-            keyExtractor={keyExtractor}
-            contentInsetAdjustmentBehavior="automatic"
-            ListHeaderComponent={<ConversationTileWithYourself />}
-            renderItem={renderItem}
-            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={doRefresh} />}
-            initialNumToRender={windowHeight / 80}
-            maxToRenderPerBatch={windowHeight / 80}
-            windowSize={2}
-          />
+          <ErrorBoundary>
+            <Animated.FlatList
+              ref={scrollRef}
+              itemLayoutAnimation={LinearTransition}
+              data={conversations}
+              showsVerticalScrollIndicator={false}
+              keyExtractor={keyExtractor}
+              contentInsetAdjustmentBehavior="automatic"
+              ListHeaderComponent={<ConversationTileWithYourself />}
+              renderItem={renderItem}
+              refreshControl={<RefreshControl refreshing={refreshing} onRefresh={doRefresh} />}
+              initialNumToRender={windowHeight / 80}
+              maxToRenderPerBatch={windowHeight / 80}
+              windowSize={2}
+            />
+          </ErrorBoundary>
         ) : conversationsFetched ? (
           <EmptyConversation conversationsFetched={conversationsFetched} />
         ) : conversationsFetching ? (
