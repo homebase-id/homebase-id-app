@@ -145,7 +145,7 @@ export const getChatMessageInfiniteQueryOptions: (
       ? lastPage.cursorState
       : undefined,
   enabled: !!conversationId,
-  staleTime: 1000 * 60 * 60 * 24, // 24 hour // Needs to be more than 0 to allow `useLastUpdatedChatMessages` to work properly without endless re-fetching
+  staleTime: 1000 * 60 * 60 * 24 * 7, // 7 days; But should be Infinite in practice for any active conversations, as insertMessages updates them // Needs to be more than 0 to allow `useLastUpdatedChatMessages` to work properly without endless re-fetching
 });
 
 export const insertNewMessagesForConversation = (
@@ -204,13 +204,18 @@ export const insertNewMessage = (
   if (extistingMessages) {
     queryClient.setQueryData(
       ['chat-messages', conversationId],
-      internalInsertNewMessage(extistingMessages, newMessage)
+      internalInsertNewMessage(extistingMessages, newMessage),
+      {
+        updatedAt: new Date().getTime(),
+      }
     );
   } else {
     queryClient.invalidateQueries({ queryKey: ['chat-messages', conversationId] });
   }
 
-  queryClient.setQueryData(['chat-message', newMessage.fileMetadata.appData.uniqueId], newMessage);
+  queryClient.setQueryData(['chat-message', newMessage.fileMetadata.appData.uniqueId], newMessage, {
+    updatedAt: new Date().getTime(),
+  });
 
   return { extistingMessages };
 };

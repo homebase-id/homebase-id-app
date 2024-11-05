@@ -1,13 +1,13 @@
 import { UnifiedConversation } from '../../provider/chat/ConversationProvider';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
-import { t, useDotYouClientContext } from 'homebase-id-app-common';
+import { useDotYouClientContext } from 'homebase-id-app-common';
 import { ChatMessage } from '../../provider/chat/ChatProvider';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { getChatMessageInfiniteQueryOptions } from './useChatMessages';
 import { useFocusEffect } from '@react-navigation/native';
 import { useConversations } from './useConversations';
-import logger, { addLogs } from '../../provider/log/logger';
+import logger from '../../provider/log/logger';
 
 export type ConversationWithRecentMessage = HomebaseFile<UnifiedConversation> & {
   lastMessage: HomebaseFile<ChatMessage> | null;
