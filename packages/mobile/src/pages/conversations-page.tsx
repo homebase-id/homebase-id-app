@@ -46,8 +46,20 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
     useConversations().all;
   const { data: conversations } = useConversationsWithRecentMessage().all;
 
-  logger.Log('[PERF-DEBUG] rendering conversations', conversations?.length);
-  console.log('[PERF-DEBUG] rendering conversations', conversations?.length);
+  const windowHeight = useMemo(() => Dimensions.get('window').height, []);
+
+  logger.Log(
+    '[PERF-DEBUG] rendering conversations',
+    conversations?.length,
+    'maxRender',
+    windowHeight / 80
+  );
+  console.log(
+    '[PERF-DEBUG] rendering conversations',
+    conversations?.length,
+    'maxRender',
+    windowHeight / 80
+  );
 
   const [query, setQuery] = useState<string | undefined>(undefined);
   const { isDarkMode } = useDarkMode();
@@ -140,8 +152,6 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
     setRefreshing(false);
   }, [queryClient]);
 
-  const windowHeight = useMemo(() => Dimensions.get('window').height, []);
-
   const isQueryActive = useMemo(() => !!(query && query.length >= 1), [query]);
   if (isQueryActive) {
     return (
@@ -168,8 +178,8 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
               ListHeaderComponent={<ConversationTileWithYourself />}
               renderItem={renderItem}
               refreshControl={<RefreshControl refreshing={refreshing} onRefresh={doRefresh} />}
-              initialNumToRender={windowHeight / 80}
-              maxToRenderPerBatch={windowHeight / 80}
+              initialNumToRender={(windowHeight / 80) * 1.5} // 1.5 screens worth of data
+              maxToRenderPerBatch={(windowHeight / 80) * 1.5}
               windowSize={2}
             />
           </ErrorBoundary>
