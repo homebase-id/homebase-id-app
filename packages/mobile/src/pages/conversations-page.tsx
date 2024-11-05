@@ -101,7 +101,7 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
 
   const renderItem = useCallback(
     ({ item }: ListRenderItemInfo<ConversationWithRecentMessage>) => {
-      if (!item) return null;
+      if (!item) return <View />;
       const hasPayload = item.fileMetadata.payloads?.length > 0;
       return (
         <ErrorBoundary>
