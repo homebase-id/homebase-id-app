@@ -1,5 +1,6 @@
 import {
   ActivityIndicator,
+  Dimensions,
   FlatList,
   ListRenderItemInfo,
   Platform,
@@ -134,6 +135,8 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
     setRefreshing(false);
   }, [queryClient]);
 
+  const windowHeight = useMemo(() => Dimensions.get('window').height, []);
+
   const isQueryActive = useMemo(() => !!(query && query.length >= 1), [query]);
   if (isQueryActive) {
     return (
@@ -160,6 +163,9 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
             ListHeaderComponent={<ConversationTileWithYourself />}
             renderItem={renderItem}
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={doRefresh} />}
+            initialNumToRender={windowHeight / 80}
+            maxToRenderPerBatch={windowHeight / 80}
+            windowSize={2}
           />
         ) : conversationsFetched ? (
           <EmptyConversation conversationsFetched={conversationsFetched} />
