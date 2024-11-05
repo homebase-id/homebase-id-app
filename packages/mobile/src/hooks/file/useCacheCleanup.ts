@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { Platform } from 'react-native';
 import { CachesDirectoryPath, readDir, unlink } from 'react-native-fs';
 
-const twoWeeksAgo = Date.now() - 14 * 24 * 60 * 60 * 1000;
+const fourWeeksAgo = Date.now() - 28 * 24 * 60 * 60 * 1000;
 const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
 const cleanupCache = async () => {
   console.log('[CacheCleanup] Starting...');
@@ -11,7 +11,7 @@ const cleanupCache = async () => {
   const allFilesInCache = await readDir(CachesDirectoryPath);
   console.log(`[CacheCleanup] found ${allFilesInCache.length} items in caches directory`);
 
-  const thresholdDate = __DEV__ ? oneWeekAgo : twoWeeksAgo;
+  const thresholdDate = __DEV__ ? oneWeekAgo : fourWeeksAgo;
 
   for (let i = 0; i < allFilesInCache.length; i++) {
     const file = allFilesInCache[i];
