@@ -91,6 +91,7 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
 
   const renderItem = useCallback(
     ({ item }: ListRenderItemInfo<ConversationWithRecentMessage>) => {
+      if (!item) return null;
       const hasPayload = item.fileMetadata.payloads?.length > 0;
       return (
         <ConversationTile
@@ -110,7 +111,10 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
     [identity, onPress]
   );
 
-  const keyExtractor = useCallback((item: ConversationWithRecentMessage) => item.fileId, []);
+  const keyExtractor = useCallback(
+    (item: ConversationWithRecentMessage) => item?.fileId || item?.fileMetadata?.appData?.uniqueId,
+    []
+  );
 
   const [refreshing, setRefreshing] = useState(false);
   const doRefresh = useCallback(async () => {
