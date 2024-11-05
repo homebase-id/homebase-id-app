@@ -93,18 +93,20 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
       if (!item) return null;
       const hasPayload = item.fileMetadata.payloads?.length > 0;
       return (
-        <ConversationTile
-          conversation={item.fileMetadata.appData.content}
-          conversationId={item.fileMetadata.appData.uniqueId}
-          fileId={item.fileId}
-          payloadKey={hasPayload ? item.fileMetadata.payloads[0].key : undefined}
-          onPress={onPress}
-          odinId={
-            item.fileMetadata.appData.content.recipients.filter(
-              (recipient) => recipient !== identity
-            )[0]
-          }
-        />
+        <ErrorBoundary>
+          <ConversationTile
+            conversation={item.fileMetadata.appData.content}
+            conversationId={item.fileMetadata.appData.uniqueId}
+            fileId={item.fileId}
+            payloadKey={hasPayload ? item.fileMetadata.payloads[0].key : undefined}
+            onPress={onPress}
+            odinId={
+              item.fileMetadata.appData.content.recipients.filter(
+                (recipient) => recipient !== identity
+              )[0]
+            }
+          />
+        </ErrorBoundary>
       );
     },
     [identity, onPress]
