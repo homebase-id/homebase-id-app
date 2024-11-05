@@ -145,6 +145,8 @@ export const getChatMessageInfiniteQueryOptions: (
       ? lastPage.cursorState
       : undefined,
   enabled: !!conversationId,
+  refetchOnMount: false,
+  refetchOnWindowFocus: false,
   staleTime: 1000 * 60 * 60 * 24 * 7, // 7 days; But should be Infinite in practice for any active conversations, as insertMessages updates them // Needs to be more than 0 to allow `useLastUpdatedChatMessages` to work properly without endless re-fetching
 });
 

@@ -35,7 +35,6 @@ import { SafeAreaView } from '../components/ui/SafeAreaView/SafeAreaView';
 import { OfflineState } from '../components/Platform/OfflineState';
 import { ConversationTileWithYourself } from '../components/Conversation/ConversationTileWithYourself';
 import { EmptyConversation } from '../components/Conversation/EmptyConversation';
-import Animated, { LinearTransition } from 'react-native-reanimated';
 import { SearchConversationResults } from '../components/Chat/SearchConversationsResults';
 import logger from '../provider/log/logger';
 import { useConversations } from '../hooks/chat/useConversations';
@@ -160,9 +159,8 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
         <OfflineState />
         {conversations && conversations?.length ? (
           <ErrorBoundary>
-            <Animated.FlatList
+            <FlatList
               ref={scrollRef}
-              itemLayoutAnimation={LinearTransition}
               data={conversations}
               showsVerticalScrollIndicator={false}
               keyExtractor={keyExtractor}
