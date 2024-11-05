@@ -32,7 +32,7 @@ export const useConversations = () => {
       getNextPageParam: (lastPage) =>
         lastPage && lastPage.searchResults?.length >= PAGE_SIZE ? lastPage.cursorState : undefined,
       refetchOnMount: false,
-      staleTime: 1000 * 60 * 5, // 5min before new conversations from another device are fetched on this one
+      staleTime: 1000 * 60 * 60 * 24 * 7, // 7 days
     }),
   };
 };
