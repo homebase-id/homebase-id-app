@@ -47,7 +47,7 @@ import { insertNewReaction, removeReaction } from './useChatReaction';
 import { useNotification } from '../notifications/useNotification';
 import { useDriveSubscriber } from '../drive/useDriveSubscriber';
 import { generateClientError } from '../errors/useErrors';
-import { addLogs } from '../../provider/log/logger';
+import logger, { addLogs } from '../../provider/log/logger';
 
 const MINUTE_IN_MS = 60000;
 const isDebug = false; // The babel plugin to remove console logs would remove any if they get to production
@@ -136,6 +136,7 @@ const useInboxProcessor = (connected?: boolean) => {
         updatedConversationMetadatas
       );
     } else {
+      logger.Log('[PERF-DEBUG] no last processed time');
       // We have no reference to the last time we processed the inbox, so we can only invalidate all chat messages
       queryClient.invalidateQueries({ queryKey: ['chat-messages'], exact: false });
       queryClient.invalidateQueries({ queryKey: ['conversations'], exact: false });
@@ -239,6 +240,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
           !updatedConversation ||
           Object.keys(updatedConversation.fileMetadata.appData.content).length === 0
         ) {
+          logger.Log('[PERF-DEBUG] got bad conversation, invalidating all conversations');
           queryClient.invalidateQueries({ queryKey: ['conversations'] });
           return;
         }
@@ -448,6 +450,7 @@ const processConversationsBatch = async (
   await Promise.all(
     conversations.map(async (conversationsDsr) => {
       if (conversationsDsr.fileState === 'deleted') {
+        logger.Log('[PERF-DEBUG] got deleted conversation, invalidating all conversations');
         queryClient.invalidateQueries({ queryKey: ['conversations'] });
         return;
       }
@@ -460,6 +463,9 @@ const processConversationsBatch = async (
       );
 
       if (!updatedConversation) {
+        logger.Log(
+          '[PERF-DEBUG] something went wrong with a new conversation, invalidating all conversations'
+        );
         queryClient.invalidateQueries({ queryKey: ['conversations'] });
         return;
       }

@@ -20,7 +20,7 @@ import {
   ConversationWithYourselfId,
   UnifiedConversation,
 } from '../../provider/chat/ConversationProvider';
-import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { formatGuidId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { SendReadReceiptResponseRecipientStatus } from '@homebase-id/js-lib/peer';
 import logger from '../../provider/log/logger';
 
@@ -116,8 +116,8 @@ const fetchMessages = async (
   conversationId: string,
   cursorState: string | undefined
 ) => {
-  logger.Log('[PERF-DEBUG] fetching messages', conversationId);
-  console.log('[PERF-DEBUG] fetching messages', conversationId);
+  logger.Log(`[PERF-DEBUG] fetching messages ${cursorState ? 'with cursor' : ''}`, conversationId);
+  console.log(`[PERF-DEBUG] fetching messages ${cursorState ? 'with cursor' : ''}`, conversationId);
   return await getChatMessages(
     dotYouClient,
     conversationId,
@@ -135,17 +135,20 @@ export const getChatMessageInfiniteQueryOptions: (
   queryTime: number;
   includeMetadataHeader: boolean;
 }> = (dotYouClient, conversationId) => ({
-  queryKey: ['chat-messages', conversationId],
+  queryKey: ['chat-messages', formatGuidId(conversationId)],
   initialPageParam: undefined as string | undefined,
   queryFn: ({ pageParam }) =>
-    fetchMessages(dotYouClient, conversationId as string, pageParam as string | undefined),
+    fetchMessages(
+      dotYouClient,
+      formatGuidId(conversationId as string),
+      pageParam as string | undefined
+    ),
   getNextPageParam: (lastPage, pages) =>
     lastPage &&
     lastPage.searchResults?.length >= (lastPage === pages[0] ? FIRST_PAGE_SIZE : PAGE_SIZE)
       ? lastPage.cursorState
       : undefined,
   enabled: !!conversationId,
-  refetchOnMount: false,
   refetchOnWindowFocus: false,
   staleTime: 1000 * 60 * 60 * 24 * 7, // 7 days; But should be Infinite in practice for any active conversations, as insertMessages updates them // Needs to be more than 0 to allow `useLastUpdatedChatMessages` to work properly without endless re-fetching
 });

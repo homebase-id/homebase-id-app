@@ -145,6 +145,8 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
         });
       }
     });
+    logger.Log('[PERF-DEBUG] manual doRefresh');
+
     await queryClient.invalidateQueries({ queryKey: ['chat-messages'], exact: false });
     await queryClient.invalidateQueries({ queryKey: ['conversations'] });
     await queryClient.invalidateQueries({ queryKey: ['connections'] });
