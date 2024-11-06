@@ -174,15 +174,15 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
           <ErrorBoundary>
             <FlatList
               ref={scrollRef}
-              data={conversations}
+              data={conversations.filter(Boolean)}
               showsVerticalScrollIndicator={false}
               keyExtractor={keyExtractor}
               contentInsetAdjustmentBehavior="automatic"
               ListHeaderComponent={<ConversationTileWithYourself />}
               renderItem={renderItem}
               refreshControl={<RefreshControl refreshing={refreshing} onRefresh={doRefresh} />}
-              initialNumToRender={(windowHeight / 80) * 1.5} // 1.5 screens worth of data
-              maxToRenderPerBatch={(windowHeight / 80) * 1.5}
+              initialNumToRender={Math.round((windowHeight / 80) * 1.5)} // 1.5 screens worth of data
+              maxToRenderPerBatch={Math.round((windowHeight / 80) * 1.5)}
               windowSize={2}
             />
           </ErrorBoundary>
