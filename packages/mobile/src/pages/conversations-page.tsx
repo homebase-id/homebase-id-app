@@ -52,18 +52,8 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
     []
   );
 
-  logger.Log(
-    '[PERF-DEBUG] rendering conversations',
-    conversations?.length,
-    'maxRender',
-    renderPageSize
-  );
-  console.log(
-    '[PERF-DEBUG] rendering conversations',
-    conversations?.length,
-    'maxRender',
-    renderPageSize
-  );
+  logger.Log('[PERF-DEBUG] rendering conversations', conversations?.length);
+  console.log('[PERF-DEBUG] rendering conversations', conversations?.length);
 
   const [query, setQuery] = useState<string | undefined>(undefined);
   const { isDarkMode } = useDarkMode();

@@ -57,6 +57,7 @@ export const useConversationsWithRecentMessage = () => {
       return b.lastMessage.fileMetadata.created - a.lastMessage.fileMetadata.created;
     });
 
+    if (!convoWithMessage || !convoWithMessage.length) return;
     queryClient.setQueryData(['conversations-with-recent-message'], convoWithMessage, {
       updatedAt: Date.now(),
     });
@@ -117,9 +118,6 @@ const useLastUpdatedChatMessages = () => {
       return acc;
     }, 0);
     setLastUpdate(newLastUpdate);
-
-    logger.Log('[PERF-DEBUG] latestUpdate', newLastUpdate);
-    console.log('[PERF-DEBUG] latestUpdate', newLastUpdate);
   });
 
   return {
