@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
-import { Query, QueryClient, QueryKey } from '@tanstack/react-query';
+import { QueryClient } from '@tanstack/react-query';
 import {
   PersistQueryClientOptions,
   PersistQueryClientProvider,
@@ -134,7 +134,7 @@ export const OdinQueryClient = ({ children }: { children: ReactNode }) => {
     });
 
     const persistOptions: Omit<PersistQueryClientOptions, 'queryClient'> = {
-      buster: '20241106',
+      buster: '20241110',
       maxAge: Infinity,
       persister: asyncPersist,
       dehydrateOptions: {
