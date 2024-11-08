@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
-import { QueryClient } from '@tanstack/react-query';
+import { Query, QueryClient, QueryKey } from '@tanstack/react-query';
 import {
   PersistQueryClientOptions,
   PersistQueryClientProvider,
@@ -134,7 +134,7 @@ export const OdinQueryClient = ({ children }: { children: ReactNode }) => {
     });
 
     const persistOptions: Omit<PersistQueryClientOptions, 'queryClient'> = {
-      buster: '20241001',
+      buster: '20241106',
       maxAge: Infinity,
       persister: asyncPersist,
       dehydrateOptions: {
@@ -154,6 +154,16 @@ export const OdinQueryClient = ({ children }: { children: ReactNode }) => {
 
           const queryKey = query.queryKey;
           return INCLUDED_QUERY_KEYS.some((key) => queryKey.includes(key));
+        },
+        serializeData: (data) => {
+          // Keep the serialized data small by only including the first two pages of data for infinite queries
+          if (data?.pages?.length && data?.pages?.length > 2) {
+            const adjustedData = { ...data };
+            adjustedData.pages = adjustedData.pages.slice(0, 2);
+            return adjustedData;
+          }
+
+          return data;
         },
       },
     };
