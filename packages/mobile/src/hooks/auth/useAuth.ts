@@ -25,6 +25,7 @@ import {
 import { BlogConfig, HomePageConfig } from '@homebase-id/js-lib/public';
 import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@homebase-id/js-lib/profile';
 import { useQueryClient } from '@tanstack/react-query';
+import logger from '../../provider/log/logger';
 
 const StandardProfileDrive = GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId);
 
@@ -192,6 +193,7 @@ export const useAuth = () => {
     setAuthToken('');
     setIdentity('');
 
+    logger.Log('[useAuth] removeQueryies on logout');
     queryClient.removeQueries();
   }, [
     getDotYouClient,

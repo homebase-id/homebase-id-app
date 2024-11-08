@@ -56,16 +56,29 @@ const converErrorToLog = (error: Error) => {
   return `${error.title} - ${error.message}`;
 };
 
+const parseArgsToString = (args: (Error | string | number | object | undefined | unknown)[]) =>
+  args.map(parseArgToString).join(' ');
+
+const parseArgToString = (arg: Error | string | number | object | undefined | unknown) => {
+  if (!arg || typeof arg === 'string' || typeof arg === 'number') {
+    return arg;
+  }
+
+  if (typeof arg === 'object' && 'title' in arg && 'message' in arg) {
+    return converErrorToLog(arg as Error);
+  }
+
+  if (typeof arg === 'object') {
+    return JSON.stringify(arg);
+  }
+
+  return arg;
+};
+
 export default {
-  Log: (...args: (string | number | undefined)[]) => addLogs(args.join(' ')),
-  Warn: (...args: (string | number | undefined)[]) => addLogs(args.join(' '), 'warn'),
-  Error: (...args: (Error | string | number | undefined)[]) =>
-    addLogs(
-      args
-        .map((arg) =>
-          !arg || typeof arg === 'string' || typeof arg === 'number' ? arg : converErrorToLog(arg)
-        )
-        .join(' '),
-      'error'
-    ),
+  Log: (...args: (string | number | object | undefined)[]) => addLogs(parseArgsToString(args)),
+  Warn: (...args: (string | number | object | undefined)[]) =>
+    addLogs(parseArgsToString(args), 'warn'),
+  Error: (...args: (Error | string | number | object | undefined | unknown)[]) =>
+    addLogs(parseArgsToString(args), 'error'),
 };

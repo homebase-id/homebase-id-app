@@ -243,6 +243,7 @@ export const internalInsertNewMessage = (
   }
 
   if (!newMessage.fileMetadata.appData.content) {
+    logger.Error('[useChatMessages] Attempted to insert an empty message', newMessage);
     console.error('Attempted to insert an empty message', newMessage);
     return extistingMessages;
   }
