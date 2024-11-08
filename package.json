@@ -16,11 +16,11 @@
     "lint": "npm run lint -workspaces --if-present"
   },
   "dependencies": {
-    "@homebase-id/js-lib": "0.0.6-alpha.2",
-    "axios": "1.7.5",
+    "@homebase-id/js-lib": "0.0.6-alpha.5",
+    "axios": "1.7.7",
     "patch-package": "8.0.0",
     "react": "18.3.1",
-    "react-native": "0.75.4"
+    "react-native": "0.76.1"
   },
   "overrides": {
     "browserify-sign": "4.2.2",
@@ -29,8 +29,8 @@
   "devDependencies": {
     "@eslint/eslintrc": "3.1.0",
     "@eslint/js": "^8.56.0",
-    "@react-native/eslint-config": "0.75.2",
-    "@react-native/eslint-plugin": "0.75.2",
+    "@react-native/eslint-config": "0.76.1",
+    "@react-native/eslint-plugin": "0.76.1",
     "typescript-eslint": "8.3.0",
     "@typescript-eslint/parser": "8.3.0",
     "@typescript-eslint/eslint-plugin": "8.3.0",
