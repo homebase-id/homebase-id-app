@@ -854,7 +854,7 @@ const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
   const { isDarkMode } = useDarkMode();
   const [message, setMessage] = useState(props.currentMessage as ChatMessageIMessage);
   const deleted = message?.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus;
-  const hasMoreTextContent = message?.fileMetadata.payloads.some(
+  const hasMoreTextContent = message?.fileMetadata?.payloads?.some(
     (e) => e.key === DEFAULT_PAYLOAD_KEY
   );
   const { data: completeMessage } = useChatMessagePayload({
@@ -972,7 +972,7 @@ const RenderBubble = memo(
     const hasPayloadandNoText =
       message?.fileMetadata.payloads?.length > 0 &&
       !content?.message &&
-      !message.fileMetadata.payloads?.some(
+      !message?.fileMetadata?.payloads?.some(
         (val) => val.contentType.startsWith('audio') || val.contentType.startsWith('application')
       );
 
