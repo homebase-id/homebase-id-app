@@ -3,6 +3,7 @@ import { PushNotification } from '@homebase-id/js-lib/core';
 import notifee, { AndroidVisibility } from '@notifee/react-native';
 import { bodyFormer } from '../../components/Dashboard/NotificationsOverview';
 import axios from 'axios';
+import logger from '../log/logger';
 
 //
 // CAVEATS GALORE!
@@ -84,6 +85,7 @@ const baseMessageParsing = async (
 
     return notification;
   } catch (error) {
+    logger.Error('Failed to parse notification message:', error);
     console.error('Failed to parse notification message:', error);
     return;
   }

@@ -1,4 +1,12 @@
-import { FlatList, ListRenderItemInfo, Platform, RefreshControl, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Dimensions,
+  FlatList,
+  ListRenderItemInfo,
+  Platform,
+  RefreshControl,
+  View,
+} from 'react-native';
 import ConversationTile from '../components/Chat/Conversation-tile';
 
 import {
@@ -27,14 +35,25 @@ import { SafeAreaView } from '../components/ui/SafeAreaView/SafeAreaView';
 import { OfflineState } from '../components/Platform/OfflineState';
 import { ConversationTileWithYourself } from '../components/Conversation/ConversationTileWithYourself';
 import { EmptyConversation } from '../components/Conversation/EmptyConversation';
-import Animated, { LinearTransition } from 'react-native-reanimated';
 import { SearchConversationResults } from '../components/Chat/SearchConversationsResults';
+import logger from '../provider/log/logger';
+import { useConversations } from '../hooks/chat/useConversations';
 
 type ConversationProp = NativeStackScreenProps<ChatStackParamList, 'Conversation'>;
 
 export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
-  const { data: conversations, isFetched: conversationsFetched } =
-    useConversationsWithRecentMessage().all;
+  const { isFetched: conversationsFetched, isLoading: conversationsFetching } =
+    useConversations().all;
+  const { data: conversations } = useConversationsWithRecentMessage().all;
+
+  const renderPageSize = useMemo(
+    () => Math.round((Dimensions.get('window').height / 80) * 1.5),
+    // 1.5 screens worth of data
+    []
+  );
+
+  logger.Log('[PERF-DEBUG] rendering conversations', conversations?.length);
+  console.log('[PERF-DEBUG] rendering conversations', conversations?.length);
 
   const [query, setQuery] = useState<string | undefined>(undefined);
   const { isDarkMode } = useDarkMode();
@@ -76,26 +95,33 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
 
   const renderItem = useCallback(
     ({ item }: ListRenderItemInfo<ConversationWithRecentMessage>) => {
+      if (!item) return <View />;
       const hasPayload = item.fileMetadata.payloads?.length > 0;
       return (
-        <ConversationTile
-          conversation={item.fileMetadata.appData.content}
-          conversationId={item.fileMetadata.appData.uniqueId}
-          fileId={item.fileId}
-          payloadKey={hasPayload ? item.fileMetadata.payloads[0].key : undefined}
-          onPress={onPress}
-          odinId={
-            item.fileMetadata.appData.content.recipients.filter(
-              (recipient) => recipient !== identity
-            )[0]
-          }
-        />
+        <ErrorBoundary>
+          <ConversationTile
+            conversation={item.fileMetadata.appData.content}
+            conversationId={item.fileMetadata.appData.uniqueId}
+            fileId={item.fileId}
+            payloadKey={hasPayload ? item.fileMetadata.payloads[0].key : undefined}
+            onPress={onPress}
+            odinId={
+              item.fileMetadata.appData.content.recipients.filter(
+                (recipient) => recipient !== identity
+              )[0]
+            }
+          />
+        </ErrorBoundary>
       );
     },
     [identity, onPress]
   );
 
-  const keyExtractor = useCallback((item: ConversationWithRecentMessage) => item.fileId, []);
+  const keyExtractor = useCallback(
+    (item: ConversationWithRecentMessage) =>
+      item?.fileId || item?.fileMetadata?.appData?.uniqueId || '',
+    []
+  );
 
   const [refreshing, setRefreshing] = useState(false);
   const doRefresh = useCallback(async () => {
@@ -113,12 +139,16 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
         });
       }
     });
+    console.log('[PERF-DEBUG] manual doRefresh');
+    logger.Log('[PERF-DEBUG] manual doRefresh');
+
     await queryClient.invalidateQueries({ queryKey: ['chat-messages'], exact: false });
     await queryClient.invalidateQueries({ queryKey: ['conversations'] });
     await queryClient.invalidateQueries({ queryKey: ['connections'] });
 
     setRefreshing(false);
   }, [queryClient]);
+
   const isQueryActive = useMemo(() => !!(query && query.length >= 1), [query]);
   if (isQueryActive) {
     return (
@@ -135,20 +165,26 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
         <FloatingActionButton />
         <OfflineState />
         {conversations && conversations?.length ? (
-          <Animated.FlatList
-            ref={scrollRef}
-            itemLayoutAnimation={LinearTransition}
-            data={conversations}
-            showsVerticalScrollIndicator={false}
-            keyExtractor={keyExtractor}
-            contentInsetAdjustmentBehavior="automatic"
-            ListHeaderComponent={<ConversationTileWithYourself />}
-            renderItem={renderItem}
-            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={doRefresh} />}
-          />
-        ) : (
+          <ErrorBoundary>
+            <FlatList
+              ref={scrollRef}
+              data={conversations.filter(Boolean)}
+              showsVerticalScrollIndicator={false}
+              keyExtractor={keyExtractor}
+              contentInsetAdjustmentBehavior="automatic"
+              ListHeaderComponent={<ConversationTileWithYourself />}
+              renderItem={renderItem}
+              refreshControl={<RefreshControl refreshing={refreshing} onRefresh={doRefresh} />}
+              initialNumToRender={renderPageSize}
+              maxToRenderPerBatch={renderPageSize}
+              windowSize={2}
+            />
+          </ErrorBoundary>
+        ) : conversationsFetched ? (
           <EmptyConversation conversationsFetched={conversationsFetched} />
-        )}
+        ) : conversationsFetching ? (
+          <ActivityIndicator />
+        ) : null}
       </SafeAreaView>
     </ErrorBoundary>
   );

@@ -39,7 +39,7 @@ export const usePushNotifications = () => {
       queryFn: ({ pageParam }) => getNotifications(pageParam),
       getNextPageParam: (lastPage) =>
         lastPage?.results && lastPage?.results?.length >= PAGE_SIZE ? lastPage.cursor : undefined,
-      staleTime: 1000 * 60 * 5, // 5 minutes
+      staleTime: 1000 * 60 * 60, // 1h
       // select: (data) => ({
       //   ...data,
       //   results: data.results.filter(

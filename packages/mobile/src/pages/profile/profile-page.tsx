@@ -3,6 +3,7 @@ import { useLayoutEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Platform,
   ScrollView,
   Share,
   StyleProp,
@@ -26,6 +27,7 @@ import {
   People,
   RecycleBin,
   Sun,
+  Trash,
 } from '../../components/ui/Icons/icons';
 import codePush from 'react-native-code-push';
 import { useAuth } from '../../hooks/auth/useAuth';
@@ -34,7 +36,7 @@ import { useAuthenticatedPushNotification } from '../../hooks/push-notification/
 
 import { ProfileInfo } from '../../components/Profile/ProfileInfo';
 import { t } from 'homebase-id-app-common';
-import { getLogs } from '../../provider/log/logger';
+import { clearLogs, getLogs, shareLogs } from '../../provider/log/logger';
 import Toast from 'react-native-toast-message';
 import { ListTile } from '../../components/ui/ListTile';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
@@ -56,22 +58,6 @@ export const ProfilePage = (_props: SettingsProps) => {
   const doLogout = async () => {
     await removeDeviceToken();
     return logout();
-  };
-
-  const onShareLogs = async () => {
-    setModalVisible(true);
-    // const path = await getLogs();
-    // if (!path) {
-    //   Toast.show({
-    //     type: 'info',
-    //     text1: 'No Logs recorded',
-    //     position: 'bottom',
-    //   });
-    //   return;
-    // }
-    // Share.share({
-    //   url: path,
-    // });
   };
 
   const onDeleteAccount = async () => {
@@ -142,7 +128,12 @@ export const ProfilePage = (_props: SettingsProps) => {
             {notficationRegistering ? <ActivityIndicator style={{ marginLeft: 'auto' }} /> : null}
           </TouchableOpacity> */}
           <ListTile title={t('Logout')} icon={Logout} onPress={doLogout} showLoader />
-          <ListTile title={t('Share Debug Logs')} icon={Gear} showLoader onPress={onShareLogs} />
+          <ListTile
+            title={t('Debug Logs')}
+            icon={Gear}
+            showLoader
+            onPress={() => setModalVisible(true)}
+          />
           <ListTile title={t('Delete my account')} icon={RecycleBin} onPress={onDeleteAccount} />
           <CheckForUpdates
             style={{
@@ -159,7 +150,7 @@ export const ProfilePage = (_props: SettingsProps) => {
           {/*<ListTile title={t('Debug')} icon={Gear} onPress={() => navigate('Debug')} /> */}
           <VersionInfo />
         </ScrollView>
-        <ShareLogsModal visible={modalVisible} onDismiss={() => setModalVisible(false)} />
+        <LogsModal visible={modalVisible} onDismiss={() => setModalVisible(false)} />
       </Container>
     </SafeAreaView>
   );
@@ -251,7 +242,7 @@ export const CheckForUpdates = ({
   );
 };
 
-const ShareLogsModal = ({ visible, onDismiss }: { visible: boolean; onDismiss: () => void }) => {
+const LogsModal = ({ visible, onDismiss }: { visible: boolean; onDismiss: () => void }) => {
   const ref = useRef<BottomSheetModalMethods>(null);
   const { isDarkMode } = useDarkMode();
   useLayoutEffect(() => {
@@ -261,8 +252,8 @@ const ShareLogsModal = ({ visible, onDismiss }: { visible: boolean; onDismiss: (
   }, [visible]);
 
   const onShareLogs = async () => {
-    const path = await getLogs();
-    if (!path) {
+    const shareContent = await shareLogs();
+    if (!shareContent) {
       Toast.show({
         type: 'info',
         text1: 'No Logs recorded',
@@ -270,9 +261,9 @@ const ShareLogsModal = ({ visible, onDismiss }: { visible: boolean; onDismiss: (
       });
       return;
     }
-    Share.share({
-      url: path,
-    });
+
+    await Share.share(shareContent);
+
     ref.current?.dismiss();
     onDismiss();
   };
@@ -294,6 +285,13 @@ const ShareLogsModal = ({ visible, onDismiss }: { visible: boolean; onDismiss: (
       text1: 'Logs copied to clipboard',
       position: 'bottom',
     });
+    ref.current?.dismiss();
+    onDismiss();
+  };
+
+  const emptyLogs = async () => {
+    await clearLogs();
+
     ref.current?.dismiss();
     onDismiss();
   };
@@ -351,6 +349,21 @@ const ShareLogsModal = ({ visible, onDismiss }: { visible: boolean; onDismiss: (
           showLoader
           icon={Copy}
           onPress={copyLogs}
+        />
+        <ListTile
+          style={{
+            backgroundColor: isDarkMode ? Colors.gray[800] : Colors.gray[200],
+            borderTopColor: isDarkMode ? Colors.gray[900] : Colors.gray[300],
+            borderTopWidth: 2,
+            borderEndStartRadius: 12,
+            borderEndEndRadius: 12,
+            paddingLeft: 16,
+            paddingRight: 16,
+          }}
+          title={t('Clear logs')}
+          showLoader
+          icon={Trash}
+          onPress={emptyLogs}
         />
       </BottomSheetView>
     </BottomSheetModal>

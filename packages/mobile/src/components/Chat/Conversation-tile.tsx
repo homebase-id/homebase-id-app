@@ -127,7 +127,7 @@ const ConversationTile = memo((props: ConversationTileProps) => {
                 : ((connectionDetails?.name?.displayName || connectionDetails?.name?.givenName) ?? (
                     <ConnectionName odinId={props.odinId} />
                   ))}
-              {props.isSelf ? <Text style={styles.you}>(you)</Text> : null}
+              {props.isSelf ? <Text style={styles.you}> (you)</Text> : null}
             </Text>
 
             {props.selectMode ? null : draftMessage ? (

@@ -25,7 +25,7 @@ export const useFollowerInfinite = ({ pageSize = 30 }: useFollowerInfiniteProps)
           : undefined,
       refetchOnMount: false,
       refetchOnWindowFocus: false,
-      staleTime: 1000 * 60 * 60 * 24 * 1,
+      staleTime: 1000 * 60 * 60 * 24 * 1, // 1 day
     }),
   };
 };

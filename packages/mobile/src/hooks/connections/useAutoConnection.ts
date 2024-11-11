@@ -1,13 +1,9 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useConnection } from './useConnection';
 import { AUTO_CONNECTIONS_CIRCLE_ID, ConnectionInfo } from '@homebase-id/js-lib/network';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 
-const TWO_MINUTES = 1000 * 60 * 2;
 export const useAutoConnection = ({ odinId }: { odinId?: string }) => {
-  const queryClient = useQueryClient();
-  const cachedData = queryClient.getQueryData<boolean>(['unconfirmed-connection', odinId]);
-
   const {
     fetch: { data: connectionInfo },
   } = useConnection({ odinId: odinId });

@@ -11,6 +11,10 @@ import com.facebook.soloader.SoLoader;
 import java.util.List;
 import com.microsoft.codepush.react.CodePush;
 
+import java.lang.reflect.Field;
+import android.database.CursorWindow;
+import android.util.Log;
+
 public class MainApplication extends Application implements ReactApplication {
 
   private final ReactNativeHost mReactNativeHost =
@@ -67,6 +71,19 @@ public class MainApplication extends Application implements ReactApplication {
       // If you opted-in for the New Architecture, we load the native entry point for this app.
       DefaultNewArchitectureEntryPoint.load();
     }
-    // ReactNativeFlipper.initializeFlipper(this, getReactNativeHost().getReactInstanceManager());
+
+    // Increased the windowSize to ensure AsyncStorage can load back the react query cache on startup;
+    // https://github.com/react-native-async-storage/async-storage/issues/537
+    try {
+      Field field = CursorWindow.class.getDeclaredField("sCursorWindowSize");
+      field.setAccessible(true);
+      field.set(null, 256 * 1024 * 1024); //500MB
+
+      Log.d("MainApplication", "CursorWindow size set to 500MB");
+    } catch (Exception e) {
+      if (BuildConfig.DEBUG) {
+        e.printStackTrace();
+      }
+    }
   }
 }

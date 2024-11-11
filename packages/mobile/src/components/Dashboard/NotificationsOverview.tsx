@@ -339,6 +339,8 @@ export const navigateOnNotification = (
       ].includes(notification.options.typeId)
     ) {
       return openURL(`https://${identity}/owner/connections/${notification.senderId}`);
+    } else if (notification.options.typeId === OWNER_INTRODUCTION_RECEIVED_TYPE_ID) {
+      return openURL(`https://${identity}/owner/connections`);
     }
   } else if (notification.options.appId === CHAT_APP_ID) {
     chatNavigator.navigate('ChatScreen', { convoId: notification.options.typeId });

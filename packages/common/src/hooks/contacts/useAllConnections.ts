@@ -1,4 +1,9 @@
-import { ContactFile, DotYouProfile, getConnections, getContactByOdinId } from '@homebase-id/js-lib/network';
+import {
+  ContactFile,
+  DotYouProfile,
+  getConnections,
+  getContactByOdinId,
+} from '@homebase-id/js-lib/network';
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
@@ -25,26 +30,32 @@ export const useAllConnections = (enabled: boolean) => {
 
     const allConnections = await internalGetConnections(undefined, CHUNKSIZE);
 
-    const getContactDataAndUpdateCache = async (connection: DotYouProfile) => {
-      const contact = await queryClient.fetchQuery({ queryKey: ["contact", connection.odinId], queryFn: () => getContactByOdinId(dotYouClient, connection.odinId) });
-      if (!contact) {
-        return;
-      }
+    const getContactDataAndUpdateCache = async (connection: DotYouProfile) =>
+      await queryClient.fetchQuery({
+        queryKey: ['contact', connection.odinId],
+        queryFn: () => getContactByOdinId(dotYouClient, connection.odinId),
+      });
 
-      return contact;
-    }
-    const allContactsData = (await Promise.all(allConnections.map(getContactDataAndUpdateCache))).filter(Boolean) as HomebaseFile<ContactFile>[];
-    return allContactsData.sort((contacta, contactB) => {
-
-      const a = contacta?.fileMetadata.appData.content;
-      const b = contactB?.fileMetadata.appData.content;
-      if (!a || !b) return 0;
-      return (a.name?.displayName || a.odinId || '').localeCompare(b.name?.displayName || b.odinId || '') || 0;
-    }).map((contact) => {
-      console.log('contact', contact.fileMetadata.appData.content);
-      return allConnections.find((connection) => connection.odinId === contact.fileMetadata.appData.content.odinId) as DotYouProfile;
-    });
-
+    const allContactsData = (
+      await Promise.all(allConnections.map(getContactDataAndUpdateCache))
+    ).filter(Boolean) as HomebaseFile<ContactFile>[];
+    return allContactsData
+      .sort((contacta, contactB) => {
+        const a = contacta?.fileMetadata.appData.content;
+        const b = contactB?.fileMetadata.appData.content;
+        if (!a || !b) return 0;
+        return (
+          (a.name?.displayName || a.odinId || '').localeCompare(
+            b.name?.displayName || b.odinId || ''
+          ) || 0
+        );
+      })
+      .map(
+        (contact) =>
+          allConnections.find(
+            (connection) => connection.odinId === contact.fileMetadata.appData.content.odinId
+          ) as DotYouProfile
+      );
   };
 
   // TODO: needs to get merged with useConnections
