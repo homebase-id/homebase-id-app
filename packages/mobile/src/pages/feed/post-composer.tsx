@@ -27,7 +27,7 @@ import { useCircles } from '../../hooks/circles/useCircles';
 import { ScrollView } from 'react-native-gesture-handler';
 import { Text } from '../../components/ui/Text/Text';
 import { ActionGroup } from '../../components/ui/Form/ActionGroup';
-import { openURL } from '../../utils/utils';
+import { getImageSize, openURL } from '../../utils/utils';
 import React from 'react';
 import Animated, { SlideInDown, SlideOutDown } from 'react-native-reanimated';
 import { FeedStackParamList } from '../../app/FeedStack';
@@ -35,6 +35,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { LinkPreviewBar } from '../../components/Chat/Link-Preview-Bar';
 import { LinkPreview } from '@homebase-id/js-lib/media';
 import { Backdrop } from '../../components/ui/Modal/Backdrop';
+import PasteInput, { PastedFile } from '@mattermost/react-native-paste-input';
 
 type PostComposerProps = NativeStackScreenProps<FeedStackParamList, 'Compose'>;
 
@@ -126,6 +127,33 @@ export const PostComposer = memo(({ navigation }: PostComposerProps) => {
 
   const canPost = caption?.length || assets?.length;
 
+  const onPaste = useCallback(
+    async (error: string | null | undefined, files: PastedFile[]) => {
+      if (error) {
+        console.error('Error while pasting:', error);
+        return;
+      }
+      const pastedItems: Asset[] = await Promise.all(
+        files
+          .map(async (file) => {
+            if (!file.type.startsWith('image')) return;
+            const { width, height } = await getImageSize(file.uri);
+            return {
+              uri: file.uri,
+              type: file.type,
+              fileName: file.fileName,
+              fileSize: file.fileSize,
+              height: height,
+              width: width,
+            } as Asset;
+          })
+          .filter(Boolean) as Promise<Asset>[]
+      );
+      setAssets(pastedItems);
+    },
+    [setAssets]
+  );
+
   return (
     <React.Fragment>
       <ErrorNotification error={error} />
@@ -193,7 +221,8 @@ export const PostComposer = memo(({ navigation }: PostComposerProps) => {
             borderRadius: 6,
           }}
         >
-          <TextInput
+          <PasteInput
+            onPaste={onPaste}
             placeholder="What's up?"
             style={{
               paddingVertical: 5,
