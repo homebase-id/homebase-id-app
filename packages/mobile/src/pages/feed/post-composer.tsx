@@ -437,17 +437,13 @@ const AclDialog = memo(
   ({
     title,
     isOpen,
-
     acl,
-
     onConfirm,
     onCancel,
   }: {
     title: string;
     isOpen: boolean;
-
     acl: AccessControlList;
-
     onConfirm: (acl: AccessControlList) => void;
     onCancel: (implicit?: boolean) => void;
   }) => {
