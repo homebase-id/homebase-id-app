@@ -116,8 +116,6 @@ const fetchMessages = async (
   conversationId: string,
   cursorState: string | undefined
 ) => {
-  logger.Log(`[PERF-DEBUG] fetching messages ${cursorState ? 'with cursor' : ''}`, conversationId);
-  console.log(`[PERF-DEBUG] fetching messages ${cursorState ? 'with cursor' : ''}`, conversationId);
   return await getChatMessages(
     dotYouClient,
     conversationId,

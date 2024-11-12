@@ -7,7 +7,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { getChatMessageInfiniteQueryOptions } from './useChatMessages';
 import { useFocusEffect } from '@react-navigation/native';
 import { useConversations } from './useConversations';
-import logger from '../../provider/log/logger';
 
 export type ConversationWithRecentMessage = HomebaseFile<UnifiedConversation> & {
   lastMessage: HomebaseFile<ChatMessage> | null;
@@ -32,9 +31,6 @@ export const useConversationsWithRecentMessage = () => {
     if (!flatConversations || !flatConversations || flatConversations.length === 0) {
       return;
     }
-
-    logger.Log('[PERF-DEBUG] building conversations with recent message');
-    console.log('[PERF-DEBUG] building conversations with recent message');
 
     const convoWithMessage: ConversationWithRecentMessage[] = await Promise.all(
       (flatConversations.filter(Boolean) as HomebaseFile<UnifiedConversation>[]).map(
@@ -84,8 +80,6 @@ export const useConversationsWithRecentMessage = () => {
     all: useQuery({
       queryKey: ['conversations-with-recent-message'],
       queryFn: () => {
-        logger.Log('[PERF-DEBUG] !! First time fetching conversations with recent message');
-        console.log('[PERF-DEBUG] !! First time fetching conversations with recent message');
         return [] as ConversationWithRecentMessage[];
       },
       staleTime: Infinity,
