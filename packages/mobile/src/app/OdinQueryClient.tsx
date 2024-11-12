@@ -5,7 +5,7 @@ import {
   PersistQueryClientOptions,
   PersistQueryClientProvider,
 } from '@tanstack/react-query-persist-client';
-import { ReactNode, useEffect, useMemo } from 'react';
+import { ReactNode, useMemo } from 'react';
 import {
   getSendChatMessageMutationOptions,
   getUpdateChatMessageMutationOptions,
@@ -15,8 +15,6 @@ import {
   getRemoveReactionMutationOptions,
 } from '../hooks/chat/useChatReaction';
 import { getSavePostMutationOptions } from '../hooks/feed/post/useManagePost';
-import { tryJsonParse } from '@homebase-id/js-lib/helpers';
-import logger from '../provider/log/logger';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -71,61 +69,6 @@ const INCLUDED_QUERY_KEYS = [
 ];
 
 export const OdinQueryClient = ({ children }: { children: ReactNode }) => {
-  useEffect(() => {
-    (async () => {
-      try {
-        const allKeys = await AsyncStorage.getAllKeys();
-        logger.Log('[PERF-DEBUG] allKeys', allKeys.join(', '));
-        console.log('[PERF-DEBUG] allKeys', allKeys.join(', '));
-
-        const cacheVal = await AsyncStorage.getItem('REACT_QUERY_OFFLINE_CACHE');
-        if (!cacheVal) {
-          logger.Log('[PERF-DEBUG] cacheVal is empty');
-          console.log('[PERF-DEBUG] cacheVal is empty');
-          return;
-        }
-
-        const parsedCacheVal = tryJsonParse<{
-          clientState: {
-            mutations: unknown[];
-            queries: {
-              queryKey: string[];
-              queryHash: string;
-              state: {
-                data: unknown;
-                error: unknown;
-                status: string;
-              };
-            }[];
-          };
-          timestamp: number;
-        }>(cacheVal);
-
-        logger.Log('[PERF-DEBUG] cache timestamp', parsedCacheVal.timestamp);
-        console.log('[PERF-DEBUG] cache timestamp', parsedCacheVal.timestamp);
-
-        const conversationQuery = parsedCacheVal.clientState.queries.find((query) =>
-          query.queryKey.includes('conversations-with-recent-message')
-        );
-        if (conversationQuery?.state?.data && Array.isArray(conversationQuery.state.data)) {
-          conversationQuery.state.data = `${conversationQuery.state.data.length}`;
-        }
-        logger.Log(
-          '[PERF-DEBUG] conversations',
-          conversationQuery?.state && JSON.stringify(conversationQuery.state)
-        );
-        console.log(
-          '[PERF-DEBUG] conversations',
-          conversationQuery?.state && JSON.stringify(conversationQuery.state)
-        );
-      } catch (error) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        logger.Error('[PERF-DEBUG] error fetching AsyncStorage state', (error as any)?.message);
-        console.log('[PERF-DEBUG] error fetching AsyncStorage state', error);
-      }
-    })();
-  });
-
   const persistOptions = useMemo(() => {
     const asyncPersist = createAsyncStoragePersister({
       storage: AsyncStorage,
