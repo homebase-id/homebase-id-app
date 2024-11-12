@@ -64,14 +64,13 @@ const SocialFeedMainContent = memo(() => {
     const post = flattenedPosts.find((post) =>
       stringGuidsEqual(post.fileMetadata.globalTransitId, params.postKey)
     );
-    if (post) {
-      const postContent = post.fileMetadata.appData.content;
-      navigation.navigate('Post', {
-        odinId: post.fileMetadata.senderOdinId,
-        postKey: postContent.slug || postContent.id,
-        channelKey: postContent.channelId,
-      });
-    }
+
+    const postContent = post?.fileMetadata.appData.content;
+    navigation.navigate('Post', {
+      odinId: post?.fileMetadata.senderOdinId,
+      postKey: postContent?.slug || postContent?.id || '',
+      channelKey: postContent?.channelId,
+    });
   }, [flattenedPosts, navigation, params]);
 
   const [refreshing, setRefreshing] = useState(false);
