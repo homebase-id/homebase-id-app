@@ -17,7 +17,6 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import TextButton from '../ui/Text/Text-Button';
-import { useAutoConnection } from '../../hooks/connections/useAutoConnection';
 
 export const ChatConnectedState = (conversation: HomebaseFile<UnifiedConversation> | undefined) => {
   const { isDarkMode } = useDarkMode();

@@ -36,7 +36,6 @@ import { OfflineState } from '../components/Platform/OfflineState';
 import { ConversationTileWithYourself } from '../components/Conversation/ConversationTileWithYourself';
 import { EmptyConversation } from '../components/Conversation/EmptyConversation';
 import { SearchConversationResults } from '../components/Chat/SearchConversationsResults';
-import logger from '../provider/log/logger';
 import { useConversations } from '../hooks/chat/useConversations';
 
 type ConversationProp = NativeStackScreenProps<ChatStackParamList, 'Conversation'>;
@@ -51,9 +50,6 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
     // 1.5 screens worth of data
     []
   );
-
-  logger.Log('[PERF-DEBUG] rendering conversations', conversations?.length);
-  console.log('[PERF-DEBUG] rendering conversations', conversations?.length);
 
   const [query, setQuery] = useState<string | undefined>(undefined);
   const { isDarkMode } = useDarkMode();
@@ -139,8 +135,6 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
         });
       }
     });
-    console.log('[PERF-DEBUG] manual doRefresh');
-    logger.Log('[PERF-DEBUG] manual doRefresh');
 
     await queryClient.invalidateQueries({ queryKey: ['chat-messages'], exact: false });
     await queryClient.invalidateQueries({ queryKey: ['conversations'] });
