@@ -22,7 +22,7 @@ import { Select, Option } from '../../components/ui/Form/Select';
 import { AclIcon, AclSummary } from '../../components/Feed/Composer/AclSummary';
 import { Colors } from '../../app/Colors';
 import { ImageSource } from '../../provider/image/RNImageProvider';
-import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
+import { BottomSheetModal, BottomSheetScrollView, BottomSheetView } from '@gorhom/bottom-sheet';
 import { useCircles } from '../../hooks/circles/useCircles';
 import { ScrollView } from 'react-native-gesture-handler';
 import { Text } from '../../components/ui/Text/Text';
@@ -511,7 +511,7 @@ const AclDialog = memo(
           elevation: 20,
         }}
       >
-        <BottomSheetView
+        <BottomSheetScrollView
           style={{
             paddingHorizontal: 16,
           }}
@@ -531,10 +531,8 @@ const AclDialog = memo(
               {title}
             </Text>
           </View>
-          <ScrollView>
-            <AclWizard acl={acl} onConfirm={onConfirm} onCancel={onCancel} />
-          </ScrollView>
-        </BottomSheetView>
+          <AclWizard acl={acl} onConfirm={onConfirm} onCancel={onCancel} />
+        </BottomSheetScrollView>
       </BottomSheetModal>
     );
   }
