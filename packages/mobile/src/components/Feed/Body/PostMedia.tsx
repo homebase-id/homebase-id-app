@@ -10,10 +10,11 @@ import { GestureType } from 'react-native-gesture-handler';
 
 type PostMediaProps = {
   post: HomebaseFile<PostContent>;
+  showPrimaryMedia?: boolean;
   gestureRefs?: React.RefObject<GestureType | undefined>[];
 };
 
-export const PostMedia = memo(({ post, gestureRefs }: PostMediaProps) => {
+export const PostMedia = memo(({ post, gestureRefs, showPrimaryMedia }: PostMediaProps) => {
   const payloads = post?.fileMetadata.payloads?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY);
   const fileId = post.fileId;
   const previewThumbnail = post.fileMetadata.appData.previewThumbnail;
@@ -22,9 +23,11 @@ export const PostMedia = memo(({ post, gestureRefs }: PostMediaProps) => {
   const { width, height } = Dimensions.get('screen');
   const hasContent = !!post.fileMetadata.appData.content.caption;
   const navigation = useNavigation<NavigationProp<FeedStackParamList>>();
+
   if (!payloads || payloads?.length === 0) return null;
-  if (payloads?.length === 1) {
+  if (payloads?.length === 1 || showPrimaryMedia) {
     const payload = payloads[0];
+    const previewThumbnail = post.fileMetadata.appData.previewThumbnail || payload.previewThumbnail;
     const aspectRatio = (previewThumbnail?.pixelWidth || 1) / (previewThumbnail?.pixelHeight || 1);
 
     const { width: newWidth, height: newHeight } = calculateScaledDimensions(

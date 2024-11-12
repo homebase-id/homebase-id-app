@@ -126,6 +126,7 @@ export const InnerPostTeaserCard = memo(
     const odinId = postFile.fileMetadata.senderOdinId;
     const authorOdinId = postFile.fileMetadata.originalAuthor || odinId;
     const navigation = useNavigation<NavigationProp<FeedStackParamList>>();
+    const showPrimaryMedia = !!post.primaryMediaFile;
     const viewStyle = useMemo(() => {
       return {
         padding: 10,
@@ -202,7 +203,11 @@ export const InnerPostTeaserCard = memo(
               payloads={postFile.fileMetadata.payloads}
             />
             <DoubleTapHeart doubleTapRef={doubleTapRef} postFile={postFile} odinId={odinId}>
-              <PostMedia post={postFile} gestureRefs={[doubleTapRef, singleTapRef]} />
+              <PostMedia
+                post={postFile}
+                gestureRefs={[doubleTapRef, singleTapRef]}
+                showPrimaryMedia={showPrimaryMedia}
+              />
             </DoubleTapHeart>
           </>
         </GestureDetector>

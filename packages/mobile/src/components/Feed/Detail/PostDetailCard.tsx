@@ -51,7 +51,7 @@ export const PostDetailCard = memo(
       channel?.serverMetadata?.accessControlList?.requiredSecurityGroup ===
         SecurityGroupType.Authenticated;
     const groupPost = authorOdinId !== (odinId || identity) && (odinId || identity) && authorOdinId;
-
+    const showPrimaryMedia = !!post.primaryMediaFile;
     const onPostActionPress = () => {
       onMorePress?.({
         odinId: odinId || postFile.fileMetadata.senderOdinId,
@@ -118,7 +118,11 @@ export const PostDetailCard = memo(
           postFile={postFile}
           odinId={postFile.fileMetadata.senderOdinId}
         >
-          <PostMedia post={postFile} gestureRefs={[doubleTapRef]} />
+          <PostMedia
+            post={postFile}
+            gestureRefs={[doubleTapRef]}
+            showPrimaryMedia={showPrimaryMedia}
+          />
         </DoubleTapHeart>
         <PostInteracts
           postFile={postFile}

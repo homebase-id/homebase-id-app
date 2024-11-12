@@ -63,7 +63,7 @@ const savePost = async ({
             },
           },
         };
-        return savePostFile(
+        return await savePostFile(
           dotYouClient,
           newPost,
           odinId,
@@ -76,7 +76,8 @@ const savePost = async ({
   postFile.fileMetadata.appData.content.captionAsRichText = getRichTextFromString(
     postFile.fileMetadata.appData.content.caption.trim()
   );
-  const uploadResult = savePostFile(
+
+  const uploadResult = await savePostFile(
     dotYouClient,
     postFile,
     odinId,
