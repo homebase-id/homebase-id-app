@@ -22,9 +22,8 @@ import { Select, Option } from '../../components/ui/Form/Select';
 import { AclIcon, AclSummary } from '../../components/Feed/Composer/AclSummary';
 import { Colors } from '../../app/Colors';
 import { ImageSource } from '../../provider/image/RNImageProvider';
-import { BottomSheetModal, BottomSheetScrollView, BottomSheetView } from '@gorhom/bottom-sheet';
+import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { useCircles } from '../../hooks/circles/useCircles';
-import { ScrollView } from 'react-native-gesture-handler';
 import { Text } from '../../components/ui/Text/Text';
 import { ActionGroup } from '../../components/ui/Form/ActionGroup';
 import { getImageSize, openURL } from '../../utils/utils';
@@ -711,8 +710,8 @@ const GroupOption = memo(
           backgroundColor: props.checked
             ? Colors.indigo[500]
             : isDarkMode
-              ? Colors.slate[700]
-              : Colors.slate[100],
+            ? Colors.slate[700]
+            : Colors.slate[100],
         }}
         onPress={() => props.onChange && props.onChange(props.value)}
       >
@@ -807,8 +806,8 @@ const CircleSelector = memo(
                   backgroundColor: isChecked
                     ? Colors.indigo[500]
                     : isDarkMode
-                      ? Colors.slate[700]
-                      : Colors.slate[100],
+                    ? Colors.slate[700]
+                    : Colors.slate[100],
                 }}
                 key={circle.id}
                 onPress={clickHandler}
