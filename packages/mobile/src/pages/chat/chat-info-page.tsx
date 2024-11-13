@@ -24,6 +24,7 @@ import { Avatar, GroupAvatar, OwnerAvatar } from '../../components/ui/Avatars/Av
 
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
+import TextButton from '../../components/ui/Text/Text-Button';
 
 export type ChatInfoProp = NativeStackScreenProps<ChatStackParamList, 'ChatInfo'>;
 
@@ -52,21 +53,21 @@ export const ChatInfoPage = memo((prop: ChatInfoProp) => {
     [isDarkMode, prop.navigation.goBack]
   );
 
-  // const headerRight = useCallback(
-  //   () =>
-  //     conversationContent && 'version' in conversationContent && conversationContent.version ? (
-  //       <TextButton
-  //         title="Edit"
-  //         unFilledStyle={{ marginRight: 8 }}
-  //         onPress={() => {
-  //           prop.navigation.navigate('EditGroup', {
-  //             convoId: conversationId,
-  //           });
-  //         }}
-  //       />
-  //     ) : null,
-  //   [conversationContent, conversationId, prop.navigation]
-  // );
+  const headerRight = useCallback(
+    () =>
+      conversationContent && 'version' in conversationContent && conversationContent.version ? (
+        <TextButton
+          title="Edit"
+          unFilledStyle={{ marginRight: 8 }}
+          onPress={() => {
+            prop.navigation.navigate('EditGroup', {
+              convoId: conversationId,
+            });
+          }}
+        />
+      ) : null,
+    [conversationContent, conversationId, prop.navigation]
+  );
 
   const headerStyle = useMemo(() => {
     return {
@@ -76,6 +77,7 @@ export const ChatInfoPage = memo((prop: ChatInfoProp) => {
   if (!conversation) return null;
 
   const data = [...(recipients as string[]), identity as string] as string[];
+  const isAdmin = conversation.fileMetadata.senderOdinId === identity;
 
   return (
     <View
@@ -86,7 +88,7 @@ export const ChatInfoPage = memo((prop: ChatInfoProp) => {
       <Header
         title={isGroup ? 'Group Info' : 'Chat Info'}
         headerLeft={headerLeft}
-        // headerRight={isGroup ? headerRight : undefined} //TODO: Enable this when we have figured out editing group conversations
+        headerRight={isGroup && isAdmin ? headerRight : undefined}
         headerStyle={headerStyle}
       />
 
@@ -238,11 +240,6 @@ const RenderListHeader = memo(
 
 const RenderRecipientTile = memo(({ recipient, isMe }: { recipient: string; isMe: boolean }) => {
   const { isDarkMode } = useDarkMode();
-  const colorStyle = useMemo(() => {
-    return {
-      color: isDarkMode ? Colors.white : Colors.black,
-    };
-  }, [isDarkMode]);
   return (
     <TouchableOpacity onPress={() => openURL(`https://${recipient}/`)}>
       <View
@@ -273,7 +270,7 @@ const RenderRecipientTile = memo(({ recipient, isMe }: { recipient: string; isMe
               fontWeight: '400',
               fontSize: 18,
               marginLeft: 12,
-              ...colorStyle,
+              color: isDarkMode ? Colors.white : Colors.black,
             },
           ]}
         >
