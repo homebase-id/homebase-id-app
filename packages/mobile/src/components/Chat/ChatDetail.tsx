@@ -704,7 +704,8 @@ export const ChatDetail = memo(
     );
 
     const onReplyMessagePressed = useCallback(
-      (message: HomebaseFile<ChatMessage>) => {
+      (message: HomebaseFile<ChatMessage> | null | undefined) => {
+        if (!message) return;
         const index = messages.findIndex(
           (m) => m._id === (message.fileMetadata.appData.uniqueId || message.fileId || '')
         );
@@ -1172,7 +1173,7 @@ const RenderBubble = memo(
 const RenderReplyMessageView = memo(
   (
     props: BubbleProps<ChatMessageIMessage> & {
-      onReplyPress: (message: HomebaseFile<ChatMessage>) => void;
+      onReplyPress: (message: HomebaseFile<ChatMessage> | null | undefined) => void;
     }
   ) => {
     const { data: replyMessage } = useChatMessage({
