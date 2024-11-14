@@ -370,7 +370,9 @@ export const navigateOnNotification = (
       screen: 'Posts',
     });
   } else if (notification.options.appId === COMMUNITY_APP_ID) {
-    return openURL(`https://${identity}/apps/community/${notification.options.typeId}`);
+    return openURL(
+      `https://${identity}/apps/community/redirect/${notification.options.typeId}/${notification.options.tagId}`
+    );
   } else {
     // You shouldn't come here
     return Toast.show({
