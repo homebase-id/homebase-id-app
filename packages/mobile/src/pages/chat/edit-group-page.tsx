@@ -26,7 +26,6 @@ import { SearchConversationWithSelectionResults } from '../../components/Chat/Se
 import { FlatList } from 'react-native-gesture-handler';
 import { ContactTile } from '../../components/Contact/Contact-Tile';
 import { IconButton } from '../../components/ui/Buttons';
-import { EmptyFeed } from '../../components/Feed/MainContent/EmptyFeed';
 
 export type EditGroupProp = NativeStackScreenProps<ChatStackParamList, 'EditGroup'>;
 
