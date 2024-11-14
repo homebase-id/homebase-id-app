@@ -49,12 +49,9 @@ export function EditGroupPage(props: EditGroupProp) {
     []
   );
 
-  const setContact = useCallback(
-    (newContact: string) => {
-      setNewRecipients([...newRecipients.filter((x) => x !== newContact), newContact]);
-    },
-    [newRecipients]
-  );
+  const setContact = useCallback((newContact: string) => {
+    setNewRecipients((currentRecipients) => [...currentRecipients, newContact]);
+  }, []);
 
   const recipients = conversationContent?.recipients.filter((recipient) => recipient !== identity);
 
