@@ -74,9 +74,20 @@ export const ChatInfoPage = memo((prop: ChatInfoProp) => {
       backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
     };
   }, [isDarkMode]);
+  const keyExtractor = useCallback((item: string) => item, []);
+  const data = useMemo(
+    () => [...(recipients as string[]), identity as string] as string[],
+    [recipients, identity]
+  );
+
+  const renderItem = useCallback(
+    ({ item, index }: { item: string; index: number }) => (
+      <RenderRecipientTile recipient={item} isMe={index === data.length} />
+    ),
+    [data]
+  );
   if (!conversation) return null;
 
-  const data = [...(recipients as string[]), identity as string] as string[];
   const isAdmin = conversation.fileMetadata.senderOdinId === identity;
 
   return (
@@ -101,10 +112,8 @@ export const ChatInfoPage = memo((prop: ChatInfoProp) => {
             conversation={conversation}
           />
         }
-        keyExtractor={(item) => item}
-        renderItem={({ item, index }) => (
-          <RenderRecipientTile recipient={item} isMe={index === data.length} />
-        )}
+        keyExtractor={keyExtractor}
+        renderItem={renderItem}
       />
     </View>
   );

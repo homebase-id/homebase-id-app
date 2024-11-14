@@ -43,6 +43,18 @@ export function EditGroupPage(props: EditGroupProp) {
   const { mutate: introduceIdentities } = useIntroductions().introduceIdentities;
 
   const [newRecipients, setNewRecipients] = useState<string[]>([]);
+  const onRemove = useCallback(
+    (odinId: string) =>
+      setNewRecipients((currentRecipients) => currentRecipients.filter((x) => x !== odinId)),
+    []
+  );
+
+  const setContact = useCallback(
+    (newContact: string) => {
+      setNewRecipients([...newRecipients.filter((x) => x !== newContact), newContact]);
+    },
+    [newRecipients]
+  );
 
   const recipients = conversationContent?.recipients.filter((recipient) => recipient !== identity);
 
@@ -122,6 +134,7 @@ export function EditGroupPage(props: EditGroupProp) {
   }, [conversationContent?.title, newRecipients.length, save, title, updateStatus]);
 
   const { isDarkMode } = useDarkMode();
+
   const headerColor = useMemo(
     () => (isDarkMode ? Colors.slate[900] : Colors.gray[50]),
     [isDarkMode]
@@ -217,16 +230,12 @@ export function EditGroupPage(props: EditGroupProp) {
             recipient={recipient}
             isMe={false}
             newRecipient={newRecipients.includes(recipient)}
-            onRemove={(odinId) => {
-              setNewRecipients(newRecipients.filter((x) => x !== odinId));
-            }}
+            onRemove={onRemove}
           />
         ))}
       </ScrollView>
       <ContactsBottomModal
-        addContact={(newContact) => {
-          setNewRecipients([...newRecipients.filter((x) => x !== newContact), newContact]);
-        }}
+        addContact={setContact}
         defaultValue={[...newRecipients, ...conversation.fileMetadata.appData.content.recipients]}
         visible={visible}
         onDismiss={() => setVisible(false)}
