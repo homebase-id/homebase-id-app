@@ -33,6 +33,8 @@ type ConversationTileProps = {
   fileId?: string;
   payloadKey?: string;
   previewThumbnail?: EmbeddedThumb;
+  conversationCreated: number;
+  conversationUpdated: number;
   odinId: string;
   conversationId?: string;
   selectMode?: boolean;
@@ -191,7 +193,13 @@ const ConversationTile = memo((props: ConversationTileProps) => {
                 display: 'flex',
               }}
             >
-              {lastMessage && <ChatSentTimeIndicator msg={lastMessage} keepDetail={false} />}
+              {
+                <ChatSentTimeIndicator
+                  msg={lastMessage}
+                  keepDetail={false}
+                  conversationLastUpdated={props.conversationUpdated}
+                />
+              }
               {unreadCount > 0 ? <UnreadCount count={unreadCount} /> : null}
             </View>
           )}

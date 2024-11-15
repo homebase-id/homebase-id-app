@@ -7,9 +7,20 @@ import { Colors } from '../../app/Colors';
 import { useDarkMode } from '../../hooks/useDarkMode';
 
 export const ChatSentTimeIndicator = memo(
-  ({ msg, keepDetail }: { msg: HomebaseFile<ChatMessage>; keepDetail?: boolean }) => {
+  ({
+    msg,
+    keepDetail,
+    conversationLastUpdated,
+  }: {
+    msg?: HomebaseFile<ChatMessage>;
+    keepDetail?: boolean;
+    conversationLastUpdated: number;
+  }) => {
     const { isDarkMode } = useDarkMode();
-    const date = useMemo(() => new Date(msg.fileMetadata.created), [msg.fileMetadata.created]);
+    const date = useMemo(
+      () => new Date(msg?.fileMetadata.created || conversationLastUpdated),
+      [msg, conversationLastUpdated]
+    );
     const [_, setStateIndex] = useState(0);
 
     useEffect(() => {
@@ -23,7 +34,6 @@ export const ChatSentTimeIndicator = memo(
       }
     }, [date]);
 
-    if (!msg.fileMetadata.created) return null;
     return (
       <Text style={{ fontSize: 12, color: isDarkMode ? Colors.slate[300] : Colors.slate[500] }}>
         {formatToTimeAgoWithRelativeDetail(date, keepDetail) || 'Unknown'}

@@ -48,9 +48,9 @@ export const useConversationsWithRecentMessage = () => {
     );
 
     convoWithMessage.sort((a, b) => {
-      if (!a.lastMessage) return -1;
-      if (!b.lastMessage) return 1;
-      return b.lastMessage.fileMetadata.created - a.lastMessage.fileMetadata.created;
+      // if (!a.lastMessage) return -1;
+      // if (!b.lastMessage) return 1;
+      return (b.lastMessage?.fileMetadata.created || b.fileMetadata.updated) - (a.lastMessage?.fileMetadata.created || a.fileMetadata.updated);
     });
 
     if (!convoWithMessage || !convoWithMessage.length) return;
