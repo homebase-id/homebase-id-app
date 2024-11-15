@@ -38,7 +38,6 @@ export interface dirtyReactionContext extends Omit<ReactionContext, 'target'> {
 
 export const Comment = memo(
   ({ context, canReact, commentData, onReply, isThread }: CommentProps) => {
-    //TODO: Support Edit Comments
     const [isEdit, setIsEdit] = useState(false);
     const {
       saveComment: { mutateAsync: postComment, error: postCommentError, status: postState },
