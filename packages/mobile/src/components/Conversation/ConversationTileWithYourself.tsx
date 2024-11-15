@@ -36,6 +36,8 @@ export const ConversationTileWithYourself = memo(
           recipients: [],
         }}
         conversationId={ConversationWithYourselfId}
+        conversationCreated={Date.now()}
+        conversationUpdated={Date.now()}
         isSelf
         isSelected={isSelected}
         selectMode={selectMode}

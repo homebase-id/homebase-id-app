@@ -128,19 +128,15 @@ const ShareModalListWrapper = memo(
         bottomSheetRef.current?.dismiss();
       }, []);
 
-      useImperativeHandle(
-        ref,
-        () => {
-          return {
-            setShareContext: (context: ShareContext) => {
-              setContext(context);
-              bottomSheetRef.current?.present();
-            },
-            dismiss: onClose,
-          };
-        },
-        [onClose]
-      );
+      useImperativeHandle(ref, () => {
+        return {
+          setShareContext: (context: ShareContext) => {
+            setContext(context);
+            bottomSheetRef.current?.present();
+          },
+          dismiss: onClose,
+        };
+      }, [onClose]);
 
       const renderFooter = useCallback(
         (props: BottomSheetFooterProps) => {
@@ -689,6 +685,8 @@ const ShareModalList = memo(
             <ConversationTile
               conversation={conversation.fileMetadata.appData.content}
               conversationId={conversation.fileMetadata.appData.uniqueId}
+              conversationCreated={conversation.fileMetadata.created}
+              conversationUpdated={conversation.fileMetadata.updated}
               selectMode
               isSelected={selectedConversation.includes(conversation)}
               onPress={() => onSelectConversation(conversation)}
