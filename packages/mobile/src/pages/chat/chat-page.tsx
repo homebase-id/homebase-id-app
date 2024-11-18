@@ -65,6 +65,7 @@ import { getImageSize } from '../../utils/utils';
 import { openURL } from '../../utils/utils';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ReportModal } from '../../components/Chat/Reactions/Modal/ReportModal';
+import { useIntroductions } from '../../hooks/introductions/useIntroductions';
 
 export type SelectedMessageState = {
   messageCordinates: { x: number; y: number };
@@ -253,6 +254,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
     status: sendMessageState,
     reset: resetState,
   } = useChatMessage().send;
+  const { mutate: introduceIdentities } = useIntroductions().introduceIdentities;
 
   useMarkMessagesAsRead({ conversation: conversation || undefined, messages });
 
@@ -292,6 +294,13 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
         if (anyRecipientMissingConversation) {
           console.log('invite recipient');
           inviteRecipient({ conversation });
+          if (filteredRecipients.length > 1) {
+            // Group chat; Good to introduce everyone
+            introduceIdentities({
+              message: t('{0} has added you to a group chat', identity || ''),
+              recipients: filteredRecipients,
+            });
+          }
         }
       }
 
@@ -315,6 +324,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
       linkPreviews,
       identity,
       inviteRecipient,
+      introduceIdentities,
     ]
   );
 

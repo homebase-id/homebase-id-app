@@ -82,7 +82,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import { TouchableHighlight } from 'react-native-gesture-handler';
+import { FlatList, TouchableHighlight } from 'react-native-gesture-handler';
 import { ParseShape } from 'react-native-gifted-chat/src/MessageText';
 import { MentionDropDown } from './Mention-Dropdown';
 import { LinkPreviewBar } from './Link-Preview-Bar';
@@ -146,11 +146,13 @@ export const ChatDetail = memo(
     const textRef = useRef<TextInput>(null);
 
     const [draftMessage, setdraftMessage] = useState<string | undefined>(initialMessage);
+    const messageContainerRef = useRef<FlatList<IMessage>>(null);
 
     const _doSend = useCallback(
       (message: ChatMessageIMessage[]) => {
         doSend(message);
         setdraftMessage(undefined);
+        messageContainerRef.current?.scrollToIndex({ index: 0, animated: true });
       },
       [doSend]
     );
@@ -701,9 +703,24 @@ export const ChatDetail = memo(
       [onLongPress]
     );
 
+    const onReplyMessagePressed = useCallback(
+      (message: HomebaseFile<ChatMessage> | null | undefined) => {
+        if (!message) return;
+        const index = messages.findIndex(
+          (m) => m._id === (message.fileMetadata.appData.uniqueId || message.fileId || '')
+        );
+        console.log('onReplyMessagePressed', index);
+        if (index === -1) return;
+        messageContainerRef.current?.scrollToIndex({ index, animated: true, viewPosition: 0.5 });
+      },
+      [messages]
+    );
+
     const renderCustomView = useCallback(
-      (prop: BubbleProps<ChatMessageIMessage>) => <RenderReplyMessageView {...prop} />,
-      []
+      (prop: BubbleProps<ChatMessageIMessage>) => (
+        <RenderReplyMessageView {...prop} onReplyPress={onReplyMessagePressed} />
+      ),
+      [onReplyMessagePressed]
     );
 
     const renderEmptyChat = useCallback(
@@ -714,6 +731,7 @@ export const ChatDetail = memo(
     return (
       <SafeAreaView>
         <GiftedChat<ChatMessageIMessage>
+          messageContainerRef={messageContainerRef}
           messages={messages}
           onSend={_doSend}
           locale={locale}
@@ -1152,96 +1170,104 @@ const RenderBubble = memo(
   }
 );
 
-const RenderReplyMessageView = memo((props: BubbleProps<ChatMessageIMessage>) => {
-  const { data: replyMessage } = useChatMessage({
-    conversationId: props.currentMessage?.fileMetadata.appData.groupId,
-    messageId: props.currentMessage?.fileMetadata.appData.content.replyId,
-  }).get;
-  const { isDarkMode } = useDarkMode();
+const RenderReplyMessageView = memo(
+  (
+    props: BubbleProps<ChatMessageIMessage> & {
+      onReplyPress: (message: HomebaseFile<ChatMessage> | null | undefined) => void;
+    }
+  ) => {
+    const { data: replyMessage } = useChatMessage({
+      conversationId: props.currentMessage?.fileMetadata.appData.groupId,
+      messageId: props.currentMessage?.fileMetadata.appData.content.replyId,
+    }).get;
+    const { isDarkMode } = useDarkMode();
 
-  if (!props.currentMessage?.fileMetadata.appData.content.replyId) return null;
-  const color = getOdinIdColor(replyMessage?.fileMetadata.senderOdinId || '');
+    if (!props.currentMessage?.fileMetadata.appData.content.replyId) return null;
+    const color = getOdinIdColor(replyMessage?.fileMetadata.senderOdinId || '');
 
-  return (
-    props.currentMessage &&
-    props.currentMessage.fileMetadata.appData.content.replyId && (
-      <View
-        style={[
-          chatStyles.replyMessageContainer,
-          {
-            borderLeftColor:
-              props.position === 'left' ? color.color(isDarkMode) : Colors.purple[500],
-            backgroundColor: `${Colors.indigo[500]}1A`,
-          },
-        ]}
-      >
-        <View style={chatStyles.replyText}>
-          {replyMessage ? (
-            <>
-              <Text
-                style={{
-                  fontWeight: '600',
-                  fontSize: 15,
-                  color: color.color(props.position === 'right' ? true : isDarkMode),
-                }}
-              >
-                {replyMessage?.fileMetadata.senderOdinId?.length > 0 ? (
-                  <ConnectionName odinId={replyMessage?.fileMetadata.senderOdinId} />
-                ) : (
-                  'You'
-                )}
-              </Text>
-              <Text
-                numberOfLines={3}
-                style={{
-                  fontSize: 14,
-                  marginTop: 4,
-                  color:
-                    props.position === 'right'
-                      ? Colors.slate[300]
-                      : isDarkMode
-                        ? Colors.slate[300]
-                        : Colors.slate[900],
-                }}
-              >
-                <ChatMessageContent {...replyMessage} />
-              </Text>
-            </>
-          ) : (
-            <Text
-              style={{
-                fontSize: 14,
-                fontStyle: 'italic',
-                color: isDarkMode ? Colors.slate[400] : Colors.slate[600],
-              }}
-            >
-              Message not found
-            </Text>
-          )}
-        </View>
-        {replyMessage &&
-          replyMessage.fileMetadata.payloads?.length > 0 &&
-          replyMessage.fileMetadata.payloads[0].contentType.startsWith('image') && (
-            <OdinImage
-              fileId={replyMessage.fileId}
-              targetDrive={ChatDrive}
-              fileKey={replyMessage.fileMetadata.payloads[0].key}
-              previewThumbnail={replyMessage.fileMetadata.appData.previewThumbnail}
-              avoidPayload={true}
-              enableZoom={false}
-              style={{
-                flex: 1,
-              }}
-              imageSize={{
-                width: 60,
-                height: 60,
-              }}
-            />
-          )}
-      </View>
-    )
-  );
-});
+    return (
+      props.currentMessage &&
+      props.currentMessage.fileMetadata.appData.content.replyId && (
+        <Pressable onPress={() => props.onReplyPress(replyMessage)}>
+          <View
+            style={[
+              chatStyles.replyMessageContainer,
+              {
+                borderLeftColor:
+                  props.position === 'left' ? color.color(isDarkMode) : Colors.purple[500],
+                backgroundColor: `${Colors.indigo[500]}1A`,
+              },
+            ]}
+          >
+            <View style={chatStyles.replyText}>
+              {replyMessage ? (
+                <>
+                  <Text
+                    style={{
+                      fontWeight: '600',
+                      fontSize: 15,
+                      color: color.color(props.position === 'right' ? true : isDarkMode),
+                    }}
+                  >
+                    {replyMessage?.fileMetadata.senderOdinId?.length > 0 ? (
+                      <ConnectionName odinId={replyMessage?.fileMetadata.senderOdinId} />
+                    ) : (
+                      'You'
+                    )}
+                  </Text>
+                  <Text
+                    numberOfLines={3}
+                    style={{
+                      fontSize: 14,
+                      marginTop: 4,
+                      color:
+                        props.position === 'right'
+                          ? Colors.slate[300]
+                          : isDarkMode
+                            ? Colors.slate[300]
+                            : Colors.slate[900],
+                    }}
+                  >
+                    <ChatMessageContent {...replyMessage} />
+                  </Text>
+                </>
+              ) : (
+                <Text
+                  style={{
+                    fontSize: 14,
+                    fontStyle: 'italic',
+                    color: isDarkMode ? Colors.slate[400] : Colors.slate[600],
+                  }}
+                >
+                  Message not found
+                </Text>
+              )}
+            </View>
+            {replyMessage &&
+              replyMessage.fileMetadata.payloads?.length > 0 &&
+              replyMessage.fileMetadata.payloads[0].contentType.startsWith('image') && (
+                <OdinImage
+                  fileId={replyMessage.fileId}
+                  targetDrive={ChatDrive}
+                  fileKey={replyMessage.fileMetadata.payloads[0].key}
+                  previewThumbnail={replyMessage.fileMetadata.appData.previewThumbnail}
+                  avoidPayload={true}
+                  enableZoom={false}
+                  style={{
+                    flex: 1,
+                  }}
+                  imageSize={{
+                    width: 60,
+                    height: 60,
+                  }}
+                />
+              )}
+          </View>
+        </Pressable>
+      )
+    );
+  }
+);
 
 export const chatStyles = StyleSheet.create({
   container: {
