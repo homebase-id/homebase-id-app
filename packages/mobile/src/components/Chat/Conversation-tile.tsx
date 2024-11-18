@@ -33,7 +33,7 @@ type ConversationTileProps = {
   fileId?: string;
   payloadKey?: string;
   previewThumbnail?: EmbeddedThumb;
-  conversationUpdated: number;
+  conversationUpdated: number; //TODO: Maybe useHooks instead of passing prop?
   odinId: string;
   conversationId?: string;
   selectMode?: boolean;
