@@ -58,11 +58,17 @@ export const useAudioRecorder = () => {
       setDuration(0);
 
       // throw new Error('Transcoding Error');
-      return transcodePath;
+      return {
+        path: transcodePath,
+        duration,
+      };
     }
     setIsRecording(false);
     setDuration(0);
-    return result;
+    return {
+      path: result,
+      duration,
+    };
   };
 
   const [isRecording, setIsRecording] = useState(false);

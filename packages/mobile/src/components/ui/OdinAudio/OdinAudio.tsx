@@ -8,6 +8,7 @@ import Slider from '@react-native-community/slider';
 import { Text } from '../Text/Text';
 import { millisToMinutesAndSeconds } from '../../../utils/utils';
 import { useAudio } from './hooks/useAudio';
+import { tryJsonParse } from '@homebase-id/js-lib/helpers';
 
 interface OdinAudioProps {
   fileId: string;
@@ -21,6 +22,11 @@ export const OdinAudio = memo((props: OdinAudioProps) => {
     payloadKey: props.payload.key,
     lastModified: props.payload.lastModified,
   }).fetch;
+  const { payload } = props;
+  const { duration: playableDuration } = tryJsonParse<{
+    duration?: number | null | undefined;
+    filename?: string | null | undefined;
+  }>(payload.descriptorContent || '{}');
 
   const { play, stop, playing, currDuration, duration } = useAudioPlayback(audioData?.url);
 
@@ -83,7 +89,7 @@ export const OdinAudio = memo((props: OdinAudioProps) => {
             marginLeft: 12,
           }}
         >
-          {millisToMinutesAndSeconds(duration || 0)}
+          {millisToMinutesAndSeconds(playableDuration || duration || 0)}
         </Text>
       </>
     </View>
