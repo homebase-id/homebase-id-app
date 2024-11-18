@@ -552,6 +552,7 @@ const InnerForwardListPage = memo(
               conversationId={conversation.fileMetadata.appData.uniqueId}
               selectMode
               isSelected={selectedConversation.includes(conversation)}
+              conversationUpdated={conversation.fileMetadata.updated}
               onPress={() => onSelectConversation(conversation)}
               odinId={conversation.fileMetadata.appData.content.recipients[0]}
               fileId={conversation.fileId}
