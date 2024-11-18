@@ -469,6 +469,7 @@ const InnerShareChatPage = memo(
             <ConversationTile
               conversation={conversation.fileMetadata.appData.content}
               conversationId={conversation.fileMetadata.appData.uniqueId}
+              conversationUpdated={conversation.fileMetadata.updated}
               selectMode
               isSelected={selectedConversation.includes(conversation)}
               onPress={() => onSelectConversation(conversation)}
