@@ -111,7 +111,7 @@ export const SearchConversationResults = memo(
                 key={item.fileId}
                 conversation={item.fileMetadata.appData.content}
                 conversationId={item.fileMetadata.appData.uniqueId}
-                conversationCreated={item.fileMetadata.created}
+
                 conversationUpdated={item.fileMetadata.updated}
                 onPress={onPress}
                 odinId={
@@ -296,7 +296,6 @@ export const SearchConversationWithSelectionResults = memo(
                     conversation.fileMetadata.appData.uniqueId ===
                     item.fileMetadata.appData.uniqueId
                 )}
-                conversationCreated={item.fileMetadata.created}
                 conversationUpdated={item.fileMetadata.updated}
                 onPress={() => onSelectConversation(item)}
                 odinId={

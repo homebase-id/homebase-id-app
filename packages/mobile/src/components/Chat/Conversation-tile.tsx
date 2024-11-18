@@ -33,7 +33,6 @@ type ConversationTileProps = {
   fileId?: string;
   payloadKey?: string;
   previewThumbnail?: EmbeddedThumb;
-  conversationCreated: number;
   conversationUpdated: number;
   odinId: string;
   conversationId?: string;

@@ -98,7 +98,6 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
           <ConversationTile
             conversation={item.fileMetadata.appData.content}
             conversationId={item.fileMetadata.appData.uniqueId}
-            conversationCreated={item.fileMetadata.created}
             conversationUpdated={item.fileMetadata.updated}
             fileId={item.fileId}
             payloadKey={hasPayload ? item.fileMetadata.payloads[0].key : undefined}
