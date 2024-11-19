@@ -276,11 +276,12 @@ export const ChatDetail = memo(
 
     const onStopRecording = useCallback(() => {
       requestAnimationFrame(async () => {
-        const audioPath = await stop();
+        const { path, duration } = await stop();
         const audio: ImageSource = {
-          uri: audioPath,
+          uri: path,
           type: 'audio/mp3',
           filename: 'recording',
+          playableDuration: duration,
           fileSize: 0,
           height: 0,
           width: 0,
