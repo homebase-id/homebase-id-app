@@ -51,7 +51,7 @@ export const PostDetailCard = memo(
       channel?.serverMetadata?.accessControlList?.requiredSecurityGroup ===
         SecurityGroupType.Authenticated;
     const groupPost = authorOdinId !== (odinId || identity) && (odinId || identity) && authorOdinId;
-    const showPrimaryMedia = !!post.primaryMediaFile;
+    const showPrimaryMedia = post.primaryMediaFile && post.type === 'Article';
     const onPostActionPress = () => {
       onMorePress?.({
         odinId: odinId || postFile.fileMetadata.senderOdinId,
