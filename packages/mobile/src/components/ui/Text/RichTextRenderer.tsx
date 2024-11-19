@@ -1,10 +1,10 @@
 import { PayloadDescriptor, RichText, TargetDrive } from '@homebase-id/js-lib/core';
 import React, { memo, ReactNode, useCallback } from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { highlightQuery } from './HighlightQuery';
 import { OdinImage } from '../OdinImage/OdinImage';
 import { AuthorName } from '../Name';
-import { openURL } from '../../../utils/utils';
+import { calculateScaledDimensions, openURL } from '../../../utils/utils';
 import { Text } from './Text';
 import { useDarkMode } from '../../../hooks/useDarkMode';
 import { Colors } from '../../../app/Colors';
@@ -32,7 +32,6 @@ export const RichTextRenderer = memo(
     ) => ReactNode;
   }) => {
     const { isDarkMode } = useDarkMode();
-
     const renderLeaf = useCallback(
       (
         leaf: {
@@ -148,19 +147,35 @@ export const RichTextRenderer = memo(
               const matchingPreviewThumbnail = options.previewThumbnails?.find(
                 (payload) => payload.key === attributes.fileKey
               )?.previewThumbnail;
+              const { width, height } = Dimensions.get('screen');
+              const aspectRatio =
+                (matchingPreviewThumbnail?.pixelWidth || 1) /
+                (matchingPreviewThumbnail?.pixelHeight || 1);
+
+              const { width: newWidth, height: newHeight } = calculateScaledDimensions(
+                matchingPreviewThumbnail?.pixelWidth || 300,
+                matchingPreviewThumbnail?.pixelHeight || 300,
+                { width: width * 0.9, height: height * 0.9 }
+              );
 
               return (
-                <View style={matchingPreviewThumbnail ? {} : styles.imagePlaceholder}>
-                  <OdinImage
-                    targetDrive={options.imageDrive}
-                    fileId={(attributes.fileId as string) || options.defaultFileId}
-                    globalTransitId={attributes.fileId ? undefined : options.defaultGlobalTransitId}
-                    lastModified={options.lastModified}
-                    fileKey={attributes.fileKey as string}
-                    previewThumbnail={matchingPreviewThumbnail}
-                    odinId={odinId}
-                  />
-                </View>
+                <OdinImage
+                  targetDrive={options.imageDrive}
+                  fileId={(attributes.fileId as string) || options.defaultFileId}
+                  globalTransitId={attributes.fileId ? undefined : options.defaultGlobalTransitId}
+                  lastModified={options.lastModified}
+                  fileKey={attributes.fileKey as string}
+                  previewThumbnail={matchingPreviewThumbnail}
+                  imageSize={{
+                    width: newWidth,
+                    height: newHeight,
+                  }}
+                  fit={'cover'}
+                  style={{
+                    aspectRatio,
+                  }}
+                  odinId={odinId}
+                />
               );
             }
             return null;
@@ -310,11 +325,6 @@ const styles = StyleSheet.create({
   },
   link: {
     textDecorationLine: 'underline',
-  },
-  imagePlaceholder: {
-    width: '100%',
-    aspectRatio: 1,
-    maxWidth: 300,
   },
   actionLink: {
     marginBottom: 10,

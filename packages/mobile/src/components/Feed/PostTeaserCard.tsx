@@ -126,7 +126,7 @@ export const InnerPostTeaserCard = memo(
     const odinId = postFile.fileMetadata.senderOdinId;
     const authorOdinId = postFile.fileMetadata.originalAuthor || odinId;
     const navigation = useNavigation<NavigationProp<FeedStackParamList>>();
-    const showPrimaryMedia = !!post.primaryMediaFile;
+    const showPrimaryMedia = post.primaryMediaFile && post.type === 'Article';
     const viewStyle = useMemo(() => {
       return {
         padding: 10,
