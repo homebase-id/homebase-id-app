@@ -278,7 +278,9 @@ const LogsModal = ({ visible, onDismiss }: { visible: boolean; onDismiss: () => 
       return;
     }
     const fileData = await readFile(path);
-    Clipboard.setString(fileData);
+    // convert fileData to array of strings. get the last 1000 lines
+    const data = fileData.split('\n').slice(-1000).join('\n');
+    Clipboard.setString(data);
     Toast.show({
       type: 'success',
       text1: 'Logs copied to clipboard',

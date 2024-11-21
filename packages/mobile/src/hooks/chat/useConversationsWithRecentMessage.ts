@@ -21,9 +21,7 @@ export const useConversationsWithRecentMessage = () => {
     () =>
       (conversations?.pages
         ?.flatMap((page) => page?.searchResults)
-        .filter(
-          (convo) => convo && [0, undefined].includes(convo.fileMetadata.appData.archivalStatus)
-        ) as ConversationWithRecentMessage[]) || [],
+        .filter((Boolean)) as ConversationWithRecentMessage[]) || [],
     [conversations]
   );
 
@@ -60,20 +58,24 @@ export const useConversationsWithRecentMessage = () => {
   }, [flatConversations, dotYouClient, queryClient]);
 
   const { lastUpdate } = useLastUpdatedChatMessages();
+  const { lastConversationUpdate } = useLastUpdatedConversations();
   useEffect(() => {
-    if (lastUpdate === null) return;
+    if (lastUpdate === null || lastConversationUpdate === null) return;
+
 
     const currentCacheUpdate = queryClient.getQueryState(['conversations-with-recent-message']);
     if (
       currentCacheUpdate?.dataUpdatedAt &&
-      lastUpdate !== 0 &&
-      lastUpdate <= currentCacheUpdate?.dataUpdatedAt
+      (lastUpdate !== 0 &&
+        lastUpdate <= currentCacheUpdate?.dataUpdatedAt) &&
+      (lastConversationUpdate !== 0 &&
+        lastConversationUpdate <= currentCacheUpdate?.dataUpdatedAt)
     ) {
       return;
     }
 
     buildConversationsWithRecent();
-  }, [lastUpdate, buildConversationsWithRecent, queryClient]);
+  }, [lastUpdate, buildConversationsWithRecent, queryClient, lastConversationUpdate]);
 
   return {
     // We only setup a cache entry that we will fill up with the setQueryData later; So we can cache the data for offline and faster startup;
@@ -118,3 +120,26 @@ const useLastUpdatedChatMessages = () => {
     lastUpdate,
   };
 };
+
+const useLastUpdatedConversations = () => {
+  const queryClient = useQueryClient();
+  const [lastUpdate, setLastUpdate] = useState<number | null>(null);
+
+  useFocusEffect(() => {
+    const lastUpdate = queryClient
+      .getQueryCache()
+      .find({ queryKey: ['conversations'], exact: true })?.state.dataUpdatedAt;
+
+
+    if (!lastUpdate) {
+      return;
+    }
+
+    setLastUpdate(lastUpdate);
+  });
+
+  return {
+    lastConversationUpdate: lastUpdate,
+  };
+};
+

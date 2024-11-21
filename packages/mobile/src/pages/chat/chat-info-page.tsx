@@ -41,16 +41,22 @@ export const ChatInfoPage = memo((prop: ChatInfoProp) => {
 
   const isGroup = recipients && recipients.length > 1;
 
+  const goBack = useCallback(() => {
+    return requestAnimationFrame(() => {
+      prop.navigation.goBack();
+    });
+  }, [prop.navigation]);
+
   const headerLeft = useCallback(
     () => (
       <HeaderBackButton
         canGoBack={true}
         labelVisible={false}
-        onPress={prop.navigation.goBack}
+        onPress={goBack}
         tintColor={isDarkMode ? Colors.white : Colors.black}
       />
     ),
-    [isDarkMode, prop.navigation.goBack]
+    [goBack, isDarkMode]
   );
 
   const headerRight = useCallback(
