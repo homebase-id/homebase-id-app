@@ -126,23 +126,16 @@ const useLastUpdatedConversations = () => {
   const [lastUpdate, setLastUpdate] = useState<number | null>(null);
 
   useFocusEffect(() => {
-    const lastUpdates = queryClient
+    const lastUpdate = queryClient
       .getQueryCache()
-      .findAll({ queryKey: ['conversations'], exact: false })
-      .map((query) => query.state.dataUpdatedAt);
+      .find({ queryKey: ['conversations'], exact: true })?.state.dataUpdatedAt;
 
-    if (!lastUpdates || !lastUpdates.length) {
+
+    if (!lastUpdate) {
       return;
     }
 
-    const newLastUpdate = lastUpdates.reduce((acc, val) => {
-      if (val > acc) {
-        return val;
-      }
-
-      return acc;
-    }, 0);
-    setLastUpdate(newLastUpdate);
+    setLastUpdate(lastUpdate);
   });
 
   return {
