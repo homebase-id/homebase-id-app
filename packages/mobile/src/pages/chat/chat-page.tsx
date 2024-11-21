@@ -181,15 +181,15 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
     [loadedPages, messages]
   );
 
-  // Conversation & Contact
-  const { data: conversation, isLoading: isLoadingConversation } = useConversation({
-    conversationId: route.params.convoId,
-  }).single;
-
   const {
+    single: { data: conversation, isLoading: isLoadingConversation },
     clearChat: { mutate: clearChat, error: clearChatError },
     deleteChat: { mutate: deleteChat, error: deleteChatError },
-  } = useConversation();
+    inviteRecipient: { mutateAsync: inviteRecipient },
+    update: { mutate: updateArchivalStatus },
+  } = useConversation({
+    conversationId: route.params.convoId,
+  });
 
   const filteredRecipients = conversation?.fileMetadata.appData.content.recipients.filter(
     (recipient) => recipient !== identity
@@ -257,8 +257,6 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
   const { mutate: introduceIdentities } = useIntroductions().introduceIdentities;
 
   useMarkMessagesAsRead({ conversation: conversation || undefined, messages });
-
-  const { mutateAsync: inviteRecipient } = useConversation().inviteRecipient;
 
   const [linkPreviews, setLinkPreviews] = useState<LinkPreview | null>(null);
   const onDismissLinkPreview = useCallback(() => {
@@ -508,6 +506,34 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
     () =>
       [
         {
+          label:
+            conversation?.fileMetadata.appData.archivalStatus === 3
+              ? 'Unarchive Chat'
+              : 'Archive Chat',
+          onPress: () => {
+            if (!conversation) return;
+            updateArchivalStatus({
+              distribute: false,
+              conversation: {
+                ...conversation,
+                fileMetadata: {
+                  ...conversation.fileMetadata,
+                  appData: {
+                    ...conversation.fileMetadata.appData,
+                    archivalStatus: conversation.fileMetadata.appData.archivalStatus === 3 ? 1 : 3,
+                  },
+                },
+              },
+            });
+            navigation.navigate('Conversation');
+            Toast.show({
+              type: 'success',
+              text1: 'Chat archived',
+              position: 'bottom',
+            });
+          },
+        },
+        {
           label: 'Clear Chat',
           onPress: () => {
             if (!conversation) return;
@@ -583,6 +609,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
       isGroupChat,
       navigation,
       route.params.convoId,
+      updateArchivalStatus,
     ]
   );
 
