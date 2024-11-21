@@ -527,6 +527,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
               },
             });
             if ([0, undefined].includes(archivalStatus)) navigation.navigate('Conversation');
+
             Toast.show({
               type: 'success',
               text1: `Chat ${archivalStatus === 3 ? 'unarchived' : 'archived'}`,

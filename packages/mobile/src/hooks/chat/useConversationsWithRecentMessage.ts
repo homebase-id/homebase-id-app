@@ -58,20 +58,24 @@ export const useConversationsWithRecentMessage = () => {
   }, [flatConversations, dotYouClient, queryClient]);
 
   const { lastUpdate } = useLastUpdatedChatMessages();
+  const { lastConversationUpdate } = useLastUpdatedConversations();
   useEffect(() => {
-    if (lastUpdate === null) return;
+    if (lastUpdate === null || lastConversationUpdate === null) return;
+
 
     const currentCacheUpdate = queryClient.getQueryState(['conversations-with-recent-message']);
     if (
       currentCacheUpdate?.dataUpdatedAt &&
-      lastUpdate !== 0 &&
-      lastUpdate <= currentCacheUpdate?.dataUpdatedAt
+      (lastUpdate !== 0 &&
+        lastUpdate <= currentCacheUpdate?.dataUpdatedAt) &&
+      (lastConversationUpdate !== 0 &&
+        lastConversationUpdate <= currentCacheUpdate?.dataUpdatedAt)
     ) {
       return;
     }
 
     buildConversationsWithRecent();
-  }, [lastUpdate, buildConversationsWithRecent, queryClient]);
+  }, [lastUpdate, buildConversationsWithRecent, queryClient, lastConversationUpdate]);
 
   return {
     // We only setup a cache entry that we will fill up with the setQueryData later; So we can cache the data for offline and faster startup;
@@ -116,3 +120,33 @@ const useLastUpdatedChatMessages = () => {
     lastUpdate,
   };
 };
+
+const useLastUpdatedConversations = () => {
+  const queryClient = useQueryClient();
+  const [lastUpdate, setLastUpdate] = useState<number | null>(null);
+
+  useFocusEffect(() => {
+    const lastUpdates = queryClient
+      .getQueryCache()
+      .findAll({ queryKey: ['conversations'], exact: false })
+      .map((query) => query.state.dataUpdatedAt);
+
+    if (!lastUpdates || !lastUpdates.length) {
+      return;
+    }
+
+    const newLastUpdate = lastUpdates.reduce((acc, val) => {
+      if (val > acc) {
+        return val;
+      }
+
+      return acc;
+    }, 0);
+    setLastUpdate(newLastUpdate);
+  });
+
+  return {
+    lastConversationUpdate: lastUpdate,
+  };
+};
+
