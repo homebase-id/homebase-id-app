@@ -21,9 +21,7 @@ export const useConversationsWithRecentMessage = () => {
     () =>
       (conversations?.pages
         ?.flatMap((page) => page?.searchResults)
-        .filter(
-          (convo) => convo && [0, undefined].includes(convo.fileMetadata.appData.archivalStatus)
-        ) as ConversationWithRecentMessage[]) || [],
+        .filter((Boolean)) as ConversationWithRecentMessage[]) || [],
     [conversations]
   );
 

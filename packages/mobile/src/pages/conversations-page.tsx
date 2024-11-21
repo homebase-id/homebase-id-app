@@ -29,7 +29,7 @@ import { useDarkMode } from '../hooks/useDarkMode';
 import { CHAT_APP_ID } from '../app/constants';
 import { ErrorBoundary } from '../components/ui/ErrorBoundary/ErrorBoundary';
 import { InfiniteData, useQueryClient } from '@tanstack/react-query';
-import { Pencil } from '../components/ui/Icons/icons';
+import { Archive, Pencil } from '../components/ui/Icons/icons';
 import { TouchableOpacity } from '@gorhom/bottom-sheet';
 import { SafeAreaView } from '../components/ui/SafeAreaView/SafeAreaView';
 import { OfflineState } from '../components/Platform/OfflineState';
@@ -37,6 +37,7 @@ import { ConversationTileWithYourself } from '../components/Conversation/Convers
 import { EmptyConversation } from '../components/Conversation/EmptyConversation';
 import { SearchConversationResults } from '../components/Chat/SearchConversationsResults';
 import { useConversations } from '../hooks/chat/useConversations';
+import { ListTile } from '../components/ui/ListTile';
 
 type ConversationProp = NativeStackScreenProps<ChatStackParamList, 'Conversation'>;
 
@@ -44,6 +45,17 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
   const { isFetched: conversationsFetched, isLoading: conversationsFetching } =
     useConversations().all;
   const { data: conversations } = useConversationsWithRecentMessage().all;
+
+  const filteredConversations = useMemo(
+    () =>
+      conversations?.filter((convo) =>
+        [0, undefined].includes(convo.fileMetadata.appData.archivalStatus)
+      ),
+    [conversations]
+  );
+
+  const hasArchivedConversations =
+    conversations?.some((convo) => convo.fileMetadata.appData.archivalStatus === 3) || false;
 
   const renderPageSize = useMemo(
     () => Math.round((Dimensions.get('window').height / 80) * 1.5),
@@ -145,6 +157,27 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
   }, [queryClient]);
 
   const isQueryActive = useMemo(() => !!(query && query.length >= 1), [query]);
+
+  const renderHeader = useCallback(() => {
+    return (
+      <>
+        {hasArchivedConversations && (
+          <ListTile
+            style={{
+              padding: 24,
+              flexDirection: 'row',
+              borderRadius: 5,
+            }}
+            icon={Archive}
+            title="Archived Conversations"
+            onPress={() => {}}
+          />
+        )}
+        <ConversationTileWithYourself />
+      </>
+    );
+  }, [hasArchivedConversations]);
+
   if (isQueryActive) {
     return (
       <ErrorBoundary>
@@ -163,11 +196,11 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
           <ErrorBoundary>
             <FlatList
               ref={scrollRef}
-              data={conversations.filter(Boolean)}
+              data={filteredConversations}
               showsVerticalScrollIndicator={false}
               keyExtractor={keyExtractor}
               contentInsetAdjustmentBehavior="automatic"
-              ListHeaderComponent={<ConversationTileWithYourself />}
+              ListHeaderComponent={renderHeader}
               renderItem={renderItem}
               refreshControl={<RefreshControl refreshing={refreshing} onRefresh={doRefresh} />}
               initialNumToRender={renderPageSize}
