@@ -512,6 +512,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
               : 'Archive Chat',
           onPress: () => {
             if (!conversation) return;
+            const archivalStatus = conversation.fileMetadata.appData.archivalStatus;
             updateArchivalStatus({
               distribute: false,
               conversation: {
@@ -520,15 +521,15 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
                   ...conversation.fileMetadata,
                   appData: {
                     ...conversation.fileMetadata.appData,
-                    archivalStatus: conversation.fileMetadata.appData.archivalStatus === 3 ? 1 : 3,
+                    archivalStatus: archivalStatus === 3 ? 0 : 3,
                   },
                 },
               },
             });
-            navigation.navigate('Conversation');
+            if ([0, undefined].includes(archivalStatus)) navigation.navigate('Conversation');
             Toast.show({
               type: 'success',
-              text1: 'Chat archived',
+              text1: `Chat ${archivalStatus === 3 ? 'unarchived' : 'archived'}`,
               position: 'bottom',
             });
           },

@@ -49,7 +49,7 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
   const filteredConversations = useMemo(
     () =>
       conversations?.filter((convo) =>
-        [0, undefined].includes(convo.fileMetadata.appData.archivalStatus)
+        [0, 1, undefined].includes(convo.fileMetadata.appData.archivalStatus)
       ),
     [conversations]
   );
@@ -170,13 +170,13 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
             }}
             icon={Archive}
             title="Archived Conversations"
-            onPress={() => {}}
+            onPress={() => navigation.navigate('Archived')}
           />
         )}
         <ConversationTileWithYourself />
       </>
     );
-  }, [hasArchivedConversations]);
+  }, [hasArchivedConversations, navigation]);
 
   if (isQueryActive) {
     return (
