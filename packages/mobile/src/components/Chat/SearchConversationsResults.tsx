@@ -18,9 +18,11 @@ export const SearchConversationResults = memo(
   ({
     query,
     conversations,
+    afterSelect,
   }: {
     query: string | undefined;
     conversations: ConversationWithRecentMessage[];
+    afterSelect?: () => void;
   }) => {
     const isActive = useMemo(() => !!(query && query.length >= 1), [query]);
     const { data: contacts } = useAllContacts(isActive);
@@ -82,8 +84,11 @@ export const SearchConversationResults = memo(
         navigation.navigate('ChatScreen', {
           convoId: convoId,
         });
+        setTimeout(() => {
+          afterSelect?.();
+        }, 1500);
       },
-      [navigation]
+      [afterSelect, navigation]
     );
 
     if (!isActive) return null;
@@ -111,7 +116,6 @@ export const SearchConversationResults = memo(
                 key={item.fileId}
                 conversation={item.fileMetadata.appData.content}
                 conversationId={item.fileMetadata.appData.uniqueId}
-
                 conversationUpdated={item.fileMetadata.updated}
                 onPress={onPress}
                 odinId={
