@@ -7,7 +7,7 @@ import { useAllConnections } from 'homebase-id-app-common';
 import { ChatStackParamList, NewChatStackParamList } from '../../app/ChatStack';
 import { ContactTile, Tile } from '../../components/Contact/Contact-Tile';
 import { Users } from '../../components/ui/Icons/icons';
-import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { DotYouProfile } from '@homebase-id/js-lib/network';
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 import { NoContacts } from '../../components/Contact/NoContacts';
@@ -16,6 +16,7 @@ import { Colors } from '../../app/Colors';
 import { ErrorBoundary } from '../../components/ui/ErrorBoundary/ErrorBoundary';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { SearchConversationResults } from '../../components/Chat/SearchConversationsResults';
+import { SearchBarCommands } from 'react-native-screens';
 
 const ListHeaderComponent = memo(() => {
   const navigation = useNavigation<NavigationProp<NewChatStackParamList>>();
@@ -45,10 +46,12 @@ export const ContactPage = memo(({ navigation }: ContactPageProp) => {
       setRefreshing(false);
     }
   }, [status]);
+  const searchRef = useRef<SearchBarCommands>(null);
 
   useLayoutEffect(() => {
     navigation.setOptions({
       headerSearchBarOptions: {
+        ref: searchRef,
         hideWhenScrolling: false,
         headerIconColor: isDarkMode ? Colors.white : Colors.black,
         placeholder: 'Search contacts',
@@ -85,12 +88,17 @@ export const ContactPage = memo(({ navigation }: ContactPageProp) => {
   );
   const isQueryActive = useMemo(() => !!(query && query.length >= 1), [query]);
 
+  const afterSelect = useCallback(() => {
+    searchRef.current?.cancelSearch();
+    setQuery(undefined);
+  }, []);
+
   if (!connections) return null;
 
   if (isQueryActive) {
     return (
       <ErrorBoundary>
-        <SearchConversationResults query={query} conversations={[]} />
+        <SearchConversationResults query={query} conversations={[]} afterSelect={afterSelect} />
       </ErrorBoundary>
     );
   }

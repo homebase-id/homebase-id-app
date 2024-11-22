@@ -38,6 +38,7 @@ import { EmptyConversation } from '../components/Conversation/EmptyConversation'
 import { SearchConversationResults } from '../components/Chat/SearchConversationsResults';
 import { useConversations } from '../hooks/chat/useConversations';
 import { ListTile } from '../components/ui/ListTile';
+import { SearchBarCommands } from 'react-native-screens';
 
 type ConversationProp = NativeStackScreenProps<ChatStackParamList, 'Conversation'>;
 
@@ -70,10 +71,12 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
 
   const scrollRef = useRef<FlatList<ConversationWithRecentMessage>>(null);
   useScrollToTop(scrollRef);
+  const searchRef = useRef<SearchBarCommands>(null);
 
   useLayoutEffect(() => {
     navigation.setOptions({
       headerSearchBarOptions: {
+        ref: searchRef,
         hideWhenScrolling: true,
         headerIconColor: isDarkMode ? Colors.white : Colors.black,
         placeholder: 'Search people',
@@ -158,6 +161,11 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
 
   const isQueryActive = useMemo(() => !!(query && query.length >= 1), [query]);
 
+  const afterSelect = useCallback(() => {
+    searchRef.current?.cancelSearch();
+    setQuery(undefined);
+  }, []);
+
   const renderHeader = useCallback(() => {
     return (
       <>
@@ -181,7 +189,11 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
   if (isQueryActive) {
     return (
       <ErrorBoundary>
-        <SearchConversationResults query={query} conversations={conversations || []} />
+        <SearchConversationResults
+          query={query}
+          conversations={conversations || []}
+          afterSelect={afterSelect}
+        />
       </ErrorBoundary>
     );
   }
