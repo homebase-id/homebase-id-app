@@ -37,7 +37,6 @@ export const usePost = ({ odinId, channelKey, postKey }: usePostProps = {}) => {
     channelKey,
   }).fetch;
 
-
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
 
