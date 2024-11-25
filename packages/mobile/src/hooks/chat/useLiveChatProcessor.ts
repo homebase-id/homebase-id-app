@@ -81,7 +81,6 @@ const useInboxProcessor = (connected?: boolean) => {
 
     const processedresult = await processInbox(dotYouClient, ChatDrive, BATCH_SIZE);
 
-    logger.Log('[InboxProcessor] fetching updates since', lastProcessedWithBuffer);
     isDebug && console.debug('[InboxProcessor] fetching updates since', lastProcessedWithBuffer);
     if (lastProcessedWithBuffer) {
       const updatedMessages = await findChangesSinceTimestamp(
