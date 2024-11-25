@@ -23,11 +23,16 @@
 
 - (NSURL *)sourceURLForBridge:(RCTBridge *)bridge
 {
+  return [self bundleURL];
+}
+
+- (NSURL *)bundleURL
+{
 #if DEBUG
   return [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index"];
 #else
-  // return [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
-  return [CodePush bundleURL];
+  // return [CodePush bundleURL];
+  return [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
 #endif
 }
 
@@ -38,13 +43,13 @@
   //  Check if the passed url is a <YOUR_URL_SCHEME_NAME>://
     NSString *urlString = url.absoluteString;
   NSLog(@"Entered with the following string: %@s", urlString);
-    
+
   // Check if its "homebase-share"
     if ([urlString hasPrefix:@"homebase-share://"]) {
-     
+
       return [ShareMenuManager application:application openURL:url options:options];
     }
-  
+
   return [RCTLinkingManager application:application openURL:url options:options];
 }
 

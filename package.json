@@ -12,6 +12,7 @@
     "start": "npm run start:mobile",
     "start:mobile": "npm run start --w packages/mobile",
     "build:libs": "npm run build --w packages/react-native-gifted-chat",
+    "build:pods": "npm run build:pods --w packages/mobile",
     "test": "npm run test -workspaces --if-present",
     "lint": "npm run lint -workspaces --if-present"
   },
@@ -20,7 +21,7 @@
     "axios": "1.7.7",
     "patch-package": "8.0.0",
     "react": "18.3.1",
-    "react-native": "0.76.1"
+    "react-native": "^0.76.0"
   },
   "overrides": {
     "browserify-sign": "4.2.2",
@@ -29,8 +30,8 @@
   "devDependencies": {
     "@eslint/eslintrc": "3.1.0",
     "@eslint/js": "^8.56.0",
-    "@react-native/eslint-config": "0.76.1",
-    "@react-native/eslint-plugin": "0.76.1",
+    "@react-native/eslint-config": "^0.76.0",
+    "@react-native/eslint-plugin": "^0.76.0",
     "typescript-eslint": "8.3.0",
     "@typescript-eslint/parser": "8.3.0",
     "@typescript-eslint/eslint-plugin": "8.3.0",
