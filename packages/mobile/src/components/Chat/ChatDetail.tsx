@@ -916,6 +916,16 @@ const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
     ];
   }, []);
 
+  useEffect(() => {
+    if (!completeMessage) {
+      setMessage(props.currentMessage as ChatMessageIMessage);
+    } else {
+      const message = props.currentMessage as ChatMessageIMessage;
+      message.text = completeMessage.message;
+      setMessage(message);
+    }
+  }, [completeMessage, props.currentMessage]);
+
   const onExpand = useCallback(() => {
     if (!hasMoreTextContent || !completeMessage) return;
     const message = props.currentMessage as ChatMessageIMessage;
