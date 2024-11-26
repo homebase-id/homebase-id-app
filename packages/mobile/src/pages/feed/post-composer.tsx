@@ -8,15 +8,21 @@ import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { ChannelDefinition, BlogConfig, ReactAccess } from '@homebase-id/js-lib/public';
 import { t, useDotYouClientContext } from 'homebase-id-app-common';
 import { useState, useMemo, useCallback, useLayoutEffect, useRef, useEffect, memo } from 'react';
-import { View, TouchableOpacity } from 'react-native';
+import { View, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
 import { Asset, launchImageLibrary } from 'react-native-image-picker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
+import {
+  DEFAULT_TOOLBAR_ITEMS,
+  RichText,
+  Toolbar,
+  useEditorBridge,
+  useEditorContent,
+} from '@10play/tentap-editor';
 import { useChannels } from '../../hooks/feed/channels/useChannels';
 import { usePostComposer } from '../../hooks/feed/post/usePostComposer';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { ErrorNotification } from '../../components/ui/Alert/ErrorNotification';
-import { Plus, Ellipsis, Globe, Lock, Pencil } from '../../components/ui/Icons/icons';
+import { Plus, Ellipsis, Globe, Lock, Pencil, Article } from '../../components/ui/Icons/icons';
 import { FileOverview } from '../../components/Files/FileOverview';
 import { Select, Option } from '../../components/ui/Form/Select';
 import { AclIcon, AclSummary } from '../../components/Feed/Composer/AclSummary';
@@ -123,8 +129,11 @@ export const PostComposer = memo(({ navigation }: PostComposerProps) => {
     },
     []
   );
+  const [articleMode, setArticleMode] = useState(false);
 
-  const canPost = caption?.length || assets?.length;
+  const baseText = '<p></p>';
+
+  const canPost = (caption?.length && !caption?.startsWith(baseText)) || assets?.length;
 
   const onPaste = useCallback(
     async (error: string | null | undefined, files: PastedFile[]) => {
@@ -152,6 +161,40 @@ export const PostComposer = memo(({ navigation }: PostComposerProps) => {
     },
     [setAssets]
   );
+
+  const editor = useEditorBridge({
+    autofocus: true,
+    avoidIosKeyboard: true,
+    editable: true,
+    theme: {
+      toolbar: {
+        toolbarBody: {
+          borderTopColor: '#C6C6C6B3',
+          borderBottomColor: '#C6C6C6B3',
+        },
+        // Check the ToolbarTheme type for all options
+      },
+      colorKeyboard: {
+        keyboardRootColor: 'white', // IOS only the background color of rootView of the custom keyboard
+        colorSelection: [
+          // Custom colors in color keyboard
+          {
+            name: 'Custom Color',
+            value: '#E5112B',
+            displayColor: '#E5112B', // Optional - the color that will be displayed on ui (if left empty will default to use value)
+          },
+        ],
+      },
+      webviewContainer: {},
+    },
+  });
+  const editorContent = useEditorContent(editor);
+
+  useEffect(() => {
+    if (editorContent) {
+      setCaption(editorContent?.toString());
+    }
+  }, [editorContent]);
 
   return (
     <React.Fragment>
@@ -210,104 +253,136 @@ export const PostComposer = memo(({ navigation }: PostComposerProps) => {
             <Text style={{ color: Colors.white, fontSize: 16 }}>{t('Post')}</Text>
           </TouchableOpacity>
         </View>
-
-        <View
-          style={{
-            padding: 16,
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-            borderWidth: 1,
-            borderColor: isDarkMode ? Colors.slate[800] : Colors.gray[100],
-            borderRadius: 6,
-          }}
-        >
-          <PasteInput
-            onPaste={onPaste}
-            placeholder="What's up?"
-            style={{
-              paddingVertical: 5,
-              lineHeight: 20,
-              fontSize: 16,
-              minHeight: 124,
-              color: isDarkMode ? Colors.white : Colors.black,
-              textAlignVertical: 'top',
-            }}
-            multiline={true}
-            onChange={(event) => setCaption(event.nativeEvent.text)}
-          />
-
-          <FileOverview assets={assets} setAssets={setAssets} />
-          <LinkPreviewBar
-            textToSearchIn={caption}
-            onLinkData={onLinkData}
-            onDismiss={onDismissLinkPreview}
-          />
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View
             style={{
-              display: 'flex',
-              flexDirection: 'row-reverse',
-              alignItems: 'center',
-              gap: 8,
-              zIndex: -1,
-              marginVertical: 8,
+              padding: 16,
+              backgroundColor: isDarkMode ? Colors.black : Colors.white,
+              borderWidth: 1,
+              borderColor: isDarkMode ? Colors.slate[800] : Colors.gray[100],
+              borderRadius: 6,
             }}
           >
-            {channel.serverMetadata?.accessControlList ? (
-              <AclIcon size={'sm'} acl={customAcl || channel.serverMetadata?.accessControlList} />
-            ) : null}
+            {articleMode ? (
+              <View
+                style={{
+                  minHeight: 124,
+                }}
+              >
+                <RichText editor={editor} />
+              </View>
+            ) : (
+              <PasteInput
+                onPaste={onPaste}
+                placeholder="What's up?"
+                style={{
+                  paddingVertical: 5,
+                  lineHeight: 20,
+                  fontSize: 16,
+                  minHeight: 124,
+                  color: isDarkMode ? Colors.white : Colors.black,
+                  textAlignVertical: 'top',
+                }}
+                multiline={true}
+                onChange={(event) => setCaption(event.nativeEvent.text)}
+              />
+            )}
+            <View>
+              <FileOverview assets={assets} setAssets={setAssets} />
+              <LinkPreviewBar
+                textToSearchIn={caption}
+                onLinkData={onLinkData}
+                onDismiss={onDismissLinkPreview}
+              />
+              <View
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row-reverse',
+                  alignItems: 'center',
+                  gap: 8,
+                  zIndex: -1,
+                  marginVertical: 8,
+                }}
+              >
+                {channel.serverMetadata?.accessControlList ? (
+                  <AclIcon
+                    size={'sm'}
+                    acl={customAcl || channel.serverMetadata?.accessControlList}
+                  />
+                ) : null}
 
-            {channel.serverMetadata?.accessControlList ? (
-              <Text style={{ fontSize: 12 }}>
-                <AclSummary acl={customAcl || channel.serverMetadata?.accessControlList} />
-              </Text>
-            ) : null}
-          </View>
+                {channel.serverMetadata?.accessControlList ? (
+                  <Text style={{ fontSize: 12 }}>
+                    <AclSummary acl={customAcl || channel.serverMetadata?.accessControlList} />
+                  </Text>
+                ) : null}
+              </View>
 
-          <View
-            style={{
-              display: 'flex',
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: 10,
-            }}
-          >
-            <TouchableOpacity onPress={handleImageIconPress}>
-              <Plus size={'sm'} />
-            </TouchableOpacity>
-            <ActionGroup
-              options={[
-                reactAccess === false
-                  ? {
-                      label: t('Enable reactions'),
-                      icon: Globe,
-                      onPress: () => setReactAccess(true),
-                    }
-                  : {
-                      label: t('Disable reactions'),
-                      icon: Lock,
-                      onPress: () => setReactAccess(false),
+              <View
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 10,
+                }}
+              >
+                <TouchableOpacity onPress={handleImageIconPress}>
+                  <Plus size={'sm'} />
+                </TouchableOpacity>
+                <ActionGroup
+                  options={[
+                    reactAccess === false
+                      ? {
+                          label: t('Enable reactions'),
+                          icon: Globe,
+                          onPress: () => setReactAccess(true),
+                        }
+                      : {
+                          label: t('Disable reactions'),
+                          icon: Lock,
+                          onPress: () => setReactAccess(false),
+                        },
+                    {
+                      label: t(!articleMode ? 'New Article' : 'New Post'),
+                      onPress: () => setArticleMode(!articleMode),
+                      icon: Article,
                     },
-                {
-                  label: t('See my drafts'),
-                  onPress: () => openURL(`https://${identity}/apps/feed/articles`),
-                  icon: Pencil,
-                },
-              ]}
-            >
-              <Ellipsis size={'sm'} />
-            </ActionGroup>
+                    {
+                      label: t('See my drafts'),
+                      onPress: () => openURL(`https://${identity}/apps/feed/articles`),
+                      icon: Pencil,
+                    },
+                  ]}
+                >
+                  <Ellipsis size={'sm'} />
+                </ActionGroup>
 
-            <ChannelOrAclSelector
-              defaultChannelValue={
-                channel?.fileMetadata?.appData?.uniqueId || BlogConfig.PublicChannelId
-              }
-              defaultAcl={customAcl}
-              onChange={handleChange}
-            />
+                <ChannelOrAclSelector
+                  defaultChannelValue={
+                    channel?.fileMetadata?.appData?.uniqueId || BlogConfig.PublicChannelId
+                  }
+                  defaultAcl={customAcl}
+                  onChange={handleChange}
+                />
+              </View>
+            </View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Animated.View>
 
       {!error ? <ProgressIndicator processingProgress={processingProgress} /> : null}
+      {articleMode && (
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={{
+            position: 'absolute',
+            width: '100%',
+            bottom: 0,
+          }}
+        >
+          <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS.filter((_, i) => i !== 3)} />
+        </KeyboardAvoidingView>
+      )}
     </React.Fragment>
   );
 });
@@ -710,8 +785,8 @@ const GroupOption = memo(
           backgroundColor: props.checked
             ? Colors.indigo[500]
             : isDarkMode
-            ? Colors.slate[700]
-            : Colors.slate[100],
+              ? Colors.slate[700]
+              : Colors.slate[100],
         }}
         onPress={() => props.onChange && props.onChange(props.value)}
       >
@@ -806,8 +881,8 @@ const CircleSelector = memo(
                   backgroundColor: isChecked
                     ? Colors.indigo[500]
                     : isDarkMode
-                    ? Colors.slate[700]
-                    : Colors.slate[100],
+                      ? Colors.slate[700]
+                      : Colors.slate[100],
                 }}
                 key={circle.id}
                 onPress={clickHandler}

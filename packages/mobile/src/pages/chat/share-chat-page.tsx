@@ -509,6 +509,7 @@ const InnerShareChatPage = memo(
         renderSectionHeader={renderSectionHeader}
         renderItem={renderItem}
         stickySectionHeadersEnabled={false}
+        initialNumToRender={20}
         ListHeaderComponent={
           <ConversationTileWithYourself
             selecMode

@@ -2033,6 +2033,27 @@ PODS:
     - React-Core
   - SocketRocket (0.7.0)
   - SSZipArchive (2.2.3)
+  - tentap (0.5.23):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.01.01.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - Yoga (0.0.0)
   - ZIPFoundation (0.9.19)
 
@@ -2144,6 +2165,7 @@ DEPENDENCIES:
   - RNShare (from `../../../node_modules/react-native-share`)
   - RNShareMenu (from `../../../node_modules/react-native-share-menu`)
   - RNSVG (from `../../../node_modules/react-native-svg`)
+  - "tentap (from `../../../node_modules/@10play/tentap-editor`)"
   - Yoga (from `../../../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
@@ -2381,6 +2403,8 @@ EXTERNAL SOURCES:
     :path: "../../../node_modules/react-native-share-menu"
   RNSVG:
     :path: "../../../node_modules/react-native-svg"
+  tentap:
+    :path: "../../../node_modules/@10play/tentap-editor"
   Yoga:
     :path: "../../../node_modules/react-native/ReactCommon/yoga"
 
@@ -2510,6 +2534,7 @@ SPEC CHECKSUMS:
   RNSVG: 4590aa95758149fa27c5c83e54a6a466349a1688
   SocketRocket: abac6f5de4d4d62d24e11868d7a2f427e0ef940d
   SSZipArchive: 62d4947b08730e4cda640473b0066d209ff033c9
+  tentap: 4ec333dcaaece174187c38db7dfb4a7acd7ae4c4
   Yoga: b05994d1933f507b0a28ceaa4fdb968dc18da178
   ZIPFoundation: b8c29ea7ae353b309bc810586181fd073cb3312c
 

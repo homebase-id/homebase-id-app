@@ -16,6 +16,7 @@
     "test": "node --experimental-vm-modules ../../node_modules/.bin/jest"
   },
   "dependencies": {
+    "@10play/tentap-editor": "^0.5.23",
     "@bam.tech/react-native-image-resizer": "^3.0.10",
     "@gorhom/bottom-sheet": "^5.0.1",
     "@likashefqet/react-native-image-zoom": "^4.2.0",
