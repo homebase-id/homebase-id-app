@@ -36,6 +36,7 @@ jobs:
           working-directory: packages/mobile
           ruby-version: 2.7.4
           bundler-cache: true
+          cache-version: 1
 
       - name: Bump version
         uses: yanamura/ios-bump-version@v1
