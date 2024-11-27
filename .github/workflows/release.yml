@@ -33,6 +33,7 @@ jobs:
       - name: Setup Ruby (bundle)
         uses: ruby/setup-ruby@v1
         with:
+          working-directory: packages/mobile
           ruby-version: 2.7.4
           bundler-cache: true
 
