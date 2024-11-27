@@ -48,7 +48,6 @@ jobs:
       - name: setup-cocoapods
         uses: maxim-lobanov/setup-cocoapods@v1
         with:
-          version: 1.16.2
           podfile-path: packages/mobile/ios/Podfile.lock
 
       - name: Install Pods
