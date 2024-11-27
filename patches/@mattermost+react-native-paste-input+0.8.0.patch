@@ -1,0 +1,17 @@
+diff --git a/node_modules/@mattermost/react-native-paste-input/react-native-paste-input.podspec b/node_modules/@mattermost/react-native-paste-input/react-native-paste-input.podspec
+index 605909d..1a8eeeb 100644
+--- a/node_modules/@mattermost/react-native-paste-input/react-native-paste-input.podspec
++++ b/node_modules/@mattermost/react-native-paste-input/react-native-paste-input.podspec
+@@ -17,9 +17,9 @@ Pod::Spec.new do |s|
+
+   s.source_files = "ios/**/*.{h,m,mm,swift,cpp}"
+
+-  if ENV["RCT_NEW_ARCH_ENABLED"] == nil || ENV["RCT_NEW_ARCH_ENABLED"] != "1"
+-    s.exclude_files = "ios/PasteTextInputSpecs"
+-  end
++  s.pod_target_xcconfig = {
++    'HEADER_SEARCH_PATHS' => '"${PODS_ROOT}/Headers/Public" "${PODS_ROOT}/Headers/Public/react-native" "${PODS_ROOT}/Headers/Public/React-Fabric" "${PODS_ROOT}/Headers/Private/react-native/ReactCommon"'
++  }
+
+   install_modules_dependencies(s)
+ end

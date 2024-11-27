@@ -1504,6 +1504,27 @@ PODS:
     - Yoga
   - react-native-netinfo (11.4.1):
     - React-Core
+  - react-native-paste-input (0.8.0):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.01.01.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - react-native-quick-crypto (0.7.7):
     - DoubleConversion
     - glog
@@ -2479,6 +2500,7 @@ DEPENDENCIES:
   - "react-native-image-resizer (from `../../../node_modules/@bam.tech/react-native-image-resizer`)"
   - react-native-mmkv-storage (from `../../../node_modules/react-native-mmkv-storage`)
   - "react-native-netinfo (from `../../../node_modules/@react-native-community/netinfo`)"
+  - "react-native-paste-input (from `../../../node_modules/@mattermost/react-native-paste-input`)"
   - react-native-quick-crypto (from `../../../node_modules/react-native-quick-crypto`)
   - react-native-safe-area-context (from `../../../node_modules/react-native-safe-area-context`)
   - "react-native-slider (from `../../../node_modules/@react-native-community/slider`)"
@@ -2660,6 +2682,8 @@ EXTERNAL SOURCES:
     :path: "../../../node_modules/react-native-mmkv-storage"
   react-native-netinfo:
     :path: "../../../node_modules/@react-native-community/netinfo"
+  react-native-paste-input:
+    :path: "../../../node_modules/@mattermost/react-native-paste-input"
   react-native-quick-crypto:
     :path: "../../../node_modules/react-native-quick-crypto"
   react-native-safe-area-context:
@@ -2842,6 +2866,7 @@ SPEC CHECKSUMS:
   react-native-image-resizer: dc4cffd25ee99b754eb8aa5b490fdb2989e5fd55
   react-native-mmkv-storage: 716f6d0ed2dd6efa0e6004efac1ecae85b9a8e16
   react-native-netinfo: f0a9899081c185db1de5bb2fdc1c88c202a059ac
+  react-native-paste-input: e924b38d57dd21acc1d0cc1fed949661ac7d2864
   react-native-quick-crypto: 273ed61ac39817d33d372eca82462493d93f77e2
   react-native-safe-area-context: f826417dadd1c1042c59355fb050682a9839f990
   react-native-slider: da7c05c52827d597bb7824c5b1acb35741d41f89
