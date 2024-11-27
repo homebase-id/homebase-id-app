@@ -247,6 +247,8 @@ export const getSendChatMessageMutationOptions: (queryClient: QueryClient) => Us
   mutationKey: ['send-chat-message'],
   mutationFn: async (params) => sendMessage({ ...params, queryClient }),
   onMutate: async ({ conversation, replyId, files, message, chatId, userDate }) => {
+    const identity = (await getSynchronousDotYouClient()).getIdentity();
+
     const newMessageDsr: NewHomebaseFile<ChatMessage> = {
       fileMetadata: {
         created: userDate,
@@ -279,6 +281,8 @@ export const getSendChatMessageMutationOptions: (queryClient: QueryClient) => Us
                 }) as unknown as Blob)
               : undefined,
         })),
+        senderOdinId: identity,
+        originalAuthor: identity,
       },
       serverMetadata: {
         accessControlList: {

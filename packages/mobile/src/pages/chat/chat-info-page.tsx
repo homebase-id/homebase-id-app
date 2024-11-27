@@ -1,8 +1,12 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { StyleSheet, Text, View } from 'react-native';
+import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { useConversation } from '../../hooks/chat/useConversation';
 
-import { ChatDrive, ConversationWithYourselfId } from '../../provider/chat/ConversationProvider';
+import {
+  ChatDrive,
+  ConversationWithYourselfId,
+  UnifiedConversation,
+} from '../../provider/chat/ConversationProvider';
 import { Home } from '../../components/ui/Icons/icons';
 
 import { memo, useCallback, useMemo } from 'react';
@@ -17,8 +21,10 @@ import { ConnectionName } from '../../components/ui/Name';
 import { ChatStackParamList } from '../../app/ChatStack';
 import { openURL } from '../../utils/utils';
 import { Avatar, GroupAvatar, OwnerAvatar } from '../../components/ui/Avatars/Avatar';
-import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
+
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
+import TextButton from '../../components/ui/Text/Text-Button';
 
 export type ChatInfoProp = NativeStackScreenProps<ChatStackParamList, 'ChatInfo'>;
 
@@ -29,98 +35,156 @@ export const ChatInfoPage = memo((prop: ChatInfoProp) => {
 
   const { isDarkMode } = useDarkMode();
   const identity = useAuth().getIdentity();
-  const profile = useProfile().data;
 
   const recipients = conversationContent?.recipients.filter((recipient) => recipient !== identity);
-
-  const withYourself = stringGuidsEqual(
-    conversation?.fileMetadata.appData.uniqueId,
-    ConversationWithYourselfId
-  );
   const recipient = recipients && recipients.length === 1 ? recipients[0] : undefined;
 
-  const onPress = useCallback(async () => {
-    await openURL(`https://${withYourself ? identity : recipient}/`);
-  }, [withYourself, identity, recipient]);
-
   const isGroup = recipients && recipients.length > 1;
+
+  const goBack = useCallback(() => {
+    return requestAnimationFrame(() => {
+      prop.navigation.goBack();
+    });
+  }, [prop.navigation]);
 
   const headerLeft = useCallback(
     () => (
       <HeaderBackButton
         canGoBack={true}
         labelVisible={false}
-        onPress={prop.navigation.goBack}
+        onPress={goBack}
         tintColor={isDarkMode ? Colors.white : Colors.black}
       />
     ),
-    [isDarkMode, prop.navigation.goBack]
+    [goBack, isDarkMode]
   );
 
-  // const headerRight = useCallback(
-  //   () =>
-  //     conversationContent && 'version' in conversationContent && conversationContent.version ? (
-  //       <TextButton
-  //         title="Edit"
-  //         unFilledStyle={{ marginRight: 8 }}
-  //         onPress={() => {
-  //           prop.navigation.navigate('EditGroup', {
-  //             convoId: conversationId,
-  //           });
-  //         }}
-  //       />
-  //     ) : null,
-  //   [conversationContent, conversationId, prop.navigation]
-  // );
+  const headerRight = useCallback(
+    () =>
+      conversationContent && 'version' in conversationContent && conversationContent.version ? (
+        <TextButton
+          title="Edit"
+          unFilledStyle={{ marginRight: 8 }}
+          onPress={() => {
+            prop.navigation.navigate('EditGroup', {
+              convoId: conversationId,
+            });
+          }}
+        />
+      ) : null,
+    [conversationContent, conversationId, prop.navigation]
+  );
 
-  const colorStyle = useMemo(() => {
-    return {
-      color: isDarkMode ? Colors.white : Colors.black,
-    };
-  }, [isDarkMode]);
   const headerStyle = useMemo(() => {
     return {
       backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
     };
   }, [isDarkMode]);
+  const keyExtractor = useCallback((item: string) => item, []);
+  const data = useMemo(
+    () => [...(recipients as string[]), identity as string] as string[],
+    [recipients, identity]
+  );
+
+  const renderItem = useCallback(
+    ({ item, index }: { item: string; index: number }) => (
+      <RenderRecipientTile recipient={item} isMe={index === data.length} />
+    ),
+    [data]
+  );
   if (!conversation) return null;
-  const hasGroupImage = conversation.fileMetadata.payloads?.length > 0;
-  const groupAvatarPayloadKey = conversation.fileMetadata.payloads?.[0]?.key;
+
+  const isAdmin = conversation.fileMetadata.senderOdinId === identity;
+
   return (
-    <>
+    <View
+      style={{
+        flex: 1,
+      }}
+    >
       <Header
         title={isGroup ? 'Group Info' : 'Chat Info'}
         headerLeft={headerLeft}
-        // headerRight={isGroup ? headerRight : undefined} //TODO: Enable this when we have figured out editing group conversations
+        headerRight={isGroup && isAdmin ? headerRight : undefined}
         headerStyle={headerStyle}
       />
-      <SafeAreaView>
-        <View style={styles.content}>
-          {!isGroup ? (
-            withYourself ? (
-              <OwnerAvatar style={styles.avatar} imageSize={styles.largeAvatarSize} />
-            ) : (
-              <Avatar
-                odinId={recipient as string}
-                style={styles.avatar}
-                imageSize={styles.largeAvatarSize}
-              />
-            )
+
+      <FlatList
+        data={data}
+        ListHeaderComponent={
+          <RenderListHeader
+            isGroup={isGroup || false}
+            recipient={recipient}
+            conversation={conversation}
+          />
+        }
+        keyExtractor={keyExtractor}
+        renderItem={renderItem}
+      />
+    </View>
+  );
+});
+
+const RenderListHeader = memo(
+  ({
+    isGroup = false,
+    recipient,
+    conversation,
+  }: {
+    isGroup: boolean;
+    conversation?: HomebaseFile<UnifiedConversation>;
+    recipient: string | undefined;
+  }) => {
+    const { isDarkMode } = useDarkMode();
+    const colorStyle = useMemo(() => {
+      return {
+        color: isDarkMode ? Colors.white : Colors.black,
+      };
+    }, [isDarkMode]);
+
+    const withYourself = stringGuidsEqual(
+      conversation?.fileMetadata.appData.uniqueId,
+      ConversationWithYourselfId
+    );
+    const identity = useAuth().getIdentity();
+
+    const profile = useProfile().data;
+
+    const onPress = useCallback(async () => {
+      await openURL(`https://${withYourself ? identity : recipient}/`);
+    }, [withYourself, identity, recipient]);
+    if (!conversation) return null;
+    const hasGroupImage = conversation.fileMetadata.payloads?.length > 0;
+    const groupAvatarPayloadKey = conversation.fileMetadata.payloads?.[0]?.key;
+    const conversationContent = conversation?.fileMetadata.appData.content;
+
+    return (
+      <View style={styles.content}>
+        {!isGroup ? (
+          withYourself ? (
+            <OwnerAvatar style={styles.avatar} imageSize={styles.largeAvatarSize} />
           ) : (
-            <GroupAvatar
-              fileId={conversation.fileId}
-              fileKey={hasGroupImage ? groupAvatarPayloadKey : undefined}
-              targetDrive={ChatDrive}
-              previewThumbnail={conversation.fileMetadata.appData.previewThumbnail}
-              imageStyle={{
-                width: 81,
-                height: 81,
-              }}
+            <Avatar
+              odinId={recipient as string}
               style={styles.avatar}
-              iconSize={'2xl'}
+              imageSize={styles.largeAvatarSize}
             />
-          )}
-          {/* <Text
+          )
+        ) : (
+          <GroupAvatar
+            fileId={conversation.fileId}
+            fileKey={hasGroupImage ? groupAvatarPayloadKey : undefined}
+            targetDrive={ChatDrive}
+            previewThumbnail={conversation.fileMetadata.appData.previewThumbnail}
+            imageStyle={{
+              width: 81,
+              height: 81,
+            }}
+            style={styles.avatar}
+            iconSize={'2xl'}
+          />
+        )}
+        {/* <Text
             style={{
               backgroundColor: Colors.indigo[500],
               color: Colors.white,
@@ -131,105 +195,105 @@ export const ChatInfoPage = memo((prop: ChatInfoProp) => {
           >
             Auto-connected
           </Text> */}
-          <Text
-            style={[
-              styles.title,
-              {
-                marginTop: isGroup ? 0 : 24,
-                ...colorStyle,
-              },
-            ]}
+        <Text
+          style={[
+            styles.title,
+            {
+              marginTop: isGroup ? 0 : 24,
+              ...colorStyle,
+            },
+          ]}
+        >
+          {withYourself ? (
+            `${profile?.firstName} ${profile?.surName}`
+          ) : isGroup ? (
+            conversationContent?.title
+          ) : (
+            <ConnectionName odinId={recipient as string} />
+          )}
+        </Text>
+        {!isGroup && (
+          <View
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'flex-end',
+            }}
           >
-            {withYourself ? (
-              `${profile?.firstName} ${profile?.surName}`
-            ) : isGroup ? (
-              conversationContent?.title
-            ) : (
-              <ConnectionName odinId={recipient as string} />
-            )}
-          </Text>
-          {!isGroup && (
-            <View
+            <Home />
+            <TouchableOpacity onPress={onPress}>
+              <Text
+                style={[
+                  styles.subtitle,
+                  {
+                    color: isDarkMode ? Colors.purple[300] : Colors.purple[800],
+                  },
+                ]}
+              >
+                {withYourself ? identity : (recipient as string)}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
+        {isGroup && (
+          <View style={styles.groupRecipient}>
+            <Text
               style={{
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'flex-end',
+                fontSize: 22,
+                fontWeight: '500',
+                ...colorStyle,
               }}
             >
-              <Home />
-              <TouchableOpacity onPress={onPress}>
-                <Text
-                  style={[
-                    styles.subtitle,
-                    {
-                      color: isDarkMode ? Colors.purple[300] : Colors.purple[800],
-                    },
-                  ]}
-                >
-                  {withYourself ? identity : (recipient as string)}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          )}
-          {isGroup && (
-            <View style={styles.groupRecipient}>
-              <Text
-                style={{
-                  fontSize: 22,
-                  fontWeight: '500',
-                  ...colorStyle,
-                }}
-              >
-                Recipients
-              </Text>
-              {[...recipients, identity as string].map((recipient, index) => (
-                <TouchableOpacity key={index} onPress={() => openURL(`https://${recipient}/`)}>
-                  <View
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      alignContent: 'center',
-                      width: '100%',
-                      padding: 8,
-                      paddingLeft: 0,
-                      marginTop: 8,
-                    }}
-                  >
-                    {/* NOTE : Last one's your identity so show the owner avatar */}
-                    {index === recipients?.length ? (
-                      <OwnerAvatar
-                        style={styles.mediumAvatarSize}
-                        imageSize={styles.mediumAvatarSize}
-                      />
-                    ) : (
-                      <Avatar
-                        odinId={recipient as string}
-                        style={styles.mediumAvatarSize}
-                        imageSize={styles.mediumAvatarSize}
-                      />
-                    )}
-                    <Text
-                      style={[
-                        {
-                          fontWeight: '400',
-                          fontSize: 18,
-                          marginLeft: 12,
-                          ...colorStyle,
-                        },
-                      ]}
-                    >
-                      <ConnectionName odinId={recipient as string} />
-                      {index === recipients?.length && <Text style={styles.you}> (you) </Text>}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-              ))}
-            </View>
-          )}
-        </View>
-      </SafeAreaView>
-    </>
+              Recipients
+            </Text>
+          </View>
+        )}
+      </View>
+    );
+  }
+);
+
+const RenderRecipientTile = memo(({ recipient, isMe }: { recipient: string; isMe: boolean }) => {
+  const { isDarkMode } = useDarkMode();
+  return (
+    <TouchableOpacity onPress={() => openURL(`https://${recipient}/`)}>
+      <View
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          alignContent: 'center',
+          width: '100%',
+          padding: 8,
+          paddingHorizontal: 12,
+          marginTop: 8,
+        }}
+      >
+        {/* NOTE : Last one's your identity so show the owner avatar */}
+        {isMe ? (
+          <OwnerAvatar style={styles.mediumAvatarSize} imageSize={styles.mediumAvatarSize} />
+        ) : (
+          <Avatar
+            odinId={recipient as string}
+            style={styles.mediumAvatarSize}
+            imageSize={styles.mediumAvatarSize}
+          />
+        )}
+        <Text
+          style={[
+            {
+              fontWeight: '400',
+              fontSize: 18,
+              marginLeft: 12,
+              color: isDarkMode ? Colors.white : Colors.black,
+            },
+          ]}
+        >
+          <ConnectionName odinId={recipient as string} />
+          {isMe && <Text style={styles.you}> (you) </Text>}
+        </Text>
+      </View>
+    </TouchableOpacity>
   );
 });
 

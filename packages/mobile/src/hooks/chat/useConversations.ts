@@ -19,8 +19,6 @@ export const useConversations = () => {
   const fetchConversations = async (
     cursorState: string | undefined
   ): Promise<ChatConversationsReturn | null> => {
-    logger.Log('[PERF-DEBUG] fetching conversations');
-    console.log('[PERF-DEBUG] fetching conversations');
     return await getConversations(dotYouClient, cursorState, PAGE_SIZE);
   };
 

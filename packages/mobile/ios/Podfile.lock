@@ -2498,6 +2498,7 @@ DEPENDENCIES:
   - react-native-http-bridge-refurbished (from `../../../node_modules/react-native-http-bridge-refurbished`)
   - react-native-image-picker (from `../../../node_modules/react-native-image-picker`)
   - "react-native-image-resizer (from `../../../node_modules/@bam.tech/react-native-image-resizer`)"
+  - "react-native-keep-awake (from `../../../node_modules/@sayem314/react-native-keep-awake`)"
   - react-native-mmkv-storage (from `../../../node_modules/react-native-mmkv-storage`)
   - "react-native-netinfo (from `../../../node_modules/@react-native-community/netinfo`)"
   - "react-native-paste-input (from `../../../node_modules/@mattermost/react-native-paste-input`)"
@@ -2678,6 +2679,8 @@ EXTERNAL SOURCES:
     :path: "../../../node_modules/react-native-image-picker"
   react-native-image-resizer:
     :path: "../../../node_modules/@bam.tech/react-native-image-resizer"
+  react-native-keep-awake:
+    :path: "../../../node_modules/@sayem314/react-native-keep-awake"
   react-native-mmkv-storage:
     :path: "../../../node_modules/react-native-mmkv-storage"
   react-native-netinfo:

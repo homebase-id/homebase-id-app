@@ -165,6 +165,8 @@ export const CommentsModal = memo(
           <ErrorLoadingComments />
         ) : isLoading ? (
           <CommentsLoader />
+        ) : !flattenedComments?.length ? (
+          <EmptyComment />
         ) : (
           <BottomSheetFlashList
             data={flattenedComments}
@@ -175,7 +177,7 @@ export const CommentsModal = memo(
                 fetchNextPage();
               }
             }}
-            ListEmptyComponent={EmptyComment}
+            // ListEmptyComponent={EmptyComment}
             onEndReachedThreshold={0.3}
             renderItem={renderItem}
             ListFooterComponent={listFooter}

@@ -552,6 +552,7 @@ const InnerForwardListPage = memo(
               conversationId={conversation.fileMetadata.appData.uniqueId}
               selectMode
               isSelected={selectedConversation.includes(conversation)}
+              conversationUpdated={conversation.fileMetadata.updated}
               onPress={() => onSelectConversation(conversation)}
               odinId={conversation.fileMetadata.appData.content.recipients[0]}
               fileId={conversation.fileId}
@@ -630,7 +631,7 @@ export const GroupConversationsComponent = memo(
                 [0, undefined].includes(convo.fileMetadata.appData.archivalStatus) &&
                 convo.fileMetadata.appData.content.recipients.length > 2
             ) as HomebaseFile<UnifiedConversation>[]
-        ).sort((a, b) =>
+        )?.sort((a, b) =>
           a?.fileMetadata.appData.content.title.localeCompare(b?.fileMetadata.appData.content.title)
         ) || [],
       [conversations]

@@ -279,7 +279,9 @@ const LogsModal = ({ visible, onDismiss }: { visible: boolean; onDismiss: () => 
       return;
     }
     const fileData = await readFile(path);
-    Clipboard.setString(fileData);
+    // convert fileData to array of strings. get the last 1000 lines
+    const data = fileData.split('\n').slice(-1000).join('\n');
+    Clipboard.setString(data);
     Toast.show({
       type: 'success',
       text1: 'Logs copied to clipboard',
@@ -297,13 +299,12 @@ const LogsModal = ({ visible, onDismiss }: { visible: boolean; onDismiss: () => 
   };
 
   const insets = useSafeAreaInsets();
-
   return (
     <BottomSheetModal
       ref={ref}
       backdropComponent={Backdrop}
       snapPoints={['20%']}
-      enableDynamicSizing={false}
+      enableDynamicSizing={true}
       enableDismissOnClose={true}
       enablePanDownToClose
       bottomInset={insets.bottom}
@@ -322,6 +323,7 @@ const LogsModal = ({ visible, onDismiss }: { visible: boolean; onDismiss: () => 
       <BottomSheetView
         style={{
           marginHorizontal: 16,
+          paddingBottom: 20,
         }}
       >
         <ListTile
@@ -340,8 +342,7 @@ const LogsModal = ({ visible, onDismiss }: { visible: boolean; onDismiss: () => 
             backgroundColor: isDarkMode ? Colors.gray[800] : Colors.gray[200],
             borderTopColor: isDarkMode ? Colors.gray[900] : Colors.gray[300],
             borderTopWidth: 2,
-            borderEndStartRadius: 12,
-            borderEndEndRadius: 12,
+
             paddingLeft: 16,
             paddingRight: 16,
           }}
@@ -355,7 +356,7 @@ const LogsModal = ({ visible, onDismiss }: { visible: boolean; onDismiss: () => 
             backgroundColor: isDarkMode ? Colors.gray[800] : Colors.gray[200],
             borderTopColor: isDarkMode ? Colors.gray[900] : Colors.gray[300],
             borderTopWidth: 2,
-            borderEndStartRadius: 12,
+            borderBottomLeftRadius: 12,
             borderEndEndRadius: 12,
             paddingLeft: 16,
             paddingRight: 16,

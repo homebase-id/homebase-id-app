@@ -38,6 +38,7 @@ import { DotYouProfile } from '@homebase-id/js-lib/network';
 import { ChatFileOverview } from '../components/Files/ChatFileOverview';
 import { ImageSource } from '../provider/image/RNImageProvider';
 import { ShareEditorPage } from '../pages/chat/share-editor-page';
+import { ArchivedPage } from '../pages/chat/archived-page';
 
 export type ChatStackParamList = {
   Conversation: undefined;
@@ -60,6 +61,7 @@ export type ChatStackParamList = {
     text: string;
     recipients: HomebaseFile<UnifiedConversation>[];
   };
+  Archived: undefined;
   PreviewMedia: {
     fileId: string;
     globalTransitId?: string;
@@ -201,7 +203,14 @@ export const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Cha
       >
         <StackChat.Screen name="New" component={NewChatStackScreen} />
       </StackChat.Group>
-
+      <StackChat.Screen
+        name="Archived"
+        component={ArchivedPage}
+        options={{
+          headerShown: true,
+          headerTitle: 'Archived',
+        }}
+      />
       <StackChat.Screen
         name="ChatScreen"
         // component={(props) => <ChatPage {...props} />} // This is faster, but react-navigation goes crazy with warnings

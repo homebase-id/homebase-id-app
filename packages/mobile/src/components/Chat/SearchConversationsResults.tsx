@@ -18,9 +18,11 @@ export const SearchConversationResults = memo(
   ({
     query,
     conversations,
+    afterSelect,
   }: {
     query: string | undefined;
     conversations: ConversationWithRecentMessage[];
+    afterSelect?: () => void;
   }) => {
     const isActive = useMemo(() => !!(query && query.length >= 1), [query]);
     const { data: contacts } = useAllContacts(isActive);
@@ -82,8 +84,11 @@ export const SearchConversationResults = memo(
         navigation.navigate('ChatScreen', {
           convoId: convoId,
         });
+        setTimeout(() => {
+          afterSelect?.();
+        }, 1500);
       },
-      [navigation]
+      [afterSelect, navigation]
     );
 
     if (!isActive) return null;
@@ -111,6 +116,7 @@ export const SearchConversationResults = memo(
                 key={item.fileId}
                 conversation={item.fileMetadata.appData.content}
                 conversationId={item.fileMetadata.appData.uniqueId}
+                conversationUpdated={item.fileMetadata.updated}
                 onPress={onPress}
                 odinId={
                   item.fileMetadata.appData.content.recipients.filter(
@@ -146,15 +152,19 @@ export const SearchConversationWithSelectionResults = memo(
     setSelectedContact,
     selectedConversation,
     setSelectedConversation,
+    selectionLimit,
+    onContactSelect,
   }: {
     query: string | undefined;
     allConversations: ConversationWithRecentMessage[] | undefined;
     selectedContact: DotYouProfile[];
     setSelectedContact: React.Dispatch<React.SetStateAction<DotYouProfile[]>>;
-    selectedConversation: HomebaseFile<UnifiedConversation>[];
-    setSelectedConversation: React.Dispatch<
+    onContactSelect?: (contact: string) => void;
+    selectedConversation?: HomebaseFile<UnifiedConversation>[];
+    setSelectedConversation?: React.Dispatch<
       React.SetStateAction<HomebaseFile<UnifiedConversation>[]>
     >;
+    selectionLimit?: number;
   }) => {
     const isActive = useMemo(() => !!(query && query.length >= 1), [query]);
     const { data: contacts } = useAllContacts(isActive);
@@ -176,15 +186,21 @@ export const SearchConversationWithSelectionResults = memo(
 
     const onSelectConversation = useCallback(
       (conversation: HomebaseFile<UnifiedConversation>) => {
-        setSelectedConversation((selectedConversation) => {
+        setSelectedConversation?.((selectedConversation) => {
           if (selectedConversation.includes(conversation)) {
             return selectedConversation.filter((c) => c !== conversation);
           } else {
-            if (selectedContact.length + selectedConversation.length === maxConnectionsForward) {
+            if (
+              selectedContact.length + selectedConversation.length ===
+              (selectionLimit || maxConnectionsForward)
+            ) {
               Toast.show({
                 type: 'info',
                 text1: t('Forward limit reached'),
-                text2: t('You can only forward to {0} contacts at a time', maxConnectionsForward),
+                text2: t(
+                  'You can only forward to {0} contacts at a time',
+                  selectionLimit || maxConnectionsForward
+                ),
                 position: 'bottom',
                 visibilityTime: 2000,
               });
@@ -195,7 +211,7 @@ export const SearchConversationWithSelectionResults = memo(
           }
         });
       },
-      [setSelectedConversation, selectedContact.length]
+      [setSelectedConversation, selectedContact.length, selectionLimit]
     );
 
     const onSelectContact = useCallback(
@@ -204,11 +220,17 @@ export const SearchConversationWithSelectionResults = memo(
           if (selectedContact.some((c) => c.odinId === contact)) {
             return selectedContact.filter((c) => c.odinId !== contact);
           } else {
-            if (selectedContact.length + selectedConversation.length === maxConnectionsForward) {
+            if (
+              selectedContact.length + (selectedConversation?.length || 0) ===
+              (selectionLimit || maxConnectionsForward)
+            ) {
               Toast.show({
                 type: 'info',
                 text1: t('Forward limit reached'),
-                text2: t('You can only forward to {0} contacts at a time', maxConnectionsForward),
+                text2: t(
+                  'You can only forward to {0} contacts at a time',
+                  selectionLimit || maxConnectionsForward
+                ),
                 position: 'bottom',
                 visibilityTime: 2000,
               });
@@ -224,7 +246,7 @@ export const SearchConversationWithSelectionResults = memo(
           }
         });
       },
-      [setSelectedContact, selectedConversation.length]
+      [setSelectedContact, selectedConversation?.length, selectionLimit]
     );
 
     const contactResults = useMemo(
@@ -289,11 +311,12 @@ export const SearchConversationWithSelectionResults = memo(
                 conversation={item.fileMetadata.appData.content}
                 conversationId={item.fileMetadata.appData.uniqueId}
                 selectMode
-                isSelected={selectedConversation.some(
+                isSelected={selectedConversation?.some(
                   (conversation) =>
                     conversation.fileMetadata.appData.uniqueId ===
                     item.fileMetadata.appData.uniqueId
                 )}
+                conversationUpdated={item.fileMetadata.updated}
                 onPress={() => onSelectConversation(item)}
                 odinId={
                   item.fileMetadata.appData.content.recipients.filter(
@@ -313,7 +336,11 @@ export const SearchConversationWithSelectionResults = memo(
                 }}
                 selectMode
                 isSelected={selectedContact.some((contact) => contact.odinId === item.odinId)}
-                onPress={() => onSelectContact(item.odinId as string)}
+                onPress={() =>
+                  onContactSelect
+                    ? onContactSelect(item.odinId as string)
+                    : onSelectContact(item.odinId as string)
+                }
               />
             ))}
           </ScrollView>

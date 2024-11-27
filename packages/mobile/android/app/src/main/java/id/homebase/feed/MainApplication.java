@@ -15,6 +15,10 @@ import java.lang.reflect.Field;
 import android.database.CursorWindow;
 import android.util.Log;
 
+import java.lang.reflect.Field;
+import android.database.CursorWindow;
+import android.util.Log;
+
 public class MainApplication extends Application implements ReactApplication {
 
   private final ReactNativeHost mReactNativeHost =

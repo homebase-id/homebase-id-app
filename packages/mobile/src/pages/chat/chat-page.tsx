@@ -65,6 +65,7 @@ import { getImageSize } from '../../utils/utils';
 import { openURL } from '../../utils/utils';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ReportModal } from '../../components/Chat/Reactions/Modal/ReportModal';
+import { useIntroductions } from '../../hooks/introductions/useIntroductions';
 
 export type SelectedMessageState = {
   messageCordinates: { x: number; y: number };
@@ -180,15 +181,15 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
     [loadedPages, messages]
   );
 
-  // Conversation & Contact
-  const { data: conversation, isLoading: isLoadingConversation } = useConversation({
-    conversationId: route.params.convoId,
-  }).single;
-
   const {
+    single: { data: conversation, isLoading: isLoadingConversation },
     clearChat: { mutate: clearChat, error: clearChatError },
     deleteChat: { mutate: deleteChat, error: deleteChatError },
-  } = useConversation();
+    inviteRecipient: { mutateAsync: inviteRecipient },
+    update: { mutate: updateArchivalStatus },
+  } = useConversation({
+    conversationId: route.params.convoId,
+  });
 
   const filteredRecipients = conversation?.fileMetadata.appData.content.recipients.filter(
     (recipient) => recipient !== identity
@@ -253,10 +254,9 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
     status: sendMessageState,
     reset: resetState,
   } = useChatMessage().send;
+  const { mutate: introduceIdentities } = useIntroductions().introduceIdentities;
 
   useMarkMessagesAsRead({ conversation: conversation || undefined, messages });
-
-  const { mutateAsync: inviteRecipient } = useConversation().inviteRecipient;
 
   const [linkPreviews, setLinkPreviews] = useState<LinkPreview | null>(null);
   const onDismissLinkPreview = useCallback(() => {
@@ -292,6 +292,13 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
         if (anyRecipientMissingConversation) {
           console.log('invite recipient');
           inviteRecipient({ conversation });
+          if (filteredRecipients.length > 1) {
+            // Group chat; Good to introduce everyone
+            introduceIdentities({
+              message: t('{0} has added you to a group chat', identity || ''),
+              recipients: filteredRecipients,
+            });
+          }
         }
       }
 
@@ -315,6 +322,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
       linkPreviews,
       identity,
       inviteRecipient,
+      introduceIdentities,
     ]
   );
 
@@ -498,6 +506,36 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
     () =>
       [
         {
+          label:
+            conversation?.fileMetadata.appData.archivalStatus === 3
+              ? 'Unarchive Chat'
+              : 'Archive Chat',
+          onPress: () => {
+            if (!conversation) return;
+            const archivalStatus = conversation.fileMetadata.appData.archivalStatus;
+            updateArchivalStatus({
+              distribute: false,
+              conversation: {
+                ...conversation,
+                fileMetadata: {
+                  ...conversation.fileMetadata,
+                  appData: {
+                    ...conversation.fileMetadata.appData,
+                    archivalStatus: archivalStatus === 3 ? 0 : 3,
+                  },
+                },
+              },
+            });
+            if ([0, undefined].includes(archivalStatus)) navigation.navigate('Conversation');
+
+            Toast.show({
+              type: 'success',
+              text1: `Chat ${archivalStatus === 3 ? 'unarchived' : 'archived'}`,
+              position: 'bottom',
+            });
+          },
+        },
+        {
           label: 'Clear Chat',
           onPress: () => {
             if (!conversation) return;
@@ -573,6 +611,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
       isGroupChat,
       navigation,
       route.params.convoId,
+      updateArchivalStatus,
     ]
   );
 

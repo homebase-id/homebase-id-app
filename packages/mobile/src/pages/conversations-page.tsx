@@ -29,15 +29,16 @@ import { useDarkMode } from '../hooks/useDarkMode';
 import { CHAT_APP_ID } from '../app/constants';
 import { ErrorBoundary } from '../components/ui/ErrorBoundary/ErrorBoundary';
 import { InfiniteData, useQueryClient } from '@tanstack/react-query';
-import { Pencil } from '../components/ui/Icons/icons';
+import { Archive, Pencil } from '../components/ui/Icons/icons';
 import { TouchableOpacity } from '@gorhom/bottom-sheet';
 import { SafeAreaView } from '../components/ui/SafeAreaView/SafeAreaView';
 import { OfflineState } from '../components/Platform/OfflineState';
 import { ConversationTileWithYourself } from '../components/Conversation/ConversationTileWithYourself';
 import { EmptyConversation } from '../components/Conversation/EmptyConversation';
 import { SearchConversationResults } from '../components/Chat/SearchConversationsResults';
-import logger from '../provider/log/logger';
 import { useConversations } from '../hooks/chat/useConversations';
+import { ListTile } from '../components/ui/ListTile';
+import { SearchBarCommands } from 'react-native-screens';
 
 type ConversationProp = NativeStackScreenProps<ChatStackParamList, 'Conversation'>;
 
@@ -46,14 +47,22 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
     useConversations().all;
   const { data: conversations } = useConversationsWithRecentMessage().all;
 
+  const filteredConversations = useMemo(
+    () =>
+      conversations?.filter((convo) =>
+        [0, 1, undefined].includes(convo.fileMetadata.appData.archivalStatus)
+      ),
+    [conversations]
+  );
+
+  const hasArchivedConversations =
+    conversations?.some((convo) => convo.fileMetadata.appData.archivalStatus === 3) || false;
+
   const renderPageSize = useMemo(
     () => Math.round((Dimensions.get('window').height / 80) * 1.5),
     // 1.5 screens worth of data
     []
   );
-
-  logger.Log('[PERF-DEBUG] rendering conversations', conversations?.length);
-  console.log('[PERF-DEBUG] rendering conversations', conversations?.length);
 
   const [query, setQuery] = useState<string | undefined>(undefined);
   const { isDarkMode } = useDarkMode();
@@ -62,10 +71,12 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
 
   const scrollRef = useRef<FlatList<ConversationWithRecentMessage>>(null);
   useScrollToTop(scrollRef);
+  const searchRef = useRef<SearchBarCommands>(null);
 
   useLayoutEffect(() => {
     navigation.setOptions({
       headerSearchBarOptions: {
+        ref: searchRef,
         hideWhenScrolling: true,
         headerIconColor: isDarkMode ? Colors.white : Colors.black,
         placeholder: 'Search people',
@@ -102,6 +113,7 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
           <ConversationTile
             conversation={item.fileMetadata.appData.content}
             conversationId={item.fileMetadata.appData.uniqueId}
+            conversationUpdated={item.fileMetadata.updated}
             fileId={item.fileId}
             payloadKey={hasPayload ? item.fileMetadata.payloads[0].key : undefined}
             onPress={onPress}
@@ -139,8 +151,6 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
         });
       }
     });
-    console.log('[PERF-DEBUG] manual doRefresh');
-    logger.Log('[PERF-DEBUG] manual doRefresh');
 
     await queryClient.invalidateQueries({ queryKey: ['chat-messages'], exact: false });
     await queryClient.invalidateQueries({ queryKey: ['conversations'] });
@@ -150,10 +160,40 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
   }, [queryClient]);
 
   const isQueryActive = useMemo(() => !!(query && query.length >= 1), [query]);
+
+  const afterSelect = useCallback(() => {
+    searchRef.current?.cancelSearch();
+    setQuery(undefined);
+  }, []);
+
+  const renderHeader = useCallback(() => {
+    return (
+      <>
+        {hasArchivedConversations && (
+          <ListTile
+            style={{
+              padding: 24,
+              flexDirection: 'row',
+              borderRadius: 5,
+            }}
+            icon={Archive}
+            title="Archived Conversations"
+            onPress={() => navigation.navigate('Archived')}
+          />
+        )}
+        <ConversationTileWithYourself />
+      </>
+    );
+  }, [hasArchivedConversations, navigation]);
+
   if (isQueryActive) {
     return (
       <ErrorBoundary>
-        <SearchConversationResults query={query} conversations={conversations || []} />
+        <SearchConversationResults
+          query={query}
+          conversations={conversations || []}
+          afterSelect={afterSelect}
+        />
       </ErrorBoundary>
     );
   }
@@ -168,11 +208,11 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
           <ErrorBoundary>
             <FlatList
               ref={scrollRef}
-              data={conversations.filter(Boolean)}
+              data={filteredConversations}
               showsVerticalScrollIndicator={false}
               keyExtractor={keyExtractor}
               contentInsetAdjustmentBehavior="automatic"
-              ListHeaderComponent={<ConversationTileWithYourself />}
+              ListHeaderComponent={renderHeader}
               renderItem={renderItem}
               refreshControl={<RefreshControl refreshing={refreshing} onRefresh={doRefresh} />}
               initialNumToRender={renderPageSize}

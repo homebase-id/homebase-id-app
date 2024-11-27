@@ -13,6 +13,7 @@ import { CachesDirectoryPath } from 'react-native-fs';
 import { transcodeAudio } from '../../provider/audio/AudioTranscoder';
 import { getNewId } from '@homebase-id/js-lib/helpers';
 import { useAudioContext } from '../../components/AudioContext/useAudioContext';
+import { activateKeepAwake, deactivateKeepAwake } from '@sayem314/react-native-keep-awake';
 
 const audioSet: AudioSet = {
   AudioEncoderAndroid: AudioEncoderAndroidType.AAC,
@@ -36,15 +37,18 @@ export const useAudioRecorder = () => {
 
   const record = async () => {
     try {
+      activateKeepAwake();
       await audioRecorder.startRecorder(path, audioSet);
       setIsRecording(true);
     } catch (error) {
       console.error('error Starting  Recording', error);
     }
+
   };
 
   const stop = async () => {
     const result = await audioRecorder.stopRecorder();
+    deactivateKeepAwake();
     if (Platform.OS === 'ios') {
       const transcodePath = `file://${dirs}/audio-${runningId}.mp3`;
       const tempPath = `file://${dirs}/audio-${runningId}.tmp`;
@@ -54,11 +58,17 @@ export const useAudioRecorder = () => {
       setDuration(0);
 
       // throw new Error('Transcoding Error');
-      return transcodePath;
+      return {
+        path: transcodePath,
+        duration,
+      };
     }
     setIsRecording(false);
     setDuration(0);
-    return result;
+    return {
+      path: result,
+      duration,
+    };
   };
 
   const [isRecording, setIsRecording] = useState(false);
@@ -100,6 +110,7 @@ export const useAudioPlayback = (audioPath: string | undefined) => {
     if (currDuration === duration && currDuration !== 0) {
       setplaying(false);
       setCurrDuration(0);
+      deactivateKeepAwake();
     }
 
     return () => audioPlayer.removePlayBackListener();
@@ -117,6 +128,7 @@ export const useAudioPlayback = (audioPath: string | undefined) => {
     if (!audioPath) return;
     try {
       await audioPlayer.startPlayer(audioPath);
+      activateKeepAwake();
       setGlobalAudioPath(audioPath);
       setplaying(true);
     } catch (error) {
@@ -129,6 +141,7 @@ export const useAudioPlayback = (audioPath: string | undefined) => {
     setGlobalAudioPath(null);
     setplaying(false);
     setCurrDuration(0);
+    deactivateKeepAwake();
     return result;
   };
 

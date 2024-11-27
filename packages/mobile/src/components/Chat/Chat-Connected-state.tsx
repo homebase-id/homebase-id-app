@@ -17,7 +17,6 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import TextButton from '../ui/Text/Text-Button';
-import { useAutoConnection } from '../../hooks/connections/useAutoConnection';
 
 export const ChatConnectedState = (conversation: HomebaseFile<UnifiedConversation> | undefined) => {
   const { isDarkMode } = useDarkMode();
@@ -172,9 +171,6 @@ const RecipientConnectedState = ({
   animatedProps?: AnimatedStyle<ViewStyle>;
 }) => {
   const { data: isConnected, isFetched: isFetchedConnected } = useIsConnected(recipient);
-  const { data: isUnconfirmed } = useAutoConnection({
-    odinId: recipient,
-  }).isUnconfirmedAutoConnected;
 
   const identity = useDotYouClientContext().getIdentity();
 
@@ -182,10 +178,7 @@ const RecipientConnectedState = ({
     if (!isConnected && isFetchedConnected) {
       onValidRecipientStateChange(recipient);
     }
-    if (isUnconfirmed) {
-      onValidRecipientStateChange(recipient);
-    }
-  }, [isConnected, isFetchedConnected, isUnconfirmed, onValidRecipientStateChange, recipient]);
+  }, [isConnected, isFetchedConnected, onValidRecipientStateChange, recipient]);
 
   if (!isConnected && isFetchedConnected) {
     return (
@@ -206,30 +199,6 @@ const RecipientConnectedState = ({
         >
           {recipient}
         </Text>
-      </StateWrapper>
-    );
-  }
-
-  if (isUnconfirmed) {
-    return (
-      <StateWrapper
-        linkText={t('Confirm')}
-        linkTarget={`https://${identity}/owner/connections/${recipient}`}
-        animatedProps={animatedProps}
-      >
-        {t('You were automatically connected to')}{' '}
-        <Text
-          onPress={async () => {
-            await openURL(`https://${recipient}`);
-          }}
-          style={{
-            textDecorationLine: 'underline',
-            fontWeight: '500',
-          }}
-        >
-          {recipient}
-        </Text>{' '}
-        {t('because of an introduction. Would you like to confirm this connection?')}
       </StateWrapper>
     );
   }
