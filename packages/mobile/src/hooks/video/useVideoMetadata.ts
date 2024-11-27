@@ -56,11 +56,11 @@ export const useVideoMetadata = (
         odinId !== identity
           ? videoGlobalTransitId
             ? await getFileHeaderBytesOverPeerByGlobalTransitId(
-              dotYouClient,
-              odinId,
-              videoDrive,
-              videoGlobalTransitId
-            )
+                dotYouClient,
+                odinId,
+                videoDrive,
+                videoGlobalTransitId
+              )
             : await getFileHeaderOverPeer(dotYouClient, odinId, videoDrive, videoFileId)
           : await getFileHeader(dotYouClient, videoDrive, videoFileId);
 
@@ -87,6 +87,7 @@ export const useVideoMetadata = (
         odinId || identity,
         videoDrive?.alias,
         videoGlobalTransitId || videoFileId,
+        videoFileKey,
       ],
       queryFn: () =>
         fetchVideoData(odinId || identity, videoFileId, videoGlobalTransitId, videoDrive),
