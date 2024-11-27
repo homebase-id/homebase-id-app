@@ -15,6 +15,8 @@ import {
   getRemoveReactionMutationOptions,
 } from '../hooks/chat/useChatReaction';
 import { getSavePostMutationOptions } from '../hooks/feed/post/useManagePost';
+import { tryJsonParse } from '@homebase-id/js-lib/helpers';
+import logger from '../provider/log/logger';
 
 const queryClient = new QueryClient({
   defaultOptions: {

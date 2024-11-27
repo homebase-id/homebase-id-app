@@ -3,6 +3,7 @@ import { InfiniteData, QueryClient, useInfiniteQuery } from '@tanstack/react-que
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { useDotYouClientContext } from 'homebase-id-app-common';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import logger from '../../provider/log/logger';
 
 export interface ChatConversationsReturn {
   searchResults: HomebaseFile<UnifiedConversation>[];

@@ -21,7 +21,7 @@ export const useConversationsWithRecentMessage = () => {
     () =>
       (conversations?.pages
         ?.flatMap((page) => page?.searchResults)
-        .filter((Boolean)) as ConversationWithRecentMessage[]) || [],
+        .filter(Boolean) as ConversationWithRecentMessage[]) || [],
     [conversations]
   );
 
@@ -29,6 +29,9 @@ export const useConversationsWithRecentMessage = () => {
     if (!flatConversations || !flatConversations || flatConversations.length === 0) {
       return;
     }
+
+    logger.Log('[PERF-DEBUG] building conversations with recent message');
+    console.log('[PERF-DEBUG] building conversations with recent message');
 
     const convoWithMessage: ConversationWithRecentMessage[] = await Promise.all(
       (flatConversations.filter(Boolean) as HomebaseFile<UnifiedConversation>[]).map(
@@ -48,7 +51,10 @@ export const useConversationsWithRecentMessage = () => {
     convoWithMessage.sort((a, b) => {
       // if (!a.lastMessage) return -1;
       // if (!b.lastMessage) return 1;
-      return (b.lastMessage?.fileMetadata.created || b.fileMetadata.updated) - (a.lastMessage?.fileMetadata.created || a.fileMetadata.updated);
+      return (
+        (b.lastMessage?.fileMetadata.created || b.fileMetadata.updated) -
+        (a.lastMessage?.fileMetadata.created || a.fileMetadata.updated)
+      );
     });
 
     if (!convoWithMessage || !convoWithMessage.length) return;
@@ -62,14 +68,13 @@ export const useConversationsWithRecentMessage = () => {
   useEffect(() => {
     if (lastUpdate === null || lastConversationUpdate === null) return;
 
-
     const currentCacheUpdate = queryClient.getQueryState(['conversations-with-recent-message']);
     if (
       currentCacheUpdate?.dataUpdatedAt &&
-      (lastUpdate !== 0 &&
-        lastUpdate <= currentCacheUpdate?.dataUpdatedAt) &&
-      (lastConversationUpdate !== 0 &&
-        lastConversationUpdate <= currentCacheUpdate?.dataUpdatedAt)
+      lastUpdate !== 0 &&
+      lastUpdate <= currentCacheUpdate?.dataUpdatedAt &&
+      lastConversationUpdate !== 0 &&
+      lastConversationUpdate <= currentCacheUpdate?.dataUpdatedAt
     ) {
       return;
     }
@@ -130,7 +135,6 @@ const useLastUpdatedConversations = () => {
       .getQueryCache()
       .find({ queryKey: ['conversations'], exact: true })?.state.dataUpdatedAt;
 
-
     if (!lastUpdate) {
       return;
     }
@@ -142,4 +146,3 @@ const useLastUpdatedConversations = () => {
     lastConversationUpdate: lastUpdate,
   };
 };
-

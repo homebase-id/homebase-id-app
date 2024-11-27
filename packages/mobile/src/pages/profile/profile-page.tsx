@@ -3,6 +3,7 @@ import { useLayoutEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Platform,
   ScrollView,
   Share,
   StyleProp,

@@ -81,6 +81,7 @@ const useInboxProcessor = (connected?: boolean) => {
 
     const processedresult = await processInbox(dotYouClient, ChatDrive, BATCH_SIZE);
 
+    logger.Log('[InboxProcessor] fetching updates since', lastProcessedWithBuffer);
     isDebug && console.debug('[InboxProcessor] fetching updates since', lastProcessedWithBuffer);
     if (lastProcessedWithBuffer) {
       const updatedMessages = await findChangesSinceTimestamp(
@@ -136,6 +137,8 @@ const useInboxProcessor = (connected?: boolean) => {
         updatedConversationMetadatas
       );
     } else {
+      console.log('[PERF-DEBUG] no last processed time');
+      logger.Log('[PERF-DEBUG] no last processed time');
       // We have no reference to the last time we processed the inbox, so we can only invalidate all chat messages
       queryClient.invalidateQueries({ queryKey: ['chat-messages'], exact: false });
       queryClient.invalidateQueries({ queryKey: ['conversations'], exact: false });
@@ -246,6 +249,8 @@ const useChatWebsocket = (isEnabled: boolean) => {
           !updatedConversation ||
           Object.keys(updatedConversation.fileMetadata.appData.content).length === 0
         ) {
+          console.log('[PERF-DEBUG] got bad conversation, invalidating all conversations');
+          logger.Log('[PERF-DEBUG] got bad conversation, invalidating all conversations');
           queryClient.invalidateQueries({ queryKey: ['conversations'] });
           return;
         }
@@ -467,6 +472,8 @@ const processConversationsBatch = async (
   await Promise.all(
     conversations.map(async (conversationsDsr) => {
       if (conversationsDsr.fileState === 'deleted') {
+        console.log('[PERF-DEBUG] got deleted conversation, invalidating all conversations');
+        logger.Log('[PERF-DEBUG] got deleted conversation, invalidating all conversations');
         queryClient.invalidateQueries({ queryKey: ['conversations'] });
         return;
       }
@@ -479,6 +486,12 @@ const processConversationsBatch = async (
       );
 
       if (!updatedConversation) {
+        console.log(
+          '[PERF-DEBUG] something went wrong with a new conversation, invalidating all conversations'
+        );
+        logger.Log(
+          '[PERF-DEBUG] something went wrong with a new conversation, invalidating all conversations'
+        );
         queryClient.invalidateQueries({ queryKey: ['conversations'] });
         return;
       }
