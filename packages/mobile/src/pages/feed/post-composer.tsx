@@ -11,13 +11,6 @@ import { useState, useMemo, useCallback, useLayoutEffect, useRef, useEffect, mem
 import { View, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
 import { Asset, launchImageLibrary } from 'react-native-image-picker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import {
-  DEFAULT_TOOLBAR_ITEMS,
-  RichText,
-  Toolbar,
-  useEditorBridge,
-  useEditorContent,
-} from '@10play/tentap-editor';
 import { useChannels } from '../../hooks/feed/channels/useChannels';
 import { usePostComposer } from '../../hooks/feed/post/usePostComposer';
 import { useDarkMode } from '../../hooks/useDarkMode';
@@ -36,242 +29,214 @@ import { getImageSize, openURL } from '../../utils/utils';
 import React from 'react';
 import Animated, { SlideInDown, SlideOutDown } from 'react-native-reanimated';
 import { FeedStackParamList } from '../../app/FeedStack';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { NativeStackNavigationProp, NativeStackScreenProps } from '@react-navigation/native-stack';
 import { LinkPreviewBar } from '../../components/Chat/Link-Preview-Bar';
 import { LinkPreview } from '@homebase-id/js-lib/media';
 import { Backdrop } from '../../components/ui/Modal/Backdrop';
 import PasteInput, { PastedFile } from '@mattermost/react-native-paste-input';
+import { ArticleComposer } from '../../components/Feed/Article/ArticleComposer';
 
 type PostComposerProps = NativeStackScreenProps<FeedStackParamList, 'Compose'>;
 
-export const PostComposer = memo(({ navigation }: PostComposerProps) => {
-  const { isDarkMode } = useDarkMode();
-  const insets = useSafeAreaInsets();
-
-  const identity = useDotYouClientContext().getIdentity();
-
-  const { savePost, processingProgress, error } = usePostComposer();
-
-  const [caption, setCaption] = useState<string>('');
-  const [channel, setChannel] = useState<
-    HomebaseFile<ChannelDefinition> | NewHomebaseFile<ChannelDefinition>
-  >(BlogConfig.PublicChannelNewDsr);
-  const [customAcl, setCustomAcl] = useState<AccessControlList | undefined>(undefined);
-  const [assets, setAssets] = useState<Asset[]>([]);
-
-  const [reactAccess, setReactAccess] = useState<ReactAccess | undefined>(undefined);
-  const [linkPreviews, setLinkPreviews] = useState<LinkPreview | null>(null);
-  const onDismissLinkPreview = useCallback(() => {
-    setLinkPreviews(null);
-  }, []);
-  const onLinkData = useCallback((link: LinkPreview) => {
-    setLinkPreviews(link);
-  }, []);
-
-  const isPosting = useMemo(() => !!processingProgress?.phase, [processingProgress]);
-
-  const doPost = useCallback(async () => {
-    if (isPosting) return;
-    await savePost(
-      caption,
-      assets.map<ImageSource>((value) => {
-        return {
-          height: value.height || 0,
-          width: value.width || 0,
-          name: value.fileName,
-          type: value.type && value.type === 'image/jpg' ? 'image/jpeg' : value.type,
-          uri: value.uri,
-          filename: value.fileName,
-          date: Date.parse(value.timestamp || new Date().toUTCString()),
-          filepath: value.originalPath,
-          id: value.id,
-          fileSize: value.fileSize,
-        };
-      }),
-      linkPreviews ? [linkPreviews] : undefined,
-      undefined,
-      channel,
-      reactAccess,
-      customAcl
-    );
-
-    navigation.goBack();
-  }, [
-    isPosting,
-    savePost,
-    caption,
-    assets,
-    linkPreviews,
-    channel,
-    reactAccess,
-    customAcl,
-    navigation,
-  ]);
-
-  const handleImageIconPress = useCallback(async () => {
-    const imagePickerResult = await launchImageLibrary({
-      mediaType: 'mixed',
-      selectionLimit: 10,
-    });
-    if (imagePickerResult.didCancel || imagePickerResult.errorCode) return;
-
-    setAssets(
-      imagePickerResult.assets
-        ?.filter(Boolean)
-        .filter((file) => Object.keys(file)?.length && file.type) ?? []
-    );
-  }, [setAssets]);
-
-  const handleChange = useCallback(
-    (channel: HomebaseFile<ChannelDefinition> | undefined, acl: AccessControlList | undefined) => {
-      channel && setChannel(channel);
-      setCustomAcl(acl);
-    },
-    []
-  );
+export const ComposePost = ({ navigation }: PostComposerProps) => {
   const [articleMode, setArticleMode] = useState(false);
 
-  const baseText = '<p></p>';
+  if (!articleMode) {
+    return <PostComposer onModeChanged={() => setArticleMode(true)} navigation={navigation} />;
+  }
+  return <ArticleComposer />;
+};
 
-  const canPost = (caption?.length && !caption?.startsWith(baseText)) || assets?.length;
+export const PostComposer = memo(
+  ({
+    onModeChanged,
+    navigation,
+  }: {
+    onModeChanged: () => void;
+    navigation: NativeStackNavigationProp<FeedStackParamList, 'Compose'>;
+  }) => {
+    const { isDarkMode } = useDarkMode();
+    const insets = useSafeAreaInsets();
+    const identity = useDotYouClientContext().getIdentity();
 
-  const onPaste = useCallback(
-    async (error: string | null | undefined, files: PastedFile[]) => {
-      if (error) {
-        console.error('Error while pasting:', error);
-        return;
-      }
-      const pastedItems: Asset[] = await Promise.all(
-        files
-          .map(async (file) => {
-            if (!file.type.startsWith('image')) return;
-            const { width, height } = await getImageSize(file.uri);
-            return {
-              uri: file.uri,
-              type: file.type,
-              fileName: file.fileName,
-              fileSize: file.fileSize,
-              height: height,
-              width: width,
-            } as Asset;
-          })
-          .filter(Boolean) as Promise<Asset>[]
+    const { savePost, processingProgress, error } = usePostComposer();
+
+    const [caption, setCaption] = useState<string>('');
+    const [channel, setChannel] = useState<
+      HomebaseFile<ChannelDefinition> | NewHomebaseFile<ChannelDefinition>
+    >(BlogConfig.PublicChannelNewDsr);
+    const [customAcl, setCustomAcl] = useState<AccessControlList | undefined>(undefined);
+    const [assets, setAssets] = useState<Asset[]>([]);
+
+    const [reactAccess, setReactAccess] = useState<ReactAccess | undefined>(undefined);
+    const [linkPreviews, setLinkPreviews] = useState<LinkPreview | null>(null);
+    const onDismissLinkPreview = useCallback(() => {
+      setLinkPreviews(null);
+    }, []);
+    const onLinkData = useCallback((link: LinkPreview) => {
+      setLinkPreviews(link);
+    }, []);
+
+    const isPosting = useMemo(() => !!processingProgress?.phase, [processingProgress]);
+
+    const doPost = useCallback(async () => {
+      if (isPosting) return;
+      await savePost(
+        caption,
+        assets.map<ImageSource>((value) => {
+          return {
+            height: value.height || 0,
+            width: value.width || 0,
+            name: value.fileName,
+            type: value.type && value.type === 'image/jpg' ? 'image/jpeg' : value.type,
+            uri: value.uri,
+            filename: value.fileName,
+            date: Date.parse(value.timestamp || new Date().toUTCString()),
+            filepath: value.originalPath,
+            id: value.id,
+            fileSize: value.fileSize,
+          };
+        }),
+        linkPreviews ? [linkPreviews] : undefined,
+        undefined,
+        channel,
+        reactAccess,
+        customAcl
       );
-      setAssets(pastedItems);
-    },
-    [setAssets]
-  );
 
-  const editor = useEditorBridge({
-    autofocus: true,
-    avoidIosKeyboard: true,
-    editable: true,
-    theme: {
-      toolbar: {
-        toolbarBody: {
-          borderTopColor: '#C6C6C6B3',
-          borderBottomColor: '#C6C6C6B3',
-        },
-        // Check the ToolbarTheme type for all options
+      navigation.goBack();
+    }, [
+      isPosting,
+      savePost,
+      caption,
+      assets,
+      linkPreviews,
+      channel,
+      reactAccess,
+      customAcl,
+      navigation,
+    ]);
+
+    const handleImageIconPress = useCallback(async () => {
+      const imagePickerResult = await launchImageLibrary({
+        mediaType: 'mixed',
+        selectionLimit: 10,
+      });
+      if (imagePickerResult.didCancel || imagePickerResult.errorCode) return;
+
+      setAssets(
+        imagePickerResult.assets
+          ?.filter(Boolean)
+          .filter((file) => Object.keys(file)?.length && file.type) ?? []
+      );
+    }, [setAssets]);
+
+    const handleChange = useCallback(
+      (
+        channel: HomebaseFile<ChannelDefinition> | undefined,
+        acl: AccessControlList | undefined
+      ) => {
+        channel && setChannel(channel);
+        setCustomAcl(acl);
       },
-      colorKeyboard: {
-        keyboardRootColor: 'white', // IOS only the background color of rootView of the custom keyboard
-        colorSelection: [
-          // Custom colors in color keyboard
-          {
-            name: 'Custom Color',
-            value: '#E5112B',
-            displayColor: '#E5112B', // Optional - the color that will be displayed on ui (if left empty will default to use value)
-          },
-        ],
+      []
+    );
+    const canPost = caption?.length || assets?.length;
+
+    const onPaste = useCallback(
+      async (error: string | null | undefined, files: PastedFile[]) => {
+        if (error) {
+          console.error('Error while pasting:', error);
+          return;
+        }
+        const pastedItems: Asset[] = await Promise.all(
+          files
+            .map(async (file) => {
+              if (!file.type.startsWith('image')) return;
+              const { width, height } = await getImageSize(file.uri);
+              return {
+                uri: file.uri,
+                type: file.type,
+                fileName: file.fileName,
+                fileSize: file.fileSize,
+                height: height,
+                width: width,
+              } as Asset;
+            })
+            .filter(Boolean) as Promise<Asset>[]
+        );
+        setAssets(pastedItems);
       },
-      webviewContainer: {},
-    },
-  });
-  const editorContent = useEditorContent(editor);
+      [setAssets]
+    );
 
-  useEffect(() => {
-    if (editorContent) {
-      setCaption(editorContent?.toString());
-    }
-  }, [editorContent]);
-
-  return (
-    <React.Fragment>
-      <ErrorNotification error={error} />
-      <Animated.View
-        entering={SlideInDown}
-        exiting={SlideOutDown}
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          paddingTop: insets.top + 8,
-          paddingBottom: 16,
-          paddingHorizontal: 8,
-          backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
-          zIndex: 0,
-        }}
-      >
-        <View
+    return (
+      <React.Fragment>
+        <ErrorNotification error={error} />
+        <Animated.View
+          entering={SlideInDown}
+          exiting={SlideOutDown}
           style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            paddingBottom: 8,
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            paddingTop: insets.top + 8,
+            paddingBottom: 16,
+            paddingHorizontal: 8,
+            backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
+            zIndex: 0,
           }}
         >
-          <TouchableOpacity
-            style={{
-              paddingHorizontal: 8,
-              paddingTop: 8,
-              paddingBottom: 12,
-            }}
-            onPress={() => navigation.goBack()}
-          >
-            <Text style={{ fontSize: 16 }}>{t('Cancel')}</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={{
-              backgroundColor: Colors.indigo[500],
-              opacity: canPost ? 1 : 0.5,
-
-              paddingHorizontal: 8,
-              paddingVertical: 6,
-              borderRadius: 5,
-              display: 'flex',
-              flexDirection: 'row',
-              alignItems: 'center',
-              zIndex: -1,
-            }}
-            disabled={!canPost}
-            onPress={doPost}
-          >
-            <Text style={{ color: Colors.white, fontSize: 16 }}>{t('Post')}</Text>
-          </TouchableOpacity>
-        </View>
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View
             style={{
-              padding: 16,
-              backgroundColor: isDarkMode ? Colors.black : Colors.white,
-              borderWidth: 1,
-              borderColor: isDarkMode ? Colors.slate[800] : Colors.gray[100],
-              borderRadius: 6,
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              paddingBottom: 8,
             }}
           >
-            {articleMode ? (
-              <View
-                style={{
-                  minHeight: 124,
-                }}
-              >
-                <RichText editor={editor} />
-              </View>
-            ) : (
+            <TouchableOpacity
+              style={{
+                paddingHorizontal: 8,
+                paddingTop: 8,
+                paddingBottom: 12,
+              }}
+              onPress={() => navigation.goBack()}
+            >
+              <Text style={{ fontSize: 16 }}>{t('Cancel')}</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={{
+                backgroundColor: Colors.indigo[500],
+                opacity: canPost ? 1 : 0.5,
+
+                paddingHorizontal: 8,
+                paddingVertical: 6,
+                borderRadius: 5,
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+                zIndex: -1,
+              }}
+              disabled={!canPost}
+              onPress={doPost}
+            >
+              <Text style={{ color: Colors.white, fontSize: 16 }}>{t('Post')}</Text>
+            </TouchableOpacity>
+          </View>
+          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+            <View
+              style={{
+                padding: 16,
+                backgroundColor: isDarkMode ? Colors.black : Colors.white,
+                borderWidth: 1,
+                borderColor: isDarkMode ? Colors.slate[800] : Colors.gray[100],
+                borderRadius: 6,
+              }}
+            >
               <PasteInput
                 onPaste={onPaste}
                 placeholder="What's up?"
@@ -286,108 +251,97 @@ export const PostComposer = memo(({ navigation }: PostComposerProps) => {
                 multiline={true}
                 onChange={(event) => setCaption(event.nativeEvent.text)}
               />
-            )}
-            <View>
-              <FileOverview assets={assets} setAssets={setAssets} />
-              <LinkPreviewBar
-                textToSearchIn={caption}
-                onLinkData={onLinkData}
-                onDismiss={onDismissLinkPreview}
-              />
-              <View
-                style={{
-                  display: 'flex',
-                  flexDirection: 'row-reverse',
-                  alignItems: 'center',
-                  gap: 8,
-                  zIndex: -1,
-                  marginVertical: 8,
-                }}
-              >
-                {channel.serverMetadata?.accessControlList ? (
-                  <AclIcon
-                    size={'sm'}
-                    acl={customAcl || channel.serverMetadata?.accessControlList}
-                  />
-                ) : null}
 
-                {channel.serverMetadata?.accessControlList ? (
-                  <Text style={{ fontSize: 12 }}>
-                    <AclSummary acl={customAcl || channel.serverMetadata?.accessControlList} />
-                  </Text>
-                ) : null}
-              </View>
-
-              <View
-                style={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: 10,
-                }}
-              >
-                <TouchableOpacity onPress={handleImageIconPress}>
-                  <Plus size={'sm'} />
-                </TouchableOpacity>
-                <ActionGroup
-                  options={[
-                    reactAccess === false
-                      ? {
-                          label: t('Enable reactions'),
-                          icon: Globe,
-                          onPress: () => setReactAccess(true),
-                        }
-                      : {
-                          label: t('Disable reactions'),
-                          icon: Lock,
-                          onPress: () => setReactAccess(false),
-                        },
-                    {
-                      label: t(!articleMode ? 'New Article' : 'New Post'),
-                      onPress: () => setArticleMode(!articleMode),
-                      icon: Article,
-                    },
-                    {
-                      label: t('See my drafts'),
-                      onPress: () => openURL(`https://${identity}/apps/feed/articles`),
-                      icon: Pencil,
-                    },
-                  ]}
-                >
-                  <Ellipsis size={'sm'} />
-                </ActionGroup>
-
-                <ChannelOrAclSelector
-                  defaultChannelValue={
-                    channel?.fileMetadata?.appData?.uniqueId || BlogConfig.PublicChannelId
-                  }
-                  defaultAcl={customAcl}
-                  onChange={handleChange}
+              <View>
+                <FileOverview assets={assets} setAssets={setAssets} />
+                <LinkPreviewBar
+                  textToSearchIn={caption}
+                  onLinkData={onLinkData}
+                  onDismiss={onDismissLinkPreview}
                 />
+                <View
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'row-reverse',
+                    alignItems: 'center',
+                    gap: 8,
+                    zIndex: -1,
+                    marginVertical: 8,
+                  }}
+                >
+                  {channel.serverMetadata?.accessControlList ? (
+                    <AclIcon
+                      size={'sm'}
+                      acl={customAcl || channel.serverMetadata?.accessControlList}
+                    />
+                  ) : null}
+
+                  {channel.serverMetadata?.accessControlList ? (
+                    <Text style={{ fontSize: 12 }}>
+                      <AclSummary acl={customAcl || channel.serverMetadata?.accessControlList} />
+                    </Text>
+                  ) : null}
+                </View>
+
+                <View
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 10,
+                  }}
+                >
+                  <TouchableOpacity onPress={handleImageIconPress}>
+                    <Plus size={'sm'} />
+                  </TouchableOpacity>
+                  <ActionGroup
+                    options={[
+                      reactAccess === false
+                        ? {
+                            label: t('Enable reactions'),
+                            icon: Globe,
+                            onPress: () => setReactAccess(true),
+                          }
+                        : {
+                            label: t('Disable reactions'),
+                            icon: Lock,
+                            onPress: () => setReactAccess(false),
+                          },
+                      {
+                        label: t('New Article'),
+                        onPress: onModeChanged,
+                        icon: Article,
+                      },
+                      {
+                        label: t('See my drafts'),
+                        onPress: () => openURL(`https://${identity}/apps/feed/articles`),
+                        icon: Pencil,
+                      },
+                    ]}
+                  >
+                    <Ellipsis size={'sm'} />
+                  </ActionGroup>
+
+                  <ChannelOrAclSelector
+                    defaultChannelValue={
+                      channel?.fileMetadata?.appData?.uniqueId || BlogConfig.PublicChannelId
+                    }
+                    defaultAcl={customAcl}
+                    onChange={handleChange}
+                  />
+                </View>
               </View>
             </View>
-          </View>
-        </KeyboardAvoidingView>
-      </Animated.View>
+          </KeyboardAvoidingView>
+        </Animated.View>
 
-      {!error ? <ProgressIndicator processingProgress={processingProgress} /> : null}
-      {articleMode && (
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={{
-            position: 'absolute',
-            width: '100%',
-            bottom: 0,
-          }}
-        >
-          <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS.filter((_, i) => i !== 3)} />
-        </KeyboardAvoidingView>
-      )}
-    </React.Fragment>
-  );
-});
+        {!error ? <ProgressIndicator processingProgress={processingProgress} /> : null}
+      </React.Fragment>
+    );
+  }
+);
 
-const ChannelOrAclSelector = memo(
+export const ChannelOrAclSelector = memo(
   ({
     defaultChannelValue,
     defaultAcl,
