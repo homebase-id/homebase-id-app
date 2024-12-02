@@ -172,7 +172,7 @@ export function cleanString(input: string): string {
   return cleanedString;
 }
 
-export function assetsToImageSource(assets: Asset[]): ImageSource[] {
+export function assetsToImageSource(assets: Asset[], key?: string): ImageSource[] {
   return assets.map((value) => {
     return {
       height: value.height || 0,
@@ -185,6 +185,7 @@ export function assetsToImageSource(assets: Asset[]): ImageSource[] {
       filepath: value.originalPath,
       id: value.id,
       fileSize: value.fileSize,
+      key: assets?.length === 1 ? key : undefined,
     };
   });
 }

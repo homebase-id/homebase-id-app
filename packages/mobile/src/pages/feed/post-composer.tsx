@@ -44,7 +44,7 @@ export const ComposePost = ({ navigation }: PostComposerProps) => {
   if (!articleMode) {
     return <PostComposer onModeChanged={() => setArticleMode(true)} navigation={navigation} />;
   }
-  return <ArticleComposer />;
+  return <ArticleComposer navigation={navigation} />;
 };
 
 export const PostComposer = memo(
