@@ -23,6 +23,7 @@ import { assetsToImageSource, openURL } from '../../../utils/utils';
 import { Input } from '../../ui/Form/Input';
 import { useArticleComposer } from '../../../hooks/feed/article/useArticleComposer';
 import { Text } from '../../ui/Text/Text';
+import TextButton from '../../ui/Text/Text-Button';
 
 export const ArticleComposer = () => {
   const { isDarkMode } = useDarkMode();
@@ -117,6 +118,7 @@ export const ArticleComposer = () => {
     [setChannel]
   );
   const identity = useDotYouClientContext().getIdentity();
+  const [isEditTeaser, setIsEditTeaser] = useState(true);
 
   const editor = useEditorBridge({
     autofocus: true,
@@ -256,81 +258,101 @@ export const ArticleComposer = () => {
       <Animated.ScrollView>
         <View
           style={{
+            justifyContent: 'flex-end',
+            flexDirection: 'row',
             padding: 16,
             marginBottom: 8,
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-            borderWidth: 1,
-            borderColor: isDarkMode ? Colors.slate[800] : Colors.gray[100],
-            borderRadius: 6,
           }}
         >
-          <Text style={styles.heading}>{t('Title')}</Text>
-          <Input
-            value="Untitled"
-            viewStyle={{
-              paddingLeft: 0,
-              backgroundColor: 'transparent',
-              borderBottomWidth: 1,
-              borderColor: isDarkMode ? Colors.slate[800] : Colors.gray[200],
-            }}
-            style={{
-              marginLeft: 6,
-            }}
+          {!isEditTeaser && (
+            <Text style={{ fontSize: 16, fontWeight: '500', flex: 1 }}>{t('Untitled')}</Text>
+          )}
+          <TextButton
+            title={isEditTeaser ? t('Collapse') : t('Expand')}
+            onPress={() => setIsEditTeaser(!isEditTeaser)}
           />
         </View>
-        <View
-          style={{
-            padding: 16,
-            marginBottom: 8,
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-            borderWidth: 1,
-            borderColor: isDarkMode ? Colors.slate[800] : Colors.gray[100],
-            borderRadius: 6,
-          }}
-        >
-          <Text style={styles.heading}>{t('Summary')}</Text>
-          <Input
-            placeholder="Summary"
-            viewStyle={{
-              paddingLeft: 0,
-              backgroundColor: 'transparent',
-              borderWidth: 1,
-              borderRadius: 5,
-              borderColor: isDarkMode ? Colors.slate[800] : Colors.gray[200],
-              minHeight: '20%',
-            }}
-            style={{
-              marginLeft: 6,
-            }}
-          />
-        </View>
-        <View
-          style={{
-            padding: 16,
-            marginBottom: 8,
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-            borderWidth: 1,
-            borderColor: isDarkMode ? Colors.slate[800] : Colors.gray[100],
-            borderRadius: 6,
-          }}
-        >
-          <Text style={styles.heading}>{t('Hero')}</Text>
-          <TouchableOpacity
-            onPress={onPrimaryImageSelected}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 16,
-              padding: 8,
-              backgroundColor: isDarkMode ? Colors.gray[800] : Colors.gray[100],
-              borderRadius: 6,
-              marginVertical: 12,
-            }}
-          >
-            <CircleExclamation size={'md'} />
-            <Text>{t('No Primary Image selected')}</Text>
-          </TouchableOpacity>
-        </View>
+        {isEditTeaser && (
+          <>
+            <View
+              style={{
+                padding: 16,
+                marginBottom: 8,
+                backgroundColor: isDarkMode ? Colors.black : Colors.white,
+                borderWidth: 1,
+                borderColor: isDarkMode ? Colors.slate[800] : Colors.gray[100],
+                borderRadius: 6,
+              }}
+            >
+              <Text style={styles.heading}>{t('Title')}</Text>
+              <Input
+                value="Untitled"
+                viewStyle={{
+                  paddingLeft: 0,
+                  backgroundColor: 'transparent',
+                  borderBottomWidth: 1,
+                  borderColor: isDarkMode ? Colors.slate[800] : Colors.gray[200],
+                }}
+                style={{
+                  marginLeft: 6,
+                }}
+              />
+            </View>
+            <View
+              style={{
+                padding: 16,
+                marginBottom: 8,
+                backgroundColor: isDarkMode ? Colors.black : Colors.white,
+                borderWidth: 1,
+                borderColor: isDarkMode ? Colors.slate[800] : Colors.gray[100],
+                borderRadius: 6,
+              }}
+            >
+              <Text style={styles.heading}>{t('Summary')}</Text>
+              <Input
+                placeholder="Summary"
+                viewStyle={{
+                  paddingLeft: 0,
+                  backgroundColor: 'transparent',
+                  borderWidth: 1,
+                  borderRadius: 5,
+                  borderColor: isDarkMode ? Colors.slate[800] : Colors.gray[200],
+                  minHeight: '20%',
+                }}
+                style={{
+                  marginLeft: 6,
+                }}
+              />
+            </View>
+            <View
+              style={{
+                padding: 16,
+                marginBottom: 8,
+                backgroundColor: isDarkMode ? Colors.black : Colors.white,
+                borderWidth: 1,
+                borderColor: isDarkMode ? Colors.slate[800] : Colors.gray[100],
+                borderRadius: 6,
+              }}
+            >
+              <Text style={styles.heading}>{t('Hero')}</Text>
+              <TouchableOpacity
+                onPress={onPrimaryImageSelected}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 16,
+                  padding: 8,
+                  backgroundColor: isDarkMode ? Colors.gray[800] : Colors.gray[100],
+                  borderRadius: 6,
+                  marginVertical: 12,
+                }}
+              >
+                <CircleExclamation size={'md'} />
+                <Text>{t('No Primary Image selected')}</Text>
+              </TouchableOpacity>
+            </View>
+          </>
+        )}
         <View
           style={{
             padding: 16,
