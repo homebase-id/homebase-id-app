@@ -155,6 +155,7 @@ export const ArticleComposer = ({
       setContent(editorContent?.toString());
     }
   }, [editorContent]);
+
   const canPost = useMemo(
     () =>
       !postFile.fileId ||
@@ -213,19 +214,15 @@ export const ArticleComposer = ({
     if (imagePickerResult.didCancel || imagePickerResult.errorCode) return;
 
     const fileKey = `${POST_MEDIA_RTE_PAYLOAD_KEY}i${files.length}`;
-
-    setFiles(
-      assetsToImageSource(
-        imagePickerResult.assets
-          ?.filter(Boolean)
-          .filter((file) => Object.keys(file)?.length && file.type) ?? [],
-        fileKey
-      )
+    const assets = assetsToImageSource(
+      imagePickerResult.assets?.filter(Boolean).filter((file) => Object.keys(file)?.length) ?? [],
+      fileKey
     );
+    setFiles(assets);
     handleRTEChange({
       target: {
         name: 'primaryMediaFile',
-        value: { fileKey: fileKey, type: 'image' },
+        value: { fileKey: assets[0].key || fileKey, type: assets[0].type || 'image' },
       },
     });
   }, [files.length, handleRTEChange, setFiles]);
