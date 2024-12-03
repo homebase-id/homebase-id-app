@@ -28,6 +28,9 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { FeedStackParamList } from '../../../app/FeedStack';
 import { ErrorNotification } from '../../ui/Alert/ErrorNotification';
 import { ActionButton } from '../Meta/Actions';
+import { SaveStatus } from '../../ui/SaveStatus';
+import { Header } from '@react-navigation/elements';
+import { BackButton } from '../../ui/Buttons';
 
 const POST_MEDIA_RTE_PAYLOAD_KEY = 'pst_rte';
 
@@ -220,283 +223,314 @@ export const ArticleComposer = ({
     });
   }, [files.length, handleRTEChange, setFiles]);
 
+  const renderHeaderLeft = useCallback(() => {
+    return (
+      <BackButton
+        label="Cancel"
+        style={{
+          marginLeft: 8,
+        }}
+        onPress={() => {
+          if (navigation.canGoBack()) {
+            navigation.goBack();
+          }
+        }}
+      />
+    );
+  }, [navigation]);
+
+  const renderHeaderRight = useCallback(() => {
+    return (
+      <View
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'flex-end',
+          flex: 1,
+          gap: 8,
+        }}
+      >
+        <ActionButton
+          icon={<FloppyDisk />}
+          onPress={() => {
+            doSave(undefined, isPublished ? 'publish' : undefined);
+            setNeedsSaving(false);
+          }}
+          label="Save"
+        />
+        <TouchableOpacity
+          style={{
+            backgroundColor: Colors.indigo[500],
+            opacity: !canPost ? 1 : 0.5,
+            paddingHorizontal: 8,
+            paddingVertical: 6,
+            borderRadius: 5,
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            zIndex: -1,
+          }}
+          disabled={!canPost}
+          onPress={() => {}}
+        >
+          <Text style={{ color: Colors.white, fontSize: 16 }}>{t('Publish')}</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }, [canPost, doSave, isPublished]);
+
   if (isLoadingServerData) return null;
 
   return (
-    <Animated.View
-      style={{
-        paddingTop: insets.top + 8,
-        paddingBottom: 16,
-        paddingHorizontal: 8,
-        backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
-        zIndex: 0,
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-      }}
-    >
-      <ErrorNotification error={error} />
-      <View
+    <>
+      <Animated.View
         style={{
-          flexDirection: 'row',
-
-          alignItems: 'center',
-          paddingBottom: 8,
+          paddingBottom: insets.bottom + 16,
+          paddingHorizontal: 8,
+          backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
+          flex: 1,
         }}
       >
-        <TouchableOpacity
-          style={{
-            paddingHorizontal: 8,
-            paddingTop: 8,
-            paddingBottom: 12,
+        <Header
+          title=""
+          headerLeft={renderHeaderLeft}
+          headerRight={renderHeaderRight}
+          headerShadowVisible={false}
+          headerStyle={{
+            backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
           }}
-          onPress={() => navigation.goBack()}
-        >
-          <Text style={{ fontSize: 16 }}>{t('Cancel')}</Text>
-        </TouchableOpacity>
-        <View
-          style={{
+          headerRightContainerStyle={{
             display: 'flex',
             flexDirection: 'row',
             justifyContent: 'flex-end',
             flex: 1,
             gap: 8,
           }}
+        />
+        <ErrorNotification error={error} />
+
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={{
+            flex: 1,
+          }}
         >
-          <ActionButton
-            icon={<FloppyDisk />}
-            onPress={() => {
-              doSave(undefined, isPublished ? 'publish' : undefined);
-              setNeedsSaving(false);
-            }}
-            label="Save"
-          />
-          <TouchableOpacity
-            style={{
-              backgroundColor: Colors.indigo[500],
-              opacity: !canPost ? 1 : 0.5,
-              paddingHorizontal: 8,
-              paddingVertical: 6,
-              borderRadius: 5,
-              display: 'flex',
-              flexDirection: 'row',
-              alignItems: 'center',
-              zIndex: -1,
-            }}
-            disabled={!canPost}
-            onPress={() => {}}
-          >
-            <Text style={{ color: Colors.white, fontSize: 16 }}>{t('Publish')}</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{
-          flex: 1,
-        }}
-      >
-        <Animated.ScrollView>
-          <View
-            style={{
-              justifyContent: 'flex-end',
-              flexDirection: 'row',
-              padding: 16,
-              marginBottom: 8,
-            }}
-          >
-            {!isEditTeaser && (
-              <Text style={{ fontSize: 16, fontWeight: '500', flex: 1 }}>
-                {postFile.fileMetadata.appData.content.caption}
-              </Text>
-            )}
-            <TextButton
-              title={isEditTeaser ? t('Collapse') : t('Expand')}
-              onPress={() => setIsEditTeaser(!isEditTeaser)}
-            />
-          </View>
-          {isEditTeaser && (
-            <>
-              <View
-                style={{
-                  padding: 16,
-                  marginBottom: 8,
-                  backgroundColor: isDarkMode ? Colors.black : Colors.white,
-                  borderWidth: 1,
-                  borderColor: isDarkMode ? Colors.slate[800] : Colors.gray[100],
-                  borderRadius: 6,
-                }}
-              >
-                <Text style={styles.heading}>{t('Title')}</Text>
-                <Input
-                  defaultValue={postFile.fileMetadata.appData.content.caption}
-                  onChangeText={(e) => handleRTEChange({ target: { name: 'caption', value: e } })}
-                  viewStyle={{
-                    paddingLeft: 0,
-                    backgroundColor: 'transparent',
-                    borderBottomWidth: 1,
-                    borderColor: isDarkMode ? Colors.slate[800] : Colors.gray[200],
-                  }}
-                  style={{
-                    marginLeft: 6,
-                  }}
-                />
-              </View>
-              <View
-                style={{
-                  padding: 16,
-                  marginBottom: 8,
-                  backgroundColor: isDarkMode ? Colors.black : Colors.white,
-                  borderWidth: 1,
-                  borderColor: isDarkMode ? Colors.slate[800] : Colors.gray[100],
-                  borderRadius: 6,
-                }}
-              >
-                <Text style={styles.heading}>{t('Summary')}</Text>
-                <Input
-                  placeholder="Summary"
-                  defaultValue={(postFile.fileMetadata.appData.content as Article).abstract}
-                  onChangeText={(e) => handleRTEChange({ target: { name: 'abstract', value: e } })}
-                  viewStyle={{
-                    paddingLeft: 0,
-                    backgroundColor: 'transparent',
-                    borderWidth: 1,
-                    borderRadius: 5,
-                    borderColor: isDarkMode ? Colors.slate[800] : Colors.gray[200],
-                    minHeight: '20%',
-                  }}
-                  style={{
-                    marginLeft: 6,
-                  }}
-                />
-              </View>
-              <View
-                style={{
-                  padding: 16,
-                  marginBottom: 8,
-                  backgroundColor: isDarkMode ? Colors.black : Colors.white,
-                  borderWidth: 1,
-                  borderColor: isDarkMode ? Colors.slate[800] : Colors.gray[100],
-                  borderRadius: 6,
-                }}
-              >
-                <Text style={styles.heading}>{t('Hero')}</Text>
-                <TouchableOpacity
-                  onPress={onPrimaryImageSelected}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 16,
-                    padding: 8,
-                    backgroundColor: isDarkMode ? Colors.gray[800] : Colors.gray[100],
-                    borderRadius: 6,
-                    marginVertical: 12,
-                  }}
-                >
-                  <CircleExclamation size={'md'} />
-                  <Text>{t('No Primary Image selected')}</Text>
-                </TouchableOpacity>
-              </View>
-            </>
-          )}
-          <View
-            style={{
-              padding: 16,
-              backgroundColor: isDarkMode ? Colors.black : Colors.white,
-              borderWidth: 1,
-              borderColor: isDarkMode ? Colors.slate[800] : Colors.gray[100],
-              borderRadius: 6,
-              minHeight: '35%',
-            }}
-          >
-            <KeyboardAvoidingView
-              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-              style={{
-                flex: 1,
-              }}
-            >
-              <RichText editor={editor} />
-            </KeyboardAvoidingView>
+          <Animated.ScrollView>
             <View
               style={{
-                display: 'flex',
-                flexDirection: 'row-reverse',
-                alignItems: 'center',
-                gap: 8,
-                zIndex: -1,
-                marginVertical: 8,
-              }}
-            >
-              {channel.serverMetadata?.accessControlList ? (
-                <AclIcon size={'sm'} acl={customAcl || channel.serverMetadata?.accessControlList} />
-              ) : null}
-
-              {channel.serverMetadata?.accessControlList ? (
-                <Text style={{ fontSize: 12 }}>
-                  <AclSummary acl={customAcl || channel.serverMetadata?.accessControlList} />
-                </Text>
-              ) : null}
-            </View>
-            <View
-              style={{
-                display: 'flex',
+                justifyContent: 'flex-end',
                 flexDirection: 'row',
-                alignItems: 'center',
-                gap: 10,
+                padding: 16,
+                marginBottom: 8,
               }}
             >
-              {/* <TouchableOpacity onPress={handleImageIconPress}>
-              <Plus size={'sm'} />
-            </TouchableOpacity> */}
-              <ActionGroup
-                options={[
-                  reactAccess === false
-                    ? {
-                        label: t('Enable reactions'),
-                        icon: Globe,
-                        onPress: () => setReactAccess(true),
-                      }
-                    : {
-                        label: t('Disable reactions'),
-                        icon: Lock,
-                        onPress: () => setReactAccess(false),
-                      },
-
-                  {
-                    label: t('See my drafts'),
-                    onPress: () => openURL(`https://${identity}/apps/feed/articles`),
-                    icon: Pencil,
-                  },
-                ]}
-              >
-                <Ellipsis size={'sm'} />
-              </ActionGroup>
-
-              <ChannelOrAclSelector
-                defaultChannelValue={
-                  channel?.fileMetadata?.appData?.uniqueId || BlogConfig.PublicChannelId
-                }
-                defaultAcl={customAcl}
-                onChange={handleChange}
-                excludeCustom
+              {!isEditTeaser && (
+                <Text style={{ fontSize: 16, fontWeight: '500', flex: 1 }}>
+                  {postFile.fileMetadata.appData.content.caption}
+                </Text>
+              )}
+              <TextButton
+                title={isEditTeaser ? t('Collapse') : t('Expand')}
+                onPress={() => setIsEditTeaser(!isEditTeaser)}
               />
             </View>
-          </View>
-        </Animated.ScrollView>
-      </KeyboardAvoidingView>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{
-          position: 'absolute',
-          width: '100%',
-          bottom: 0,
-        }}
-      >
-        <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS.filter((_, i) => i !== 3)} />
-      </KeyboardAvoidingView>
-    </Animated.View>
+            {isEditTeaser && (
+              <>
+                <View
+                  style={{
+                    padding: 16,
+                    marginBottom: 8,
+                    backgroundColor: isDarkMode ? Colors.black : Colors.white,
+                    borderWidth: 1,
+                    borderColor: isDarkMode ? Colors.slate[800] : Colors.gray[100],
+                    borderRadius: 6,
+                  }}
+                >
+                  <Text style={styles.heading}>{t('Title')}</Text>
+                  <Input
+                    defaultValue={postFile.fileMetadata.appData.content.caption}
+                    onChangeText={(e) => handleRTEChange({ target: { name: 'caption', value: e } })}
+                    viewStyle={{
+                      paddingLeft: 0,
+                      backgroundColor: 'transparent',
+                      borderBottomWidth: 1,
+                      borderColor: isDarkMode ? Colors.slate[800] : Colors.gray[200],
+                    }}
+                    style={{
+                      marginLeft: 6,
+                    }}
+                  />
+                </View>
+                <View
+                  style={{
+                    padding: 16,
+                    marginBottom: 8,
+                    backgroundColor: isDarkMode ? Colors.black : Colors.white,
+                    borderWidth: 1,
+                    borderColor: isDarkMode ? Colors.slate[800] : Colors.gray[100],
+                    borderRadius: 6,
+                  }}
+                >
+                  <Text style={styles.heading}>{t('Summary')}</Text>
+                  <Input
+                    placeholder="Summary"
+                    defaultValue={(postFile.fileMetadata.appData.content as Article).abstract}
+                    onChangeText={(e) =>
+                      handleRTEChange({ target: { name: 'abstract', value: e } })
+                    }
+                    viewStyle={{
+                      paddingLeft: 0,
+                      backgroundColor: 'transparent',
+                      borderWidth: 1,
+                      borderRadius: 5,
+                      borderColor: isDarkMode ? Colors.slate[800] : Colors.gray[200],
+                      minHeight: '20%',
+                    }}
+                    style={{
+                      marginLeft: 6,
+                    }}
+                  />
+                </View>
+                <View
+                  style={{
+                    padding: 16,
+                    marginBottom: 8,
+                    backgroundColor: isDarkMode ? Colors.black : Colors.white,
+                    borderWidth: 1,
+                    borderColor: isDarkMode ? Colors.slate[800] : Colors.gray[100],
+                    borderRadius: 6,
+                  }}
+                >
+                  <Text style={styles.heading}>{t('Hero')}</Text>
+                  <TouchableOpacity
+                    onPress={onPrimaryImageSelected}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 16,
+                      padding: 8,
+                      backgroundColor: isDarkMode ? Colors.gray[800] : Colors.gray[100],
+                      borderRadius: 6,
+                      marginVertical: 12,
+                    }}
+                  >
+                    <CircleExclamation size={'md'} />
+                    <Text>{t('No Primary Image selected')}</Text>
+                  </TouchableOpacity>
+                </View>
+              </>
+            )}
+            <View
+              style={{
+                padding: 16,
+                backgroundColor: isDarkMode ? Colors.black : Colors.white,
+                borderWidth: 1,
+                borderColor: isDarkMode ? Colors.slate[800] : Colors.gray[100],
+                borderRadius: 6,
+                minHeight: '35%',
+              }}
+            >
+              <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                style={{
+                  flex: 1,
+                }}
+              >
+                <RichText editor={editor} />
+              </KeyboardAvoidingView>
+              <View
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row-reverse',
+                  alignItems: 'center',
+                  gap: 8,
+                  zIndex: -1,
+                  marginVertical: 8,
+                }}
+              >
+                {channel.serverMetadata?.accessControlList ? (
+                  <AclIcon
+                    size={'sm'}
+                    acl={customAcl || channel.serverMetadata?.accessControlList}
+                  />
+                ) : null}
+
+                {channel.serverMetadata?.accessControlList ? (
+                  <Text style={{ fontSize: 12 }}>
+                    <AclSummary acl={customAcl || channel.serverMetadata?.accessControlList} />
+                  </Text>
+                ) : null}
+              </View>
+              <View
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 10,
+                }}
+              >
+                {/* <TouchableOpacity onPress={handleImageIconPress}>
+              <Plus size={'sm'} />
+            </TouchableOpacity> */}
+                <ActionGroup
+                  options={[
+                    reactAccess === false
+                      ? {
+                          label: t('Enable reactions'),
+                          icon: Globe,
+                          onPress: () => setReactAccess(true),
+                        }
+                      : {
+                          label: t('Disable reactions'),
+                          icon: Lock,
+                          onPress: () => setReactAccess(false),
+                        },
+
+                    {
+                      label: t('See my drafts'),
+                      onPress: () => openURL(`https://${identity}/apps/feed/articles`),
+                      icon: Pencil,
+                    },
+                  ]}
+                >
+                  <Ellipsis size={'sm'} />
+                </ActionGroup>
+
+                <ChannelOrAclSelector
+                  defaultChannelValue={
+                    channel?.fileMetadata?.appData?.uniqueId || BlogConfig.PublicChannelId
+                  }
+                  defaultAcl={customAcl}
+                  onChange={handleChange}
+                  excludeCustom
+                />
+              </View>
+            </View>
+            <View
+              style={{
+                alignContent: 'flex-end',
+                justifyContent: 'flex-end',
+                alignItems: 'flex-end',
+                marginVertical: 14,
+                marginRight: 16,
+              }}
+            >
+              <SaveStatus state={saveStatus} error={error} />
+            </View>
+          </Animated.ScrollView>
+        </KeyboardAvoidingView>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={{
+            position: 'absolute',
+            width: '100%',
+            bottom: 0,
+          }}
+        >
+          <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS.filter((_, i) => i !== 3)} />
+        </KeyboardAvoidingView>
+      </Animated.View>
+    </>
   );
 };
 
