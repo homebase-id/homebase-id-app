@@ -278,13 +278,16 @@ export const ArticleComposer = ({
             zIndex: -1,
           }}
           disabled={!canPost}
-          onPress={() => {}}
+          onPress={() => {
+            doSave(postFile, 'publish', undefined);
+            setNeedsSaving(false);
+          }}
         >
           <Text style={{ color: Colors.white, fontSize: 16 }}>{t('Publish')}</Text>
         </TouchableOpacity>
       </View>
     );
-  }, [canPost, doSave, isPublished]);
+  }, [canPost, doSave, isPublished, postFile]);
 
   if (isLoadingServerData) return null;
 
