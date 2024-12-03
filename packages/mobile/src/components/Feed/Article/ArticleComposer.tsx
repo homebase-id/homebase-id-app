@@ -16,7 +16,7 @@ import { AclIcon, AclSummary } from '../Composer/AclSummary';
 import { Article, BlogConfig, ChannelDefinition, ReactAccess } from '@homebase-id/js-lib/public';
 import { AccessControlList, HomebaseFile } from '@homebase-id/js-lib/core';
 import { launchImageLibrary } from 'react-native-image-picker';
-import { CircleExclamation, Ellipsis, Globe, Images, Lock, Pencil } from '../../ui/Icons/icons';
+import { CircleExclamation, Ellipsis, FloppyDisk, Globe, Lock, Pencil } from '../../ui/Icons/icons';
 import { ActionGroup } from '../../ui/Form/ActionGroup';
 import { ChannelOrAclSelector } from '../../../pages/feed/post-composer';
 import { assetsToImageSource, openURL } from '../../../utils/utils';
@@ -27,7 +27,7 @@ import TextButton from '../../ui/Text/Text-Button';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { FeedStackParamList } from '../../../app/FeedStack';
 import { ErrorNotification } from '../../ui/Alert/ErrorNotification';
-import { MediaGallery } from '../../ui/Media/MediaGallery';
+import { ActionButton } from '../Meta/Actions';
 
 const POST_MEDIA_RTE_PAYLOAD_KEY = 'pst_rte';
 
@@ -241,7 +241,7 @@ export const ArticleComposer = ({
       <View
         style={{
           flexDirection: 'row',
-          justifyContent: 'space-between',
+
           alignItems: 'center',
           paddingBottom: 8,
         }}
@@ -256,24 +256,41 @@ export const ArticleComposer = ({
         >
           <Text style={{ fontSize: 16 }}>{t('Cancel')}</Text>
         </TouchableOpacity>
-
-        <TouchableOpacity
+        <View
           style={{
-            backgroundColor: Colors.indigo[500],
-            opacity: !canPost ? 1 : 0.5,
-            paddingHorizontal: 8,
-            paddingVertical: 6,
-            borderRadius: 5,
             display: 'flex',
             flexDirection: 'row',
-            alignItems: 'center',
-            zIndex: -1,
+            justifyContent: 'flex-end',
+            flex: 1,
+            gap: 8,
           }}
-          disabled={!canPost}
-          onPress={() => {}}
         >
-          <Text style={{ color: Colors.white, fontSize: 16 }}>{t('Publish')}</Text>
-        </TouchableOpacity>
+          <ActionButton
+            icon={<FloppyDisk />}
+            onPress={() => {
+              doSave(undefined, isPublished ? 'publish' : undefined);
+              setNeedsSaving(false);
+            }}
+            label="Save"
+          />
+          <TouchableOpacity
+            style={{
+              backgroundColor: Colors.indigo[500],
+              opacity: !canPost ? 1 : 0.5,
+              paddingHorizontal: 8,
+              paddingVertical: 6,
+              borderRadius: 5,
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+              zIndex: -1,
+            }}
+            disabled={!canPost}
+            onPress={() => {}}
+          >
+            <Text style={{ color: Colors.white, fontSize: 16 }}>{t('Publish')}</Text>
+          </TouchableOpacity>
+        </View>
       </View>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
