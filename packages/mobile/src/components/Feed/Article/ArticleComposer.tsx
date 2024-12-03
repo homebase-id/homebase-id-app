@@ -16,7 +16,7 @@ import { AclIcon, AclSummary } from '../Composer/AclSummary';
 import { Article, BlogConfig, ChannelDefinition, ReactAccess } from '@homebase-id/js-lib/public';
 import { AccessControlList, HomebaseFile } from '@homebase-id/js-lib/core';
 import { launchImageLibrary } from 'react-native-image-picker';
-import { CircleExclamation, Ellipsis, FloppyDisk, Globe, Lock, Pencil } from '../../ui/Icons/icons';
+import { Ellipsis, FloppyDisk, Globe, Lock, Pencil } from '../../ui/Icons/icons';
 import { ActionGroup } from '../../ui/Form/ActionGroup';
 import { ChannelOrAclSelector } from '../../../pages/feed/post-composer';
 import { assetsToImageSource, openURL } from '../../../utils/utils';
@@ -31,8 +31,7 @@ import { ActionButton } from '../Meta/Actions';
 import { SaveStatus } from '../../ui/SaveStatus';
 import { Header } from '@react-navigation/elements';
 import { BackButton } from '../../ui/Buttons';
-
-const POST_MEDIA_RTE_PAYLOAD_KEY = 'pst_rte';
+import { PrimaryImageComponent } from './PrimaryImageComponent';
 
 export const ArticleComposer = ({
   navigation,
@@ -205,27 +204,6 @@ export const ArticleComposer = ({
     },
     [setNeedsSaving, setPostFile]
   );
-
-  const onPrimaryImageSelected = useCallback(async () => {
-    const imagePickerResult = await launchImageLibrary({
-      mediaType: 'mixed',
-      selectionLimit: 1,
-    });
-    if (imagePickerResult.didCancel || imagePickerResult.errorCode) return;
-
-    const fileKey = `${POST_MEDIA_RTE_PAYLOAD_KEY}i${files.length}`;
-    const assets = assetsToImageSource(
-      imagePickerResult.assets?.filter(Boolean).filter((file) => Object.keys(file)?.length) ?? [],
-      fileKey
-    );
-    setFiles(assets);
-    handleRTEChange({
-      target: {
-        name: 'primaryMediaFile',
-        value: { fileKey: assets[0].key || fileKey, type: assets[0].type || 'image' },
-      },
-    });
-  }, [files.length, handleRTEChange, setFiles]);
 
   const renderHeaderLeft = useCallback(() => {
     return (
@@ -406,21 +384,14 @@ export const ArticleComposer = ({
                 }}
               >
                 <Text style={styles.heading}>{t('Hero')}</Text>
-                <TouchableOpacity
-                  onPress={onPrimaryImageSelected}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 16,
-                    padding: 8,
-                    backgroundColor: isDarkMode ? Colors.gray[800] : Colors.gray[100],
-                    borderRadius: 6,
-                    marginVertical: 12,
-                  }}
-                >
-                  <CircleExclamation size={'md'} />
-                  <Text>{t('No Primary Image selected')}</Text>
-                </TouchableOpacity>
+                <PrimaryImageComponent
+                  postFile={postFile}
+                  channel={channel}
+                  files={files}
+                  onChange={handleRTEChange}
+                  disabled={false}
+                  setFiles={setFiles}
+                />
               </View>
             </>
           )}
