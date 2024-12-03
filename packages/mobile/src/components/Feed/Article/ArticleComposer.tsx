@@ -5,7 +5,7 @@ import {
   useEditorBridge,
   useEditorContent,
 } from '@10play/tentap-editor';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Colors } from '../../../app/Colors';
 import { t, useDotYouClientContext } from 'homebase-id-app-common';
@@ -155,7 +155,14 @@ export const ArticleComposer = ({
       setContent(editorContent?.toString());
     }
   }, [editorContent]);
-  const canPost = !!content?.length;
+  const canPost = useMemo(
+    () =>
+      !postFile.fileId ||
+      isInvalidPost(postFile) ||
+      !postFile.fileMetadata.appData.content.caption ||
+      !postFile.fileMetadata.appData.content.caption.length,
+    [isInvalidPost, postFile]
+  );
 
   const handleRTEChange = useCallback(
     (e: {
