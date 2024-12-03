@@ -5,6 +5,9 @@ import { CachesDirectoryPath, copyFile } from 'react-native-fs';
 import { Asset } from 'react-native-image-picker';
 import InAppBrowser from 'react-native-inappbrowser-reborn';
 import { ImageSource } from '../provider/image/RNImageProvider';
+import { Parser, DomHandler } from 'htmlparser2';
+import { RichText } from '@homebase-id/js-lib/core';
+
 
 //https://stackoverflow.com/a/21294619/15538463
 export function millisToMinutesAndSeconds(millis: number | undefined): string {
@@ -236,3 +239,40 @@ export function isEmojiOnly(text: string | undefined): boolean {
     !text?.match(/[0-9a-zA-Z]/)) ??
     false;
 }
+
+export function htmlToRecord(htmlString: string): RichText {
+  const handler = new DomHandler((error, _) => {
+    if (error) {
+      throw error;
+    }
+  });
+  const parser = new Parser(handler);
+  parser.write(htmlString);
+  parser.end();
+
+  function processNode(node: any): Record<string, unknown> | null {
+    if (node.type === 'text' && node.data.trim()) {
+      return { text: node.data.trim() };
+    }
+
+    if (node.type === 'tag') {
+      const children = (node.children || []).map(processNode).filter(Boolean);
+
+      const attributes = node.attribs || {};
+
+      return {
+        tag: node.name,
+        ...(Object.keys(attributes).length > 0 && { attributes }),
+        ...(children.length > 0 && { children }),
+      };
+    }
+
+    return null;
+  }
+
+  const result = handler.dom.map(processNode).filter(Boolean) as RichText;
+
+  return result;
+}
+
+

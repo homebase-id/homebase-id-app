@@ -59,7 +59,6 @@ export const PrimaryImageComponent = ({
   ) as ImageSource | null;
 
   const [defaultFile, setDefaultFile] = useState(pendingFile?.uri || imageData?.url);
-
   const dimensions = Dimensions.get('window');
 
   const size = pendingFile
@@ -86,6 +85,7 @@ export const PrimaryImageComponent = ({
     if (imagePickerResult.didCancel || imagePickerResult.errorCode) return;
 
     const fileKey = `${POST_MEDIA_RTE_PAYLOAD_KEY}i${files.length}`;
+
     const assets = assetsToImageSource(
       imagePickerResult.assets?.filter(Boolean).filter((file) => Object.keys(file)?.length) ?? [],
       fileKey
@@ -99,6 +99,19 @@ export const PrimaryImageComponent = ({
     });
   }, [files.length, onChange, setFiles]);
 
+  const onRemovePrimaryImage = useCallback(() => {
+    setFiles(
+      files.filter((f) => f.key !== postFile.fileMetadata.appData.content.primaryMediaFile?.fileKey)
+    );
+    onChange({
+      target: {
+        name: 'primaryMediaFile',
+        value: undefined,
+      },
+    });
+    setDefaultFile(undefined);
+  }, [files, onChange, postFile, setFiles]);
+
   if (defaultFile) {
     return (
       <View
@@ -108,13 +121,13 @@ export const PrimaryImageComponent = ({
         }}
       >
         <Image
-          key={postFile.fileMetadata.appData.content.primaryMediaFile?.fileKey}
+          key={'primaryMediaFile'}
           source={{ uri: typeof defaultFile === 'string' ? defaultFile : defaultFile.uri }}
           style={{ ...size, position: 'absolute' }}
-          onError={(_) => {
-            // console.log('error', e.nativeEvent.error);
+          onError={(e) => {
+            console.log('error', e.nativeEvent.error);
             // Happens when after uploading , we delete the cache and try to load the image
-            setDefaultFile(imageData?.url);
+            if (imageData?.url) setDefaultFile(imageData?.url);
           }}
         />
         <IconButton
@@ -125,21 +138,7 @@ export const PrimaryImageComponent = ({
             position: 'absolute',
           }}
           icon={<Trash color={Colors.red[300]} />}
-          onPress={() => {
-            setFiles(
-              files.filter(
-                (f) => f.key !== postFile.fileMetadata.appData.content.primaryMediaFile?.fileKey
-              )
-            );
-
-            onChange({
-              target: {
-                name: 'primaryMediaFile',
-                value: undefined,
-              },
-            });
-            return;
-          }}
+          onPress={onRemovePrimaryImage}
         />
       </View>
     );

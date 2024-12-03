@@ -6,12 +6,18 @@ import {
   useEditorContent,
 } from '@10play/tentap-editor';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { KeyboardAvoidingView, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { Colors } from '../../../app/Colors';
 import { t, useDotYouClientContext } from 'homebase-id-app-common';
 import { useDarkMode } from '../../../hooks/useDarkMode';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Animated from 'react-native-reanimated';
 import { AclIcon, AclSummary } from '../Composer/AclSummary';
 import { Article, BlogConfig, ChannelDefinition, ReactAccess } from '@homebase-id/js-lib/public';
 import { AccessControlList, HomebaseFile } from '@homebase-id/js-lib/core';
@@ -19,7 +25,7 @@ import { launchImageLibrary } from 'react-native-image-picker';
 import { Ellipsis, FloppyDisk, Globe, Lock, Pencil } from '../../ui/Icons/icons';
 import { ActionGroup } from '../../ui/Form/ActionGroup';
 import { ChannelOrAclSelector } from '../../../pages/feed/post-composer';
-import { assetsToImageSource, openURL } from '../../../utils/utils';
+import { assetsToImageSource, htmlToRecord, openURL } from '../../../utils/utils';
 import { Input } from '../../ui/Form/Input';
 import { useArticleComposer } from '../../../hooks/feed/article/useArticleComposer';
 import { Text } from '../../ui/Text/Text';
@@ -39,7 +45,6 @@ export const ArticleComposer = ({
   navigation: NativeStackNavigationProp<FeedStackParamList, 'Compose'>;
 }) => {
   const { isDarkMode } = useDarkMode();
-  const [content, setContent] = useState<string | undefined>();
   const [customAcl, setCustomAcl] = useState<AccessControlList | undefined>(undefined);
   const [reactAccess, setReactAccess] = useState<ReactAccess | undefined>(undefined);
   const [needsSaving, setNeedsSaving] = useState(false);
@@ -149,13 +154,7 @@ export const ArticleComposer = ({
   const editorContent = useEditorContent(editor);
   const insets = useSafeAreaInsets();
 
-  useEffect(() => {
-    if (editorContent) {
-      setContent(editorContent?.toString());
-    }
-  }, [editorContent]);
-
-  const canPost = useMemo(
+  const cannotPost = useMemo(
     () =>
       !postFile.fileId ||
       isInvalidPost(postFile) ||
@@ -163,6 +162,7 @@ export const ArticleComposer = ({
       !postFile.fileMetadata.appData.content.caption.length,
     [isInvalidPost, postFile]
   );
+  console.log('postFile', cannotPost);
 
   const handleRTEChange = useCallback(
     (e: {
@@ -190,7 +190,9 @@ export const ArticleComposer = ({
             dirtyPostFile.fileMetadata.appData.content.primaryMediaFile = undefined;
           }
         } else if (e.target.name === 'body') {
-          dirtyPostFile.fileMetadata.appData.content.body = e.target.value as string;
+          const richText = htmlToRecord(e.target.value as string);
+          console.log('richText', richText);
+          dirtyPostFile.fileMetadata.appData.content.body = richText;
         }
 
         return {
@@ -204,6 +206,12 @@ export const ArticleComposer = ({
     },
     [setNeedsSaving, setPostFile]
   );
+
+  useEffect(() => {
+    if (editorContent) {
+      handleRTEChange({ target: { name: 'body', value: editorContent?.toString() } });
+    }
+  }, [editorContent, handleRTEChange]);
 
   const renderHeaderLeft = useCallback(() => {
     return (
@@ -243,7 +251,7 @@ export const ArticleComposer = ({
         <TouchableOpacity
           style={{
             backgroundColor: Colors.indigo[500],
-            opacity: !canPost ? 1 : 0.5,
+            opacity: !cannotPost ? 1 : 0.5,
             paddingHorizontal: 8,
             paddingVertical: 6,
             borderRadius: 5,
@@ -252,26 +260,25 @@ export const ArticleComposer = ({
             alignItems: 'center',
             zIndex: -1,
           }}
-          disabled={!canPost}
-          onPress={() => {
-            doSave(postFile, 'publish', undefined);
+          disabled={cannotPost}
+          onPress={async () => {
+            await doSave(postFile, 'publish', undefined);
+
             setNeedsSaving(false);
+            navigation.navigate('Posts');
           }}
         >
           <Text style={{ color: Colors.white, fontSize: 16 }}>{t('Publish')}</Text>
         </TouchableOpacity>
       </View>
     );
-  }, [canPost, doSave, isPublished, postFile]);
+  }, [cannotPost, doSave, isPublished, navigation, postFile]);
 
   if (isLoadingServerData) return null;
 
   return (
-    <Animated.View
+    <View
       style={{
-        paddingBottom: insets.bottom + 16,
-        paddingHorizontal: 8,
-        backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
         flex: 1,
       }}
     >
@@ -289,208 +296,208 @@ export const ArticleComposer = ({
           justifyContent: 'flex-end',
           flex: 1,
           gap: 8,
+          paddingRight: 8,
         }}
       />
       <ErrorNotification error={error} />
 
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      <ScrollView
         style={{
-          flex: 1,
+          paddingBottom: insets.bottom + 16,
+          paddingHorizontal: 8,
+          backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
         }}
       >
-        <Animated.ScrollView>
-          <View
-            style={{
-              justifyContent: 'flex-end',
-              flexDirection: 'row',
-              padding: 16,
-              marginBottom: 8,
-            }}
-          >
-            {!isEditTeaser && (
-              <Text style={{ fontSize: 16, fontWeight: '500', flex: 1 }}>
-                {postFile.fileMetadata.appData.content.caption}
-              </Text>
-            )}
-            <TextButton
-              title={isEditTeaser ? t('Collapse') : t('Expand')}
-              onPress={() => setIsEditTeaser(!isEditTeaser)}
-            />
-          </View>
-          {isEditTeaser && (
-            <>
-              <View
-                style={{
-                  padding: 16,
-                  marginBottom: 8,
-                  backgroundColor: isDarkMode ? Colors.black : Colors.white,
-                  borderWidth: 1,
-                  borderColor: isDarkMode ? Colors.slate[800] : Colors.gray[100],
-                  borderRadius: 6,
-                }}
-              >
-                <Text style={styles.heading}>{t('Title')}</Text>
-                <Input
-                  defaultValue={postFile.fileMetadata.appData.content.caption}
-                  onChangeText={(e) => handleRTEChange({ target: { name: 'caption', value: e } })}
-                  viewStyle={{
-                    paddingLeft: 0,
-                    backgroundColor: 'transparent',
-                    borderBottomWidth: 1,
-                    borderColor: isDarkMode ? Colors.slate[800] : Colors.gray[200],
-                  }}
-                  style={{
-                    marginLeft: 6,
-                  }}
-                />
-              </View>
-              <View
-                style={{
-                  padding: 16,
-                  marginBottom: 8,
-                  backgroundColor: isDarkMode ? Colors.black : Colors.white,
-                  borderWidth: 1,
-                  borderColor: isDarkMode ? Colors.slate[800] : Colors.gray[100],
-                  borderRadius: 6,
-                }}
-              >
-                <Text style={styles.heading}>{t('Summary')}</Text>
-                <Input
-                  placeholder="Summary"
-                  defaultValue={(postFile.fileMetadata.appData.content as Article).abstract}
-                  onChangeText={(e) => handleRTEChange({ target: { name: 'abstract', value: e } })}
-                  viewStyle={{
-                    paddingLeft: 0,
-                    backgroundColor: 'transparent',
-                    borderWidth: 1,
-                    borderRadius: 5,
-                    borderColor: isDarkMode ? Colors.slate[800] : Colors.gray[200],
-                    minHeight: '20%',
-                  }}
-                  style={{
-                    marginLeft: 6,
-                  }}
-                />
-              </View>
-              <View
-                style={{
-                  padding: 16,
-                  marginBottom: 8,
-                  backgroundColor: isDarkMode ? Colors.black : Colors.white,
-                  borderWidth: 1,
-                  borderColor: isDarkMode ? Colors.slate[800] : Colors.gray[100],
-                  borderRadius: 6,
-                }}
-              >
-                <Text style={styles.heading}>{t('Hero')}</Text>
-                <PrimaryImageComponent
-                  postFile={postFile}
-                  channel={channel}
-                  files={files}
-                  onChange={handleRTEChange}
-                  disabled={false}
-                  setFiles={setFiles}
-                />
-              </View>
-            </>
+        <View
+          style={{
+            justifyContent: 'flex-end',
+            flexDirection: 'row',
+            padding: 16,
+            marginBottom: 8,
+          }}
+        >
+          {!isEditTeaser && (
+            <Text style={{ fontSize: 16, fontWeight: '500', flex: 1 }}>
+              {postFile.fileMetadata.appData.content.caption}
+            </Text>
           )}
-          <View
-            style={{
-              padding: 16,
-              backgroundColor: isDarkMode ? Colors.black : Colors.white,
-              borderWidth: 1,
-              borderColor: isDarkMode ? Colors.slate[800] : Colors.gray[100],
-              borderRadius: 6,
-              minHeight: '35%',
-            }}
-          >
-            <KeyboardAvoidingView
-              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-              style={{
-                flex: 1,
-              }}
-            >
-              <RichText editor={editor} />
-            </KeyboardAvoidingView>
+          <TextButton
+            title={isEditTeaser ? t('Collapse') : t('Expand')}
+            onPress={() => setIsEditTeaser(!isEditTeaser)}
+          />
+        </View>
+        {isEditTeaser && (
+          <>
             <View
               style={{
-                display: 'flex',
-                flexDirection: 'row-reverse',
-                alignItems: 'center',
-                gap: 8,
-                zIndex: -1,
-                marginVertical: 8,
+                padding: 16,
+                marginBottom: 8,
+                backgroundColor: isDarkMode ? Colors.black : Colors.white,
+                borderWidth: 1,
+                borderColor: isDarkMode ? Colors.slate[800] : Colors.gray[100],
+                borderRadius: 6,
               }}
             >
-              {channel.serverMetadata?.accessControlList ? (
-                <AclIcon size={'sm'} acl={customAcl || channel.serverMetadata?.accessControlList} />
-              ) : null}
-
-              {channel.serverMetadata?.accessControlList ? (
-                <Text style={{ fontSize: 12 }}>
-                  <AclSummary acl={customAcl || channel.serverMetadata?.accessControlList} />
-                </Text>
-              ) : null}
-            </View>
-            <View
-              style={{
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 10,
-              }}
-            >
-              {/* <TouchableOpacity onPress={handleImageIconPress}>
-              <Plus size={'sm'} />
-            </TouchableOpacity> */}
-              <ActionGroup
-                options={[
-                  reactAccess === false
-                    ? {
-                        label: t('Enable reactions'),
-                        icon: Globe,
-                        onPress: () => setReactAccess(true),
-                      }
-                    : {
-                        label: t('Disable reactions'),
-                        icon: Lock,
-                        onPress: () => setReactAccess(false),
-                      },
-
-                  {
-                    label: t('See my drafts'),
-                    onPress: () => openURL(`https://${identity}/apps/feed/articles`),
-                    icon: Pencil,
-                  },
-                ]}
-              >
-                <Ellipsis size={'sm'} />
-              </ActionGroup>
-
-              <ChannelOrAclSelector
-                defaultChannelValue={
-                  channel?.fileMetadata?.appData?.uniqueId || BlogConfig.PublicChannelId
-                }
-                defaultAcl={customAcl}
-                onChange={handleChange}
-                excludeCustom
+              <Text style={styles.heading}>{t('Title')}</Text>
+              <Input
+                defaultValue={postFile.fileMetadata.appData.content.caption}
+                onChangeText={(e) => handleRTEChange({ target: { name: 'caption', value: e } })}
+                viewStyle={{
+                  paddingLeft: 0,
+                  backgroundColor: 'transparent',
+                  borderBottomWidth: 1,
+                  borderColor: isDarkMode ? Colors.slate[800] : Colors.gray[200],
+                }}
+                style={{
+                  marginLeft: 6,
+                }}
               />
             </View>
+            <View
+              style={{
+                padding: 16,
+                marginBottom: 8,
+                backgroundColor: isDarkMode ? Colors.black : Colors.white,
+                borderWidth: 1,
+                borderColor: isDarkMode ? Colors.slate[800] : Colors.gray[100],
+                borderRadius: 6,
+              }}
+            >
+              <Text style={styles.heading}>{t('Summary')}</Text>
+              <Input
+                placeholder="Summary"
+                defaultValue={(postFile.fileMetadata.appData.content as Article).abstract}
+                onChangeText={(e) => handleRTEChange({ target: { name: 'abstract', value: e } })}
+                viewStyle={{
+                  paddingLeft: 0,
+                  backgroundColor: 'transparent',
+                  borderWidth: 1,
+                  borderRadius: 5,
+                  borderColor: isDarkMode ? Colors.slate[800] : Colors.gray[200],
+                  minHeight: '20%',
+                }}
+                style={{
+                  marginLeft: 6,
+                }}
+              />
+            </View>
+            <View
+              style={{
+                padding: 16,
+                marginBottom: 8,
+                backgroundColor: isDarkMode ? Colors.black : Colors.white,
+                borderWidth: 1,
+                borderColor: isDarkMode ? Colors.slate[800] : Colors.gray[100],
+                borderRadius: 6,
+              }}
+            >
+              <Text style={styles.heading}>{t('Hero')}</Text>
+              <PrimaryImageComponent
+                postFile={postFile}
+                channel={channel}
+                files={files}
+                onChange={handleRTEChange}
+                disabled={false}
+                setFiles={setFiles}
+              />
+            </View>
+          </>
+        )}
+        <View
+          style={{
+            padding: 16,
+            backgroundColor: isDarkMode ? Colors.black : Colors.white,
+            borderWidth: 1,
+            borderColor: isDarkMode ? Colors.slate[800] : Colors.gray[100],
+            borderRadius: 6,
+            minHeight: '35%',
+          }}
+        >
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={{
+              flex: 1,
+            }}
+          >
+            <RichText editor={editor} />
+          </KeyboardAvoidingView>
+          <View
+            style={{
+              display: 'flex',
+              flexDirection: 'row-reverse',
+              alignItems: 'center',
+              gap: 8,
+              zIndex: -1,
+              marginVertical: 8,
+            }}
+          >
+            {channel.serverMetadata?.accessControlList ? (
+              <AclIcon size={'sm'} acl={customAcl || channel.serverMetadata?.accessControlList} />
+            ) : null}
+
+            {channel.serverMetadata?.accessControlList ? (
+              <Text style={{ fontSize: 12 }}>
+                <AclSummary acl={customAcl || channel.serverMetadata?.accessControlList} />
+              </Text>
+            ) : null}
           </View>
           <View
             style={{
-              alignContent: 'flex-end',
-              justifyContent: 'flex-end',
-              alignItems: 'flex-end',
-              marginVertical: 14,
-              marginRight: 16,
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 10,
             }}
           >
-            <SaveStatus state={saveStatus} error={error} />
+            {/* <TouchableOpacity onPress={handleImageIconPress}>
+              <Plus size={'sm'} />
+            </TouchableOpacity> */}
+            <ActionGroup
+              options={[
+                reactAccess === false
+                  ? {
+                      label: t('Enable reactions'),
+                      icon: Globe,
+                      onPress: () => setReactAccess(true),
+                    }
+                  : {
+                      label: t('Disable reactions'),
+                      icon: Lock,
+                      onPress: () => setReactAccess(false),
+                    },
+
+                {
+                  label: t('See my drafts'),
+                  onPress: () => openURL(`https://${identity}/apps/feed/articles`),
+                  icon: Pencil,
+                },
+              ]}
+            >
+              <Ellipsis size={'sm'} />
+            </ActionGroup>
+
+            <ChannelOrAclSelector
+              defaultChannelValue={
+                channel?.fileMetadata?.appData?.uniqueId || BlogConfig.PublicChannelId
+              }
+              defaultAcl={customAcl}
+              onChange={handleChange}
+              excludeCustom
+            />
           </View>
-        </Animated.ScrollView>
-      </KeyboardAvoidingView>
+        </View>
+        <View
+          style={{
+            alignContent: 'flex-end',
+            justifyContent: 'flex-end',
+            alignItems: 'flex-end',
+            marginVertical: 14,
+            marginRight: 16,
+          }}
+        >
+          <SaveStatus state={saveStatus} error={error} />
+        </View>
+      </ScrollView>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{
@@ -501,7 +508,7 @@ export const ArticleComposer = ({
       >
         <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS.filter((_, i) => i !== 3)} />
       </KeyboardAvoidingView>
-    </Animated.View>
+    </View>
   );
 };
 
