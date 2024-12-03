@@ -33,7 +33,6 @@ export const PrimaryImageComponent = ({
   postFile: HomebaseFile<Article> | NewHomebaseFile<Article>;
   channel: NewHomebaseFile<ChannelDefinition>;
   files: (ImageSource | MediaFile)[];
-
   onChange: (e: {
     target: {
       name: string;
@@ -58,7 +57,7 @@ export const PrimaryImageComponent = ({
     (f) => 'uri' in f && f.key === postFile.fileMetadata.appData.content.primaryMediaFile?.fileKey
   ) as ImageSource | null;
 
-  const [defaultFile, setDefaultFile] = useState(pendingFile?.uri || imageData?.url);
+  const defaultFile = pendingFile?.uri || imageData?.url;
   const dimensions = Dimensions.get('window');
 
   const size = pendingFile
@@ -109,7 +108,6 @@ export const PrimaryImageComponent = ({
         value: undefined,
       },
     });
-    setDefaultFile(undefined);
   }, [files, onChange, postFile, setFiles]);
 
   if (defaultFile) {
@@ -124,10 +122,9 @@ export const PrimaryImageComponent = ({
           key={'primaryMediaFile'}
           source={{ uri: typeof defaultFile === 'string' ? defaultFile : defaultFile.uri }}
           style={{ ...size, position: 'absolute' }}
+          defaultSource={{ uri: typeof defaultFile === 'string' ? imageData : imageData?.url }}
           onError={(e) => {
             console.log('error', e.nativeEvent.error);
-            // Happens when after uploading , we delete the cache and try to load the image
-            if (imageData?.url) setDefaultFile(imageData?.url);
           }}
         />
         <IconButton

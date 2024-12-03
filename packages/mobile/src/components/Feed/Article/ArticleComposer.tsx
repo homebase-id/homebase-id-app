@@ -162,7 +162,6 @@ export const ArticleComposer = ({
       !postFile.fileMetadata.appData.content.caption.length,
     [isInvalidPost, postFile]
   );
-  console.log('postFile', cannotPost);
 
   const handleRTEChange = useCallback(
     (e: {
@@ -191,7 +190,6 @@ export const ArticleComposer = ({
           }
         } else if (e.target.name === 'body') {
           const richText = htmlToRecord(e.target.value as string);
-          console.log('richText', richText);
           dirtyPostFile.fileMetadata.appData.content.body = richText;
         }
 

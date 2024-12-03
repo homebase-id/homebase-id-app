@@ -261,7 +261,7 @@ export function htmlToRecord(htmlString: string): RichText {
       const attributes = node.attribs || {};
 
       return {
-        tag: node.name,
+        type: node.name,
         ...(Object.keys(attributes).length > 0 && { attributes }),
         ...(children.length > 0 && { children }),
       };
