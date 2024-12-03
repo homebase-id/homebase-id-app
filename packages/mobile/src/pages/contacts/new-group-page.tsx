@@ -87,6 +87,7 @@ export const NewGroupPage = memo(
             keyExtractor={(item) => item.odinId}
             renderItem={renderItem}
             ListEmptyComponent={<NoContacts />}
+            contentContainerStyle={{ paddingBottom: 70 }}
           />
           {/* <Dialog.Container visible={dialogVisible} onBackdropPress={() => setDialogVisible(false)}>
             <Dialog.Title>New Group Name</Dialog.Title>
