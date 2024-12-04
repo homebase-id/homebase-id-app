@@ -41,6 +41,9 @@ export const useArticleComposer = ({
     postKey?: string;
     caption?: string;
 }) => {
+    const [processingProgress, setProcessingProgress] = useState<
+        { phase: string; progress: number } | undefined
+    >(undefined);
     const { data: serverChannel, isPending: isLoadingServerChannel } = useChannel({
         odinId: odinKey,
         channelKey,
@@ -185,6 +188,7 @@ export const useArticleComposer = ({
                         .appData.content.uniqueId as string)
                     : undefined) || (targetChannel.fileMetadata.appData.uniqueId as string),
             mediaFiles: files,
+            onUpdate: action === 'publish' ? (phase, progress) => setProcessingProgress({ phase, progress }) : undefined,
         });
 
         if (!uploadResult) throw new Error('Failed to save post');
@@ -214,22 +218,6 @@ export const useArticleComposer = ({
         } else if (!postFile.fileId) {
             // We didn't get any direct info from the upload; So we need to fully load the edit page again so it can get fetched;
             // window.location.href = `${FEED_ROOT_PATH}/edit/${odinId ? `${odinId}/` : ''}${targetChannel.fileMetadata.appData.content.slug}/${toPostFile.fileMetadata.appData.content.id}`;
-        }
-
-        if (isPublish) {
-            //TODO: we will do something
-            // if (odinId && odinId !== window.location.host) {
-            //     window.location.href = `https://${odinId}/posts/${targetChannel.fileMetadata.appData.content.slug}/${toPostFile.fileMetadata.appData.content.id}`;
-            // } else {
-            //     window.location.href = `${HOME_ROOT_PATH}posts/${targetChannel.fileMetadata.appData.content.slug}/${toPostFile.fileMetadata.appData.content.slug}`;
-            // }
-        } else {
-            // // Update url to support proper back browsing; And not losing the context when a refresh is needed
-            // window.history.replaceState(
-            //     null,
-            //     toPostFile.fileMetadata.appData.content.caption,
-            //     `${FEED_ROOT_PATH}/edit/${odinId ? `${odinId}/` : ''}${targetChannel.fileMetadata.appData.content.slug}/${toPostFile.fileMetadata.appData.content.id}`
-            // );
         }
     };
 
@@ -263,6 +251,9 @@ export const useArticleComposer = ({
         // Status
         saveStatus: savePostStatus,
         removeStatus: removePostStatus,
+
+        //progress
+        processingProgress,
 
         // Errors
         error: savePostError || removePostError,
