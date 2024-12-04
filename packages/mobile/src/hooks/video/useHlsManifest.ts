@@ -100,6 +100,7 @@ export const useHlsManifest = (
         odinId || identity,
         videoDrive?.alias,
         videoGlobalTransitId || videoFileId,
+        videoFileKey,
       ],
       queryFn: () =>
         fetchManifest(odinId || identity, videoFileData?.fileHeader, videoDrive, videoFileKey),

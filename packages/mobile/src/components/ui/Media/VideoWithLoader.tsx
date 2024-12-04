@@ -143,6 +143,7 @@ export const VideoWithLoader = memo(
               targetDrive={targetDrive}
               fileId={fileId}
               previewThumbnail={previewThumbnail}
+              fileKey={payload.key}
               fit={fit}
               imageSize={imageSize}
               onClick={doLoadVideo}
