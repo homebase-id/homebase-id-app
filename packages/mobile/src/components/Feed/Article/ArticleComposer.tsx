@@ -47,7 +47,7 @@ export const ArticleComposer = ({
   const { isDarkMode } = useDarkMode();
   const [customAcl, setCustomAcl] = useState<AccessControlList | undefined>(undefined);
   const [reactAccess, setReactAccess] = useState<ReactAccess | undefined>(undefined);
-  const [needsSaving, setNeedsSaving] = useState(false);
+  const [_, setNeedsSaving] = useState(false);
   const [willSave, setWillSave] = useState(false);
   const {
     // Actions
@@ -63,7 +63,6 @@ export const ArticleComposer = ({
 
     // Data updates
     setPostFile,
-    setOdinId,
     setChannel,
     setFiles,
 
