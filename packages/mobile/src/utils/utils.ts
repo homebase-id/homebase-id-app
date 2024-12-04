@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { getNewId } from '@homebase-id/js-lib/helpers';
 import { InfiniteData } from '@tanstack/react-query';
 import { Image, Linking } from 'react-native';
@@ -250,27 +251,55 @@ export function htmlToRecord(htmlString: string): RichText {
   parser.write(htmlString);
   parser.end();
 
-  function processNode(node: any): Record<string, unknown> | null {
+  function processNode(node: any, inheritedStyles: Record<string, unknown> = {}): Record<string, unknown> | null {
     if (node.type === 'text' && node.data.trim()) {
-      return { text: node.data.trim() };
+      return { text: node.data.trim(), ...inheritedStyles };
     }
 
     if (node.type === 'tag') {
-      const children = (node.children || []).map(processNode).filter(Boolean);
-
-      const attributes = node.attribs || {};
-
-      return {
-        type: node.name,
-        ...(Object.keys(attributes).length > 0 && { attributes }),
-        ...(children.length > 0 && { children }),
+      const isBold = node.name === 'strong';
+      const isItalic = node.name === 'em';
+      const isUnderline = node.name === 'u';
+      const isStrikeThrough = node.name === 's';
+      const isLink = node.name === 'a';
+      const newStyles = {
+        ...(inheritedStyles || {}),
+        ...(isBold ? { bold: true } : {}),
+        ...(isItalic ? { italic: true } : {}),
+        ...(isUnderline ? { underline: true } : {}),
+        ...(isStrikeThrough ? { strikethrough: true } : {}),
+        ...(isLink ? { link: node.attribs.href } : {}),
       };
+
+      const children = (node.children || [])
+        .map((child: any) => processNode(child, newStyles))
+        .filter(Boolean) as RichText;
+
+      if (node.name === 'li') {
+        return {
+          type: 'li',
+          children: children.map((child) => ({
+            type: 'lic',
+            children: Array.isArray(child) ? child : [child],
+          })),
+        };
+      }
+
+      if (['p', 'h1', 'h2', 'h3', 'h4', 'ul', 'ol'].includes(node.name)) {
+        return {
+          type: node.name,
+          children: children.length ? children : [{ text: '' }],
+        };
+      }
+
+      // Return only the children if not a paragraph, header, or list
+      return children.length === 1 ? children[0] : { children };
     }
 
     return null;
   }
 
-  const result = handler.dom.map(processNode).filter(Boolean) as RichText;
+  const result = handler.dom.map((node: any) => processNode(node)).filter(Boolean) as RichText;
 
   return result;
 }

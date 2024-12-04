@@ -11,7 +11,7 @@ import { Dimensions, Image, TouchableOpacity, View } from 'react-native';
 import { CircleExclamation, Trash } from '../../ui/Icons/icons';
 import { Text } from '../../ui/Text/Text';
 import { useDarkMode } from '../../../hooks/useDarkMode';
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { assetsToImageSource, calculateScaledDimensions } from '../../../utils/utils';
 import { t } from 'homebase-id-app-common';

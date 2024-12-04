@@ -189,6 +189,7 @@ export const ArticleComposer = ({
             dirtyPostFile.fileMetadata.appData.content.primaryMediaFile = undefined;
           }
         } else if (e.target.name === 'body') {
+          console.log(e.target.value);
           const richText = htmlToRecord(e.target.value as string);
           dirtyPostFile.fileMetadata.appData.content.body = richText;
         }
