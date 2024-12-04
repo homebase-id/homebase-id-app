@@ -140,14 +140,6 @@ export const ArticleComposer = ({
 
       colorKeyboard: {
         keyboardRootColor: isDarkMode ? Colors.black : Colors.white, // IOS only the background color of rootView of the custom keyboard
-        colorSelection: [
-          // Custom colors in color keyboard
-          {
-            name: 'Custom Color',
-            value: '#E5112B',
-            displayColor: '#E5112B', // Optional - the color that will be displayed on ui (if left empty will default to use value)
-          },
-        ],
       },
       webview: {
         backgroundColor: isDarkMode ? Colors.black : Colors.white,
@@ -239,8 +231,10 @@ export const ArticleComposer = ({
           display: 'flex',
           flexDirection: 'row',
           justifyContent: 'flex-end',
+          alignContent: 'space-between',
           flex: 1,
           gap: 8,
+          // backgroundColor: 'red',
         }}
       >
         <ActionButton
@@ -253,17 +247,15 @@ export const ArticleComposer = ({
         />
         <TextButton
           title="Publish"
-          showLoaderOnPress
-          filledStyle={{
-            backgroundColor: Colors.indigo[500],
+          unFilledStyle={{
+            backgroundColor: isDarkMode ? Colors.indigo[500] : Colors.indigo[400],
             opacity: !cannotPost ? 1 : 0.5,
-            paddingHorizontal: 8,
-            paddingVertical: 6,
             borderRadius: 5,
-            display: 'flex',
-            flexDirection: 'row',
+            paddingHorizontal: 16,
+            paddingVertical: 8,
             alignItems: 'center',
             zIndex: -1,
+            justifyContent: 'flex-end',
           }}
           disabled={cannotPost}
           onPress={async () => {
@@ -272,10 +264,14 @@ export const ArticleComposer = ({
             setNeedsSaving(false);
             navigation.navigate('Posts');
           }}
+          textStyle={{
+            color: Colors.white,
+            fontSize: 16,
+          }}
         />
       </View>
     );
-  }, [cannotPost, doSave, isPosting, isPublished, navigation, postFile]);
+  }, [cannotPost, doSave, isDarkMode, isPosting, isPublished, navigation, postFile]);
 
   if (isLoadingServerData) return null;
 
