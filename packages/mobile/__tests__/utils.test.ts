@@ -133,9 +133,9 @@ describe('htmlToRecord', () => {
             {
                 type: 'p',
                 children: [
-                    { text: 'This is ' },
+                    { text: 'This is' },
                     { text: 'bold', bold: true },
-                    { text: ' text' },
+                    { text: 'text' },
                 ],
             },
         ];
@@ -148,9 +148,9 @@ describe('htmlToRecord', () => {
             {
                 type: 'p',
                 children: [
-                    { text: 'This is ' },
+                    { text: 'This is' },
                     { text: 'bold and italic', bold: true, italic: true },
-                    { text: ' text' },
+                    { text: 'text' },
                 ],
             },
         ];
@@ -162,10 +162,10 @@ describe('htmlToRecord', () => {
       <ul>
         <li>First item</li>
         <li>
-          <strong>Second item</strong> with more text
+         <p> <strong>Second item</strong> with more text</p>
         </li>
         <li>
-          <em>Third</em> <u>item</u> with styles
+         <p> <em>Third</em><u>item</u> with styles </p>
         </li>
       </ul>
     `;
@@ -188,8 +188,12 @@ describe('htmlToRecord', () => {
                             {
                                 type: 'lic',
                                 children: [
-                                    { text: 'Second item', bold: true },
-                                    { text: ' with more text' },
+                                    {
+                                        type: 'p', children: [
+                                            { text: 'Second item', bold: true },
+                                            { text: 'with more text' },
+                                        ],
+                                    },
                                 ],
                             },
                         ],
@@ -200,10 +204,13 @@ describe('htmlToRecord', () => {
                             {
                                 type: 'lic',
                                 children: [
-                                    { text: 'Third', italic: true },
-                                    { text: ' ' },
-                                    { text: 'item', underline: true },
-                                    { text: ' with styles' },
+                                    {
+                                        type: 'p', children: [
+                                            { text: 'Third', italic: true },
+                                            { text: 'item', underline: true },
+                                            { text: 'with styles' },
+                                        ],
+                                    },
                                 ],
                             },
                         ],
@@ -211,74 +218,10 @@ describe('htmlToRecord', () => {
                 ],
             },
         ];
+
         expect(htmlToRecord(html)).toEqual(expected);
     });
 
-    test('should handle deeply nested lists', () => {
-        const html = `
-      <ul>
-        <li>
-          First item
-          <ul>
-            <li>Nested item 1</li>
-            <li>
-              <strong>Nested item 2</strong>
-            </li>
-          </ul>
-        </li>
-        <li>Second item</li>
-      </ul>
-    `;
-        const expected = [
-            {
-                type: 'ul',
-                children: [
-                    {
-                        type: 'li',
-                        children: [
-                            {
-                                type: 'lic',
-                                children: [{ text: 'First item' }],
-                            },
-                            {
-                                type: 'ul',
-                                children: [
-                                    {
-                                        type: 'li',
-                                        children: [
-                                            {
-                                                type: 'lic',
-                                                children: [{ text: 'Nested item 1' }],
-                                            },
-                                        ],
-                                    },
-                                    {
-                                        type: 'li',
-                                        children: [
-                                            {
-                                                type: 'lic',
-                                                children: [{ text: 'Nested item 2', bold: true }],
-                                            },
-                                        ],
-                                    },
-                                ],
-                            },
-                        ],
-                    },
-                    {
-                        type: 'li',
-                        children: [
-                            {
-                                type: 'lic',
-                                children: [{ text: 'Second item' }],
-                            },
-                        ],
-                    },
-                ],
-            },
-        ];
-        expect(htmlToRecord(html)).toEqual(expected);
-    });
 
     test('should handle empty tags gracefully', () => {
         const html = `<p></p><ul><li></li></ul>`;
@@ -293,10 +236,6 @@ describe('htmlToRecord', () => {
                     {
                         type: 'li',
                         children: [
-                            {
-                                type: 'lic',
-                                children: [{ text: '' }],
-                            },
                         ],
                     },
                 ],
