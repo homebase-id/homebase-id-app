@@ -37,14 +37,17 @@ const PAGE_SIZE = 10;
 
 const SocialFeedMainContent = memo(() => {
   const {
-    data: posts,
-    hasNextPage: hasMorePosts,
-    isLoading: postsLoading,
-    fetchNextPage,
-    isFetchingNextPage,
-    refetch: refreshFeed,
-    error,
-  } = useSocialFeed({ pageSize: PAGE_SIZE }).fetchAll;
+    fetchAll: {
+      data: posts,
+      hasNextPage: hasMorePosts,
+      isLoading: postsLoading,
+      fetchNextPage,
+      isFetchingNextPage,
+      refetch: refreshFeed,
+      error,
+    },
+    inboxProcessed,
+  } = useSocialFeed({ pageSize: PAGE_SIZE });
   const { params } = useRoute<RouteProp<FeedStackParamList, 'Posts'>>();
   const navigation = useNavigation<NavigationProp<FeedStackParamList, 'Posts'>>();
   // Flatten all pages, sorted descending and slice on the max number expected
@@ -60,7 +63,7 @@ const SocialFeedMainContent = memo(() => {
   }, [hasMorePosts, posts]);
 
   useEffect(() => {
-    if (!params || !flattenedPosts) return;
+    if (!params || !flattenedPosts || !inboxProcessed) return;
     const post = flattenedPosts.find((post) =>
       stringGuidsEqual(post.fileMetadata.globalTransitId, params.postKey)
     );
@@ -71,7 +74,7 @@ const SocialFeedMainContent = memo(() => {
       postKey: postContent?.slug || postContent?.id || '',
       channelKey: postContent?.channelId,
     });
-  }, [flattenedPosts, navigation, params]);
+  }, [flattenedPosts, inboxProcessed, navigation, params]);
 
   const [refreshing, setRefreshing] = useState(false);
 
