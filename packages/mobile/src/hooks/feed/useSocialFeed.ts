@@ -16,6 +16,8 @@ const MINUTE_IN_MS = 60000;
 const useInboxProcessor = (isEnabled?: boolean) => {
   const { data: chnlDrives, isFetchedAfterMount: channelsFetched } = useChannelDrives(!!isEnabled);
   const dotYouClient = useDotYouClientContext();
+  const queryClient = useQueryClient();
+
 
   const fetchData = async () => {
     await processInbox(dotYouClient, BlogConfig.FeedDrive, 100);
@@ -26,6 +28,7 @@ const useInboxProcessor = (isEnabled?: boolean) => {
         })
       );
     }
+    queryClient.invalidateQueries({ queryKey: ['social-feeds'], exact: false });
     return true;
   };
 
@@ -43,7 +46,6 @@ const useInboxProcessor = (isEnabled?: boolean) => {
 const useFeedWebsocket = (isEnabled: boolean) => {
   const queryClient = useQueryClient();
   const { data: subscribedDrives, isFetched } = useDriveSubscriber();
-
   const handler = useCallback(
     (notification: TypedConnectionNotification) => {
       if (
@@ -85,6 +87,7 @@ export const useLiveFeedProcessor = () => {
 
 export const useSocialFeed = ({ pageSize = 10 }: { pageSize: number }) => {
   const dotYouClient = useDotYouClientContext();
+  const { status } = useInboxProcessor(true);
 
   const { data: ownChannels, isFetched: channelsFetched } = useChannels({
     isAuthenticated: true,
@@ -111,8 +114,8 @@ export const useSocialFeed = ({ pageSize = 10 }: { pageSize: number }) => {
       queryFn: ({ pageParam }) => fetchAll({ pageParam }),
       getNextPageParam: (lastPage) =>
         lastPage &&
-        lastPage?.results?.length >= 1 &&
-        (lastPage?.cursorState || lastPage?.ownerCursorState)
+          lastPage?.results?.length >= 1 &&
+          (lastPage?.cursorState || lastPage?.ownerCursorState)
           ? { cursorState: lastPage.cursorState, ownerCursorState: lastPage.ownerCursorState }
           : undefined,
       refetchOnMount: false,
@@ -120,5 +123,6 @@ export const useSocialFeed = ({ pageSize = 10 }: { pageSize: number }) => {
       enabled: channelsFetched,
       staleTime: MINUTE_IN_MS * 10,
     }),
+    inboxProcessed: status === 'success',
   };
 };

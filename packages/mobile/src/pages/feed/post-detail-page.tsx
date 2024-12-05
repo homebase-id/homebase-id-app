@@ -39,7 +39,7 @@ export const PostDetailPage = ({ route: { params } }: PostDetailPageProps) => {
   const shareRef = useRef<ShareModalMethods>(null);
   const postActionRef = useRef<PostActionMethods>(null);
   const postEmojiPickerRef = useRef<PostEmojiPickerModalMethods>(null);
-  const { data: postFile, isLoading } = usePost({
+  const { data: postFile, isPending } = usePost({
     postKey: postKey,
     channelKey: channelKey,
     odinId,
@@ -74,7 +74,7 @@ export const PostDetailPage = ({ route: { params } }: PostDetailPageProps) => {
     odinId: isExternal ? postOdinId : undefined,
   }).fetch;
 
-  if (isLoading) {
+  if (isPending) {
     return (
       <SafeAreaView
         style={{
