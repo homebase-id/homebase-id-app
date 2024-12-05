@@ -11,7 +11,7 @@ import { Platform } from 'react-native';
 import { Colors } from './Colors';
 import { FeedPage } from '../pages/feed/feed-page';
 import { PreviewMedia } from '../pages/media-preview-page';
-import { PostComposer } from '../pages/feed/post-composer';
+import { ComposePost } from '../pages/feed/post-composer';
 import { PostDetailPage } from '../pages/feed/post-detail-page';
 import { BackButton } from '../components/ui/Buttons';
 
@@ -92,7 +92,7 @@ export const FeedStack = ({ navigation }: NativeStackScreenProps<TabStackParamLi
       />
       <StackFeed.Screen
         name="Compose"
-        component={PostComposer}
+        component={ComposePost}
         options={{
           animation: 'slide_from_bottom',
         }}

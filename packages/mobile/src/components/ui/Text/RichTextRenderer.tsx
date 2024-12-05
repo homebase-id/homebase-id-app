@@ -40,12 +40,13 @@ export const RichTextRenderer = memo(
           italic?: boolean;
           underline?: boolean;
           code?: boolean;
+          strong?: boolean;
         },
         text: string,
         attributes: Record<string, unknown>
       ) => {
         let children: ReactNode = highlightQuery(text, options?.query);
-        if (leaf.bold) {
+        if (leaf.bold || leaf.strong) {
           children = <Text style={styles.bold}>{children}</Text>;
         }
 

@@ -1,7 +1,7 @@
 
 import InAppBrowser from 'react-native-inappbrowser-reborn';
 import { Linking } from 'react-native';
-import { calculateScaledDimensions, extractUrls, extractVideoParams, isEmojiOnly, millisToMinutesAndSeconds, openURL } from '../src/utils/utils';
+import { calculateScaledDimensions, extractUrls, extractVideoParams, htmlToRecord, isEmojiOnly, millisToMinutesAndSeconds, openURL } from '../src/utils/utils';
 
 jest.mock('react-native-inappbrowser-reborn', () => ({
     isAvailable: jest.fn(),
@@ -111,5 +111,196 @@ describe('utils.ts', () => {
         }
         );
 
+    });
+});
+
+
+describe('htmlToRecord', () => {
+    test('should convert a simple paragraph to the correct structure', () => {
+        const html = `<p>This is a paragraph</p>`;
+        const expected = [
+            {
+                type: 'p',
+                children: [{ text: 'This is a paragraph' }],
+            },
+        ];
+        expect(htmlToRecord(html)).toEqual(expected);
+    });
+
+    test('should handle bold text within a paragraph', () => {
+        const html = `<p>This is <strong>bold</strong> text</p>`;
+        const expected = [
+            {
+                type: 'p',
+                children: [
+                    { text: 'This is' },
+                    { text: 'bold', bold: true },
+                    { text: 'text' },
+                ],
+            },
+        ];
+        expect(htmlToRecord(html)).toEqual(expected);
+    });
+
+    test('should handle nested styles like bold and italic', () => {
+        const html = `<p>This is <strong><em>bold and italic</em></strong> text</p>`;
+        const expected = [
+            {
+                type: 'p',
+                children: [
+                    { text: 'This is' },
+                    { text: 'bold and italic', bold: true, italic: true },
+                    { text: 'text' },
+                ],
+            },
+        ];
+        expect(htmlToRecord(html)).toEqual(expected);
+    });
+
+    test('should handle lists with nested children', () => {
+        const html = `
+      <ul>
+        <li>First item</li>
+        <li>
+         <p> <strong>Second item</strong> with more text</p>
+        </li>
+        <li>
+         <p> <em>Third</em><u>item</u> with styles </p>
+        </li>
+      </ul>
+    `;
+        const expected = [
+            {
+                type: 'ul',
+                children: [
+                    {
+                        type: 'li',
+                        children: [
+                            {
+                                type: 'lic',
+                                children: [{ text: 'First item' }],
+                            },
+                        ],
+                    },
+                    {
+                        type: 'li',
+                        children: [
+                            {
+                                type: 'lic',
+                                children: [
+                                    {
+                                        type: 'p', children: [
+                                            { text: 'Second item', bold: true },
+                                            { text: 'with more text' },
+                                        ],
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                    {
+                        type: 'li',
+                        children: [
+                            {
+                                type: 'lic',
+                                children: [
+                                    {
+                                        type: 'p', children: [
+                                            { text: 'Third', italic: true },
+                                            { text: 'item', underline: true },
+                                            { text: 'with styles' },
+                                        ],
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                ],
+            },
+        ];
+
+        expect(htmlToRecord(html)).toEqual(expected);
+    });
+
+
+    test('should handle empty tags gracefully', () => {
+        const html = `<p></p><ul><li></li></ul>`;
+        const expected = [
+            {
+                type: 'p',
+                children: [{ text: '' }],
+            },
+            {
+                type: 'ul',
+                children: [
+                    {
+                        type: 'li',
+                        children: [
+                        ],
+                    },
+                ],
+            },
+        ];
+        expect(htmlToRecord(html)).toEqual(expected);
+    });
+
+    test('should handle multiple paragraphs', () => {
+        const html = `<p>First paragraph</p><p>Second paragraph</p>`;
+        const expected = [
+            {
+                type: 'p',
+                children: [{ text: 'First paragraph' }],
+            },
+            {
+                type: 'p',
+                children: [{ text: 'Second paragraph' }],
+            },
+        ];
+        expect(htmlToRecord(html)).toEqual(expected);
+    });
+
+    test('should handle mixed content with lists and paragraphs', () => {
+        const html = `
+      <p>This is a paragraph</p>
+      <ul>
+        <li>List item 1</li>
+        <li>List item 2</li>
+      </ul>
+      <p>Another paragraph</p>
+    `;
+        const expected = [
+            {
+                type: 'p',
+                children: [{ text: 'This is a paragraph' }],
+            },
+            {
+                type: 'ul',
+                children: [
+                    {
+                        type: 'li',
+                        children: [
+                            {
+                                type: 'lic',
+                                children: [{ text: 'List item 1' }],
+                            },
+                        ],
+                    },
+                    {
+                        type: 'li',
+                        children: [
+                            {
+                                type: 'lic',
+                                children: [{ text: 'List item 2' }],
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                type: 'p',
+                children: [{ text: 'Another paragraph' }],
+            },
+        ];
+        expect(htmlToRecord(html)).toEqual(expected);
     });
 });

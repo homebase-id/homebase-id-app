@@ -8,15 +8,14 @@ import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { ChannelDefinition, BlogConfig, ReactAccess } from '@homebase-id/js-lib/public';
 import { t, useDotYouClientContext } from 'homebase-id-app-common';
 import { useState, useMemo, useCallback, useLayoutEffect, useRef, useEffect, memo } from 'react';
-import { View, TouchableOpacity } from 'react-native';
+import { View, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
 import { Asset, launchImageLibrary } from 'react-native-image-picker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
 import { useChannels } from '../../hooks/feed/channels/useChannels';
 import { usePostComposer } from '../../hooks/feed/post/usePostComposer';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { ErrorNotification } from '../../components/ui/Alert/ErrorNotification';
-import { Plus, Ellipsis, Globe, Lock, Pencil } from '../../components/ui/Icons/icons';
+import { Plus, Ellipsis, Globe, Lock, Pencil, Article } from '../../components/ui/Icons/icons';
 import { FileOverview } from '../../components/Files/FileOverview';
 import { Select, Option } from '../../components/ui/Form/Select';
 import { AclIcon, AclSummary } from '../../components/Feed/Composer/AclSummary';
@@ -30,289 +29,319 @@ import { getImageSize, openURL } from '../../utils/utils';
 import React from 'react';
 import Animated, { SlideInDown, SlideOutDown } from 'react-native-reanimated';
 import { FeedStackParamList } from '../../app/FeedStack';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { NativeStackNavigationProp, NativeStackScreenProps } from '@react-navigation/native-stack';
 import { LinkPreviewBar } from '../../components/Chat/Link-Preview-Bar';
 import { LinkPreview } from '@homebase-id/js-lib/media';
 import { Backdrop } from '../../components/ui/Modal/Backdrop';
 import PasteInput, { PastedFile } from '@mattermost/react-native-paste-input';
+import { ArticleComposer } from '../../components/Feed/Article/ArticleComposer';
 
 type PostComposerProps = NativeStackScreenProps<FeedStackParamList, 'Compose'>;
 
-export const PostComposer = memo(({ navigation }: PostComposerProps) => {
-  const { isDarkMode } = useDarkMode();
-  const insets = useSafeAreaInsets();
+export const ComposePost = ({ navigation }: PostComposerProps) => {
+  const [articleMode, setArticleMode] = useState(false);
 
-  const identity = useDotYouClientContext().getIdentity();
+  if (!articleMode) {
+    return <PostComposer onModeChanged={() => setArticleMode(true)} navigation={navigation} />;
+  }
+  return <ArticleComposer navigation={navigation} />;
+};
 
-  const { savePost, processingProgress, error } = usePostComposer();
+export const PostComposer = memo(
+  ({
+    onModeChanged,
+    navigation,
+  }: {
+    onModeChanged: () => void;
+    navigation: NativeStackNavigationProp<FeedStackParamList, 'Compose'>;
+  }) => {
+    const { isDarkMode } = useDarkMode();
+    const insets = useSafeAreaInsets();
+    const identity = useDotYouClientContext().getIdentity();
 
-  const [caption, setCaption] = useState<string>('');
-  const [channel, setChannel] = useState<
-    HomebaseFile<ChannelDefinition> | NewHomebaseFile<ChannelDefinition>
-  >(BlogConfig.PublicChannelNewDsr);
-  const [customAcl, setCustomAcl] = useState<AccessControlList | undefined>(undefined);
-  const [assets, setAssets] = useState<Asset[]>([]);
+    const { savePost, processingProgress, error } = usePostComposer();
 
-  const [reactAccess, setReactAccess] = useState<ReactAccess | undefined>(undefined);
-  const [linkPreviews, setLinkPreviews] = useState<LinkPreview | null>(null);
-  const onDismissLinkPreview = useCallback(() => {
-    setLinkPreviews(null);
-  }, []);
-  const onLinkData = useCallback((link: LinkPreview) => {
-    setLinkPreviews(link);
-  }, []);
+    const [caption, setCaption] = useState<string>('');
+    const [channel, setChannel] = useState<
+      HomebaseFile<ChannelDefinition> | NewHomebaseFile<ChannelDefinition>
+    >(BlogConfig.PublicChannelNewDsr);
+    const [customAcl, setCustomAcl] = useState<AccessControlList | undefined>(undefined);
+    const [assets, setAssets] = useState<Asset[]>([]);
 
-  const isPosting = useMemo(() => !!processingProgress?.phase, [processingProgress]);
+    const [reactAccess, setReactAccess] = useState<ReactAccess | undefined>(undefined);
+    const [linkPreviews, setLinkPreviews] = useState<LinkPreview | null>(null);
+    const onDismissLinkPreview = useCallback(() => {
+      setLinkPreviews(null);
+    }, []);
+    const onLinkData = useCallback((link: LinkPreview) => {
+      setLinkPreviews(link);
+    }, []);
 
-  const doPost = useCallback(async () => {
-    if (isPosting) return;
-    await savePost(
+    const isPosting = useMemo(() => !!processingProgress?.phase, [processingProgress]);
+
+    const doPost = useCallback(async () => {
+      if (isPosting) return;
+      await savePost(
+        caption,
+        assets.map<ImageSource>((value) => {
+          return {
+            height: value.height || 0,
+            width: value.width || 0,
+            name: value.fileName,
+            type: value.type && value.type === 'image/jpg' ? 'image/jpeg' : value.type,
+            uri: value.uri,
+            filename: value.fileName,
+            date: Date.parse(value.timestamp || new Date().toUTCString()),
+            filepath: value.originalPath,
+            id: value.id,
+            fileSize: value.fileSize,
+          };
+        }),
+        linkPreviews ? [linkPreviews] : undefined,
+        undefined,
+        channel,
+        reactAccess,
+        customAcl
+      );
+
+      navigation.goBack();
+    }, [
+      isPosting,
+      savePost,
       caption,
-      assets.map<ImageSource>((value) => {
-        return {
-          height: value.height || 0,
-          width: value.width || 0,
-          name: value.fileName,
-          type: value.type && value.type === 'image/jpg' ? 'image/jpeg' : value.type,
-          uri: value.uri,
-          filename: value.fileName,
-          date: Date.parse(value.timestamp || new Date().toUTCString()),
-          filepath: value.originalPath,
-          id: value.id,
-          fileSize: value.fileSize,
-        };
-      }),
-      linkPreviews ? [linkPreviews] : undefined,
-      undefined,
+      assets,
+      linkPreviews,
       channel,
       reactAccess,
-      customAcl
-    );
+      customAcl,
+      navigation,
+    ]);
 
-    navigation.goBack();
-  }, [
-    isPosting,
-    savePost,
-    caption,
-    assets,
-    linkPreviews,
-    channel,
-    reactAccess,
-    customAcl,
-    navigation,
-  ]);
+    const handleImageIconPress = useCallback(async () => {
+      const imagePickerResult = await launchImageLibrary({
+        mediaType: 'mixed',
+        selectionLimit: 10,
+      });
+      if (imagePickerResult.didCancel || imagePickerResult.errorCode) return;
 
-  const handleImageIconPress = useCallback(async () => {
-    const imagePickerResult = await launchImageLibrary({
-      mediaType: 'mixed',
-      selectionLimit: 10,
-    });
-    if (imagePickerResult.didCancel || imagePickerResult.errorCode) return;
-
-    setAssets(
-      imagePickerResult.assets
-        ?.filter(Boolean)
-        .filter((file) => Object.keys(file)?.length && file.type) ?? []
-    );
-  }, [setAssets]);
-
-  const handleChange = useCallback(
-    (channel: HomebaseFile<ChannelDefinition> | undefined, acl: AccessControlList | undefined) => {
-      channel && setChannel(channel);
-      setCustomAcl(acl);
-    },
-    []
-  );
-
-  const canPost = caption?.length || assets?.length;
-
-  const onPaste = useCallback(
-    async (error: string | null | undefined, files: PastedFile[]) => {
-      if (error) {
-        console.error('Error while pasting:', error);
-        return;
-      }
-      const pastedItems: Asset[] = await Promise.all(
-        files
-          .map(async (file) => {
-            if (!file.type.startsWith('image')) return;
-            const { width, height } = await getImageSize(file.uri);
-            return {
-              uri: file.uri,
-              type: file.type,
-              fileName: file.fileName,
-              fileSize: file.fileSize,
-              height: height,
-              width: width,
-            } as Asset;
-          })
-          .filter(Boolean) as Promise<Asset>[]
+      setAssets(
+        imagePickerResult.assets
+          ?.filter(Boolean)
+          .filter((file) => Object.keys(file)?.length && file.type) ?? []
       );
-      setAssets(pastedItems);
-    },
-    [setAssets]
-  );
+    }, [setAssets]);
 
-  return (
-    <React.Fragment>
-      <ErrorNotification error={error} />
-      <Animated.View
-        entering={SlideInDown}
-        exiting={SlideOutDown}
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          paddingTop: insets.top + 8,
-          paddingBottom: 16,
-          paddingHorizontal: 8,
-          backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
-          zIndex: 0,
-        }}
-      >
-        <View
+    const handleChange = useCallback(
+      (
+        channel: HomebaseFile<ChannelDefinition> | undefined,
+        acl: AccessControlList | undefined
+      ) => {
+        channel && setChannel(channel);
+        setCustomAcl(acl);
+      },
+      []
+    );
+    const canPost = caption?.length || assets?.length;
+
+    const onPaste = useCallback(
+      async (error: string | null | undefined, files: PastedFile[]) => {
+        if (error) {
+          console.error('Error while pasting:', error);
+          return;
+        }
+        const pastedItems: Asset[] = await Promise.all(
+          files
+            .map(async (file) => {
+              if (!file.type.startsWith('image')) return;
+              const { width, height } = await getImageSize(file.uri);
+              return {
+                uri: file.uri,
+                type: file.type,
+                fileName: file.fileName,
+                fileSize: file.fileSize,
+                height: height,
+                width: width,
+              } as Asset;
+            })
+            .filter(Boolean) as Promise<Asset>[]
+        );
+        setAssets(pastedItems);
+      },
+      [setAssets]
+    );
+
+    return (
+      <React.Fragment>
+        <ErrorNotification error={error} />
+        <Animated.View
+          entering={SlideInDown}
+          exiting={SlideOutDown}
           style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            paddingBottom: 8,
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            paddingTop: insets.top + 8,
+            paddingBottom: 16,
+            paddingHorizontal: 8,
+            backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
+            zIndex: 0,
           }}
         >
-          <TouchableOpacity
-            style={{
-              paddingHorizontal: 8,
-              paddingTop: 8,
-              paddingBottom: 12,
-            }}
-            onPress={() => navigation.goBack()}
-          >
-            <Text style={{ fontSize: 16 }}>{t('Cancel')}</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={{
-              backgroundColor: Colors.indigo[500],
-              opacity: canPost ? 1 : 0.5,
-
-              paddingHorizontal: 8,
-              paddingVertical: 6,
-              borderRadius: 5,
-              display: 'flex',
-              flexDirection: 'row',
-              alignItems: 'center',
-              zIndex: -1,
-            }}
-            disabled={!canPost}
-            onPress={doPost}
-          >
-            <Text style={{ color: Colors.white, fontSize: 16 }}>{t('Post')}</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View
-          style={{
-            padding: 16,
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-            borderWidth: 1,
-            borderColor: isDarkMode ? Colors.slate[800] : Colors.gray[100],
-            borderRadius: 6,
-          }}
-        >
-          <PasteInput
-            onPaste={onPaste}
-            placeholder="What's up?"
-            style={{
-              paddingVertical: 5,
-              lineHeight: 20,
-              fontSize: 16,
-              minHeight: 124,
-              color: isDarkMode ? Colors.white : Colors.black,
-              textAlignVertical: 'top',
-            }}
-            multiline={true}
-            onChange={(event) => setCaption(event.nativeEvent.text)}
-          />
-
-          <FileOverview assets={assets} setAssets={setAssets} />
-          <LinkPreviewBar
-            textToSearchIn={caption}
-            onLinkData={onLinkData}
-            onDismiss={onDismissLinkPreview}
-          />
           <View
             style={{
-              display: 'flex',
-              flexDirection: 'row-reverse',
-              alignItems: 'center',
-              gap: 8,
-              zIndex: -1,
-              marginVertical: 8,
-            }}
-          >
-            {channel.serverMetadata?.accessControlList ? (
-              <AclIcon size={'sm'} acl={customAcl || channel.serverMetadata?.accessControlList} />
-            ) : null}
-
-            {channel.serverMetadata?.accessControlList ? (
-              <Text style={{ fontSize: 12 }}>
-                <AclSummary acl={customAcl || channel.serverMetadata?.accessControlList} />
-              </Text>
-            ) : null}
-          </View>
-
-          <View
-            style={{
-              display: 'flex',
               flexDirection: 'row',
+              justifyContent: 'space-between',
               alignItems: 'center',
-              gap: 10,
+              paddingBottom: 8,
             }}
           >
-            <TouchableOpacity onPress={handleImageIconPress}>
-              <Plus size={'sm'} />
-            </TouchableOpacity>
-            <ActionGroup
-              options={[
-                reactAccess === false
-                  ? {
-                      label: t('Enable reactions'),
-                      icon: Globe,
-                      onPress: () => setReactAccess(true),
-                    }
-                  : {
-                      label: t('Disable reactions'),
-                      icon: Lock,
-                      onPress: () => setReactAccess(false),
-                    },
-                {
-                  label: t('See my drafts'),
-                  onPress: () => openURL(`https://${identity}/apps/feed/articles`),
-                  icon: Pencil,
-                },
-              ]}
+            <TouchableOpacity
+              style={{
+                paddingHorizontal: 8,
+                paddingTop: 8,
+                paddingBottom: 12,
+              }}
+              onPress={() => navigation.goBack()}
             >
-              <Ellipsis size={'sm'} />
-            </ActionGroup>
+              <Text style={{ fontSize: 16 }}>{t('Cancel')}</Text>
+            </TouchableOpacity>
 
-            <ChannelOrAclSelector
-              defaultChannelValue={
-                channel?.fileMetadata?.appData?.uniqueId || BlogConfig.PublicChannelId
-              }
-              defaultAcl={customAcl}
-              onChange={handleChange}
-            />
+            <TouchableOpacity
+              style={{
+                backgroundColor: Colors.indigo[500],
+                opacity: canPost ? 1 : 0.5,
+
+                paddingHorizontal: 8,
+                paddingVertical: 6,
+                borderRadius: 5,
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+                zIndex: -1,
+              }}
+              disabled={!canPost}
+              onPress={doPost}
+            >
+              <Text style={{ color: Colors.white, fontSize: 16 }}>{t('Post')}</Text>
+            </TouchableOpacity>
           </View>
-        </View>
-      </Animated.View>
+          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+            <View
+              style={{
+                padding: 16,
+                backgroundColor: isDarkMode ? Colors.black : Colors.white,
+                borderWidth: 1,
+                borderColor: isDarkMode ? Colors.slate[800] : Colors.gray[100],
+                borderRadius: 6,
+              }}
+            >
+              <PasteInput
+                onPaste={onPaste}
+                placeholder="What's up?"
+                style={{
+                  paddingVertical: 5,
+                  lineHeight: 20,
+                  fontSize: 16,
+                  minHeight: 124,
+                  color: isDarkMode ? Colors.white : Colors.black,
+                  textAlignVertical: 'top',
+                }}
+                multiline={true}
+                onChange={(event) => setCaption(event.nativeEvent.text)}
+              />
 
-      {!error ? <ProgressIndicator processingProgress={processingProgress} /> : null}
-    </React.Fragment>
-  );
-});
+              <View>
+                <FileOverview assets={assets} setAssets={setAssets} />
+                <LinkPreviewBar
+                  textToSearchIn={caption}
+                  onLinkData={onLinkData}
+                  onDismiss={onDismissLinkPreview}
+                />
+                <View
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'row-reverse',
+                    alignItems: 'center',
+                    gap: 8,
+                    zIndex: -1,
+                    marginVertical: 8,
+                  }}
+                >
+                  {channel.serverMetadata?.accessControlList ? (
+                    <AclIcon
+                      size={'sm'}
+                      acl={customAcl || channel.serverMetadata?.accessControlList}
+                    />
+                  ) : null}
 
-const ChannelOrAclSelector = memo(
+                  {channel.serverMetadata?.accessControlList ? (
+                    <Text style={{ fontSize: 12 }}>
+                      <AclSummary acl={customAcl || channel.serverMetadata?.accessControlList} />
+                    </Text>
+                  ) : null}
+                </View>
+
+                <View
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 10,
+                  }}
+                >
+                  <TouchableOpacity onPress={handleImageIconPress}>
+                    <Plus size={'sm'} />
+                  </TouchableOpacity>
+                  <ActionGroup
+                    options={[
+                      reactAccess === false
+                        ? {
+                            label: t('Enable reactions'),
+                            icon: Globe,
+                            onPress: () => setReactAccess(true),
+                          }
+                        : {
+                            label: t('Disable reactions'),
+                            icon: Lock,
+                            onPress: () => setReactAccess(false),
+                          },
+                      {
+                        label: t('New Article'),
+                        onPress: onModeChanged,
+                        icon: Article,
+                      },
+                      {
+                        label: t('See my drafts'),
+                        onPress: () => openURL(`https://${identity}/apps/feed/articles`),
+                        icon: Pencil,
+                      },
+                    ]}
+                  >
+                    <Ellipsis size={'sm'} />
+                  </ActionGroup>
+
+                  <ChannelOrAclSelector
+                    defaultChannelValue={
+                      channel?.fileMetadata?.appData?.uniqueId || BlogConfig.PublicChannelId
+                    }
+                    defaultAcl={customAcl}
+                    onChange={handleChange}
+                  />
+                </View>
+              </View>
+            </View>
+          </KeyboardAvoidingView>
+        </Animated.View>
+
+        {!error ? <ProgressIndicator processingProgress={processingProgress} /> : null}
+      </React.Fragment>
+    );
+  }
+);
+
+export const ChannelOrAclSelector = memo(
   ({
     defaultChannelValue,
     defaultAcl,
@@ -710,8 +739,8 @@ const GroupOption = memo(
           backgroundColor: props.checked
             ? Colors.indigo[500]
             : isDarkMode
-            ? Colors.slate[700]
-            : Colors.slate[100],
+              ? Colors.slate[700]
+              : Colors.slate[100],
         }}
         onPress={() => props.onChange && props.onChange(props.value)}
       >
@@ -806,8 +835,8 @@ const CircleSelector = memo(
                   backgroundColor: isChecked
                     ? Colors.indigo[500]
                     : isDarkMode
-                    ? Colors.slate[700]
-                    : Colors.slate[100],
+                      ? Colors.slate[700]
+                      : Colors.slate[100],
                 }}
                 key={circle.id}
                 onPress={clickHandler}

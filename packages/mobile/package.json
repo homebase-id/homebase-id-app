@@ -16,6 +16,7 @@
     "test": "node --experimental-vm-modules ../../node_modules/.bin/jest"
   },
   "dependencies": {
+    "@10play/tentap-editor": "^0.5.23",
     "@bam.tech/react-native-image-resizer": "^3.0.10",
     "@gorhom/bottom-sheet": "^5.0.1",
     "@likashefqet/react-native-image-zoom": "^4.2.0",
@@ -48,6 +49,7 @@
     "create-ecdh": "^4.0.4",
     "ffmpeg-kit-react-native": "6.0.2",
     "homebase-id-app-common": "*",
+    "htmlparser2": "^9.1.0",
     "js-crypto-hkdf": "^1.0.5",
     "lodash-es": "^4.17.21",
     "mp4box": "^0.5.2",

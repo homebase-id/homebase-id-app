@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { getNewId } from '@homebase-id/js-lib/helpers';
 import { InfiniteData } from '@tanstack/react-query';
 import { Image, Linking } from 'react-native';
@@ -5,6 +6,9 @@ import { CachesDirectoryPath, copyFile } from 'react-native-fs';
 import { Asset } from 'react-native-image-picker';
 import InAppBrowser from 'react-native-inappbrowser-reborn';
 import { ImageSource } from '../provider/image/RNImageProvider';
+import { Parser, DomHandler } from 'htmlparser2';
+import { RichText } from '@homebase-id/js-lib/core';
+
 
 //https://stackoverflow.com/a/21294619/15538463
 export function millisToMinutesAndSeconds(millis: number | undefined): string {
@@ -172,7 +176,7 @@ export function cleanString(input: string): string {
   return cleanedString;
 }
 
-export function assetsToImageSource(assets: Asset[]): ImageSource[] {
+export function assetsToImageSource(assets: Asset[], key?: string): ImageSource[] {
   return assets.map((value) => {
     return {
       height: value.height || 0,
@@ -185,6 +189,7 @@ export function assetsToImageSource(assets: Asset[]): ImageSource[] {
       filepath: value.originalPath,
       id: value.id,
       fileSize: value.fileSize,
+      key: assets?.length === 1 ? key : undefined,
     };
   });
 }
@@ -235,3 +240,68 @@ export function isEmojiOnly(text: string | undefined): boolean {
     !text?.match(/[0-9a-zA-Z]/)) ??
     false;
 }
+
+export function htmlToRecord(htmlString: string): RichText {
+  const handler = new DomHandler((error, _) => {
+    if (error) {
+      throw error;
+    }
+  });
+  const parser = new Parser(handler);
+  parser.write(htmlString);
+  parser.end();
+
+  function processNode(node: any, inheritedStyles: Record<string, unknown> = {}): Record<string, unknown> | null {
+    if (node.type === 'text' && node.data.trim()) {
+      return { text: node.data.trim(), ...inheritedStyles };
+    }
+
+    if (node.type === 'tag') {
+      const isBold = node.name === 'strong';
+      const isItalic = node.name === 'em';
+      const isUnderline = node.name === 'u';
+      const isStrikeThrough = node.name === 's';
+      const isLink = node.name === 'a';
+      const newStyles = {
+        ...(inheritedStyles || {}),
+        ...(isBold ? { bold: true } : {}),
+        ...(isItalic ? { italic: true } : {}),
+        ...(isUnderline ? { underline: true } : {}),
+        ...(isStrikeThrough ? { strikethrough: true } : {}),
+        ...(isLink ? { link: node.attribs.href } : {}),
+      };
+
+      const children = (node.children || [])
+        .map((child: any) => processNode(child, newStyles))
+        .filter(Boolean) as RichText;
+
+      if (node.name === 'li') {
+        return {
+          type: 'li',
+          children: children.map((child) => ({
+            type: 'lic',
+            children: Array.isArray(child) ? child : [child],
+          })),
+        };
+      }
+
+      if (['p', 'h1', 'h2', 'h3', 'h4', 'ul', 'ol'].includes(node.name)) {
+        return {
+          type: node.name,
+          children: children.length ? children : [{ text: '' }],
+        };
+      }
+
+      // Return only the children if not a paragraph, header, or list
+      return children.length === 1 ? children[0] : { children };
+    }
+
+    return null;
+  }
+
+  const result = handler.dom.map((node: any) => processNode(node)).filter(Boolean) as RichText;
+
+  return result;
+}
+
+

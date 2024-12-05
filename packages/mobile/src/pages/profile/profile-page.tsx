@@ -7,6 +7,7 @@ import {
   Share,
   StyleProp,
   TouchableOpacity,
+  View,
   ViewStyle,
 } from 'react-native';
 import { Text } from '../../components/ui/Text/Text';
@@ -19,6 +20,8 @@ import { Container } from '../../components/ui/Container/Container';
 import {
   AddressBook,
   ChatIcon,
+  CheckCircle,
+  Cog,
   Copy,
   Download,
   Gear,
@@ -46,6 +49,7 @@ import { Colors } from '../../app/Colors';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { readFile } from 'react-native-fs';
 import Clipboard from '@react-native-clipboard/clipboard';
+import { useQueryClient } from '@tanstack/react-query';
 
 type SettingsProps = NativeStackScreenProps<ProfileStackParamList, 'Overview'>;
 
@@ -133,6 +137,7 @@ export const ProfilePage = (_props: SettingsProps) => {
             showLoader
             onPress={() => setModalVisible(true)}
           />
+          <DeleteCache />
           <ListTile title={t('Delete my account')} icon={RecycleBin} onPress={onDeleteAccount} />
           <CheckForUpdates
             style={{
@@ -371,51 +376,51 @@ const LogsModal = ({ visible, onDismiss }: { visible: boolean; onDismiss: () => 
 };
 
 // Keeping it commented if needed in future
-// const DeleteCache = () => {
-//   const query = useQueryClient();
-//   const [done, setDone] = useState(false);
-//   const doDeleteCache = async () => {
-//     query.removeQueries({
-//       queryKey: ['chat-messages'],
-//       exact: false,
-//     });
-//     query.removeQueries({
-//       queryKey: ['conversations'],
-//       exact: false,
-//     });
-//     query.removeQueries({
-//       queryKey: ['contacts'],
-//       exact: false,
-//     });
-//     setDone(true);
-//     setTimeout(() => {
-//       setDone(false);
-//     }, 5000);
-//   };
-//   return (
-//     <TouchableOpacity
-//       onPress={doDeleteCache}
-//       style={{
-//         display: 'flex',
-//         flexDirection: 'row',
-//         alignItems: 'center',
-//         paddingVertical: 12,
-//         width: '100%',
-//       }}
-//     >
-//       <Cog size={'lg'} />
-//       <Text
-//         style={{
-//           marginLeft: 16,
-//         }}
-//       >
-//         Delete Cache
-//       </Text>
-//       {done ? (
-//         <View style={{ marginLeft: 'auto' }}>
-//           <CheckCircle />
-//         </View>
-//       ) : null}
-//     </TouchableOpacity>
-//   );
-// };
+const DeleteCache = () => {
+  const query = useQueryClient();
+  const [done, setDone] = useState(false);
+  const doDeleteCache = async () => {
+    query.removeQueries({
+      queryKey: ['chat-messages'],
+      exact: false,
+    });
+    query.removeQueries({
+      queryKey: ['conversations'],
+      exact: false,
+    });
+    query.removeQueries({
+      queryKey: ['contacts'],
+      exact: false,
+    });
+    setDone(true);
+    setTimeout(() => {
+      setDone(false);
+    }, 5000);
+  };
+  return (
+    <TouchableOpacity
+      onPress={doDeleteCache}
+      style={{
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 12,
+        width: '100%',
+      }}
+    >
+      <Cog size={'lg'} />
+      <Text
+        style={{
+          marginLeft: 16,
+        }}
+      >
+        Delete Cache
+      </Text>
+      {done ? (
+        <View style={{ marginLeft: 'auto' }}>
+          <CheckCircle />
+        </View>
+      ) : null}
+    </TouchableOpacity>
+  );
+};
