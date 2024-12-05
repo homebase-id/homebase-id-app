@@ -28,7 +28,6 @@ export const PrimaryImageComponent = memo(
     channel,
     files,
     onChange,
-    disabled,
     setFiles,
   }: {
     odinId?: string;
@@ -41,7 +40,6 @@ export const PrimaryImageComponent = memo(
         value: string | { fileKey: string; type: string } | undefined;
       };
     }) => void;
-    disabled?: boolean;
     setFiles: (newFiles: (ImageSource | MediaFile)[]) => void;
   }) => {
     const channelId =

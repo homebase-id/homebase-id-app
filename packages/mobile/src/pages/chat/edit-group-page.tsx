@@ -11,8 +11,6 @@ import { Avatar, GroupAvatar, OwnerAvatar } from '../../components/ui/Avatars/Av
 
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { Colors } from '../../app/Colors';
-import { launchImageLibrary } from 'react-native-image-picker';
-import { ImageSource } from '../../provider/image/RNImageProvider';
 import { t, useAllConnections } from 'homebase-id-app-common';
 import { ChatDrive } from '../../provider/chat/ConversationProvider';
 import { useAuth } from '../../hooks/auth/useAuth';
@@ -38,7 +36,7 @@ export function EditGroupPage(props: EditGroupProp) {
 
   const conversationContent = conversation?.fileMetadata.appData.content;
   const [title, setTitle] = useState<string>(conversationContent?.title || '');
-  const [, setAsset] = useState<ImageSource | undefined>();
+  // const [, setAsset] = useState<ImageSource | undefined>();
   const identity = useAuth().getIdentity();
   const { mutate: introduceIdentities } = useIntroductions().introduceIdentities;
 
@@ -86,24 +84,24 @@ export function EditGroupPage(props: EditGroupProp) {
     updateGroupConversation,
   ]);
 
-  const pickAvatar = useCallback(async () => {
-    const image = await launchImageLibrary({
-      mediaType: 'photo',
-      selectionLimit: 1,
-    });
-    if (image.assets) {
-      const pickedImage = image.assets[0];
-      const imageSource: ImageSource = {
-        uri: pickedImage.uri,
-        type: pickedImage.type,
-        height: pickedImage.height || 0,
-        width: pickedImage.width || 0,
-        filename: pickedImage.fileName || '',
-        fileSize: pickedImage.fileSize,
-      };
-      setAsset(imageSource);
-    }
-  }, []);
+  // const pickAvatar = useCallback(async () => {
+  //   const image = await launchImageLibrary({
+  //     mediaType: 'photo',
+  //     selectionLimit: 1,
+  //   });
+  //   if (image.assets) {
+  //     const pickedImage = image.assets[0];
+  //     const imageSource: ImageSource = {
+  //       uri: pickedImage.uri,
+  //       type: pickedImage.type,
+  //       height: pickedImage.height || 0,
+  //       width: pickedImage.width || 0,
+  //       filename: pickedImage.fileName || '',
+  //       fileSize: pickedImage.fileSize,
+  //     };
+  //     setAsset(imageSource);
+  //   }
+  // }, []);
 
   useEffect(() => {
     if (updateStatus === 'success') {

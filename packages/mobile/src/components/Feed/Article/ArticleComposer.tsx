@@ -6,14 +6,7 @@ import {
   useEditorContent,
 } from '@10play/tentap-editor';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { Colors } from '../../../app/Colors';
 import { t, useDotYouClientContext } from 'homebase-id-app-common';
 import { useDarkMode } from '../../../hooks/useDarkMode';
@@ -21,11 +14,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AclIcon, AclSummary } from '../Composer/AclSummary';
 import { Article, BlogConfig, ChannelDefinition, ReactAccess } from '@homebase-id/js-lib/public';
 import { AccessControlList, HomebaseFile } from '@homebase-id/js-lib/core';
-import { launchImageLibrary } from 'react-native-image-picker';
 import { Ellipsis, FloppyDisk, Globe, Lock, Pencil } from '../../ui/Icons/icons';
 import { ActionGroup } from '../../ui/Form/ActionGroup';
 import { ChannelOrAclSelector, ProgressIndicator } from '../../../pages/feed/post-composer';
-import { assetsToImageSource, htmlToRecord, openURL } from '../../../utils/utils';
+import { htmlToRecord, openURL } from '../../../utils/utils';
 import { Input } from '../../ui/Form/Input';
 import { useArticleComposer } from '../../../hooks/feed/article/useArticleComposer';
 import { Text } from '../../ui/Text/Text';
@@ -52,7 +44,7 @@ export const ArticleComposer = ({
   const {
     // Actions
     doSave,
-    doRemovePost,
+    // doRemovePost,
 
     // Data
     channel,
@@ -97,21 +89,21 @@ export const ArticleComposer = ({
     }
   }, [willSave, setWillSave, postFile, isPublished, doSave]);
 
-  const handleImageIconPress = useCallback(async () => {
-    const imagePickerResult = await launchImageLibrary({
-      mediaType: 'mixed',
-      selectionLimit: 10,
-    });
-    if (imagePickerResult.didCancel || imagePickerResult.errorCode) return;
+  // const handleImageIconPress = useCallback(async () => {
+  //   const imagePickerResult = await launchImageLibrary({
+  //     mediaType: 'mixed',
+  //     selectionLimit: 10,
+  //   });
+  //   if (imagePickerResult.didCancel || imagePickerResult.errorCode) return;
 
-    setFiles(
-      assetsToImageSource(
-        imagePickerResult.assets
-          ?.filter(Boolean)
-          .filter((file) => Object.keys(file)?.length && file.type) ?? []
-      )
-    );
-  }, [setFiles]);
+  //   setFiles(
+  //     assetsToImageSource(
+  //       imagePickerResult.assets
+  //         ?.filter(Boolean)
+  //         .filter((file) => Object.keys(file)?.length && file.type) ?? []
+  //     )
+  //   );
+  // }, [setFiles]);
 
   const handleChange = useCallback(
     (channel: HomebaseFile<ChannelDefinition> | undefined, acl: AccessControlList | undefined) => {
@@ -398,7 +390,6 @@ export const ArticleComposer = ({
                   channel={channel}
                   files={files}
                   onChange={handleRTEChange}
-                  disabled={false}
                   setFiles={setFiles}
                 />
               </View>
