@@ -205,7 +205,6 @@ const TabStack = memo(() => {
   ];
   const { route } = useRouteContext();
   const hide = !route || !rootRoutes.includes(route.name);
-  // TODO: Hide seems slow for the chat-page.. While actually it's the ChatScreen being slow in detecting it's correct size
 
   return (
     <BottomSheetModalProvider>

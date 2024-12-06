@@ -6,6 +6,8 @@ import { SvgUri } from 'react-native-svg';
 import { ImageZoom, ImageZoomProps } from '@likashefqet/react-native-image-zoom';
 import Animated, { runOnJS } from 'react-native-reanimated';
 import { Gesture, GestureDetector, GestureType } from 'react-native-gesture-handler';
+import React from 'react';
+import { drivesEqual } from '@homebase-id/js-lib/helpers';
 
 export interface OdinImageProps {
   odinId?: string;
@@ -33,27 +35,29 @@ export interface OdinImageProps {
 const thumblessContentTypes = ['image/svg+xml', 'image/gif'];
 
 export const OdinImage = memo(
-  ({
-    odinId,
-    targetDrive,
-    fileId,
-    fileKey,
-    lastModified,
-    fit,
-    imageSize,
-    alt,
-    title,
-    previewThumbnail,
-    enableZoom,
-    style,
-    onClick,
-    onLongPress,
-    imageZoomProps,
-    globalTransitId,
-    probablyEncrypted,
-    systemFileType,
-    gestureRefs,
-  }: OdinImageProps) => {
+  (props: OdinImageProps) => {
+    const {
+      odinId,
+      targetDrive,
+      fileId,
+      fileKey,
+      lastModified,
+      fit,
+      imageSize,
+      alt,
+      title,
+      previewThumbnail,
+      enableZoom,
+      style,
+      onClick,
+      onLongPress,
+      imageZoomProps,
+      globalTransitId,
+      probablyEncrypted,
+      systemFileType,
+      gestureRefs,
+    } = props;
+
     // Don't set load size if it's a thumbnessLessContentType; As they don't have a thumb
     const loadSize = useMemo(
       () =>
@@ -139,24 +143,27 @@ export const OdinImage = memo(
         gestureRefs={gestureRefs}
       />
     );
+  },
+  (prevProps: OdinImageProps, nextProps: OdinImageProps) => {
+    // Custom comparison as targetDrive and imageSize are complex types but often the same
+    if (!drivesEqual(prevProps.targetDrive, nextProps.targetDrive)) return false;
+    if (
+      prevProps.imageSize?.width !== nextProps.imageSize?.width ||
+      prevProps.imageSize?.height !== nextProps.imageSize?.height
+    ) {
+      return false;
+    }
+
+    return Object.keys(prevProps).every(
+      (key) =>
+        ['targetDrive', 'imageSize'].includes(key) ||
+        prevProps[key as keyof OdinImageProps] === nextProps[key as keyof OdinImageProps]
+    );
   }
 );
 
 const InnerImage = memo(
-  ({
-    uri,
-    alt,
-    imageSize,
-    blurRadius,
-    style,
-    fit,
-    onLoad,
-    onPress,
-    onLongPress,
-    contentType,
-    imageMeta,
-    gestureRefs,
-  }: {
+  (props: {
     uri: string | undefined;
     imageSize?: { width: number; height: number };
     blurRadius?: number;
@@ -177,6 +184,21 @@ const InnerImage = memo(
 
     contentType: string | undefined;
   }) => {
+    const {
+      uri,
+      alt,
+      imageSize,
+      blurRadius,
+      style,
+      fit,
+      onLoad,
+      onPress,
+      onLongPress,
+      contentType,
+      imageMeta,
+      gestureRefs,
+    } = props;
+
     const { invalidateCache } = useImage();
     const tapGesture = useMemo(() => {
       const tap = Gesture.Tap().onStart(() => {
