@@ -15,6 +15,7 @@ export interface ImageData {
   naturalSize?: ImageSize;
   type?: ImageContentType;
 }
+const isDebug = false;
 
 const roundToNearest25 = (value: number) => Math.round(value / 25) * 25;
 const queryKeyBuilder = (
@@ -86,16 +87,17 @@ const useImage = (props?: {
         queryKey: queryKeyBuilder(odinId, imageFileId, imageFileKey, imageDrive),
         exact: false,
       })
-      .filter((query) => query.state.status !== 'error');
+      .filter((query) => query.state.status === 'success');
 
     const cachedEntriesWithSize = cachedEntries.map((entry) => {
       const sizeParts = (entry.queryKey[5] as string)?.split('x');
-      const size = sizeParts
-        ? {
-            pixelHeight: parseInt(sizeParts[0]),
-            pixelWidth: parseInt(sizeParts[1]),
-          }
-        : undefined;
+      const size =
+        sizeParts?.length === 2
+          ? {
+              pixelHeight: parseInt(sizeParts[0]),
+              pixelWidth: parseInt(sizeParts[1]),
+            }
+          : undefined;
 
       return {
         ...entry,
@@ -148,6 +150,8 @@ const useImage = (props?: {
     }
 
     const fetchImageFromServer = async (): Promise<ImageData | null> => {
+      isDebug && console.log('fetching from server', odinId, imageFileId, size);
+
       if (odinId && odinId !== localHost) {
         if (imageGlobalTransitId) {
           const imageBlob = await getDecryptedMediaDataOverPeerByGlobalTransitId(
@@ -232,6 +236,12 @@ const useImage = (props?: {
     // Find any cached version, the bigger the better and if we have it return it;
     const cachedImages = getCachedImages(odinId, imageFileId, imageFileKey, imageDrive);
     if (cachedImages.length) {
+      isDebug &&
+        console.log(
+          'cached images',
+          imageFileId,
+          cachedImages.map((c) => c.size)
+        );
       const largestCachedImage = cachedImages.reduce((prev, current) => {
         if (!prev) return current;
 
@@ -272,7 +282,14 @@ const useImage = (props?: {
             );
           }, 0);
         }
+        isDebug &&
+          console.log('returning cached image', odinId, imageFileId, largestCachedImage.size);
         return cachedData;
+      } else {
+        isDebug &&
+          console.log(
+            cachedData ? 'cached image does not exist on disk' : 'cached image data is null'
+          );
       }
     }
 
