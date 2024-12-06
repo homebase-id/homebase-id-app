@@ -288,6 +288,7 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
     (item) =>
       item.contentType?.startsWith('video') || item.contentType === 'application/vnd.apple.mpegurl'
   );
+  const onSnapToItem = useCallback((index: number) => setCurrIndex(index), []);
 
   return (
     <BottomSheetModalProvider>
@@ -299,9 +300,7 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
         data={payloads}
         enabled={payloads?.length > 1 && isVisible}
         scrollAnimationDuration={1000}
-        onSnapToItem={(index) => {
-          setCurrIndex(index);
-        }}
+        onSnapToItem={onSnapToItem}
         overscrollEnabled={false}
         windowSize={5}
         loop={false}
