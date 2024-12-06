@@ -87,7 +87,7 @@ export const useNotificationSubscriber = (
     }
 
     return () => {
-      if (isConnected.current && localHandler) {
+      if (localHandler) {
         isConnected.current = false;
         try {
           Unsubscribe(localHandler);
