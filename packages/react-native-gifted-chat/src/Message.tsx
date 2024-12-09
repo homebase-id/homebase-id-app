@@ -1,12 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import {
-  View,
-  StyleSheet,
-  ViewStyle,
-  LayoutChangeEvent,
-  Animated,
-} from 'react-native';
+import { View, StyleSheet, ViewStyle, LayoutChangeEvent } from 'react-native';
 
 import { Avatar, AvatarProps } from './Avatar';
 import Bubble from './Bubble';
@@ -18,11 +12,15 @@ import { IMessage, User, LeftRightStyle } from './Models';
 import ReactNativeHapticFeedback, {
   HapticFeedbackTypes,
 } from 'react-native-haptic-feedback';
-import Swipeable, {
+import ReanimatedSwipeable, {
   SwipeableMethods,
   SwipeableProps,
 } from 'react-native-gesture-handler/ReanimatedSwipeable';
-import { interpolate, SharedValue } from 'react-native-reanimated';
+import Animated, {
+  interpolate,
+  SharedValue,
+  useAnimatedStyle,
+} from 'react-native-reanimated';
 
 const styles = {
   left: StyleSheet.create({
@@ -226,30 +224,33 @@ export default class Message<
     isSameDay(this.props.currentMessage, this.props.nextMessage);
 
   renderRightAction = (progressAnimatedValue: SharedValue<number>) => {
-    const size = interpolate(
-      progressAnimatedValue.value,
-      [0, 1, 100],
-      [0, 1, 1],
-    );
-    const trans = interpolate(
-      progressAnimatedValue.value,
-      [0, 1, 2],
-      [0, -12, -20],
-    );
-
     const { renderLeftIcon } = this.props;
+
+    const animatedStyles = useAnimatedStyle(() => {
+      const size = interpolate(
+        progressAnimatedValue.value,
+        [0, 1, 100],
+        [0, 1, 1],
+      );
+      const trans = interpolate(
+        progressAnimatedValue.value,
+        [0, 1, 2],
+        [0, -12, -20],
+      );
+      return {
+        transform: [{ scale: size }, { translateX: trans }],
+      };
+    });
 
     return (
       <Animated.View
         style={[
           styles.container,
-          {
-            transform: [{ scale: size }, { translateX: trans }],
-          },
           this.isNextMyMessage
             ? styles.defaultBottomOffset
             : styles.bottomOffsetNext,
           this.props.position === 'right' && styles.leftOffsetValue,
+          animatedStyles,
         ]}
       >
         <View
@@ -265,28 +266,31 @@ export default class Message<
     );
   };
   renderLeftAction = (progressAnimatedValue: SharedValue<number>) => {
-    const size = interpolate(
-      progressAnimatedValue.value,
-      [0, 1, 100],
-      [0, 1, 1],
-    );
-    const trans = interpolate(
-      progressAnimatedValue.value,
-      [0, 1, 2],
-      [0, -12, -20],
-    );
+    const animatedStyles = useAnimatedStyle(() => {
+      const size = interpolate(
+        progressAnimatedValue.value,
+        [0, 1, 100],
+        [0, 1, 1],
+      );
+      const trans = interpolate(
+        progressAnimatedValue.value,
+        [0, 1, 2],
+        [0, -12, -20],
+      );
+      return {
+        transform: [{ scale: size }, { translateX: trans }],
+      };
+    });
 
     return (
       <Animated.View
         style={[
           styles.container,
-          {
-            transform: [{ scale: size }, { translateX: trans }],
-          },
           this.isNextMyMessage
             ? styles.defaultBottomOffset
             : styles.bottomOffsetNext,
           this.props.position === 'right' && styles.leftOffsetValue,
+          animatedStyles,
         ]}
       >
         <View
@@ -345,14 +349,14 @@ export default class Message<
               ]}
             >
               {this.props.position === 'left' ? this.renderAvatar() : null}
-              <Swipeable
+              <ReanimatedSwipeable
                 renderRightActions={this.renderRightAction}
                 renderLeftActions={this.renderLeftAction}
                 onSwipeableOpen={this.onSwipeOpenAction}
                 {...swipeableProps}
               >
                 {this.renderBubble()}
-              </Swipeable>
+              </ReanimatedSwipeable>
               {this.props.position === 'right' ? this.renderAvatar() : null}
             </View>
           )}
