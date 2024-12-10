@@ -305,9 +305,9 @@ export const bodyFormer = (
       return `${sender} confirmed the introduction`;
     }
   } else if (payload.options.appId === CHAT_APP_ID) {
-    return `${sender} sent you ${hasMultiple ? 'multiple messages' : 'a message'}`;
+    return `${sender} sent ${hasMultiple ? 'multiple messages' : 'a message'}`;
   } else if (payload.options.appId === MAIL_APP_ID) {
-    return `${sender} sent you ${hasMultiple ? 'multiple messages' : 'a message'}`;
+    return `${sender} sent ${hasMultiple ? 'multiple messages' : 'a message'}`;
   } else if (payload.options.appId === FEED_APP_ID) {
     if (payload.options.typeId === FEED_NEW_CONTENT_TYPE_ID) {
       return `${sender} uploaded a new post`;
@@ -317,7 +317,7 @@ export const bodyFormer = (
       return `${sender} commented to your post`;
     }
   } else if (payload.options.appId === COMMUNITY_APP_ID) {
-    return `${sender} sent you ${hasMultiple ? 'multiple messages' : 'a message'}`;
+    return `${sender} sent ${hasMultiple ? 'multiple messages' : 'a message'}`;
   }
 
   return `${sender} sent you a notification via ${appName}`;

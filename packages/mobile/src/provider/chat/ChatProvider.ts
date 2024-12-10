@@ -271,19 +271,19 @@ export const uploadChatMessage = async (
     },
     transitOptions: distribute
       ? {
-        recipients: [...recipients],
-        schedule: ScheduleOptions.SendLater,
-        priority: PriorityOptions.High,
-        sendContents: SendContents.All,
-        useAppNotification: true,
-        appNotificationOptions: {
-          appId: CHAT_APP_ID,
-          typeId: message.fileMetadata.appData.groupId || getNewId(),
-          tagId: message.fileMetadata.appData.uniqueId || getNewId(),
-          silent: false,
-          unEncryptedMessage: notificationBody,
-        },
-      }
+          recipients: [...recipients],
+          schedule: ScheduleOptions.SendLater,
+          priority: PriorityOptions.High,
+          sendContents: SendContents.All,
+          useAppNotification: true,
+          appNotificationOptions: {
+            appId: CHAT_APP_ID,
+            typeId: message.fileMetadata.appData.groupId || getNewId(),
+            tagId: message.fileMetadata.appData.uniqueId || getNewId(),
+            silent: false,
+            unEncryptedMessage: notificationBody,
+          },
+        }
       : undefined,
   };
 
@@ -300,11 +300,11 @@ export const uploadChatMessage = async (
   const content = shouldEmbedContent
     ? jsonContent
     : jsonStringify64({
-      message: ellipsisAtMaxChar(getPlainTextFromRichText(messageContent.message), 400),
-      replyId: messageContent.replyId,
-      deliveryDetails: messageContent.deliveryDetails,
-      deliveryStatus: messageContent.deliveryStatus,
-    }); // We only embed the content if it's less than 3kb
+        message: ellipsisAtMaxChar(getPlainTextFromRichText(messageContent.message), 400),
+        replyId: messageContent.replyId,
+        deliveryDetails: messageContent.deliveryDetails,
+        deliveryStatus: messageContent.deliveryStatus,
+      }); // We only embed the content if it's less than 3kb
 
   if (!shouldEmbedContent) {
     payloads.push({
@@ -346,10 +346,10 @@ export const uploadChatMessage = async (
 
     const imageSource: ImageSource | undefined = linkPreviewWithImage
       ? {
-        height: linkPreviewWithImage.imageHeight || 0,
-        width: linkPreviewWithImage.imageWidth || 0,
-        uri: linkPreviewWithImage.imageUrl,
-      }
+          height: linkPreviewWithImage.imageHeight || 0,
+          width: linkPreviewWithImage.imageWidth || 0,
+          uri: linkPreviewWithImage.imageUrl,
+        }
       : undefined;
 
     const { tinyThumb } = imageSource
@@ -469,12 +469,12 @@ export const uploadChatMessage = async (
   ) {
     message.fileId = uploadResult.file.fileId;
     message.fileMetadata.versionTag = uploadResult.newVersionTag;
-    message.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Failed;
+    message.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Sent;
     message.fileMetadata.appData.content.deliveryDetails = {};
     for (const recipient of recipients) {
       message.fileMetadata.appData.content.deliveryDetails[recipient] =
         uploadResult.recipientStatus?.[recipient].toLowerCase() ===
-          TransferUploadStatus.EnqueuedFailed
+        TransferUploadStatus.EnqueuedFailed
           ? ChatDeliveryStatus.Failed
           : ChatDeliveryStatus.Delivered;
     }
@@ -485,14 +485,13 @@ export const uploadChatMessage = async (
       recipients,
       uploadResult.keyHeader
     );
-
     console.warn('Not all recipients received the message: ', uploadResult);
     // We don't throw an error as it is not a critical failure; And the message is still saved locally
     return {
       ...uploadResult,
       newVersionTag: updateResult?.newVersionTag || uploadResult?.newVersionTag,
       previewThumbnail: uploadMetadata.appData.previewThumbnail,
-      chatDeliveryStatus: ChatDeliveryStatus.Failed, // Should we set failed, or does an enqueueFailed have a retry? (Either way it should auto-solve if it does)
+      chatDeliveryStatus: ChatDeliveryStatus.Sent, // Should we set failed, or does an enqueueFailed have a retry? (Either way it should auto-solve if it does)
     };
   }
 
@@ -519,11 +518,11 @@ export const updateChatMessage = async (
     },
     transitOptions: distribute
       ? {
-        recipients: [...recipients],
-        schedule: ScheduleOptions.SendLater,
-        priority: PriorityOptions.High,
-        sendContents: SendContents.All,
-      }
+          recipients: [...recipients],
+          schedule: ScheduleOptions.SendLater,
+          priority: PriorityOptions.High,
+          sendContents: SendContents.All,
+        }
       : undefined,
     storageIntent: 'header',
   };
