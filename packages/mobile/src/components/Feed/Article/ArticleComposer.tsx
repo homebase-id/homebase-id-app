@@ -1,13 +1,12 @@
 import {
   DEFAULT_TOOLBAR_ITEMS,
   RichText,
-  TenTapStartKit,
   Toolbar,
   useEditorBridge,
   useEditorContent,
 } from '@10play/tentap-editor';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
 import { Colors } from '../../../app/Colors';
 import { t, useDotYouClientContext } from 'homebase-id-app-common';
 import { useDarkMode } from '../../../hooks/useDarkMode';
