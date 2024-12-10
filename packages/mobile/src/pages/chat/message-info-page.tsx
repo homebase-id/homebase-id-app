@@ -13,6 +13,7 @@ import { ChatStackParamList } from '../../app/ChatStack';
 import { Avatar, OwnerAvatar } from '../../components/ui/Avatars/Avatar';
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 import { EmojiReaction } from '@homebase-id/js-lib/core';
+import { ChatDeliveryStatus } from '../../provider/chat/ChatProvider';
 
 export type MessageInfoProp = NativeStackScreenProps<ChatStackParamList, 'MessageInfo'>;
 
@@ -31,7 +32,7 @@ export const MessageInfoPage = ({ route }: MessageInfoProp) => {
   const identity = useDotYouClientContext().getIdentity();
   const conversationContent = conversation.fileMetadata.appData.content;
   const recipients = conversationContent.recipients.filter(
-    (recipient) => recipient && recipient !== identity
+    (recipient) => recipient && recipient !== (message.fileMetadata.senderOdinId || identity)
   );
 
   const isAuthor =
@@ -106,9 +107,7 @@ export const MessageInfoPage = ({ route }: MessageInfoProp) => {
 
               {isAuthor ? (
                 <InnerDeliveryIndicator
-                  state={
-                    messageContent.deliveryDetails?.[recipient] || messageContent.deliveryStatus
-                  }
+                  state={messageContent.deliveryDetails?.[recipient] || ChatDeliveryStatus.Failed}
                   showDefault
                   style={{ marginLeft: 'auto' }}
                 />
