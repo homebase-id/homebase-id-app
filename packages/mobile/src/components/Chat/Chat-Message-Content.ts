@@ -27,10 +27,8 @@ export const ChatMessageContent = memo(
         return '🎥 Video';
       } else if (payload.contentType.startsWith('audio')) {
         return '🎵 Audio';
-      } else if (payload.contentType.startsWith('application')) {
-        return '📄 Document';
       } else {
-        return '📁 File';
+        return '📄 File';
       }
     }
   }
