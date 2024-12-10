@@ -1,6 +1,7 @@
 import {
   DEFAULT_TOOLBAR_ITEMS,
   RichText,
+  TenTapStartKit,
   Toolbar,
   useEditorBridge,
   useEditorContent,
@@ -17,7 +18,7 @@ import { AccessControlList, HomebaseFile } from '@homebase-id/js-lib/core';
 import { Ellipsis, FloppyDisk, Globe, Lock, Pencil, Trash } from '../../ui/Icons/icons';
 import { ActionGroup } from '../../ui/Form/ActionGroup';
 import { ChannelOrAclSelector, ProgressIndicator } from '../../../pages/feed/post-composer';
-import { htmlToRecord, openURL } from '../../../utils/utils';
+import { assetsToImageSource, htmlToRecord, openURL } from '../../../utils/utils';
 import { Input } from '../../ui/Form/Input';
 import { useArticleComposer } from '../../../hooks/feed/article/useArticleComposer';
 import { Text } from '../../ui/Text/Text';
@@ -31,6 +32,8 @@ import { Header } from '@react-navigation/elements';
 import { BackButton } from '../../ui/Buttons';
 import { PrimaryImageComponent } from './PrimaryImageComponent';
 import Animated from 'react-native-reanimated';
+import image from '../../../assets/image.png';
+import { launchImageLibrary } from 'react-native-image-picker';
 
 export const ArticleComposer = ({
   navigation,
@@ -90,22 +93,6 @@ export const ArticleComposer = ({
     }
   }, [willSave, setWillSave, postFile, isPublished, doSave]);
 
-  // const handleImageIconPress = useCallback(async () => {
-  //   const imagePickerResult = await launchImageLibrary({
-  //     mediaType: 'mixed',
-  //     selectionLimit: 10,
-  //   });
-  //   if (imagePickerResult.didCancel || imagePickerResult.errorCode) return;
-
-  //   setFiles(
-  //     assetsToImageSource(
-  //       imagePickerResult.assets
-  //         ?.filter(Boolean)
-  //         .filter((file) => Object.keys(file)?.length && file.type) ?? []
-  //     )
-  //   );
-  // }, [setFiles]);
-
   const handleChange = useCallback(
     (channel: HomebaseFile<ChannelDefinition> | undefined, acl: AccessControlList | undefined) => {
       channel && setChannel(channel);
@@ -140,6 +127,27 @@ export const ArticleComposer = ({
   });
   const editorContent = useEditorContent(editor);
   const insets = useSafeAreaInsets();
+
+  const handleImageIconPress = useCallback(async () => {
+    const imagePickerResult = await launchImageLibrary({
+      mediaType: 'mixed',
+      selectionLimit: 2,
+    });
+    if (imagePickerResult.didCancel || imagePickerResult.errorCode) return;
+
+    setFiles(
+      assetsToImageSource(
+        imagePickerResult.assets
+          ?.filter(Boolean)
+          .filter((file) => Object.keys(file)?.length && file.type) ?? []
+      )
+    );
+    imagePickerResult.assets?.forEach((file) => {
+      if (file.uri || file.originalPath) {
+        editor.setImage(file.uri || file.originalPath || '');
+      }
+    });
+  }, [editor, setFiles]);
 
   const isPosting = useMemo(() => !!processingProgress?.phase, [processingProgress]);
 
@@ -199,6 +207,68 @@ export const ArticleComposer = ({
       handleRTEChange({ target: { name: 'body', value: editorContent?.toString() } });
     }
   }, [editorContent, handleRTEChange]);
+
+  const itemsToolbar = useMemo(() => {
+    return [
+      {
+        onPress: () => {
+          return () => {
+            handleImageIconPress();
+          };
+        },
+        disabled: () => false,
+        active: () => false,
+        image: () => image, // only accepts png,jpg so can't use a jsx component here
+      },
+      ...DEFAULT_TOOLBAR_ITEMS.filter((_, i) => i !== 3),
+    ];
+  }, [handleImageIconPress]);
+
+  const actionGroupOptions = useMemo(() => {
+    return [
+      reactAccess === false
+        ? {
+            label: t('Enable reactions'),
+            icon: Globe,
+            onPress: () => setReactAccess(true),
+          }
+        : {
+            label: t('Disable reactions'),
+            icon: Lock,
+            onPress: () => setReactAccess(false),
+          },
+
+      {
+        label: t('See my drafts'),
+        onPress: () => openURL(`https://${identity}/apps/feed/articles`),
+        icon: Pencil,
+      },
+      postFile.fileId
+        ? {
+            label: t('Remove'),
+            onPress: () => {
+              doRemovePost();
+              navigation.navigate('Posts');
+            },
+            icon: Trash,
+            confirmOptions: {
+              title: t('Remove'),
+              body: `${t('Are you sure you want to remove')} "${
+                postFile?.fileMetadata.appData.content?.caption || t('New article')
+              }". Any reactions or comments will be lost.`,
+              buttonText: t('Remove'),
+            },
+          }
+        : null,
+    ].filter((option) => option !== null);
+  }, [
+    doRemovePost,
+    identity,
+    navigation,
+    postFile.fileId,
+    postFile?.fileMetadata.appData.content?.caption,
+    reactAccess,
+  ]);
 
   const renderHeaderLeft = useCallback(() => {
     return (
@@ -394,14 +464,14 @@ export const ArticleComposer = ({
             minHeight: '35%',
           }}
         >
-          <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            style={{
-              flex: 1,
-            }}
-          >
-            <RichText editor={editor} />
-          </KeyboardAvoidingView>
+          <RichText
+            editor={editor}
+            allowFileAccess={true}
+            allowFileAccessFromFileURLs={true}
+            allowUniversalAccessFromFileURLs={true}
+            originWhitelist={['*']}
+            mixedContentMode="always"
+          />
           <View
             style={{
               display: 'flex',
@@ -430,50 +500,12 @@ export const ArticleComposer = ({
               gap: 10,
             }}
           >
-            {/* <TouchableOpacity onPress={handleImageIconPress}>
-              <Plus size={'sm'} />
-            </TouchableOpacity> */}
             <ActionGroup
               style={{
                 zIndex: 100,
                 elevation: 1000,
               }}
-              options={[
-                reactAccess === false
-                  ? {
-                      label: t('Enable reactions'),
-                      icon: Globe,
-                      onPress: () => setReactAccess(true),
-                    }
-                  : {
-                      label: t('Disable reactions'),
-                      icon: Lock,
-                      onPress: () => setReactAccess(false),
-                    },
-
-                {
-                  label: t('See my drafts'),
-                  onPress: () => openURL(`https://${identity}/apps/feed/articles`),
-                  icon: Pencil,
-                },
-                postFile.fileId
-                  ? {
-                      label: t('Remove'),
-                      onPress: () => {
-                        doRemovePost();
-                        navigation.navigate('Posts');
-                      },
-                      icon: Trash,
-                      confirmOptions: {
-                        title: t('Remove'),
-                        body: `${t('Are you sure you want to remove')} "${
-                          postFile?.fileMetadata.appData.content?.caption || t('New article')
-                        }". Any reactions or comments will be lost.`,
-                        buttonText: t('Remove'),
-                      },
-                    }
-                  : null,
-              ].filter((option) => option !== null)}
+              options={actionGroupOptions}
             >
               <Ellipsis size={'sm'} />
             </ActionGroup>
@@ -488,15 +520,7 @@ export const ArticleComposer = ({
             />
           </View>
         </View>
-        <View
-          style={{
-            alignContent: 'flex-end',
-            justifyContent: 'flex-end',
-            alignItems: 'flex-end',
-            marginVertical: 14,
-            marginRight: 16,
-          }}
-        >
+        <View style={styles.saveState}>
           <SaveStatus state={saveStatus} error={error} />
         </View>
       </Animated.ScrollView>
@@ -508,7 +532,7 @@ export const ArticleComposer = ({
           bottom: 0,
         }}
       >
-        <Toolbar editor={editor} items={DEFAULT_TOOLBAR_ITEMS.filter((_, i) => i !== 3)} />
+        <Toolbar editor={editor} items={itemsToolbar} />
       </KeyboardAvoidingView>
       {isPosting && <ProgressIndicator processingProgress={processingProgress} />}
     </React.Fragment>
@@ -526,5 +550,12 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: 8,
     paddingRight: 8,
+  },
+  saveState: {
+    alignContent: 'flex-end',
+    justifyContent: 'flex-end',
+    alignItems: 'flex-end',
+    marginVertical: 14,
+    marginRight: 16,
   },
 });
