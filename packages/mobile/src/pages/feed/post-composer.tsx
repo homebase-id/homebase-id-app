@@ -175,7 +175,6 @@ export const PostComposer = memo(
         <ErrorNotification error={error} />
         <Animated.View
           entering={SlideInDown}
-          exiting={SlideOutDown}
           style={{
             position: 'absolute',
             top: 0,
