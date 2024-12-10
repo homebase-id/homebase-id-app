@@ -1,6 +1,6 @@
-import { TouchableOpacity } from 'react-native';
+import { StyleSheet, TouchableOpacity } from 'react-native';
 import { Text } from '../../ui/Text/Text';
-import { memo, ReactNode } from 'react';
+import { memo, ReactNode, useCallback, useState } from 'react';
 import { ChannelDefinition, PostContent } from '@homebase-id/js-lib/public';
 import { ApiType, DotYouClient, HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
 import { t, useDotYouClientContext } from 'homebase-id-app-common';
@@ -10,7 +10,10 @@ import { useManagePost } from '../../../hooks/feed/post/useManagePost';
 import { openURL } from '../../../utils/utils';
 import { ErrorNotification } from '../../ui/Alert/ErrorNotification';
 import { Users, Times, Flag, Block, ChainLink, Trash } from '../../ui/Icons/icons';
-
+import Dialog from 'react-native-dialog';
+import { BlurView } from '@react-native-community/blur';
+import { useDarkMode } from '../../../hooks/useDarkMode';
+import { Colors } from '../../../app/Colors';
 export type ActionGroupProps = {
   icon: ReactNode;
   label: string;
@@ -184,26 +187,64 @@ export const GroupChannelActions = memo(
   }
 );
 
-export const ActionButton = memo(({ icon, label, onPress }: ActionGroupProps) => {
+export const ActionButton = memo(({ icon, label, onPress, confirmOptions }: ActionGroupProps) => {
+  const [dialogVisible, setDialogVisible] = useState(false);
+
+  const _onPress = useCallback(() => {
+    if (!confirmOptions) return onPress();
+    else setDialogVisible(true);
+  }, [confirmOptions, onPress]);
+  const { isDarkMode } = useDarkMode();
+
+  const blurComponentIOS = (
+    <BlurView
+      style={StyleSheet.absoluteFill}
+      blurType={isDarkMode ? 'dark' : 'light'}
+      blurAmount={50}
+    />
+  );
   return (
-    <TouchableOpacity
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        padding: 16,
-      }}
-      onPress={onPress}
-    >
-      {icon}
-      <Text
+    <>
+      <TouchableOpacity
         style={{
-          marginLeft: 16,
-          fontSize: 16,
-          fontWeight: '600',
+          flexDirection: 'row',
+          alignItems: 'center',
+          padding: 16,
+        }}
+        onPress={_onPress}
+      >
+        {icon}
+        <Text
+          style={{
+            marginLeft: 16,
+            fontSize: 16,
+            fontWeight: '600',
+          }}
+        >
+          {label}
+        </Text>
+      </TouchableOpacity>
+      <Dialog.Container
+        useNativeDriver
+        visible={dialogVisible}
+        blurComponentIOS={blurComponentIOS}
+        contentStyle={{
+          borderRadius: 15,
+          backgroundColor: isDarkMode ? Colors.slate[900] : Colors.slate[200],
         }}
       >
-        {label}
-      </Text>
-    </TouchableOpacity>
+        <Dialog.Title>{confirmOptions?.title}</Dialog.Title>
+        <Dialog.Description>{confirmOptions?.body}</Dialog.Description>
+
+        <Dialog.Button
+          label={confirmOptions?.buttonText}
+          onPress={() => {
+            setDialogVisible(false);
+            onPress();
+          }}
+        />
+        <Dialog.Button label="Cancel" onPress={() => setDialogVisible(false)} />
+      </Dialog.Container>
+    </>
   );
 });

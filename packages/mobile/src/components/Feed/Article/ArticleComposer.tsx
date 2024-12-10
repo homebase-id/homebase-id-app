@@ -14,7 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AclIcon, AclSummary } from '../Composer/AclSummary';
 import { Article, BlogConfig, ChannelDefinition, ReactAccess } from '@homebase-id/js-lib/public';
 import { AccessControlList, HomebaseFile } from '@homebase-id/js-lib/core';
-import { Ellipsis, FloppyDisk, Globe, Lock, Pencil } from '../../ui/Icons/icons';
+import { Ellipsis, FloppyDisk, Globe, Lock, Pencil, Trash } from '../../ui/Icons/icons';
 import { ActionGroup } from '../../ui/Form/ActionGroup';
 import { ChannelOrAclSelector, ProgressIndicator } from '../../../pages/feed/post-composer';
 import { htmlToRecord, openURL } from '../../../utils/utils';
@@ -44,7 +44,7 @@ export const ArticleComposer = ({
   const {
     // Actions
     doSave,
-    // doRemovePost,
+    doRemovePost,
 
     // Data
     channel,
@@ -463,7 +463,24 @@ export const ArticleComposer = ({
                     onPress: () => openURL(`https://${identity}/apps/feed/articles`),
                     icon: Pencil,
                   },
-                ]}
+                  postFile.fileId
+                    ? {
+                        label: t('Remove'),
+                        onPress: () => {
+                          doRemovePost();
+                          navigation.navigate('Posts');
+                        },
+                        icon: Trash,
+                        confirmOptions: {
+                          title: t('Remove'),
+                          body: `${t('Are you sure you want to remove')} "${
+                            postFile?.fileMetadata.appData.content?.caption || t('New article')
+                          }". Any reactions or comments will be lost.`,
+                          buttonText: t('Remove'),
+                        },
+                      }
+                    : null,
+                ].filter((option) => option !== null)}
               >
                 <Ellipsis size={'sm'} />
               </ActionGroup>
