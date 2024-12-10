@@ -74,7 +74,7 @@ export const PostDetailPage = ({ route: { params } }: PostDetailPageProps) => {
     odinId: isExternal ? postOdinId : undefined,
   }).fetch;
 
-  if (isPending) {
+  if (isPending && postKey && !referencedPost && !post) {
     return (
       <SafeAreaView
         style={{
