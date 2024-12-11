@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     tags:
-      - '*'
+      - "*"
 
 jobs:
   build-ios:
@@ -62,7 +62,7 @@ jobs:
           mobileprovision-base64: |
             ${{ secrets.FEED_IOS_MOBILE_PROVISION_BASE64 }}
             ${{ secrets.FEED_APP_GROUP_IOS_MOBILE_PROVISION_BASE64 }}
-          code-signing-identity: 'Apple Distribution'
+          code-signing-identity: "Apple Distribution"
           team-id: ${{ secrets.IOS_TEAM_ID }}
           certificate-password: ${{ secrets.IOS_FEED_CERTIFICATE_PASSWORD }}
           workspace-path: packages/mobile/ios/HomebaseFeed.xcworkspace
@@ -72,7 +72,7 @@ jobs:
       - name: Rename output
         run: mv output.ipa homebase-id-app.ipa
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: homebase-id-app-ios
           path: homebase-id-app.ipa
@@ -100,8 +100,8 @@ jobs:
       - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
-          distribution: 'zulu'
-          java-version: '17'
+          distribution: "zulu"
+          java-version: "17"
 
       - name: Bump version
         uses: chkfung/android-version-actions@v1.2.1
