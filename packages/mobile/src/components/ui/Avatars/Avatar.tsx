@@ -10,6 +10,7 @@ import {
   Image,
   Platform,
   Pressable,
+  ActivityIndicator,
 } from 'react-native';
 import useContact from '../../../hooks/contact/useContact';
 import { useProfile } from '../../../hooks/profile/useProfile';
@@ -19,6 +20,7 @@ import { OdinImage } from '../OdinImage/OdinImage';
 import { Colors } from '../../../app/Colors';
 import { SvgUri } from 'react-native-svg';
 import { EmbeddedThumb, TargetDrive } from '@homebase-id/js-lib/core';
+import Animated from 'react-native-reanimated';
 
 export const Avatar = memo(
   (props: {
@@ -27,8 +29,14 @@ export const Avatar = memo(
     onPress?: () => void;
     imageSize?: { width: number; height: number };
   }) => {
-    const { data: contact, isFetching } = useContact(props.odinId).fetch;
-    if (isFetching) return null;
+    const { data: contact, isLoading } = useContact(props.odinId).fetch;
+    if (isLoading) {
+      return (
+        <Animated.View style={{ ...styles.tinyLogo, ...props.style }}>
+          <ActivityIndicator size="small" color={Colors.violet[500]} />
+        </Animated.View>
+      );
+    }
 
     if (contact?.fileMetadata.payloads.some((p) => p.key === CONTACT_PROFILE_IMAGE_KEY)) {
       return (
