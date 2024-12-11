@@ -7,6 +7,7 @@ import { useDarkMode } from '../../../hooks/useDarkMode';
 import { Text } from '../Text/Text';
 import Dialog from 'react-native-dialog';
 import { BlurView } from '@react-native-community/blur';
+import React from 'react';
 
 interface SelectProps {
   children?: ReactNode;
@@ -45,6 +46,7 @@ export const ActionGroup = ({ children, style, options }: SelectProps) => {
 
       {isOpen ? (
         <View
+          key={'options'}
           style={{
             position: 'absolute',
             top: 22,
@@ -59,9 +61,8 @@ export const ActionGroup = ({ children, style, options }: SelectProps) => {
           }}
         >
           {options.map((child, index) => (
-            <>
+            <React.Fragment key={index}>
               <TouchableOpacity
-                key={index}
                 onPress={() => {
                   if (!child.confirmOptions) {
                     child.onPress();
@@ -81,29 +82,31 @@ export const ActionGroup = ({ children, style, options }: SelectProps) => {
                 {child.icon && <child.icon size={'xs'} />}
                 <Text>{child.label}</Text>
               </TouchableOpacity>
-              <Dialog.Container
-                useNativeDriver
-                visible={dialogVisible}
-                blurComponentIOS={blurComponentIOS}
-                contentStyle={{
-                  borderRadius: 15,
-                  backgroundColor: isDarkMode ? Colors.slate[900] : Colors.slate[200],
-                }}
-              >
-                <Dialog.Title>{child.confirmOptions?.title}</Dialog.Title>
-                <Dialog.Description>{child.confirmOptions?.body}</Dialog.Description>
-
-                <Dialog.Button
-                  label={child.confirmOptions?.buttonText}
-                  onPress={() => {
-                    setDialogVisible(false);
-                    child.onPress();
-                    setIsOpen(false);
+              {child.confirmOptions && (
+                <Dialog.Container
+                  useNativeDriver
+                  visible={dialogVisible}
+                  blurComponentIOS={blurComponentIOS}
+                  contentStyle={{
+                    borderRadius: 15,
+                    backgroundColor: isDarkMode ? Colors.slate[900] : Colors.slate[200],
                   }}
-                />
-                <Dialog.Button label="Cancel" onPress={() => setDialogVisible(false)} />
-              </Dialog.Container>
-            </>
+                >
+                  <Dialog.Title>{child.confirmOptions?.title}</Dialog.Title>
+                  <Dialog.Description>{child.confirmOptions?.body}</Dialog.Description>
+
+                  <Dialog.Button
+                    label={child.confirmOptions?.buttonText}
+                    onPress={() => {
+                      setDialogVisible(false);
+                      child.onPress();
+                      setIsOpen(false);
+                    }}
+                  />
+                  <Dialog.Button label="Cancel" onPress={() => setDialogVisible(false)} />
+                </Dialog.Container>
+              )}
+            </React.Fragment>
           ))}
         </View>
       ) : null}

@@ -45,34 +45,35 @@ export const SearchConversationResults = memo(
     const contactResults = useMemo(
       () =>
         query && contacts
-          ? contacts
-              .map((contact) => contact.fileMetadata.appData.content)
-              .filter((contact) => {
-                return (
-                  contact.odinId &&
-                  (contact.odinId?.includes(query) ||
-                    contact.name?.displayName?.toLowerCase().includes(query) ||
-                    contact.name?.givenName?.toLowerCase().includes(query) ||
-                    contact.name?.surname?.toLowerCase().includes(query))
-                );
-              })
+          ? contacts.filter((contacts) => {
+              const { odinId, name } = contacts.fileMetadata.appData.content;
+              const { displayName, givenName, surname } = name || {};
+              return (
+                odinId &&
+                (odinId?.includes(query) ||
+                  displayName?.toLowerCase().includes(query) ||
+                  givenName?.toLowerCase().includes(query) ||
+                  surname?.toLowerCase().includes(query))
+              );
+            })
           : [],
       [contacts, query]
     );
 
     const contactsWithoutAConversation = useMemo(
       () =>
-        contactResults.filter((contact) => {
+        contactResults.filter((contacts) => {
           // filter conversations which have should not have more than 1 recipient
           const singleConversations = conversationResults.filter((conversation) => {
             const content = conversation.fileMetadata.appData.content;
             return content.recipients.length === 2;
           });
+          const { odinId } = contacts.fileMetadata.appData.content;
           return (
-            contact.odinId &&
+            odinId &&
             !singleConversations.some((conversation) => {
               const content = conversation.fileMetadata.appData.content;
-              return content.recipients.includes(contact.odinId as string);
+              return content.recipients.includes(odinId as string);
             })
           );
         }),
@@ -111,15 +112,15 @@ export const SearchConversationResults = memo(
         ) : (
           <ScrollView contentInsetAdjustmentBehavior="automatic">
             {conversationResults?.length ? <Text style={styles.title}>Chats</Text> : null}
-            {conversationResults.map((item) => (
+            {conversationResults.map(({ fileId, fileMetadata }) => (
               <ConversationTile
-                key={item.fileId}
-                conversation={item.fileMetadata.appData.content}
-                conversationId={item.fileMetadata.appData.uniqueId}
-                conversationUpdated={item.fileMetadata.updated}
+                key={fileId}
+                conversation={fileMetadata.appData.content}
+                conversationId={fileMetadata.appData.uniqueId}
+                conversationUpdated={fileMetadata.updated}
                 onPress={onPress}
                 odinId={
-                  item.fileMetadata.appData.content.recipients.filter(
+                  fileMetadata.appData.content.recipients.filter(
                     (recipient) => recipient !== identity
                   )[0]
                 }
@@ -128,15 +129,18 @@ export const SearchConversationResults = memo(
             {contactsWithoutAConversation?.length ? (
               <Text style={styles.title}>Contacts</Text>
             ) : null}
-            {contactsWithoutAConversation.map((item) => (
-              <ContactTile
-                key={item.odinId}
-                item={{
-                  odinId: item.odinId as string,
-                }}
-                onOpen={onPress}
-              />
-            ))}
+            {contactsWithoutAConversation.map((item) => {
+              const contact = item.fileMetadata.appData.content;
+              return (
+                <ContactTile
+                  key={contact.odinId}
+                  item={{
+                    odinId: contact.odinId as string,
+                  }}
+                  onOpen={onPress}
+                />
+              );
+            })}
           </ScrollView>
         )}
       </SafeAreaView>
