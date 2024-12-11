@@ -170,6 +170,33 @@ export const PostComposer = memo(
       [setAssets]
     );
 
+    const actionGroupOptions = useMemo(
+      () => [
+        reactAccess === false
+          ? {
+              label: t('Enable reactions'),
+              icon: Globe,
+              onPress: () => setReactAccess(true),
+            }
+          : {
+              label: t('Disable reactions'),
+              icon: Lock,
+              onPress: () => setReactAccess(false),
+            },
+        {
+          label: t('New Article'),
+          onPress: onModeChanged,
+          icon: Article,
+        },
+        {
+          label: t('See my drafts'),
+          onPress: () => openURL(`https://${identity}/apps/feed/articles`),
+          icon: Pencil,
+        },
+      ],
+      [identity, onModeChanged, reactAccess]
+    );
+
     return (
       <React.Fragment>
         <ErrorNotification error={error} />
@@ -293,31 +320,7 @@ export const PostComposer = memo(
                   <TouchableOpacity onPress={handleImageIconPress}>
                     <Plus size={'sm'} />
                   </TouchableOpacity>
-                  <ActionGroup
-                    options={[
-                      reactAccess === false
-                        ? {
-                            label: t('Enable reactions'),
-                            icon: Globe,
-                            onPress: () => setReactAccess(true),
-                          }
-                        : {
-                            label: t('Disable reactions'),
-                            icon: Lock,
-                            onPress: () => setReactAccess(false),
-                          },
-                      {
-                        label: t('New Article'),
-                        onPress: onModeChanged,
-                        icon: Article,
-                      },
-                      {
-                        label: t('See my drafts'),
-                        onPress: () => openURL(`https://${identity}/apps/feed/articles`),
-                        icon: Pencil,
-                      },
-                    ]}
-                  >
+                  <ActionGroup options={actionGroupOptions}>
                     <Ellipsis size={'sm'} />
                   </ActionGroup>
 
