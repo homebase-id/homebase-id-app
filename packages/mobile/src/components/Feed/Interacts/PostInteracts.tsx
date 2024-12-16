@@ -97,7 +97,7 @@ export const PostInteracts = memo(
 
     const permalink = useMemo(
       () =>
-        `${new DotYouClient({ loggedInIdentity: odinId || undefined, api: ApiType.Guest }).getRoot()}/posts/${postContent.channelId}/${
+        `${new DotYouClient({ hostIdentity: odinId || undefined, api: ApiType.Guest }).getRoot()}/posts/${postContent.channelId}/${
           postContent.slug ?? postContent.id
         }`,
       [odinId, postContent]

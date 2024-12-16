@@ -64,7 +64,7 @@ export const PostMeta = memo(
     const channelLink = useMemo(
       () =>
         channel
-          ? `${odinId ? new DotYouClient({ loggedInIdentity: odinId, api: ApiType.Guest }).getRoot() : dotYouClient.getRoot()}/posts/${
+          ? `${odinId ? new DotYouClient({ hostIdentity: odinId, api: ApiType.Guest }).getRoot() : dotYouClient.getRoot()}/posts/${
               channel.fileMetadata.appData.content.slug
             }${isConnected && identity ? '?youauth-logon=' + identity : ''}`
           : undefined,
@@ -133,7 +133,7 @@ export const ToGroupBlock = memo(
     const channelLink = useMemo(
       () =>
         channel
-          ? `${odinId ? new DotYouClient({ loggedInIdentity: odinId, api: ApiType.Guest }).getRoot() : dotYouClient.getRoot()}/posts/${
+          ? `${odinId ? new DotYouClient({ hostIdentity: odinId, api: ApiType.Guest }).getRoot() : dotYouClient.getRoot()}/posts/${
               channel.fileMetadata.appData.content.slug
             }${isConnected && identity ? '?youauth-logon=' + identity : ''}`
           : undefined,
