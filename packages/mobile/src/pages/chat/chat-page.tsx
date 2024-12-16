@@ -655,7 +655,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
                 isGroupChat
                   ? {
                       fileId: conversation.fileId,
-                      fileKey: conversation.fileMetadata.payloads?.[0].key as string,
+                      fileKey: conversation.fileMetadata.payloads?.[0]?.key as string,
                       previewThumbnail: conversation.fileMetadata.appData.previewThumbnail,
                     }
                   : undefined
