@@ -34,7 +34,7 @@ export const usePostsInfinite = ({
 }: usePostsInfiniteProps) => {
   const dotYouClient = useDotYouClientContext();
   const isOwner = !!useAuth().getIdentity();
-  const isAuthenticated = isOwner || !!dotYouClient.getLoggedInIdentity(); ();
+  const isAuthenticated = isOwner || !!dotYouClient.getLoggedInIdentity();
   const { data: channels } = useChannels({ isAuthenticated, isOwner });
 
   const fetchBlogData = async ({
