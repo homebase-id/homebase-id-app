@@ -67,7 +67,7 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
   const [query, setQuery] = useState<string | undefined>(undefined);
   const { isDarkMode } = useDarkMode();
   const queryClient = useQueryClient();
-  const identity = useDotYouClientContext().getIdentity();
+  const identity = useDotYouClientContext().getLoggedInIdentity();
 
   const scrollRef = useRef<FlatList<ConversationWithRecentMessage>>(null);
   useScrollToTop(scrollRef);

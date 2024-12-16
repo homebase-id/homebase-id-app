@@ -13,7 +13,7 @@ import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 type ConnectionsProps = NativeStackScreenProps<ProfileStackParamList, 'Connections'>;
 
 export const ConnectionsPage = (_props: ConnectionsProps) => {
-  const identity = useDotYouClientContext().getIdentity();
+  const identity = useDotYouClientContext().getLoggedInIdentity();
 
   const {
     data: identities,

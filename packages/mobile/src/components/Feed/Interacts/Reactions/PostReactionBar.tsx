@@ -36,7 +36,7 @@ export const PostReactionBar = memo(
     onClose: () => void;
     onEmojiModalOpen?: () => void;
   }) => {
-    const identity = useDotYouClientContext().getIdentity();
+    const identity = useDotYouClientContext().getLoggedInIdentity();
     const {
       saveEmoji: { mutate: postEmoji, error: postEmojiError },
       removeEmoji: { mutate: removeEmoji, error: removeEmojiError },

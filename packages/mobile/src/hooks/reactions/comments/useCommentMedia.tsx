@@ -32,7 +32,7 @@ export const useCommentMedia = ({
   }) => {
     if (!odinId || !targetDrive || !fileId || !fileKey) return null;
 
-    const isLocal = odinId === dotYouClient.getIdentity();
+    const isLocal = odinId === dotYouClient.getLoggedInIdentity();
 
     return isLocal
       ? getDecryptedImageUrl(dotYouClient, targetDrive, fileId, fileKey, undefined, undefined, {

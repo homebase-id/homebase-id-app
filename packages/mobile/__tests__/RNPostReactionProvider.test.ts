@@ -101,7 +101,7 @@ describe('RNPostReactionProvider', () => {
   beforeEach(() => {
     const mockGetRandom16Bytes = jest.fn().mockReturnValue(new Uint8Array(16));
     (getRandom16ByteArray as jest.Mock) = mockGetRandom16Bytes;
-    dotYouClient.getIdentity = jest.fn().mockReturnValue('frodobaggins.me');
+    dotYouClient.getLoggedInIdentity(); = jest.fn().mockReturnValue('frodobaggins.me');
     dotYouClient.getSharedSecret = jest.fn().mockReturnValue(new Uint8Array(32));
 
     context = {
@@ -217,7 +217,7 @@ describe('RNPostReactionProvider', () => {
   });
 
   it('should handle local comments correctly', async () => {
-    context.odinId = dotYouClient.getIdentity();
+    context.odinId = dotYouClient.getLoggedInIdentity(); 
     const result = await saveComment(dotYouClient, context, comment);
     expect(result).toBeDefined();
   });

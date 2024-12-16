@@ -115,7 +115,8 @@ export const finalizeAuthentication = async (
   console.log({ base64ExchangedSecretDigest });
   const dotYouClient = new DotYouClient({
     api: ApiType.App,
-    identity: identity,
+    loggedInIdentity: identity,
+    hostIdentity: identity,
   });
 
   const token = await exchangeDigestForToken(dotYouClient, base64ExchangedSecretDigest);

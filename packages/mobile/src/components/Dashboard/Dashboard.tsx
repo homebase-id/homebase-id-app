@@ -33,7 +33,7 @@ const AppLink = (props: {
   icon: FC<BrandIconProps>;
 }) => {
   const { isDarkMode } = useDarkMode();
-  const identity = useDotYouClientContext().getIdentity();
+  const identity = useDotYouClientContext().getLoggedInIdentity();
   const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: props.appId });
 
   return (

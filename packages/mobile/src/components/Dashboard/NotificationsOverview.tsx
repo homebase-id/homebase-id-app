@@ -114,7 +114,7 @@ const NotificationGroup = ({
   const groupCount = typeGroup.length - 1;
   const visibleLength = isExpanded ? 10 : 3;
 
-  const identity = useDotYouClientContext().getIdentity();
+  const identity = useDotYouClientContext().getLoggedInIdentity();
   const chatNavigator = useNavigation<NavigationProp<ChatStackParamList>>();
   const tabNavigator = useNavigation<NavigationProp<TabStackParamList>>();
 
@@ -190,7 +190,7 @@ const NotificationItem = ({
   appName: string;
 }) => {
   const { isDarkMode } = useDarkMode();
-  const identity = useDotYouClientContext().getIdentity();
+  const identity = useDotYouClientContext().getLoggedInIdentity();
   const isLocalNotification = notification.senderId === identity;
 
   const { data: contactFile } = useContact(

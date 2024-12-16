@@ -34,7 +34,7 @@ export const usePostsInfinite = ({
 }: usePostsInfiniteProps) => {
   const dotYouClient = useDotYouClientContext();
   const isOwner = !!useAuth().getIdentity();
-  const isAuthenticated = isOwner || !!dotYouClient.getIdentity();
+  const isAuthenticated = isOwner || !!dotYouClient.getLoggedInIdentity(); ();
   const { data: channels } = useChannels({ isAuthenticated, isOwner });
 
   const fetchBlogData = async ({
@@ -55,22 +55,22 @@ export const usePostsInfinite = ({
       cachedData ||
       (channelId
         ? await getPosts(
-            dotYouClient,
-            channelId,
-            postType,
-            false,
-            typeof pageParam === 'string' ? pageParam : undefined,
-            BLOG_POST_INFIITE_PAGE_SIZE
-          )
+          dotYouClient,
+          channelId,
+          postType,
+          false,
+          typeof pageParam === 'string' ? pageParam : undefined,
+          BLOG_POST_INFIITE_PAGE_SIZE
+        )
         : await getRecentPosts(
-            dotYouClient,
-            postType,
-            false,
-            typeof pageParam === 'object' ? pageParam : undefined,
-            BLOG_POST_INFIITE_PAGE_SIZE,
-            channels,
-            includeHidden
-          ));
+          dotYouClient,
+          postType,
+          false,
+          typeof pageParam === 'object' ? pageParam : undefined,
+          BLOG_POST_INFIITE_PAGE_SIZE,
+          channels,
+          includeHidden
+        ));
 
     return {
       results: response.results.filter(

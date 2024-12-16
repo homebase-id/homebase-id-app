@@ -151,7 +151,7 @@ export const getPostQueryOptions: (
 ) => ({
   queryKey: [
     'post',
-    odinId || dotYouClient.getIdentity(),
+    odinId || dotYouClient.getLoggedInIdentity(),
     channel?.fileMetadata.appData.uniqueId,
     postKey,
   ],

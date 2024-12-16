@@ -27,7 +27,7 @@ export const SearchConversationResults = memo(
     const isActive = useMemo(() => !!(query && query.length >= 1), [query]);
     const { data: contacts } = useAllContacts(isActive);
     query = query?.trim().toLowerCase();
-    const identity = useDotYouClientContext().getIdentity();
+    const identity = useDotYouClientContext().getLoggedInIdentity();
     const conversationResults = useMemo(
       () =>
         query && conversations
@@ -173,7 +173,7 @@ export const SearchConversationWithSelectionResults = memo(
     const isActive = useMemo(() => !!(query && query.length >= 1), [query]);
     const { data: contacts } = useAllContacts(isActive);
     query = query?.trim().toLowerCase();
-    const identity = useDotYouClientContext().getIdentity();
+    const identity = useDotYouClientContext().getLoggedInIdentity();
     const conversationResults = useMemo(
       () =>
         query && conversations

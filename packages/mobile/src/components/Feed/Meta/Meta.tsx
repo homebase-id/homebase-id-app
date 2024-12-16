@@ -56,7 +56,7 @@ export const PostMeta = memo(
       minute: 'numeric',
     };
 
-    const identity = dotYouClient.getIdentity();
+    const identity = dotYouClient.getLoggedInIdentity();
     const isAuthor = authorOdinId === identity;
 
     const isConnected = useIsConnected(odinId).data;
@@ -64,7 +64,7 @@ export const PostMeta = memo(
     const channelLink = useMemo(
       () =>
         channel
-          ? `${odinId ? new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot() : dotYouClient.getRoot()}/posts/${
+          ? `${odinId ? new DotYouClient({ loggedInIdentity: odinId, api: ApiType.Guest }).getRoot() : dotYouClient.getRoot()}/posts/${
               channel.fileMetadata.appData.content.slug
             }${isConnected && identity ? '?youauth-logon=' + identity : ''}`
           : undefined,
@@ -124,7 +124,7 @@ export const ToGroupBlock = memo(
       | NewHomebaseFile<ChannelDefinitionVm | ChannelDefinition>;
   }) => {
     const dotYouClient = useDotYouClientContext();
-    const identity = dotYouClient.getIdentity();
+    const identity = dotYouClient.getLoggedInIdentity();
     const groupPost =
       channel?.fileMetadata.appData.content.isCollaborative ||
       (authorOdinId !== (odinId || identity) && (odinId || identity) && authorOdinId);
@@ -133,7 +133,7 @@ export const ToGroupBlock = memo(
     const channelLink = useMemo(
       () =>
         channel
-          ? `${odinId ? new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot() : dotYouClient.getRoot()}/posts/${
+          ? `${odinId ? new DotYouClient({ loggedInIdentity: odinId, api: ApiType.Guest }).getRoot() : dotYouClient.getRoot()}/posts/${
               channel.fileMetadata.appData.content.slug
             }${isConnected && identity ? '?youauth-logon=' + identity : ''}`
           : undefined,

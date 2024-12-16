@@ -44,7 +44,7 @@ export const PostDetailMainContent = ({
       }
     | undefined
   >();
-  const owner = useDotYouClientContext().getIdentity();
+  const owner = useDotYouClientContext().getLoggedInIdentity();
   const authorOdinId = postFile.fileMetadata.senderOdinId || owner;
   const postContent = postFile.fileMetadata.appData.content;
 

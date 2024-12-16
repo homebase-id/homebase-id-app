@@ -18,7 +18,7 @@ export const CommentHead = memo(
     setIsEdit?: (isEdit: boolean) => void;
     onRemove?: () => void;
   }) => {
-    const identity = useDotYouClientContext().getIdentity();
+    const identity = useDotYouClientContext().getLoggedInIdentity();
     const isAuthor = authorOdinId === identity;
 
     const actionOptions = [];

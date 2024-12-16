@@ -29,7 +29,7 @@ export const useProfile = () => {
     const photoAttr = photoDsr?.fileMetadata.appData.content;
 
     return {
-      displayName: nameAttr?.data?.displayName || dotYouClient.getIdentity(),
+      displayName: nameAttr?.data?.displayName || dotYouClient.getLoggedInIdentity(),
       firstName: nameAttr?.data?.givenName,
       surName: nameAttr?.data?.surname,
 

@@ -64,7 +64,7 @@ const sendMessage = async ({
 
   const conversationId = conversation.fileMetadata.appData.uniqueId as string;
   const conversationContent = conversation.fileMetadata.appData.content;
-  const identity = dotYouClient.getIdentity();
+  const identity = dotYouClient.getLoggedInIdentity();
   const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
 
   const newChatId = chatId || getNewId();
@@ -112,15 +112,15 @@ const sendMessage = async ({
             newChat.fileMetadata.appData.uniqueId
           )
             ? ({
-                ...msg,
-                fileMetadata: {
-                  ...msg?.fileMetadata,
-                  payloads: (msg?.fileMetadata.payloads?.map((payload) => ({
-                    ...payload,
-                    uploadProgress: { phase, progress },
-                  })) || []) as NewPayloadDescriptor,
-                },
-              } as HomebaseFile<ChatMessage>)
+              ...msg,
+              fileMetadata: {
+                ...msg?.fileMetadata,
+                payloads: (msg?.fileMetadata.payloads?.map((payload) => ({
+                  ...payload,
+                  uploadProgress: { phase, progress },
+                })) || []) as NewPayloadDescriptor,
+              },
+            } as HomebaseFile<ChatMessage>)
             : msg
         ),
       })),
@@ -210,7 +210,7 @@ const sendMessage = async ({
             }
           );
         }
-      } catch {}
+      } catch { }
 
       return {
         key,
@@ -218,8 +218,8 @@ const sendMessage = async ({
         pendingFile:
           file.filepath || file.uri
             ? (new OdinBlob((file.uri || file.filepath) as string, {
-                type: file.type || undefined,
-              }) as unknown as Blob)
+              type: file.type || undefined,
+            }) as unknown as Blob)
             : undefined,
       };
     })
@@ -230,7 +230,7 @@ const sendMessage = async ({
     (files || [])?.map(async (file) => {
       try {
         await unlink(file.uri || file.filepath || '');
-      } catch {}
+      } catch { }
     })
   );
 
@@ -262,7 +262,7 @@ export const getSendChatMessageMutationOptions: (queryClient: QueryClient) => Us
   mutationKey: ['send-chat-message'],
   mutationFn: async (params) => sendMessage({ ...params, queryClient }),
   onMutate: async ({ conversation, replyId, files, message, chatId, userDate }) => {
-    const identity = (await getSynchronousDotYouClient()).getIdentity();
+    const identity = (await getSynchronousDotYouClient()).getLoggedInIdentity();
 
     const newMessageDsr: NewHomebaseFile<ChatMessage> = {
       fileMetadata: {
@@ -279,11 +279,11 @@ export const getSendChatMessageMutationOptions: (queryClient: QueryClient) => Us
           previewThumbnail:
             files && files.length === 1
               ? {
-                  contentType: files[0].type as string,
-                  content: files[0].uri || files[0].filepath || '',
-                  pixelWidth: files[0].width,
-                  pixelHeight: files[0].height,
-                }
+                contentType: files[0].type as string,
+                content: files[0].uri || files[0].filepath || '',
+                pixelWidth: files[0].width,
+                pixelHeight: files[0].height,
+              }
               : undefined,
         },
         payloads: files?.map((file, index) => ({
@@ -292,8 +292,8 @@ export const getSendChatMessageMutationOptions: (queryClient: QueryClient) => Us
           pendingFile:
             file.filepath || file.uri
               ? (new OdinBlob((file.uri || file.filepath) as string, {
-                  type: file.type || undefined,
-                }) as unknown as Blob)
+                type: file.type || undefined,
+              }) as unknown as Blob)
               : undefined,
         })),
         senderOdinId: identity,
@@ -335,7 +335,7 @@ const updateMessage = async ({
 }) => {
   const dotYouClient = await getSynchronousDotYouClient();
   const conversationContent = conversation.fileMetadata.appData.content;
-  const identity = dotYouClient.getIdentity();
+  const identity = dotYouClient.getLoggedInIdentity();
   const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
 
   await updateChatMessage(dotYouClient, updatedChatMessage, recipients);
@@ -350,16 +350,16 @@ export const getUpdateChatMessageMutationOptions: (queryClient: QueryClient) => 
   },
   {
     extistingMessages:
-      | InfiniteData<
-          {
-            searchResults: (HomebaseFile<ChatMessage> | null)[];
-            cursorState: string;
-            queryTime: number;
-            includeMetadataHeader: boolean;
-          },
-          unknown
-        >
-      | undefined;
+    | InfiniteData<
+      {
+        searchResults: (HomebaseFile<ChatMessage> | null)[];
+        cursorState: string;
+        queryTime: number;
+        includeMetadataHeader: boolean;
+      },
+      unknown
+    >
+    | undefined;
     existingMessage: HomebaseFile<ChatMessage> | undefined;
   }
 > = (queryClient) => ({
@@ -434,13 +434,13 @@ export const useChatMessage = (props?: {
   const getMessageByUniqueId = async (conversationId: string | undefined, messageId: string) => {
     const extistingMessages = conversationId
       ? queryClient.getQueryData<
-          InfiniteData<{
-            searchResults: (HomebaseFile<ChatMessage> | null)[];
-            cursorState: string;
-            queryTime: number;
-            includeMetadataHeader: boolean;
-          }>
-        >(['chat-messages', conversationId])
+        InfiniteData<{
+          searchResults: (HomebaseFile<ChatMessage> | null)[];
+          cursorState: string;
+          queryTime: number;
+          includeMetadataHeader: boolean;
+        }>
+      >(['chat-messages', conversationId])
       : undefined;
 
     if (extistingMessages) {

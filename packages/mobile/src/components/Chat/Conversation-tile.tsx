@@ -43,7 +43,7 @@ type ConversationTileProps = {
 };
 
 const ConversationTile = memo((props: ConversationTileProps) => {
-  const identity = useDotYouClientContext().getIdentity();
+  const identity = useDotYouClientContext().getLoggedInIdentity();
   const { data: chatMessages } = useChatMessages({
     conversationId: props.conversationId,
   }).all;

@@ -24,7 +24,7 @@ export const useMyEmojiReactions = (context?: ReactionContext) => {
     return (
       (await getMyReactions(
         dotYouClient,
-        dotYouClient.getIdentity() || undefined,
+        dotYouClient.getLoggedInIdentity() || undefined,
         context,
         PAGE_SIZE,
         pageParam

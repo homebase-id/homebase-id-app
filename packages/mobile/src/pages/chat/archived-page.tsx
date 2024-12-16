@@ -16,7 +16,7 @@ import { Text } from '../../components/ui/Text/Text';
 type ArchivedPageProp = NativeStackScreenProps<ChatStackParamList, 'Archived'>;
 
 export const ArchivedPage = ({ navigation }: ArchivedPageProp) => {
-  const identity = useDotYouClientContext().getIdentity();
+  const identity = useDotYouClientContext().getLoggedInIdentity();
   const { data: conversations } = useConversationsWithRecentMessage().all;
 
   const filteredConversations = useMemo(

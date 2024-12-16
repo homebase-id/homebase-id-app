@@ -57,7 +57,6 @@ export const ConversationWithYourself: HomebaseFile<UnifiedConversation> = {
     payloads: [],
   },
   serverMetadata: undefined,
-  priority: 0,
   sharedSecretEncryptedKeyHeader: {} as EncryptedKeyHeader,
 };
 
@@ -144,9 +143,9 @@ export const getConversation = async (dotYouClient: DotYouClient, conversationId
           ...conversationHeader.fileMetadata.appData.content,
           recipients: (conversationHeader.fileMetadata.appData.content as GroupConversation)
             .recipients || [
-            (conversationHeader.fileMetadata.appData.content as SingleConversation).recipient,
-            dotYouClient.getIdentity(),
-          ],
+              (conversationHeader.fileMetadata.appData.content as SingleConversation).recipient,
+              dotYouClient.getLoggedInIdentity(),
+            ],
         },
       },
     },
@@ -170,7 +169,7 @@ export const dsrToConversation = async (
     );
     if (!attrContent) return null;
 
-    const identity = dotYouClient.getIdentity();
+    const identity = dotYouClient.getLoggedInIdentity();
     const conversation: HomebaseFile<UnifiedConversation> = {
       ...dsr,
       fileMetadata: {
@@ -181,11 +180,11 @@ export const dsrToConversation = async (
             ...attrContent,
             recipients: (attrContent as GroupConversation).recipients
               ? [
-                  ...(attrContent as GroupConversation).recipients.filter(
-                    (recipient) => recipient !== identity
-                  ),
-                  identity,
-                ]
+                ...(attrContent as GroupConversation).recipients.filter(
+                  (recipient) => recipient !== identity
+                ),
+                identity,
+              ]
               : [(attrContent as SingleConversation).recipient, identity],
           },
         },
@@ -206,7 +205,7 @@ export const uploadConversation = async (
   image?: ImageSource,
   onVersionConflict?: () => void
 ) => {
-  const identity = dotYouClient.getIdentity();
+  const identity = dotYouClient.getLoggedInIdentity();
   const uploadInstructions: UploadInstructionSet = {
     storageOptions: {
       drive: ChatDrive,
@@ -214,13 +213,13 @@ export const uploadConversation = async (
     },
     transitOptions: distribute
       ? {
-          recipients: conversation.fileMetadata.appData.content.recipients.filter(
-            (recipient) => recipient !== identity
-          ),
-          schedule: ScheduleOptions.SendLater,
-          priority: PriorityOptions.Medium,
-          sendContents: SendContents.All,
-        }
+        recipients: conversation.fileMetadata.appData.content.recipients.filter(
+          (recipient) => recipient !== identity
+        ),
+        schedule: ScheduleOptions.SendLater,
+        priority: PriorityOptions.Medium,
+        sendContents: SendContents.All,
+      }
       : undefined,
   };
 
@@ -289,7 +288,7 @@ export const updateConversation = async (
   distribute = false,
   ignoreConflict = false
 ): Promise<UploadResult | void> => {
-  const identity = dotYouClient.getIdentity();
+  const identity = dotYouClient.getLoggedInIdentity();
   const uploadInstructions: UpdateHeaderInstructionSet = {
     storageOptions: {
       drive: ChatDrive,
@@ -297,13 +296,13 @@ export const updateConversation = async (
     },
     transitOptions: distribute
       ? {
-          recipients: conversation.fileMetadata.appData.content.recipients.filter(
-            (recipient) => recipient !== identity
-          ),
-          schedule: ScheduleOptions.SendLater,
-          priority: PriorityOptions.Medium,
-          sendContents: SendContents.All,
-        }
+        recipients: conversation.fileMetadata.appData.content.recipients.filter(
+          (recipient) => recipient !== identity
+        ),
+        schedule: ScheduleOptions.SendLater,
+        priority: PriorityOptions.Medium,
+        sendContents: SendContents.All,
+      }
       : undefined,
     storageIntent: 'header',
   };
@@ -333,19 +332,19 @@ export const updateConversation = async (
     uploadMetadata,
     !ignoreConflict
       ? async () => {
-          const existingConversation = await getConversation(
-            dotYouClient,
-            conversation.fileMetadata.appData.uniqueId as string
-          );
-          if (!existingConversation) return;
-          conversation.fileMetadata.versionTag = existingConversation.fileMetadata.versionTag;
-          conversation.sharedSecretEncryptedKeyHeader =
-            existingConversation.sharedSecretEncryptedKeyHeader;
-          return updateConversation(dotYouClient, conversation, distribute, true);
-        }
+        const existingConversation = await getConversation(
+          dotYouClient,
+          conversation.fileMetadata.appData.uniqueId as string
+        );
+        if (!existingConversation) return;
+        conversation.fileMetadata.versionTag = existingConversation.fileMetadata.versionTag;
+        conversation.sharedSecretEncryptedKeyHeader =
+          existingConversation.sharedSecretEncryptedKeyHeader;
+        return updateConversation(dotYouClient, conversation, distribute, true);
+      }
       : () => {
-          // We just supress the warning; As we are ignoring the conflict following @param ignoreConflict
-        }
+        // We just supress the warning; As we are ignoring the conflict following @param ignoreConflict
+      }
   );
 };
 

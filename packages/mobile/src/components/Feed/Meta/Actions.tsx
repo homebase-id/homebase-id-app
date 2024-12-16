@@ -36,7 +36,7 @@ export const ExternalActions = memo(
     postFile: HomebaseFile<PostContent>;
     onClose?: () => void;
   }) => {
-    const identity = useDotYouClientContext().getIdentity();
+    const identity = useDotYouClientContext().getLoggedInIdentity();
     const {
       removeFromFeed: { mutateAsync: removeFromMyFeed },
       getReportContentUrl,
@@ -108,7 +108,7 @@ export const GroupChannelActions = memo(
     postFile: HomebaseFile<PostContent>;
     onClose?: () => void;
   }) => {
-    const identity = useDotYouClientContext().getIdentity();
+    const identity = useDotYouClientContext().getLoggedInIdentity();
     const isAuthor = postFile.fileMetadata.appData.content.authorOdinId === identity;
 
     const {

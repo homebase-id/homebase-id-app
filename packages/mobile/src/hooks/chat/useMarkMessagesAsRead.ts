@@ -15,7 +15,7 @@ export const useMarkMessagesAsRead = ({
   conversation: HomebaseFile<UnifiedConversation> | undefined;
   messages: HomebaseFile<ChatMessage>[] | undefined;
 }) => {
-  const identity = useDotYouClientContext().getIdentity();
+  const identity = useDotYouClientContext().getLoggedInIdentity();
   const { mutateAsync: markAsRead } = useChatMessages({
     conversationId: conversation?.fileMetadata.appData.uniqueId,
   }).markAsRead;
@@ -35,7 +35,7 @@ export const useMarkMessagesAsRead = ({
       const unreadMessages = messages.filter(
         (msg) =>
           (msg?.fileMetadata.transitCreated || msg?.fileMetadata.created) >
-            (conversationMetadata.fileMetadata.appData.content.lastReadTime || 0) &&
+          (conversationMetadata.fileMetadata.appData.content.lastReadTime || 0) &&
           msg.fileMetadata.senderOdinId &&
           msg.fileMetadata.senderOdinId !== identity
       );

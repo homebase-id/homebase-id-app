@@ -45,7 +45,7 @@ export const PostEmojiPickerModal = forwardRef(
       removeEmoji: { mutate: removeEmoji, error: removeEmojiError },
     } = useReaction();
     const { data: myEmojis } = useMyEmojiReactions(context).fetch;
-    const identity = useDotYouClientContext().getIdentity();
+    const identity = useDotYouClientContext().getLoggedInIdentity();
 
     const onSelectEmoji = useCallback(
       (emoji: Emoji) => {

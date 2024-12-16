@@ -93,7 +93,7 @@ const ChatReaction = memo(
       messageGlobalTransitId: selectedMessage?.selectedMessage?.fileMetadata.globalTransitId,
     });
 
-    const identity = useDotYouClientContext().getIdentity();
+    const identity = useDotYouClientContext().getLoggedInIdentity();
     const { data: reactions } = get;
     const myReactions = useMemo(
       () => reactions?.filter((reaction) => reaction?.authorOdinId === identity) || [],

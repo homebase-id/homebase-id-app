@@ -46,7 +46,7 @@ export const PostDetailPage = ({ route: { params } }: PostDetailPageProps) => {
   });
 
   const referencedPost = useReferencedPost(!postFile ? postKey : undefined);
-  const identity = useDotYouClientContext().getIdentity();
+  const identity = useDotYouClientContext().getLoggedInIdentity();
 
   const post = referencedPost || postFile;
   const postOdinId = odinId || post?.fileMetadata.senderOdinId;
