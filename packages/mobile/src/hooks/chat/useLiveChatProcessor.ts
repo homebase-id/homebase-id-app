@@ -160,7 +160,7 @@ const useInboxProcessor = (connected?: boolean) => {
 
 const useChatWebsocket = (isEnabled: boolean) => {
   const dotYouClient = useDotYouClientContext();
-  const identity = dotYouClient.getIdentity();
+  const identity = dotYouClient.getLoggedInIdentity();
 
   // Added to ensure we have the conversation query available
   const {
@@ -433,11 +433,11 @@ const processChatMessagesBatch = async (
           uniqueMessagesPerConversation[conversationId].map(async (newMessage) =>
             typeof newMessage.fileMetadata.appData.content === 'string'
               ? await dsrToMessage(
-                  dotYouClient,
-                  newMessage as HomebaseFile<string>,
-                  ChatDrive,
-                  true
-                )
+                dotYouClient,
+                newMessage as HomebaseFile<string>,
+                ChatDrive,
+                true
+              )
               : (newMessage as HomebaseFile<ChatMessage>)
           )
         )

@@ -37,7 +37,8 @@ export const ReportModal = forwardRef(
     const identity = useAuth().getIdentity();
     const host = new DotYouClient({
       api: ApiType.Guest,
-      identity: identity || undefined,
+      loggedInIdentity: identity || undefined,
+      hostIdentity: identity || undefined,
     }).getRoot();
 
     const onBlock = () =>

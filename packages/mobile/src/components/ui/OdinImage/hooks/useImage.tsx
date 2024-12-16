@@ -73,7 +73,7 @@ const useImage = (props?: {
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
 
-  const localHost = dotYouClient.getIdentity(); // This is the identity of the user
+  const localHost = dotYouClient.getLoggedInIdentity(); // This is the identity of the user
 
   const getCachedImages = (
     odinId: string | undefined,

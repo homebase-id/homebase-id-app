@@ -29,7 +29,7 @@ export const MessageInfoPage = ({ route }: MessageInfoProp) => {
   const { message, conversation } = route.params;
   const messageContent = message.fileMetadata.appData.content;
 
-  const identity = useDotYouClientContext().getIdentity();
+  const identity = useDotYouClientContext().getLoggedInIdentity();
   const conversationContent = conversation.fileMetadata.appData.content;
   const recipients = conversationContent.recipients.filter(
     (recipient) => recipient && recipient !== (message.fileMetadata.senderOdinId || identity)
@@ -186,7 +186,7 @@ const Header = ({ title }: { title: string }) => {
 };
 
 const AuthorImage = ({ odinId }: { odinId?: string }) => {
-  const identity = useDotYouClientContext().getIdentity();
+  const identity = useDotYouClientContext().getLoggedInIdentity();
   const isSelf = !odinId || identity === odinId;
 
   if (isSelf) return <OwnerAvatar />;

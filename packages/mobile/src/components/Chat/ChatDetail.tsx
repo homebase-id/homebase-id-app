@@ -999,6 +999,7 @@ const RenderBubble = memo(
 
     // has pauload and no text but no audio payload
     const hasPayloadandNoText =
+      message?.fileMetadata.payloads &&
       message?.fileMetadata.payloads?.length > 0 &&
       !content?.message &&
       !message?.fileMetadata?.payloads?.some(
@@ -1255,6 +1256,7 @@ const RenderReplyMessageView = memo(
               )}
             </View>
             {replyMessage &&
+              replyMessage.fileMetadata.payloads &&
               replyMessage.fileMetadata.payloads?.length > 0 &&
               replyMessage.fileMetadata.payloads[0].contentType.startsWith('image') && (
                 <OdinImage

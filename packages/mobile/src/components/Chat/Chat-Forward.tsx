@@ -108,7 +108,7 @@ export const ChatForwardModal = memo(
         message: ChatMessageIMessage
       ) {
         const messagePayloads: ImageSource[] = [];
-        if (message.fileMetadata.payloads.length > 0) {
+        if (message.fileMetadata.payloads && message.fileMetadata.payloads.length > 0) {
           const payloads = message.fileMetadata.payloads;
 
           for (const payload of payloads) {

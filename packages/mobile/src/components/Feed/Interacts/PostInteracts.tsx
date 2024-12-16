@@ -48,7 +48,7 @@ export const PostInteracts = memo(
     showSummary?: boolean;
   }) => {
     const postContent = postFile.fileMetadata.appData.content;
-    const owner = useDotYouClientContext().getIdentity();
+    const owner = useDotYouClientContext().getLoggedInIdentity();
     const odinId = postFile.fileMetadata.senderOdinId || owner;
     const postDisabledEmoji =
       postContent.reactAccess !== undefined &&
@@ -97,7 +97,7 @@ export const PostInteracts = memo(
 
     const permalink = useMemo(
       () =>
-        `${new DotYouClient({ identity: odinId || undefined, api: ApiType.Guest }).getRoot()}/posts/${postContent.channelId}/${
+        `${new DotYouClient({ hostIdentity: odinId || undefined, api: ApiType.Guest }).getRoot()}/posts/${postContent.channelId}/${
           postContent.slug ?? postContent.id
         }`,
       [odinId, postContent]
@@ -193,7 +193,7 @@ export const LikeButton = memo(
     canReact?: CanReactInfo;
     onEmojiModalOpen?: () => void;
   }) => {
-    const identity = useDotYouClientContext().getIdentity();
+    const identity = useDotYouClientContext().getLoggedInIdentity();
     const {
       saveEmoji: { mutate: postEmoji, error: postEmojiError },
       removeEmoji: { mutate: removeEmoji, error: removeEmojiError },

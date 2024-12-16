@@ -45,7 +45,7 @@ export const CommentComposer = memo(
 
     const { isDarkMode } = useDarkMode();
     const [comment, setComment] = useState('');
-    const identity = useDotYouClientContext().getIdentity();
+    const identity = useDotYouClientContext().getLoggedInIdentity();
     const [assets, setAssets] = useState<Asset[]>([]);
     const disabled = postState === 'pending' || (comment.length === 0 && assets.length === 0);
 

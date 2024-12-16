@@ -53,7 +53,7 @@ export const saveComment = async (
     | HomebaseFile<RawReactionContent>
 ): Promise<string> => {
   const encrypt = context.target.isEncrypted;
-  const isLocal = context.odinId === dotYouClient.getIdentity();
+  const isLocal = context.odinId === dotYouClient.getLoggedInIdentity();
   const targetDrive = GetTargetDriveFromChannelId(context.channelId);
 
   let payloads: PayloadFile[] = [];

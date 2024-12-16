@@ -12,7 +12,7 @@ import { MediaGallery, MediaItem } from '../ui/Media/MediaGallery';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { Colors } from '../../app/Colors';
 import { useAuth } from '../../hooks/auth/useAuth';
-import { DEFAULT_PAYLOAD_KEY } from '@homebase-id/js-lib/core';
+import { DEFAULT_PAYLOAD_KEY, PayloadDescriptor } from '@homebase-id/js-lib/core';
 
 const MediaMessage = memo(
   ({
@@ -44,6 +44,7 @@ const MediaMessage = memo(
     );
     if (
       !props.currentMessage ||
+      !props.currentMessage.fileMetadata.payloads ||
       !props.currentMessage.fileMetadata.payloads?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY)
         .length
     ) {
@@ -91,6 +92,7 @@ const InnerMediaMessage = memo(
 
     const onClick = useCallback(
       (currIndex?: number) => {
+        if (!payloads) return;
         navigation.navigate('PreviewMedia', {
           fileId: currentMessage.fileId,
           payloads: payloads,
@@ -104,7 +106,7 @@ const InnerMediaMessage = memo(
       [currentMessage, navigation, payloads]
     );
     const previewThumbnail =
-      (payloads.length === 1 ? payloads[0]?.previewThumbnail : undefined) ||
+      (payloads && payloads.length === 1 ? payloads[0]?.previewThumbnail : undefined) ||
       currentMessage.fileMetadata.appData.previewThumbnail;
 
     const aspectRatio = useMemo(
@@ -122,7 +124,7 @@ const InnerMediaMessage = memo(
       [previewThumbnail, width, height]
     );
 
-    if (payloads.length === 1) {
+    if (payloads?.length === 1) {
       return (
         <MediaItem
           key={`${currentMessage.fileMetadata.appData.content}_${payloads[0].key}`}
@@ -152,7 +154,7 @@ const InnerMediaMessage = memo(
     return (
       <MediaGallery
         fileId={currentMessage.fileId}
-        payloads={payloads}
+        payloads={payloads as PayloadDescriptor[]}
         targetDrive={ChatDrive}
         previewThumbnail={currentMessage.fileMetadata.appData.previewThumbnail}
         onLongPress={(e) => onLongPress(e, currentMessage)}

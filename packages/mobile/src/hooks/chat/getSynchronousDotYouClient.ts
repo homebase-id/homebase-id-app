@@ -31,7 +31,8 @@ export const getSynchronousDotYouClient = async () => {
     return new DotYouClient({
       sharedSecret: base64ToUint8Array(sharedSecret),
       api: ApiType.App,
-      identity: identity,
+      loggedInIdentity: identity,
+      hostIdentity: identity,
       headers: headers,
     });
   })();

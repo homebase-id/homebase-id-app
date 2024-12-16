@@ -33,7 +33,7 @@ export const useVideo = ({
 }) => {
   const queryClient = useQueryClient();
   const dotyouClient = useDotYouClientContext();
-  const localHost = dotyouClient.getIdentity(); // This is the identity of the user
+  const localHost = dotyouClient.getLoggedInIdentity(); // This is the identity of the user
 
   const fetchVideo = async ({ payloadKey }: { payloadKey?: string }) => {
     if (!fileId || !targetDrive || !payloadKey) return null;

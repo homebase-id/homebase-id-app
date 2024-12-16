@@ -40,7 +40,7 @@ export const PostDetailCard = memo(
   }) => {
     const { isDarkMode } = useDarkMode();
     const doubleTapRef = useRef<GestureType>();
-    const identity = useDotYouClientContext().getIdentity();
+    const identity = useDotYouClientContext().getLoggedInIdentity();
 
     if (!postFile) return <ActivityIndicator />;
     const post = postFile.fileMetadata.appData.content;

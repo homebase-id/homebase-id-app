@@ -25,7 +25,7 @@ export const CommentMeta = memo(
   }) => {
     const isEdited = updated && updated !== 0 && updated !== created;
     const { mutateAsync: postReaction, error: postReactionError } = useReaction().saveEmoji;
-    const identity = useDotYouClientContext().getIdentity();
+    const identity = useDotYouClientContext().getLoggedInIdentity();
     const doLike = () => {
       postReaction({
         emojiData: {

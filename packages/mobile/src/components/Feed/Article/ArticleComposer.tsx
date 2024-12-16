@@ -99,7 +99,7 @@ export const ArticleComposer = ({
     },
     [setChannel]
   );
-  const identity = useDotYouClientContext().getIdentity();
+  const identity = useDotYouClientContext().getLoggedInIdentity();
   const [isEditTeaser, setIsEditTeaser] = useState(true);
 
   const editor = useEditorBridge({

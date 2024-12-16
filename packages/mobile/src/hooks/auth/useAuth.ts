@@ -172,7 +172,8 @@ export const useAuth = () => {
     return new DotYouClient({
       sharedSecret: base64ToUint8Array(sharedSecret),
       api: ApiType.App,
-      identity: identity,
+      loggedInIdentity: identity,
+      hostIdentity: identity,
       headers: headers,
     });
   }, [authToken, identity, sharedSecret]);
@@ -241,8 +242,7 @@ export const useYouAuthAuthorization = () => {
       [CONFIRMED_CONNECTIONS_CIRCLE_ID, AUTO_CONNECTIONS_CIRCLE_ID],
       uint8ArrayToBase64(stringToUint8Array(JSON.stringify(publicKeyJwk))),
       corsHost,
-      `${Platform.OS === 'ios' ? 'iOS' : Platform.OS === 'android' ? 'Android' : Platform.OS} | ${
-        Platform.Version
+      `${Platform.OS === 'ios' ? 'iOS' : Platform.OS === 'android' ? 'Android' : Platform.OS} | ${Platform.Version
       }`
     );
   }, [setPrivateKey]);

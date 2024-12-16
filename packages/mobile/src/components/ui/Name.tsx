@@ -32,7 +32,7 @@ export const AuthorName = memo(
     showYou?: boolean;
     showFirstNameOnly?: boolean;
   }) => {
-    const identity = useDotYouClientContext().getIdentity();
+    const identity = useDotYouClientContext().getLoggedInIdentity();
 
     if (!odinId || odinId === identity) {
       return (

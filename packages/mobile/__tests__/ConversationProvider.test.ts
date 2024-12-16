@@ -82,7 +82,7 @@ jest.mock('react-native-fs', () => {
 
 describe('ConversationProvider', () => {
   const dotYouClientMock = new DotYouClient({
-    identity: 'frodobaggins.me',
+    loggedInIdentity: 'frodobaggins.me',
     api: ApiType.App,
     headers: {},
     sharedSecret: new Uint8Array(16),
@@ -202,7 +202,6 @@ describe('ConversationProvider', () => {
       fileId: 'file-id',
       fileState: 'active',
       fileSystemType: 'Standard',
-      priority: 0,
       sharedSecretEncryptedKeyHeader: {
         encryptedAesKey: new Uint8Array(32),
         encryptionVersion: 1,
@@ -278,7 +277,6 @@ describe('ConversationProvider', () => {
               isEncrypted: true,
               senderOdinId: 'frodo',
             },
-            priority: 2,
             sharedSecretEncryptedKeyHeader: {
               encryptedAesKey: new Uint8Array(32),
               encryptionVersion: 1,

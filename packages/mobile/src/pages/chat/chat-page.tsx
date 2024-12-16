@@ -147,7 +147,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
             received: value.fileMetadata.appData.content.deliveryStatus === 40,
             pending: value.fileMetadata.appData.content.deliveryStatus === 15,
             image:
-              value.fileMetadata.payloads?.length > 0
+              value.fileMetadata.payloads && value.fileMetadata.payloads?.length > 0
                 ? value.fileMetadata.payloads.length.toString()
                 : undefined,
             ...value,
@@ -497,7 +497,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
 
   const host = new DotYouClient({
     api: ApiType.Guest,
-    identity: identity || undefined,
+    loggedInIdentity: identity || undefined,
   }).getRoot();
   const chatOptions: {
     label: string;
@@ -655,7 +655,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
                 isGroupChat
                   ? {
                       fileId: conversation.fileId,
-                      fileKey: conversation.fileMetadata.payloads?.[0]?.key,
+                      fileKey: conversation.fileMetadata.payloads?.[0]?.key as string,
                       previewThumbnail: conversation.fileMetadata.appData.previewThumbnail,
                     }
                   : undefined

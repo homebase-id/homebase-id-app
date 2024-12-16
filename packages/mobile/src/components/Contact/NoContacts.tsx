@@ -7,7 +7,7 @@ import { People } from '../ui/Icons/icons';
 import { Colors } from '../../app/Colors';
 
 export const NoContacts = () => {
-  const identity = useDotYouClientContext().getIdentity();
+  const identity = useDotYouClientContext().getLoggedInIdentity();
   return (
     <View style={{ padding: 16, flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
       <Text style={{ color: Colors.gray[400], fontStyle: 'italic' }}>

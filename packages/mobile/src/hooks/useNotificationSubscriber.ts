@@ -6,6 +6,7 @@ import {
   TargetDrive,
   TypedConnectionNotification,
   Notify,
+  DotYouClient,
 } from '@homebase-id/js-lib/core';
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { hasDebugFlag } from '@homebase-id/js-lib/helpers';
@@ -30,7 +31,7 @@ export const useNotificationSubscriber = (
   if (!authToken) throw new Error('No auth token found');
 
   const wrappedSubscriber = useCallback(
-    (notification: TypedConnectionNotification) => {
+    (dotYouClient: DotYouClient, notification: TypedConnectionNotification) => {
       if (notification.notificationType === 'inboxItemReceived') {
         isDebug &&
           console.debug(

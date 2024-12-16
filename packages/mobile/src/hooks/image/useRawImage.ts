@@ -30,7 +30,7 @@ export const useRawImage = ({
     lastModified?: number;
 }) => {
     const dotYouClient = useDotYouClientContext();
-    const localHost = dotYouClient.getIdentity();
+    const localHost = dotYouClient.getLoggedInIdentity();
     const fetchImageData = async (
         odinId: string,
         imageFileId: string | undefined,

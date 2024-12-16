@@ -57,7 +57,7 @@ export const PostComposer = memo(
   }) => {
     const { isDarkMode } = useDarkMode();
     const insets = useSafeAreaInsets();
-    const identity = useDotYouClientContext().getIdentity();
+    const identity = useDotYouClientContext().getLoggedInIdentity();
 
     const { savePost, processingProgress, error } = usePostComposer();
 

@@ -60,7 +60,7 @@ describe('RNPostUploadProvider', () => {
   let onVersionConflict: jest.Mock;
   let onUpdate: jest.Mock;
   const dotYouClient = new DotYouClient({
-    identity: 'frodobaggins.me',
+    loggedInIdentity: 'frodobaggins.me',
     api: ApiType.App,
     headers: {},
     sharedSecret: new Uint8Array(32),
@@ -69,7 +69,7 @@ describe('RNPostUploadProvider', () => {
   beforeEach(() => {
     const mockGetRandom16Bytes = jest.fn().mockReturnValue(new Uint8Array(16));
     (getRandom16ByteArray as jest.Mock) = mockGetRandom16Bytes;
-    dotYouClient.getIdentity = jest.fn().mockReturnValue('frodobaggins.me');
+    dotYouClient.getLoggedInIdentity = jest.fn().mockReturnValue('frodobaggins.me');
     dotYouClient.getSharedSecret = jest.fn().mockReturnValue(new Uint8Array(32));
     (getFileHeader as jest.Mock).mockClear();
     file = {
@@ -78,7 +78,7 @@ describe('RNPostUploadProvider', () => {
         versionTag: 'old-version-tag',
         appData: {
           content: {
-            authorOdinId: dotYouClient.getIdentity(),
+            authorOdinId: dotYouClient.getLoggedInIdentity(),
             type: 'Tweet',
             caption: 'Here is a demo caption',
             id: 'random-guid-id',
@@ -164,7 +164,6 @@ describe('RNPostUploadProvider', () => {
 
     const fileHeader: HomebaseFile<string> = {
       fileId: 'existing-file-id',
-      priority: 0,
       sharedSecretEncryptedKeyHeader: {
         encryptedAesKey: new Uint8Array(32),
         iv: new Uint8Array(16),
@@ -222,7 +221,6 @@ describe('RNPostUploadProvider', () => {
 
     const fileHeader: HomebaseFile<string> = {
       fileId: 'existing-file-id',
-      priority: 0,
       sharedSecretEncryptedKeyHeader: {
         encryptedAesKey: new Uint8Array(32),
         iv: new Uint8Array(16),
@@ -321,7 +319,6 @@ describe('RNPostUploadProvider', () => {
 
     const fileHeader: HomebaseFile<string> = {
       fileId: 'existing-file-id',
-      priority: 0,
       sharedSecretEncryptedKeyHeader: {
         encryptedAesKey: new Uint8Array(32),
         iv: new Uint8Array(16),

@@ -72,7 +72,7 @@ export const useChannel = ({ odinId, channelKey }: useChannelsProps) => {
 
   return {
     fetch: useQuery({
-      queryKey: ['channel', odinId || dotYouClient.getIdentity(), channelKey],
+      queryKey: ['channel', odinId || dotYouClient.getLoggedInIdentity(), channelKey],
       queryFn: () => fetchChannelData({ channelKey }),
       refetchOnMount: false,
       refetchOnWindowFocus: false,

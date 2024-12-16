@@ -14,7 +14,7 @@ import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 
 type ConnectionRequestProps = NativeStackScreenProps<HomeStackParamList, 'ConnectionRequests'>;
 export const ConnectionRequestsPage = (_props: ConnectionRequestProps) => {
-  const identity = useDotYouClientContext().getIdentity();
+  const identity = useDotYouClientContext().getLoggedInIdentity();
   const {
     data: identities,
     refetch: refetchIdentities,

@@ -29,7 +29,7 @@ export const DoubleTapHeart = memo(
     const opacity = useSharedValue(0);
     const scale = useSharedValue(1);
     const { mutateAsync: postEmoji, error: postEmojiError } = useReaction().saveEmoji;
-    const identity = useDotYouClientContext().getIdentity();
+    const identity = useDotYouClientContext().getLoggedInIdentity();
     const postContent = postFile.fileMetadata.appData.content;
     const reactionContext: ReactionContext = useMemo(() => {
       return {

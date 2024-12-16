@@ -13,7 +13,7 @@ import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 type FollowingProps = NativeStackScreenProps<ProfileStackParamList, 'Following'>;
 
 export const FollowingPage = (_props: FollowingProps) => {
-  const identity = useDotYouClientContext().getIdentity();
+  const identity = useDotYouClientContext().getLoggedInIdentity();
 
   const {
     data: identities,

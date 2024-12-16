@@ -39,7 +39,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
   const { conversationId } = props || {};
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
-  const identity = useDotYouClientContext().getIdentity();
+  const identity = useDotYouClientContext().getLoggedInIdentity();
   const addErrors = useErrors().add;
 
   const createConversation = async ({
@@ -113,7 +113,6 @@ export const useConversation = (props?: { conversationId?: string | undefined })
         doNotIndex: false,
         allowDistribution: false,
       },
-      priority: 0,
     };
 
     return serverVersion;

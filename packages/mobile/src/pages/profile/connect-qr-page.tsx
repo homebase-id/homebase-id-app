@@ -9,7 +9,7 @@ import { Text } from '../../components/ui/Text/Text';
 type ConnectQrProps = NativeStackScreenProps<ProfileStackParamList, 'ConnectQr'>;
 
 export const ConnectQrPage = (_props: ConnectQrProps) => {
-  const identity = useDotYouClientContext().getIdentity();
+  const identity = useDotYouClientContext().getLoggedInIdentity();
   return (
     <SafeAreaView>
       <View

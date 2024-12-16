@@ -34,7 +34,7 @@ export type MediaProp = NativeStackScreenProps<
 >;
 
 export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
-  const identity = useDotYouClientContext().getIdentity();
+  const identity = useDotYouClientContext().getLoggedInIdentity();
   const {
     fileId,
     globalTransitId,

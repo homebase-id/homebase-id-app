@@ -271,19 +271,19 @@ export const uploadChatMessage = async (
     },
     transitOptions: distribute
       ? {
-          recipients: [...recipients],
-          schedule: ScheduleOptions.SendLater,
-          priority: PriorityOptions.High,
-          sendContents: SendContents.All,
-          useAppNotification: true,
-          appNotificationOptions: {
-            appId: CHAT_APP_ID,
-            typeId: message.fileMetadata.appData.groupId || getNewId(),
-            tagId: message.fileMetadata.appData.uniqueId || getNewId(),
-            silent: false,
-            unEncryptedMessage: notificationBody,
-          },
-        }
+        recipients: [...recipients],
+        schedule: ScheduleOptions.SendLater,
+        priority: PriorityOptions.High,
+        sendContents: SendContents.All,
+        useAppNotification: true,
+        appNotificationOptions: {
+          appId: CHAT_APP_ID,
+          typeId: message.fileMetadata.appData.groupId || getNewId(),
+          tagId: message.fileMetadata.appData.uniqueId || getNewId(),
+          silent: false,
+          unEncryptedMessage: notificationBody,
+        },
+      }
       : undefined,
   };
 
@@ -300,11 +300,11 @@ export const uploadChatMessage = async (
   const content = shouldEmbedContent
     ? jsonContent
     : jsonStringify64({
-        message: ellipsisAtMaxChar(getPlainTextFromRichText(messageContent.message), 400),
-        replyId: messageContent.replyId,
-        deliveryDetails: messageContent.deliveryDetails,
-        deliveryStatus: messageContent.deliveryStatus,
-      }); // We only embed the content if it's less than 3kb
+      message: ellipsisAtMaxChar(getPlainTextFromRichText(messageContent.message), 400),
+      replyId: messageContent.replyId,
+      deliveryDetails: messageContent.deliveryDetails,
+      deliveryStatus: messageContent.deliveryStatus,
+    }); // We only embed the content if it's less than 3kb
 
   if (!shouldEmbedContent) {
     payloads.push({
@@ -346,10 +346,10 @@ export const uploadChatMessage = async (
 
     const imageSource: ImageSource | undefined = linkPreviewWithImage
       ? {
-          height: linkPreviewWithImage.imageHeight || 0,
-          width: linkPreviewWithImage.imageWidth || 0,
-          uri: linkPreviewWithImage.imageUrl,
-        }
+        height: linkPreviewWithImage.imageHeight || 0,
+        width: linkPreviewWithImage.imageWidth || 0,
+        uri: linkPreviewWithImage.imageUrl,
+      }
       : undefined;
 
     const { tinyThumb } = imageSource
@@ -474,7 +474,7 @@ export const uploadChatMessage = async (
     for (const recipient of recipients) {
       message.fileMetadata.appData.content.deliveryDetails[recipient] =
         uploadResult.recipientStatus?.[recipient].toLowerCase() ===
-        TransferUploadStatus.EnqueuedFailed
+          TransferUploadStatus.EnqueuedFailed
           ? ChatDeliveryStatus.Failed
           : ChatDeliveryStatus.Delivered;
     }
@@ -518,11 +518,11 @@ export const updateChatMessage = async (
     },
     transitOptions: distribute
       ? {
-          recipients: [...recipients],
-          schedule: ScheduleOptions.SendLater,
-          priority: PriorityOptions.High,
-          sendContents: SendContents.All,
-        }
+        recipients: [...recipients],
+        schedule: ScheduleOptions.SendLater,
+        priority: PriorityOptions.High,
+        sendContents: SendContents.All,
+      }
       : undefined,
     storageIntent: 'header',
   };
@@ -577,20 +577,21 @@ export const softDeleteChatMessage = async (
 ) => {
   message.fileMetadata.appData.archivalStatus = ChatDeletedArchivalStaus;
   let runningVersionTag = message.fileMetadata.versionTag;
-
-  for (let i = 0; i < message.fileMetadata.payloads.length; i++) {
-    const payload = message.fileMetadata.payloads[i];
-    // TODO: Should the payload be deleted for everyone? With "TransitOptions"
-    const deleteResult = await deletePayload(
-      dotYouClient,
-      ChatDrive,
-      message.fileId,
-      payload.key,
-      runningVersionTag
-    );
-
-    if (!deleteResult) throw new Error('Failed to delete payload');
-    runningVersionTag = deleteResult.newVersionTag;
+  const { payloads } = message.fileMetadata;
+  if (payloads) {
+    await Promise.all(payloads.map(async (payload) => {
+      // TODO: Should the payload be deleted for everyone? With "TransitOptions"
+      const deleteResult = await deletePayload(
+        dotYouClient,
+        ChatDrive,
+        message.fileId,
+        payload.key,
+        runningVersionTag
+      );
+      if (!deleteResult) throw new Error('Failed to delete payload');
+      runningVersionTag = deleteResult.newVersionTag;
+    }
+    ));
   }
 
   message.fileMetadata.versionTag = runningVersionTag;
@@ -608,7 +609,7 @@ export const requestMarkAsRead = async (
       (msg) =>
         msg.fileMetadata.appData.content.deliveryStatus !== ChatDeliveryStatus.Read &&
         msg.fileMetadata.senderOdinId &&
-        msg.fileMetadata.senderOdinId !== dotYouClient.getIdentity()
+        msg.fileMetadata.senderOdinId !== dotYouClient.getLoggedInIdentity()
     )
     .map((msg) => msg.fileId) as string[];
 

@@ -16,7 +16,7 @@ export const ChatDeliveryIndicator = ({
   showDefaultColor?: boolean;
   onPress?: () => void;
 }) => {
-  const identity = useDotYouClientContext().getIdentity();
+  const identity = useDotYouClientContext().getLoggedInIdentity();
   const content = msg.fileMetadata.appData.content;
   const authorOdinId = msg.fileMetadata.senderOdinId || identity;
   const messageFromMe = !authorOdinId || authorOdinId === identity;

@@ -12,7 +12,7 @@ import { TabStackParamList } from '../../app/App';
 const handledNotifications: unknown[] = [];
 
 export const useInitialPushNotification = () => {
-  const identity = useDotYouClientContext().getIdentity();
+  const identity = useDotYouClientContext().getLoggedInIdentity();
   const chatNavigator = useNavigation<NavigationProp<ChatStackParamList>>();
   const tabNavigator = useNavigation<NavigationProp<TabStackParamList>>();
 

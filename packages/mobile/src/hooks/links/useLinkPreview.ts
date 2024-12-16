@@ -50,7 +50,7 @@ export const useLinkMetadata = ({
   payloadKey: string;
 }) => {
   const dotYouClient = useDotYouClientContext();
-  const identity = dotYouClient.getIdentity();
+  const identity = dotYouClient.getLoggedInIdentity();
   const fetchLinkData = async () => {
     if (!fileId || !payloadKey || !targetDrive) {
       return null;

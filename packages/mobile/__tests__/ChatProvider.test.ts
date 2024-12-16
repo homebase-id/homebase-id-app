@@ -102,7 +102,7 @@ describe('ChatProvider', () => {
   (getRandom16ByteArray as jest.Mock) = mockGetRandom16Bytes;
   beforeEach(() => {
     dotYouClient = new DotYouClient({
-      identity: 'frodobaggins.me',
+      loggedInIdentity: 'frodobaggins.me',
       api: ApiType.App,
       headers: {},
       sharedSecret: new Uint8Array(32),
@@ -235,7 +235,6 @@ describe('ChatProvider', () => {
         doNotIndex: false,
         allowDistribution: false,
       },
-      priority: 1,
     };
 
     const recipients = ['frodo', 'sam'];
@@ -296,7 +295,6 @@ describe('ChatProvider', () => {
         doNotIndex: false,
         allowDistribution: false,
       },
-      priority: 1,
     };
 
     (deleteFile as jest.Mock).mockResolvedValue(true);
@@ -355,7 +353,6 @@ describe('ChatProvider', () => {
         doNotIndex: false,
         allowDistribution: false,
       },
-      priority: 1,
     };
     const recipients = ['recipient1', 'recipient2'];
 

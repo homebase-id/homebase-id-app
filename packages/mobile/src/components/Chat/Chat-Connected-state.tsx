@@ -20,7 +20,7 @@ import TextButton from '../ui/Text/Text-Button';
 
 export const ChatConnectedState = (conversation: HomebaseFile<UnifiedConversation> | undefined) => {
   const { isDarkMode } = useDarkMode();
-  const identity = useDotYouClientContext().getIdentity();
+  const identity = useDotYouClientContext().getLoggedInIdentity();
   const [expanded, setExpanded] = useState(false);
   const validRecipientsState = useSharedValue<string[]>([]);
   const sharedExpanded = useSharedValue<boolean>(false);
@@ -172,7 +172,7 @@ const RecipientConnectedState = ({
 }) => {
   const { data: isConnected, isFetched: isFetchedConnected } = useIsConnected(recipient);
 
-  const identity = useDotYouClientContext().getIdentity();
+  const identity = useDotYouClientContext().getLoggedInIdentity();
 
   useEffect(() => {
     if (!isConnected && isFetchedConnected) {

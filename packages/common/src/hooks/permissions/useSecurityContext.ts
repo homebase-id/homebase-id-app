@@ -8,7 +8,7 @@ export const useSecurityContext = (odinId?: string, isEnabled?: boolean) => {
   const fetch = async (odinId?: string) => {
     if (
       !odinId ||
-      (dotYouClient.getType() === ApiType.App && odinId === dotYouClient.getIdentity())
+      (dotYouClient.getType() === ApiType.App && odinId === dotYouClient.getLoggedInIdentity())
     ) {
       return await getSecurityContext(dotYouClient);
     } else return await getSecurityContextOverPeer(dotYouClient, odinId);

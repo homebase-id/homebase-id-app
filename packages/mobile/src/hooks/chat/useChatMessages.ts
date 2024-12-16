@@ -66,7 +66,7 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
     deleteForEveryone?: boolean;
   }) => {
     const conversationContent = conversation.fileMetadata.appData.content;
-    const identity = dotYouClient.getIdentity();
+    const identity = dotYouClient.getLoggedInIdentity();
     const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
 
     const hardDelete = stringGuidsEqual(
@@ -79,11 +79,11 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
         return hardDelete
           ? await hardDeleteChatMessage(dotYouClient, msg)
           : await softDeleteChatMessage(
-              dotYouClient,
-              msg,
-              recipients.filter(Boolean),
-              deleteForEveryone
-            );
+            dotYouClient,
+            msg,
+            recipients.filter(Boolean),
+            deleteForEveryone
+          );
       })
     );
   };
@@ -143,7 +143,7 @@ export const getChatMessageInfiniteQueryOptions: (
     ),
   getNextPageParam: (lastPage, pages) =>
     lastPage &&
-    lastPage.searchResults?.length >= (lastPage === pages[0] ? FIRST_PAGE_SIZE : PAGE_SIZE)
+      lastPage.searchResults?.length >= (lastPage === pages[0] ? FIRST_PAGE_SIZE : PAGE_SIZE)
       ? lastPage.cursorState
       : undefined,
   enabled: !!conversationId,
@@ -285,8 +285,8 @@ export const internalInsertNewMessage = (
           searchResults:
             index === 0
               ? [newMessage, ...filteredSearchResults].sort(
-                  (a, b) => (b.fileMetadata.created || 0) - (a.fileMetadata.created || 0)
-                ) // Re-sort the first page, as the new message might be older than the first message in the page;
+                (a, b) => (b.fileMetadata.created || 0) - (a.fileMetadata.created || 0)
+              ) // Re-sort the first page, as the new message might be older than the first message in the page;
               : filteredSearchResults,
         };
       }

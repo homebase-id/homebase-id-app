@@ -21,7 +21,7 @@ import { TabStackParamList } from '../../../app/App';
 export const NotificationToaster = () => {
   const { route } = useRouteContext();
   const dotYouClient = useDotYouClientContext();
-  const identity = useDotYouClientContext().getIdentity();
+  const identity = useDotYouClientContext().getLoggedInIdentity();
   const chatNavigator = useNavigation<NavigationProp<ChatStackParamList>>();
   const tabNavigator = useNavigation<NavigationProp<TabStackParamList>>();
   const isConversationScreen = route?.name === 'Conversation' && !route.params;

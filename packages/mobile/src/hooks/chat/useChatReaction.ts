@@ -33,7 +33,7 @@ const addReaction = async ({
 }) => {
   const dotYouClient = await getSynchronousDotYouClient();
   const conversationContent = conversation.fileMetadata.appData.content;
-  const identity = dotYouClient.getIdentity();
+  const identity = dotYouClient.getLoggedInIdentity();
   const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
 
   if (!message.fileMetadata.globalTransitId) {
@@ -66,7 +66,7 @@ export const getAddReactionMutationOptions: (queryClient: QueryClient) => UseMut
       queryClient.getQueryData<EmojiReaction[]>(['chat-reaction', message.fileId]) || [];
 
     const newReaction: EmojiReaction = {
-      authorOdinId: (await getSynchronousDotYouClient()).getIdentity(),
+      authorOdinId: (await getSynchronousDotYouClient()).getLoggedInIdentity(),
       body: reaction,
     };
 
@@ -118,7 +118,7 @@ const removeReactionOnServer = async ({
 }) => {
   const dotYouClient = await getSynchronousDotYouClient();
   const conversationContent = conversation.fileMetadata.appData.content;
-  const identity = dotYouClient.getIdentity();
+  const identity = dotYouClient.getLoggedInIdentity();
   const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
 
   if (!message.fileMetadata.globalTransitId) {

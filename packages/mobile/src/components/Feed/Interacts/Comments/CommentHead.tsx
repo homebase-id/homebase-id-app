@@ -18,7 +18,7 @@ export const CommentHead = memo(
     setIsEdit?: (isEdit: boolean) => void;
     onRemove?: () => void;
   }) => {
-    const identity = useDotYouClientContext().getIdentity();
+    const identity = useDotYouClientContext().getLoggedInIdentity();
     const isAuthor = authorOdinId === identity;
 
     const actionOptions = [];
@@ -35,7 +35,7 @@ export const CommentHead = memo(
         label: `${t('Block this user')}`,
         onPress: () =>
           openURL(
-            `${new DotYouClient({ identity, api: ApiType.Guest }).getRoot()}/owner/connections/${authorOdinId}/block`
+            `${new DotYouClient({ hostIdentity: identity, api: ApiType.Guest }).getRoot()}/owner/connections/${authorOdinId}/block`
           ),
       });
     }

@@ -16,7 +16,7 @@ import { Text } from '../../components/ui/Text/Text';
 type ArchivedPageProp = NativeStackScreenProps<ChatStackParamList, 'Archived'>;
 
 export const ArchivedPage = ({ navigation }: ArchivedPageProp) => {
-  const identity = useDotYouClientContext().getIdentity();
+  const identity = useDotYouClientContext().getLoggedInIdentity();
   const { data: conversations } = useConversationsWithRecentMessage().all;
 
   const filteredConversations = useMemo(
@@ -41,7 +41,6 @@ export const ArchivedPage = ({ navigation }: ArchivedPageProp) => {
   const renderItem = useCallback(
     ({ item }: ListRenderItemInfo<ConversationWithRecentMessage>) => {
       if (!item) return <View />;
-      const hasPayload = item.fileMetadata.payloads?.length > 0;
       return (
         <ErrorBoundary>
           <ConversationTile
@@ -49,7 +48,7 @@ export const ArchivedPage = ({ navigation }: ArchivedPageProp) => {
             conversationId={item.fileMetadata.appData.uniqueId}
             conversationUpdated={item.fileMetadata.updated}
             fileId={item.fileId}
-            payloadKey={hasPayload ? item.fileMetadata.payloads[0].key : undefined}
+            payloadKey={item.fileMetadata.payloads?.[0]?.key}
             onPress={onPress}
             odinId={
               item.fileMetadata.appData.content.recipients.filter(
