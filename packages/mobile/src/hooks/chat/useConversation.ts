@@ -113,7 +113,6 @@ export const useConversation = (props?: { conversationId?: string | undefined })
         doNotIndex: false,
         allowDistribution: false,
       },
-      priority: 0,
     };
 
     return serverVersion;

@@ -137,7 +137,8 @@ export function EditGroupPage(props: EditGroupProp) {
   const [visible, setVisible] = useState(false);
   if (!conversation) return null;
 
-  const hasGroupImage = conversation.fileMetadata.payloads?.length > 0;
+  const hasGroupImage =
+    conversation.fileMetadata.payloads && conversation.fileMetadata.payloads?.length > 0;
   const groupAvatarPayloadKey = conversation.fileMetadata.payloads?.[0]?.key;
 
   return (

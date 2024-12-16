@@ -35,7 +35,7 @@ export const CommentHead = memo(
         label: `${t('Block this user')}`,
         onPress: () =>
           openURL(
-            `${new DotYouClient({ identity, api: ApiType.Guest }).getRoot()}/owner/connections/${authorOdinId}/block`
+            `${new DotYouClient({ loggedInIdentity: identity, api: ApiType.Guest }).getRoot()}/owner/connections/${authorOdinId}/block`
           ),
       });
     }

@@ -13,7 +13,7 @@ export const ChatMessageContent = memo(
     }
     if (textMessage?.length > 0) {
       return ellipsisAtMaxChar(getPlainTextFromRichText(textMessage), 30);
-    } else if (payloads?.length > 1) {
+    } else if (payloads && payloads?.length > 1) {
       return '📸 Medias';
     } else {
       const payload = payloads?.[0];

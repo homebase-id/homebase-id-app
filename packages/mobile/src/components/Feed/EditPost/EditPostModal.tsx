@@ -40,9 +40,11 @@ export const EditPostModal = memo(
     useEffect(() => {
       if (incomingPostFile) {
         setPostFile({ ...incomingPostFile });
-        setNewMediaFiles(
-          incomingPostFile.fileMetadata.payloads?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY)
-        );
+        if (incomingPostFile.fileMetadata.payloads) {
+          setNewMediaFiles(
+            incomingPostFile.fileMetadata.payloads?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY)
+          );
+        }
       }
     }, [incomingPostFile]);
 

@@ -154,7 +154,8 @@ const RenderListHeader = memo(
       await openURL(`https://${withYourself ? identity : recipient}/`);
     }, [withYourself, identity, recipient]);
     if (!conversation) return null;
-    const hasGroupImage = conversation.fileMetadata.payloads?.length > 0;
+    const hasGroupImage =
+      conversation.fileMetadata.payloads && conversation.fileMetadata.payloads?.length > 0;
     const groupAvatarPayloadKey = conversation.fileMetadata.payloads?.[0]?.key;
     const conversationContent = conversation?.fileMetadata.appData.content;
 

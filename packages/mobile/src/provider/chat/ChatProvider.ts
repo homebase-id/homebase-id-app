@@ -577,20 +577,21 @@ export const softDeleteChatMessage = async (
 ) => {
   message.fileMetadata.appData.archivalStatus = ChatDeletedArchivalStaus;
   let runningVersionTag = message.fileMetadata.versionTag;
-
-  for (let i = 0; i < message.fileMetadata.payloads.length; i++) {
-    const payload = message.fileMetadata.payloads[i];
-    // TODO: Should the payload be deleted for everyone? With "TransitOptions"
-    const deleteResult = await deletePayload(
-      dotYouClient,
-      ChatDrive,
-      message.fileId,
-      payload.key,
-      runningVersionTag
-    );
-
-    if (!deleteResult) throw new Error('Failed to delete payload');
-    runningVersionTag = deleteResult.newVersionTag;
+  const { payloads } = message.fileMetadata;
+  if (payloads) {
+    await Promise.all(payloads.map(async (payload) => {
+      // TODO: Should the payload be deleted for everyone? With "TransitOptions"
+      const deleteResult = await deletePayload(
+        dotYouClient,
+        ChatDrive,
+        message.fileId,
+        payload.key,
+        runningVersionTag
+      );
+      if (!deleteResult) throw new Error('Failed to delete payload');
+      runningVersionTag = deleteResult.newVersionTag;
+    }
+    ));
   }
 
   message.fileMetadata.versionTag = runningVersionTag;

@@ -65,7 +65,7 @@ export const useVideoMetadata = (
           : await getFileHeader(dotYouClient, videoDrive, videoFileId);
 
       if (!fileHeader) return undefined;
-      const payloadData = fileHeader.fileMetadata.payloads.find((p) => p.key === videoFileKey);
+      const payloadData = fileHeader.fileMetadata.payloads?.find((p) => p.key === videoFileKey);
       const descriptor = payloadData?.descriptorContent;
       if (!descriptor) return undefined;
 

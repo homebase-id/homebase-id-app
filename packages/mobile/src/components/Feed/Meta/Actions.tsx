@@ -44,7 +44,7 @@ export const ExternalActions = memo(
 
     const host = new DotYouClient({
       api: ApiType.Guest,
-      identity: identity || undefined,
+      loggedInIdentity: identity || undefined,
     }).getRoot();
     const options: ActionGroupProps[] = [
       {

@@ -83,7 +83,7 @@ const ReplyMessageBar = ({ clearReply, message }: ReplyMessageBarProps) => {
               fileId={message.fileId}
               targetDrive={ChatDrive}
               previewThumbnail={message.fileMetadata.appData.previewThumbnail}
-              fileKey={message.fileMetadata.payloads[0].key}
+              fileKey={payloads[0].key}
               fit="cover"
               imageSize={{
                 width: 45,

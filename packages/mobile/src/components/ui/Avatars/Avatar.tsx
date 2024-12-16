@@ -38,7 +38,10 @@ export const Avatar = memo(
       );
     }
 
-    if (contact?.fileMetadata.payloads.some((p) => p.key === CONTACT_PROFILE_IMAGE_KEY)) {
+    if (
+      contact?.fileMetadata.payloads &&
+      contact?.fileMetadata.payloads.some((p) => p.key === CONTACT_PROFILE_IMAGE_KEY)
+    ) {
       return (
         <View style={{ ...styles.tinyLogo, ...props.style }}>
           <OdinImage
