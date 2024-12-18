@@ -329,7 +329,7 @@ export const uploadChatMessage = async (
     },
   };
 
-  if (!files?.length && linkPreviews?.length) {
+  if (!files && linkPreviews?.length) {
     // We only support link previews when there is no media
     const descriptorContent = JSON.stringify(
       linkPreviews.map((preview) => {

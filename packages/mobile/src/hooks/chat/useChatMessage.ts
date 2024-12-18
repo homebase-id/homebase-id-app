@@ -145,7 +145,7 @@ const sendMessage = async ({
   );
 
   const messageType =
-    message.length > 0
+    message?.length > 0
       ? 'a message'
       : linkPreviews && linkPreviews?.length > 0
         ? '🔗 a link'
