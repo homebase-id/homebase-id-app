@@ -4,19 +4,14 @@ import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { ChatStackParamList } from '../../../app/ChatStack';
 import { useNotification } from '../../../hooks/notifications/useNotification';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
-import {
-  CHAT_APP_ID,
-  FEED_APP_ID,
-  FEED_CHAT_APP_ID,
-  MAIL_APP_ID,
-  OWNER_APP_ID,
-} from '../../../app/constants';
+import { CHAT_APP_ID, FEED_APP_ID } from '../../../app/constants';
 import { bodyFormer, navigateOnNotification } from '../../Dashboard/NotificationsOverview';
 import Toast from 'react-native-toast-message';
 import { useCallback, useEffect } from 'react';
 import { getContactByOdinId } from '@homebase-id/js-lib/network';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TabStackParamList } from '../../../app/App';
+import { getAppName } from '../../../utils/utils';
 
 export const NotificationToaster = () => {
   const { route } = useRouteContext();
@@ -37,17 +32,7 @@ export const NotificationToaster = () => {
     if (!notifications) return;
     notifications.map(async (notification) => {
       const appId = notification.options.appId;
-      const appName = stringGuidsEqual(appId, OWNER_APP_ID)
-        ? 'Homebase'
-        : stringGuidsEqual(appId, FEED_APP_ID)
-          ? 'Homebase - Feed'
-          : stringGuidsEqual(appId, CHAT_APP_ID)
-            ? 'Homebase - Chat'
-            : stringGuidsEqual(appId, FEED_CHAT_APP_ID) // We shouldn't ever have this one, but for sanity
-              ? 'Homebase - Feed & Chat'
-              : stringGuidsEqual(appId, MAIL_APP_ID)
-                ? 'Homebase - Mail'
-                : `Unknown (${appId})`;
+      const appName = getAppName(appId);
       const contactFile = await getContactByOdinId(dotYouClient, notification.senderId);
       const senderName =
         contactFile?.fileMetadata.appData.content.name?.displayName || notification.senderId;

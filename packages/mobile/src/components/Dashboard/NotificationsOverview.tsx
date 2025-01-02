@@ -4,12 +4,11 @@ import { usePushNotifications } from '../../hooks/notifications/usePushNotificat
 import { memo, useMemo, useState } from 'react';
 import { PushNotification } from '@homebase-id/js-lib/core';
 import { formatToTimeAgoWithRelativeDetail, useDotYouClientContext } from 'homebase-id-app-common';
-import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+
 import {
   CHAT_APP_ID,
   COMMUNITY_APP_ID,
   FEED_APP_ID,
-  FEED_CHAT_APP_ID,
   MAIL_APP_ID,
   OWNER_APP_ID,
 } from '../../app/constants';
@@ -19,7 +18,7 @@ import { Times } from '../ui/Icons/icons';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { ChatStackParamList } from '../../app/ChatStack';
 import { useDarkMode } from '../../hooks/useDarkMode';
-import { openURL } from '../../utils/utils';
+import { getAppName, openURL } from '../../utils/utils';
 import { Text } from '../ui/Text/Text';
 import Toast from 'react-native-toast-message';
 import Clipboard from '@react-native-clipboard/clipboard';
@@ -62,19 +61,7 @@ export const NotificationDay = memo(
 
 const NotificationAppGroup = memo(
   ({ appId, notifications }: { appId: string; notifications: PushNotification[] }) => {
-    const appName = stringGuidsEqual(appId, OWNER_APP_ID)
-      ? 'Homebase'
-      : stringGuidsEqual(appId, FEED_APP_ID)
-        ? 'Homebase - Feed'
-        : stringGuidsEqual(appId, CHAT_APP_ID)
-          ? 'Homebase - Chat'
-          : stringGuidsEqual(appId, FEED_CHAT_APP_ID) // We shouldn't ever have this one, but for sanity
-            ? 'Homebase - Feed & Chat'
-            : stringGuidsEqual(appId, MAIL_APP_ID)
-              ? 'Homebase - Mail'
-              : stringGuidsEqual(appId, COMMUNITY_APP_ID)
-                ? 'Homebase - Community'
-                : `Unknown (${appId})`;
+    const appName = getAppName(appId);
 
     const groupedByTypeNotifications =
       notifications.reduce(

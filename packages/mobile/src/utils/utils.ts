@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { getNewId } from '@homebase-id/js-lib/helpers';
+import { getNewId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { InfiniteData } from '@tanstack/react-query';
 import { Image, Linking } from 'react-native';
 import { CachesDirectoryPath, copyFile } from 'react-native-fs';
@@ -8,6 +8,7 @@ import InAppBrowser from 'react-native-inappbrowser-reborn';
 import { ImageSource } from '../provider/image/RNImageProvider';
 import { Parser, DomHandler } from 'htmlparser2';
 import { RichText } from '@homebase-id/js-lib/core';
+import { OWNER_APP_ID, FEED_APP_ID, CHAT_APP_ID, FEED_CHAT_APP_ID, MAIL_APP_ID, COMMUNITY_APP_ID } from '../app/constants';
 
 
 //https://stackoverflow.com/a/21294619/15538463
@@ -304,4 +305,18 @@ export function htmlToRecord(htmlString: string): RichText {
   return result;
 }
 
-
+export const getAppName = (appId: string): string => {
+  return stringGuidsEqual(appId, OWNER_APP_ID)
+    ? 'Homebase'
+    : stringGuidsEqual(appId, FEED_APP_ID)
+      ? 'Homebase - Feed'
+      : stringGuidsEqual(appId, CHAT_APP_ID)
+        ? 'Homebase - Chat'
+        : stringGuidsEqual(appId, FEED_CHAT_APP_ID) // We shouldn't ever have this one, but for sanity
+          ? 'Homebase - Feed & Chat'
+          : stringGuidsEqual(appId, MAIL_APP_ID)
+            ? 'Homebase - Mail'
+            : stringGuidsEqual(appId, COMMUNITY_APP_ID)
+              ? 'Homebase - Community'
+              : `Unknown (${appId})`;
+};

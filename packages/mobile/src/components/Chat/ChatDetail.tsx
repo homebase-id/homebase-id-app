@@ -321,7 +321,13 @@ export const ChatDetail = memo(
       requestAnimationFrame(async () => {
         const document = await Document.pickSingle({
           copyTo: 'cachesDirectory',
-          type: [Document.types.pdf, Document.types.doc, Document.types.docx], // Don't add support for all files. Keeping it pdf and docs for now
+          type: [
+            Document.types.pdf,
+            Document.types.doc,
+            Document.types.docx,
+            Document.types.json,
+            Document.types.zip,
+          ], // Don't add support for all files. Keeping it pdf and docs for now
           mode: 'open',
         });
         document.fileCopyUri = fixDocumentURI(document.fileCopyUri || document.uri);

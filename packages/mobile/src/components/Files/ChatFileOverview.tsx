@@ -15,7 +15,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
-import { Pdf, Play, Plus, SendChat, SubtleCheck, Trash } from '../ui/Icons/icons';
+import { Play, Plus, SendChat, SubtleCheck, Trash } from '../ui/Icons/icons';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { Colors } from '../../app/Colors';
 import { Header, HeaderBackButtonProps } from '@react-navigation/elements';
@@ -36,6 +36,7 @@ import Toast from 'react-native-toast-message';
 import { AuthorName } from '../ui/Name';
 import { assetsToImageSource } from '../../utils/utils';
 import { grabThumbnail } from '../../provider/video/RNVideoSegmenter';
+import { BoringFileIcon } from '../ui/Media/BoringFile';
 
 const FilePreview = ({
   asset,
@@ -104,7 +105,7 @@ const FilePreview = ({
                 width: '100%',
               }}
             >
-              <Pdf size={'md'} color={Colors.slate[800]} />
+              <BoringFileIcon fileType={asset.type || ''} size={'md'} color={Colors.slate[600]} />
             </View>
           </View>
           {children}

@@ -1,8 +1,9 @@
 import { ScrollView, View, ImageBackground, TouchableOpacity } from 'react-native';
 import { Asset } from 'react-native-image-picker';
-import { Close, Pdf, Play } from '../ui/Icons/icons';
+import { Close, Play } from '../ui/Icons/icons';
 import { memo } from 'react';
 import { Colors } from '../../app/Colors';
+import { BoringFileIcon } from '../ui/Media/BoringFile';
 
 export const FileOverview = memo(
   ({ assets, setAssets }: { assets: Asset[]; setAssets: (newAssets: Asset[]) => void }) => {
@@ -64,7 +65,11 @@ export const FileOverview = memo(
                       justifyContent: 'center',
                     }}
                   >
-                    <Pdf size={'md'} color={Colors.slate[800]} />
+                    <BoringFileIcon
+                      fileType={value.type || ''}
+                      size={'md'}
+                      color={Colors.slate[800]}
+                    />
                     <TouchableOpacity
                       onPress={() => setAssets(assets.filter((_, i) => i !== index))}
                       style={{ position: 'absolute', top: 4, right: 4 }}

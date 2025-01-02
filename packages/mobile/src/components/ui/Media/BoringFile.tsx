@@ -1,7 +1,7 @@
 import { NewPayloadDescriptor, PayloadDescriptor, TargetDrive } from '@homebase-id/js-lib/core';
 import { memo, useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Platform, Pressable, StyleSheet, View } from 'react-native';
-import { Download, Pdf } from '../Icons/icons';
+import { Apk, Download, Excel, File, FileCode, FileZip, Pdf, WordFile } from '../Icons/icons';
 import { Text } from '../Text/Text';
 import { getPayloadSize } from '../../../utils/utils';
 import { useFile } from '../../../hooks/file/useFile';
@@ -84,30 +84,47 @@ export const BoringFile = memo(
       <Pressable onPress={blob ? async (_) => await openDocument() : downloadAndOpen}>
         <View
           style={{
-            width: 150,
             flexDirection: 'row',
+            minWidth: 200,
             padding: 12,
           }}
         >
-          <Pdf color={overwriteTextColor ? Colors.white : undefined} />
+          <BoringFileIcon
+            fileType={file.contentType || ''}
+            color={overwriteTextColor ? Colors.white : undefined}
+            size={'lg'}
+          />
           <View
             style={{
               marginLeft: 12,
               flexDirection: 'row',
-              flex: 1,
+              alignItems: 'center',
               justifyContent: 'space-between',
+              flex: 1,
             }}
           >
-            <Text
-              style={StyleSheet.flatten([
-                {
-                  fontSize: 16,
-                },
-                overwriteTextColor ? { color: Colors.white } : {},
-              ])}
-            >
-              {getPayloadSize(file.bytesWritten || 0)}
-            </Text>
+            <View>
+              <Text
+                style={StyleSheet.flatten([
+                  {
+                    fontSize: 16,
+                  },
+                  overwriteTextColor ? { color: Colors.white } : {},
+                ])}
+              >
+                {file.descriptorContent}
+              </Text>
+              <Text
+                style={StyleSheet.flatten([
+                  {
+                    fontSize: 14,
+                  },
+                  overwriteTextColor ? { color: Colors.white } : {},
+                ])}
+              >
+                {getPayloadSize(file.bytesWritten || 0)}
+              </Text>
+            </View>
             {!blob && !loading && (
               <Download color={overwriteTextColor ? Colors.white : undefined} />
             )}
@@ -118,3 +135,34 @@ export const BoringFile = memo(
     );
   }
 );
+
+export const BoringFileIcon = ({
+  fileType,
+  ...rest
+}: {
+  fileType: string;
+  color?: string;
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl' | number;
+}) => {
+  switch (fileType) {
+    case 'application/pdf':
+      return <Pdf {...rest} />;
+    case 'application/msword':
+    case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+      return <WordFile {...rest} />;
+    case 'application/vnd.ms-excel':
+    case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+      return <Excel {...rest} />;
+    case 'video/mp4':
+    case 'application/zip':
+    case 'application/x-rar-compressed':
+      return <FileZip {...rest} />;
+    case 'application/javascript':
+    case 'application/json':
+      return <FileCode {...rest} />;
+    case 'application/vnd.android.package-archive':
+      return <Apk {...rest} />;
+    default:
+      return <File />;
+  }
+};
