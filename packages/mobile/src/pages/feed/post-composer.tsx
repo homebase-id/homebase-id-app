@@ -27,7 +27,7 @@ import { Text } from '../../components/ui/Text/Text';
 import { ActionGroup } from '../../components/ui/Form/ActionGroup';
 import { getImageSize, openURL } from '../../utils/utils';
 import React from 'react';
-import Animated, { SlideInDown, SlideOutDown } from 'react-native-reanimated';
+import Animated, { SlideInDown } from 'react-native-reanimated';
 import { FeedStackParamList } from '../../app/FeedStack';
 import { NativeStackNavigationProp, NativeStackScreenProps } from '@react-navigation/native-stack';
 import { LinkPreviewBar } from '../../components/Chat/Link-Preview-Bar';
