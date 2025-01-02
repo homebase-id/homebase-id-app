@@ -135,6 +135,7 @@ const onBackgroundMessageReceived = async (
         id: 'default',
       },
       sound: 'default',
+      showTimestamp: true,
     },
     ios: {
       categoryId: 'communications',
