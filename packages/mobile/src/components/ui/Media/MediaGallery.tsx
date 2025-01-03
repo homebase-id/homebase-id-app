@@ -328,17 +328,7 @@ export const MediaItem = memo(
         />
       );
     }
-    if (payload.contentType.startsWith('application/pdf')) {
-      return (
-        <BoringFile
-          file={payload}
-          fileId={fileId}
-          targetDrive={targetDrive}
-          odinId={odinId}
-          overwriteTextColor={position && position === 'right'}
-        />
-      );
-    } else {
+    if (isImage) {
       return (
         <View style={containerStyle}>
           <OdinImage
@@ -363,6 +353,19 @@ export const MediaItem = memo(
           />
         </View>
       );
+    }
+    if (payload.contentType.startsWith('application/')) {
+      return (
+        <BoringFile
+          file={payload}
+          fileId={fileId}
+          targetDrive={targetDrive}
+          odinId={odinId}
+          overwriteTextColor={position && position === 'right'}
+        />
+      );
+    } else {
+      console.error('Unsupported media type', payload.contentType);
     }
   }
 );

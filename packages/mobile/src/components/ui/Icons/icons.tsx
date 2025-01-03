@@ -655,6 +655,114 @@ export const Pdf = (props: IconProps) => {
   );
 };
 
+export const WordFile = (props: IconProps) => {
+  const { isDarkMode } = useDarkMode();
+  return (
+    <Center>
+      <Svg
+        {...getSize(props.size || 'md')}
+        color={props.color || (isDarkMode ? 'white' : 'black')}
+        viewBox="0 0 384 512"
+      >
+        <Path
+          fill="currentColor"
+          d="M64 0C28.7 0 0 28.7 0 64L0 448c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-288-128 0c-17.7 0-32-14.3-32-32L224 0 64 0zM256 0l0 128 128 0L256 0zM111 257.1l26.8 89.2 31.6-90.3c3.4-9.6 12.5-16.1 22.7-16.1s19.3 6.4 22.7 16.1l31.6 90.3L273 257.1c3.8-12.7 17.2-19.9 29.9-16.1s19.9 17.2 16.1 29.9l-48 160c-3 10-12 16.9-22.4 17.1s-19.8-6.2-23.2-16.1L192 336.6l-33.3 95.3c-3.4 9.8-12.8 16.3-23.2 16.1s-19.5-7.1-22.4-17.1l-48-160c-3.8-12.7 3.4-26.1 16.1-29.9s26.1 3.4 29.9 16.1z"
+        />
+      </Svg>
+    </Center>
+  );
+};
+
+export const Excel = (props: IconProps) => {
+  const { isDarkMode } = useDarkMode();
+  return (
+    <Center>
+      <Svg
+        {...getSize(props.size || 'md')}
+        color={props.color || (isDarkMode ? 'white' : 'black')}
+        viewBox="0 0 384 512"
+      >
+        <Path
+          fill="currentColor"
+          d="M64 0C28.7 0 0 28.7 0 64L0 448c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-288-128 0c-17.7 0-32-14.3-32-32L224 0 64 0zM256 0l0 128 128 0L256 0zM155.7 250.2L192 302.1l36.3-51.9c7.6-10.9 22.6-13.5 33.4-5.9s13.5 22.6 5.9 33.4L221.3 344l46.4 66.2c7.6 10.9 5 25.8-5.9 33.4s-25.8 5-33.4-5.9L192 385.8l-36.3 51.9c-7.6 10.9-22.6 13.5-33.4 5.9s-13.5-22.6-5.9-33.4L162.7 344l-46.4-66.2c-7.6-10.9-5-25.8 5.9-33.4s25.8-5 33.4 5.9z"
+        />
+      </Svg>
+    </Center>
+  );
+};
+
+export const File = (props: IconProps) => {
+  const { isDarkMode } = useDarkMode();
+  return (
+    <Center>
+      <Svg
+        {...getSize(props.size || 'md')}
+        color={props.color || (isDarkMode ? 'white' : 'black')}
+        viewBox="0 0 384 512"
+      >
+        <Path
+          fill="currentColor"
+          d="M0 64C0 28.7 28.7 0 64 0L224 0l0 128c0 17.7 14.3 32 32 32l128 0 0 288c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 64zm384 64l-128 0L256 0 384 128z"
+        />
+      </Svg>
+    </Center>
+  );
+};
+
+export const FileCode = (props: IconProps) => {
+  const { isDarkMode } = useDarkMode();
+  return (
+    <Center>
+      <Svg
+        {...getSize(props.size || 'md')}
+        color={props.color || (isDarkMode ? 'white' : 'black')}
+        viewBox="0 0 384 512"
+      >
+        <Path
+          fill="currentColor"
+          d="M64 0C28.7 0 0 28.7 0 64L0 448c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-288-128 0c-17.7 0-32-14.3-32-32L224 0 64 0zM256 0l0 128 128 0L256 0zM153 289l-31 31 31 31c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0L71 337c-9.4-9.4-9.4-24.6 0-33.9l48-48c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9zM265 255l48 48c9.4 9.4 9.4 24.6 0 33.9l-48 48c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l31-31-31-31c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0z"
+        />
+      </Svg>
+    </Center>
+  );
+};
+
+export const FileZip = (props: IconProps) => {
+  const { isDarkMode } = useDarkMode();
+  return (
+    <Center>
+      <Svg
+        {...getSize(props.size || 'md')}
+        color={props.color || (isDarkMode ? 'white' : 'black')}
+        viewBox="0 0 384 512"
+      >
+        <Path
+          fill="currentColor"
+          d="M64 0C28.7 0 0 28.7 0 64L0 448c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-288-128 0c-17.7 0-32-14.3-32-32L224 0 64 0zM256 0l0 128 128 0L256 0zM96 48c0-8.8 7.2-16 16-16l32 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-32 0c-8.8 0-16-7.2-16-16zm0 64c0-8.8 7.2-16 16-16l32 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-32 0c-8.8 0-16-7.2-16-16zm0 64c0-8.8 7.2-16 16-16l32 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-32 0c-8.8 0-16-7.2-16-16zm-6.3 71.8c3.7-14 16.4-23.8 30.9-23.8l14.8 0c14.5 0 27.2 9.7 30.9 23.8l23.5 88.2c1.4 5.4 2.1 10.9 2.1 16.4c0 35.2-28.8 63.7-64 63.7s-64-28.5-64-63.7c0-5.5 .7-11.1 2.1-16.4l23.5-88.2zM112 336c-8.8 0-16 7.2-16 16s7.2 16 16 16l32 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-32 0z"
+        />
+      </Svg>
+    </Center>
+  );
+};
+
+export const Apk = (props: IconProps) => {
+  const { isDarkMode } = useDarkMode();
+  return (
+    <Center>
+      <Svg
+        {...getSize(props.size || 'md')}
+        color={props.color || (isDarkMode ? 'white' : 'black')}
+        viewBox="0 0 576 512"
+      >
+        <Path
+          fill="currentColor"
+          d="M420.6 301.9a24 24 0 1 1 24-24 24 24 0 0 1 -24 24m-265.1 0a24 24 0 1 1 24-24 24 24 0 0 1 -24 24m273.7-144.5 47.9-83a10 10 0 1 0 -17.3-10h0l-48.5 84.1a301.3 301.3 0 0 0 -246.6 0L116.2 64.5a10 10 0 1 0 -17.3 10h0l47.9 83C64.5 202.2 8.2 285.6 0 384H576c-8.2-98.5-64.5-181.8-146.9-226.6"
+        />
+      </Svg>
+    </Center>
+  );
+};
+
 export const Cog = (props: IconProps) => {
   const { isDarkMode } = useDarkMode();
   return (
