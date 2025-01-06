@@ -92,6 +92,8 @@ import { EmptyChatContainer } from './EmptyChatContainer';
 import { getPlainTextFromRichText } from 'homebase-id-app-common';
 import { ImageSource } from '../../provider/image/RNImageProvider';
 import { useChatMessagePayload } from '../../hooks/chat/useChatMessagePayload';
+import Clipboard from '@react-native-clipboard/clipboard';
+import Toast from 'react-native-toast-message';
 
 export type ChatMessageIMessage = IMessage & HomebaseFile<ChatMessage>;
 
@@ -918,6 +920,14 @@ const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
         pattern: URL_PATTERN,
         style: linkStyle,
         onPress: (text: string) => openURL(text),
+        onLongPress: (text: string) => {
+          Clipboard.setString(text);
+          Toast.show({
+            type: 'info',
+            text1: 'Copied to clipboard',
+            position: 'bottom',
+          });
+        },
       },
     ];
   }, []);
