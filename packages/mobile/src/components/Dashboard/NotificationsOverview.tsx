@@ -1,4 +1,4 @@
-import { Dimensions, Linking, TouchableOpacity, View } from 'react-native';
+import { Dimensions, TouchableOpacity, View } from 'react-native';
 
 import { usePushNotifications } from '../../hooks/notifications/usePushNotifications';
 import { memo, useMemo, useState } from 'react';
@@ -357,8 +357,9 @@ export const navigateOnNotification = (
       screen: 'Posts',
     });
   } else if (notification.options.appId === COMMUNITY_APP_ID) {
-    return Linking.openURL(
-      `https://${identity}/apps/community/redirect/${notification.options.typeId}/${notification.options.tagId}`
+    return openURL(
+      `https://${identity}/apps/community/redirect/${notification.options.typeId}/${notification.options.tagId}`,
+      true
     );
   } else {
     // You shouldn't come here
