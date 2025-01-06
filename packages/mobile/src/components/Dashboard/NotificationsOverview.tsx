@@ -358,7 +358,8 @@ export const navigateOnNotification = (
     });
   } else if (notification.options.appId === COMMUNITY_APP_ID) {
     return openURL(
-      `https://${identity}/apps/community/redirect/${notification.options.typeId}/${notification.options.tagId}`
+      `https://${identity}/apps/community/redirect/${notification.options.typeId}/${notification.options.tagId}`,
+      true
     );
   } else {
     // You shouldn't come here

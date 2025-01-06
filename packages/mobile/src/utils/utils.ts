@@ -8,8 +8,14 @@ import InAppBrowser from 'react-native-inappbrowser-reborn';
 import { ImageSource } from '../provider/image/RNImageProvider';
 import { Parser, DomHandler } from 'htmlparser2';
 import { RichText } from '@homebase-id/js-lib/core';
-import { OWNER_APP_ID, FEED_APP_ID, CHAT_APP_ID, FEED_CHAT_APP_ID, MAIL_APP_ID, COMMUNITY_APP_ID } from '../app/constants';
-
+import {
+  OWNER_APP_ID,
+  FEED_APP_ID,
+  CHAT_APP_ID,
+  FEED_CHAT_APP_ID,
+  MAIL_APP_ID,
+  COMMUNITY_APP_ID,
+} from '../app/constants';
 
 //https://stackoverflow.com/a/21294619/15538463
 export function millisToMinutesAndSeconds(millis: number | undefined): string {
@@ -19,10 +25,10 @@ export function millisToMinutesAndSeconds(millis: number | undefined): string {
   return seconds === 60 ? minutes + 1 + ':00' : minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
 }
 
-export async function openURL(url: string): Promise<void> {
+export async function openURL(url: string, alwaysExternal?: boolean): Promise<void> {
   if (!url) return;
   url = url.startsWith('http') ? url : `https://${url}`;
-  if (await InAppBrowser.isAvailable()) {
+  if ((await InAppBrowser.isAvailable()) && !alwaysExternal) {
     await InAppBrowser.open(url, {
       enableUrlBarHiding: false,
       enableDefaultShare: false,
@@ -136,9 +142,9 @@ export const getImageSize = (uri: string): Promise<{ width: number; height: numb
 export const flattenInfinteData = <T>(
   rawData:
     | InfiniteData<{
-      results: T[];
-      cursorState: unknown;
-    }>
+        results: T[];
+        cursorState: unknown;
+      }>
     | undefined,
   pageSize?: number,
   sortFn?: (a: T, b: T) => number
@@ -208,15 +214,16 @@ export const getExtensionForMimeType = (mimeType: string | undefined | null) => 
           : mimeType.split('/')[1];
 };
 
-
 /*
 Extract VideoId from the given youtube url
 */
-export function extractVideoParams(url: string): {
-  videoId: string | null | undefined;
-  start?: string | null | undefined;
-  end?: string | null | undefined;
-} | undefined {
+export function extractVideoParams(url: string):
+  | {
+      videoId: string | null | undefined;
+      start?: string | null | undefined;
+      end?: string | null | undefined;
+    }
+  | undefined {
   if (!url) return;
   if (url.includes('youtube.com') || url.includes('youtu.be')) {
     const uri = new URL(url);
@@ -237,9 +244,11 @@ export function isYoutubeURL(url: string): boolean {
 }
 
 export function isEmojiOnly(text: string | undefined): boolean {
-  return ((text?.match(/^\p{Extended_Pictographic}/u) || text?.match(/^\p{Emoji_Component}/u)) &&
-    !text?.match(/[0-9a-zA-Z]/)) ??
-    false;
+  return (
+    ((text?.match(/^\p{Extended_Pictographic}/u) || text?.match(/^\p{Emoji_Component}/u)) &&
+      !text?.match(/[0-9a-zA-Z]/)) ??
+    false
+  );
 }
 
 export function htmlToRecord(htmlString: string): RichText {
@@ -252,7 +261,10 @@ export function htmlToRecord(htmlString: string): RichText {
   parser.write(htmlString);
   parser.end();
 
-  function processNode(node: any, inheritedStyles: Record<string, unknown> = {}): Record<string, unknown> | null {
+  function processNode(
+    node: any,
+    inheritedStyles: Record<string, unknown> = {}
+  ): Record<string, unknown> | null {
     if (node.type === 'text' && node.data.trim()) {
       return { text: node.data.trim(), ...inheritedStyles };
     }
