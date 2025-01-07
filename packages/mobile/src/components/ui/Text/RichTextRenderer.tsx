@@ -1,6 +1,6 @@
 import { PayloadDescriptor, RichText, TargetDrive } from '@homebase-id/js-lib/core';
-import React, { memo, ReactNode, useCallback } from 'react';
-import { View, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import React, { FC, memo, ReactNode, useCallback } from 'react';
+import { View, StyleSheet, TouchableOpacity, Dimensions, TextStyle, StyleProp } from 'react-native';
 import { highlightQuery } from './HighlightQuery';
 import { OdinImage } from '../OdinImage/OdinImage';
 import { AuthorName } from '../Name';
@@ -8,29 +8,27 @@ import { calculateScaledDimensions, openURL } from '../../../utils/utils';
 import { Text } from './Text';
 import { useDarkMode } from '../../../hooks/useDarkMode';
 import { Colors } from '../../../app/Colors';
+import ParsedText, { ParseShape } from 'react-native-parsed-text';
+import { getPlainTextFromRichText } from 'homebase-id-app-common';
 
-export const RichTextRenderer = memo(
-  ({
-    body,
-    odinId,
-    options,
-    renderElement: renderElementProp,
-  }: {
-    body: string | RichText | undefined;
-    odinId?: string;
-    options?: {
-      imageDrive: TargetDrive;
-      defaultFileId: string;
-      defaultGlobalTransitId?: string;
-      lastModified: number | undefined;
-      previewThumbnails?: PayloadDescriptor[];
-      query?: string;
-    };
-    renderElement?: (
-      node: { type?: string; attributes?: Record<string, unknown> },
-      children: ReactNode
-    ) => ReactNode;
-  }) => {
+export interface RichTextRendererProps {
+  body: string | RichText | undefined;
+  odinId?: string;
+  options?: {
+    imageDrive: TargetDrive;
+    defaultFileId: string;
+    defaultGlobalTransitId?: string;
+    lastModified: number;
+    previewThumbnails?: PayloadDescriptor[];
+    query?: string;
+  };
+  renderElement?: (node: any, children: React.ReactNode) => React.ReactNode;
+  parsePatterns?: ParseShape[];
+  customTextStyle?: StyleProp<TextStyle>;
+}
+
+export const RichTextRenderer: FC<RichTextRendererProps> = memo(
+  ({ body, odinId, options, renderElement: renderElementProp, parsePatterns, customTextStyle }) => {
     const { isDarkMode } = useDarkMode();
     const renderLeaf = useCallback(
       (
@@ -39,36 +37,56 @@ export const RichTextRenderer = memo(
           bold?: boolean;
           italic?: boolean;
           underline?: boolean;
+          strikethrough?: boolean;
           code?: boolean;
           strong?: boolean;
         },
         text: string,
         attributes: Record<string, unknown>
       ) => {
-        let children: ReactNode = highlightQuery(text, options?.query);
+        let children: ReactNode;
+        const highlightedText = highlightQuery(text, options?.query);
         if (leaf.bold || leaf.strong) {
-          children = <Text style={styles.bold}>{children}</Text>;
+          children = <Text style={styles.bold}>{highlightedText}</Text>;
         }
 
         if (leaf.code) {
-          children = <Text style={styles.code}>{children}</Text>;
+          children = (
+            <Text
+              style={[
+                styles.code,
+                {
+                  color: isDarkMode ? Colors.orange[400] : Colors.red[200],
+                },
+              ]}
+            >
+              {highlightedText}
+            </Text>
+          );
         }
 
         if (leaf.italic) {
-          children = <Text style={styles.italic}>{children}</Text>;
+          children = <Text style={styles.italic}>{highlightedText}</Text>;
         }
 
         if (leaf.underline) {
-          children = <Text style={styles.underline}>{children}</Text>;
+          children = <Text style={styles.underline}>{highlightedText}</Text>;
+        }
+        if (leaf.strikethrough) {
+          children = <Text style={styles.strikethrough}>{highlightedText}</Text>;
         }
 
         return (
-          <Text {...attributes} style={styles.leaf}>
-            {children}
-          </Text>
+          <ParsedText
+            parse={parsePatterns || []}
+            {...attributes}
+            style={[styles.leaf, customTextStyle]}
+          >
+            {children || highlightedText}
+          </ParsedText>
         );
       },
-      [options?.query]
+      [customTextStyle, isDarkMode, options?.query, parsePatterns]
     );
 
     const renderElement = useCallback(
@@ -87,14 +105,31 @@ export const RichTextRenderer = memo(
                 style={[
                   styles.codeBlock,
                   {
-                    backgroundColor: isDarkMode ? Colors.slate[900] : Colors.slate[100],
+                    backgroundColor: isDarkMode ? Colors.slate[800] : Colors.slate[200],
+                    borderColor: isDarkMode ? Colors.slate[600] : Colors.slate[300],
                   },
                 ]}
               >
                 <Text>{children}</Text>
               </View>
             );
-
+          case 'code_line': {
+            const text = getPlainTextFromRichText([node?.attributes].filter(Boolean) as RichText);
+            return (
+              <Text
+                style={[
+                  {
+                    fontFamily: 'monospace', // Consistent styling with the block
+                    color: isDarkMode ? Colors.slate[300] : Colors.slate[700],
+                    fontSize: 15,
+                  },
+                ]}
+              >
+                {text || ''}
+                {'\n'}
+              </Text>
+            );
+          }
           case 'h1':
             return <Text style={styles.h1}>{children}</Text>;
           case 'h2':
@@ -201,7 +236,11 @@ export const RichTextRenderer = memo(
             return null;
           case 'p':
           case 'paragraph':
-            return <Text style={styles.paragraph}>{children}</Text>;
+            return (
+              <ParsedText parse={parsePatterns || []} style={[styles.paragraph, customTextStyle]}>
+                {children}
+              </ParsedText>
+            );
           case 'mention':
             if (attributes && 'value' in attributes && typeof attributes.value === 'string') {
               return (
@@ -221,13 +260,16 @@ export const RichTextRenderer = memo(
             return renderElementProp?.(node, children) || <Text {...attributes}>{children}</Text>;
         }
       },
-      [isDarkMode, odinId, options, renderElementProp]
+      [customTextStyle, isDarkMode, odinId, options, parsePatterns, renderElementProp]
     );
 
     const render = useCallback(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (node: any): ReactNode => {
-        if ('text' in node && (!('type' in node) || node.type === 'text')) {
+        if (
+          'text' in node &&
+          (!('type' in node) || node.type === 'text' || node.type === 'code_line')
+        ) {
           return renderLeaf(node, node.text, {});
         } else {
           const { type, ...attributes } = node;
@@ -247,7 +289,11 @@ export const RichTextRenderer = memo(
     );
 
     if (!body || typeof body === 'string') {
-      return <Text style={styles.paragraph}>{body}</Text>;
+      return (
+        <ParsedText parse={parsePatterns || []} style={[styles.paragraph, customTextStyle]}>
+          {body}
+        </ParsedText>
+      );
     }
 
     return body.map((element, index) => (
@@ -268,6 +314,9 @@ const styles = StyleSheet.create({
   },
   underline: {
     textDecorationLine: 'underline',
+  },
+  strikethrough: {
+    textDecorationLine: 'line-through',
   },
   orderedList: {
     marginBottom: 10,
@@ -308,8 +357,11 @@ const styles = StyleSheet.create({
   },
   codeBlock: {
     padding: 10,
+    borderWidth: 1,
+    margin: 10,
     borderRadius: 8,
     marginBottom: 10,
+    fontFamily: 'monospace', // Use monospaced font for the entire block
   },
   h1: {
     fontSize: 24,

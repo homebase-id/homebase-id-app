@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { FC } from 'react';
 import {
   Linking,
   StyleSheet,
@@ -19,6 +19,11 @@ import { StylePropType } from './utils';
 import { useChatContext } from './GiftedChatContext';
 import { error } from './logging';
 import { getPlainTextFromRichText } from 'homebase-id-app-common';
+import {
+  PayloadDescriptor,
+  RichText,
+  TargetDrive,
+} from '@homebase-id/js-lib/core';
 export type { ParseShape };
 
 const WWW_URL_PATTERN = /^www\./i;
@@ -83,6 +88,22 @@ export interface MessageTextProps<TMessage extends IMessage> {
   parsePatterns?(linkStyle: StyleProp<TextStyle>): ParseShape[];
   allowExpand?: boolean;
   onExpandPress?(): void;
+  isRichText?: boolean;
+  renderRichText?: FC<{
+    body: string | RichText | undefined;
+    odinId?: string;
+    options?: {
+      imageDrive: TargetDrive;
+      defaultFileId: string;
+      defaultGlobalTransitId?: string;
+      lastModified: number;
+      previewThumbnails?: PayloadDescriptor[];
+      query?: string;
+    };
+    renderElement?: (node: any, children: React.ReactNode) => React.ReactNode;
+    parsePatterns?: ParseShape[];
+    customTextStyle?: StyleProp<TextStyle>;
+  }>;
 }
 
 export function MessageText<TMessage extends IMessage = IMessage>({
@@ -97,6 +118,8 @@ export function MessageText<TMessage extends IMessage = IMessage>({
   textProps,
   onExpandPress,
   allowExpand,
+  isRichText,
+  renderRichText: RenderRichText,
 }: MessageTextProps<TMessage>) {
   const { actionSheet } = useChatContext();
   const [expanded, setExpanded] = React.useState(false);
@@ -172,25 +195,45 @@ export function MessageText<TMessage extends IMessage = IMessage>({
         containerStyle && containerStyle[position],
       ]}
     >
-      <ParsedText
-        style={[
-          styles[position].text,
-          textStyle && textStyle[position],
-          customTextStyle,
-        ]}
-        parse={[
-          {
-            pattern: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+.[A-Z|a-z]{2,}\b/,
-            style: linkStyle,
-            onPress: onEmailPress,
-          },
-          ...parsePatterns!(linkStyle),
-          { type: 'phone', style: linkStyle, onPress: onPhonePress },
-        ]}
-        childrenProps={{ ...textProps }}
-      >
-        {getPlainTextFromRichText(currentMessage!.text)}
-      </ParsedText>
+      {isRichText && RenderRichText ? (
+        <RenderRichText
+          body={currentMessage.text}
+          customTextStyle={[
+            styles[position].text,
+            textStyle && textStyle[position],
+            customTextStyle,
+          ]}
+          parsePatterns={[
+            {
+              pattern: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+.[A-Z|a-z]{2,}\b/,
+              style: linkStyle,
+              onPress: onEmailPress,
+            },
+            ...parsePatterns!(linkStyle),
+            { type: 'phone', style: linkStyle, onPress: onPhonePress },
+          ]}
+        />
+      ) : (
+        <ParsedText
+          style={[
+            styles[position].text,
+            textStyle && textStyle[position],
+            customTextStyle,
+          ]}
+          parse={[
+            {
+              pattern: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+.[A-Z|a-z]{2,}\b/,
+              style: linkStyle,
+              onPress: onEmailPress,
+            },
+            ...parsePatterns!(linkStyle),
+            { type: 'phone', style: linkStyle, onPress: onPhonePress },
+          ]}
+          childrenProps={{ ...textProps }}
+        >
+          {getPlainTextFromRichText(currentMessage!.text)}
+        </ParsedText>
+      )}
       {allowExpand && !expanded && (
         <TextButton
           textStyle={styles[position].button}

@@ -13,11 +13,12 @@ import { AuthorName } from '../../ui/Name';
 import { ChatMessageIMessage } from '../ChatDetail';
 import Clipboard from '@react-native-clipboard/clipboard';
 import { Colors } from '../../../app/Colors';
+import { RichTextRenderer } from '../../ui/Text/RichTextRenderer';
 
 export const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
   const { isDarkMode } = useDarkMode();
   const [message, setMessage] = useState(props.currentMessage as ChatMessageIMessage);
-  const deleted = message?.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus;
+  const isDeleted = message?.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus;
   const hasMoreTextContent = message?.fileMetadata?.payloads?.some(
     (e) => e.key === DEFAULT_PAYLOAD_KEY
   );
@@ -30,6 +31,11 @@ export const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
   const content = message?.fileMetadata.appData.content;
   const plainMessage = getPlainTextFromRichText(content.message);
   const onlyEmojis = isEmojiOnly(plainMessage);
+
+  const isRichText =
+    (hasMoreTextContent && completeMessage && typeof completeMessage.message !== 'string') ||
+    typeof message.text !== 'string';
+
   /**
    * An array of parse patterns used for parsing text in the chat detail component.
    * Each pattern consists of a regular expression pattern, a style to apply to the matched text,
@@ -69,16 +75,6 @@ export const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
     ];
   }, []);
 
-  useEffect(() => {
-    if (!completeMessage) {
-      setMessage(props.currentMessage as ChatMessageIMessage);
-    } else {
-      const message = props.currentMessage as ChatMessageIMessage;
-      message.text = completeMessage.message;
-      setMessage(message);
-    }
-  }, [completeMessage, props.currentMessage]);
-
   const onExpand = useCallback(() => {
     if (!hasMoreTextContent || !completeMessage) return;
     const message = props.currentMessage as ChatMessageIMessage;
@@ -91,6 +87,8 @@ export const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
       {...props}
       currentMessage={message}
       parsePatterns={parsePatterns}
+      isRichText={isRichText}
+      renderRichText={RichTextRenderer}
       linkStyle={{
         left: {
           color: isDarkMode ? Colors.indigo[300] : Colors.indigo[500],
@@ -108,7 +106,7 @@ export const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
               fontSize: 48,
               lineHeight: 60,
             }
-          : deleted
+          : isDeleted
             ? {
                 textDecorationLine: 'line-through',
                 color: props.position === 'left' ? Colors.gray[500] : Colors.gray[300],
