@@ -47,11 +47,11 @@ export const NotificationDay = memo(
           {isToday ? 'Today' : formatToTimeAgoWithRelativeDetail(day, false, true)}
         </Text>
 
-        {Object.keys(groupedNotifications).map((appId, index) => (
+        {Object.keys(groupedNotifications).map((appId) => (
           <NotificationAppGroup
             appId={appId}
             notifications={groupedNotifications[appId]}
-            key={index}
+            key={appId}
           />
         ))}
       </View>
@@ -74,10 +74,10 @@ const NotificationAppGroup = memo(
         {} as { [key: string]: PushNotification[] }
       ) || {};
 
-    return Object.keys(groupedByTypeNotifications).map((typeId, index) => {
+    return Object.keys(groupedByTypeNotifications).map((typeId) => {
       const typeGroup = groupedByTypeNotifications[typeId];
 
-      return <NotificationGroup typeGroup={typeGroup} appName={appName} key={index} />;
+      return <NotificationGroup typeGroup={typeGroup} appName={appName} key={typeId} />;
     });
   }
 );
@@ -108,42 +108,45 @@ const NotificationGroup = ({
       }}
     >
       <View style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {typeGroup.slice(0, visibleLength).map((notification, index) => (
-          <View
-            key={index}
-            style={{
-              ...(index === 0 || isExpanded
-                ? { position: 'relative', zIndex: 10 }
-                : { position: 'absolute', borderRadius: 8, overflow: 'hidden' }),
+        {typeGroup.slice(0, visibleLength).map((notification, index) => {
+          console.log('NotificationGroup', notification.id);
+          return (
+            <View
+              key={notification.id}
+              style={{
+                ...(index === 0 || isExpanded
+                  ? { position: 'relative', zIndex: 10 }
+                  : { position: 'absolute', borderRadius: 8, overflow: 'hidden' }),
 
-              ...(index === 0 || isExpanded
-                ? {}
-                : {
-                    top: index * 4,
-                    bottom: index * -4,
-                    left: index * 2,
-                    right: index * -4,
-                    zIndex: 4 - index,
-                    opacity: 1 - 0.3 * index,
-                  }),
-            }}
-          >
-            <NotificationItem
-              notification={notification}
-              isExpanded={index === 0 || isExpanded}
-              onDismiss={() =>
-                isExpanded ? remove([notification.id]) : remove(typeGroup.map((n) => n.id))
-              }
-              onOpen={() =>
-                canExpand && !isExpanded
-                  ? setExpanded(true)
-                  : navigateOnNotification(notification, identity, chatNavigator, tabNavigator)
-              }
-              groupCount={isExpanded ? 0 : groupCount}
-              appName={appName}
-            />
-          </View>
-        ))}
+                ...(index === 0 || isExpanded
+                  ? {}
+                  : {
+                      top: index * 4,
+                      bottom: index * -4,
+                      left: index * 2,
+                      right: index * -4,
+                      zIndex: 4 - index,
+                      opacity: 1 - 0.3 * index,
+                    }),
+              }}
+            >
+              <NotificationItem
+                notification={notification}
+                isExpanded={index === 0 || isExpanded}
+                onDismiss={() =>
+                  isExpanded ? remove([notification.id]) : remove(typeGroup.map((n) => n.id))
+                }
+                onOpen={() =>
+                  canExpand && !isExpanded
+                    ? setExpanded(true)
+                    : navigateOnNotification(notification, identity, chatNavigator, tabNavigator)
+                }
+                groupCount={isExpanded ? 0 : groupCount}
+                appName={appName}
+              />
+            </View>
+          );
+        })}
         {canExpand && isExpanded ? (
           <TouchableOpacity
             style={{ display: 'flex', flexDirection: 'row-reverse' }}
