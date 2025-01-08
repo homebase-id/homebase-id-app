@@ -1,6 +1,6 @@
 import { DEFAULT_PAYLOAD_KEY } from '@homebase-id/js-lib/core';
 import { getPlainTextFromRichText } from 'homebase-id-app-common';
-import { memo, useCallback, useEffect, useState } from 'react';
+import { memo, useCallback, useState } from 'react';
 import { StyleProp, TextStyle } from 'react-native';
 import { MessageTextProps, IMessage, MessageText } from 'react-native-gifted-chat';
 import { ParseShape } from 'react-native-parsed-text';

@@ -96,7 +96,7 @@ export interface MessageTextProps<TMessage extends IMessage> {
       imageDrive: TargetDrive;
       defaultFileId: string;
       defaultGlobalTransitId?: string;
-      lastModified: number;
+      lastModified: number | undefined;
       previewThumbnails?: PayloadDescriptor[];
       query?: string;
     };
