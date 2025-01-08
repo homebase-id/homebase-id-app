@@ -47,11 +47,11 @@ export const NotificationDay = memo(
           {isToday ? 'Today' : formatToTimeAgoWithRelativeDetail(day, false, true)}
         </Text>
 
-        {Object.keys(groupedNotifications).map((appId) => (
+        {Object.keys(groupedNotifications).map((appId, index) => (
           <NotificationAppGroup
             appId={appId}
             notifications={groupedNotifications[appId]}
-            key={appId}
+            key={index}
           />
         ))}
       </View>
@@ -74,15 +74,11 @@ const NotificationAppGroup = memo(
         {} as { [key: string]: PushNotification[] }
       ) || {};
 
-    return (
-      <>
-        {Object.keys(groupedByTypeNotifications).map((typeId) => {
-          const typeGroup = groupedByTypeNotifications[typeId];
+    return Object.keys(groupedByTypeNotifications).map((typeId, index) => {
+      const typeGroup = groupedByTypeNotifications[typeId];
 
-          return <NotificationGroup typeGroup={typeGroup} appName={appName} key={typeId} />;
-        })}
-      </>
-    );
+      return <NotificationGroup typeGroup={typeGroup} appName={appName} key={index} />;
+    });
   }
 );
 
@@ -114,7 +110,7 @@ const NotificationGroup = ({
       <View style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: 8 }}>
         {typeGroup.slice(0, visibleLength).map((notification, index) => (
           <View
-            key={notification.id}
+            key={index}
             style={{
               ...(index === 0 || isExpanded
                 ? { position: 'relative', zIndex: 10 }
