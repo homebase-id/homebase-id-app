@@ -109,7 +109,6 @@ const NotificationGroup = ({
     >
       <View style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: 8 }}>
         {typeGroup.slice(0, visibleLength).map((notification, index) => {
-          console.log('NotificationGroup', notification.id);
           return (
             <View
               key={notification.id}
