@@ -22,7 +22,7 @@ export interface RichTextRendererProps {
     previewThumbnails?: PayloadDescriptor[];
     query?: string;
   };
-  renderElement?: (node: any, children: React.ReactNode) => React.ReactNode;
+  renderElement?: (node: unknown, children: React.ReactNode) => React.ReactNode;
   parsePatterns?: ParseShape[];
   customTextStyle?: StyleProp<TextStyle>;
 }
