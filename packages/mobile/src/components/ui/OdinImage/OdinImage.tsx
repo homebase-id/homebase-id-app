@@ -8,6 +8,7 @@ import Animated, { runOnJS } from 'react-native-reanimated';
 import { Gesture, GestureDetector, GestureType } from 'react-native-gesture-handler';
 import React from 'react';
 import { drivesEqual } from '@homebase-id/js-lib/helpers';
+import { OdinBlob } from '../../../../polyfills/OdinBlob';
 
 export interface OdinImageProps {
   odinId?: string;
@@ -30,6 +31,7 @@ export interface OdinImageProps {
   probablyEncrypted?: boolean;
   systemFileType?: SystemFileType;
   gestureRefs?: React.RefObject<GestureType | undefined>[];
+  pendingFile?: OdinBlob;
 }
 
 const thumblessContentTypes = ['image/svg+xml', 'image/gif'];
@@ -56,6 +58,7 @@ export const OdinImage = memo(
       probablyEncrypted,
       systemFileType,
       gestureRefs,
+      pendingFile,
     } = props;
 
     // Don't set load size if it's a thumbnessLessContentType; As they don't have a thumb
@@ -107,7 +110,7 @@ export const OdinImage = memo(
       [fileId, fileKey, loadSize, odinId, targetDrive]
     );
 
-    const uri = imageData?.url || embeddedThumbUrl;
+    const uri = imageData?.url || embeddedThumbUrl || pendingFile?.uri;
     if (!uri) return null;
 
     if (enableZoom) {

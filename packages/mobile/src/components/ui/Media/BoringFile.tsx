@@ -25,7 +25,15 @@ export const BoringFile = memo(
   }) => {
     const { fetchFile, downloadFile } = useFile({ targetDrive });
     const [loading, setLoading] = useState(false);
-    const [blob, setBlob] = useState<OdinBlob | null>(null);
+    const [blob, setBlob] = useState<OdinBlob | null>(
+      'pendingFile' in file ? (file.pendingFile as unknown as OdinBlob) : null
+    );
+
+    const isPending = 'pendingFile' in file;
+
+    const progressPercentage = Math.round(
+      ((file as NewPayloadDescriptor)?.uploadProgress?.progress || 0) * 100
+    );
 
     const openDocument = useCallback(
       async (payload?: OdinBlob) => {
@@ -128,7 +136,9 @@ export const BoringFile = memo(
             {!blob && !loading && (
               <Download color={overwriteTextColor ? Colors.white : undefined} />
             )}
-            {loading && <ActivityIndicator color={overwriteTextColor ? Colors.white : undefined} />}
+            {(loading || isPending) && (
+              <ActivityIndicator color={overwriteTextColor ? Colors.white : undefined} />
+            )}
           </View>
         </View>
       </Pressable>

@@ -1,4 +1,4 @@
-import { PayloadDescriptor } from '@homebase-id/js-lib/core';
+import { NewPayloadDescriptor, PayloadDescriptor } from '@homebase-id/js-lib/core';
 import { useAudioPlayback } from '../../../hooks/audio/useAudioRecorderPlayer';
 import { ActivityIndicator, Pressable, View } from 'react-native';
 import { memo } from 'react';
@@ -9,10 +9,11 @@ import { Text } from '../Text/Text';
 import { millisToMinutesAndSeconds } from '../../../utils/utils';
 import { useAudio } from './hooks/useAudio';
 import { tryJsonParse } from '@homebase-id/js-lib/helpers';
+import { OdinBlob } from '../../../../polyfills/OdinBlob';
 
 interface OdinAudioProps {
   fileId: string;
-  payload: PayloadDescriptor;
+  payload: PayloadDescriptor | NewPayloadDescriptor;
 }
 
 export const OdinAudio = memo((props: OdinAudioProps) => {
@@ -30,6 +31,8 @@ export const OdinAudio = memo((props: OdinAudioProps) => {
 
   const { play, stop, playing, currDuration, duration } = useAudioPlayback(audioData?.url);
 
+  const isPending = 'pendingFile' in payload;
+
   return (
     <View
       style={{
@@ -43,7 +46,7 @@ export const OdinAudio = memo((props: OdinAudioProps) => {
             alignItems: 'center',
           }}
         >
-          {isLoading ? (
+          {isLoading || isPending ? (
             <ActivityIndicator
               style={{
                 width: 50,

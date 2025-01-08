@@ -337,7 +337,7 @@ export const ChatDetail = memo(
         const enabled =
           props.currentMessage &&
           props.currentMessage.fileMetadata.appData.archivalStatus !== ChatDeletedArchivalStaus;
-        const isSelected = selectedMessage?.fileId === props.currentMessage?.fileId;
+        const isSelected = selectedMessage?._id === props.currentMessage?._id;
         return (
           <Message
             {...props}

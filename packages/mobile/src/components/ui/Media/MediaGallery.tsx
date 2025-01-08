@@ -254,31 +254,30 @@ export const MediaItem = memo(
       const progressPercentage = Math.round(
         ((payload as NewPayloadDescriptor).uploadProgress?.progress || 0) * 100
       );
-
-      return (
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.slate[700] : Colors.slate[300],
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            gap: 10,
-            ...imageSize,
-            ...(style || { borderRadius: 10 }),
-          }}
-        >
-          <Text style={{ fontSize: 48 }}>
-            {isImage ? '📷' : isAudio ? '🎵' : isVideo ? '📹' : '📋'}
-          </Text>
-          {(payload as NewPayloadDescriptor).uploadProgress ? (
-            <Text style={{ fontSize: 14 }}>
-              {t((payload as NewPayloadDescriptor).uploadProgress?.phase)}{' '}
-              {progressPercentage !== 0 ? `${progressPercentage}%` : ''}
-            </Text>
-          ) : null}
-        </View>
-      );
+      if (isVideo) {
+        return (
+          <View
+            style={{
+              backgroundColor: isDarkMode ? Colors.slate[700] : Colors.slate[300],
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              gap: 10,
+              ...imageSize,
+              ...(style || { borderRadius: 10 }),
+            }}
+          >
+            <Text style={{ fontSize: 48 }}>📹</Text>
+            {(payload as NewPayloadDescriptor).uploadProgress ? (
+              <Text style={{ fontSize: 14 }}>
+                {t((payload as NewPayloadDescriptor).uploadProgress?.phase)}{' '}
+                {progressPercentage !== 0 ? `${progressPercentage}%` : ''}
+              </Text>
+            ) : null}
+          </View>
+        );
+      }
     }
 
     if (isVideo) {
@@ -286,7 +285,7 @@ export const MediaItem = memo(
         <View style={containerStyle}>
           <VideoWithLoader
             fileId={fileId}
-            payload={payload as PayloadDescriptor}
+            payload={payload}
             targetDrive={targetDrive}
             previewThumbnail={previewThumbnail}
             globalTransitId={globalTransitId}
@@ -309,7 +308,7 @@ export const MediaItem = memo(
       );
     }
     if (isAudio) {
-      return <OdinAudio key={payload.key} fileId={fileId} payload={payload as PayloadDescriptor} />;
+      return <OdinAudio key={payload.key} fileId={fileId} payload={payload} />;
     }
     if (isLink) {
       return (
@@ -350,11 +349,12 @@ export const MediaItem = memo(
             }
             onLongPress={onLongPress}
             onClick={onClick}
+            pendingFile={(payload as NewPayloadDescriptor)?.pendingFile as unknown as OdinBlob}
           />
         </View>
       );
     }
-    if (payload.contentType.startsWith('application/')) {
+    if (payload.contentType && payload.contentType.startsWith('application/')) {
       return (
         <BoringFile
           file={payload}
