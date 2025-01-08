@@ -711,6 +711,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
                     isGroup={!!isGroupChat}
                     messages={slicedMessages}
                     doSend={doSend}
+                    selectedMessage={selectedMessage.selectedMessage}
                     doSelectMessage={doSelectMessage}
                     doOpenMessageInfo={doOpenMessageInfo}
                     doOpenReactionModal={openReactionModal}

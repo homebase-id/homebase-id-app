@@ -10,6 +10,7 @@ import {
   InputToolbar,
   InputToolbarProps,
   LoadEarlier,
+  Message,
   MessageImageProps,
   MessageProps,
   Send,
@@ -31,8 +32,10 @@ import {
 import {
   ArrowDown,
   Camera,
+  Info,
   Microphone,
   Plus,
+  Reply,
   SendChat,
   Times,
 } from '../../components/ui/Icons/icons';
@@ -41,12 +44,11 @@ import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { useAuth } from '../../hooks/auth/useAuth';
 import { Colors, getOdinIdColor } from '../../app/Colors';
 import ReplyMessageBar from '../../components/Chat/Reply-Message-bar';
-import ChatMessageBox from '../../components/Chat/Chat-Message-box';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { Avatar as AppAvatar, OwnerAvatar } from '../../components/ui/Avatars/Avatar';
 import { ConnectionName } from '../../components/ui/Name';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
-import { ChatMessage } from '../../provider/chat/ChatProvider';
+import { ChatDeletedArchivalStaus, ChatMessage } from '../../provider/chat/ChatProvider';
 import { useAudioRecorder } from '../../hooks/audio/useAudioRecorderPlayer';
 import { Text } from '../ui/Text/Text';
 import { assetsToImageSource, fixDocumentURI, millisToMinutesAndSeconds } from '../../utils/utils';
@@ -88,10 +90,12 @@ export const ChatDetail = memo(
     onLinkData,
     onDismissLinkPreview,
     onAssetsAdded,
+    selectedMessage,
   }: {
     initialMessage?: string;
     isGroup: boolean;
     messages: ChatMessageIMessage[];
+    selectedMessage?: ChatMessageIMessage;
     doSend: (message: ChatMessageIMessage[]) => void;
     doSelectMessage: ({
       coords,
@@ -330,16 +334,43 @@ export const ChatDetail = memo(
     /* Component Function Callbacks */
     const renderMessageBox = useCallback(
       ({ key, ...props }: MessageProps<ChatMessageIMessage>) => {
+        const enabled =
+          props.currentMessage &&
+          props.currentMessage.fileMetadata.appData.archivalStatus !== ChatDeletedArchivalStaus;
+        const isSelected = selectedMessage?.fileId === props.currentMessage?.fileId;
         return (
-          <ChatMessageBox
-            key={key}
+          <Message
             {...props}
-            setReplyOnSwipeOpen={setReplyMessage}
+            key={key}
+            renderLeftIcon={<Info />}
+            renderRightIcon={<Reply />}
             onLeftSwipeOpen={onLeftSwipe}
+            onRightSwipeOpen={setReplyMessage as (message: IMessage) => void}
+            swipeableProps={{
+              friction: 3,
+              overshootFriction: 8,
+              activeOffsetX: [-30, 30],
+              failOffsetY: [-30, 30],
+              rightThreshold: 40,
+              leftThreshold: 20,
+              enabled: enabled,
+            }}
+            shouldUpdateMessage={(_, __) => isSelected}
+            containerStyle={
+              isSelected
+                ? {
+                    left: { backgroundColor: isDarkMode ? Colors.indigo[900] : Colors.indigo[100] },
+                    right: {
+                      backgroundColor: isDarkMode ? Colors.indigo[900] : Colors.indigo[100],
+                    },
+                  }
+                : undefined
+            }
+            isSelected={isSelected}
           />
         );
       },
-      [onLeftSwipe, setReplyMessage]
+      [onLeftSwipe, selectedMessage, setReplyMessage, isDarkMode]
     );
 
     const renderChatFooter = useCallback(
