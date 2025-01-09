@@ -9,7 +9,6 @@ import { Text } from '../Text/Text';
 import { millisToMinutesAndSeconds } from '../../../utils/utils';
 import { useAudio } from './hooks/useAudio';
 import { tryJsonParse } from '@homebase-id/js-lib/helpers';
-import { OdinBlob } from '../../../../polyfills/OdinBlob';
 
 interface OdinAudioProps {
   fileId: string;
