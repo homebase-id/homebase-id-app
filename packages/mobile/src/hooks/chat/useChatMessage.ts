@@ -211,7 +211,6 @@ const sendMessage = async ({
           );
         }
       } catch { }
-
       return {
         key,
         contentType: file.type || undefined,
@@ -221,6 +220,11 @@ const sendMessage = async ({
               type: file.type || undefined,
             }) as unknown as Blob)
             : undefined,
+        bytesWritten: file.fileSize ?? undefined,
+        descriptorContent: file.type?.startsWith('audio') ? JSON.stringify({
+          duration: file.playableDuration,
+          filename: file.filename,
+        }) : file.filename || file.type || undefined,
       };
     })
   );
@@ -295,6 +299,11 @@ export const getSendChatMessageMutationOptions: (queryClient: QueryClient) => Us
                 type: file.type || undefined,
               }) as unknown as Blob)
               : undefined,
+          bytesWritten: file.fileSize ?? undefined,
+          descriptorContent: file.type?.startsWith('audio') ? JSON.stringify({
+            duration: file.playableDuration,
+            filename: file.filename,
+          }) : file.filename || file.type || undefined,
         })),
         senderOdinId: identity,
         originalAuthor: identity,

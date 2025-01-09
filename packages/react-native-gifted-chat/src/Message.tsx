@@ -88,6 +88,7 @@ export interface MessageProps<TMessage extends IMessage> {
   renderLeftIcon?: React.ReactNode;
   renderRightIcon?: React.ReactNode;
   swipeableProps?: SwipeableProps;
+  isSelected?: boolean;
 }
 
 export default class Message<
@@ -113,6 +114,7 @@ export default class Message<
     renderLeftIcon: undefined,
     renderRightIcon: undefined,
     swipeEnabled: true,
+    isSelected: false,
   };
 
   static propTypes = {
@@ -131,6 +133,7 @@ export default class Message<
       left: StylePropType,
       right: StylePropType,
     }),
+    isSelected: PropTypes.bool,
     shouldUpdateMessage: PropTypes.func,
     onMessageLayout: PropTypes.func,
   };
@@ -158,7 +161,8 @@ export default class Message<
       next.audio !== current.audio ||
       previousMessage !== nextPropsPreviousMessage ||
       nextMessage !== nextPropsMessage ||
-      shouldUpdate
+      shouldUpdate ||
+      this.props.isSelected !== nextProps.isSelected
     );
   }
 

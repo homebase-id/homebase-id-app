@@ -1,4 +1,9 @@
-import { EmbeddedThumb, PayloadDescriptor, TargetDrive } from '@homebase-id/js-lib/core';
+import {
+  EmbeddedThumb,
+  NewPayloadDescriptor,
+  PayloadDescriptor,
+  TargetDrive,
+} from '@homebase-id/js-lib/core';
 import { memo, useCallback, useState } from 'react';
 import { ActivityIndicator, ImageStyle, TouchableOpacity, View } from 'react-native';
 import { Colors } from '../../../app/Colors';
@@ -235,7 +240,7 @@ interface LocalVideoProps {
   fileId: string;
   targetDrive: TargetDrive;
   globalTransitId?: string;
-  payload: PayloadDescriptor;
+  payload: PayloadDescriptor | NewPayloadDescriptor;
   probablyEncrypted?: boolean;
   lastModified?: number;
 }

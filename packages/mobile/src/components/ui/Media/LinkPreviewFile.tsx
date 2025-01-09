@@ -24,7 +24,7 @@ type LinkPreviewFileProps = {
   globalTransitId?: string;
   fileId: string;
   odinId?: string;
-  payloadKey: string;
+  payloadKey: string | undefined;
   descriptorContent?: LinkPreviewDescriptor;
   position: string;
   previewThumbnail?: EmbeddedThumb;

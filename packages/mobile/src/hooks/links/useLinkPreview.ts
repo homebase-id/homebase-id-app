@@ -47,7 +47,7 @@ export const useLinkMetadata = ({
   fileId: string;
   globalTransitId?: string;
   odinId?: string;
-  payloadKey: string;
+  payloadKey?: string;
 }) => {
   const dotYouClient = useDotYouClientContext();
   const identity = dotYouClient.getLoggedInIdentity();
@@ -79,5 +79,6 @@ export const useLinkMetadata = ({
   return useQuery({
     queryKey: ['link-metadata', targetDrive.alias, fileId, payloadKey],
     queryFn: fetchLinkData,
+    enabled: !!fileId && !!payloadKey && !!targetDrive,
   });
 };

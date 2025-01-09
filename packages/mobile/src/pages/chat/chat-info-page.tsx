@@ -87,10 +87,11 @@ export const ChatInfoPage = memo((prop: ChatInfoProp) => {
   );
 
   const renderItem = useCallback(
-    ({ item, index }: { item: string; index: number }) => (
-      <RenderRecipientTile recipient={item} isMe={index === data.length} />
-    ),
-    [data]
+    ({ item, index }: { item: string; index: number }) => {
+      if (!isGroup) return null;
+      return <RenderRecipientTile recipient={item} isMe={index === data.length} />;
+    },
+    [data.length, isGroup]
   );
   if (!conversation) return null;
 
