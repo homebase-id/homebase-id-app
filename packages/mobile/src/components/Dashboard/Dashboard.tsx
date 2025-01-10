@@ -31,6 +31,7 @@ export const Dashboard = memo(() => {
         appId={COMMUNITY_APP_ID}
         icon={HomebaseCommunity}
         style={{ width: '50%', marginBottom: 16 }}
+        alwaysExternal={true}
       />
     </>
   );
@@ -42,6 +43,7 @@ const AppLink = (props: {
   appId: string;
   icon: FC<BrandIconProps>;
   style?: ViewStyle;
+  alwaysExternal?: boolean;
 }) => {
   const { isDarkMode } = useDarkMode();
   const identity = useDotYouClientContext().getLoggedInIdentity();
@@ -65,7 +67,7 @@ const AppLink = (props: {
         borderWidth: 1,
         ...props.style,
       }}
-      onPress={() => openURL(`https://${identity}/${props.appPath}`)}
+      onPress={() => openURL(`https://${identity}/${props.appPath}`, props.alwaysExternal)}
     >
       <View style={{ position: 'relative' }}>
         <props.icon size={'4xl'} />
