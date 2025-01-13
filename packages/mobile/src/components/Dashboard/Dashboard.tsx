@@ -1,5 +1,5 @@
 import { useDotYouClientContext } from 'homebase-id-app-common';
-import { FC, memo } from 'react';
+import { FC, memo, useCallback } from 'react';
 import { TouchableOpacity, View, ViewStyle } from 'react-native';
 import { openURL } from '../../utils/utils';
 import { BrandIconProps, Homebase, HomebaseCommunity, HomebaseMail } from '../ui/Icons/brandIcons';
@@ -8,8 +8,16 @@ import { COMMUNITY_APP_ID, MAIL_APP_ID, OWNER_APP_ID } from '../../app/constants
 import { Colors } from '../../app/Colors';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { Text } from '../ui/Text/Text';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { TabStackParamList } from '../../app/App';
 
 export const Dashboard = memo(() => {
+  const navigation = useNavigation<NavigationProp<TabStackParamList>>();
+  const openCommunity = useCallback(
+    () => navigation.navigate('Community', { screen: 'Home', params: {} }),
+    [navigation]
+  );
+
   return (
     <>
       <View
@@ -24,15 +32,15 @@ export const Dashboard = memo(() => {
       >
         <AppLink label="Owner console" appPath="owner" appId={OWNER_APP_ID} icon={Homebase} />
         <AppLink label="Mail" appPath="apps/mail" appId={MAIL_APP_ID} icon={HomebaseMail} />
+        <AppLink
+          label="Community"
+          appPath="apps/community"
+          onPress={openCommunity}
+          appId={COMMUNITY_APP_ID}
+          icon={HomebaseCommunity}
+          alwaysExternal={true}
+        />
       </View>
-      <AppLink
-        label="Community"
-        appPath="apps/community"
-        appId={COMMUNITY_APP_ID}
-        icon={HomebaseCommunity}
-        style={{ width: '50%', marginBottom: 16 }}
-        alwaysExternal={true}
-      />
     </>
   );
 });
@@ -40,6 +48,7 @@ export const Dashboard = memo(() => {
 const AppLink = (props: {
   label: string;
   appPath: string;
+  onPress?: () => void;
   appId: string;
   icon: FC<BrandIconProps>;
   style?: ViewStyle;
@@ -52,10 +61,11 @@ const AppLink = (props: {
   return (
     <TouchableOpacity
       style={{
-        width: 50,
+        width: '40%',
         display: 'flex',
         flexDirection: 'row',
         flexGrow: 1,
+        flexShrink: 0,
         gap: 8,
         alignItems: 'center',
         position: 'relative',
@@ -67,7 +77,10 @@ const AppLink = (props: {
         borderWidth: 1,
         ...props.style,
       }}
-      onPress={() => openURL(`https://${identity}/${props.appPath}`, props.alwaysExternal)}
+      onPress={
+        props.onPress ||
+        (() => openURL(`https://${identity}/${props.appPath}`, props.alwaysExternal))
+      }
     >
       <View style={{ position: 'relative' }}>
         <props.icon size={'4xl'} />

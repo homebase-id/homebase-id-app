@@ -24,10 +24,8 @@ export const FeedPage = memo((_: FeedProps) => {
 
   return (
     <SafeAreaView>
-      {/* <SocialFeedWebView /> */}
       <FeedHeader />
       <SocialFeedMainContent />
-
       <FloatingActionButton />
     </SafeAreaView>
   );

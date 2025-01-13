@@ -112,7 +112,6 @@ export const finalizeAuthentication = async (
   );
 
   const base64ExchangedSecretDigest = uint8ArrayToBase64(exchangedSecretDigest);
-  console.log({ base64ExchangedSecretDigest });
   const dotYouClient = new DotYouClient({
     api: ApiType.App,
     loggedInIdentity: identity,

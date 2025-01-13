@@ -93,6 +93,13 @@ export const drives = [
       DrivePermissionType.React +
       DrivePermissionType.Comment,
   },
+  {
+    a: '3e5de26f-8fa3-43c1-975a-d0dd2aa8564c',
+    t: '93a6e08d-14d9-479e-8d99-bae4e5348a16',
+    n: 'Community Drive',
+    d: '',
+    p: DrivePermissionType.Read + DrivePermissionType.Write,
+  },
 ];
 export const permissions = [
   AppPermissionType.ReadConnections,
@@ -242,7 +249,8 @@ export const useYouAuthAuthorization = () => {
       [CONFIRMED_CONNECTIONS_CIRCLE_ID, AUTO_CONNECTIONS_CIRCLE_ID],
       uint8ArrayToBase64(stringToUint8Array(JSON.stringify(publicKeyJwk))),
       corsHost,
-      `${Platform.OS === 'ios' ? 'iOS' : Platform.OS === 'android' ? 'Android' : Platform.OS} | ${Platform.Version
+      `${Platform.OS === 'ios' ? 'iOS' : Platform.OS === 'android' ? 'Android' : Platform.OS} | ${
+        Platform.Version
       }`
     );
   }, [setPrivateKey]);
