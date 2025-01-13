@@ -4,7 +4,7 @@ import { memo, useMemo, useRef, useState } from 'react';
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 import WebView from 'react-native-webview';
 import { uint8ArrayToBase64 } from '@homebase-id/js-lib/helpers';
-import { RefreshControl } from 'react-native';
+import { NativeSyntheticEvent, RefreshControl } from 'react-native';
 import { useAuth } from '../../hooks/auth/useAuth';
 import { Colors } from '../../app/Colors';
 import { useDarkMode } from '../../hooks/useDarkMode';
@@ -62,7 +62,9 @@ export const CommunityPage = memo((_props: CommunityProps) => {
   const webviewRef = useRef<WebView>(null);
 
   //Code to get scroll position
-  const handleScroll = (event: any) => {
+  const handleScroll = (
+    event: NativeSyntheticEvent<Readonly<{ contentOffset: { y: number; x: number } }>>
+  ) => {
     const yOffset = Number(event.nativeEvent.contentOffset.y);
     if (yOffset === 0) {
       setEnableRefresher(true);
