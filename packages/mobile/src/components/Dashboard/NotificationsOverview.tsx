@@ -355,10 +355,13 @@ export const navigateOnNotification = (
       screen: 'Posts',
     });
   } else if (notification.options.appId === COMMUNITY_APP_ID) {
-    return openURL(
-      `https://${identity}/apps/community/redirect/${notification.options.typeId}/${notification.options.tagId}`,
-      true
-    );
+    return tabNavigator.navigate('Community', {
+      screen: 'Home',
+      params: {
+        typeId: notification.options.typeId,
+        tagId: notification.options.tagId,
+      },
+    });
   } else {
     // You shouldn't come here
     return Toast.show({

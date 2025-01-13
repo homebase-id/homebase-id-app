@@ -1,8 +1,8 @@
 import { View } from 'react-native';
 import { useUnreadPushNotificationsCount } from '../../hooks/notifications/usePushNotifications';
-import { Bars, ChatIcon, Feed, House, SqaurePlus } from '../ui/Icons/icons';
+import { Bars, ChatIcon, Feed, House, RadioTower, SqaurePlus } from '../ui/Icons/icons';
 import { Colors } from '../../app/Colors';
-import { CHAT_APP_ID, FEED_APP_ID } from '../../app/constants';
+import { CHAT_APP_ID, COMMUNITY_APP_ID, FEED_APP_ID } from '../../app/constants';
 
 type TabIconProps = {
   focused: boolean;
@@ -41,6 +41,16 @@ export const TabChatIcon = (props: TabIconProps) => {
   return (
     <View style={{ position: 'relative' }}>
       <ChatIcon {...props} size={'md'} />
+      {unreadCount ? <UnreadDot /> : null}
+    </View>
+  );
+};
+
+export const TabCommunityIcon = (props: TabIconProps) => {
+  const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: COMMUNITY_APP_ID });
+  return (
+    <View style={{ position: 'relative' }}>
+      <RadioTower {...props} size={'md'} />
       {unreadCount ? <UnreadDot /> : null}
     </View>
   );

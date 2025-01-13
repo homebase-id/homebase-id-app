@@ -39,13 +39,7 @@ export const usePushNotifications = () => {
       queryFn: ({ pageParam }) => getNotifications(pageParam),
       getNextPageParam: (lastPage) =>
         lastPage?.results && lastPage?.results?.length >= PAGE_SIZE ? lastPage.cursor : undefined,
-      staleTime: 1000 * 60 * 60, // 1h
-      // select: (data) => ({
-      //   ...data,
-      //   results: data.results.filter(
-      //     (n) => !props?.appId || stringGuidsEqual(n.options.appId, props.appId)
-      //   ),
-      // }),
+      staleTime: 5000, // Just 5 seconds to avoid double fetches
     }),
     markAsRead: useMutation({
       mutationFn: markAsRead,

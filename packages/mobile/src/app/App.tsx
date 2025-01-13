@@ -60,6 +60,7 @@ import { FeedStack, FeedStackParamList } from './FeedStack';
 import ChatSettingsProvider from '../components/Settings/ChatSettingsContext';
 import { useCacheCleanup } from '../hooks/file/useCacheCleanup';
 import { PendingUpgradeDialog } from '../components/PendingUpgrad/PendingUpgrade';
+import { CommunityStack, CommunityStackParamList } from './CommunityStack';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -71,6 +72,7 @@ export type TabStackParamList = {
   Feed: NavigatorScreenParams<FeedStackParamList>;
   Profile: NavigatorScreenParams<ProfileStackParamList> | undefined;
   Chat: NavigatorScreenParams<ChatStackParamList>;
+  Community: NavigatorScreenParams<CommunityStackParamList>;
 };
 
 export type HomeStackParamList = {
@@ -260,6 +262,13 @@ const TabStack = memo(() => {
           component={ProfileStack}
           options={{
             tabBarIcon: TabMenuIcon,
+          }}
+        />
+        <TabBottom.Screen
+          name="Community"
+          component={CommunityStack}
+          options={{
+            tabBarButton: () => null,
           }}
         />
       </TabBottom.Navigator>
