@@ -1,14 +1,12 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { memo, useMemo, useRef, useState } from 'react';
+import { memo, useMemo, useRef } from 'react';
 
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 import WebView from 'react-native-webview';
 import { uint8ArrayToBase64 } from '@homebase-id/js-lib/helpers';
-import { NativeSyntheticEvent, RefreshControl } from 'react-native';
 import { useAuth } from '../../hooks/auth/useAuth';
 import { Colors } from '../../app/Colors';
 import { useDarkMode } from '../../hooks/useDarkMode';
-import { ScrollView } from 'react-native-gesture-handler';
 import { useRemoveNotifications } from '../../hooks/notifications/usePushNotifications';
 import { COMMUNITY_APP_ID } from '../../app/constants';
 import { CommunityStackParamList } from '../../app/CommunityStack';
@@ -57,51 +55,24 @@ export const CommunityPage = memo((_props: CommunityProps) => {
       })();`;
   }, [authToken, base64SharedSecret, identity, isDarkMode]);
 
-  const [refreshing, setRefreshing] = useState(false);
-  const [refresherEnabled, setEnableRefresher] = useState(true);
   const webviewRef = useRef<WebView>(null);
-
-  //Code to get scroll position
-  const handleScroll = (
-    event: NativeSyntheticEvent<Readonly<{ contentOffset: { y: number; x: number } }>>
-  ) => {
-    const yOffset = Number(event.nativeEvent.contentOffset.y);
-    if (yOffset === 0) {
-      setEnableRefresher(true);
-    } else if (refresherEnabled) {
-      setEnableRefresher(false);
-    }
-  };
 
   return (
     <SafeAreaView>
       {identity && uri ? (
-        <ScrollView
-          contentContainerStyle={{ flex: 1 }}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              enabled={refresherEnabled}
-              onRefresh={() => webviewRef.current?.reload()}
-            />
-          }
-        >
-          <WebView
-            ref={webviewRef}
-            source={{ uri }}
-            injectedJavaScriptBeforeContentLoaded={INJECTED_JAVASCRIPT}
-            pullToRefreshEnabled={true}
-            containerStyle={{
-              paddingTop: 0,
-            }}
-            style={{ backgroundColor: isDarkMode ? Colors.slate[900] : Colors.slate[50] }}
-            originWhitelist={originWhitelist} // Keeps the WebView from navigating away from the feed-app; Any links that don't match will be opened by the system.. Eg: open in the browser
-            onMessage={(event) => console.warn(event)}
-            onScroll={handleScroll}
-            onLoadEnd={() => setRefreshing(false)}
-            forceDarkOn={isDarkMode}
-          />
-        </ScrollView>
+        <WebView
+          ref={webviewRef}
+          source={{ uri }}
+          injectedJavaScriptBeforeContentLoaded={INJECTED_JAVASCRIPT}
+          pullToRefreshEnabled={true}
+          containerStyle={{
+            paddingTop: 0,
+          }}
+          style={{ backgroundColor: isDarkMode ? Colors.slate[900] : Colors.slate[50] }}
+          originWhitelist={originWhitelist} // Keeps the WebView from navigating away from the feed-app; Any links that don't match will be opened by the system.. Eg: open in the browser
+          onMessage={(event) => console.warn(event)}
+          forceDarkOn={isDarkMode}
+        />
       ) : null}
     </SafeAreaView>
   );
