@@ -23,8 +23,14 @@ export const usePushNotifications = () => {
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
 
-  const getNotifications = async (cursor: number | undefined) =>
-    await GetNotifications(dotYouClient, undefined, PAGE_SIZE, cursor);
+  const getNotifications = async (cursor: number | undefined) => {
+    console.log('Fetching using Cursor', cursor);
+    const result = await GetNotifications(dotYouClient, undefined, PAGE_SIZE, cursor);
+    console.log('Recived Cursor', result.cursor);
+    console.log('Recived Result', result.results);
+    return result;
+  };
+
 
   const markAsRead = async (notificationIds: string[]) =>
     await MarkNotificationsAsRead(dotYouClient, notificationIds);
@@ -137,9 +143,9 @@ export const insertNewNotification = (
       results:
         index === 0
           ? [
-              appNotification,
-              ...page.results.filter((notification) => notification.id !== appNotification.id),
-            ]
+            appNotification,
+            ...page.results.filter((notification) => notification.id !== appNotification.id),
+          ]
           : page.results.filter((notification) => notification.id !== appNotification.id),
     })),
   };

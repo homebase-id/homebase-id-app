@@ -24,7 +24,8 @@ export const HomePage = (_props: HomeProps) => {
   const flattenedNotifications = useMemo(() => {
     const flatNotifications = notifications?.pages.flatMap((page) => page.results) || [];
     // Remove duplicates
-    return Array.from(new Map(flatNotifications.map((item) => [item.id, item])).values());
+    // return Array.from(new Map(flatNotifications.map((item) => [item.id, item])).values());
+    return flatNotifications;
   }, [notifications]);
 
   const groupedNotificationsPerDay = useMemo(
