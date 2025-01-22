@@ -12,11 +12,13 @@ import { Container } from '../../../ui/Container/Container';
 import { StyleSheet } from 'react-native';
 import { TouchableHighlight } from 'react-native-gesture-handler';
 import { useChatMessage } from '../../../../hooks/chat/useChatMessage';
-import { HomebaseFile } from '@homebase-id/js-lib/core';
+import { HomebaseFile, RecipientTransferHistory } from '@homebase-id/js-lib/core';
 import { ChatMessage } from '../../../../provider/chat/ChatProvider';
-import { UnifiedConversation } from '../../../../provider/chat/ConversationProvider';
+import { ChatDrive, UnifiedConversation } from '../../../../provider/chat/ConversationProvider';
 import { ErrorNotification } from '../../../ui/Alert/ErrorNotification';
 import { Backdrop } from '../../../ui/Modal/Backdrop';
+import { useTransferHistory } from '../../../../hooks/file/useTransferHistory';
+
 export const RetryModal = forwardRef(
   (
     {
@@ -32,7 +34,26 @@ export const RetryModal = forwardRef(
   ) => {
     const { isDarkMode } = useDarkMode();
     const { mutate, error } = useChatMessage().update;
-    const recipients = message?.serverMetadata?.transferHistory?.recipients;
+    const { data: transferHistory } = useTransferHistory(
+      message && {
+        fileId: message?.fileId,
+        targetDrive: ChatDrive,
+      }
+    ).fetch;
+
+    const recipients =
+      (message?.serverMetadata?.transferHistory &&
+        'recipients' in message.serverMetadata.transferHistory &&
+        (message.serverMetadata.transferHistory as unknown as {
+          [key: string]: RecipientTransferHistory;
+        })) ||
+      transferHistory?.history.results.reduce(
+        (acc, curr) => {
+          acc[curr.recipient] = curr;
+          return acc;
+        },
+        {} as Record<string, RecipientTransferHistory>
+      );
 
     const onRetry = useCallback(() => {
       if (!message) return;
@@ -69,6 +90,7 @@ export const RetryModal = forwardRef(
         return recipients[failedRecipient[0]].latestTransferStatus;
       }
     }, [failedRecipient, recipients]);
+
     return (
       <BottomSheetModal
         ref={ref}

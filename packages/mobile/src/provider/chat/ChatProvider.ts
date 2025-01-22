@@ -36,13 +36,15 @@ import {
   getFileHeader,
   DEFAULT_PAYLOAD_KEY,
   UpdateHeaderInstructionSet,
+  RecipientTransferSummary,
 } from '@homebase-id/js-lib/core';
-import { ChatDrive, UnifiedConversation } from './ConversationProvider';
+import { ChatDrive, ConversationWithYourselfId, UnifiedConversation } from './ConversationProvider';
 import {
   assertIfDefined,
   getNewId,
   getRandom16ByteArray,
   jsonStringify64,
+  stringGuidsEqual,
   stringToUint8Array,
   tryJsonParse,
 } from '@homebase-id/js-lib/helpers';
@@ -89,7 +91,6 @@ export interface ChatMessage {
 
   /// DeliveryStatus of the message. Indicates if the message is sent, delivered or read
   deliveryStatus: ChatDeliveryStatus;
-  deliveryDetails?: Record<string, ChatDeliveryStatus>;
 }
 
 const CHAT_MESSAGE_PAYLOAD_KEY = 'chat_mbl';
@@ -174,14 +175,31 @@ export const dsrToMessage = async (
     if (!msgContent) return null;
 
     if (
-      (msgContent.deliveryStatus === ChatDeliveryStatus.Sent ||
-        msgContent.deliveryStatus === ChatDeliveryStatus.Failed) &&
-      dsr.serverMetadata?.transferHistory?.recipients
+      msgContent.deliveryStatus === ChatDeliveryStatus.Sent ||
+      msgContent.deliveryStatus === ChatDeliveryStatus.Failed
     ) {
-      msgContent.deliveryDetails = buildDeliveryDetails(
-        dsr.serverMetadata.transferHistory.recipients
-      );
-      msgContent.deliveryStatus = buildDeliveryStatus(msgContent.deliveryDetails);
+      if (
+        dsr.serverMetadata?.transferHistory &&
+        'recipients' in dsr.serverMetadata.transferHistory
+      ) {
+        msgContent.deliveryStatus = buildDeliveryStatusBasedOnDeprecatedDeliveryDetails(
+          buildDeprecatedDeliveryDetails(
+            dsr.serverMetadata.transferHistory.recipients as {
+              [key: string]: RecipientTransferHistory;
+            }
+          )
+        );
+      } else if (dsr.serverMetadata?.transferHistory?.summary) {
+        msgContent.deliveryStatus = stringGuidsEqual(
+          dsr.fileMetadata.appData.groupId,
+          ConversationWithYourselfId
+        )
+          ? ChatDeliveryStatus.Read
+          : buildDeliveryStatus(
+              dsr.serverMetadata.originalRecipientCount,
+              dsr.serverMetadata.transferHistory.summary
+            );
+      }
     }
 
     const chatMessage: HomebaseFile<ChatMessage> = {
@@ -204,7 +222,10 @@ export const dsrToMessage = async (
   }
 };
 
-const buildDeliveryDetails = (recipientTransferHistory: {
+/**
+ * @deprecated Use buildDeliveryStatus instead
+ */
+const buildDeprecatedDeliveryDetails = (recipientTransferHistory: {
   [key: string]: RecipientTransferHistory;
 }): Record<string, ChatDeliveryStatus> => {
   const deliveryDetails: Record<string, ChatDeliveryStatus> = {};
@@ -233,7 +254,10 @@ const buildDeliveryDetails = (recipientTransferHistory: {
   return deliveryDetails;
 };
 
-const buildDeliveryStatus = (
+/**
+ * @deprecated Use buildDeliveryStatus instead
+ */
+const buildDeliveryStatusBasedOnDeprecatedDeliveryDetails = (
   deliveryDetails: Record<string, ChatDeliveryStatus>
 ): ChatDeliveryStatus => {
   const values = Object.values(deliveryDetails);
@@ -248,6 +272,42 @@ const buildDeliveryStatus = (
   }
 
   // If it exists, it's sent
+  return ChatDeliveryStatus.Sent;
+};
+
+export const transferHistoryToChatDeliveryStatus = (
+  transferHistory: RecipientTransferHistory | undefined
+): ChatDeliveryStatus => {
+  if (!transferHistory) return ChatDeliveryStatus.Failed;
+
+  if (transferHistory.latestSuccessfullyDeliveredVersionTag) {
+    if (transferHistory.isReadByRecipient) {
+      return ChatDeliveryStatus.Read;
+    } else {
+      return ChatDeliveryStatus.Delivered;
+    }
+  }
+
+  const latest = transferHistory.latestTransferStatus;
+  const transferStatus =
+    latest && typeof latest === 'string'
+      ? (latest?.toLocaleLowerCase() as TransferStatus)
+      : undefined;
+  if (transferStatus && FailedTransferStatuses.includes(transferStatus)) {
+    return ChatDeliveryStatus.Failed;
+  }
+  return ChatDeliveryStatus.Sent;
+};
+
+export const buildDeliveryStatus = (
+  recipientCount: number | undefined,
+  transferSummary: RecipientTransferSummary
+): ChatDeliveryStatus => {
+  if (transferSummary.totalFailed > 0) return ChatDeliveryStatus.Failed;
+
+  if (transferSummary.totalReadByRecipient >= (recipientCount || 0)) return ChatDeliveryStatus.Read;
+  if (transferSummary.totalDelivered >= (recipientCount || 0)) return ChatDeliveryStatus.Delivered;
+
   return ChatDeliveryStatus.Sent;
 };
 
@@ -271,19 +331,19 @@ export const uploadChatMessage = async (
     },
     transitOptions: distribute
       ? {
-        recipients: [...recipients],
-        schedule: ScheduleOptions.SendLater,
-        priority: PriorityOptions.High,
-        sendContents: SendContents.All,
-        useAppNotification: true,
-        appNotificationOptions: {
-          appId: CHAT_APP_ID,
-          typeId: message.fileMetadata.appData.groupId || getNewId(),
-          tagId: message.fileMetadata.appData.uniqueId || getNewId(),
-          silent: false,
-          unEncryptedMessage: notificationBody,
-        },
-      }
+          recipients: [...recipients],
+          schedule: ScheduleOptions.SendLater,
+          priority: PriorityOptions.High,
+          sendContents: SendContents.All,
+          useAppNotification: true,
+          appNotificationOptions: {
+            appId: CHAT_APP_ID,
+            typeId: message.fileMetadata.appData.groupId || getNewId(),
+            tagId: message.fileMetadata.appData.uniqueId || getNewId(),
+            silent: false,
+            unEncryptedMessage: notificationBody,
+          },
+        }
       : undefined,
   };
 
@@ -300,11 +360,10 @@ export const uploadChatMessage = async (
   const content = shouldEmbedContent
     ? jsonContent
     : jsonStringify64({
-      message: ellipsisAtMaxChar(getPlainTextFromRichText(messageContent.message), 400),
-      replyId: messageContent.replyId,
-      deliveryDetails: messageContent.deliveryDetails,
-      deliveryStatus: messageContent.deliveryStatus,
-    }); // We only embed the content if it's less than 3kb
+        message: ellipsisAtMaxChar(getPlainTextFromRichText(messageContent.message), 400),
+        replyId: messageContent.replyId,
+        deliveryStatus: messageContent.deliveryStatus,
+      }); // We only embed the content if it's less than 3kb
 
   if (!shouldEmbedContent) {
     payloads.push({
@@ -346,10 +405,10 @@ export const uploadChatMessage = async (
 
     const imageSource: ImageSource | undefined = linkPreviewWithImage
       ? {
-        height: linkPreviewWithImage.imageHeight || 0,
-        width: linkPreviewWithImage.imageWidth || 0,
-        uri: linkPreviewWithImage.imageUrl,
-      }
+          height: linkPreviewWithImage.imageHeight || 0,
+          width: linkPreviewWithImage.imageWidth || 0,
+          uri: linkPreviewWithImage.imageUrl,
+        }
       : undefined;
 
     const { tinyThumb } = imageSource
@@ -461,23 +520,13 @@ export const uploadChatMessage = async (
   }
 
   if (
-    recipients.some(
-      (recipient) =>
-        uploadResult.recipientStatus?.[recipient].toLowerCase() ===
-        TransferUploadStatus.EnqueuedFailed
+    Object.values(uploadResult.recipientStatus).some(
+      (recipienStatus) => recipienStatus.toLowerCase() === TransferUploadStatus.EnqueuedFailed
     )
   ) {
     message.fileId = uploadResult.file.fileId;
     message.fileMetadata.versionTag = uploadResult.newVersionTag;
-    message.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Sent;
-    message.fileMetadata.appData.content.deliveryDetails = {};
-    for (const recipient of recipients) {
-      message.fileMetadata.appData.content.deliveryDetails[recipient] =
-        uploadResult.recipientStatus?.[recipient].toLowerCase() ===
-          TransferUploadStatus.EnqueuedFailed
-          ? ChatDeliveryStatus.Failed
-          : ChatDeliveryStatus.Delivered;
-    }
+    message.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Failed;
 
     const updateResult = await updateChatMessage(
       dotYouClient,
@@ -491,7 +540,7 @@ export const uploadChatMessage = async (
       ...uploadResult,
       newVersionTag: updateResult?.newVersionTag || uploadResult?.newVersionTag,
       previewThumbnail: uploadMetadata.appData.previewThumbnail,
-      chatDeliveryStatus: ChatDeliveryStatus.Sent, // Should we set failed, or does an enqueueFailed have a retry? (Either way it should auto-solve if it does)
+      chatDeliveryStatus: ChatDeliveryStatus.Failed, // Should we set failed, or does an enqueueFailed have a retry? (Either way it should auto-solve if it does)
     };
   }
 
@@ -518,11 +567,11 @@ export const updateChatMessage = async (
     },
     transitOptions: distribute
       ? {
-        recipients: [...recipients],
-        schedule: ScheduleOptions.SendLater,
-        priority: PriorityOptions.High,
-        sendContents: SendContents.All,
-      }
+          recipients: [...recipients],
+          schedule: ScheduleOptions.SendLater,
+          priority: PriorityOptions.High,
+          sendContents: SendContents.All,
+        }
       : undefined,
     storageIntent: 'header',
   };
@@ -579,19 +628,20 @@ export const softDeleteChatMessage = async (
   let runningVersionTag = message.fileMetadata.versionTag;
   const { payloads } = message.fileMetadata;
   if (payloads) {
-    await Promise.all(payloads.map(async (payload) => {
-      // TODO: Should the payload be deleted for everyone? With "TransitOptions"
-      const deleteResult = await deletePayload(
-        dotYouClient,
-        ChatDrive,
-        message.fileId,
-        payload.key,
-        runningVersionTag
-      );
-      if (!deleteResult) throw new Error('Failed to delete payload');
-      runningVersionTag = deleteResult.newVersionTag;
-    }
-    ));
+    await Promise.all(
+      payloads.map(async (payload) => {
+        // TODO: Should the payload be deleted for everyone? With "TransitOptions"
+        const deleteResult = await deletePayload(
+          dotYouClient,
+          ChatDrive,
+          message.fileId,
+          payload.key,
+          runningVersionTag
+        );
+        if (!deleteResult) throw new Error('Failed to delete payload');
+        runningVersionTag = deleteResult.newVersionTag;
+      })
+    );
   }
 
   message.fileMetadata.versionTag = runningVersionTag;

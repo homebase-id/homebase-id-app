@@ -22,6 +22,7 @@ export const getSynchronousDotYouClient = async () => {
     if (!sharedSecret || !identity) {
       return new DotYouClient({
         api: ApiType.App,
+        hostIdentity: '',
       });
     }
 

@@ -31,10 +31,6 @@ export const BoringFile = memo(
 
     const isPending = 'pendingFile' in file;
 
-    const progressPercentage = Math.round(
-      ((file as NewPayloadDescriptor)?.uploadProgress?.progress || 0) * 100
-    );
-
     const openDocument = useCallback(
       async (payload?: OdinBlob) => {
         if (!blob && !payload) {

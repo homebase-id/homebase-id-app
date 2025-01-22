@@ -35,11 +35,14 @@ export const ReportModal = forwardRef(
       );
     };
     const identity = useAuth().getIdentity();
-    const host = new DotYouClient({
-      api: ApiType.Guest,
-      loggedInIdentity: identity || undefined,
-      hostIdentity: identity || undefined,
-    }).getRoot();
+    const host =
+      (identity &&
+        new DotYouClient({
+          api: ApiType.Guest,
+          loggedInIdentity: identity,
+          hostIdentity: identity,
+        }).getRoot()) ||
+      '';
 
     const onBlock = () =>
       openURL(`${host}/owner/connections/${message?.fileMetadata.originalAuthor}/block`);

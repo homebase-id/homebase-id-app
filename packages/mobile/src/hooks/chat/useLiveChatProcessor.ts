@@ -311,9 +311,14 @@ const useChatWebsocket = (isEnabled: boolean) => {
       fileMetadata: {
         ...m.fileMetadata,
         updated:
-          Object.values(m.serverMetadata?.transferHistory?.recipients || []).reduce((acc, cur) => {
-            return Math.max(acc, cur.lastUpdated || 0);
-          }, 0) ||
+          (m.serverMetadata?.transferHistory &&
+            'recipients' in m.serverMetadata.transferHistory &&
+            Object.values(m.serverMetadata?.transferHistory?.recipients || []).reduce(
+              (acc, cur) => {
+                return Math.max(acc, cur.lastUpdated || 0);
+              },
+              0
+            )) ||
           m.fileMetadata.updated ||
           0,
       },
@@ -433,11 +438,11 @@ const processChatMessagesBatch = async (
           uniqueMessagesPerConversation[conversationId].map(async (newMessage) =>
             typeof newMessage.fileMetadata.appData.content === 'string'
               ? await dsrToMessage(
-                dotYouClient,
-                newMessage as HomebaseFile<string>,
-                ChatDrive,
-                true
-              )
+                  dotYouClient,
+                  newMessage as HomebaseFile<string>,
+                  ChatDrive,
+                  true
+                )
               : (newMessage as HomebaseFile<ChatMessage>)
           )
         )

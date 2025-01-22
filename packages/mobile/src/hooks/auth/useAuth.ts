@@ -170,6 +170,7 @@ export const useAuth = () => {
     if (!sharedSecret || !identity || !authToken) {
       return new DotYouClient({
         api: ApiType.App,
+        hostIdentity: '',
       });
     }
 
