@@ -82,7 +82,7 @@ jest.mock('react-native-fs', () => {
 
 describe('ConversationProvider', () => {
   const dotYouClientMock = new DotYouClient({
-    loggedInIdentity: 'frodobaggins.me',
+    hostIdentity: 'frodobaggins.me',
     api: ApiType.App,
     headers: {},
     sharedSecret: new Uint8Array(16),

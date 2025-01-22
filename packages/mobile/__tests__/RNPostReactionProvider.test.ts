@@ -93,7 +93,7 @@ describe('RNPostReactionProvider', () => {
   let context: ReactionContext;
   let comment: NewHomebaseFile<RawReactionContent> | HomebaseFile<RawReactionContent>;
   const dotYouClient = new DotYouClient({
-    loggedInIdentity: 'frodobaggins.me',
+    hostIdentity: 'frodobaggins.me',
     api: ApiType.App,
     headers: {},
     sharedSecret: new Uint8Array(32),
