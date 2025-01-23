@@ -86,8 +86,10 @@ let App = () => {
       <GestureHandlerRootView>
         <PushNotificationProvider>
           <RouteContextProvider>
-            <RootStack />
-            <Toast />
+            <DotYouClientProvider>
+              <RootStack />
+              <Toast />
+            </DotYouClientProvider>
           </RouteContextProvider>
         </PushNotificationProvider>
       </GestureHandlerRootView>
