@@ -61,6 +61,7 @@ export const CommunityPage = memo((_props: CommunityProps) => {
     <SafeAreaView>
       {identity && uri ? (
         <WebView
+          key={uri} // Reloads the WebView when the uri changes
           ref={webviewRef}
           source={{ uri }}
           injectedJavaScriptBeforeContentLoaded={INJECTED_JAVASCRIPT}
