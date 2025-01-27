@@ -1,11 +1,5 @@
 import React, { memo, useCallback, useRef } from 'react';
-import {
-  StyleSheet,
-  NativeSyntheticEvent,
-  TextInputContentSizeChangeEventData,
-  ViewStyle,
-  View,
-} from 'react-native';
+import { StyleSheet, ViewStyle, View, LayoutChangeEvent } from 'react-native';
 import { MIN_COMPOSER_HEIGHT, DEFAULT_PLACEHOLDER } from './Constant';
 import Color from './Color';
 import PasteInput, {
@@ -62,7 +56,6 @@ export const Composer = memo((props: ComposerProps): React.ReactElement => {
       if (!dimensions) {
         return;
       }
-
       if (
         !dimensionsRef ||
         !dimensionsRef.current ||
@@ -76,10 +69,17 @@ export const Composer = memo((props: ComposerProps): React.ReactElement => {
     },
     [onInputSizeChanged],
   );
-  const handleContentSizeChange = ({
-    nativeEvent: { contentSize },
-  }: NativeSyntheticEvent<TextInputContentSizeChangeEventData>) =>
-    determineInputSizeChange(contentSize);
+  // const handleContentSizeChange = ({
+  //   nativeEvent: { contentSize },
+  // }: NativeSyntheticEvent<TextInputContentSizeChangeEventData>) =>
+  //   determineInputSizeChange(contentSize);
+
+  const onInitialLayout = useCallback((event: LayoutChangeEvent) => {
+    const { layout: dimensions } = event.nativeEvent;
+
+    determineInputSizeChange(dimensions);
+  }, []);
+
   return (
     <View
       style={[
@@ -91,6 +91,7 @@ export const Composer = memo((props: ComposerProps): React.ReactElement => {
       ]}
     >
       <PasteInput
+        onLayout={onInitialLayout}
         testID={placeholder}
         accessible
         accessibilityLabel={placeholder}
@@ -99,7 +100,7 @@ export const Composer = memo((props: ComposerProps): React.ReactElement => {
         multiline={multiline}
         editable={!disableComposer}
         onPaste={onPaste}
-        onContentSizeChange={handleContentSizeChange}
+        // onContentSizeChange={handleContentSizeChange}
         onChangeText={onTextChanged}
         style={[styles.textInput, textInputStyle]}
         autoFocus={textInputAutoFocus}

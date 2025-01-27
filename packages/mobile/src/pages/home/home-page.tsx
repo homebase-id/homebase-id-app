@@ -21,11 +21,10 @@ type HomeProps = NativeStackScreenProps<TabStackParamList, 'Home'>;
 
 export const HomePage = (_props: HomeProps) => {
   const { data: notifications, hasNextPage, fetchNextPage } = usePushNotifications().fetch;
-  const flattenedNotifications = useMemo(() => {
-    const flatNotifications = notifications?.pages.flatMap((page) => page.results) || [];
-    // Remove duplicates
-    return Array.from(new Map(flatNotifications.map((item) => [item.id, item])).values());
-  }, [notifications]);
+  const flattenedNotifications = useMemo(
+    () => notifications?.pages.flatMap((page) => page.results) || [],
+    [notifications]
+  );
 
   const groupedNotificationsPerDay = useMemo(
     () =>
