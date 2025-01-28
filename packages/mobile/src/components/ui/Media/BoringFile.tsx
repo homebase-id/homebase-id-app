@@ -107,8 +107,9 @@ export const BoringFile = memo(
               flex: 1,
             }}
           >
-            <View>
+            <View style={{ flex: 1 }}>
               <Text
+                numberOfLines={1}
                 style={StyleSheet.flatten([
                   {
                     fontSize: 16,
