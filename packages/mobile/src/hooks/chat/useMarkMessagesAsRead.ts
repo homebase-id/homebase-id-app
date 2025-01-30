@@ -3,7 +3,10 @@ import { HomebaseFile } from '@homebase-id/js-lib/core';
 
 import { useChatMessages } from './useChatMessages';
 import { useEffect, useState } from 'react';
-import { UnifiedConversation } from '../../provider/chat/ConversationProvider';
+import {
+  ConversationMetadata,
+  UnifiedConversation,
+} from '../../provider/chat/ConversationProvider';
 import { ChatMessage } from '../../provider/chat/ChatProvider';
 import { useConversationMetadata } from './useConversationMetadata';
 import { useDotYouClientContext } from 'homebase-id-app-common';
@@ -12,7 +15,7 @@ export const useMarkMessagesAsRead = ({
   conversation,
   messages,
 }: {
-  conversation: HomebaseFile<UnifiedConversation> | undefined;
+  conversation: HomebaseFile<UnifiedConversation, ConversationMetadata> | undefined;
   messages: HomebaseFile<ChatMessage>[] | undefined;
 }) => {
   const identity = useDotYouClientContext().getLoggedInIdentity();
@@ -23,28 +26,26 @@ export const useMarkMessagesAsRead = ({
   const [messagesMarkedAsRead, setMessagesMarkedAsRead] = useState<boolean>(false);
 
   const {
-    single: { data: conversationMetadata },
     update: { mutate: updateConversationMetadata },
   } = useConversationMetadata({ conversationId: conversation?.fileMetadata.appData.uniqueId });
   const [pendingReadTime, setPendingReadTime] = useState<number | undefined>(undefined);
 
   useEffect(() => {
     (async () => {
-      if (!conversation || !conversationMetadata || !messages || isProcessing.current) return;
+      if (!conversation || !messages || isProcessing.current) return;
 
       const unreadMessages = messages.filter(
         (msg) =>
           (msg?.fileMetadata.transitCreated || msg?.fileMetadata.created) >
-          (conversationMetadata.fileMetadata.appData.content.lastReadTime || 0) &&
-          msg.fileMetadata.senderOdinId &&
-          msg.fileMetadata.senderOdinId !== identity
+            (conversation.fileMetadata.localAppData?.content?.lastReadTime || 0) &&
+          (!msg.fileMetadata.senderOdinId || msg.fileMetadata.senderOdinId !== identity)
       );
 
       const newestMessageCreated = unreadMessages.reduce((acc, msg) => {
         return (msg?.fileMetadata.transitCreated || msg.fileMetadata.created) > acc
           ? msg?.fileMetadata.transitCreated || msg.fileMetadata.created
           : acc;
-      }, conversationMetadata.fileMetadata.appData.content.lastReadTime || 0);
+      }, conversation.fileMetadata.localAppData?.content?.lastReadTime || 0);
 
       setPendingReadTime(newestMessageCreated);
 
@@ -66,37 +67,24 @@ export const useMarkMessagesAsRead = ({
         isProcessing.current = false;
       }
     })();
-  }, [messages, conversationMetadata, conversation, markAsRead, identity]);
+  }, [messages, conversation, markAsRead, identity]);
 
   useEffect(() => {
-    if (!conversationMetadata || !messages || !pendingReadTime) return;
-    if (conversationMetadata.fileMetadata.appData.content.lastReadTime === pendingReadTime) return;
+    if (!conversation || !messages || !pendingReadTime) return;
+    if (conversation?.fileMetadata?.localAppData?.content?.lastReadTime === pendingReadTime) return;
 
-    if (messagesMarkedAsRead && pendingReadTime && conversationMetadata) {
+    if (messagesMarkedAsRead && pendingReadTime && conversation?.fileMetadata?.localAppData) {
       updateConversationMetadata({
-        conversation: {
-          ...conversationMetadata,
-          fileMetadata: {
-            ...conversationMetadata.fileMetadata,
-            appData: {
-              ...conversationMetadata.fileMetadata.appData,
-              content: {
-                ...conversationMetadata.fileMetadata.appData.content,
-                lastReadTime: pendingReadTime,
-              },
-            },
-          },
+        conversation,
+        newMetadata: {
+          ...conversation?.fileMetadata?.localAppData.content,
+          conversationId: conversation.fileMetadata.appData.uniqueId as string,
+          lastReadTime: pendingReadTime,
         },
       });
       setPendingReadTime(undefined);
       setMessagesMarkedAsRead(false);
       isProcessing.current = false;
     }
-  }, [
-    conversationMetadata,
-    messages,
-    messagesMarkedAsRead,
-    pendingReadTime,
-    updateConversationMetadata,
-  ]);
+  }, [conversation, messages, messagesMarkedAsRead, pendingReadTime, updateConversationMetadata]);
 };

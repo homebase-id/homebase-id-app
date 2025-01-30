@@ -4,6 +4,7 @@ import { useConversation } from '../../hooks/chat/useConversation';
 
 import {
   ChatDrive,
+  ConversationMetadata,
   ConversationWithYourselfId,
   UnifiedConversation,
 } from '../../provider/chat/ConversationProvider';
@@ -133,7 +134,7 @@ const RenderListHeader = memo(
     conversation,
   }: {
     isGroup: boolean;
-    conversation?: HomebaseFile<UnifiedConversation>;
+    conversation?: HomebaseFile<UnifiedConversation, ConversationMetadata>;
     recipient: string | undefined;
   }) => {
     const { isDarkMode } = useDarkMode();

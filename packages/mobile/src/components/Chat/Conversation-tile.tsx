@@ -67,7 +67,7 @@ const ConversationTile = memo((props: ConversationTileProps) => {
   const { data: conversationMetadata } = useConversationMetadata({
     conversationId: props.conversationId,
   }).single;
-  const lastReadTime = conversationMetadata?.fileMetadata.appData.content.lastReadTime;
+  const lastReadTime = conversationMetadata?.fileMetadata?.localAppData?.content?.lastReadTime;
   const unreadCount = useMemo(
     () =>
       lastReadTime &&

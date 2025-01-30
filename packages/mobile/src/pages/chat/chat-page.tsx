@@ -30,6 +30,7 @@ import { useChatMessages } from '../../hooks/chat/useChatMessages';
 import { useChatMessage } from '../../hooks/chat/useChatMessage';
 import { useConversation } from '../../hooks/chat/useConversation';
 import {
+  ConversationMetadata,
   ConversationWithYourselfId,
   UnifiedConversation,
 } from '../../provider/chat/ConversationProvider';
@@ -244,7 +245,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
     (message: ChatMessageIMessage) => {
       navigation.navigate('MessageInfo', {
         message,
-        conversation: conversation as HomebaseFile<UnifiedConversation>,
+        conversation: conversation as HomebaseFile<UnifiedConversation, ConversationMetadata>,
       });
     },
     [conversation, navigation]
@@ -289,8 +290,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
           ) {
             return filteredRecipients.some((recipient) => {
               const latestTransferStatus = (
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                conversation.serverMetadata as any as {
+                conversation.serverMetadata as unknown as {
                   transferHistory: {
                     recipients: {
                       [key: string]: RecipientTransferHistory;

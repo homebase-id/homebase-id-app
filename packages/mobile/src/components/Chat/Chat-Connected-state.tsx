@@ -6,7 +6,10 @@ import { useDarkMode } from '../../hooks/useDarkMode';
 import { Colors } from '../../app/Colors';
 import { ReactNode, useEffect, useState } from 'react';
 import { openURL } from '../../utils/utils';
-import { UnifiedConversation } from '../../provider/chat/ConversationProvider';
+import {
+  ConversationMetadata,
+  UnifiedConversation,
+} from '../../provider/chat/ConversationProvider';
 import Animated, {
   AnimatedStyle,
   FadeOut,
@@ -18,7 +21,9 @@ import Animated, {
 } from 'react-native-reanimated';
 import TextButton from '../ui/Text/Text-Button';
 
-export const ChatConnectedState = (conversation: HomebaseFile<UnifiedConversation> | undefined) => {
+export const ChatConnectedState = (
+  conversation: HomebaseFile<UnifiedConversation, ConversationMetadata> | undefined
+) => {
   const { isDarkMode } = useDarkMode();
   const identity = useDotYouClientContext().getLoggedInIdentity();
   const [expanded, setExpanded] = useState(false);

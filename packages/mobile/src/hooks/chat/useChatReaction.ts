@@ -15,7 +15,11 @@ import {
   uploadGroupReaction,
 } from '@homebase-id/js-lib/core';
 import { t, useDotYouClientContext } from 'homebase-id-app-common';
-import { ChatDrive, UnifiedConversation } from '../../provider/chat/ConversationProvider';
+import {
+  ChatDrive,
+  ConversationMetadata,
+  UnifiedConversation,
+} from '../../provider/chat/ConversationProvider';
 import { ChatMessage } from '../../provider/chat/ChatProvider';
 import { getSynchronousDotYouClient } from './getSynchronousDotYouClient';
 import { addError } from '../errors/useErrors';
@@ -27,7 +31,7 @@ const addReaction = async ({
   message,
   reaction,
 }: {
-  conversation: HomebaseFile<UnifiedConversation>;
+  conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>;
   message: HomebaseFile<ChatMessage>;
   reaction: string;
 }) => {
@@ -53,7 +57,7 @@ export const getAddReactionMutationOptions: (queryClient: QueryClient) => UseMut
   unknown,
   unknown,
   {
-    conversation: HomebaseFile<UnifiedConversation>;
+    conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>;
     message: HomebaseFile<ChatMessage>;
     reaction: string;
   }
@@ -112,7 +116,7 @@ const removeReactionOnServer = async ({
   message,
   reaction,
 }: {
-  conversation: HomebaseFile<UnifiedConversation>;
+  conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>;
   message: HomebaseFile<ChatMessage>;
   reaction: EmojiReaction;
 }) => {
@@ -136,7 +140,7 @@ export const getRemoveReactionMutationOptions: (queryClient: QueryClient) => Use
   unknown,
   unknown,
   {
-    conversation: HomebaseFile<UnifiedConversation>;
+    conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>;
     message: HomebaseFile<ChatMessage>;
     reaction: EmojiReaction;
   }

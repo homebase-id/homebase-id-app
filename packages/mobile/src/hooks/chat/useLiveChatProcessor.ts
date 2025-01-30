@@ -32,13 +32,10 @@ import {
   ChatDrive,
   CHAT_CONVERSATION_FILE_TYPE,
   dsrToConversation,
-  CHAT_CONVERSATION_LOCAL_METADATA_FILE_TYPE,
-  dsrToConversationMetadata,
 } from '../../provider/chat/ConversationProvider';
 import { insertNewMessage, insertNewMessagesForConversation } from './useChatMessages';
 import { insertNewConversation } from './useConversations';
 import { useWebSocketContext } from '../../components/WebSocketContext/useWebSocketContext';
-import { insertNewConversationMetadata } from './useConversationMetadata';
 import {
   incrementAppIdNotificationCount,
   insertNewNotification,
@@ -119,22 +116,6 @@ const useInboxProcessor = (connected?: boolean) => {
       );
       isDebug && console.debug('[InboxProcessor] new conversations', updatedConversations.length);
       await processConversationsBatch(dotYouClient, queryClient, updatedConversations);
-
-      const updatedConversationMetadatas = await findChangesSinceTimestamp(
-        dotYouClient,
-        lastProcessedWithBuffer,
-        {
-          targetDrive: ChatDrive,
-          fileType: [CHAT_CONVERSATION_LOCAL_METADATA_FILE_TYPE],
-        }
-      );
-      isDebug &&
-        console.debug('[InboxProcessor] new metadata', updatedConversationMetadatas.length);
-      await processConversationsMetadataBatch(
-        dotYouClient,
-        queryClient,
-        updatedConversationMetadatas
-      );
     } else {
       // We have no reference to the last time we processed the inbox, so we can only invalidate all chat messages
       queryClient.invalidateQueries({ queryKey: ['chat-messages'], exact: false });
@@ -251,20 +232,6 @@ const useChatWebsocket = (isEnabled: boolean) => {
         }
 
         insertNewConversation(queryClient, updatedConversation, !isNewFile);
-      } else if (
-        notification.header.fileMetadata.appData.fileType ===
-        CHAT_CONVERSATION_LOCAL_METADATA_FILE_TYPE
-      ) {
-        const updatedMetadata = await dsrToConversationMetadata(
-          dotYouClient,
-          notification.header,
-          ChatDrive,
-          true
-        );
-
-        if (!updatedMetadata) return;
-
-        insertNewConversationMetadata(queryClient, updatedMetadata);
       }
     }
 
@@ -489,35 +456,6 @@ const processConversationsBatch = async (
       }
 
       insertNewConversation(queryClient, updatedConversation);
-    })
-  );
-};
-
-const processConversationsMetadataBatch = async (
-  dotYouClient: DotYouClient,
-  queryClient: QueryClient,
-  conversations: (HomebaseFile<string> | DeletedHomebaseFile<string>)[]
-) => {
-  await Promise.all(
-    conversations.map(async (conversationsDsr) => {
-      if (conversationsDsr.fileState === 'deleted') {
-        queryClient.invalidateQueries({ queryKey: ['conversation-metadata'], exact: false });
-        return;
-      }
-
-      const updatedMetadata = await dsrToConversationMetadata(
-        dotYouClient,
-        conversationsDsr,
-        ChatDrive,
-        true
-      );
-
-      if (!updatedMetadata) {
-        queryClient.invalidateQueries({ queryKey: ['conversation-metadata'], exact: false });
-        return;
-      }
-
-      insertNewConversationMetadata(queryClient, updatedMetadata);
     })
   );
 };

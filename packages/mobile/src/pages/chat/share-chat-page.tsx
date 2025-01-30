@@ -16,6 +16,7 @@ import { memo, useCallback, useLayoutEffect, useMemo, useState } from 'react';
 import { DotYouProfile } from '@homebase-id/js-lib/network';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import {
+  ConversationMetadata,
   ConversationWithYourself,
   UnifiedConversation,
 } from '../../provider/chat/ConversationProvider';
@@ -75,7 +76,7 @@ export const ShareChatPage = (prop: ShareChatProp) => {
 
   const [selectedContact, setSelectedContact] = useState<DotYouProfile[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<
-    HomebaseFile<UnifiedConversation>[]
+    HomebaseFile<UnifiedConversation, ConversationMetadata>[]
   >([]);
   const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
 
@@ -309,9 +310,9 @@ const InnerShareChatPage = memo(
     allConversations: ConversationWithRecentMessage[] | undefined;
     selectedContact: DotYouProfile[];
     setSelectedContact: React.Dispatch<React.SetStateAction<DotYouProfile[]>>;
-    selectedConversation: HomebaseFile<UnifiedConversation>[];
+    selectedConversation: HomebaseFile<UnifiedConversation, ConversationMetadata>[];
     setSelectedConversation: React.Dispatch<
-      React.SetStateAction<HomebaseFile<UnifiedConversation>[]>
+      React.SetStateAction<HomebaseFile<UnifiedConversation, ConversationMetadata>[]>
     >;
   }) => {
     const {
@@ -324,7 +325,7 @@ const InnerShareChatPage = memo(
     } = props;
 
     const onSelectConversation = useCallback(
-      (conversation: HomebaseFile<UnifiedConversation>) => {
+      (conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>) => {
         setSelectedConversation((selectedConversation) => {
           if (selectedConversation.includes(conversation)) {
             return selectedConversation.filter((c) => c !== conversation);
