@@ -42,10 +42,12 @@ export const ExternalActions = memo(
       getReportContentUrl,
     } = useManageSocialFeed({ odinId });
 
-    const host = new DotYouClient({
-      api: ApiType.Guest,
-      loggedInIdentity: identity || undefined,
-    }).getRoot();
+    const host = identity
+      ? new DotYouClient({
+          api: ApiType.Guest,
+          hostIdentity: identity,
+        }).getRoot()
+      : '';
     const options: ActionGroupProps[] = [
       {
         icon: <Users />,

@@ -102,7 +102,7 @@ describe('ChatProvider', () => {
   (getRandom16ByteArray as jest.Mock) = mockGetRandom16Bytes;
   beforeEach(() => {
     dotYouClient = new DotYouClient({
-      loggedInIdentity: 'frodobaggins.me',
+      hostIdentity: 'frodobaggins.me',
       api: ApiType.App,
       headers: {},
       sharedSecret: new Uint8Array(32),
@@ -179,7 +179,10 @@ describe('ChatProvider', () => {
     const files = undefined;
     const linkPreviews = undefined;
 
-    (uploadFile as jest.Mock).mockResolvedValue({ file: { fileId: 'file-id' } });
+    (uploadFile as jest.Mock).mockResolvedValue({
+      file: { fileId: 'file-id' },
+      recipientStatus: {},
+    });
 
     const result = await uploadChatMessage(dotYouClient, message, recipients, files, linkPreviews);
 
@@ -216,10 +219,6 @@ describe('ChatProvider', () => {
           content: {
             message: '',
             deliveryStatus: 30,
-            deliveryDetails: {
-              'samwisegamgee.me': 30,
-              'frodobaggins.me': 30,
-            },
           },
           archivalStatus: 2,
         },
@@ -276,10 +275,6 @@ describe('ChatProvider', () => {
           content: {
             message: '',
             deliveryStatus: 30,
-            deliveryDetails: {
-              'samwisegamgee.me': 30,
-              'frodobaggins.me': 30,
-            },
           },
           archivalStatus: 2,
         },
@@ -334,10 +329,6 @@ describe('ChatProvider', () => {
           content: {
             message: '',
             deliveryStatus: 30,
-            deliveryDetails: {
-              'samwisegamgee.me': 30,
-              'frodobaggins.me': 30,
-            },
           },
           archivalStatus: 2,
         },

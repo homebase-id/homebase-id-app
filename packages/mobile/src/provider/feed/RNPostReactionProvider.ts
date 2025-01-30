@@ -24,11 +24,7 @@ import {
   getRandom16ByteArray,
 } from '@homebase-id/js-lib/helpers';
 
-import {
-  TransitInstructionSet,
-  TransitUploadResult,
-  uploadFileOverPeer,
-} from '@homebase-id/js-lib/peer';
+import { TransitInstructionSet, uploadFileOverPeer } from '@homebase-id/js-lib/peer';
 import {
   GetTargetDriveFromChannelId,
   ReactionConfig,
@@ -195,7 +191,7 @@ export const saveComment = async (
       systemFileType: 'Comment',
     };
 
-    const result: TransitUploadResult = await uploadFileOverPeer(
+    const result = await uploadFileOverPeer(
       dotYouClient,
       instructionSet,
       metadata,
@@ -203,6 +199,8 @@ export const saveComment = async (
       thumbnails,
       encrypt
     );
+
+    if (!result) throw new Error('Upload failed');
 
     if (
       TransferUploadStatus.EnqueuedFailed === result.recipientStatus[context.odinId].toLowerCase()

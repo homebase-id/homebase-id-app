@@ -12,8 +12,13 @@ import { useDotYouClientContext } from 'homebase-id-app-common';
 import { ChatStackParamList } from '../../app/ChatStack';
 import { Avatar, OwnerAvatar } from '../../components/ui/Avatars/Avatar';
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
-import { EmojiReaction } from '@homebase-id/js-lib/core';
-import { ChatDeliveryStatus } from '../../provider/chat/ChatProvider';
+import { EmojiReaction, RecipientTransferHistory } from '@homebase-id/js-lib/core';
+import {
+  ChatDeliveryStatus,
+  transferHistoryToChatDeliveryStatus,
+} from '../../provider/chat/ChatProvider';
+import { useTransferHistory } from '../../hooks/file/useTransferHistory';
+import { ChatDrive } from '../../provider/chat/ConversationProvider';
 
 export type MessageInfoProp = NativeStackScreenProps<ChatStackParamList, 'MessageInfo'>;
 
@@ -27,7 +32,6 @@ const dateTimeFormat: Intl.DateTimeFormatOptions = {
 
 export const MessageInfoPage = ({ route }: MessageInfoProp) => {
   const { message, conversation } = route.params;
-  const messageContent = message.fileMetadata.appData.content;
 
   const identity = useDotYouClientContext().getLoggedInIdentity();
   const conversationContent = conversation.fileMetadata.appData.content;
@@ -42,6 +46,13 @@ export const MessageInfoPage = ({ route }: MessageInfoProp) => {
     messageFileId: message.fileId,
     messageGlobalTransitId: message.fileMetadata.globalTransitId,
   }).get;
+
+  const { data: transferHistory } = useTransferHistory(
+    message && {
+      fileId: message?.fileId,
+      targetDrive: ChatDrive,
+    }
+  ).fetch;
 
   function renderDetails() {
     return (
@@ -75,10 +86,28 @@ export const MessageInfoPage = ({ route }: MessageInfoProp) => {
   }
   function renderRecipients() {
     if (!recipients.length) return null;
+
+    const recipientTransferHistory =
+      (message?.serverMetadata?.transferHistory &&
+        'recipients' in message.serverMetadata.transferHistory &&
+        (message.serverMetadata.transferHistory.recipients as unknown as {
+          [key: string]: RecipientTransferHistory;
+        })) ||
+      transferHistory?.history.results.reduce(
+        (acc, curr) => {
+          acc[curr.recipient] = curr;
+          return acc;
+        },
+        {} as Record<string, RecipientTransferHistory>
+      );
+
     return (
       <View style={styles.container}>
         <Header title="Recipients" />
         {recipients.map((recipient) => {
+          const deliveryStatus = transferHistoryToChatDeliveryStatus(
+            recipientTransferHistory?.[recipient]
+          );
           return (
             <View
               key={recipient}
@@ -96,10 +125,9 @@ export const MessageInfoPage = ({ route }: MessageInfoProp) => {
                   <ConnectionName odinId={recipient} />
                 </Text>
 
-                {isAuthor ? (
+                {isAuthor && recipientTransferHistory ? (
                   <FailedDeliveryDetails
-                    msg={message}
-                    recipient={recipient}
+                    transferHistory={recipientTransferHistory[recipient]}
                     style={{ maxWidth: '80%' }}
                   />
                 ) : null}
@@ -107,7 +135,7 @@ export const MessageInfoPage = ({ route }: MessageInfoProp) => {
 
               {isAuthor ? (
                 <InnerDeliveryIndicator
-                  state={messageContent.deliveryDetails?.[recipient] || ChatDeliveryStatus.Failed}
+                  state={deliveryStatus || ChatDeliveryStatus.Failed}
                   showDefault
                   style={{ marginLeft: 'auto' }}
                 />

@@ -4,6 +4,7 @@ import {
   DotYouClient,
   FailedTransferStatuses,
   HomebaseFile,
+  RecipientTransferHistory,
   RichText,
 } from '@homebase-id/js-lib/core';
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
@@ -281,14 +282,34 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
           (recipient) => recipient !== identity
         );
 
-        const anyRecipientMissingConversation = filteredRecipients.some((recipient) => {
-          const latestTransferStatus =
-            conversation.serverMetadata?.transferHistory?.recipients[recipient]
-              ?.latestTransferStatus;
+        const anyRecipientMissingConversation = (() => {
+          if (
+            conversation.serverMetadata?.transferHistory &&
+            'recipients' in conversation.serverMetadata.transferHistory
+          ) {
+            return filteredRecipients.some((recipient) => {
+              const latestTransferStatus = (
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                conversation.serverMetadata as any as {
+                  transferHistory: {
+                    recipients: {
+                      [key: string]: RecipientTransferHistory;
+                    };
+                  };
+                }
+              ).transferHistory.recipients[recipient]?.latestTransferStatus;
 
-          if (!latestTransferStatus) return true;
-          return FailedTransferStatuses.includes(latestTransferStatus);
-        });
+              if (!latestTransferStatus) return true;
+              return FailedTransferStatuses.includes(latestTransferStatus);
+            });
+          }
+
+          return (
+            conversation.serverMetadata?.originalRecipientCount !==
+            conversation.serverMetadata?.transferHistory?.summary.totalDelivered
+          );
+        })();
+
         if (anyRecipientMissingConversation) {
           console.log('invite recipient');
           inviteRecipient({ conversation });
@@ -495,10 +516,12 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
   const [isOpen, setIsOpen] = useState(false);
   const { isDarkMode } = useDarkMode();
 
-  const host = new DotYouClient({
-    api: ApiType.Guest,
-    loggedInIdentity: identity || undefined,
-  }).getRoot();
+  const host = identity
+    ? new DotYouClient({
+        api: ApiType.Guest,
+        hostIdentity: identity,
+      }).getRoot()
+    : '';
   const chatOptions: {
     label: string;
     onPress: () => void;

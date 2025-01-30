@@ -60,7 +60,7 @@ describe('RNPostUploadProvider', () => {
   let onVersionConflict: jest.Mock;
   let onUpdate: jest.Mock;
   const dotYouClient = new DotYouClient({
-    loggedInIdentity: 'frodobaggins.me',
+    hostIdentity: 'frodobaggins.me',
     api: ApiType.App,
     headers: {},
     sharedSecret: new Uint8Array(32),

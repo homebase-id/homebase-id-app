@@ -169,7 +169,8 @@ export const useAuth = () => {
   const getDotYouClient = useCallback(() => {
     if (!sharedSecret || !identity || !authToken) {
       return new DotYouClient({
-        api: ApiType.App,
+        api: ApiType.Guest,
+        hostIdentity: identity || '',
       });
     }
 

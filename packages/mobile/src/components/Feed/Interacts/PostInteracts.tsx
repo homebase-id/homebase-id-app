@@ -49,7 +49,7 @@ export const PostInteracts = memo(
   }) => {
     const postContent = postFile.fileMetadata.appData.content;
     const owner = useDotYouClientContext().getLoggedInIdentity();
-    const odinId = postFile.fileMetadata.senderOdinId || owner;
+    const odinId = postFile.fileMetadata.senderOdinId ?? owner;
     const postDisabledEmoji =
       postContent.reactAccess !== undefined &&
       (postContent.reactAccess === false || postContent.reactAccess === 'comment');
@@ -97,9 +97,11 @@ export const PostInteracts = memo(
 
     const permalink = useMemo(
       () =>
-        `${new DotYouClient({ hostIdentity: odinId || undefined, api: ApiType.Guest }).getRoot()}/posts/${postContent.channelId}/${
-          postContent.slug ?? postContent.id
-        }`,
+        odinId
+          ? `${new DotYouClient({ hostIdentity: odinId, api: ApiType.Guest }).getRoot()}/posts/${postContent.channelId}/${
+              postContent.slug ?? postContent.id
+            }`
+          : '',
       [odinId, postContent]
     );
 
