@@ -217,7 +217,7 @@ describe('RNPostReactionProvider', () => {
   });
 
   it('should handle local comments correctly', async () => {
-    context.odinId = dotYouClient.getLoggedInIdentity();
+    context.odinId = dotYouClient.getLoggedInIdentity() || '';
     const result = await saveComment(dotYouClient, context, comment);
     expect(result).toBeDefined();
   });
