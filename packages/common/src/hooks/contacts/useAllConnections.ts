@@ -17,7 +17,7 @@ export const useAllConnections = (enabled: boolean) => {
   const fetchConnections = async () => {
     // self invoking function that fetches the contacts in blocks of a CHUNKSIZE untill there are no more contacts to fetch
     const internalGetConnections = async (
-      cursor: number | undefined,
+      cursor: unknown | undefined,
       limit: number
     ): Promise<DotYouProfile[]> => {
       const connections = await getConnections(dotYouClient, { cursor, count: limit });

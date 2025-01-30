@@ -14,7 +14,7 @@ export const useConnections = (
   const dotYouClient = useDotYouClientContext();
 
   const fetchConnections = async (
-    { pageSize, cursor }: { pageSize: number; cursor?: number } = {
+    { pageSize, cursor }: { pageSize: number; cursor?: unknown } = {
       pageSize: 10,
     }
   ) => {
@@ -35,7 +35,7 @@ export const useConnections = (
   return {
     fetch: useInfiniteQuery({
       queryKey: ['active-connections', activePageSize],
-      initialPageParam: undefined as number | undefined,
+      initialPageParam: undefined as unknown | undefined,
       queryFn: ({ pageParam }) => fetchConnections({ pageSize: activePageSize, cursor: pageParam }),
 
       getNextPageParam: (lastPage) =>

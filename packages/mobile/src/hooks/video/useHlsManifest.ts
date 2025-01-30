@@ -103,7 +103,12 @@ export const useHlsManifest = (
         videoFileKey,
       ],
       queryFn: () =>
-        fetchManifest(odinId || identity, videoFileData?.fileHeader, videoDrive, videoFileKey),
+        fetchManifest(
+          odinId || identity || '',
+          videoFileData?.fileHeader,
+          videoDrive,
+          videoFileKey
+        ),
       refetchOnMount: false,
       refetchOnWindowFocus: false,
       enabled: !!videoFileId && videoFileId !== '' && videoFileDataFetched,
@@ -170,7 +175,7 @@ const getSegmentUrl = async (
   const identity = dotYouClient.getLoggedInIdentity();
   if (!isEncrypted) {
     return await getAnonymousDirectImageUrl(
-      odinId || identity,
+      odinId || identity || '',
       videoDrive,
       videoFileId,
       videoFileKey,

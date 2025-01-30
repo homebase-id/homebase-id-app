@@ -23,7 +23,7 @@ export const usePushNotifications = () => {
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
 
-  const getNotifications = async (cursor: number | undefined) =>
+  const getNotifications = async (cursor: unknown | undefined) =>
     await GetNotifications(dotYouClient, undefined, PAGE_SIZE, cursor);
 
   const markAsRead = async (notificationIds: string[]) =>
@@ -35,7 +35,7 @@ export const usePushNotifications = () => {
   return {
     fetch: useInfiniteQuery({
       queryKey: ['push-notifications'],
-      initialPageParam: undefined as number | undefined,
+      initialPageParam: undefined as unknown | undefined,
       queryFn: ({ pageParam }) => getNotifications(pageParam),
       getNextPageParam: (lastPage) =>
         lastPage?.results && lastPage?.results?.length >= PAGE_SIZE ? lastPage.cursor : undefined,
@@ -47,14 +47,14 @@ export const usePushNotifications = () => {
         const existingData = queryClient.getQueryData<
           InfiniteData<{
             results: PushNotification[];
-            cursor: number;
+            cursor: unknown;
           }>
         >(['push-notifications']);
 
         if (!existingData) return;
         const newData: InfiniteData<{
           results: PushNotification[];
-          cursor: number;
+          cursor: unknown;
         }> = {
           ...existingData,
           pages: existingData.pages.map((page) => ({
@@ -68,7 +68,7 @@ export const usePushNotifications = () => {
         queryClient.setQueryData<
           InfiniteData<{
             results: PushNotification[];
-            cursor: number;
+            cursor: unknown;
           }>
         >(['push-notifications'], newData);
 
@@ -84,14 +84,14 @@ export const usePushNotifications = () => {
         const existingData = queryClient.getQueryData<
           InfiniteData<{
             results: PushNotification[];
-            cursor: number;
+            cursor: unknown;
           }>
         >(['push-notifications']);
 
         if (!existingData) return;
         const newData: InfiniteData<{
           results: PushNotification[];
-          cursor: number;
+          cursor: unknown;
         }> = {
           ...existingData,
           pages: existingData.pages.map((page) => ({
@@ -102,7 +102,7 @@ export const usePushNotifications = () => {
         queryClient.setQueryData<
           InfiniteData<{
             results: PushNotification[];
-            cursor: number;
+            cursor: unknown;
           }>
         >(['push-notifications'], newData);
 
@@ -122,14 +122,14 @@ export const insertNewNotification = (
   const existingData = queryClient.getQueryData<
     InfiniteData<{
       results: PushNotification[];
-      cursor: number;
+      cursor: unknown;
     }>
   >(['push-notifications']);
 
   if (!existingData) return;
   const newData: InfiniteData<{
     results: PushNotification[];
-    cursor: number;
+    cursor: unknown;
   }> = {
     ...existingData,
     pages: existingData.pages.map((page, index) => ({
@@ -147,7 +147,7 @@ export const insertNewNotification = (
   queryClient.setQueryData<
     InfiniteData<{
       results: PushNotification[];
-      cursor: number;
+      cursor: unknown;
     }>
   >(['push-notifications'], newData);
 };

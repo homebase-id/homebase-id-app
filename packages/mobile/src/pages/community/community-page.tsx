@@ -28,9 +28,9 @@ export const CommunityPage = memo((_props: CommunityProps) => {
   const uri = useMemo(
     () =>
       typeId || tagId
-        ? `https://${identity}/apps/community/redirect/${typeId}/${tagId}`
-        : `https://${identity}/apps/community`,
-    [identity, typeId, tagId]
+        ? `https://${identity}/apps/community/redirect/${typeId}/${tagId}?prefersDark=${isDarkMode ? '1' : '0'}`
+        : `https://${identity}/apps/community?prefersDark=${isDarkMode ? '1' : '0'}`,
+    [typeId, tagId, identity, isDarkMode]
   );
   const originWhitelist = useMemo(() => [`https://${identity}`], [identity]);
 

@@ -33,7 +33,7 @@ export const DoubleTapHeart = memo(
     const postContent = postFile.fileMetadata.appData.content;
     const reactionContext: ReactionContext = useMemo(() => {
       return {
-        odinId: odinId || identity,
+        odinId: odinId || identity || '',
         channelId: postContent.channelId,
         target: {
           globalTransitId: postFile.fileMetadata.globalTransitId ?? 'unknown',

@@ -101,6 +101,8 @@ const NotificationGroup = ({
   const chatNavigator = useNavigation<NavigationProp<ChatStackParamList>>();
   const tabNavigator = useNavigation<NavigationProp<TabStackParamList>>();
 
+  if (!identity || !chatNavigator || !tabNavigator) return null;
+
   return (
     <View
       style={{
