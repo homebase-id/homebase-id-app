@@ -8,10 +8,6 @@
     "build:android": "react-native build-android --mode=release",
     "lint": "tsc --noEmit && eslint .",
     "start": "react-native start",
-    "build:android-codepush": "rm -rf codepush && mkdir codepush && react-native bundle --platform android --dev false --entry-file packages/mobile/index.js --bundle-output codepush/index.android.bundle --assets-dest codepush",
-    "build:ios-codepush": "rm -rf codepush && mkdir codepush && react-native bundle --platform ios --dev false --entry-file packages/mobile/index.js --bundle-output codepush/index.ios.bundle --assets-dest codepush",
-    "release:android-codepush": "appcenter codepush release -a odinops/Homebase-Feed -d Staging -c ./codepush -t 0.0.1 && rm -rf codepush",
-    "release:ios-codepush": "appcenter codepush release -a odinops/Homebase-Feed-ios -d Staging -c ./codepush -t 0.0.1 && rm -rf codepush",
     "build:splash": "react-native generate-bootsplash src/assets/homebase.svg --platforms=android,ios --background=F5FCFF --logo-width=100 --assets-output=assets/bootsplash --flavor=main",
     "test": "node --experimental-vm-modules ../../node_modules/.bin/jest"
   },
@@ -59,7 +55,6 @@
     "react-native-audio-recorder-player": "^3.6.11",
     "react-native-blob-util": "^0.19.6",
     "react-native-bootsplash": "^6.2.0",
-    "react-native-code-push": "8.2.1",
     "react-native-compressor": "^1.8.24",
     "react-native-device-info": "^10.12.0",
     "react-native-dialog": "^9.3.0",

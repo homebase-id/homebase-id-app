@@ -65,7 +65,5 @@ yarn-error.log
 # testing
 /coverage
 
-# Codepush
-codepush/
 packages/mobile/ios/.xcode.env.local
 .npmrc

@@ -3,7 +3,7 @@ import { View, Button, ScrollView } from 'react-native';
 import Toast from 'react-native-toast-message';
 import Clipboard from '@react-native-clipboard/clipboard';
 import { Text } from '../Text/Text';
-import CodePush from 'react-native-code-push';
+// import CodePush from 'react-native-code-push';
 
 type ErrorBoundaryProps = {
   children: ReactNode;
@@ -65,12 +65,12 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
                 }
               />
             </View>
-            <Button
+            {/* <Button
               title="Reload App"
               onPress={() => {
                 CodePush.restartApp();
               }}
-            />
+            /> */}
           </View>
           {this.state.showDetails ? (
             <View>

@@ -51,11 +51,6 @@ react {
     //   The list of flags to pass to the Hermes compiler. By default is "-O", "-output-source-map"
     // hermesFlags = ["-O", "-output-source-map"]
 
-    // https://github.com/microsoft/react-native-code-push/issues/1887
-    // CodePush fix for the monorepo structure
-    project.ext.nodeModulesPath = "../../../../node_modules"
-
-
     /* Autolinking */
     autolinkLibrariesWithApp()
 }
