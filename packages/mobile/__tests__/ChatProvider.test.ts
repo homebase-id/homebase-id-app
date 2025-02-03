@@ -26,7 +26,11 @@ import {
   ChatMessage,
 } from '../src/provider/chat/ChatProvider';
 import * as ChatProvider from '../src/provider/chat/ChatProvider';
-import { ChatDrive, UnifiedConversation } from '../src/provider/chat/ConversationProvider';
+import {
+  ChatDrive,
+  ConversationMetadata,
+  UnifiedConversation,
+} from '../src/provider/chat/ConversationProvider';
 import { sendReadReceipt } from '@homebase-id/js-lib/peer';
 import { getRandom16ByteArray } from '@homebase-id/js-lib/helpers';
 
@@ -371,7 +375,10 @@ describe('ChatProvider', () => {
   });
 
   it('should request mark as read', async () => {
-    const conversation = { fileId: 'conversation-id' } as HomebaseFile<UnifiedConversation>;
+    const conversation = { fileId: 'conversation-id' } as HomebaseFile<
+      UnifiedConversation,
+      ConversationMetadata
+    >;
     const messages = [
       {
         fileId: 'message-id',

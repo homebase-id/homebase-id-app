@@ -26,7 +26,7 @@ import {
 } from '@homebase-id/js-lib/core';
 import { ChatMessage } from '../provider/chat/ChatProvider';
 import { MessageInfoPage } from '../pages/chat/message-info-page';
-import { UnifiedConversation } from '../provider/chat/ConversationProvider';
+import { ConversationMetadata, UnifiedConversation } from '../provider/chat/ConversationProvider';
 import { OwnerAvatar } from '../components/ui/Avatars/Avatar';
 import { NativeStackNavigationOptions } from '@react-navigation/native-stack';
 import { SharedItem } from '../hooks/platform/useShareManager';
@@ -48,18 +48,18 @@ export type ChatStackParamList = {
   ChatInfo: { convoId: string };
   MessageInfo: {
     message: HomebaseFile<ChatMessage>;
-    conversation: HomebaseFile<UnifiedConversation>;
+    conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>;
   };
   ChatFileOverview: {
     initialAssets: ImageSource[];
-    recipients: HomebaseFile<UnifiedConversation>[];
+    recipients: HomebaseFile<UnifiedConversation, ConversationMetadata>[];
     title?: string;
   };
   EditGroup: { convoId: string };
   ShareChat: SharedItem[];
   ShareEditor: {
     text: string;
-    recipients: HomebaseFile<UnifiedConversation>[];
+    recipients: HomebaseFile<UnifiedConversation, ConversationMetadata>[];
   };
   Archived: undefined;
   PreviewMedia: {

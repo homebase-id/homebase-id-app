@@ -46,7 +46,6 @@ const INCLUDED_QUERY_KEYS = [
   'chat-message',
   'chat-messages',
   'conversations',
-  'conversation-metadata',
   'chat-reaction',
   'connection-details',
   'contacts',
@@ -77,7 +76,7 @@ export const OdinQueryClient = ({ children }: { children: ReactNode }) => {
     });
 
     const persistOptions: Omit<PersistQueryClientOptions, 'queryClient'> = {
-      buster: '20241110',
+      buster: '202501',
       maxAge: Infinity,
       persister: asyncPersist,
       dehydrateOptions: {

@@ -10,7 +10,10 @@ import { Text } from '../ui/Text/Text';
 import { SafeAreaView } from '../ui/SafeAreaView/SafeAreaView';
 import { DotYouProfile } from '@homebase-id/js-lib/network';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
-import { UnifiedConversation } from '../../provider/chat/ConversationProvider';
+import {
+  ConversationMetadata,
+  UnifiedConversation,
+} from '../../provider/chat/ConversationProvider';
 import Toast from 'react-native-toast-message';
 import { maxConnectionsForward } from './Chat-Forward';
 
@@ -164,9 +167,9 @@ export const SearchConversationWithSelectionResults = memo(
     selectedContact: DotYouProfile[];
     setSelectedContact: React.Dispatch<React.SetStateAction<DotYouProfile[]>>;
     onContactSelect?: (contact: string) => void;
-    selectedConversation?: HomebaseFile<UnifiedConversation>[];
+    selectedConversation?: HomebaseFile<UnifiedConversation, ConversationMetadata>[];
     setSelectedConversation?: React.Dispatch<
-      React.SetStateAction<HomebaseFile<UnifiedConversation>[]>
+      React.SetStateAction<HomebaseFile<UnifiedConversation, ConversationMetadata>[]>
     >;
     selectionLimit?: number;
   }) => {
@@ -189,7 +192,7 @@ export const SearchConversationWithSelectionResults = memo(
     );
 
     const onSelectConversation = useCallback(
-      (conversation: HomebaseFile<UnifiedConversation>) => {
+      (conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>) => {
         setSelectedConversation?.((selectedConversation) => {
           if (selectedConversation.includes(conversation)) {
             return selectedConversation.filter((c) => c !== conversation);

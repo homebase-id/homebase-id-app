@@ -95,7 +95,8 @@ describe('ConversationProvider', () => {
       const queryBatchMock = jest.fn().mockResolvedValue({
         searchResults: [
           {
-            /* mock result */
+            fileId: 'file-id',
+            fileMetadata: { appData: { content: { recipients: [] } }, payloads: [] },
           },
         ],
       });
@@ -127,7 +128,8 @@ describe('ConversationProvider', () => {
 
     it('should return a valid conversation when conversationId is valid', async () => {
       const getFileHeaderByUniqueIdMock = jest.fn().mockResolvedValue({
-        fileMetadata: { appData: { content: { recipients: [] } } },
+        fileId: 'file-id',
+        fileMetadata: { appData: { content: { recipients: [] } }, payloads: [] },
       });
       (getFileHeaderByUniqueId as jest.Mock) = getFileHeaderByUniqueIdMock;
 
@@ -149,7 +151,7 @@ describe('ConversationProvider', () => {
   });
 
   describe('uploadConversation', () => {
-    const conversation: NewHomebaseFile<UnifiedConversation> = {
+    const conversation: NewHomebaseFile<UnifiedConversation, ConversationMetadata> = {
       fileMetadata: {
         appData: {
           uniqueId: 'unique-id',
@@ -198,7 +200,7 @@ describe('ConversationProvider', () => {
   });
 
   describe('updateConversation', () => {
-    const conversation: HomebaseFile<UnifiedConversation> = {
+    const conversation: HomebaseFile<UnifiedConversation, ConversationMetadata> = {
       fileId: 'file-id',
       fileState: 'active',
       fileSystemType: 'Standard',
@@ -260,102 +262,6 @@ describe('ConversationProvider', () => {
 
       expect(uploadHeaderMock).toHaveBeenCalled();
       expect(getConversationMock).toHaveBeenCalled();
-    });
-  });
-
-  describe('getConversationMetadata', () => {
-    it('should return metadata when queryBatch returns a valid response', async () => {
-      const queryBatchMock = jest.fn().mockResolvedValue({
-        searchResults: [
-          {
-            fileId: 'file-id',
-            fileState: 'active',
-            fileSystemType: 'Standard',
-            fileMetadata: {
-              created: 1727354465999,
-              updated: 1727354465999,
-              isEncrypted: true,
-              senderOdinId: 'frodo',
-            },
-            sharedSecretEncryptedKeyHeader: {
-              encryptedAesKey: new Uint8Array(32),
-              encryptionVersion: 1,
-              iv: new Uint8Array(16),
-              type: 2,
-            },
-          },
-        ] as HomebaseFile<string>[],
-      } as QueryBatchResponse);
-      (queryBatch as jest.Mock) = queryBatchMock;
-
-      const getContentFromHeaderOrPayloadMock = jest
-        .fn()
-        .mockResolvedValue({ conversationId: 'valid-id' } as ConversationMetadata);
-      (getContentFromHeaderOrPayload as jest.Mock) = getContentFromHeaderOrPayloadMock;
-
-      const result = await getConversationMetadata(dotYouClientMock, 'valid-id');
-
-      expect(queryBatchMock).toHaveBeenCalled();
-      expect(result).toHaveProperty('fileMetadata');
-    });
-
-    it('should return null when queryBatch returns no response', async () => {
-      const queryBatchMock = jest.fn().mockResolvedValue(null);
-      (queryBatch as jest.Mock) = queryBatchMock;
-
-      const result = await getConversationMetadata(dotYouClientMock, 'valid-id');
-
-      expect(queryBatchMock).toHaveBeenCalled();
-      expect(result).toBeNull();
-    });
-  });
-
-  describe('uploadConversationMetadata', () => {
-    it('should upload metadata with valid tags', async () => {
-      const uploadFileMock = jest.fn().mockResolvedValue({});
-      (uploadFile as jest.Mock) = uploadFileMock;
-
-      const conversation = {
-        fileMetadata: {
-          appData: {
-            tags: ['valid-tag'],
-            content: { conversationId: 'valid-tag' },
-          },
-        },
-      } as NewHomebaseFile<ConversationMetadata>;
-
-      await uploadConversationMetadata(dotYouClientMock, conversation);
-
-      expect(uploadFileMock).toHaveBeenCalled();
-    });
-
-    it('should throw error when tags are missing', async () => {
-      const conversation = {
-        fileMetadata: {
-          appData: {
-            content: { conversationId: 'valid-tag' },
-          },
-        },
-      } as NewHomebaseFile<ConversationMetadata>;
-
-      await expect(uploadConversationMetadata(dotYouClientMock, conversation)).rejects.toThrow(
-        'ConversationMetadata must have tags'
-      );
-    });
-
-    it('should throw error when tags do not match conversationId', async () => {
-      const conversation = {
-        fileMetadata: {
-          appData: {
-            tags: ['invalid-tag'],
-            content: { conversationId: 'valid-tag' },
-          },
-        },
-      } as NewHomebaseFile<ConversationMetadata>;
-
-      await expect(uploadConversationMetadata(dotYouClientMock, conversation)).rejects.toThrow(
-        'ConversationMetadata must have a tag that matches the conversationId'
-      );
     });
   });
 });

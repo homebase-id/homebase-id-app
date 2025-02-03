@@ -35,6 +35,7 @@ import { ErrorNotification } from '../ui/Alert/ErrorNotification';
 import useImage from '../ui/OdinImage/hooks/useImage';
 import {
   ChatDrive,
+  ConversationMetadata,
   ConversationWithYourself,
   UnifiedConversation,
 } from '../../provider/chat/ConversationProvider';
@@ -75,7 +76,7 @@ export const ChatForwardModal = memo(
     const { mutate: sendMessage, error } = useChatMessage().send;
     const [selectedContact, setselectedContact] = useState<DotYouProfile[]>([]);
     const [selectedConversation, setSelectedConversation] = useState<
-      HomebaseFile<UnifiedConversation>[]
+      HomebaseFile<UnifiedConversation, ConversationMetadata>[]
     >([]);
     const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
     const { bottom } = useSafeAreaInsets();
@@ -104,7 +105,7 @@ export const ChatForwardModal = memo(
       if ((selectedContact.length === 0 && selectedConversation.length === 0) || !message) return;
       setIsLoading(true);
       async function forwardMessages(
-        conversation: HomebaseFile<UnifiedConversation>,
+        conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>,
         message: ChatMessageIMessage
       ) {
         const messagePayloads: ImageSource[] = [];
@@ -390,9 +391,9 @@ const InnerForwardListPage = memo(
     allConversations: ConversationWithRecentMessage[] | undefined;
     selectedContact: DotYouProfile[];
     setSelectedContact: React.Dispatch<React.SetStateAction<DotYouProfile[]>>;
-    selectedConversation: HomebaseFile<UnifiedConversation>[];
+    selectedConversation: HomebaseFile<UnifiedConversation, ConversationMetadata>[];
     setSelectedConversation: React.Dispatch<
-      React.SetStateAction<HomebaseFile<UnifiedConversation>[]>
+      React.SetStateAction<HomebaseFile<UnifiedConversation, ConversationMetadata>[]>
     >;
   }) => {
     const {
@@ -405,7 +406,7 @@ const InnerForwardListPage = memo(
     } = props;
 
     const onSelectConversation = useCallback(
-      (conversation: HomebaseFile<UnifiedConversation>) => {
+      (conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>) => {
         setSelectedConversation((selectedConversation) => {
           if (selectedConversation.includes(conversation)) {
             return selectedConversation.filter((c) => c !== conversation);
@@ -616,8 +617,8 @@ export const GroupConversationsComponent = memo(
     selectedGroup,
     setselectedGroup,
   }: {
-    selectedGroup: HomebaseFile<UnifiedConversation>[];
-    setselectedGroup: (group: HomebaseFile<UnifiedConversation>[]) => void;
+    selectedGroup: HomebaseFile<UnifiedConversation, ConversationMetadata>[];
+    setselectedGroup: (group: HomebaseFile<UnifiedConversation, ConversationMetadata>[]) => void;
   }) => {
     const { data: conversations } = useConversations().all;
     const flatConversations = useMemo(
@@ -630,7 +631,7 @@ export const GroupConversationsComponent = memo(
                 convo &&
                 [0, undefined].includes(convo.fileMetadata.appData.archivalStatus) &&
                 convo.fileMetadata.appData.content.recipients.length > 2
-            ) as HomebaseFile<UnifiedConversation>[]
+            ) as HomebaseFile<UnifiedConversation, ConversationMetadata>[]
         )?.sort((a, b) =>
           a?.fileMetadata.appData.content.title.localeCompare(b?.fileMetadata.appData.content.title)
         ) || [],
@@ -638,7 +639,7 @@ export const GroupConversationsComponent = memo(
     );
 
     const onSelect = useCallback(
-      (group: HomebaseFile<UnifiedConversation>) => {
+      (group: HomebaseFile<UnifiedConversation, ConversationMetadata>) => {
         if (selectedGroup.includes(group)) {
           setselectedGroup(selectedGroup.filter((grp) => grp !== group));
         } else {

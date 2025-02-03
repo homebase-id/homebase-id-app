@@ -14,7 +14,11 @@ import { TouchableHighlight } from 'react-native-gesture-handler';
 import { useChatMessage } from '../../../../hooks/chat/useChatMessage';
 import { HomebaseFile, RecipientTransferHistory } from '@homebase-id/js-lib/core';
 import { ChatMessage } from '../../../../provider/chat/ChatProvider';
-import { ChatDrive, UnifiedConversation } from '../../../../provider/chat/ConversationProvider';
+import {
+  ChatDrive,
+  ConversationMetadata,
+  UnifiedConversation,
+} from '../../../../provider/chat/ConversationProvider';
 import { ErrorNotification } from '../../../ui/Alert/ErrorNotification';
 import { Backdrop } from '../../../ui/Modal/Backdrop';
 import { useTransferHistory } from '../../../../hooks/file/useTransferHistory';
@@ -27,7 +31,7 @@ export const RetryModal = forwardRef(
       onClose,
     }: {
       message: ChatMessageIMessage | undefined;
-      conversation: HomebaseFile<UnifiedConversation>;
+      conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>;
       onClose: () => void;
     },
     ref: React.Ref<BottomSheetModalMethods>
