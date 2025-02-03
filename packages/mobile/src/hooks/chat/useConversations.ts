@@ -1,11 +1,15 @@
-import { UnifiedConversation, getConversations } from '../../provider/chat/ConversationProvider';
+import {
+  ConversationMetadata,
+  UnifiedConversation,
+  getConversations,
+} from '../../provider/chat/ConversationProvider';
 import { InfiniteData, QueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { useDotYouClientContext } from 'homebase-id-app-common';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 
 export interface ChatConversationsReturn {
-  searchResults: HomebaseFile<UnifiedConversation>[];
+  searchResults: HomebaseFile<UnifiedConversation, ConversationMetadata>[];
   cursorState: string;
   queryTime: number;
   includeMetadataHeader: boolean;
@@ -36,12 +40,12 @@ export const useConversations = () => {
 
 export const insertNewConversation = (
   queryClient: QueryClient,
-  newConversation: HomebaseFile<UnifiedConversation>,
+  newConversation: HomebaseFile<UnifiedConversation, ConversationMetadata>,
   isUpdate?: boolean
 ) => {
   const extistingConversations = queryClient.getQueryData<
     InfiniteData<{
-      searchResults: HomebaseFile<UnifiedConversation>[];
+      searchResults: HomebaseFile<UnifiedConversation, ConversationMetadata>[];
       cursorState: string;
       queryTime: number;
       includeMetadataHeader: boolean;
@@ -87,10 +91,9 @@ export const insertNewConversation = (
     queryClient.invalidateQueries({ queryKey: ['conversations'] });
   }
 
-  const extistingConversation = queryClient.getQueryData<HomebaseFile<UnifiedConversation>>([
-    'conversation',
-    newConversation.fileMetadata.appData.uniqueId,
-  ]);
+  const extistingConversation = queryClient.getQueryData<
+    HomebaseFile<UnifiedConversation, ConversationMetadata>
+  >(['conversation', newConversation.fileMetadata.appData.uniqueId]);
   if (extistingConversation) {
     queryClient.setQueryData(
       ['conversation', newConversation.fileMetadata.appData.uniqueId],

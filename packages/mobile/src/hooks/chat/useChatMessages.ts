@@ -17,6 +17,7 @@ import {
 import { DotYouClient, HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
 import { useDotYouClientContext } from 'homebase-id-app-common';
 import {
+  ConversationMetadata,
   ConversationWithYourselfId,
   UnifiedConversation,
 } from '../../provider/chat/ConversationProvider';
@@ -36,7 +37,7 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
     conversation,
     messages,
   }: {
-    conversation: HomebaseFile<UnifiedConversation>;
+    conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>;
     messages: HomebaseFile<ChatMessage>[];
   }) => {
     const response = await requestMarkAsRead(dotYouClient, conversation, messages);
@@ -61,7 +62,7 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
     messages,
     deleteForEveryone,
   }: {
-    conversation: HomebaseFile<UnifiedConversation>;
+    conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>;
     messages: HomebaseFile<ChatMessage>[];
     deleteForEveryone?: boolean;
   }) => {
@@ -79,11 +80,11 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
         return hardDelete
           ? await hardDeleteChatMessage(dotYouClient, msg)
           : await softDeleteChatMessage(
-            dotYouClient,
-            msg,
-            recipients.filter(Boolean),
-            deleteForEveryone
-          );
+              dotYouClient,
+              msg,
+              recipients.filter(Boolean),
+              deleteForEveryone
+            );
       })
     );
   };
@@ -143,7 +144,7 @@ export const getChatMessageInfiniteQueryOptions: (
     ),
   getNextPageParam: (lastPage, pages) =>
     lastPage &&
-      lastPage.searchResults?.length >= (lastPage === pages[0] ? FIRST_PAGE_SIZE : PAGE_SIZE)
+    lastPage.searchResults?.length >= (lastPage === pages[0] ? FIRST_PAGE_SIZE : PAGE_SIZE)
       ? lastPage.cursorState
       : undefined,
   enabled: !!conversationId,
@@ -285,8 +286,8 @@ export const internalInsertNewMessage = (
           searchResults:
             index === 0
               ? [newMessage, ...filteredSearchResults].sort(
-                (a, b) => (b.fileMetadata.created || 0) - (a.fileMetadata.created || 0)
-              ) // Re-sort the first page, as the new message might be older than the first message in the page;
+                  (a, b) => (b.fileMetadata.created || 0) - (a.fileMetadata.created || 0)
+                ) // Re-sort the first page, as the new message might be older than the first message in the page;
               : filteredSearchResults,
         };
       }

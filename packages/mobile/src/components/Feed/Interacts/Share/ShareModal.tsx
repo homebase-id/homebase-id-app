@@ -48,6 +48,7 @@ import { ContactTile } from '../../../Contact/Contact-Tile';
 import { DotYouProfile } from '@homebase-id/js-lib/network';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import {
+  ConversationMetadata,
   ConversationWithYourself,
   UnifiedConversation,
 } from '../../../../provider/chat/ConversationProvider';
@@ -115,7 +116,7 @@ const ShareModalListWrapper = memo(
       const [context, setContext] = useState<ShareContext | undefined>();
       const [selectedContact, setselectedContact] = useState<DotYouProfile[]>([]);
       const [selectedConversation, setSelectedConversation] = useState<
-        HomebaseFile<UnifiedConversation>[]
+        HomebaseFile<UnifiedConversation, ConversationMetadata>[]
       >([]);
       const [query, setQuery] = useState<string | undefined>(undefined);
       const { handleSheetPositionChange } = useBottomSheetBackHandler(bottomSheetRef);
@@ -361,7 +362,7 @@ const AppFooter = memo(({ context, ...props }: AppFooterProps) => {
 interface SelectedFooterProps extends BottomSheetFooterProps {
   context: ShareContext | undefined;
   selectedContact: DotYouProfile[];
-  selectedConversation: HomebaseFile<UnifiedConversation>[];
+  selectedConversation: HomebaseFile<UnifiedConversation, ConversationMetadata>[];
   onClose: () => void;
 }
 const SelectedFooter = memo(
@@ -378,7 +379,9 @@ const SelectedFooter = memo(
         return;
       }
 
-      async function forwardMessages(conversation: HomebaseFile<UnifiedConversation>) {
+      async function forwardMessages(
+        conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>
+      ) {
         return sendMessage({
           conversation,
           message: `${context?.title || ''}${context?.href}`,
@@ -534,13 +537,13 @@ const ShareModalList = memo(
     allConversations: ConversationWithRecentMessage[] | undefined;
     selectedContact: DotYouProfile[];
     setSelectedContact: React.Dispatch<React.SetStateAction<DotYouProfile[]>>;
-    selectedConversation: HomebaseFile<UnifiedConversation>[];
+    selectedConversation: HomebaseFile<UnifiedConversation, ConversationMetadata>[];
     setSelectedConversation: React.Dispatch<
-      React.SetStateAction<HomebaseFile<UnifiedConversation>[]>
+      React.SetStateAction<HomebaseFile<UnifiedConversation, ConversationMetadata>[]>
     >;
   }) => {
     const onSelectConversation = useCallback(
-      (conversation: HomebaseFile<UnifiedConversation>) => {
+      (conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>) => {
         setSelectedConversation((selectedConversation) => {
           if (selectedConversation.includes(conversation)) {
             return selectedConversation.filter((c) => c !== conversation);

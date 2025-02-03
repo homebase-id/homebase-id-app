@@ -1,4 +1,7 @@
-import { UnifiedConversation } from '../../provider/chat/ConversationProvider';
+import {
+  ConversationMetadata,
+  UnifiedConversation,
+} from '../../provider/chat/ConversationProvider';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { useDotYouClientContext } from 'homebase-id-app-common';
@@ -8,7 +11,10 @@ import { getChatMessageInfiniteQueryOptions } from './useChatMessages';
 import { useFocusEffect } from '@react-navigation/native';
 import { useConversations } from './useConversations';
 
-export type ConversationWithRecentMessage = HomebaseFile<UnifiedConversation> & {
+export type ConversationWithRecentMessage = HomebaseFile<
+  UnifiedConversation,
+  ConversationMetadata
+> & {
   lastMessage: HomebaseFile<ChatMessage> | null;
 };
 export const useConversationsWithRecentMessage = () => {
@@ -21,7 +27,7 @@ export const useConversationsWithRecentMessage = () => {
     () =>
       (conversations?.pages
         ?.flatMap((page) => page?.searchResults)
-        .filter((Boolean)) as ConversationWithRecentMessage[]) || [],
+        .filter(Boolean) as ConversationWithRecentMessage[]) || [],
     [conversations]
   );
 
@@ -31,24 +37,30 @@ export const useConversationsWithRecentMessage = () => {
     }
 
     const convoWithMessage: ConversationWithRecentMessage[] = await Promise.all(
-      (flatConversations.filter(Boolean) as HomebaseFile<UnifiedConversation>[]).map(
-        async (convo) => {
-          const conversationId = convo.fileMetadata.appData.uniqueId;
-          const messagesA = await queryClient.fetchInfiniteQuery(
-            getChatMessageInfiniteQueryOptions(dotYouClient, conversationId)
-          );
-          return {
-            ...convo,
-            lastMessage: messagesA.pages[0].searchResults[0],
-          };
-        }
-      )
+      (
+        flatConversations.filter(Boolean) as HomebaseFile<
+          UnifiedConversation,
+          ConversationMetadata
+        >[]
+      ).map(async (convo) => {
+        const conversationId = convo.fileMetadata.appData.uniqueId;
+        const messagesA = await queryClient.fetchInfiniteQuery(
+          getChatMessageInfiniteQueryOptions(dotYouClient, conversationId)
+        );
+        return {
+          ...convo,
+          lastMessage: messagesA.pages[0].searchResults[0],
+        };
+      })
     );
 
     convoWithMessage.sort((a, b) => {
       // if (!a.lastMessage) return -1;
       // if (!b.lastMessage) return 1;
-      return (b.lastMessage?.fileMetadata.created || b.fileMetadata.updated) - (a.lastMessage?.fileMetadata.created || a.fileMetadata.updated);
+      return (
+        (b.lastMessage?.fileMetadata.created || b.fileMetadata.updated) -
+        (a.lastMessage?.fileMetadata.created || a.fileMetadata.updated)
+      );
     });
 
     if (!convoWithMessage || !convoWithMessage.length) return;
@@ -62,14 +74,13 @@ export const useConversationsWithRecentMessage = () => {
   useEffect(() => {
     if (lastUpdate === null || lastConversationUpdate === null) return;
 
-
     const currentCacheUpdate = queryClient.getQueryState(['conversations-with-recent-message']);
     if (
       currentCacheUpdate?.dataUpdatedAt &&
-      (lastUpdate !== 0 &&
-        lastUpdate <= currentCacheUpdate?.dataUpdatedAt) &&
-      (lastConversationUpdate !== 0 &&
-        lastConversationUpdate <= currentCacheUpdate?.dataUpdatedAt)
+      lastUpdate !== 0 &&
+      lastUpdate <= currentCacheUpdate?.dataUpdatedAt &&
+      lastConversationUpdate !== 0 &&
+      lastConversationUpdate <= currentCacheUpdate?.dataUpdatedAt
     ) {
       return;
     }
@@ -130,7 +141,6 @@ const useLastUpdatedConversations = () => {
       .getQueryCache()
       .find({ queryKey: ['conversations'], exact: true })?.state.dataUpdatedAt;
 
-
     if (!lastUpdate) {
       return;
     }
@@ -142,4 +152,3 @@ const useLastUpdatedConversations = () => {
     lastConversationUpdate: lastUpdate,
   };
 };
-
