@@ -1,15 +1,6 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useLayoutEffect, useRef, useState } from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  ScrollView,
-  Share,
-  StyleProp,
-  TouchableOpacity,
-  View,
-  ViewStyle,
-} from 'react-native';
+import { Alert, ScrollView, Share, TouchableOpacity, View } from 'react-native';
 import { Text } from '../../components/ui/Text/Text';
 import { getVersion, getBuildNumber } from 'react-native-device-info';
 import { version } from '../../../package.json';
@@ -23,7 +14,6 @@ import {
   CheckCircle,
   Cog,
   Copy,
-  Download,
   Gear,
   Logout,
   People,
@@ -31,7 +21,6 @@ import {
   Sun,
   Trash,
 } from '../../components/ui/Icons/icons';
-import codePush from 'react-native-code-push';
 import { useAuth } from '../../hooks/auth/useAuth';
 import { openURL } from '../../utils/utils';
 import { useAuthenticatedPushNotification } from '../../hooks/push-notification/useAuthenticatedPushNotification';
@@ -139,13 +128,6 @@ export const ProfilePage = (_props: SettingsProps) => {
           />
           <DeleteCache />
           <ListTile title={t('Delete my account')} icon={RecycleBin} onPress={onDeleteAccount} />
-          <CheckForUpdates
-            style={{
-              alignItems: 'center',
-              paddingVertical: 12,
-              width: '100%',
-            }}
-          />
           {/* <ListTile
             title={t('Drive Status')}
             icon={HardDisk}
@@ -162,12 +144,7 @@ export const ProfilePage = (_props: SettingsProps) => {
 
 const getVersionInfo = async () => {
   const appVersion = `v${getVersion()} (${getBuildNumber()})`;
-  const update = await codePush.getUpdateMetadata();
-
-  if (!update) return `${appVersion}`;
-
-  const label = update.label.substring(1);
-  return `${appVersion} rev.${label}`;
+  return `${appVersion}`;
 };
 
 export const VersionInfo = () => {
@@ -181,67 +158,6 @@ export const VersionInfo = () => {
   return (
     <TouchableOpacity onPress={doLoadFullVersion}>
       <Text style={{ paddingTop: 10 }}>{fullVersion || version}</Text>
-    </TouchableOpacity>
-  );
-};
-
-export const CheckForUpdates = ({
-  style,
-  hideIcon,
-}: {
-  style: StyleProp<ViewStyle>;
-  hideIcon?: boolean;
-}) => {
-  const [isSyncing, setIsSyncing] = useState(false);
-  const [codePushResult, setCodePushResult] = useState<codePush.SyncStatus>();
-  const doCheckForUpdate = async () => {
-    setIsSyncing(true);
-    const state = await codePush.sync({
-      updateDialog: {
-        title: 'You have an update',
-        optionalUpdateMessage: 'There is an update available. Do you want to install?',
-        optionalIgnoreButtonLabel: 'No',
-        optionalInstallButtonLabel: 'Yes',
-      },
-      installMode: codePush.InstallMode.IMMEDIATE,
-    });
-    setCodePushResult(state);
-    setIsSyncing(false);
-  };
-
-  return (
-    <TouchableOpacity
-      onPress={() => doCheckForUpdate()}
-      style={[
-        {
-          display: 'flex',
-          flexDirection: 'row',
-          gap: 5,
-        },
-        style,
-      ]}
-    >
-      {hideIcon ? null : <Download size={'lg'} />}
-      <Text
-        style={{
-          marginLeft: hideIcon ? 0 : 11,
-        }}
-      >
-        Check for app updates
-      </Text>
-      {isSyncing ? (
-        <ActivityIndicator size="small" color="#000" style={{ marginLeft: 'auto' }} />
-      ) : codePushResult !== undefined ? (
-        <Text style={{ marginLeft: 'auto', fontStyle: 'italic' }}>
-          {codePushResult === codePush.SyncStatus.UP_TO_DATE
-            ? 'Up to date'
-            : codePushResult === codePush.SyncStatus.UPDATE_INSTALLED
-              ? 'Installed'
-              : codePushResult === codePush.SyncStatus.SYNC_IN_PROGRESS
-                ? 'Unknown'
-                : null}
-        </Text>
-      ) : null}
     </TouchableOpacity>
   );
 };

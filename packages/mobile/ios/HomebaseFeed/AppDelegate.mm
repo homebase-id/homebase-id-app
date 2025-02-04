@@ -4,7 +4,6 @@
 #import <React/RCTBundleURLProvider.h>
 // iOS 9.x or newer
 #import <React/RCTLinkingManager.h>
-#import <CodePush/CodePush.h>
 #import <ShareMenuManager.h>
 
 @implementation AppDelegate
@@ -26,8 +25,7 @@
 #if DEBUG
   return [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index"];
 #else
-  // return [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
-  return [CodePush bundleURL];
+  return [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
 #endif
 }
 
@@ -38,13 +36,13 @@
   //  Check if the passed url is a <YOUR_URL_SCHEME_NAME>://
     NSString *urlString = url.absoluteString;
   NSLog(@"Entered with the following string: %@s", urlString);
-    
+
   // Check if its "homebase-share"
     if ([urlString hasPrefix:@"homebase-share://"]) {
-     
+
       return [ShareMenuManager application:application openURL:url options:options];
     }
-  
+
   return [RCTLinkingManager application:application openURL:url options:options];
 }
 

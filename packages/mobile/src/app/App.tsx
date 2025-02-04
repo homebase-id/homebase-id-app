@@ -7,7 +7,6 @@ import {
 } from '@react-navigation/native';
 
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import CodePush from 'react-native-code-push';
 import {
   circleDrives,
   drives,
@@ -80,7 +79,7 @@ export type HomeStackParamList = {
   ConnectionRequests: undefined;
 };
 
-let App = () => {
+const App = () => {
   return (
     <OdinQueryClient>
       <GestureHandlerRootView>
@@ -96,9 +95,6 @@ let App = () => {
     </OdinQueryClient>
   );
 };
-
-const codePushOptions = { checkFrequency: CodePush.CheckFrequency.MANUAL };
-App = CodePush(codePushOptions)(App);
 
 const navigationContainerRef = createNavigationContainerRef();
 const StackRoot = createNativeStackNavigator<AuthStackParamList>();
