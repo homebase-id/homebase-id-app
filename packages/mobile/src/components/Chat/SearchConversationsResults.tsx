@@ -114,7 +114,11 @@ export const SearchConversationResults = memo(
           </Text>
         ) : (
           <ScrollView contentInsetAdjustmentBehavior="automatic">
-            {conversationResults?.length ? <Text style={styles.title}>Chats</Text> : null}
+            {conversationResults?.length ? (
+              <Text key={'Chats'} style={styles.title}>
+                Chats
+              </Text>
+            ) : null}
             {conversationResults.map(({ fileId, fileMetadata }) => (
               <ConversationTile
                 key={fileId}
@@ -130,7 +134,9 @@ export const SearchConversationResults = memo(
               />
             ))}
             {contactsWithoutAConversation?.length ? (
-              <Text style={styles.title}>Contacts</Text>
+              <Text key={'Contacts'} style={styles.title}>
+                Contacts
+              </Text>
             ) : null}
             {contactsWithoutAConversation.map((item) => {
               const contact = item.fileMetadata.appData.content;
