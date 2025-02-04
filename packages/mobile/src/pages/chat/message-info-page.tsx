@@ -133,7 +133,7 @@ export const MessageInfoPage = ({ route }: MessageInfoProp) => {
                 ) : null}
               </View>
 
-              {isAuthor ? (
+              {isAuthor && recipientTransferHistory ? (
                 <InnerDeliveryIndicator
                   state={deliveryStatus || ChatDeliveryStatus.Failed}
                   showDefault
