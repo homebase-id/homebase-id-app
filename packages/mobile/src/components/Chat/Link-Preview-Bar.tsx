@@ -16,7 +16,7 @@ export type LinkPreviewProps = {
 
 export const LinkPreviewBar = memo(
   ({ textToSearchIn, onDismiss, onLinkData }: LinkPreviewProps) => {
-    const link = textToSearchIn.match(/(https?:\/\/[^\s]+)/gi)?.[0];
+    const link = textToSearchIn?.toLowerCase()?.match(/(https?:\/\/[^\s]+)/gi)?.[0];
     const { data, isLoading } = useLinkPreview(link).get;
     const [isVisible, setIsVisible] = useState(false);
 
