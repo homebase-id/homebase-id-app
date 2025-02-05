@@ -152,7 +152,8 @@ const SocialFeedMainContent = memo(() => {
     [hasMorePosts, fetchNextPage]
   );
   const keyExtractor = useCallback(
-    (item: HomebaseFile<PostContent>) => item.fileMetadata.appData.uniqueId || item.fileId,
+    (item: HomebaseFile<PostContent>, index: number) =>
+      item.fileMetadata.appData.uniqueId || item.fileId || index + '',
     []
   );
 

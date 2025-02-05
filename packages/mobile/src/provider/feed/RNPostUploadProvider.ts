@@ -223,7 +223,6 @@ export const savePost = async <T extends PostContent>(
   const previewThumbnail: EmbeddedThumb | undefined = previewThumbnails[0];
 
   onUpdate?.('Uploading', 0);
-
   return await uploadPost(
     dotYouClient,
     odinId,
