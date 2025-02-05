@@ -10,7 +10,7 @@ import {
   SecurityGroupType,
   TransferUploadStatus,
   uploadFile,
-  uploadHeader,
+  patchFile,
   UploadResult,
 } from '@homebase-id/js-lib/core';
 import { ImageSource } from '../src/provider/image/RNImageProvider';
@@ -198,7 +198,7 @@ describe('RNPostUploadProvider', () => {
 
     (getFileHeader as jest.Mock).mockResolvedValue(fileHeader);
 
-    (uploadHeader as jest.Mock).mockResolvedValue(result);
+    (patchFile as jest.Mock).mockResolvedValue(result);
 
     const uploadResult = await savePost(
       dotYouClient,

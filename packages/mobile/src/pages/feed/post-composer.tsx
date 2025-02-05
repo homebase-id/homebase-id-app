@@ -49,7 +49,6 @@ export const ComposePost = ({ navigation }: PostComposerProps) => {
 
 export const PostComposer = memo(
   ({
-    onModeChanged,
     navigation,
   }: {
     onModeChanged: () => void;

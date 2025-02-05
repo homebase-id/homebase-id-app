@@ -11,7 +11,7 @@ import {
   SecurityGroupType,
   TransferUploadStatus,
   uploadFile,
-  uploadHeader,
+  patchFile,
 } from '@homebase-id/js-lib/core';
 import {
   getChatMessages,
@@ -242,11 +242,11 @@ describe('ChatProvider', () => {
 
     const recipients = ['frodo', 'sam'];
 
-    (uploadHeader as jest.Mock).mockResolvedValue({ newVersionTag: 'new-version-tag' });
+    (patchFile as jest.Mock).mockResolvedValue({ newVersionTag: 'new-version-tag' });
 
     const result = await updateChatMessage(dotYouClient, message, recipients);
 
-    expect(uploadHeader).toHaveBeenCalled();
+    expect(patchFile).toHaveBeenCalled();
     expect(result).toHaveProperty('newVersionTag', 'new-version-tag');
   });
 
@@ -352,15 +352,6 @@ describe('ChatProvider', () => {
     const recipients = ['recipient1', 'recipient2'];
 
     const updateChatMessageSpy = jest.spyOn(ChatProvider, 'updateChatMessage').mockResolvedValue({
-      file: { fileId: '14962219-a0e1-6a00-028e-e64531e86b28', targetDrive: ChatDrive },
-      globalTransitIdFileIdentifier: {
-        globalTransitId: '70980857-d4c6-4719-8261-56d5cd097f8b',
-        targetDrive: ChatDrive,
-      },
-      keyHeader: {
-        aesKey: new Uint8Array(32),
-        iv: new Uint8Array(16),
-      },
       newVersionTag: 'new-version-tag',
       recipientStatus: {
         recipient1: TransferUploadStatus.DeliveredToTargetDrive,
