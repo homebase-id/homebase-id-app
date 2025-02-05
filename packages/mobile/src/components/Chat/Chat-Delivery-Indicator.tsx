@@ -1,4 +1,4 @@
-import { HomebaseFile, RecipientTransferHistory } from '@homebase-id/js-lib/core';
+import { HomebaseFile, RecipientTransferHistory, TransferStatus } from '@homebase-id/js-lib/core';
 import { ChatDeliveryStatus, ChatMessage } from '../../provider/chat/ChatProvider';
 import { t, useDotYouClientContext } from 'homebase-id-app-common';
 import { Pressable, StyleProp, Text, TextStyle, View, ViewStyle } from 'react-native';
@@ -38,7 +38,8 @@ export const FailedDeliveryDetails = ({
   transferHistory: RecipientTransferHistory | undefined;
   style?: StyleProp<TextStyle>;
 }) => {
-  if (!transferHistory) return null;
+  if (!transferHistory?.latestTransferStatus) return null;
+  if (transferHistory.latestTransferStatus === TransferStatus.None) return null;
   if (transferHistory.latestSuccessfullyDeliveredVersionTag) return null;
 
   return (
