@@ -12,6 +12,7 @@ import {
   MediaFile,
   MultiRequestCursoredResult,
   NewHomebaseFile,
+  UpdateResult,
   UploadResult,
 } from '@homebase-id/js-lib/core';
 
@@ -42,7 +43,7 @@ const savePost = async ({
   const dotYouClient = await getSynchronousDotYouClient();
   const onVersionConflict = odinId
     ? undefined
-    : async (): Promise<UploadResult | TransitUploadResult | undefined> => {
+    : async (): Promise<UploadResult | TransitUploadResult | UpdateResult | undefined> => {
         const serverPost = await getPost<PostContent>(
           dotYouClient,
           channelId,
@@ -103,7 +104,7 @@ const savePost = async ({
 };
 
 export const getSavePostMutationOptions: (queryClient: QueryClient) => MutationOptions<
-  UploadResult | TransitUploadResult,
+  UploadResult | TransitUploadResult | UpdateResult,
   unknown,
   {
     postFile: NewHomebaseFile<PostContent> | HomebaseFile<PostContent>;
@@ -237,72 +238,6 @@ export const getSavePostMutationOptions: (queryClient: QueryClient) => MutationO
 export const useManagePost = () => {
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
-
-  // const duplicatePost = async ({
-  //     toDuplicatePostFile,
-  //     channelId,
-  //     newPostId,
-  //     odinId,
-  //     targetChannel,
-  // }: {
-  //     toDuplicatePostFile: HomebaseFile<PostContent>;
-  //     channelId: string;
-  //     newPostId: string;
-  //     odinId?: string;
-  //     targetChannel: HomebaseFile<ChannelDefinition> | NewHomebaseFile<ChannelDefinition>;
-  // }) => {
-  //     const currentTargetDrive = GetTargetDriveFromChannelId(channelId);
-
-  //     // Fetch payloads from the original post
-  //     const mediaFiles: NewMediaFile[] = (
-  //         await Promise.all(
-  //             toDuplicatePostFile.fileMetadata.payloads.map(async (payload) => {
-  //                 const bytes = await getPayloadBytes(
-  //                     dotYouClient,
-  //                     currentTargetDrive,
-  //                     toDuplicatePostFile.fileId,
-  //                     payload.key
-  //                 );
-  //                 if (!bytes) return;
-  //                 return {
-  //                     file: new Blob([bytes.bytes], { type: payload.contentType }),
-  //                     key: payload.key,
-  //                     thumbnail: payload.previewThumbnail,
-  //                 };
-  //             })
-  //         )
-  //     ).filter(Boolean) as NewMediaFile[];
-
-  //     // Save everything to a new post
-  //     const postFile: NewHomebaseFile<PostContent> = {
-  //         ...toDuplicatePostFile,
-  //         fileId: undefined, // Clear FileId
-  //         fileMetadata: {
-  //             ...toDuplicatePostFile.fileMetadata,
-  //             appData: {
-  //                 ...toDuplicatePostFile.fileMetadata.appData,
-  //                 fileType: BlogConfig.DraftPostFileType,
-  //                 uniqueId: undefined, // Clear UniqueId
-  //                 content: {
-  //                     ...toDuplicatePostFile.fileMetadata.appData.content,
-  //                     id: newPostId,
-  //                     channelId: targetChannel.fileMetadata.appData.uniqueId as string,
-  //                 },
-  //             },
-  //         },
-  //         serverMetadata: targetChannel.serverMetadata || {
-  //             accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
-  //         },
-  //     };
-
-  //     return savePostFile(
-  //         dotYouClient,
-  //         postFile,
-  //         odinId,
-  //         targetChannel.fileMetadata.appData.uniqueId as string,
-  //         mediaFiles
-  //     );
-  // };
 
   // slug property is need to clear the cache later, but not for the actual removeData
   const removeData = async ({

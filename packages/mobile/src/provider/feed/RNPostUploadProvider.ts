@@ -14,15 +14,14 @@ import {
   DEFAULT_PAYLOAD_KEY,
   UploadFileMetadata,
   uploadFile,
-  appendDataToFile,
-  deletePayload,
-  uploadHeader,
   getFileHeader,
-  AppendInstructionSet,
   UploadResult,
   ImageContentType,
   PriorityOptions,
-  UpdateHeaderInstructionSet,
+  UpdateInstructionSet,
+  patchFile,
+  GenerateKeyHeader,
+  UpdateResult,
 } from '@homebase-id/js-lib/core';
 import {
   toGuidId,
@@ -64,7 +63,7 @@ export const savePost = async <T extends PostContent>(
   linkPreviews?: LinkPreview[],
   onVersionConflict?: () => void,
   onUpdate?: (phase: string, progress: number) => void
-): Promise<TransitUploadResult | UploadResult> => {
+): Promise<TransitUploadResult | UploadResult | UpdateResult> => {
   if (odinId && file.fileId) {
     throw new Error(
       '[PostUploadProvider] Editing a post to a group channel is not supported (yet)'
@@ -400,43 +399,111 @@ const uploadPost = async <T extends PostContent>(
   }
 };
 
-const uploadPostHeader = async <T extends PostContent>(
+const updatePost = async <T extends PostContent>(
   dotYouClient: DotYouClient,
+  odinId: string | undefined,
   file: HomebaseFile<T>,
   channelId: string,
-  targetDrive: TargetDrive
-) => {
-  const instructionSet: UpdateHeaderInstructionSet = {
-    transferIv: getRandom16ByteArray(),
-    storageOptions: {
-      overwriteFileId: file?.fileId ?? '',
-      drive: targetDrive,
-    },
-    transitOptions: {
-      recipients: [],
-      schedule: ScheduleOptions.SendLater,
-      priority: PriorityOptions.Medium,
-      sendContents: SendContents.All, // TODO: Should this be header only?
-    },
-    storageIntent: 'header',
-  };
+  existingAndNewMediaFiles?: (ImageSource | MediaFile)[]
+): Promise<UpdateResult> => {
+  const targetDrive = GetTargetDriveFromChannelId(channelId);
+  const header = await getFileHeader(dotYouClient, targetDrive, file.fileId as string);
 
-  const existingPostWithThisSlug = await getPostBySlug(
-    dotYouClient,
-    channelId,
-    file.fileMetadata.appData.content.slug ?? file.fileMetadata.appData.content.id
-  );
+  if (!header) throw new Error('Cannot update a post that does not exist');
+  if (header?.fileMetadata.versionTag !== file.fileMetadata.versionTag) {
+    throw new Error('Version conflict');
+  }
 
   if (
-    existingPostWithThisSlug &&
-    existingPostWithThisSlug?.fileMetadata.appData.content.id !==
-      file.fileMetadata.appData.content.id
+    !file.fileId ||
+    !file.serverMetadata?.accessControlList ||
+    !file.fileMetadata.appData.content.id
   ) {
-    // There is clash with an existing slug
-    file.fileMetadata.appData.content.slug = `${
-      file.fileMetadata.appData.content.slug
-    }-${new Date().getTime()}`;
+    throw new Error('[chat-rn] PostProvider: fileId is required to update a post');
   }
+
+  const encrypt = !(
+    file.serverMetadata.accessControlList?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
+    file.serverMetadata.accessControlList?.requiredSecurityGroup === SecurityGroupType.Authenticated
+  );
+
+  const existingMediaFiles =
+    file.fileMetadata.payloads?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY) || [];
+
+  const newMediaFiles: ImageSource[] =
+    (existingAndNewMediaFiles?.filter(
+      (f) => 'file' in f && f.file instanceof Blob
+    ) as ImageSource[]) || [];
+
+  // Discover deleted files:
+  const deletedMediaFiles: MediaFile[] = [];
+  for (let i = 0; existingMediaFiles && i < existingMediaFiles?.length; i++) {
+    const existingMediaFile = existingMediaFiles[i];
+    if (!existingAndNewMediaFiles?.find((f) => f.key === existingMediaFile.key)) {
+      deletedMediaFiles.push(existingMediaFile);
+    }
+  }
+
+  // When all media is removed from the post, remove the preview thumbnail
+  if (existingMediaFiles.length === deletedMediaFiles.length) {
+    file.fileMetadata.appData.previewThumbnail = undefined;
+  }
+
+  const deletedPayloads =
+    deletedMediaFiles?.map((payload) => {
+      return { key: payload.key };
+    }) || [];
+
+  // Process new files:
+  const payloads: PayloadFile[] = [];
+  const thumbnails: ThumbnailFile[] = [];
+  let previewThumbnail: EmbeddedThumb | undefined;
+
+  const encryptedKeyHeader = encrypt
+    ? file.sharedSecretEncryptedKeyHeader || GenerateKeyHeader()
+    : undefined;
+
+  for (let i = 0; newMediaFiles && i < newMediaFiles.length; i++) {
+    const newMediaFile = newMediaFiles[i];
+    // We ignore existing files as they are just kept
+    if (!('file' in newMediaFile)) {
+      continue;
+    }
+
+    const payloadKey =
+      newMediaFile.key ||
+      `${POST_MEDIA_PAYLOAD_KEY}${(existingAndNewMediaFiles || newMediaFiles).length + i}`;
+
+    // Custom blob to avoid reading and writing the file to disk again
+    const payloadBlob = new OdinBlob((newMediaFile.filepath || newMediaFile.uri) as string, {
+      type: newMediaFile.type || 'image/jpeg',
+    }) as unknown as Blob;
+
+    const { additionalThumbnails, tinyThumb } = await createThumbnails(newMediaFile, payloadKey);
+
+    payloads.push({
+      payload: payloadBlob,
+      key: payloadKey,
+      previewThumbnail: tinyThumb,
+    });
+    thumbnails.push(...additionalThumbnails);
+    previewThumbnail = previewThumbnail || tinyThumb;
+  }
+
+  if (file.fileMetadata.appData.content.type !== 'Article') {
+    if (existingMediaFiles?.length) {
+      file.fileMetadata.appData.content.primaryMediaFile = {
+        fileId: file.fileId,
+        fileKey: existingMediaFiles[0].key,
+        type: existingMediaFiles[0].contentType,
+      };
+    }
+  }
+
+  file.fileMetadata.appData.previewThumbnail =
+    deletedMediaFiles.length && existingMediaFiles.length === 1
+      ? previewThumbnail
+      : file.fileMetadata.appData.previewThumbnail || previewThumbnail;
 
   const uniqueId = file.fileMetadata.appData.content.slug
     ? toGuidId(file.fileMetadata.appData.content.slug)
@@ -471,191 +538,48 @@ const uploadPostHeader = async <T extends PostContent>(
     accessControlList: file.serverMetadata?.accessControlList,
   };
 
-  let runningVersionTag;
   if (!shouldEmbedContent) {
-    // Append/update payload
-    runningVersionTag = (
-      await appendDataToFile(
-        dotYouClient,
-        file.fileMetadata.isEncrypted ? file.sharedSecretEncryptedKeyHeader : undefined,
-        {
-          targetFile: {
-            fileId: file.fileId as string,
-            targetDrive: targetDrive,
-          },
-          versionTag: file.fileMetadata.versionTag,
-          storageIntent: 'append',
-        },
-        [
-          {
-            key: DEFAULT_PAYLOAD_KEY,
-            payload: new OdinBlob([payloadBytes], { type: 'application/json' }) as unknown as Blob,
-          },
-        ],
-        undefined
-      )
-    )?.newVersionTag;
-  } else if (file.fileMetadata.payloads?.some((p) => p.key === DEFAULT_PAYLOAD_KEY)) {
-    // Remove default payload if it was there before
-    runningVersionTag = (
-      await deletePayload(
-        dotYouClient,
-        targetDrive,
-        file.fileId as string,
-        DEFAULT_PAYLOAD_KEY,
-        file.fileMetadata.versionTag
-      )
-    ).newVersionTag;
-  }
-
-  if (runningVersionTag) metadata.versionTag = runningVersionTag;
-  return await uploadHeader(
-    dotYouClient,
-    file.fileMetadata.isEncrypted ? file.sharedSecretEncryptedKeyHeader : undefined,
-    instructionSet,
-    metadata
-  );
-};
-
-const updatePost = async <T extends PostContent>(
-  dotYouClient: DotYouClient,
-  odinId: string | undefined,
-  file: HomebaseFile<T>,
-  channelId: string,
-  existingAndNewMediaFiles?: (ImageSource | MediaFile)[]
-): Promise<UploadResult> => {
-  const targetDrive = GetTargetDriveFromChannelId(channelId);
-  const header = await getFileHeader(dotYouClient, targetDrive, file.fileId as string);
-
-  if (!header) throw new Error('Cannot update a post that does not exist');
-  if (header?.fileMetadata.versionTag !== file.fileMetadata.versionTag) {
-    throw new Error('Version conflict');
-  }
-
-  if (
-    !file.fileId ||
-    !file.serverMetadata?.accessControlList ||
-    !file.fileMetadata.appData.content.id
-  ) {
-    throw new Error('[chat-rn] PostProvider: fileId is required to update a post');
-  }
-
-  let runningVersionTag: string = file.fileMetadata.versionTag;
-  const existingMediaFiles =
-    file.fileMetadata.payloads?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY) || [];
-
-  const newMediaFiles: ImageSource[] =
-    (existingAndNewMediaFiles?.filter(
-      (f) => 'file' in f && f.file instanceof Blob
-    ) as ImageSource[]) || [];
-
-  // Discover deleted files:
-  const deletedMediaFiles: MediaFile[] = [];
-  for (let i = 0; existingMediaFiles && i < existingMediaFiles?.length; i++) {
-    const existingMediaFile = existingMediaFiles[i];
-    if (!existingAndNewMediaFiles?.find((f) => f.key === existingMediaFile.key)) {
-      deletedMediaFiles.push(existingMediaFile);
-    }
-  }
-
-  // Remove the payloads that are removed from the post
-  if (deletedMediaFiles.length) {
-    for (let i = 0; i < deletedMediaFiles.length; i++) {
-      const mediaFile = deletedMediaFiles[i];
-      runningVersionTag = (
-        await deletePayload(
-          dotYouClient,
-          targetDrive,
-          file.fileId as string,
-          mediaFile.key,
-          runningVersionTag
-        )
-      ).newVersionTag;
-    }
-  }
-
-  // When all media is removed from the post, remove the preview thumbnail
-  if (existingMediaFiles.length === deletedMediaFiles.length) {
-    file.fileMetadata.appData.previewThumbnail = undefined;
-  }
-
-  // Process new files:
-  const payloads: PayloadFile[] = [];
-  const thumbnails: ThumbnailFile[] = [];
-  let previewThumbnail: EmbeddedThumb | undefined;
-  for (let i = 0; newMediaFiles && i < newMediaFiles.length; i++) {
-    const newMediaFile = newMediaFiles[i];
-    // We ignore existing files as they are just kept
-    if (!('file' in newMediaFile)) {
-      continue;
-    }
-
-    const payloadKey =
-      newMediaFile.key ||
-      `${POST_MEDIA_PAYLOAD_KEY}${(existingAndNewMediaFiles || newMediaFiles).length + i}`;
-
-    // Custom blob to avoid reading and writing the file to disk again
-    const payloadBlob = new OdinBlob((newMediaFile.filepath || newMediaFile.uri) as string, {
-      type: newMediaFile.type || 'image/jpeg',
-    }) as unknown as Blob;
-
-    const { additionalThumbnails, tinyThumb } = await createThumbnails(newMediaFile, payloadKey);
-
-    payloads.push({
-      payload: payloadBlob,
-      key: payloadKey,
-      previewThumbnail: tinyThumb,
-    });
-    thumbnails.push(...additionalThumbnails);
-    previewThumbnail = previewThumbnail || tinyThumb;
-  }
-
-  // Append new files:
-  if (payloads.length) {
-    const appendInstructionSet: AppendInstructionSet = {
-      targetFile: {
-        fileId: file.fileId as string,
-        targetDrive: targetDrive,
-      },
-      versionTag: runningVersionTag,
-      storageIntent: 'append',
+    const defaultPayload = {
+      key: DEFAULT_PAYLOAD_KEY,
+      payload: new OdinBlob([payloadBytes], { type: 'application/json' }) as unknown as Blob,
     };
-
-    runningVersionTag =
-      (
-        await appendDataToFile(
-          dotYouClient,
-          header?.fileMetadata.isEncrypted ? header.sharedSecretEncryptedKeyHeader : undefined,
-          appendInstructionSet,
-          payloads,
-          thumbnails
-        )
-      )?.newVersionTag || runningVersionTag;
+    payloads.push(defaultPayload);
+  } else if (file.fileMetadata.payloads?.some((p) => p.key === DEFAULT_PAYLOAD_KEY)) {
+    deletedPayloads.push({ key: DEFAULT_PAYLOAD_KEY });
   }
 
-  if (file.fileMetadata.appData.content.type !== 'Article') {
-    if (existingMediaFiles?.length) {
-      file.fileMetadata.appData.content.primaryMediaFile = {
-        fileId: file.fileId,
-        fileKey: existingMediaFiles[0].key,
-        type: existingMediaFiles[0].contentType,
+  const instructionSet: UpdateInstructionSet = odinId
+    ? {
+        transferIv: getRandom16ByteArray(),
+        locale: 'peer',
+        file: {
+          globalTransitId: file.fileMetadata.globalTransitId as string,
+          targetDrive,
+        },
+        versionTag: file.fileMetadata.versionTag,
+        recipients: [odinId],
+      }
+    : {
+        transferIv: getRandom16ByteArray(),
+        locale: 'local',
+        file: {
+          fileId: file.fileId,
+          targetDrive,
+        },
+        versionTag: file.fileMetadata.versionTag,
       };
-    }
-  }
 
-  file.fileMetadata.appData.previewThumbnail =
-    deletedMediaFiles.length && existingMediaFiles.length === 1
-      ? previewThumbnail
-      : file.fileMetadata.appData.previewThumbnail || previewThumbnail;
-
-  const encrypt = !(
-    file.serverMetadata.accessControlList?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
-    file.serverMetadata.accessControlList?.requiredSecurityGroup === SecurityGroupType.Authenticated
+  const updateResult = await patchFile(
+    dotYouClient,
+    encryptedKeyHeader,
+    instructionSet,
+    metadata,
+    payloads,
+    thumbnails,
+    deletedPayloads,
+    undefined
   );
-  file.fileMetadata.isEncrypted = encrypt;
-  file.fileMetadata.versionTag = runningVersionTag;
-  const result = await uploadPostHeader(dotYouClient, file, channelId, targetDrive);
-  if (!result) throw new Error('[chat-rn] PostProvider: Post update failed');
 
-  return result;
+  if (!updateResult) throw new Error('[PostUploader]: Post update failed');
+  return updateResult;
 };
