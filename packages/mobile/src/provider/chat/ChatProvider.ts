@@ -527,6 +527,7 @@ export const uploadChatMessage = async (
   }
 
   if (
+    uploadResult.recipientStatus &&
     Object.values(uploadResult.recipientStatus).some(
       (recipienStatus) => recipienStatus.toLowerCase() === TransferUploadStatus.EnqueuedFailed
     )
