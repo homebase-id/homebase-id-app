@@ -49,7 +49,6 @@ export const ComposePost = ({ navigation }: PostComposerProps) => {
 
 export const PostComposer = memo(
   ({
-    onModeChanged,
     navigation,
   }: {
     onModeChanged: () => void;
@@ -185,7 +184,7 @@ export const PostComposer = memo(
             },
         {
           label: t('New Article'),
-          onPress: onModeChanged,
+          onPress: () => openURL(`https://${identity}/apps/feed/new`),
           icon: Article,
         },
         {
@@ -194,7 +193,7 @@ export const PostComposer = memo(
           icon: Pencil,
         },
       ],
-      [identity, onModeChanged, reactAccess]
+      [identity, reactAccess]
     );
 
     return (

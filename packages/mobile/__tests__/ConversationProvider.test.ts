@@ -11,7 +11,7 @@ import {
   QueryBatchResponse,
   SecurityGroupType,
   uploadFile,
-  uploadHeader,
+  patchFile,
 } from '@homebase-id/js-lib/core';
 import {
   CHAT_CONVERSATION_FILE_TYPE,
@@ -238,19 +238,21 @@ describe('ConversationProvider', () => {
     };
 
     it('should update conversation without conflict', async () => {
-      const uploadHeaderMock = jest.fn().mockResolvedValue({});
-      (uploadHeader as jest.Mock) = uploadHeaderMock;
+      const patchFileMock = jest.fn().mockResolvedValue({});
+      (patchFile as jest.Mock) = patchFileMock;
 
       await updateConversation(dotYouClientMock, conversation);
 
-      expect(uploadHeaderMock).toHaveBeenCalled();
+      expect(patchFileMock).toHaveBeenCalled();
     });
 
     it('should handle version conflict', async () => {
-      const uploadHeaderMock = jest.fn().mockImplementation((_, __, ___, ____, conflictHandler) => {
-        conflictHandler();
-      });
-      (uploadHeader as jest.Mock) = uploadHeaderMock;
+      const patchFileMock = jest
+        .fn()
+        .mockImplementation((_, __, ___, ____, _____, ______, _______, conflictHandler) => {
+          conflictHandler();
+        });
+      (patchFile as jest.Mock) = patchFileMock;
 
       const getConversationMock = jest.fn().mockResolvedValue({
         fileMetadata: { versionTag: 'new-version' },
@@ -260,7 +262,7 @@ describe('ConversationProvider', () => {
 
       await updateConversation(dotYouClientMock, conversation);
 
-      expect(uploadHeaderMock).toHaveBeenCalled();
+      expect(patchFileMock).toHaveBeenCalled();
       expect(getConversationMock).toHaveBeenCalled();
     });
   });

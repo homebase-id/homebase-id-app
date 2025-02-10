@@ -31,13 +31,17 @@ export const DoubleTapHeart = memo(
     const { mutateAsync: postEmoji, error: postEmojiError } = useReaction().saveEmoji;
     const identity = useDotYouClientContext().getLoggedInIdentity();
     const postContent = postFile.fileMetadata.appData.content;
-    const reactionContext: ReactionContext = useMemo(() => {
+    const reactionContext: ReactionContext | undefined = useMemo(() => {
+      if (!postFile.fileMetadata.globalTransitId || !postFile.fileId) {
+        return undefined;
+      }
+
       return {
         odinId: odinId || identity || '',
         channelId: postContent.channelId,
         target: {
-          globalTransitId: postFile.fileMetadata.globalTransitId ?? 'unknown',
-          fileId: postFile.fileId ?? 'unknown',
+          globalTransitId: postFile.fileMetadata.globalTransitId,
+          fileId: postFile.fileId,
           isEncrypted: postFile.fileMetadata.isEncrypted || false,
         },
       };
@@ -45,6 +49,7 @@ export const DoubleTapHeart = memo(
     const { data: myEmojis } = useMyEmojiReactions(reactionContext).fetch;
 
     const doLike = useCallback(() => {
+      if (!reactionContext) return;
       postEmoji({
         emojiData: {
           body: '❤️',
