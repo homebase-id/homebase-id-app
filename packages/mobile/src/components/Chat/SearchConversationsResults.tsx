@@ -28,38 +28,22 @@ export const SearchConversationResults = memo(
     conversations: ConversationWithRecentMessage[];
     afterSelect?: () => void;
   }) => {
-    const [debouncedQuery, setDebouncedQuery] = useState(query?.trim().toLowerCase());
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const debouncedSetQuery = useCallback(
-      debounce((q) => setDebouncedQuery(q), 300),
-      []
-    );
-
-    useMemo(() => {
-      debouncedSetQuery(query?.trim().toLowerCase());
-    }, [query, debouncedSetQuery]);
-
-    const isActive = useMemo(
-      () => !!(debouncedQuery && debouncedQuery.length >= 1),
-      [debouncedQuery]
-    );
+    const isActive = useMemo(() => !!(query && query.length >= 1), [query]);
     const { data: contacts } = useAllContacts(isActive);
     query = query?.trim().toLowerCase();
     const identity = useDotYouClientContext().getLoggedInIdentity();
     const conversationResults = useMemo(
       () =>
-        debouncedQuery && conversations
+        query && conversations
           ? conversations.filter((conversation) => {
               const content = conversation.fileMetadata.appData.content;
               return (
-                content.recipients?.some((recipient) =>
-                  recipient?.toLowerCase().includes(debouncedQuery)
-                ) || content.title?.toLowerCase().includes(debouncedQuery)
+                content.recipients?.some((recipient) => recipient?.toLowerCase().includes(query)) ||
+                content.title?.toLowerCase().includes(query)
               );
             })
           : [],
-      [conversations, debouncedQuery]
+      [conversations, query]
     );
 
     const contactResults = useMemo(

@@ -39,6 +39,7 @@ import { SearchConversationResults } from '../components/Chat/SearchConversation
 import { useConversations } from '../hooks/chat/useConversations';
 import { ListTile } from '../components/ui/ListTile';
 import { SearchBarCommands } from 'react-native-screens';
+import { debounce } from 'lodash';
 
 type ConversationProp = NativeStackScreenProps<ChatStackParamList, 'Conversation'>;
 
@@ -73,6 +74,11 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
   useScrollToTop(scrollRef);
   const searchRef = useRef<SearchBarCommands>(null);
 
+  const debouncedSetQuery = useCallback(
+    debounce((q) => setQuery(q.nativeEvent.text), 300),
+    []
+  );
+
   useLayoutEffect(() => {
     navigation.setOptions({
       headerSearchBarOptions: {
@@ -82,8 +88,9 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
         placeholder: 'Search people',
         hideNavigationBar: true,
         autoCapitalize: 'none',
-        onChangeText: (event) => {
-          setQuery(event.nativeEvent.text);
+        onChangeText: (e) => {
+          e.persist();
+          debouncedSetQuery(e);
         },
         onCancelButtonPress: () => {
           setQuery(undefined);
@@ -93,7 +100,7 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
         },
       },
     });
-  }, [isDarkMode, navigation]);
+  }, [debouncedSetQuery, isDarkMode, navigation]);
 
   const onPress = useCallback(
     (convoId: string) => {
