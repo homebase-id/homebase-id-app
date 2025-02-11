@@ -185,7 +185,7 @@ const RecipientConnectedState = ({
     }
   }, [isConnected, isFetchedConnected, onValidRecipientStateChange, recipient]);
 
-  if (!isConnected && isFetchedConnected) {
+  if (isConnected === false && isFetchedConnected) {
     return (
       <StateWrapper
         linkText={t('Connect')}
