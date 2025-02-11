@@ -39,7 +39,7 @@ import { SearchConversationResults } from '../components/Chat/SearchConversation
 import { useConversations } from '../hooks/chat/useConversations';
 import { ListTile } from '../components/ui/ListTile';
 import { SearchBarCommands } from 'react-native-screens';
-import { debounce } from 'lodash';
+import { useTextInput } from '../hooks/useTextInput';
 
 type ConversationProp = NativeStackScreenProps<ChatStackParamList, 'Conversation'>;
 
@@ -65,7 +65,7 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
     []
   );
 
-  const [query, setQuery] = useState<string | undefined>(undefined);
+  const { query, setQuery } = useTextInput();
   const { isDarkMode } = useDarkMode();
   const queryClient = useQueryClient();
   const identity = useDotYouClientContext().getLoggedInIdentity();
@@ -73,11 +73,6 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
   const scrollRef = useRef<FlatList<ConversationWithRecentMessage>>(null);
   useScrollToTop(scrollRef);
   const searchRef = useRef<SearchBarCommands>(null);
-
-  const debouncedSetQuery = useCallback(
-    debounce((q) => setQuery(q.nativeEvent.text), 300),
-    []
-  );
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -90,7 +85,7 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
         autoCapitalize: 'none',
         onChangeText: (e) => {
           e.persist();
-          debouncedSetQuery(e);
+          setQuery(e.nativeEvent.text);
         },
         onCancelButtonPress: () => {
           setQuery(undefined);
@@ -100,7 +95,7 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
         },
       },
     });
-  }, [debouncedSetQuery, isDarkMode, navigation]);
+  }, [isDarkMode, navigation, setQuery]);
 
   const onPress = useCallback(
     (convoId: string) => {

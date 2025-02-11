@@ -42,6 +42,7 @@ import ConversationTile from '../../components/Chat/Conversation-tile';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ConversationTileWithYourself } from '../../components/Conversation/ConversationTileWithYourself';
 import { SearchConversationWithSelectionResults } from '../../components/Chat/SearchConversationsResults';
+import { useTextInput } from '../../hooks/useTextInput';
 
 export type ShareChatProp = NativeStackScreenProps<ChatStackParamList, 'ShareChat'>;
 export const ShareChatPage = (prop: ShareChatProp) => {
@@ -51,7 +52,7 @@ export const ShareChatPage = (prop: ShareChatProp) => {
   const [sending, setSending] = useState(false);
   const { data: connections } = useAllConnections(true);
   const { data: allConversations } = useConversationsWithRecentMessage().all;
-  const [query, setQuery] = useState<string | undefined>(undefined);
+  const { query, setQuery } = useTextInput();
 
   useLayoutEffect(() => {
     prop.navigation.setOptions({
@@ -72,7 +73,7 @@ export const ShareChatPage = (prop: ShareChatProp) => {
         },
       },
     });
-  }, [isDarkMode, prop.navigation]);
+  }, [isDarkMode, prop.navigation, setQuery]);
 
   const [selectedContact, setSelectedContact] = useState<DotYouProfile[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<

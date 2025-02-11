@@ -17,6 +17,7 @@ import { ErrorBoundary } from '../../components/ui/ErrorBoundary/ErrorBoundary';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { SearchConversationResults } from '../../components/Chat/SearchConversationsResults';
 import { SearchBarCommands } from 'react-native-screens';
+import { useTextInput } from '../../hooks/useTextInput';
 
 const ListHeaderComponent = memo(() => {
   const navigation = useNavigation<NavigationProp<NewChatStackParamList>>();
@@ -38,7 +39,7 @@ type ContactPageProp = NativeStackScreenProps<NewChatStackParamList, 'NewChat'>;
 export const ContactPage = memo(({ navigation }: ContactPageProp) => {
   const { data: connections, refetch, status } = useAllConnections(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [query, setQuery] = useState<string | undefined>(undefined);
+  const { query, setQuery } = useTextInput();
   const nav = useNavigation<NavigationProp<ChatStackParamList>>();
   const { isDarkMode } = useDarkMode();
   useEffect(() => {
@@ -57,8 +58,9 @@ export const ContactPage = memo(({ navigation }: ContactPageProp) => {
         placeholder: 'Search contacts',
         hideNavigationBar: true,
         autoCapitalize: 'none',
-        onChangeText: (event) => {
-          setQuery(event.nativeEvent.text);
+        onChangeText: (e) => {
+          e.persist();
+          setQuery(e.nativeEvent.text);
         },
         onCancelButtonPress: () => {
           setQuery(undefined);
@@ -68,7 +70,7 @@ export const ContactPage = memo(({ navigation }: ContactPageProp) => {
         },
       },
     });
-  }, [isDarkMode, navigation]);
+  }, [isDarkMode, navigation, setQuery]);
 
   const renderItem = useCallback(
     ({ item }: ListRenderItemInfo<DotYouProfile>) => (

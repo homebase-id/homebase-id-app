@@ -1,6 +1,6 @@
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { t, useAllContacts, useDotYouClientContext } from 'homebase-id-app-common';
-import { memo, useMemo, useCallback, useState } from 'react';
+import { memo, useMemo, useCallback } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
 import { ChatStackParamList } from '../../app/ChatStack';
 import { ConversationWithRecentMessage } from '../../hooks/chat/useConversationsWithRecentMessage';
@@ -16,7 +16,7 @@ import {
 } from '../../provider/chat/ConversationProvider';
 import Toast from 'react-native-toast-message';
 import { maxConnectionsForward } from './Chat-Forward';
-import { debounce } from 'lodash';
+import Animated from 'react-native-reanimated';
 
 export const SearchConversationResults = memo(
   ({
@@ -169,37 +169,22 @@ export const SearchConversationWithSelectionResults = memo(
     >;
     selectionLimit?: number;
   }) => {
-    const [debouncedQuery, setDebouncedQuery] = useState(query?.trim().toLowerCase());
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const debouncedSetQuery = useCallback(
-      debounce((q) => setDebouncedQuery(q), 300),
-      []
-    );
-
-    useMemo(() => {
-      debouncedSetQuery(query?.trim().toLowerCase());
-    }, [query, debouncedSetQuery]);
-    const isActive = useMemo(
-      () => !!(debouncedQuery && debouncedQuery.length >= 1),
-      [debouncedQuery]
-    );
+    const isActive = useMemo(() => !!(query && query.length >= 1), [query]);
     const { data: contacts } = useAllContacts(isActive);
     query = query?.trim().toLowerCase();
     const identity = useDotYouClientContext().getLoggedInIdentity();
     const conversationResults = useMemo(
       () =>
-        debouncedQuery && conversations
+        query && conversations
           ? conversations.filter((conversation) => {
               const content = conversation.fileMetadata.appData.content;
               return (
-                content.recipients?.some((recipient) =>
-                  recipient?.toLowerCase().includes(debouncedQuery)
-                ) || content.title?.toLowerCase().includes(debouncedQuery)
+                content.recipients?.some((recipient) => recipient?.toLowerCase().includes(query)) ||
+                content.title?.toLowerCase().includes(query)
               );
             })
           : [],
-      [conversations, debouncedQuery]
+      [conversations, query]
     );
 
     const onSelectConversation = useCallback(
@@ -310,7 +295,7 @@ export const SearchConversationWithSelectionResults = memo(
         {!conversationResults?.length && !contactsWithoutAConversation?.length ? (
           <Text style={styles.noContactsFound}>No Contacts Found</Text>
         ) : (
-          <ScrollView contentInsetAdjustmentBehavior="automatic">
+          <Animated.ScrollView contentInsetAdjustmentBehavior="automatic">
             {conversationResults?.length ? <Text style={styles.title}>Chats</Text> : null}
             {conversationResults.map((item) => (
               <ConversationTile
@@ -350,7 +335,7 @@ export const SearchConversationWithSelectionResults = memo(
                 }
               />
             ))}
-          </ScrollView>
+          </Animated.ScrollView>
         )}
       </SafeAreaView>
     );

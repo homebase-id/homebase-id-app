@@ -57,6 +57,7 @@ import {
 import ConversationTile from './Conversation-tile';
 import { ConversationTileWithYourself } from '../Conversation/ConversationTileWithYourself';
 import { SearchConversationWithSelectionResults } from './SearchConversationsResults';
+import { useTextInput } from '../../hooks/useTextInput';
 
 export type ChatForwardModalProps = {
   onClose: () => void;
@@ -82,7 +83,7 @@ export const ChatForwardModal = memo(
     const { bottom } = useSafeAreaInsets();
     const [isLoading, setIsLoading] = useState(false);
     const { add } = useErrors();
-    const [query, setQuery] = useState<string | undefined>(undefined);
+    const { query, setQuery } = useTextInput();
 
     const getAudio = useAudio().fetchManually;
     const { getFromCache } = useImage();
