@@ -39,6 +39,7 @@ import { SearchConversationResults } from '../components/Chat/SearchConversation
 import { useConversations } from '../hooks/chat/useConversations';
 import { ListTile } from '../components/ui/ListTile';
 import { SearchBarCommands } from 'react-native-screens';
+import { useTextInput } from '../hooks/useTextInput';
 
 type ConversationProp = NativeStackScreenProps<ChatStackParamList, 'Conversation'>;
 
@@ -64,7 +65,7 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
     []
   );
 
-  const [query, setQuery] = useState<string | undefined>(undefined);
+  const { query, setQuery } = useTextInput();
   const { isDarkMode } = useDarkMode();
   const queryClient = useQueryClient();
   const identity = useDotYouClientContext().getLoggedInIdentity();
@@ -82,8 +83,9 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
         placeholder: 'Search people',
         hideNavigationBar: true,
         autoCapitalize: 'none',
-        onChangeText: (event) => {
-          setQuery(event.nativeEvent.text);
+        onChangeText: (e) => {
+          e.persist();
+          setQuery(e.nativeEvent.text);
         },
         onCancelButtonPress: () => {
           setQuery(undefined);
@@ -93,7 +95,7 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
         },
       },
     });
-  }, [isDarkMode, navigation]);
+  }, [isDarkMode, navigation, setQuery]);
 
   const onPress = useCallback(
     (convoId: string) => {

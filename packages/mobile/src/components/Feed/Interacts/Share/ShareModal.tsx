@@ -71,6 +71,7 @@ import { ConversationTileWithYourself } from '../../../Conversation/Conversation
 import { IconButton } from '../../../ui/Buttons';
 import { useBottomSheetBackHandler } from '../../../../hooks/useBottomSheetBackHandler';
 import { SearchConversationWithSelectionResults } from '../../../Chat/SearchConversationsResults';
+import { useTextInput } from '../../../../hooks/useTextInput';
 
 export type ShareModalMethods = {
   setShareContext: (context: ShareContext) => void;
@@ -118,7 +119,7 @@ const ShareModalListWrapper = memo(
       const [selectedConversation, setSelectedConversation] = useState<
         HomebaseFile<UnifiedConversation, ConversationMetadata>[]
       >([]);
-      const [query, setQuery] = useState<string | undefined>(undefined);
+      const { query, setQuery } = useTextInput();
       const { handleSheetPositionChange } = useBottomSheetBackHandler(bottomSheetRef);
 
       const onClose = useCallback(() => {
@@ -127,7 +128,7 @@ const ShareModalListWrapper = memo(
         setSelectedConversation([]);
         setQuery(undefined);
         bottomSheetRef.current?.dismiss();
-      }, []);
+      }, [setQuery]);
 
       useImperativeHandle(ref, () => {
         return {

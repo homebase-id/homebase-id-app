@@ -16,6 +16,7 @@ import {
 } from '../../provider/chat/ConversationProvider';
 import Toast from 'react-native-toast-message';
 import { maxConnectionsForward } from './Chat-Forward';
+import Animated from 'react-native-reanimated';
 
 export const SearchConversationResults = memo(
   ({
@@ -100,21 +101,14 @@ export const SearchConversationResults = memo(
     return (
       <SafeAreaView>
         {!conversationResults?.length && !contactsWithoutAConversation?.length ? (
-          <Text
-            style={{
-              fontSize: 16,
-              fontWeight: '600',
-              display: 'flex',
-              marginTop: 'auto',
-              marginBottom: 'auto',
-              alignSelf: 'center',
-            }}
-          >
-            No Contacts Found
-          </Text>
+          <Text style={styles.noContactsFound}>No Contacts Found</Text>
         ) : (
           <ScrollView contentInsetAdjustmentBehavior="automatic">
-            {conversationResults?.length ? <Text style={styles.title}>Chats</Text> : null}
+            {conversationResults?.length ? (
+              <Text key={'Chats'} style={styles.title}>
+                Chats
+              </Text>
+            ) : null}
             {conversationResults.map(({ fileId, fileMetadata }) => (
               <ConversationTile
                 key={fileId}
@@ -130,7 +124,9 @@ export const SearchConversationResults = memo(
               />
             ))}
             {contactsWithoutAConversation?.length ? (
-              <Text style={styles.title}>Contacts</Text>
+              <Text key={'Contacts'} style={styles.title}>
+                Contacts
+              </Text>
             ) : null}
             {contactsWithoutAConversation.map((item) => {
               const contact = item.fileMetadata.appData.content;
@@ -297,20 +293,9 @@ export const SearchConversationWithSelectionResults = memo(
     return (
       <SafeAreaView>
         {!conversationResults?.length && !contactsWithoutAConversation?.length ? (
-          <Text
-            style={{
-              fontSize: 16,
-              fontWeight: '600',
-              display: 'flex',
-              marginTop: 'auto',
-              marginBottom: 'auto',
-              alignSelf: 'center',
-            }}
-          >
-            No Contacts Found
-          </Text>
+          <Text style={styles.noContactsFound}>No Contacts Found</Text>
         ) : (
-          <ScrollView contentInsetAdjustmentBehavior="automatic">
+          <Animated.ScrollView contentInsetAdjustmentBehavior="automatic">
             {conversationResults?.length ? <Text style={styles.title}>Chats</Text> : null}
             {conversationResults.map((item) => (
               <ConversationTile
@@ -350,7 +335,7 @@ export const SearchConversationWithSelectionResults = memo(
                 }
               />
             ))}
-          </ScrollView>
+          </Animated.ScrollView>
         )}
       </SafeAreaView>
     );
@@ -363,5 +348,13 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginLeft: 8,
     marginTop: 4,
+  },
+  noContactsFound: {
+    fontSize: 16,
+    fontWeight: '600',
+    display: 'flex',
+    marginTop: 'auto',
+    marginBottom: 'auto',
+    alignSelf: 'center',
   },
 });

@@ -24,6 +24,7 @@ import { SearchConversationWithSelectionResults } from '../../components/Chat/Se
 import { FlatList } from 'react-native-gesture-handler';
 import { ContactTile } from '../../components/Contact/Contact-Tile';
 import { IconButton } from '../../components/ui/Buttons';
+import { useTextInput } from '../../hooks/useTextInput';
 
 export type EditGroupProp = NativeStackScreenProps<ChatStackParamList, 'EditGroup'>;
 
@@ -343,7 +344,7 @@ const ContactsBottomModal = memo(
     onDismiss?: () => void;
   }) => {
     const ref = useRef<BottomSheetModal>(null);
-    const [query, setQuery] = useState<string | undefined>(undefined);
+    const { query, setQuery } = useTextInput();
 
     const { data: contacts } = useAllConnections(true);
 
