@@ -8,9 +8,9 @@ import { HomeStackParamList } from '../../app/App';
 import { usePendingConnections } from '../../hooks/connections/usePendingConnections';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { useDotYouClientContext } from 'homebase-id-app-common';
-import { RedactedConnectionRequest } from '@homebase-id/js-lib/network';
 import { openURL } from '../../utils/utils';
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
+import { IncomingConnectionRequest } from '@homebase-id/js-lib/network';
 
 type ConnectionRequestProps = NativeStackScreenProps<HomeStackParamList, 'ConnectionRequests'>;
 export const ConnectionRequestsPage = (_props: ConnectionRequestProps) => {
@@ -32,7 +32,7 @@ export const ConnectionRequestsPage = (_props: ConnectionRequestProps) => {
   }, [refetchIdentities]);
 
   const renderItem = useCallback(
-    (item: ListRenderItemInfo<RedactedConnectionRequest>) => (
+    (item: ListRenderItemInfo<IncomingConnectionRequest>) => (
       <TouchableOpacity
         key={item.item.senderOdinId}
         style={{

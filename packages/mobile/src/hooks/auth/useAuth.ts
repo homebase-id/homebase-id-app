@@ -9,13 +9,13 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import useVerifyToken from './useVerifyToken';
 import {
   createEccPair,
-  getRegistrationParams as getRegistrationParamsYouAuth,
   finalizeAuthentication as finalizeAuthenticationYouAuth,
 } from '../../provider/auth/AuthenticationProvider';
-import { logout as logoutYouauth } from '@homebase-id/js-lib/auth';
+import { logout as logoutYouauth, TargetDriveAccessRequest } from '@homebase-id/js-lib/auth';
 import { useEncrtypedStorage } from './useEncryptedStorage';
 import { Platform } from 'react-native';
 import { DrivePermissionType } from '@homebase-id/js-lib/core';
+import { getRegistrationParams as getRegistrationParamsYouAuth } from '@homebase-id/js-lib/auth';
 import {
   AppPermissionType,
   ContactConfig,
@@ -38,67 +38,63 @@ export const ChatConfig = {
   description: 'Drive which contains all the chat messages',
 };
 
-export const drives = [
+export const drives: TargetDriveAccessRequest[] = [
   {
-    a: BlogConfig.FeedDrive.alias,
-    t: BlogConfig.FeedDrive.type,
-    n: '',
-    d: '',
-    p:
-      DrivePermissionType.Read +
-      DrivePermissionType.Write +
-      DrivePermissionType.Comment +
+    ...BlogConfig.FeedDrive,
+    name: '',
+    description: '',
+    permissions: [
+      DrivePermissionType.Read,
+      DrivePermissionType.Write,
+      DrivePermissionType.Comment,
       DrivePermissionType.React,
+    ],
   },
   {
-    a: ChatConfig.ChatDrive.alias,
-    t: ChatConfig.ChatDrive.type,
-    n: ChatConfig.name,
-    d: 'Drive which contains all the chat messages',
-    p: DrivePermissionType.Read + DrivePermissionType.Write + DrivePermissionType.React,
+    ...ChatConfig.ChatDrive,
+    name: 'Chat Drive',
+    description: '',
+    permissions: [DrivePermissionType.Read, DrivePermissionType.Write, DrivePermissionType.React],
   },
   {
     // Standard profile Info
-    a: StandardProfileDrive.alias,
-    t: StandardProfileDrive.type,
-    n: '',
-    d: '',
-    p: DrivePermissionType.Read,
+    ...StandardProfileDrive,
+    name: '',
+    description: '',
+    permissions: [DrivePermissionType.Read],
   },
   {
     // Homepage Config
-    a: HomePageConfig.HomepageTargetDrive.alias,
-    t: HomePageConfig.HomepageTargetDrive.type,
-    n: '',
-    d: '',
-    p: DrivePermissionType.Read,
+    ...HomePageConfig.HomepageTargetDrive,
+    name: '',
+    description: '',
+    permissions: [DrivePermissionType.Read],
   },
   {
     // Contacts drive
-    a: ContactConfig.ContactTargetDrive.alias,
-    t: ContactConfig.ContactTargetDrive.type,
-    n: '',
-    d: '',
-    p: DrivePermissionType.Read + DrivePermissionType.Write,
+    ...ContactConfig.ContactTargetDrive,
+    name: '',
+    description: '',
+    permissions: [DrivePermissionType.Read, DrivePermissionType.Write],
   },
   {
     // Public posts
-    a: BlogConfig.PublicChannelDrive.alias,
-    t: BlogConfig.PublicChannelDrive.type,
-    n: '',
-    d: '',
-    p:
-      DrivePermissionType.Read +
-      DrivePermissionType.Write +
-      DrivePermissionType.React +
+    ...BlogConfig.PublicChannelDrive,
+    name: '',
+    description: '',
+    permissions: [
+      DrivePermissionType.Read,
+      DrivePermissionType.Write,
+      DrivePermissionType.React,
       DrivePermissionType.Comment,
+    ],
   },
   {
-    a: '3e5de26f-8fa3-43c1-975a-d0dd2aa8564c',
-    t: '93a6e08d-14d9-479e-8d99-bae4e5348a16',
-    n: 'Community Drive',
-    d: '',
-    p: DrivePermissionType.Read + DrivePermissionType.Write,
+    alias: '3e5de26f-8fa3-43c1-975a-d0dd2aa8564c',
+    type: '93a6e08d-14d9-479e-8d99-bae4e5348a16',
+    name: 'Community Drive',
+    description: '',
+    permissions: [DrivePermissionType.Read, DrivePermissionType.Write],
   },
 ];
 export const permissions = [
@@ -115,13 +111,12 @@ export const permissions = [
   AppPermissionType.SendIntroductions,
 ];
 
-export const circleDrives = [
+export const circleDrives: TargetDriveAccessRequest[] = [
   {
-    a: ChatConfig.ChatDrive.alias,
-    t: ChatConfig.ChatDrive.type,
-    n: ChatConfig.name,
-    d: '',
-    p: DrivePermissionType.Write + DrivePermissionType.React,
+    ...ChatConfig.ChatDrive,
+    name: ChatConfig.name,
+    description: '',
+    permissions: [DrivePermissionType.Write, DrivePermissionType.React],
   },
 ];
 export const appName = 'Homebase - Feed & Chat';

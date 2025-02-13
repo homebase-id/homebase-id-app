@@ -93,7 +93,7 @@ export const ContactPage = memo(({ navigation }: ContactPageProp) => {
   const afterSelect = useCallback(() => {
     searchRef.current?.cancelSearch();
     setQuery(undefined);
-  }, []);
+  }, [setQuery]);
 
   if (!connections) return null;
 

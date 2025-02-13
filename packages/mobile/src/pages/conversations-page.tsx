@@ -166,7 +166,7 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
   const afterSelect = useCallback(() => {
     searchRef.current?.cancelSearch();
     setQuery(undefined);
-  }, []);
+  }, [setQuery]);
 
   const renderHeader = useCallback(() => {
     return (
