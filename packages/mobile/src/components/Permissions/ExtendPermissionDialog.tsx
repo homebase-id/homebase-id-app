@@ -4,6 +4,7 @@ import { t, useMissingPermissions } from 'homebase-id-app-common';
 import { useEffect } from 'react';
 import { Alert, Linking } from 'react-native';
 import InAppBrowser from 'react-native-inappbrowser-reborn';
+import { TargetDriveAccessRequest } from '@homebase-id/js-lib/auth';
 
 export const ExtendPermissionDialog = ({
   appId,
@@ -15,20 +16,8 @@ export const ExtendPermissionDialog = ({
 }: {
   appId: string;
   appName: string;
-  drives: {
-    a: string;
-    t: string;
-    n: string;
-    d: string;
-    p: number;
-  }[];
-  circleDrives?: {
-    a: string;
-    t: string;
-    n: string;
-    d: string;
-    p: number;
-  }[];
+  drives: TargetDriveAccessRequest[];
+  circleDrives?: TargetDriveAccessRequest[];
   permissions: AppPermissionType[];
   needsAllConnected?: boolean;
 }) => {

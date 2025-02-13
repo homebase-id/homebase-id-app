@@ -574,14 +574,6 @@ export const updateChatMessage = async (
       fileId: message.fileId,
       targetDrive: ChatDrive,
     },
-    transitOptions: distribute
-      ? {
-          recipients: [...recipients],
-          schedule: ScheduleOptions.SendLater,
-          priority: PriorityOptions.High,
-          sendContents: SendContents.All,
-        }
-      : undefined,
     recipients: distribute ? [...recipients] : undefined,
     versionTag: message.fileMetadata.versionTag,
     locale: 'local',

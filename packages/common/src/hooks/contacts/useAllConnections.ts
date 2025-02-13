@@ -1,4 +1,5 @@
 import {
+  ActiveConnection,
   ContactFile,
   DotYouProfile,
   getConnections,
@@ -19,7 +20,7 @@ export const useAllConnections = (enabled: boolean) => {
     const internalGetConnections = async (
       cursor: unknown | undefined,
       limit: number
-    ): Promise<DotYouProfile[]> => {
+    ): Promise<ActiveConnection[]> => {
       const connections = await getConnections(dotYouClient, { cursor, count: limit });
       if (connections?.cursor && connections.results.length >= limit) {
         const nextContacts = await internalGetConnections(connections.cursor, limit);
