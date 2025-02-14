@@ -3,12 +3,10 @@
 import {
   ApiType,
   DotYouClient,
-  getContentFromHeaderOrPayload,
   getFileHeaderByUniqueId,
   HomebaseFile,
   NewHomebaseFile,
   queryBatch,
-  QueryBatchResponse,
   SecurityGroupType,
   uploadFile,
   patchFile,
@@ -19,12 +17,10 @@ import {
   ConversationWithYourself,
   ConversationWithYourselfId,
   getConversation,
-  getConversationMetadata,
   getConversations,
   UnifiedConversation,
   updateConversation,
   uploadConversation,
-  uploadConversationMetadata,
 } from '../src/provider/chat/ConversationProvider';
 import { ImageSource } from '../src/provider/image/RNImageProvider';
 import { getRandom16ByteArray } from '@homebase-id/js-lib/helpers';

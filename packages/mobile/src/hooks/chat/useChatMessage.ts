@@ -181,6 +181,8 @@ const sendMessage = async ({
   newChat.fileMetadata.appData.previewThumbnail = uploadResult.previewThumbnail;
   newChat.fileMetadata.appData.content.deliveryStatus =
     uploadResult.chatDeliveryStatus || ChatDeliveryStatus.Sent;
+  newChat.fileMetadata.originalAuthor = identity;
+  newChat.fileMetadata.senderOdinId = identity;
 
   // Insert images into useImage cache:
   const fileMetadataPayloads: NewPayloadDescriptor[] = await Promise.all(
