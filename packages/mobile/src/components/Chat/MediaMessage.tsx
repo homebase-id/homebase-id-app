@@ -13,6 +13,7 @@ import { useDarkMode } from '../../hooks/useDarkMode';
 import { Colors } from '../../app/Colors';
 import { useAuth } from '../../hooks/auth/useAuth';
 import { DEFAULT_PAYLOAD_KEY, PayloadDescriptor } from '@homebase-id/js-lib/core';
+import { ChatDeletedArchivalStaus } from '../../provider/chat/ChatProvider';
 
 const MediaMessage = memo(
   ({
@@ -123,6 +124,10 @@ const InnerMediaMessage = memo(
         ),
       [previewThumbnail, width, height]
     );
+
+    if (currentMessage.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus) {
+      return null;
+    }
 
     if (payloads?.length === 1) {
       return (

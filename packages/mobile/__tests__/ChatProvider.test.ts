@@ -351,18 +351,9 @@ describe('ChatProvider', () => {
     };
     const recipients = ['recipient1', 'recipient2'];
 
-    const updateChatMessageSpy = jest.spyOn(ChatProvider, 'updateChatMessage').mockResolvedValue({
-      newVersionTag: 'new-version-tag',
-      recipientStatus: {
-        recipient1: TransferUploadStatus.DeliveredToTargetDrive,
-        recipient2: TransferUploadStatus.DeliveredToTargetDrive,
-      },
-    });
+    (patchFile as jest.Mock).mockResolvedValue({ newVersionTag: 'new-version-tag' });
     const result = await softDeleteChatMessage(dotYouClient, message, recipients);
-
-    expect(updateChatMessage).toHaveBeenCalled();
     expect(result).toHaveProperty('newVersionTag', 'new-version-tag');
-    updateChatMessageSpy.mockRestore();
   });
 
   it('should request mark as read', async () => {
