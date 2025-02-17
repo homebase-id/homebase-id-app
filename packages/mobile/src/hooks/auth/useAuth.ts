@@ -15,7 +15,7 @@ import { logout as logoutYouauth, TargetDriveAccessRequest } from '@homebase-id/
 import { useEncrtypedStorage } from './useEncryptedStorage';
 import { Platform } from 'react-native';
 import { DrivePermissionType } from '@homebase-id/js-lib/core';
-import { getRegistrationParams as getRegistrationParamsYouAuth } from '@homebase-id/js-lib/auth';
+import { getRegistrationParams as getRegistrationParamsYouAuth } from '../../provider/auth/AuthenticationProvider';
 import {
   AppPermissionType,
   ContactConfig,
@@ -245,8 +245,7 @@ export const useYouAuthAuthorization = () => {
       [CONFIRMED_CONNECTIONS_CIRCLE_ID, AUTO_CONNECTIONS_CIRCLE_ID],
       uint8ArrayToBase64(stringToUint8Array(JSON.stringify(publicKeyJwk))),
       corsHost,
-      `${Platform.OS === 'ios' ? 'iOS' : Platform.OS === 'android' ? 'Android' : Platform.OS} | ${
-        Platform.Version
+      `${Platform.OS === 'ios' ? 'iOS' : Platform.OS === 'android' ? 'Android' : Platform.OS} | ${Platform.Version
       }`
     );
   }, [setPrivateKey]);
