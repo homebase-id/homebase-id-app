@@ -1,5 +1,5 @@
 import { Buffer } from 'buffer';
-import { exchangeDigestForToken } from '@homebase-id/js-lib/auth';
+import { AppAuthorizationParams, exchangeDigestForToken, getBrowser, getOperatingSystem, parseDriveAccessRequest, TargetDriveAccessRequest, YouAuthorizationParams } from '@homebase-id/js-lib/auth';
 import { DotYouClient, ApiType } from '@homebase-id/js-lib/core';
 import { base64ToUint8Array, uint8ArrayToBase64, cbcDecrypt } from '@homebase-id/js-lib/helpers';
 
@@ -29,6 +29,49 @@ export const createEccPair = async () => {
   return {
     privateKeyHex: pk.getPrivate('hex'),
     publicKeyJwk: jwkEC,
+  };
+};
+
+// Bringing back as it can't fetch eccPublicKey from the js-lib function that broke it
+export const getRegistrationParams = async (
+  returnUrl: string,
+  appName: string,
+  appId: string,
+  permissionKeys: number[] | undefined,
+  circlePermissionKeys: number[] | undefined,
+  drives: TargetDriveAccessRequest[] | undefined,
+  circleDrives: TargetDriveAccessRequest[] | undefined,
+  circles: string[] | undefined,
+  eccPublicKey: string,
+  host?: string,
+  clientFriendlyName?: string,
+  state?: string
+): Promise<YouAuthorizationParams> => {
+  const clientFriendly = clientFriendlyName || `${getBrowser()} | ${getOperatingSystem().name}`;
+
+  const permissionRequest: AppAuthorizationParams = {
+    n: appName,
+    appId: appId,
+    fn: clientFriendly,
+    p: permissionKeys?.join(','),
+    cp: circlePermissionKeys?.join(','),
+    d: JSON.stringify(drives?.map(parseDriveAccessRequest)),
+    cd: circleDrives ? JSON.stringify(circleDrives.map(parseDriveAccessRequest)) : undefined,
+    c: circles?.join(','),
+    return: 'backend-will-decide',
+    o: undefined,
+  };
+
+  if (host) permissionRequest.o = host;
+
+  return {
+    client_id: appId,
+    client_type: 'app',
+    client_info: clientFriendly,
+    public_key: eccPublicKey,
+    permission_request: JSON.stringify(permissionRequest),
+    state: state || '',
+    redirect_uri: returnUrl,
   };
 };
 

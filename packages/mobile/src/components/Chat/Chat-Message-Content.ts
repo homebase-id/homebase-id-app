@@ -6,7 +6,8 @@ import { memo } from 'react';
 
 export const ChatMessageContent = memo(
   (message: HomebaseFile<ChatMessage> | ChatMessageIMessage) => {
-    const textMessage = message.fileMetadata.appData.content.message;
+    let textMessage = message.fileMetadata.appData.content.message;
+    textMessage = getPlainTextFromRichText(textMessage);
     const { payloads } = message.fileMetadata;
     if (message.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus) {
       return 'This message was deleted';
