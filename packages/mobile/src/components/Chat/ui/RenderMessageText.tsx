@@ -1,6 +1,6 @@
 import { DEFAULT_PAYLOAD_KEY } from '@homebase-id/js-lib/core';
 import { getPlainTextFromRichText } from 'homebase-id-app-common';
-import { memo, useCallback, useState } from 'react';
+import { memo, useCallback, useEffect, useState } from 'react';
 import { StyleProp, TextStyle } from 'react-native';
 import { MessageTextProps, IMessage, MessageText } from 'react-native-gifted-chat';
 import { ParseShape } from 'react-native-parsed-text';
@@ -17,24 +17,24 @@ import { RichTextRenderer } from '../../ui/Text/RichTextRenderer';
 
 export const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
   const { isDarkMode } = useDarkMode();
-  const [message, setMessage] = useState(props.currentMessage as ChatMessageIMessage);
+  const [message, setMessage] = useState<ChatMessageIMessage>();
   const isDeleted = message?.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus;
   const hasMoreTextContent = message?.fileMetadata?.payloads?.some(
     (e) => e.key === DEFAULT_PAYLOAD_KEY
   );
   const { data: completeMessage } = useChatMessagePayload({
-    fileId: message.fileId,
+    fileId: message?.fileId,
     payloadKey: hasMoreTextContent ? DEFAULT_PAYLOAD_KEY : undefined,
   }).getExpanded;
 
   const allowExpand = hasMoreTextContent && !!completeMessage;
   const content = message?.fileMetadata.appData.content;
-  const plainMessage = getPlainTextFromRichText(content.message);
+  const plainMessage = getPlainTextFromRichText(content?.message);
   const onlyEmojis = isEmojiOnly(plainMessage);
 
   const isRichText =
     (hasMoreTextContent && completeMessage && typeof completeMessage.message !== 'string') ||
-    typeof message.text !== 'string';
+    typeof message?.text !== 'string';
 
   /**
    * An array of parse patterns used for parsing text in the chat detail component.
@@ -81,6 +81,10 @@ export const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
     message.text = completeMessage.message;
     setMessage(message);
   }, [hasMoreTextContent, completeMessage, props]);
+
+  useEffect(() => {
+    setMessage(props.currentMessage as ChatMessageIMessage);
+  }, [props]);
 
   return (
     <MessageText
