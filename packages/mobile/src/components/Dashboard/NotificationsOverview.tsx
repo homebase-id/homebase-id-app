@@ -24,6 +24,7 @@ import Toast from 'react-native-toast-message';
 import Clipboard from '@react-native-clipboard/clipboard';
 import { Avatar } from '../ui/Avatars/Avatar';
 import { TabStackParamList } from '../../app/App';
+import { addLogs } from '../../provider/log/logger';
 
 export const NotificationDay = memo(
   ({ day, notifications }: { day: Date; notifications: PushNotification[] }) => {
@@ -365,6 +366,11 @@ export const navigateOnNotification = (
       },
     });
   } else {
+    addLogs({
+      type: 'critical',
+      message: `Error Navigating to ${notification.options.appId}  `,
+      title: 'Notification',
+    });
     // You shouldn't come here
     return Toast.show({
       type: 'error',

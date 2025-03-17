@@ -36,7 +36,7 @@ export const doCheckIdentity = async (odinId?: string) => {
     // console.debug(`Checking identity: ${url}`);
     const response = await axios.get(url);
     const validation = response.data;
-    return validation?.odinId.toLowerCase() === strippedIdentity;
+    return validation?.odinId?.toLowerCase() === strippedIdentity;
   } catch (error) {
     console.debug('Error checking identity', error);
     return false;
