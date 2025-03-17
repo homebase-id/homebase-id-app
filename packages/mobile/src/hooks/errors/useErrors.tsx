@@ -8,7 +8,7 @@ import {
 import { addLogs } from '../../provider/log/logger';
 
 export interface Error {
-  type: 'warning' | 'critical';
+  type: 'warning' | 'critical' | 'info';
   title?: string;
   message: string;
   details?: OdinErrorDetails;
