@@ -171,6 +171,12 @@ const LoginComponent = () => {
 
   const [invalid, setInvalid] = useState<boolean>(false);
   const [odinId, setOdinId] = useState<string>('');
+
+  const onChangeOdinId = useCallback((text: string) => {
+    text = text.trim();
+    setOdinId(text);
+  }, []);
+
   const { data: authParams, refetch } = useParams();
   const lastIdentity = useAuth().getLastIdentity();
   const { isDarkMode } = useDarkMode();
@@ -253,7 +259,7 @@ const LoginComponent = () => {
           fontSize: Platform.OS === 'ios' ? 16 : 14,
           // marginBottom: 16,
         }}
-        onChangeText={setOdinId}
+        onChangeText={onChangeOdinId}
         autoCapitalize="none"
         autoCorrect={false}
         onSubmitEditing={onLogin}
