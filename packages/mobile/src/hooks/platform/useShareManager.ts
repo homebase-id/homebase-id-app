@@ -29,7 +29,7 @@ export const useShareManager = () => {
         type: 'warning',
         title: 'useShareManager',
         details: {
-          stackTrace: item.toString(),
+          stackTrace: JSON.stringify(item, null, 2),
         },
       });
       navigation.navigate('ShareChat', item);
@@ -38,11 +38,6 @@ export const useShareManager = () => {
   );
 
   const handleInitialShare = useCallback(() => {
-    addLogs({
-      message: 'useShareManager: handleInitialShare',
-      type: 'warning',
-      title: 'useShareManager',
-    });
     ShareMenu.getSharedText(handleShare);
   }, [handleShare]);
 

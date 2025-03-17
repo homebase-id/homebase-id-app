@@ -27,7 +27,7 @@ import { useAuthenticatedPushNotification } from '../../hooks/push-notification/
 
 import { ProfileInfo } from '../../components/Profile/ProfileInfo';
 import { t } from 'homebase-id-app-common';
-import { clearLogs, getLogs, shareLogs } from '../../provider/log/logger';
+import { addLogs, clearLogs, getLogs, shareLogs } from '../../provider/log/logger';
 import Toast from 'react-native-toast-message';
 import { ListTile } from '../../components/ui/ListTile';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
@@ -313,6 +313,23 @@ const DeleteCache = () => {
       exact: false,
     });
     setDone(true);
+    const cache = query.getQueryCache().findAll();
+    const validQueries = cache.filter((query) => query.state.data !== undefined);
+    const validQueryKeys = validQueries.map((query) => query.queryKey);
+    const jsonData = validQueryKeys.map((query) => {
+      return {
+        key: query,
+      };
+    });
+    addLogs({
+      message: 'Cache cleared. Leftover cache data',
+      type: 'info',
+      title: 'Cache',
+      details: {
+        title: 'Cache keys left',
+        stackTrace: JSON.stringify(jsonData),
+      },
+    });
     setTimeout(() => {
       setDone(false);
     }, 5000);

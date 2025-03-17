@@ -21,6 +21,7 @@ import { Colors } from '../../../app/Colors';
 import { SvgUri } from 'react-native-svg';
 import { EmbeddedThumb, TargetDrive } from '@homebase-id/js-lib/core';
 import Animated from 'react-native-reanimated';
+import { FallbackImg } from '../FallbackImg/FallbackImg';
 
 export const Avatar = memo(
   (props: {
@@ -69,6 +70,7 @@ export const PublicAvatar = (props: {
   imageSize?: { width: number; height: number };
 }) => {
   const [isSvg, setIsSvg] = useState(false);
+
   if (!isSvg) {
     return (
       <Pressable onPress={props.onPress}>
@@ -104,6 +106,7 @@ export const PublicAvatar = (props: {
             height={props.imageSize?.height}
             uri={`https://${props.odinId}/pub/image`}
             style={{ overflow: 'hidden', ...props.style }}
+            fallback={<FallbackImg odinId={props.odinId} style={props.style} />}
           />
         </Pressable>
       </View>
