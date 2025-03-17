@@ -17,7 +17,9 @@ import { RichTextRenderer } from '../../ui/Text/RichTextRenderer';
 
 export const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
   const { isDarkMode } = useDarkMode();
-  const [message, setMessage] = useState<ChatMessageIMessage>();
+  const [message, setMessage] = useState<ChatMessageIMessage>(
+    props.currentMessage as ChatMessageIMessage
+  );
   const isDeleted = message?.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus;
   const hasMoreTextContent = message?.fileMetadata?.payloads?.some(
     (e) => e.key === DEFAULT_PAYLOAD_KEY
@@ -83,8 +85,11 @@ export const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
   }, [hasMoreTextContent, completeMessage, props]);
 
   useEffect(() => {
-    setMessage(props.currentMessage as ChatMessageIMessage);
-  }, [props]);
+    const propMessage = props.currentMessage as ChatMessageIMessage;
+    if (propMessage.fileMetadata.updated !== message.fileMetadata.updated) {
+      setMessage(props.currentMessage as ChatMessageIMessage);
+    }
+  }, [message.fileMetadata.updated, props.currentMessage]);
 
   return (
     <MessageText
