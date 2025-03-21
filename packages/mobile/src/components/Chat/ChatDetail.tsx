@@ -68,6 +68,7 @@ import Animated from 'react-native-reanimated';
 import { RenderMessageText } from './ui/RenderMessageText';
 import { RenderBubble } from './ui/RenderBubble';
 import { RenderReplyMessageView } from './ui/RenderReplyMessageView';
+import { ConversationWithYourselfId } from '../../provider/chat/ConversationProvider';
 
 export type ChatMessageIMessage = IMessage & HomebaseFile<ChatMessage>;
 
@@ -712,8 +713,13 @@ export const ChatDetail = memo(
     );
 
     const renderEmptyChat = useCallback(
-      () => <EmptyChatContainer doSend={doSend as (message: { text: string }[]) => void} />,
-      [doSend]
+      () => (
+        <EmptyChatContainer
+          doSend={doSend as (message: { text: string }[]) => void}
+          isMe={conversationId === ConversationWithYourselfId}
+        />
+      ),
+      [conversationId, doSend]
     );
 
     /* UseEffects */
