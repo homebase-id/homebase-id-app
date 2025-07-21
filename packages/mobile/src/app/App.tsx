@@ -119,7 +119,7 @@ const RootStack = () => {
       <StackRoot.Navigator
         screenOptions={{
           headerShown: false,
-          statusBarColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
+          // statusBarColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
           /// StatusBarStyle throws error when changin in Ios (even setting to Ui UIControllerbasedStatusBar to yes)
           statusBarStyle: Platform.OS === 'android' ? (isDarkMode ? 'light' : 'dark') : undefined,
           animation: 'slide_from_right',
@@ -262,13 +262,13 @@ const TabStack = memo(() => {
             tabBarIcon: TabMenuIcon,
           }}
         />
-        <TabBottom.Screen
+        {/* <TabBottom.Screen
           name="Community"
           component={CommunityStack}
           options={{
             tabBarButton: () => null,
           }}
-        />
+        /> */}
       </TabBottom.Navigator>
     </BottomSheetModalProvider>
   );
