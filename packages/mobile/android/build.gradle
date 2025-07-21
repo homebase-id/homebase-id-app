@@ -8,6 +8,7 @@ buildscript {
         targetSdkVersion = 35
         ndkVersion = "27.1.12297006"
         kotlinVersion = "2.1.20"
+        kspVersion = "2.1.20"
     }
     repositories {
         google()
@@ -28,6 +29,16 @@ allprojects {
     configurations.all {
         resolutionStrategy {
             force "com.facebook.react:react-native:" + REACT_NATIVE_VERSION
+        }
+    }
+}
+
+subprojects {
+    project.configurations.all {
+        resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+            if (details.requested.group == 'androidx.browser') {
+                details.useVersion '1.8.0'
+            }
         }
     }
 }

@@ -3,13 +3,18 @@ package id.homebase.feed;
 import android.app.Application;
 import com.facebook.react.PackageList;
 import com.facebook.react.ReactApplication;
-import com.facebook.react.ReactNativeApplicationEntryPoint.loadReactNative;
+import static com.facebook.react.ReactNativeApplicationEntryPoint.loadReactNative;
+
+import com.facebook.react.ReactHost;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
+import com.facebook.react.defaults.DefaultReactHost;
 import com.facebook.react.defaults.DefaultReactNativeHost;
 import java.util.List;
 
 import java.lang.reflect.Field;
+
+import android.content.Context;
 import android.database.CursorWindow;
 import android.util.Log;
 
@@ -48,6 +53,11 @@ public class MainApplication extends Application implements ReactApplication {
         }
       };
 
+    @Override
+    public ReactHost getReactHost() {
+        return DefaultReactHost.getDefaultReactHost(getApplicationContext(), mReactNativeHost, null);
+    }
+
   @Override
   public ReactNativeHost getReactNativeHost() {
     return mReactNativeHost;
@@ -56,7 +66,7 @@ public class MainApplication extends Application implements ReactApplication {
   @Override
   public void onCreate() {
     super.onCreate();
-    loadReactNative(this)
+    loadReactNative(this);
 
     // Increased the windowSize to ensure AsyncStorage can load back the react query cache on startup;
     // https://github.com/react-native-async-storage/async-storage/issues/537
