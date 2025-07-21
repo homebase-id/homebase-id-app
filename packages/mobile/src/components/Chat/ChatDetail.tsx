@@ -55,7 +55,6 @@ import { assetsToImageSource, fixDocumentURI, millisToMinutesAndSeconds } from '
 import { SafeAreaView } from '../ui/SafeAreaView/SafeAreaView';
 import Document from 'react-native-document-picker';
 import { getLocales } from 'react-native-localize';
-import { type PastedFile } from '@mattermost/react-native-paste-input';
 import { useDraftMessage } from '../../hooks/chat/useDraftMessage';
 import { FlatList } from 'react-native-gesture-handler';
 import { MentionDropDown } from './Mention-Dropdown';
@@ -84,7 +83,6 @@ export const ChatDetail = memo(
     doOpenRetryModal,
     replyMessage,
     setReplyMessage,
-    onPaste,
     hasMoreMessages,
     fetchMoreMessages,
     conversationId,
@@ -108,7 +106,6 @@ export const ChatDetail = memo(
     doOpenMessageInfo: (message: ChatMessageIMessage) => void;
     doOpenReactionModal: (message: ChatMessageIMessage) => void;
     doOpenRetryModal: (message: ChatMessageIMessage) => void;
-    onPaste: (error: string | null | undefined, files: PastedFile[]) => void;
     conversationId: string;
     replyMessage: ChatMessageIMessage | null;
     setReplyMessage: (message: ChatMessageIMessage | null) => void;
@@ -762,7 +759,6 @@ export const ChatDetail = memo(
           onLongPress={(e, _, m: ChatMessageIMessage) => onLongPress(e, m)}
           isKeyboardInternallyHandled={true}
           keyboardShouldPersistTaps="never"
-          onPaste={onPaste}
           renderMessageImage={renderMessageImage}
           renderCustomView={renderCustomView}
           renderBubble={(prop) => (

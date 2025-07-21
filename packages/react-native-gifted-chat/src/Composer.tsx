@@ -1,11 +1,14 @@
 import React, { memo, useCallback, useRef } from 'react';
-import { StyleSheet, ViewStyle, View, LayoutChangeEvent } from 'react-native';
+import {
+  StyleSheet,
+  ViewStyle,
+  View,
+  LayoutChangeEvent,
+  TextInputProps,
+  TextInput,
+} from 'react-native';
 import { MIN_COMPOSER_HEIGHT, DEFAULT_PLACEHOLDER } from './Constant';
 import Color from './Color';
-import PasteInput, {
-  PasteInputProps,
-} from '@mattermost/react-native-paste-input';
-
 const styles = StyleSheet.create({
   textInput: {},
   container: {},
@@ -17,10 +20,10 @@ export interface ComposerProps {
   value?: string;
   placeholder?: string;
   placeholderTextColor?: string;
-  textInputProps?: Partial<PasteInputProps>;
-  textInputStyle?: PasteInputProps['style'];
+  textInputProps?: Partial<TextInputProps>;
+  textInputStyle?: TextInputProps['style'];
   textInputAutoFocus?: boolean;
-  keyboardAppearance?: PasteInputProps['keyboardAppearance'];
+  keyboardAppearance?: TextInputProps['keyboardAppearance'];
   multiline?: boolean;
   disableComposer?: boolean;
   onTextChanged?(text: string): void;
@@ -28,7 +31,6 @@ export interface ComposerProps {
   containerStyle?: ViewStyle;
   children?: React.ReactNode;
   hasText: boolean | undefined;
-  onPaste: PasteInputProps['onPaste'];
 }
 
 export const Composer = memo((props: ComposerProps): React.ReactElement => {
@@ -90,7 +92,7 @@ export const Composer = memo((props: ComposerProps): React.ReactElement => {
         props.containerStyle,
       ]}
     >
-      <PasteInput
+      <TextInput
         onLayout={onInitialLayout}
         testID={placeholder}
         accessible
@@ -99,7 +101,6 @@ export const Composer = memo((props: ComposerProps): React.ReactElement => {
         placeholderTextColor={placeholderTextColor}
         multiline={multiline}
         editable={!disableComposer}
-        onPaste={onPaste}
         // onContentSizeChange={handleContentSizeChange}
         onChangeText={onTextChanged}
         style={[styles.textInput, textInputStyle]}

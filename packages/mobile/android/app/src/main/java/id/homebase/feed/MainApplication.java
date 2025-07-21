@@ -3,11 +3,10 @@ package id.homebase.feed;
 import android.app.Application;
 import com.facebook.react.PackageList;
 import com.facebook.react.ReactApplication;
+import com.facebook.react.ReactNativeApplicationEntryPoint.loadReactNative;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
-import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint;
 import com.facebook.react.defaults.DefaultReactNativeHost;
-import com.facebook.soloader.SoLoader;
 import java.util.List;
 
 import java.lang.reflect.Field;
@@ -57,11 +56,7 @@ public class MainApplication extends Application implements ReactApplication {
   @Override
   public void onCreate() {
     super.onCreate();
-    SoLoader.init(this, /* native exopackage */ false);
-    if (BuildConfig.IS_NEW_ARCHITECTURE_ENABLED) {
-      // If you opted-in for the New Architecture, we load the native entry point for this app.
-      DefaultNewArchitectureEntryPoint.load();
-    }
+    loadReactNative(this)
 
     // Increased the windowSize to ensure AsyncStorage can load back the react query cache on startup;
     // https://github.com/react-native-async-storage/async-storage/issues/537

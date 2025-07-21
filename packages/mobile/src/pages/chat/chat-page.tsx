@@ -54,7 +54,6 @@ import { NoConversationHeader } from '../../components/Chat/NoConversationHeader
 import { ChatForwardModal } from '../../components/Chat/Chat-Forward';
 import Dialog from 'react-native-dialog';
 import { BlurView } from '@react-native-community/blur';
-import { PastedFile } from '@mattermost/react-native-paste-input';
 import { Colors } from '../../app/Colors';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { Text } from '../../components/ui/Text/Text';
@@ -63,7 +62,6 @@ import { RetryModal } from '../../components/Chat/Reactions/Modal/RetryModal';
 import { getPlainTextFromRichText, t } from 'homebase-id-app-common';
 import { useWebSocketContext } from '../../components/WebSocketContext/useWebSocketContext';
 import { LinkPreview } from '@homebase-id/js-lib/media';
-import { getImageSize } from '../../utils/utils';
 import { openURL } from '../../utils/utils';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ReportModal } from '../../components/Chat/Reactions/Modal/ReportModal';
@@ -487,32 +485,32 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
     [conversation, doSend, navigation, title]
   );
 
-  const onPaste = useCallback(
-    async (error: string | null | undefined, files: PastedFile[]) => {
-      if (error) {
-        console.error('Error while pasting:', error);
-        return;
-      }
-      const pastedItems: ImageSource[] = await Promise.all(
-        files
-          .map(async (file) => {
-            if (!file.type.startsWith('image')) return;
-            const { width, height } = await getImageSize(file.uri);
-            return {
-              uri: file.uri,
-              type: file.type,
-              fileName: file.fileName,
-              fileSize: file.fileSize,
-              height: height,
-              width: width,
-            } as ImageSource;
-          })
-          .filter(Boolean) as Promise<ImageSource>[]
-      );
-      onAssetsAdded(pastedItems);
-    },
-    [onAssetsAdded]
-  );
+  // const onPaste = useCallback(
+  //   async (error: string | null | undefined, files: PastedFile[]) => {
+  //     if (error) {
+  //       console.error('Error while pasting:', error);
+  //       return;
+  //     }
+  //     const pastedItems: ImageSource[] = await Promise.all(
+  //       files
+  //         .map(async (file) => {
+  //           if (!file.type.startsWith('image')) return;
+  //           const { width, height } = await getImageSize(file.uri);
+  //           return {
+  //             uri: file.uri,
+  //             type: file.type,
+  //             fileName: file.fileName,
+  //             fileSize: file.fileSize,
+  //             height: height,
+  //             width: width,
+  //           } as ImageSource;
+  //         })
+  //         .filter(Boolean) as Promise<ImageSource>[]
+  //     );
+  //     onAssetsAdded(pastedItems);
+  //   },
+  //   [onAssetsAdded]
+  // );
   const [isOpen, setIsOpen] = useState(false);
   const { isDarkMode } = useDarkMode();
 
@@ -741,7 +739,6 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
                     doOpenRetryModal={openRetryModal}
                     replyMessage={replyMessage}
                     setReplyMessage={setReplyMessage}
-                    onPaste={onPaste}
                     hasMoreMessages={hasMoreMessages}
                     fetchMoreMessages={fetchMoreMessages}
                     conversationId={route.params.convoId}
