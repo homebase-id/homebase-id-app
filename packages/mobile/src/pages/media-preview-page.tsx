@@ -1,7 +1,15 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { VideoWithLoader } from '../components/ui/Media/VideoWithLoader';
 
-import { memo, useCallback, useLayoutEffect, useRef, useState } from 'react';
+import {
+  memo,
+  ReactElement,
+  ReactNode,
+  useCallback,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel';
 import { OdinImage } from '../components/ui/OdinImage/OdinImage';
 import { ChatStackParamList } from '../app/ChatStack';
@@ -71,9 +79,8 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
             style={{
               color: Colors.white,
             }}
-          >
-            <AuthorName odinId={senderOdinId} showYou />
-          </HeaderTitle>
+            children={(<AuthorName odinId={senderOdinId} showYou />) as unknown as string}
+          />
         )}
         {createdAt && (
           <Text

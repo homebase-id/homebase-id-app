@@ -48,10 +48,9 @@ export const Composer = memo((props: ComposerProps): React.ReactElement => {
     textInputAutoFocus = false,
     textInputProps = {},
     textInputStyle,
-    onPaste,
   } = props;
 
-  const dimensionsRef = useRef<{ width: number; height: number }>();
+  const dimensionsRef = useRef<{ width: number; height: number }>(undefined);
   const determineInputSizeChange = useCallback(
     (dimensions: { width: number; height: number }) => {
       // Support earlier versions of React Native on Android.

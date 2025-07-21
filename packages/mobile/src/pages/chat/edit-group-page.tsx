@@ -111,9 +111,7 @@ export function EditGroupPage(props: EditGroupProp) {
   }, [props.navigation, updateStatus]);
 
   const headerLeft = useCallback(
-    () => (
-      <HeaderBackButton canGoBack={true} labelVisible={false} onPress={props.navigation.goBack} />
-    ),
+    () => <HeaderBackButton onPress={props.navigation.goBack} />,
     [props.navigation.goBack]
   );
 

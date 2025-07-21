@@ -251,7 +251,6 @@ export const ChatStack = (_props: NativeStackScreenProps<TabStackParamList, 'Cha
         options={{
           headerShown: true,
           title: '',
-          headerBackTitleVisible: false,
           headerShadowVisible: false,
           headerTransparent: true,
           animation: 'fade_from_bottom',

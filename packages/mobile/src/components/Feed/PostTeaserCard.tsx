@@ -141,8 +141,8 @@ export const InnerPostTeaserCard = memo(
     // This is neeeded to keep a reference of doubleTapGesture. So this would be used
     // to trigger the double tap animation from the parent component and avoid triggering single Tap
     // or any other gesture until this fails
-    const doubleTapRef = useRef<GestureType>();
-    const singleTapRef = useRef<GestureType>();
+    const doubleTapRef = useRef<GestureType>(undefined);
+    const singleTapRef = useRef<GestureType>(undefined);
     const onNaviationPress = useCallback(() => {
       navigation.navigate('Post', {
         postKey: post.slug || post.id,

@@ -81,9 +81,7 @@ export const ChatAppBar = ({
       >
         <HeaderBackButton
           style={{ marginRight: Platform.OS === 'ios' ? -10 : 0 }}
-          canGoBack={true}
           onPress={goBack}
-          labelVisible={false}
           tintColor={isDarkMode ? Colors.white : Colors.black}
         />
         {selectedMessage ? null : !group ? (

@@ -10,7 +10,7 @@ export const ListTile = ({
   showLoader,
   style,
 }: {
-  icon: FC<IconProps>;
+  icon: (props: IconProps) => JSX.Element;
   title: string;
   onPress: () => void | Promise<void>;
   showLoader?: boolean;
