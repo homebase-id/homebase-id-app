@@ -402,7 +402,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
   }, [initalSelectedMessageState]);
 
   const doReturnToConversations = useCallback(
-    () => navigation.navigate('Conversation'),
+    () => navigation.navigate('Conversation', undefined, { pop: true }),
     [navigation]
   );
 
