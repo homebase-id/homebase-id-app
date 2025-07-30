@@ -54,7 +54,6 @@ jobs:
         uses: maxim-lobanov/setup-cocoapods@v1.4.0
         with:
           podfile-path: packages/mobile/ios/Podfile.lock
-          version: latest
 
       - name: Install Pods
         run: pod install --repo-update
