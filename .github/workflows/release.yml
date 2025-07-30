@@ -121,6 +121,11 @@ jobs:
       # - name: Build libs
       #   run: npm run build:libs
 
+      - name: Set up local.properties
+        run: |
+          echo "GITHUB_USERNAME=github-actions[bot]" >> packages/mobile/android/local.properties
+          echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> packages/mobile/android/local.properties
+
       - name: Decode Homebase Keystore to file
         id: decode_keystore_file
         env:
