@@ -1,15 +1,7 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { VideoWithLoader } from '../components/ui/Media/VideoWithLoader';
 
-import {
-  memo,
-  ReactElement,
-  ReactNode,
-  useCallback,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from 'react';
+import { memo, useCallback, useLayoutEffect, useRef, useState } from 'react';
 import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel';
 import { OdinImage } from '../components/ui/OdinImage/OdinImage';
 import { ChatStackParamList } from '../app/ChatStack';

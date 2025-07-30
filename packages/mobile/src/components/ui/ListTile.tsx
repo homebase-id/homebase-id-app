@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { useState } from 'react';
 import { IconProps } from './Icons/icons';
 import { ActivityIndicator, StyleProp, TouchableOpacity, ViewStyle } from 'react-native';
 import { Text } from './Text/Text';

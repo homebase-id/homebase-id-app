@@ -40,6 +40,9 @@ if linkage != nil
   use_frameworks! :linkage => linkage.to_sym
 end
 
+pod 'ffmpeg-kit-ios-full', :podspec => './ffmpeg-kit-ios-full.podspec'  # Moved inside target
+
+
 target 'HomebaseFeed' do
   config = use_native_modules!
 
@@ -51,6 +54,7 @@ target 'HomebaseFeed' do
     # An absolute path to your application root.
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
+
 
   target 'HomebaseFeedTests' do
     inherit! :complete

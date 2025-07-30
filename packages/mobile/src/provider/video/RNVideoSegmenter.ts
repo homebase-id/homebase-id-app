@@ -4,7 +4,7 @@ import { CachesDirectoryPath, exists, readFile, stat, unlink, writeFile } from '
 import { Video } from 'react-native-compressor';
 import { Platform } from 'react-native';
 
-// import { FFmpegKit, FFprobeKit, SessionState } from 'ffmpeg-kit-react-native';
+import { FFmpegKit, FFprobeKit, SessionState } from 'ffmpeg-kit-react-native';
 import {
   HlsVideoMetadata,
   PlainVideoMetadata,
@@ -72,24 +72,24 @@ const getVideoCodec = async (inputFilePath: string) => {
     // Command to get codec information
     const command = `-v error -select_streams v:0 -show_entries stream=codec_name -of default=noprint_wrappers=1 ${inputFilePath}`;
 
-    throw new Error('FFmpegKit is not available currently.');
-    // FFprobeKit.execute(command)
-    //   .then(async (session) => {
-    //     const state = await session.getState();
-    //     const returnCode = await session.getReturnCode();
-    //     const output = await session.getOutput();
+    // throw new Error('FFmpegKit is not available currently.');
+    FFprobeKit.execute(command)
+      .then(async (session) => {
+        const state = await session.getState();
+        const returnCode = await session.getReturnCode();
+        const output = await session.getOutput();
 
-    //     if (state === SessionState.FAILED || !returnCode.isValueSuccess()) {
-    //       reject(new Error(`FFmpeg process failed with state: ${state} and rc: ${returnCode}`));
-    //     } else {
-    //       // Process output to extract codec name
-    //       const codec = output.trim().split('=')[1];
-    //       resolve(codec);
-    //     }
-    //   })
-    //   .catch((error) => {
-    //     reject(new Error(`FFmpeg process failed with error: ${error}`));
-    //   });
+        if (state === SessionState.FAILED || !returnCode.isValueSuccess()) {
+          reject(new Error(`FFmpeg process failed with state: ${state} and rc: ${returnCode}`));
+        } else {
+          // Process output to extract codec name
+          const codec = output.trim().split('=')[1];
+          resolve(codec);
+        }
+      })
+      .catch((error) => {
+        reject(new Error(`FFmpeg process failed with error: ${error}`));
+      });
   });
 };
 
@@ -145,47 +145,46 @@ const segmentVideo = async (
       command = `-i ${source} -c:v libx264 -preset fast -crf 23 -c:a aac ${encryptionInfo} -hls_time 6 -hls_list_size 0 -f hls -hls_flags single_file ${playlistUri}`;
     }
 
-    throw new Error('FFmpegKit is not available currently.');
 
-    //   try {
-    //     const session = await FFmpegKit.execute(command);
-    //     const state = await session.getState();
-    //     const returnCode = await session.getReturnCode();
+    try {
+      const session = await FFmpegKit.execute(command);
+      const state = await session.getState();
+      const returnCode = await session.getReturnCode();
 
-    //     if (state === SessionState.FAILED || !returnCode.isValueSuccess()) {
-    //       throw new Error(`FFmpeg process failed with state: ${state} and rc: ${returnCode}.`);
-    //     }
+      if (state === SessionState.FAILED || !returnCode.isValueSuccess()) {
+        throw new Error(`FFmpeg process failed with state: ${state} and rc: ${returnCode}.`);
+      }
 
-    //     const segmentsUri = playlistUri.replace('.m3u8', '.ts');
+      const segmentsUri = playlistUri.replace('.m3u8', '.ts');
 
-    //     try {
-    //       pathsToClean?.forEach(async (path) => {
-    //         unlink(path);
-    //       });
+      try {
+        pathsToClean?.forEach(async (path) => {
+          unlink(path);
+        });
 
-    //       unlink(source);
-    //     } catch (error) {
-    //       console.warn(`Failed to clean up video files: ${error}`);
-    //     }
+        unlink(source);
+      } catch (error) {
+        console.warn(`Failed to clean up video files: ${error}`);
+      }
 
-    //     return {
-    //       playlist: {
-    //         ...video,
-    //         fileSize: (await stat(playlistUri).then((stats) => stats.size)) || video.fileSize,
-    //         type: 'application/vnd.apple.mpegurl',
-    //         uri: playlistUri,
-    //         filepath: playlistUri,
-    //       },
-    //       segments: {
-    //         ...video,
-    //         type: 'video/mp2t',
-    //         uri: segmentsUri,
-    //         filepath: segmentsUri,
-    //       },
-    //     };
-    //   } catch (error) {
-    //     throw new Error(`FFmpeg process failed with error: ${error}`);
-    //   }
+      return {
+        playlist: {
+          ...video,
+          fileSize: (await stat(playlistUri).then((stats) => stats.size)) || video.fileSize,
+          type: 'application/vnd.apple.mpegurl',
+          uri: playlistUri,
+          filepath: playlistUri,
+        },
+        segments: {
+          ...video,
+          type: 'video/mp2t',
+          uri: segmentsUri,
+          filepath: segmentsUri,
+        },
+      };
+    } catch (error) {
+      throw new Error(`FFmpeg process failed with error: ${error}`);
+    }
   } catch (ex) {
     console.error('failed to fragment video', ex);
     return null;
@@ -224,40 +223,40 @@ export const grabThumbnail = async (video: ImageSource) => {
   // MDN docs (https://developer.mozilla.org/en-US/docs/Web/API/Media_Source_Extensions_API/Transcoding_assets_for_MSE#fragmenting)
   // FFMPEG fragmenting: https://ffmpeg.org/ffmpeg-formats.html#Fragmentation
   const command = `-i ${source} -frames:v 1 ${commandDestinationUri}`;
-  throw new Error('FFmpegKit is not available currently.');
-  // try {
-  //   const session = await FFmpegKit.execute(command);
-  //   const state = await session.getState();
-  //   const returnCode = await session.getReturnCode();
-  //   // const failStackTrace = await session.getFailStackTrace();
-  //   // const output = await session.getOutput();
+  // throw new Error('FFmpegKit is not available currently.');
+  try {
+    const session = await FFmpegKit.execute(command);
+    const state = await session.getState();
+    const returnCode = await session.getReturnCode();
+    // const failStackTrace = await session.getFailStackTrace();
+    // const output = await session.getOutput();
 
-  //   if (state === SessionState.FAILED || !returnCode.isValueSuccess()) {
-  //     throw new Error(`FFmpeg process failed with state: ${state} and rc: ${returnCode}.`);
-  //   }
+    if (state === SessionState.FAILED || !returnCode.isValueSuccess()) {
+      throw new Error(`FFmpeg process failed with state: ${state} and rc: ${returnCode}.`);
+    }
 
-  //   const thumbBlob = new OdinBlob(destinationUri, { type: 'image/png' });
-  //   await new Promise<void>((resolve, reject) => {
-  //     let intervalCount = 0;
-  //     const interval = setInterval(async () => {
-  //       intervalCount++;
-  //       if (thumbBlob.written) {
-  //         clearInterval(interval);
-  //         resolve();
-  //       }
-  //       if (intervalCount > 200) {
-  //         clearInterval(interval);
-  //         reject(
-  //           '[RNVideoProviderSegmenter] grabThumbnail: Timeout while waiting for thumbnail to be written.'
-  //         );
-  //       }
-  //     }, 100);
-  //   });
-  //   return thumbBlob;
-  // } catch (error) {
-  //   console.error(`FFmpeg process failed with error: ${error}`);
-  //   return null;
-  // }
+    const thumbBlob = new OdinBlob(destinationUri, { type: 'image/png' });
+    await new Promise<void>((resolve, reject) => {
+      let intervalCount = 0;
+      const interval = setInterval(async () => {
+        intervalCount++;
+        if (thumbBlob.written) {
+          clearInterval(interval);
+          resolve();
+        }
+        if (intervalCount > 200) {
+          clearInterval(interval);
+          reject(
+            '[RNVideoProviderSegmenter] grabThumbnail: Timeout while waiting for thumbnail to be written.'
+          );
+        }
+      }, 100);
+    });
+    return thumbBlob;
+  } catch (error) {
+    console.error(`FFmpeg process failed with error: ${error}`);
+    return null;
+  }
 };
 
 interface VideoData {

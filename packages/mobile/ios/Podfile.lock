@@ -6,6 +6,13 @@ PODS:
   - DoubleConversion (1.1.6)
   - fast_float (8.0.0)
   - FBLazyVector (0.80.1)
+  - ffmpeg-kit-ios-full (6.0.2)
+  - ffmpeg-kit-react-native (6.0.2):
+    - ffmpeg-kit-react-native/full (= 6.0.2)
+    - React-Core
+  - ffmpeg-kit-react-native/full (6.0.2):
+    - ffmpeg-kit-ios-full (= 6.0.2)
+    - React-Core
   - Firebase/CoreOnly (10.24.0):
     - FirebaseCore (= 10.24.0)
   - Firebase/Messaging (10.24.0):
@@ -3421,6 +3428,8 @@ DEPENDENCIES:
   - DoubleConversion (from `../../../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec`)
   - fast_float (from `../../../node_modules/react-native/third-party-podspecs/fast_float.podspec`)
   - FBLazyVector (from `../../../node_modules/react-native/Libraries/FBLazyVector`)
+  - ffmpeg-kit-ios-full (from `./ffmpeg-kit-ios-full.podspec`)
+  - ffmpeg-kit-react-native (from `../../../node_modules/ffmpeg-kit-react-native`)
   - fmt (from `../../../node_modules/react-native/third-party-podspecs/fmt.podspec`)
   - glog (from `../../../node_modules/react-native/third-party-podspecs/glog.podspec`)
   - hermes-engine (from `../../../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec`)
@@ -3568,6 +3577,10 @@ EXTERNAL SOURCES:
     :podspec: "../../../node_modules/react-native/third-party-podspecs/fast_float.podspec"
   FBLazyVector:
     :path: "../../../node_modules/react-native/Libraries/FBLazyVector"
+  ffmpeg-kit-ios-full:
+    :podspec: "./ffmpeg-kit-ios-full.podspec"
+  ffmpeg-kit-react-native:
+    :path: "../../../node_modules/ffmpeg-kit-react-native"
   fmt:
     :podspec: "../../../node_modules/react-native/third-party-podspecs/fmt.podspec"
   glog:
@@ -3797,6 +3810,8 @@ SPEC CHECKSUMS:
   DoubleConversion: cb417026b2400c8f53ae97020b2be961b59470cb
   fast_float: b32c788ed9c6a8c584d114d0047beda9664e7cc6
   FBLazyVector: 09f03e4b6f42f955734b64a118f86509cc719427
+  ffmpeg-kit-ios-full: b68523d22418953d4ae41f2f7d98ad55d108f0fc
+  ffmpeg-kit-react-native: be73d3fe9ce218b23b207b249e399d1a5ab099a3
   Firebase: 91fefd38712feb9186ea8996af6cbdef41473442
   FirebaseCore: 11dc8a16dfb7c5e3c3f45ba0e191a33ac4f50894
   FirebaseCoreExtension: 705ca5b14bf71d2564a0ddc677df1fc86ffa600f
@@ -3926,6 +3941,6 @@ SPEC CHECKSUMS:
   Yoga: 2b7a0cd38b4b0b4fdd7f353017fde11914148f98
   ZIPFoundation: b8c29ea7ae353b309bc810586181fd073cb3312c
 
-PODFILE CHECKSUM: 70286be8eafbb6db473b18d4a7db85d09d3ac15a
+PODFILE CHECKSUM: 1c6972c10e95e3d7647e66ea6cf86499996fc48a
 
 COCOAPODS: 1.16.2

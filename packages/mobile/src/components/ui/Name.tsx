@@ -1,7 +1,7 @@
 import { useDotYouClientContext } from 'homebase-id-app-common';
 import { useExternalOdinId } from '../../hooks/connections/useExternalOdinId';
 import { useProfile } from '../../hooks/profile/useProfile';
-import { memo, ReactElement, ReactNode } from 'react';
+import { memo } from 'react';
 import { ErrorBoundary } from './ErrorBoundary/ErrorBoundary';
 
 export const ConnectionName = memo(

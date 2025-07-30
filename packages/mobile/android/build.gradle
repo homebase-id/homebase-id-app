@@ -31,6 +31,22 @@ allprojects {
             force "com.facebook.react:react-native:" + REACT_NATIVE_VERSION
         }
     }
+
+      repositories {
+        maven {
+            url "https://maven.pkg.github.com/homebase-id/ffmpeg-kit"
+            credentials {
+                def localProperties = new Properties()
+                def localPropertiesFile = rootProject.file('local.properties')
+                if (localPropertiesFile.exists()) {
+                    localProperties.load(localPropertiesFile.newDataInputStream())
+                }
+                username = localProperties.getProperty('GITHUB_USERNAME') ?: ''
+                password = localProperties.getProperty('GITHUB_TOKEN') ?: ''
+            }
+        }
+    }
+    
 }
 
 subprojects {
