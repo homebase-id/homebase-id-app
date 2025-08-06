@@ -172,9 +172,36 @@ const LoginComponent = () => {
   const [invalid, setInvalid] = useState<boolean>(false);
   const [odinId, setOdinId] = useState<string>('');
 
-  const onChangeOdinId = useCallback((text: string) => {
-    text = text.trim();
-    setOdinId(text);
+const onChangeOdinId = useCallback((text: string) => {
+    // Step 1: Handle pasted URLs - Strip protocols (http/https:// or similar), paths (after /), and queries (after ?)
+    let modifiedText = text
+        // Normalize common protocol typos
+        .replace(/:\/(?!\/)/g, '://') // Fix :/ to :// (missing one slash)
+        .replace(/^([\w+-]+)(\/\/)/i, '$1:$2') // Fix scheme// to scheme:// (missing colon; no . in scheme)
+        // Remove general protocol (scheme:// where scheme can be any word-like string, but no . to avoid domain mismatches)
+        .replace(/^[\w+-]+:\/\//i, '')
+        .replace(/\?.*$/, '') // Remove query params after ?
+        .replace(/\/.*$/, '') // Remove paths after /
+        .trim();
+    // Step 2: Replace spaces and commas with periods
+    modifiedText = modifiedText.replace(/ /g, '.').replace(/,/g, '.');
+    // Step 3: Remove illegal characters (e.g., #, ?, /, \, &, %, @, !, *, (, ), [, ], {, }, :, ;, ', ", <, >, =, +, ~, `, | ) but allow Unicode letters and digits (for later Punycode conversion)
+    modifiedText = modifiedText.replace(/[^\p{L}\p{N}.-]/gu, '');
+     // Step 4: Replace multiple consecutive periods with a single period
+    modifiedText = modifiedText.replace(/\.{2,}/g, '.');
+    // Step 5: Enforce per-label rules (no start/end with '-', no consecutive '-')
+    const labels = modifiedText.split('.');
+    const cleanedLabels = labels.map(label => {
+        // Remove leading/trailing '-', replace consecutive '-'
+        label = label.replace(/^-+|-+$/g, '').replace(/-{2,}/g, '-');
+        return label;
+    });
+    modifiedText = cleanedLabels.filter(Boolean).join('.'); // Remove empty labels
+    // Step 6: Remove leading or trailing periods (good for valid domains)
+    modifiedText = modifiedText.replace(/^\.|\.$/g, '');
+    // Step 7: Ensure lowercase (domains are case-insensitive)
+    modifiedText = modifiedText.toLowerCase().trim();
+    setOdinId(modifiedText);
   }, []);
 
   const { data: authParams, refetch } = useParams();
