@@ -56,10 +56,6 @@ import { Send, SendProps } from './Send';
 import { SystemMessage, SystemMessageProps } from './SystemMessage';
 import { Time, TimeProps } from './Time';
 import * as utils from './utils';
-import {
-  PasteInputProps,
-  PasteInputRef,
-} from '@mattermost/react-native-paste-input';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -71,9 +67,9 @@ dayjs.extend(localizedFormat);
 
 export interface GiftedChatProps<TMessage extends IMessage = IMessage> {
   /* Message container ref */
-  messageContainerRef?: React.RefObject<FlatList<IMessage>>;
+  messageContainerRef?: React.RefObject<FlatList<IMessage> | null>;
   /* text input ref */
-  textInputRef?: React.RefObject<TextInput>;
+  textInputRef?: React.RefObject<TextInput | null>;
   /* Messages to display */
   messages?: TMessage[];
   /* Typing Indicator state */
@@ -246,7 +242,7 @@ export interface GiftedChatProps<TMessage extends IMessage = IMessage> {
     props: Message<TMessage>['props'],
     nextProps: Message<TMessage>['props'],
   ): boolean;
-  onPaste: PasteInputProps['onPaste'];
+  renderUsernameOnMessage?: boolean;
 }
 
 const isDebug = false;
@@ -282,8 +278,7 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
     minComposerHeight = MIN_COMPOSER_HEIGHT,
     maxComposerHeight = MAX_COMPOSER_HEIGHT,
     messageContainerRef = createRef<FlatList<IMessage>>(),
-    textInputRef = createRef<PasteInputRef>(),
-    onPaste = null,
+    textInputRef = createRef<TextInput>(),
     renderBottomFooter = null,
   } = props;
 
@@ -685,7 +680,6 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
         ref: textInputRef,
         maxLength: typingDisabled ? 0 : maxInputLength,
       },
-      onPaste,
     }),
     [props, _composerHeight, typingDisabled],
   );

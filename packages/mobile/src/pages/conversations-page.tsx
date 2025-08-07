@@ -77,7 +77,7 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
   useLayoutEffect(() => {
     navigation.setOptions({
       headerSearchBarOptions: {
-        ref: searchRef,
+        ref: searchRef as React.RefObject<SearchBarCommands>,
         hideWhenScrolling: true,
         headerIconColor: isDarkMode ? Colors.white : Colors.black,
         placeholder: 'Search people',

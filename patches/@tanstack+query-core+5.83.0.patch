@@ -1,26 +1,26 @@
 diff --git a/node_modules/@tanstack/query-core/build/modern/infiniteQueryBehavior.cjs b/node_modules/@tanstack/query-core/build/modern/infiniteQueryBehavior.cjs
-index c9ee441..19b1a67 100644
+index 1891efa..54fe2f2 100644
 --- a/node_modules/@tanstack/query-core/build/modern/infiniteQueryBehavior.cjs
 +++ b/node_modules/@tanstack/query-core/build/modern/infiniteQueryBehavior.cjs
-@@ -130,7 +130,7 @@ function getPreviousPageParam(options, { pages, pageParams }) {
+@@ -134,7 +134,7 @@ function getPreviousPageParam(options, { pages, pageParams }) {
    return pages.length > 0 ? options.getPreviousPageParam?.(pages[0], pages, pageParams[0], pageParams) : void 0;
  }
  function hasNextPage(options, data) {
--  if (!data)
-+  if (!data || (!Array.isArray(data) && !Object.keys(data).length))
-     return false;
+-  if (!data) return false;
++  if (!data || (!Array.isArray(data) && !Object.keys(data).length)) return false;
    return getNextPageParam(options, data) != null;
  }
+ function hasPreviousPage(options, data) {
 diff --git a/node_modules/@tanstack/query-core/build/modern/infiniteQueryBehavior.js b/node_modules/@tanstack/query-core/build/modern/infiniteQueryBehavior.js
-index ce5518f..cc7a8cb 100644
+index 85e614f..85f8e4d 100644
 --- a/node_modules/@tanstack/query-core/build/modern/infiniteQueryBehavior.js
 +++ b/node_modules/@tanstack/query-core/build/modern/infiniteQueryBehavior.js
-@@ -104,7 +104,7 @@ function getPreviousPageParam(options, { pages, pageParams }) {
+@@ -108,7 +108,7 @@ function getPreviousPageParam(options, { pages, pageParams }) {
    return pages.length > 0 ? options.getPreviousPageParam?.(pages[0], pages, pageParams[0], pageParams) : void 0;
  }
  function hasNextPage(options, data) {
--  if (!data)
-+  if (!data || (!Array.isArray(data) && !Object.keys(data).length))
-     return false;
+-  if (!data) return false;
++  if (!data || (!Array.isArray(data) && !Object.keys(data).length)) return false;
    return getNextPageParam(options, data) != null;
  }
+ function hasPreviousPage(options, data) {

@@ -79,7 +79,7 @@ export interface MessageContainerProps<TMessage extends IMessage> {
   invertibleScrollViewProps?: any;
   extraData?: any;
   scrollToBottomOffset?: number;
-  forwardRef?: RefObject<FlatList<IMessage>>;
+  forwardRef?: RefObject<FlatList<IMessage> | null>;
   renderChatEmpty?(): React.ReactNode;
   renderFooter?(props: MessageContainerProps<TMessage>): React.ReactNode;
   renderMessage?(props: Message['props']): React.ReactNode;
@@ -97,7 +97,7 @@ interface State {
 }
 
 export default class MessageContainer<
-  TMessage extends IMessage = IMessage
+  TMessage extends IMessage = IMessage,
 > extends React.PureComponent<MessageContainerProps<TMessage>, State> {
   static defaultProps = {
     messages: [],
@@ -311,12 +311,8 @@ export default class MessageContainer<
   };
 
   onEndReached = ({ distanceFromEnd }: { distanceFromEnd: number }) => {
-    const {
-      loadEarlier,
-      onLoadEarlier,
-      infiniteScroll,
-      isLoadingEarlier,
-    } = this.props;
+    const { loadEarlier, onLoadEarlier, infiniteScroll, isLoadingEarlier } =
+      this.props;
     if (
       infiniteScroll &&
       (this.state.hasScrolled || distanceFromEnd > 0) &&

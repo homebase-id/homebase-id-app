@@ -353,10 +353,11 @@ export default class Message<
               ]}
             >
               {this.props.position === 'left' ? this.renderAvatar() : null}
+              {/* TODO: upgrade to https://docs.swmansion.com/react-native-gesture-handler/docs/components/reanimated_swipeable */}
               <ReanimatedSwipeable
                 renderRightActions={this.renderRightAction}
                 renderLeftActions={this.renderLeftAction}
-                onSwipeableOpen={this.onSwipeOpenAction}
+                onSwipeableOpen={this.onSwipeOpenAction as any}
                 {...swipeableProps}
               >
                 {this.renderBubble()}

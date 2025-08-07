@@ -71,9 +71,8 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
             style={{
               color: Colors.white,
             }}
-          >
-            <AuthorName odinId={senderOdinId} showYou />
-          </HeaderTitle>
+            children={(<AuthorName odinId={senderOdinId} showYou />) as unknown as string}
+          />
         )}
         {createdAt && (
           <Text

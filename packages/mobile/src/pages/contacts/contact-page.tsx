@@ -52,7 +52,7 @@ export const ContactPage = memo(({ navigation }: ContactPageProp) => {
   useLayoutEffect(() => {
     navigation.setOptions({
       headerSearchBarOptions: {
-        ref: searchRef,
+        ref: searchRef as React.RefObject<SearchBarCommands>,
         hideWhenScrolling: false,
         headerIconColor: isDarkMode ? Colors.white : Colors.black,
         placeholder: 'Search contacts',

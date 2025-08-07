@@ -26,7 +26,7 @@ export const NewGroupPage = memo(
         return BackButton({
           onPress: () => navigation.goBack(),
           prop: props,
-          label: '',
+          label: t('Back'),
           style: { marginLeft: 10 },
         });
       },
@@ -79,6 +79,7 @@ export const NewGroupPage = memo(
           headerLeft={headerLeft}
           headerRight={headerRight}
           headerStyle={headerStyle}
+          headerBackButtonDisplayMode="generic"
         />
         <SafeAreaView>
           {Platform.OS === 'ios' && <StatusBar barStyle="light-content" />}

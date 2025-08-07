@@ -5,6 +5,7 @@ import { BridgeServer } from 'react-native-http-bridge-refurbished';
 export const useLocalWebServer = (eanbled?: boolean) => {
   useEffect(() => {
     if (!eanbled) return;
+
     const server = new BridgeServer('http_service', true);
     server.get('*', async (req, res) => {
       if (req.url.startsWith('/manifest')) {

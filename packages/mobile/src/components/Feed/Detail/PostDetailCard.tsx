@@ -39,7 +39,7 @@ export const PostDetailCard = memo(
     onEmojiModalOpen: (context: ReactionContext) => void;
   }) => {
     const { isDarkMode } = useDarkMode();
-    const doubleTapRef = useRef<GestureType>();
+    const doubleTapRef = useRef<GestureType>(undefined);
     const identity = useDotYouClientContext().getLoggedInIdentity();
 
     if (!postFile) return <ActivityIndicator />;
