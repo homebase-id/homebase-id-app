@@ -1,7 +1,7 @@
 
 import InAppBrowser from 'react-native-inappbrowser-reborn';
 import { Linking } from 'react-native';
-import { calculateScaledDimensions, extractUrls, extractVideoParams, htmlToRecord, isEmojiOnly, millisToMinutesAndSeconds, openURL } from '../src/utils/utils';
+import { calculateScaledDimensions, extractUrls, extractVideoParams, htmlToRecord, isEmojiOnly, millisToMinutesAndSeconds, openURL, cleanDomainString } from '../src/utils/utils';
 
 jest.mock('react-native-inappbrowser-reborn', () => ({
     isAvailable: jest.fn(),
@@ -47,6 +47,27 @@ describe('utils.ts', () => {
             await openURL('');
             expect(InAppBrowser.open).not.toHaveBeenCalled();
             expect(Linking.openURL).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('cleanDomainString', () => {
+        it('handles valid URL with path and query', () => {
+            expect(cleanDomainString('https://example.com/path?query')).toBe('example.com');
+        });
+        it('preserves Unicode and fixes typos', () => {
+            expect(cleanDomainString('http:/æøå.example.com')).toBe('æøå.example.com');
+        });
+        it('collapses extra slashes', () => {
+            expect(cleanDomainString('https:///michael.seifert.page/')).toBe('michael.seifert.page');
+        });
+        it('removes invalid chars and cleans hyphens', () => {
+            expect(cleanDomainString('example--.com#invalid')).toBe('example.com');
+        });
+        it('handles plain domain with spaces', () => {
+            expect(cleanDomainString('example com')).toBe('example.com');
+        });
+        it('returns empty for invalid/empty input', () => {
+            expect(cleanDomainString('///')).toBe('');
         });
     });
 
