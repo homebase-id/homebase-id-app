@@ -13,7 +13,6 @@ import ReactNativeHapticFeedback, {
   HapticFeedbackTypes,
 } from 'react-native-haptic-feedback';
 import ReanimatedSwipeable, {
-  SwipeableMethods,
   SwipeableProps,
 } from 'react-native-gesture-handler/ReanimatedSwipeable';
 import Animated, {
@@ -94,6 +93,12 @@ export interface MessageProps<TMessage extends IMessage> {
 export default class Message<
   TMessage extends IMessage = IMessage,
 > extends React.Component<MessageProps<TMessage>> {
+  swipeableRef: React.RefObject<any>;
+
+  constructor(props: MessageProps<TMessage>) {
+    super(props);
+    this.swipeableRef = React.createRef();
+  }
   static defaultProps = {
     renderAvatar: undefined,
     renderBubble: null,
@@ -310,20 +315,17 @@ export default class Message<
     );
   };
 
-  onSwipeOpenAction = (
-    direction: 'left' | 'right',
-    swipeable: SwipeableMethods,
-  ) => {
+  onSwipeOpenAction = (direction: 'left' | 'right') => {
     ReactNativeHapticFeedback.trigger(HapticFeedbackTypes.impactMedium, {
       enableVibrateFallback: true,
     });
     if (this.props.currentMessage && direction === 'left') {
-      this.props.onRightSwipeOpen?.({ ...this.props.currentMessage });
-      swipeable.close();
+      this.props.onLeftSwipeOpen?.({ ...this.props.currentMessage });
+      this.swipeableRef.current?.close();
     } else {
       this.props.currentMessage &&
-        this.props.onLeftSwipeOpen?.({ ...this.props.currentMessage });
-      swipeable.close();
+        this.props.onRightSwipeOpen?.({ ...this.props.currentMessage });
+      this.swipeableRef.current?.close();
     }
   };
 
@@ -353,11 +355,11 @@ export default class Message<
               ]}
             >
               {this.props.position === 'left' ? this.renderAvatar() : null}
-              {/* TODO: upgrade to https://docs.swmansion.com/react-native-gesture-handler/docs/components/reanimated_swipeable */}
               <ReanimatedSwipeable
+                ref={this.swipeableRef}
                 renderRightActions={this.renderRightAction}
                 renderLeftActions={this.renderLeftAction}
-                onSwipeableOpen={this.onSwipeOpenAction as any}
+                onSwipeableOpen={this.onSwipeOpenAction}
                 {...swipeableProps}
               >
                 {this.renderBubble()}
