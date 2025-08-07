@@ -10,6 +10,7 @@ import { useDarkMode } from '../../hooks/useDarkMode';
 import { useRemoveNotifications } from '../../hooks/notifications/usePushNotifications';
 import { COMMUNITY_APP_ID } from '../../app/constants';
 import { CommunityStackParamList } from '../../app/CommunityStack';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type CommunityProps = NativeStackScreenProps<CommunityStackParamList, 'Home'>;
 
@@ -21,6 +22,7 @@ export const CommunityPage = memo((_props: CommunityProps) => {
   const { typeId, tagId } = _props.route.params;
 
   useRemoveNotifications({ appId: COMMUNITY_APP_ID });
+  const { top, bottom } = useSafeAreaInsets();
 
   const sharedSecret = getSharedSecret();
   const base64SharedSecret = sharedSecret ? uint8ArrayToBase64(sharedSecret) : '';
@@ -58,7 +60,14 @@ export const CommunityPage = memo((_props: CommunityProps) => {
   const webviewRef = useRef<WebView>(null);
 
   return (
-    <SafeAreaView>
+    <SafeAreaView
+      style={{
+        flex: 1,
+        paddingTop: top,
+        paddingBottom: bottom,
+        backgroundColor: isDarkMode ? Colors.slate[900] : Colors.slate[50],
+      }}
+    >
       {identity && uri ? (
         <WebView
           key={uri} // Reloads the WebView when the uri changes

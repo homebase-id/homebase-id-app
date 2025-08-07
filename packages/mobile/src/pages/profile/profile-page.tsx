@@ -72,11 +72,12 @@ export const ProfilePage = (_props: SettingsProps) => {
       ]
     );
   };
+  const { top, bottom } = useSafeAreaInsets();
 
   const navigate = (target: keyof ProfileStackParamList) => _props.navigation.navigate(target);
   return (
     <SafeAreaView>
-      <Container>
+      <Container style={{ flex: 1, paddingTop: top, paddingBottom: bottom }}>
         <ScrollView
           style={{ display: 'flex', flexDirection: 'column', paddingVertical: 12 }}
           showsVerticalScrollIndicator={false}

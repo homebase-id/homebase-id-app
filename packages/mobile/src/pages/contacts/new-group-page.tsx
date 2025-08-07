@@ -24,10 +24,11 @@ export const NewGroupPage = memo(
     const headerLeft = useCallback(
       (props: HeaderBackButtonProps) => {
         return BackButton({
-          onPress: () => navigation.goBack(),
           prop: props,
+          onPress: () => navigation.goBack(),
           label: t('Back'),
-          style: { marginLeft: 10 },
+          showArrow: Platform.OS === 'android',
+          style: { marginLeft: Platform.OS === 'ios' ? 10 : 0 },
         });
       },
       [navigation]
@@ -75,14 +76,14 @@ export const NewGroupPage = memo(
       <>
         <Header
           title="New Group"
-          headerStatusBarHeight={Platform.OS === 'ios' ? 10 : 0}
+          headerStatusBarHeight={Platform.OS === 'ios' ? 10 : undefined}
           headerLeft={headerLeft}
           headerRight={headerRight}
           headerStyle={headerStyle}
           headerBackButtonDisplayMode="generic"
         />
         <SafeAreaView>
-          {Platform.OS === 'ios' && <StatusBar barStyle="light-content" />}
+          {Platform.OS === 'ios' && <StatusBar barStyle="light-content" translucent />}
           <FlatList
             data={contacts}
             keyExtractor={(item) => item.odinId}
