@@ -53,7 +53,7 @@ export const HomePage = (_props: HomeProps) => {
 
   const renderHeader = useCallback(
     () => (
-      <>
+      <Container>
         <ProfileInfo />
         <Dashboard />
         {flattenedNotifications.length ? (
@@ -67,7 +67,7 @@ export const HomePage = (_props: HomeProps) => {
             </TouchableOpacity>
           </View>
         ) : null}
-      </>
+      </Container>
     ),
     [doClearAll, flattenedNotifications]
   );
@@ -80,12 +80,13 @@ export const HomePage = (_props: HomeProps) => {
   );
 
   return (
-    <SafeAreaView>
+    <SafeAreaView style={{ flex: 1 }}>
       <Container style={{ flex: 1 }}>
         <FlatList
           ref={scrollRef}
           data={Object.keys(groupedNotificationsPerDay)}
           showsVerticalScrollIndicator={false}
+          style={{ flex: 1 }}
           contentContainerStyle={{ gap: 8 }}
           ListHeaderComponent={renderHeader}
           renderItem={renderItem}

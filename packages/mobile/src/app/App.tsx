@@ -37,6 +37,7 @@ import {
   TabHouseIcon,
   TabChatIcon,
   TabMenuIcon,
+  TabCommunityIcon,
 } from '../components/Nav/TabStackIcons';
 import { AudioContextProvider } from '../components/AudioContext/AudioContext';
 import { WebSocketContextProvider } from '../components/WebSocketContext/WebSocketContext';
@@ -256,19 +257,20 @@ const TabStack = memo(() => {
           }}
         />
         <TabBottom.Screen
+          name="Community"
+          component={CommunityStack}
+          initialParams={{ screen: 'Home', params: {} }}
+          options={{
+            tabBarIcon: TabCommunityIcon,
+          }}
+        />
+        <TabBottom.Screen
           name="Profile"
           component={ProfileStack}
           options={{
             tabBarIcon: TabMenuIcon,
           }}
         />
-        {/* <TabBottom.Screen
-          name="Community"
-          component={CommunityStack}
-          options={{
-            tabBarButton: () => null,
-          }}
-        /> */}
       </TabBottom.Navigator>
     </BottomSheetModalProvider>
   );
