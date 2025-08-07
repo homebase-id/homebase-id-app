@@ -207,7 +207,8 @@ export function cleanDomainString(input: string): string {
         // Remove general protocol (scheme:// where scheme can be any word-like string, but no . to avoid domain mismatches)
         .replace(/^[\w+-]+:\/\//i, '')
         .replace(/\?.*$/, '') // Remove query params after ?
-        .replace(/\/.*$/, '');// Remove paths after /
+        .replace(/#.*$/, '') // Remove fragments after # (new addition to handle URL anchors)
+        .replace(/\/.*$/, ''); // Remove paths after /
     // Step 2: Replace spaces and commas with periods
     cleanedString = cleanedString.replace(/ /g, '.').replace(/,/g, '.');
     // Step 3: Remove illegal characters (e.g., #, ?, /, \, &, %, @, !, *, (, ), [, ], {, }, :, ;, ', ", <, >, =, +, ~, `, | ) but allow Unicode letters and digits (for later Punycode conversion)
