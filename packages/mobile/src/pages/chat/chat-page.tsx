@@ -8,6 +8,7 @@ import {
   RichText,
 } from '@homebase-id/js-lib/core';
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Alert,
@@ -512,6 +513,20 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
   //   [onAssetsAdded]
   // );
   const [isOpen, setIsOpen] = useState(false);
+  const menuAnim = useSharedValue(0);
+
+  useEffect(() => {
+    menuAnim.value = withTiming(isOpen ? 1 : 0, { duration: isOpen ? 180 : 120 });
+  }, [isOpen, menuAnim]);
+
+  const menuAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: menuAnim.value,
+    transform: [
+      {
+        translateY: menuAnim.value === 0 ? -30 : withTiming(0, { duration: 180 }),
+      },
+    ],
+  }));
   const { isDarkMode } = useDarkMode();
 
   const host = identity
@@ -682,11 +697,13 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
                   : undefined
               }
             />
-            {isOpen ? (
-              <View
-                style={{
+            <Animated.View
+              pointerEvents={isOpen ? 'auto' : 'none'}
+              style={[
+                {
                   position: 'absolute',
-                  top: Platform.select({ ios: 90, android: 56 }),
+                  // Even more vertical offset for more separation from the app bar
+                  top: Platform.select({ ios: 80, android: 95 }),
                   minWidth: 180,
                   right: 4,
                   backgroundColor: isDarkMode ? Colors.black : Colors.white,
@@ -695,9 +712,12 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
                   borderWidth: 1,
                   borderColor: isDarkMode ? Colors.slate[700] : Colors.gray[200],
                   borderRadius: 4,
-                }}
-              >
-                {chatOptions.map((child, index) => (
+                },
+                menuAnimatedStyle,
+              ]}
+            >
+              {isOpen &&
+                chatOptions.map((child, index) => (
                   <TouchableOpacity
                     key={index}
                     onPress={() => {
@@ -716,8 +736,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
                     <Text>{child.label}</Text>
                   </TouchableOpacity>
                 ))}
-              </View>
-            ) : null}
+            </Animated.View>
             <ChatConnectedState {...conversation} />
             <OfflineState isConnected={isOnline} />
             <Host>
