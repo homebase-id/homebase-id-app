@@ -129,6 +129,11 @@ const useFinalize = () => {
           const dataParams = url?.split(FINALIZE_PATH)[1];
           const params = new URLSearchParams(dataParams);
 
+          const error = params.get('error');
+          if (error) {
+            setState(null);
+            return;
+          }
           const identity = params.get('identity');
           const public_key = params.get('public_key');
           const salt = params.get('salt');
@@ -173,10 +178,10 @@ const LoginComponent = () => {
   const [invalid, setInvalid] = useState<boolean>(false);
   const [odinId, setOdinId] = useState<string>('');
 
-    const onChangeOdinId = useCallback((text: string) => {
-        const modifiedText = cleanDomainString(text);
-        setOdinId(modifiedText);
-    }, []);
+  const onChangeOdinId = useCallback((text: string) => {
+    const modifiedText = cleanDomainString(text);
+    setOdinId(modifiedText);
+  }, []);
 
   const { data: authParams, refetch } = useParams();
   const lastIdentity = useAuth().getLastIdentity();
