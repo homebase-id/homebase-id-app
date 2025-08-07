@@ -194,8 +194,9 @@ export function cleanString(input: string): string {
 export function cleanDomainString(input: string): string {
     let cleanedString = input.trim();
 
-    if (!cleanedString)
+    if (!cleanedString) {
         return '';
+    }
 
     // Step 1: Handle pasted URLs - Strip protocols (http/https:// or similar), paths (after /), and queries (after ?)
     cleanedString = cleanedString
