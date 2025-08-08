@@ -2,6 +2,7 @@ import { Colors } from '../../../app/Colors';
 import { SafeAreaView, StatusBar, ViewProps, ViewStyle } from 'react-native';
 import { useDarkMode } from '../../../hooks/useDarkMode';
 import { ErrorBoundary } from '../ErrorBoundary/ErrorBoundary';
+import { SystemBars } from 'react-native-edge-to-edge';
 
 interface SaferAreaViewProps extends Omit<ViewProps, 'style'> {
   style?: ViewStyle;
@@ -13,6 +14,7 @@ const OurSafeAreaView = (props: SaferAreaViewProps) => {
 
   return (
     <ErrorBoundary>
+      <SystemBars style={'auto'} />
       <StatusBar
         backgroundColor={isDarkMode ? Colors.gray[900] : Colors.slate[50]}
         animated

@@ -305,9 +305,6 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
         loop={false}
         defaultIndex={initialIndex}
         renderItem={renderItem}
-        style={{
-          backgroundColor: Colors.pink[100],
-        }}
       />
 
       {isVisible && (

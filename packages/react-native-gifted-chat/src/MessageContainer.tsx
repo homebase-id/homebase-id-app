@@ -24,6 +24,7 @@ import TypingIndicator from './TypingIndicator';
 
 import { StylePropType } from './utils';
 import { warning } from './logging';
+import { KeyboardGestureArea } from 'react-native-keyboard-controller';
 
 const styles = StyleSheet.create({
   container: {
@@ -331,7 +332,8 @@ export default class MessageContainer<
   render() {
     const { inverted } = this.props;
     return (
-      <View
+      <KeyboardGestureArea
+        interpolator='ios'
         style={
           this.props.alignTop ? styles.containerAlignTop : styles.container
         }
@@ -366,7 +368,7 @@ export default class MessageContainer<
         {this.state.showScrollBottom && this.props.scrollToBottom
           ? this.renderScrollToBottomWrapper()
           : null}
-      </View>
+      </KeyboardGestureArea>
     );
   }
 }

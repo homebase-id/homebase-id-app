@@ -18,7 +18,6 @@ import React, {
 import {
   FlatList,
   Keyboard,
-  KeyboardAvoidingView,
   LayoutChangeEvent,
   Platform,
   StyleProp,
@@ -62,6 +61,10 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { v4 } from 'uuid';
+import {
+  KeyboardAvoidingView,
+  KeyboardStickyView,
+} from 'react-native-keyboard-controller';
 
 dayjs.extend(localizedFormat);
 
@@ -353,11 +356,9 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
   const getMessagesContainerHeightWithKeyboard = useCallback(
     (composerHeight = _composerHeight) => {
       isDebug && console.log('getMessagesContainerHeightWithKeyboard');
-      return (
-        getBasicMessagesContainerHeight(composerHeight) -
-        getKeyboardHeight() +
-        bottomOffsetRef.current
-      );
+      // RN Keyboard Controller will handle keyboard avoidance/translation.
+      // Keep messages list height based on basic layout only.
+      return getBasicMessagesContainerHeight(composerHeight);
     },
     [getBasicMessagesContainerHeight, getKeyboardHeight],
   );
@@ -503,11 +504,9 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
     return isKeyboardInternallyHandled ? (
       <KeyboardAvoidingView
         enabled
-        style={
-          Platform.OS === 'android'
-            ? { height: 'auto', flexGrow: 1 }
-            : undefined
-        }
+        behavior='translate-with-padding'
+        keyboardVerticalOffset={insets.bottom}
+        style={{ flex: 1 }}
       >
         {fragment}
       </KeyboardAvoidingView>
@@ -700,11 +699,22 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
           <ActionSheetProvider ref={actionSheetRef}>
             <View onLayout={onMainViewLayout} style={styles.container}>
               {RenderedMessages}
-              {renderInputToolbar ? (
-                renderInputToolbar({ ...inputToolbarProps, text })
-              ) : (
-                <InputToolbar {...inputToolbarProps} text={text} />
-              )}
+              <KeyboardStickyView offset={{ closed: 0, opened: insets.bottom }}>
+                {renderInputToolbar ? (
+                  renderInputToolbar({ ...inputToolbarProps, text })
+                ) : (
+                  <InputToolbar
+                    {...inputToolbarProps}
+                    text={text}
+                    containerStyle={{
+                      position: 'relative',
+                      left: undefined,
+                      right: undefined,
+                      bottom: undefined,
+                    }}
+                  />
+                )}
+              </KeyboardStickyView>
               {renderBottomFooter}
             </View>
           </ActionSheetProvider>

@@ -202,9 +202,9 @@ export const dsrToMessage = async (
         )
           ? ChatDeliveryStatus.Read
           : buildDeliveryStatus(
-              dsr.serverMetadata.originalRecipientCount,
-              dsr.serverMetadata.transferHistory.summary
-            );
+            dsr.serverMetadata.originalRecipientCount,
+            dsr.serverMetadata.transferHistory.summary
+          );
       }
     }
 
@@ -337,19 +337,19 @@ export const uploadChatMessage = async (
     },
     transitOptions: distribute
       ? {
-          recipients: [...recipients],
-          schedule: ScheduleOptions.SendLater,
-          priority: PriorityOptions.High,
-          sendContents: SendContents.All,
-          useAppNotification: true,
-          appNotificationOptions: {
-            appId: CHAT_APP_ID,
-            typeId: message.fileMetadata.appData.groupId || getNewId(),
-            tagId: message.fileMetadata.appData.uniqueId || getNewId(),
-            silent: false,
-            unEncryptedMessage: notificationBody,
-          },
-        }
+        recipients: [...recipients],
+        schedule: ScheduleOptions.SendLater,
+        priority: PriorityOptions.High,
+        sendContents: SendContents.All,
+        useAppNotification: true,
+        appNotificationOptions: {
+          appId: CHAT_APP_ID,
+          typeId: message.fileMetadata.appData.groupId || getNewId(),
+          tagId: message.fileMetadata.appData.uniqueId || getNewId(),
+          silent: false,
+          unEncryptedMessage: notificationBody,
+        },
+      }
       : undefined,
   };
 
@@ -366,10 +366,10 @@ export const uploadChatMessage = async (
   const content = shouldEmbedContent
     ? jsonContent
     : jsonStringify64({
-        message: ellipsisAtMaxChar(getPlainTextFromRichText(messageContent.message), 400),
-        replyId: messageContent.replyId,
-        deliveryStatus: messageContent.deliveryStatus,
-      }); // We only embed the content if it's less than 3kb
+      message: ellipsisAtMaxChar(getPlainTextFromRichText(messageContent.message), 400),
+      replyId: messageContent.replyId,
+      deliveryStatus: messageContent.deliveryStatus,
+    }); // We only embed the content if it's less than 3kb
 
   if (!shouldEmbedContent) {
     payloads.push({
@@ -411,10 +411,10 @@ export const uploadChatMessage = async (
 
     const imageSource: ImageSource | undefined = linkPreviewWithImage
       ? {
-          height: linkPreviewWithImage.imageHeight || 0,
-          width: linkPreviewWithImage.imageWidth || 0,
-          uri: linkPreviewWithImage.imageUrl,
-        }
+        height: linkPreviewWithImage.imageHeight || 0,
+        width: linkPreviewWithImage.imageWidth || 0,
+        uri: linkPreviewWithImage.imageUrl,
+      }
       : undefined;
 
     const { tinyThumb } = imageSource
@@ -458,10 +458,11 @@ export const uploadChatMessage = async (
         payloadKey,
         (newMediaFile?.type as ImageContentType) || undefined,
         [
-          { quality: 75, width: 250, height: 250 },
-          { quality: 75, width: 1600, height: 1600 },
+          { quality: 84, maxPixelDimension: 320, maxBytes: 26 * 1024 },
+          { quality: 76, maxPixelDimension: 1600, maxBytes: 640 * 1024 },
         ]
       );
+
 
       thumbnails.push(...additionalThumbnails);
       payloads.push({
@@ -587,10 +588,10 @@ export const updateChatMessage = async (
   const content = shouldEmbedContent
     ? jsonContent
     : jsonStringify64({
-        message: ellipsisAtMaxChar(getPlainTextFromRichText(messageContent.message), 400),
-        replyId: messageContent.replyId,
-        deliveryStatus: messageContent.deliveryStatus,
-      }); // We only embed the content if it's less than 3kb
+      message: ellipsisAtMaxChar(getPlainTextFromRichText(messageContent.message), 400),
+      replyId: messageContent.replyId,
+      deliveryStatus: messageContent.deliveryStatus,
+    }); // We only embed the content if it's less than 3kb
 
   const payloads: PayloadFile[] = [];
   if (!shouldEmbedContent) {

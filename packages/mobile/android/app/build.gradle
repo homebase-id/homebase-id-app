@@ -138,7 +138,7 @@ dependencies {
     implementation("com.facebook.react:react-android")
 
     // For animated GIF support
-    implementation 'com.facebook.fresco:animated-gif:2.5.0'
+    implementation 'com.facebook.fresco:animated-gif:3.6.0'
 
      // For WebP support, including animated WebP
     implementation 'com.facebook.fresco:animated-webp:2.5.0'

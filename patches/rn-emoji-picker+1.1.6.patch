@@ -1,32 +1,5 @@
-diff --git a/node_modules/rn-emoji-picker/dist/tabBar/index.js b/node_modules/rn-emoji-picker/dist/tabBar/index.js
-index 9f5f7d8..1c2a3b1 100644
---- a/node_modules/rn-emoji-picker/dist/tabBar/index.js
-+++ b/node_modules/rn-emoji-picker/dist/tabBar/index.js
-@@ -4,9 +4,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
- exports.TabBar = void 0;
- const react_native_1 = require("react-native");
--const TabBar = ({ categories, activeCategory, onPress, darkMode, width }) => {
--    const tabSize = width / categories.length;
--    const uiSize = tabSize - 20;
-+const TabBar = ({ categories, activeCategory, onPress, darkMode, width }) => {
-+    const catLen = Array.isArray(categories) && categories.length ? categories.length : 1;
-+    const safeWidth = typeof width === 'number' && width > 0 ? width : 0;
-+    const tabSize = catLen > 0 && safeWidth > 0 ? safeWidth / catLen : 0;
-+    const uiSize = Math.max(tabSize - 20, 12);
-     return (<react_native_1.View style={styles.container}>
- 			{categories.map(category => {
-             return (<react_native_1.TouchableOpacity key={category.key} onPress={() => onPress(category)} style={[
-@@ -20,7 +23,7 @@ const TabBar = ({ categories, activeCategory, onPress, darkMode, width }) => {
- 							{category.emoji}
- 						</react_native_1.Text>
- 						<react_native_1.View style={{
--                    width: uiSize,
-+                    width: uiSize,
-                     height: 1,
-                     backgroundColor: category.key === activeCategory.key ? darkMode ? '#fff' : '#323333' : 'transparent'
-                 }}/>
 diff --git a/node_modules/rn-emoji-picker/dist/emojiCell/index.js b/node_modules/rn-emoji-picker/dist/emojiCell/index.js
-index 4a2c8f1..e8b6c2d 100644
+index 43b93ff..3a2c929 100644
 --- a/node_modules/rn-emoji-picker/dist/emojiCell/index.js
 +++ b/node_modules/rn-emoji-picker/dist/emojiCell/index.js
 @@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
@@ -38,12 +11,12 @@ index 4a2c8f1..e8b6c2d 100644
  	</react_native_1.TouchableOpacity>);
  exports.EmojiCell = EmojiCell;
  //# sourceMappingURL=index.js.map
+\ No newline at end of file
 diff --git a/node_modules/rn-emoji-picker/dist/index.js b/node_modules/rn-emoji-picker/dist/index.js
-index 5d6c3a1..9c8d2e4 100644
+index 1746ddb..d4eecba 100644
 --- a/node_modules/rn-emoji-picker/dist/index.js
 +++ b/node_modules/rn-emoji-picker/dist/index.js
-@@ -13,7 +13,7 @@ const emojiFromUtf16 = (utf16) => String.fromCodePoint(...utf16.split('-').map(u
- exports.emojiFromUtf16 = emojiFromUtf16;
+@@ -15,7 +15,7 @@ exports.emojiFromUtf16 = emojiFromUtf16;
  const EmojiPicker = ({ recent = [], emojis = [], loading = false, autoFocus = true, darkMode = true, backgroundColor = darkMode ? '#000' : '#fff', perLine = 8, onSelect = (emoji) => null, onChangeRecent = (recent) => { }, defaultCategory = 'emotion', enabledCategories = constants_1.categoryKeys, }) => {
      const [searchQuery, setSearchQuery] = (0, react_1.useState)('');
      const [width, setWidth] = (0, react_1.useState)(0);
@@ -52,21 +25,35 @@ index 5d6c3a1..9c8d2e4 100644
      const sectionList = (0, react_1.useRef)(null);
      const [init, setInit] = (0, react_1.useState)(true);
      const finalCategories = constants_1.categories.filter(category => enabledCategories.includes(category.key));
-@@ -46,7 +46,7 @@ const EmojiPicker = ({ recent = [], emojis = [], loading = false, autoFocus = tr
+@@ -71,12 +71,12 @@ const EmojiPicker = ({ recent = [], emojis = [], loading = false, autoFocus = tr
      const renderEmojiRow = ({ item }) => <emojiRow_1.default selectEmoji={selectEmoji} rowItems={item.data} colSize={colSize}/>;
      const activeSection = sections.find(s => s.key === category.key);
      return (<react_native_1.View style={[styles.container, { backgroundColor }]} onLayout={event => setWidth(event.nativeEvent.layout.width)}>
 -			<tabBar_1.TabBar activeCategory={category} onPress={selectTab} categories={finalCategories} darkMode={darkMode} width={width}/>
-+			{width > 0 ? (<tabBar_1.TabBar activeCategory={category} onPress={selectTab} categories={finalCategories} darkMode={darkMode} width={width}/>) : null}
++            {width > 0 ? (<tabBar_1.TabBar activeCategory={category} onPress={selectTab} categories={finalCategories} darkMode={darkMode} width={width}/>) : null}
  			<react_native_1.View style={{ flex: 1 }}>
  				<react_native_1.View style={styles.searchbarContainer}>
  					<input_1.Input placeholder="Search..." value={searchQuery} onChangeText={setSearchQuery} autoFocus={autoFocus} darkMode={darkMode}/>
-@@ -54,7 +54,7 @@ const EmojiPicker = ({ recent = [], emojis = [], loading = false, autoFocus = tr
+ 				</react_native_1.View>
 -				{!loading ? (<react_native_1.SectionList style={{ flex: 1 }} sections={searchQuery ? searchResults : init && recent.length ? [sections[0], activeSection] : [activeSection]} keyExtractor={(item) => item.key} renderItem={renderEmojiRow} renderSectionHeader={renderSectionHeader} contentContainerStyle={{ paddingBottom: colSize }} horizontal={false} keyboardShouldPersistTaps={"handled"} removeClippedSubviews showsVerticalScrollIndicator={false} stickySectionHeadersEnabled={false} ref={sectionList} onScrollBeginDrag={react_native_1.Keyboard.dismiss}/>
-+				{!loading && width > 0 ? (<react_native_1.SectionList style={{ flex: 1 }} sections={searchQuery ? searchResults : init && recent.length ? [sections[0], activeSection] : [activeSection]} keyExtractor={(item) => item.key} renderItem={renderEmojiRow} renderSectionHeader={renderSectionHeader} contentContainerStyle={{ paddingBottom: colSize }} horizontal={false} keyboardShouldPersistTaps={"handled"} removeClippedSubviews showsVerticalScrollIndicator={false} stickySectionHeadersEnabled={false} nestedScrollEnabled={true} ref={sectionList} onScrollBeginDrag={react_native_1.Keyboard.dismiss}/>
++                {!loading && width > 0 ? (<react_native_1.SectionList style={{ flex: 1 }} sections={searchQuery ? searchResults : init && recent.length ? [sections[0], activeSection] : [activeSection]} keyExtractor={(item) => item.key} renderItem={renderEmojiRow} renderSectionHeader={renderSectionHeader} contentContainerStyle={{ paddingBottom: colSize }} horizontal={false} keyboardShouldPersistTaps={"handled"} removeClippedSubviews showsVerticalScrollIndicator={false} stickySectionHeadersEnabled={false} nestedScrollEnabled={true} ref={sectionList} onScrollBeginDrag={react_native_1.Keyboard.dismiss}/>
          // <SectionList
          // 	style={{flex: 1}}
          // 	sections={searchResults.length ? searchResults : sections}
-         // 	keyExtractor={item => item.key}
-         // 	renderItem={renderEmojiRow}
-*** End Patch
+diff --git a/node_modules/rn-emoji-picker/dist/tabBar/index.js b/node_modules/rn-emoji-picker/dist/tabBar/index.js
+index bcbfcf8..99298b8 100644
+--- a/node_modules/rn-emoji-picker/dist/tabBar/index.js
++++ b/node_modules/rn-emoji-picker/dist/tabBar/index.js
+@@ -3,8 +3,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
+ exports.TabBar = void 0;
+ const react_native_1 = require("react-native");
+ const TabBar = ({ categories, activeCategory, onPress, darkMode, width }) => {
+-    const tabSize = width / categories.length;
+-    const uiSize = tabSize - 20;
++    const catLen = Array.isArray(categories) && categories.length ? categories.length : 1;
++    const safeWidth = typeof width === 'number' && width > 0 ? width : 0;
++    const tabSize = catLen > 0 && safeWidth > 0 ? safeWidth / catLen : 0;
++    const uiSize = Math.max(tabSize - 20, 12);
+     return (<react_native_1.View style={styles.container}>
+ 			{categories.map(category => {
+             return (<react_native_1.TouchableOpacity key={category.key} onPress={() => onPress(category)} style={[

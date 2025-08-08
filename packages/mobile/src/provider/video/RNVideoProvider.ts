@@ -57,11 +57,12 @@ export const uploadVideo = async (
 
   const { tinyThumb, additionalThumbnails } = uploadMeta?.thumb
     ? await createThumbnails(
-        uploadMeta.thumb.payload,
-        DEFAULT_PAYLOAD_KEY,
-        uploadMeta.thumb?.type,
-        [{ quality: 100, width: 250, height: 250 }]
-      )
+      uploadMeta.thumb.payload,
+      DEFAULT_PAYLOAD_KEY,
+      uploadMeta.thumb?.type,
+      [{ quality: 100, maxPixelDimension: 320, maxBytes: 26 * 1024 },
+      ]
+    )
     : { tinyThumb: undefined, additionalThumbnails: undefined };
 
   // Updating images in place is a rare thing, but if it happens there is often no versionTag, so we need to fetch it first

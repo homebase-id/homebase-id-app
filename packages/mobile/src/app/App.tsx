@@ -61,6 +61,7 @@ import ChatSettingsProvider from '../components/Settings/ChatSettingsContext';
 import { useCacheCleanup } from '../hooks/file/useCacheCleanup';
 import { PendingUpgradeDialog } from '../components/PendingUpgrad/PendingUpgrade';
 import { CommunityStack, CommunityStackParamList } from './CommunityStack';
+import { KeyboardProvider } from 'react-native-keyboard-controller';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -86,10 +87,12 @@ const App = () => {
       <GestureHandlerRootView>
         <PushNotificationProvider>
           <RouteContextProvider>
-            <DotYouClientProvider>
-              <RootStack />
-              <Toast />
-            </DotYouClientProvider>
+            <KeyboardProvider>
+              <DotYouClientProvider>
+                <RootStack />
+                <Toast />
+              </DotYouClientProvider>
+            </KeyboardProvider>
           </RouteContextProvider>
         </PushNotificationProvider>
       </GestureHandlerRootView>

@@ -1,5 +1,3 @@
-import { NavigationProp, useNavigation } from '@react-navigation/native';
-
 import { onlineManager } from '@tanstack/react-query';
 import { NativeStackScreenProps, createNativeStackNavigator } from '@react-navigation/native-stack';
 import { BackButton, HeaderActions } from '../components/ui/Buttons';

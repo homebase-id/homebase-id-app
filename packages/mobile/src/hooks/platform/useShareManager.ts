@@ -1,7 +1,7 @@
 import { NavigationProp, useFocusEffect, useNavigation } from '@react-navigation/native';
 import { useCallback, useEffect } from 'react';
 import { NativeEventEmitter, NativeModules } from 'react-native';
-import { AuthStackParamList, TabStackParamList } from '../../app/App';
+import { AuthStackParamList } from '../../app/App';
 import { addLogs } from '../../provider/log/logger';
 
 
