@@ -64,7 +64,7 @@ import { CommunityStack, CommunityStackParamList } from './CommunityStack';
 
 export type AuthStackParamList = {
   Login: undefined;
-  Authenticated: undefined;
+  Authenticated: NavigatorScreenParams<TabStackParamList> | undefined;
 };
 
 export type TabStackParamList = {

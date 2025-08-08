@@ -1,7 +1,7 @@
 import { NavigationProp, useFocusEffect, useNavigation } from '@react-navigation/native';
 import { useCallback, useEffect } from 'react';
 import { NativeEventEmitter, NativeModules } from 'react-native';
-import { ChatStackParamList } from '../../app/ChatStack';
+import { AuthStackParamList, TabStackParamList } from '../../app/App';
 import { addLogs } from '../../provider/log/logger';
 
 
@@ -18,7 +18,9 @@ export type SharedItem = {
 };
 
 export const useShareManager = () => {
-  const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
+  // This hook runs at the app root (inside AppStackScreen), so the nearest navigator is the Tab stack.
+  // We must navigate to the nested Chat stack to reach ShareChat.
+  const navigation = useNavigation<NavigationProp<AuthStackParamList>>();
   const handleShare = useCallback(
     (item?: SharedItem[]) => {
       if (!item) {
@@ -32,7 +34,7 @@ export const useShareManager = () => {
           stackTrace: JSON.stringify(item, null, 2),
         },
       });
-      navigation.navigate('ShareChat', item);
+      navigation.navigate('Authenticated', { screen: 'Chat', params: { screen: 'ShareChat', params: item } });
     },
     [navigation]
   );
