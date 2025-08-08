@@ -168,8 +168,8 @@ export const ChatColorSettings = () => {
               },
             ]}
           >
-            <Message {...messageProps.receiver} />
-            <Message {...messageProps.sender} />
+            <Message {...messageProps.receiver} key={'receiver'} />
+            <Message {...messageProps.sender} key={'sender'} />
           </View>
 
           {/* Render Colors */}

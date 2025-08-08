@@ -65,6 +65,7 @@ export const EmojiPickerModal = forwardRef(
         handleIndicatorStyle={{
           backgroundColor: isDarkMode ? Colors.gray[100] : Colors.gray[500],
         }}
+        enableContentPanningGesture={false}
       >
         <View
           style={{
@@ -76,7 +77,7 @@ export const EmojiPickerModal = forwardRef(
             autoFocus={true} // autofocus search input
             loading={false} // spinner for if your emoji data or recent store is async
             darkMode={isDarkMode} // to be or not to be, that is the question
-            perLine={7} // # of emoji's per line
+            perLine={7} // # of emoji's per line (reduced to avoid negative font size)
             onSelect={onSelectEmoji}
             backgroundColor={isDarkMode ? Colors.gray[900] : Colors.slate[50]}
           />
