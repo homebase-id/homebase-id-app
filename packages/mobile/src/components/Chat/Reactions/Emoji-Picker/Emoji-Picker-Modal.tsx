@@ -1,9 +1,10 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
 import { View } from 'react-native';
 import { useDarkMode } from '../../../../hooks/useDarkMode';
 import { emojis } from 'rn-emoji-picker/dist/data';
 import EmojiPicker from 'rn-emoji-picker';
-import React, { forwardRef, useCallback } from 'react';
+import React, { forwardRef, useCallback, useEffect, useState } from 'react';
 import { useChatReaction } from '../../../../hooks/chat/useChatReaction';
 import { useConversation } from '../../../../hooks/chat/useConversation';
 import { Colors } from '../../../../app/Colors';
@@ -37,8 +38,30 @@ export const EmojiPickerModal = forwardRef(
       conversationId: selectedMessage?.fileMetadata.appData.groupId,
     }).single.data;
 
+    const [recent, setRecent] = useState<Emoji[]>([]);
+    // Load recent emojis from AsyncStorage on mount
+    useEffect(() => {
+      AsyncStorage.getItem('recentEmojis').then((data) => {
+        if (data) {
+          try {
+            const parsed = JSON.parse(data);
+            if (Array.isArray(parsed)) setRecent(parsed);
+          } catch {}
+        }
+      });
+    }, []);
+    // Save recent emojis to AsyncStorage whenever updated
+    useEffect(() => {
+      AsyncStorage.setItem('recentEmojis', JSON.stringify(recent));
+    }, [recent]);
+
     const onSelectEmoji = useCallback(
       (emoji: Emoji) => {
+        // Add to recent if not present
+        setRecent((prev) => {
+          if (prev.find((e) => e.unified === emoji.unified)) return prev;
+          return [emoji, ...prev].slice(0, 18);
+        });
         if (selectedMessage && ref && conversation) {
           addReaction({
             conversation: conversation,
@@ -73,11 +96,13 @@ export const EmojiPickerModal = forwardRef(
           }}
         >
           <EmojiPicker
-            emojis={emojis} // emojis data source see data/emojis
-            autoFocus={true} // autofocus search input
-            loading={false} // spinner for if your emoji data or recent store is async
-            darkMode={isDarkMode} // to be or not to be, that is the question
-            perLine={7} // # of emoji's per line (reduced to avoid negative font size)
+            emojis={emojis}
+            recent={recent}
+            onChangeRecent={setRecent}
+            autoFocus={true}
+            loading={false}
+            darkMode={isDarkMode}
+            perLine={7}
             onSelect={onSelectEmoji}
             backgroundColor={isDarkMode ? Colors.gray[900] : Colors.slate[50]}
           />
