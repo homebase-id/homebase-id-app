@@ -212,7 +212,7 @@ export function cleanDomainString(input: string): string {
     // Step 2: Replace spaces and commas with periods
     cleanedString = cleanedString.replace(/ /g, '.').replace(/,/g, '.');
     // Step 3: Remove illegal characters (e.g., #, ?, /, \, &, %, @, !, *, (, ), [, ], {, }, :, ;, ', ", <, >, =, +, ~, `, | ) but allow Unicode letters and digits (for later Punycode conversion)
-    cleanedString = cleanedString.replace(/[^\p{L}\p{N}.-]/gu, '');
+    cleanedString = cleanedString.replace(/[ #?/\\&%@!*()[\]{}:;'",<>+=~`|]/g, '');
     // Step 4: Replace multiple consecutive periods with a single period
     cleanedString = cleanedString.replace(/\.{2,}/g, '.');
     // Step 5: Enforce per-label rules (no start/end with '-', no consecutive '-')
