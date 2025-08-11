@@ -9,8 +9,8 @@ import Animated, {
 import { ImageLibrary, PaperClip } from '../../ui/Icons/icons';
 import { Colors } from '../../../app/Colors';
 import { Platform, View } from 'react-native';
-import { TouchableHighlight } from 'react-native-gesture-handler';
 import { Text } from '../../ui/Text/Text';
+import { BaseButton } from 'react-native-gesture-handler';
 
 export const RenderBottomContainer = memo(
   ({
@@ -81,9 +81,9 @@ const MediaPickerComponent = ({
         alignItems: 'center',
       }}
     >
-      <TouchableHighlight
+      <BaseButton
         onPress={onPress}
-        underlayColor={isDarkMode ? Colors.indigo[900] : Colors.indigo[300]}
+        rippleColor={isDarkMode ? Colors.indigo[900] : Colors.indigo[300]}
         style={{
           padding: 18,
           borderRadius: 10,
@@ -92,7 +92,7 @@ const MediaPickerComponent = ({
         }}
       >
         {icon}
-      </TouchableHighlight>
+      </BaseButton>
       <Text>{title}</Text>
     </View>
   );

@@ -63,7 +63,7 @@ import { LinkPreview } from '@homebase-id/js-lib/media';
 import { EmptyChatContainer } from './EmptyChatContainer';
 import { ImageSource } from '../../provider/image/RNImageProvider';
 import { RenderBottomContainer } from './ui/RenderBottomContainer';
-import Animated from 'react-native-reanimated';
+import Animated, { SlideOutLeft } from 'react-native-reanimated';
 import { RenderMessageText } from './ui/RenderMessageText';
 import { RenderBubble } from './ui/RenderBubble';
 import { RenderReplyMessageView } from './ui/RenderReplyMessageView';
@@ -315,7 +315,6 @@ export const ChatDetail = memo(
         borderRadius: 10,
         marginTop: Platform.OS === 'android' ? 'auto' : undefined,
         paddingHorizontal: 7,
-        paddingBottom: 7,
       };
     }, [isDarkMode]);
 
@@ -392,6 +391,7 @@ export const ChatDetail = memo(
             style={{
               backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
             }}
+            exiting={SlideOutLeft}
           >
             {isGroup && (
               <MentionDropDown
@@ -749,54 +749,52 @@ export const ChatDetail = memo(
     }, [textRef, replyMessage]);
 
     return (
-      <SafeAreaView>
-        <GiftedChat<ChatMessageIMessage>
-          messageContainerRef={messageContainerRef}
-          messages={messages}
-          onSend={_doSend}
-          locale={locale}
-          textInputRef={textRef}
-          onInputTextChanged={onTextInputChanged}
-          infiniteScroll
-          scrollToBottom
-          alwaysShowSend
-          onLongPress={(e, _, m: ChatMessageIMessage) => onLongPress(e, m)}
-          isKeyboardInternallyHandled={true}
-          keyboardShouldPersistTaps="never"
-          renderMessageImage={renderMessageImage}
-          renderCustomView={renderCustomView}
-          renderBubble={(prop) => (
-            <RenderBubble
-              {...prop}
-              onReactionClick={doOpenReactionModal}
-              onRetryClick={doOpenRetryModal}
-            />
-          )}
-          renderMessageText={(prop) => <RenderMessageText {...prop} />}
-          renderMessage={renderMessageBox}
-          // renderChatFooter instead of renderFooter as the renderFooter renders within the scrollView
-          renderChatFooter={renderChatFooter}
-          showUserAvatar={false}
-          renderUsernameOnMessage={isGroup}
-          renderAvatar={isGroup ? renderAvatar : null}
-          renderInputToolbar={renderInputToolbar}
-          renderUsername={renderUsername}
-          user={{
-            _id: identity || '',
-          }}
-          loadEarlier={hasMoreMessages}
-          onLoadEarlier={fetchMoreMessages}
-          scrollToBottomStyle={scrollToBottomStyle}
-          renderBottomFooter={bottomContainerVisible ? renderBottomContainer : undefined}
-          scrollToBottomComponent={scrollToBottomComponent}
-          renderLoadEarlier={(prop) => <LoadEarlier {...prop} wrapperStyle={wrapperStyle} />}
-          listViewProps={{
-            removeClippedSubviews: true,
-            windowSize: 15,
-          }}
-          renderChatEmpty={renderEmptyChat}
-        />
-      </SafeAreaView>
+      <GiftedChat<ChatMessageIMessage>
+        messageContainerRef={messageContainerRef}
+        messages={messages}
+        onSend={_doSend}
+        locale={locale}
+        textInputRef={textRef}
+        onInputTextChanged={onTextInputChanged}
+        infiniteScroll
+        scrollToBottom
+        alwaysShowSend
+        onLongPress={(e, _, m: ChatMessageIMessage) => onLongPress(e, m)}
+        isKeyboardInternallyHandled={true}
+        keyboardShouldPersistTaps="never"
+        renderMessageImage={renderMessageImage}
+        renderCustomView={renderCustomView}
+        renderBubble={(prop) => (
+          <RenderBubble
+            {...prop}
+            onReactionClick={doOpenReactionModal}
+            onRetryClick={doOpenRetryModal}
+          />
+        )}
+        renderMessageText={(prop) => <RenderMessageText {...prop} />}
+        renderMessage={renderMessageBox}
+        // renderChatFooter instead of renderFooter as the renderFooter renders within the scrollView
+        renderChatFooter={renderChatFooter}
+        showUserAvatar={false}
+        renderUsernameOnMessage={isGroup}
+        renderAvatar={isGroup ? renderAvatar : null}
+        renderInputToolbar={renderInputToolbar}
+        renderUsername={renderUsername}
+        user={{
+          _id: identity || '',
+        }}
+        loadEarlier={hasMoreMessages}
+        onLoadEarlier={fetchMoreMessages}
+        scrollToBottomStyle={scrollToBottomStyle}
+        renderBottomFooter={renderBottomContainer}
+        scrollToBottomComponent={scrollToBottomComponent}
+        renderLoadEarlier={(prop) => <LoadEarlier {...prop} wrapperStyle={wrapperStyle} />}
+        listViewProps={{
+          removeClippedSubviews: true,
+          windowSize: 15,
+        }}
+        renderChatEmpty={renderEmptyChat}
+      />
     );
   }
 );

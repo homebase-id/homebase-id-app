@@ -67,6 +67,7 @@ import { openURL } from '../../utils/utils';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ReportModal } from '../../components/Chat/Reactions/Modal/ReportModal';
 import { useIntroductions } from '../../hooks/introductions/useIntroductions';
+import { useReanimatedKeyboardAnimation } from 'react-native-keyboard-controller';
 
 export type SelectedMessageState = {
   messageCordinates: { x: number; y: number };
@@ -77,7 +78,7 @@ export type SelectedMessageState = {
 const RENDERED_PAGE_SIZE = 50;
 export type ChatProp = NativeStackScreenProps<ChatStackParamList, 'ChatScreen'>;
 const ChatPage = memo(({ route, navigation }: ChatProp) => {
-  const insets = useSafeAreaInsets();
+  const { bottom } = useSafeAreaInsets();
 
   const [replyMessage, setReplyMessage] = useState<ChatMessageIMessage | null>(null);
   const identity = useAuth().getIdentity();
@@ -651,24 +652,37 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
     ]
   );
 
+  const { progress } = useReanimatedKeyboardAnimation();
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      paddingBottom: progress.value === 0 ? 8 : bottom,
+    };
+  }, []);
+
   if (!conversation) {
     if (isLoadingConversation) return null;
     return <NoConversationHeader title="No conversation found" goBack={doReturnToConversations} />;
   }
 
+  console.log(bottom, 'bottom');
+
   return (
     <BottomSheetModalProvider>
       <GestureHandlerRootView>
         <ErrorNotification error={clearChatError || deleteChatError} />
-        <View
-          style={{
-            paddingBottom:
-              Platform.OS === 'ios' && (replyMessage || Keyboard.isVisible()) ? 0 : insets.bottom,
-            flex: 1,
-            // Force the height on iOS to better support the keyboard handling
-            minHeight: Platform.OS === 'ios' ? Dimensions.get('window').height : undefined,
-            backgroundColor: isDarkMode ? Colors.slate[900] : Colors.slate[50],
-          }}
+        <Animated.View
+          style={[
+            {
+              // paddingBottom:
+              //   Platform.OS === 'ios' && (replyMessage || Keyboard.isVisible()) ? 0 : bottom,
+              flex: 1,
+              // Force the height on iOS to better support the keyboard handling
+              minHeight: Platform.OS === 'ios' ? Dimensions.get('window').height : undefined,
+              backgroundColor: isDarkMode ? Colors.slate[900] : Colors.slate[50],
+            },
+            animatedStyle,
+          ]}
         >
           <ErrorBoundary>
             <ChatAppBar
@@ -775,7 +789,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
               />
             </Host>
           </ErrorBoundary>
-        </View>
+        </Animated.View>
         <EmojiPickerModal
           ref={emojiPickerSheetModalRef}
           selectedMessage={selectedMessage.selectedMessage}

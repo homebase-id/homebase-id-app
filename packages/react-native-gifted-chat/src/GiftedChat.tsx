@@ -17,7 +17,6 @@ import React, {
 } from 'react';
 import {
   FlatList,
-  Keyboard,
   LayoutChangeEvent,
   Platform,
   StyleProp,
@@ -55,15 +54,12 @@ import { Send, SendProps } from './Send';
 import { SystemMessage, SystemMessageProps } from './SystemMessage';
 import { Time, TimeProps } from './Time';
 import * as utils from './utils';
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from 'react-native-reanimated';
+import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 import { v4 } from 'uuid';
 import {
   KeyboardAvoidingView,
   KeyboardStickyView,
+  useKeyboardAnimation,
 } from 'react-native-keyboard-controller';
 
 dayjs.extend(localizedFormat);
@@ -276,7 +272,6 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
     }),
     onInputTextChanged = null,
     maxInputLength = null,
-    forceGetKeyboardHeight = false,
     inverted = true,
     minComposerHeight = MIN_COMPOSER_HEIGHT,
     maxComposerHeight = MAX_COMPOSER_HEIGHT,
@@ -301,25 +296,14 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
   //   number | undefined
   // >(undefined);
 
-  const messagesContainerHeight = useSharedValue(0);
+  // No manual height control; let KeyboardAvoidingView handle translation.
 
   const [_composerHeight, setComposerHeight] = useState<number | undefined>(
     minComposerHeight,
   );
   const [typingDisabled, setTypingDisabled] = useState(false);
 
-  const getKeyboardHeight = () => {
-    isDebug && console.log('getKeyboardHeight');
-    if (Platform.OS === 'android' && !forceGetKeyboardHeight) {
-      // For android: on-screen keyboard resized main container and has own height.
-      // @see https://developer.android.com/training/keyboard-input/visibility.html
-      // So for calculate the messages container height ignore keyboard height.
-      return 0;
-    }
-    // Keyboard Height - 336
-
-    return keyboardHeightRef.current;
-  };
+  // Keyboard height calculations are not needed when using KeyboardController
 
   const calculateInputToolbarHeight = useCallback(
     (composerHeight: number) => {
@@ -356,11 +340,9 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
   const getMessagesContainerHeightWithKeyboard = useCallback(
     (composerHeight = _composerHeight) => {
       isDebug && console.log('getMessagesContainerHeightWithKeyboard');
-      // RN Keyboard Controller will handle keyboard avoidance/translation.
-      // Keep messages list height based on basic layout only.
       return getBasicMessagesContainerHeight(composerHeight);
     },
-    [getBasicMessagesContainerHeight, getKeyboardHeight],
+    [getBasicMessagesContainerHeight],
   );
 
   /**
@@ -408,10 +390,7 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
       bottomOffsetRef.current =
         bottomOffset != null ? bottomOffset : insets.bottom;
 
-      const newMessagesContainerHeight =
-        getMessagesContainerHeightWithKeyboard();
-      // setMessagesContainerHeight(newMessagesContainerHeight);
-      messagesContainerHeight.value = newMessagesContainerHeight;
+      // Height is handled by KeyboardAvoidingView
       setTypingDisabled(true);
     }
   };
@@ -424,9 +403,7 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
       keyboardHeightRef.current = 0;
       bottomOffsetRef.current = 0;
 
-      const newMessagesContainerHeight = getBasicMessagesContainerHeight();
-      // setMessagesContainerHeight(newMessagesContainerHeight);
-      messagesContainerHeight.value = newMessagesContainerHeight;
+      // Height is handled by KeyboardAvoidingView
 
       setTypingDisabled(true);
     }
@@ -446,40 +423,36 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
     if (Platform.OS === 'android') {
       onKeyboardWillHide(e);
     }
-    if (renderBottomFooter) {
-      messagesContainerHeight.value = messagesContainerHeight.value - 250;
-    }
+    // No manual override needed
     setTypingDisabled(false);
   };
 
-  const animatedStyleRenderMessage = useAnimatedStyle(() => {
-    return {
-      height:
-        messagesContainerHeight.value > 0
-          ? withTiming(messagesContainerHeight.value, {
-              duration: 150,
-            })
-          : undefined,
-    };
-  }, [messagesContainerHeight]);
+  // useEffect(() => {
+  //   // No-op: layout handled by KeyboardAvoidingView
+  // }, [renderBottomFooter]);
 
-  useEffect(() => {
-    if (renderBottomFooter) {
-      messagesContainerHeight.value = messagesContainerHeight.value - 250; // height of the bottomContainer
-    } else if (!renderBottomFooter && !Keyboard.isVisible()) {
-      messagesContainerHeight.value = getBasicMessagesContainerHeight();
-    }
-  }, [renderBottomFooter]);
+  // 1. we need to use hook to get an access to animated values
+  // const { height } = useKeyboardAnimation();
+
+  // const renderedMEssageContainerAnimnatedStyle = useAnimatedStyle(() => {
+  //   return {
+  //     transform: [
+  //       {
+  //         translateY: height,
+  //       },
+  //     ],
+  //   };
+  // }, []);
 
   const RenderedMessages = useMemo(() => {
-    isDebug && console.log('renderMessages', messagesContainerHeight);
+    isDebug && console.log('renderMessages');
     const { messagesContainerStyle, ...messagesContainerProps } = props;
     const fragment = (
       <Animated.View
         style={[
-          Platform.OS === 'android'
-            ? { height: 'auto', flexGrow: 1 }
-            : animatedStyleRenderMessage,
+          // Let KeyboardAvoidingView from react-native-keyboard-controller translate the content
+          // instead of squeezing it via height animations.
+          { flex: 1 },
           messagesContainerStyle,
         ]}
       >
@@ -497,7 +470,6 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
           forwardRef={messageContainerRef}
           isTyping={isTyping}
         />
-        {renderChatFooter && renderChatFooter(text, setText)}
       </Animated.View>
     );
 
@@ -513,7 +485,7 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
     ) : (
       fragment
     );
-  }, [messages, props, messagesContainerHeight, text]);
+  }, [messages, props, text]);
 
   const _onSend = (
     messages: TMessage[] = [],
@@ -551,10 +523,7 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
 
     notifyInputTextReset();
 
-    const newMessagesContainerHeight =
-      getMessagesContainerHeightWithKeyboard(minComposerHeight);
-    // setMessagesContainerHeight(newMessagesContainerHeight);
-    messagesContainerHeight.value = newMessagesContainerHeight;
+    // Height handled by KeyboardAvoidingView
 
     setText(initialText);
     setComposerHeight(minComposerHeight);
@@ -570,11 +539,7 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
       // Return early if the height is not changed
       if (_composerHeight === newComposerHeight) return;
 
-      const newMessagesContainerHeight = getMessagesContainerHeightWithKeyboard(
-        newComposerHeight!,
-      );
-      // setMessagesContainerHeight(newMessagesContainerHeight);
-      messagesContainerHeight.value = newMessagesContainerHeight;
+      // Height handled by KeyboardAvoidingView
 
       setComposerHeight(newComposerHeight);
     },
@@ -617,10 +582,7 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
       // notifyInputTextReset(); // Unnecessary on initial load
       maxHeightRef.current = layout.height;
 
-      const newMessagesContainerHeight =
-        getMessagesContainerHeightWithKeyboard(minComposerHeight);
-      // setMessagesContainerHeight(newMessagesContainerHeight);
-      messagesContainerHeight.value = newMessagesContainerHeight;
+      // Height handled by KeyboardAvoidingView
 
       setIsInitialized(true);
       setText(text || initialText);
@@ -650,10 +612,7 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
         isFirstLayoutRef.current === true
       ) {
         maxHeightRef.current = layout.height;
-        messagesContainerHeight.value =
-          keyboardHeightRef.current > 0
-            ? getMessagesContainerHeightWithKeyboard()
-            : getBasicMessagesContainerHeight();
+        // Height handled by KeyboardAvoidingView
       }
 
       if (isFirstLayoutRef.current === true) {
@@ -697,9 +656,10 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
       <GiftedChatContext.Provider value={contextValues}>
         <View testID={TEST_ID.WRAPPER} style={styles.wrapper}>
           <ActionSheetProvider ref={actionSheetRef}>
-            <View onLayout={onMainViewLayout} style={styles.container}>
+            <Animated.View onLayout={onMainViewLayout} style={styles.container}>
               {RenderedMessages}
               <KeyboardStickyView offset={{ closed: 0, opened: insets.bottom }}>
+                {renderChatFooter && renderChatFooter(text, setText)}
                 {renderInputToolbar ? (
                   renderInputToolbar({ ...inputToolbarProps, text })
                 ) : (
@@ -716,7 +676,7 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
                 )}
               </KeyboardStickyView>
               {renderBottomFooter}
-            </View>
+            </Animated.View>
           </ActionSheetProvider>
         </View>
       </GiftedChatContext.Provider>
