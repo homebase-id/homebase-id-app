@@ -99,10 +99,9 @@ const NotificationGroup = ({
   const visibleLength = isExpanded ? 10 : 3;
 
   const identity = useDotYouClientContext().getLoggedInIdentity();
-  const chatNavigator = useNavigation<NavigationProp<ChatStackParamList>>();
   const tabNavigator = useNavigation<NavigationProp<TabStackParamList>>();
 
-  if (!identity || !chatNavigator || !tabNavigator) return null;
+  if (!identity || !tabNavigator) return null;
 
   return (
     <View
@@ -141,7 +140,7 @@ const NotificationGroup = ({
                 onOpen={() =>
                   canExpand && !isExpanded
                     ? setExpanded(true)
-                    : navigateOnNotification(notification, identity, chatNavigator, tabNavigator)
+                    : navigateOnNotification(notification, identity, tabNavigator)
                 }
                 groupCount={isExpanded ? 0 : groupCount}
                 appName={appName}
@@ -314,7 +313,6 @@ export const bodyFormer = (
 export const navigateOnNotification = (
   notification: PushNotification,
   identity: string,
-  chatNavigator: NavigationProp<ChatStackParamList>,
   tabNavigator: NavigationProp<TabStackParamList>
 ) => {
   if (notification.options.appId === OWNER_APP_ID) {
@@ -331,7 +329,10 @@ export const navigateOnNotification = (
       return openURL(`https://${identity}/owner/connections`);
     }
   } else if (notification.options.appId === CHAT_APP_ID) {
-    chatNavigator.navigate('ChatScreen', { convoId: notification.options.typeId });
+    tabNavigator.navigate('Chat', {
+      screen: 'ChatScreen',
+      params: { convoId: notification.options.typeId },
+    });
   } else if (notification.options.appId === MAIL_APP_ID) {
     // Navigate to owner console:
     return openURL(`https://${identity}/apps/mail/inbox/${notification.options.typeId}`);

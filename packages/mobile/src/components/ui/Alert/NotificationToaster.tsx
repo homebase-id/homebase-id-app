@@ -1,7 +1,6 @@
 import { useDotYouClientContext } from 'homebase-id-app-common';
 import { useRouteContext } from '../../RouteContext/RouteContext';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { ChatStackParamList } from '../../../app/ChatStack';
 import { useNotification } from '../../../hooks/notifications/useNotification';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { CHAT_APP_ID, FEED_APP_ID } from '../../../app/constants';
@@ -17,7 +16,6 @@ export const NotificationToaster = () => {
   const { route } = useRouteContext();
   const dotYouClient = useDotYouClientContext();
   const identity = useDotYouClientContext().getLoggedInIdentity() || '';
-  const chatNavigator = useNavigation<NavigationProp<ChatStackParamList>>();
   const tabNavigator = useNavigation<NavigationProp<TabStackParamList>>();
   const isConversationScreen = route?.name === 'Conversation' && !route.params;
   const isChatScreen = route?.name === 'ChatScreen' && route.params;
@@ -71,7 +69,7 @@ export const NotificationToaster = () => {
         visibilityTime: 4000,
         topOffset: top,
         onPress: () => {
-          navigateOnNotification(notification, identity, chatNavigator, tabNavigator);
+          navigateOnNotification(notification, identity, tabNavigator);
           Toast.hide();
         },
         onHide: () => dismissNotification(notification),
@@ -81,7 +79,6 @@ export const NotificationToaster = () => {
       });
     });
   }, [
-    chatNavigator,
     dismissNotification,
     dotYouClient,
     tabNavigator,
