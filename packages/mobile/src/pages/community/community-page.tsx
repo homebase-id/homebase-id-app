@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { WebViewNavigationEvent } from 'react-native-webview/lib/WebViewTypes';
 
 import { TabStackParamList } from '../../app/App';
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 
 type CommunityProps = NativeStackScreenProps<TabStackParamList, 'Community'>;
 
@@ -86,44 +87,46 @@ export const CommunityPage = memo((_props: CommunityProps) => {
         backgroundColor: isDarkMode ? Colors.slate[900] : Colors.slate[50],
       }}
     >
-      {identity && uri ? (
-        <>
-          <WebView
-            key={uri} // Reloads the WebView when the uri changes
-            ref={webviewRef}
-            source={{ uri }}
-            injectedJavaScriptBeforeContentLoaded={INJECTED_JAVASCRIPT}
-            pullToRefreshEnabled={true}
-            containerStyle={{
-              paddingTop: 0,
-            }}
-            style={{ backgroundColor: isDarkMode ? Colors.slate[900] : Colors.slate[50] }}
-            originWhitelist={originWhitelist} // Keeps the WebView from navigating away from the feed-app; Any links that don't match will be opened by the system.. Eg: open in the browser
-            onMessage={(event) => console.warn(event)}
-            onLoad={handleLoad}
-            forceDarkOn={isDarkMode}
-          />
-          {isLoading && (
-            <View
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                justifyContent: 'center',
-                alignItems: 'center',
-                backgroundColor: isDarkMode ? Colors.slate[900] : Colors.slate[50],
+      <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
+        {identity && uri ? (
+          <>
+            <WebView
+              key={uri} // Reloads the WebView when the uri changes
+              ref={webviewRef}
+              source={{ uri }}
+              injectedJavaScriptBeforeContentLoaded={INJECTED_JAVASCRIPT}
+              pullToRefreshEnabled={true}
+              containerStyle={{
+                paddingTop: 0,
               }}
-            >
-              <ActivityIndicator
-                size="large"
-                color={isDarkMode ? Colors.slate[400] : Colors.slate[600]}
-              />
-            </View>
-          )}
-        </>
-      ) : null}
+              style={{ backgroundColor: isDarkMode ? Colors.slate[900] : Colors.slate[50] }}
+              originWhitelist={originWhitelist} // Keeps the WebView from navigating away from the feed-app; Any links that don't match will be opened by the system.. Eg: open in the browser
+              onMessage={(event) => console.warn(event)}
+              onLoad={handleLoad}
+              forceDarkOn={isDarkMode}
+            />
+            {isLoading && (
+              <View
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  backgroundColor: isDarkMode ? Colors.slate[900] : Colors.slate[50],
+                }}
+              >
+                <ActivityIndicator
+                  size="large"
+                  color={isDarkMode ? Colors.slate[400] : Colors.slate[600]}
+                />
+              </View>
+            )}
+          </>
+        ) : null}
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 });
