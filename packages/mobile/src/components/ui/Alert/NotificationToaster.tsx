@@ -3,7 +3,7 @@ import { useRouteContext } from '../../RouteContext/RouteContext';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { useNotification } from '../../../hooks/notifications/useNotification';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
-import { CHAT_APP_ID, FEED_APP_ID } from '../../../app/constants';
+import { CHAT_APP_ID, COMMUNITY_APP_ID, FEED_APP_ID } from '../../../app/constants';
 import { bodyFormer, navigateOnNotification } from '../../Dashboard/NotificationsOverview';
 import Toast from 'react-native-toast-message';
 import { useCallback, useEffect } from 'react';
@@ -20,6 +20,7 @@ export const NotificationToaster = () => {
   const isConversationScreen = route?.name === 'Conversation' && !route.params;
   const isChatScreen = route?.name === 'ChatScreen' && route.params;
   const isFeedScreen = route?.name === 'Posts';
+  const isCommunityScreen = route?.name === 'Community' && route.params;
   const { top } = useSafeAreaInsets();
   const {
     fetch: { data: notifications },
@@ -37,6 +38,7 @@ export const NotificationToaster = () => {
       const body = bodyFormer(notification, false, appName, senderName);
       const isChatNotification = stringGuidsEqual(appId, CHAT_APP_ID);
       const isFeedNotification = stringGuidsEqual(appId, FEED_APP_ID);
+      const isCommunityNotification = stringGuidsEqual(appId, COMMUNITY_APP_ID);
       if (isChatNotification) {
         // if in conversation screen, don't show notification
         if (isConversationScreen) {
@@ -59,6 +61,9 @@ export const NotificationToaster = () => {
       } else if (isFeedNotification && isFeedScreen) {
         dismissNotification(notification);
         return;
+      } else if (isCommunityScreen && isCommunityNotification) {
+        dismissNotification(notification);
+        return;
       }
       return Toast.show({
         type: 'notification',
@@ -79,16 +84,17 @@ export const NotificationToaster = () => {
       });
     });
   }, [
-    dismissNotification,
-    dotYouClient,
-    tabNavigator,
-    identity,
-    isChatScreen,
-    isConversationScreen,
-    isFeedScreen,
     notifications,
-    route,
+    dotYouClient,
+    isFeedScreen,
+    isCommunityScreen,
     top,
+    isConversationScreen,
+    isChatScreen,
+    route?.params,
+    dismissNotification,
+    identity,
+    tabNavigator,
   ]);
 
   useEffect(() => {

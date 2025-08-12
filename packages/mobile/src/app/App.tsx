@@ -60,8 +60,8 @@ import { FeedStack, FeedStackParamList } from './FeedStack';
 import ChatSettingsProvider from '../components/Settings/ChatSettingsContext';
 import { useCacheCleanup } from '../hooks/file/useCacheCleanup';
 import { PendingUpgradeDialog } from '../components/PendingUpgrad/PendingUpgrade';
-import { CommunityStack, CommunityStackParamList } from './CommunityStack';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
+import { CommunityPage } from '../pages/community/community-page';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -73,7 +73,10 @@ export type TabStackParamList = {
   Feed: NavigatorScreenParams<FeedStackParamList>;
   Profile: NavigatorScreenParams<ProfileStackParamList> | undefined;
   Chat: NavigatorScreenParams<ChatStackParamList>;
-  Community: NavigatorScreenParams<CommunityStackParamList>;
+  Community: {
+    typeId?: string;
+    tagId?: string;
+  };
 };
 
 export type HomeStackParamList = {
@@ -261,8 +264,8 @@ const TabStack = memo(() => {
         />
         <TabBottom.Screen
           name="Community"
-          component={CommunityStack}
-          initialParams={{ screen: 'Home', params: {} }}
+          component={CommunityPage}
+          initialParams={{}}
           options={{
             tabBarIcon: TabCommunityIcon,
           }}

@@ -10,11 +10,12 @@ import { Colors } from '../../app/Colors';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { useRemoveNotifications } from '../../hooks/notifications/usePushNotifications';
 import { COMMUNITY_APP_ID } from '../../app/constants';
-import { CommunityStackParamList } from '../../app/CommunityStack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { WebViewNavigationEvent } from 'react-native-webview/lib/WebViewTypes';
 
-type CommunityProps = NativeStackScreenProps<CommunityStackParamList, 'Home'>;
+import { TabStackParamList } from '../../app/App';
+
+type CommunityProps = NativeStackScreenProps<TabStackParamList, 'Community'>;
 
 export const CommunityPage = memo((_props: CommunityProps) => {
   const { isDarkMode } = useDarkMode();
@@ -29,6 +30,14 @@ export const CommunityPage = memo((_props: CommunityProps) => {
 
   const sharedSecret = getSharedSecret();
   const base64SharedSecret = sharedSecret ? uint8ArrayToBase64(sharedSecret) : '';
+
+  // const [_, setIndex] = useState(0); // Used to force the WebView to reload when the component is focused
+
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     setIndex((prevIndex) => prevIndex + 1);
+  //   }, [])
+  // );
 
   const uri = useMemo(
     () =>
@@ -64,7 +73,7 @@ export const CommunityPage = memo((_props: CommunityProps) => {
 
   const handleLoad = useCallback((event: WebViewNavigationEvent) => {
     const { nativeEvent } = event;
-    console.warn('WebView started loading:', nativeEvent.loading);
+
     setIsLoading(nativeEvent.loading);
   }, []);
 

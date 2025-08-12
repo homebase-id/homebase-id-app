@@ -360,11 +360,8 @@ export const navigateOnNotification = (
     });
   } else if (notification.options.appId === COMMUNITY_APP_ID) {
     return tabNavigator.navigate('Community', {
-      screen: 'Home',
-      params: {
-        typeId: notification.options.typeId,
-        tagId: notification.options.tagId,
-      },
+      typeId: notification.options.typeId,
+      tagId: notification.options.tagId,
     });
   } else {
     addLogs({
