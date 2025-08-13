@@ -67,6 +67,7 @@ export const ChatAppBar = ({
   const headerStyle = useMemo(
     () => ({
       backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
+      // zIndex: 1000,
     }),
     [isDarkMode]
   );

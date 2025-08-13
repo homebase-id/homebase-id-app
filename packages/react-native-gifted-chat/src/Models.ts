@@ -16,7 +16,7 @@ export type { GiftedAvatarProps } from './GiftedAvatar';
 export type { InputToolbarProps } from './InputToolbar';
 export type { LoadEarlierProps } from './LoadEarlier';
 export type { MessageProps } from './Message';
-export type { MessageContainerProps } from './MessageContainer';
+export type { MessageContainerProps } from './types';
 export type { MessageImageProps } from './MessageImage';
 export type { MessageTextProps } from './MessageText';
 export type { QuickRepliesProps } from './QuickReplies';

@@ -52,7 +52,6 @@ import { ChatDeletedArchivalStaus, ChatMessage } from '../../provider/chat/ChatP
 import { useAudioRecorder } from '../../hooks/audio/useAudioRecorderPlayer';
 import { Text } from '../ui/Text/Text';
 import { assetsToImageSource, fixDocumentURI, millisToMinutesAndSeconds } from '../../utils/utils';
-import { SafeAreaView } from '../ui/SafeAreaView/SafeAreaView';
 import { keepLocalCopy, pick, types } from '@react-native-documents/picker';
 import { getLocales } from 'react-native-localize';
 import { useDraftMessage } from '../../hooks/chat/useDraftMessage';
@@ -334,7 +333,7 @@ export const ChatDetail = memo(
 
     /* Component Function Callbacks */
     const renderMessageBox = useCallback(
-      ({ key, ...props }: MessageProps<ChatMessageIMessage>) => {
+      ({ ...props }: MessageProps<ChatMessageIMessage>) => {
         const enabled =
           props.currentMessage &&
           props.currentMessage.fileMetadata.appData.archivalStatus !== ChatDeletedArchivalStaus;
@@ -342,7 +341,6 @@ export const ChatDetail = memo(
         return (
           <Message
             {...props}
-            key={key}
             renderLeftIcon={<Info />}
             renderRightIcon={<Reply />}
             onLeftSwipeOpen={onLeftSwipe}

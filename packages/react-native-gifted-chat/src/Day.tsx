@@ -1,84 +1,93 @@
-import * as React from 'react'
-import PropTypes from 'prop-types'
+import React, { useMemo } from 'react';
 import {
-  StyleSheet,
   Text,
   View,
   StyleProp,
   ViewStyle,
   TextStyle,
-  TextProps,
-} from 'react-native'
-import dayjs from 'dayjs'
+  StyleSheet,
+} from 'react-native';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import calendar from 'dayjs/plugin/calendar';
 
-import Color from './Color'
-import { StylePropType, isSameDay } from './utils'
-import { DATE_FORMAT } from './Constant'
-import { IMessage } from './Models'
+import { DATE_FORMAT } from './Constant';
+import { useChatContext } from './GiftedChatContext';
+import Color from './Color';
 
-import { useChatContext } from './GiftedChatContext'
+export interface DayProps {
+  createdAt: Date | number;
+  dateFormat?: string;
+  dateFormatCalendar?: object;
+  containerStyle?: StyleProp<ViewStyle>;
+  wrapperStyle?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
+}
+
+const stylesCommon = StyleSheet.create({
+  centerItems: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: 'center',
-    justifyContent: 'center',
     marginTop: 5,
     marginBottom: 10,
   },
+  wrapper: {
+    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+    paddingTop: 6,
+    paddingBottom: 6,
+    paddingLeft: 10,
+    paddingRight: 10,
+    borderRadius: 15,
+  },
   text: {
-    backgroundColor: Color.backgroundTransparent,
-    color: Color.defaultColor,
+    color: Color.white,
     fontSize: 12,
     fontWeight: '600',
   },
-})
+});
 
-export interface DayProps<TMessage extends IMessage = IMessage> {
-  currentMessage?: TMessage
-  nextMessage?: TMessage
-  previousMessage?: TMessage
-  containerStyle?: StyleProp<ViewStyle>
-  wrapperStyle?: StyleProp<ViewStyle>
-  textStyle?: StyleProp<TextStyle>
-  textProps?: TextProps
-  dateFormat?: string
-  inverted?: boolean
-}
+dayjs.extend(relativeTime);
+dayjs.extend(calendar);
 
-export function Day<TMessage extends IMessage = IMessage>({
+export function Day({
   dateFormat = DATE_FORMAT,
-  currentMessage,
-  previousMessage,
+  dateFormatCalendar,
+  createdAt,
   containerStyle,
   wrapperStyle,
   textStyle,
-}: DayProps<TMessage>) {
-  const { getLocale } = useChatContext()
+}: DayProps) {
+  const { getLocale } = useChatContext();
 
-  if (currentMessage == null || isSameDay(currentMessage, previousMessage)) {
-    return null
-  }
+  const dateStr = useMemo(() => {
+    if (createdAt == null) return null;
+
+    const now = dayjs().startOf('day');
+    const date = dayjs(createdAt).locale(getLocale()).startOf('day');
+
+    if (!now.isSame(date, 'year')) return date.format('D MMMM YYYY');
+
+    if (now.diff(date, 'day') < 1)
+      return date.calendar(now, {
+        sameDay: '[Today]',
+        ...dateFormatCalendar,
+      });
+
+    return date.format(dateFormat);
+  }, [createdAt, dateFormat, getLocale, dateFormatCalendar]);
+
+  if (!dateStr) return null;
 
   return (
-    <View style={[styles.container, containerStyle]}>
-      <View style={wrapperStyle}>
-        <Text style={[styles.text, textStyle]}>
-          {dayjs(currentMessage.createdAt)
-            .locale(getLocale())
-            .format(dateFormat)}
-        </Text>
+    <View style={[stylesCommon.centerItems, styles.container, containerStyle]}>
+      <View style={[styles.wrapper, wrapperStyle]}>
+        <Text style={[styles.text, textStyle]}>{dateStr}</Text>
       </View>
     </View>
-  )
-}
-
-Day.propTypes = {
-  currentMessage: PropTypes.object,
-  previousMessage: PropTypes.object,
-  nextMessage: PropTypes.object,
-  inverted: PropTypes.bool,
-  containerStyle: StylePropType,
-  wrapperStyle: StylePropType,
-  textStyle: StylePropType,
-  dateFormat: PropTypes.string,
+  );
 }

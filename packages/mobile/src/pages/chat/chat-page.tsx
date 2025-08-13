@@ -9,17 +9,7 @@ import {
 } from '@homebase-id/js-lib/core';
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import {
-  Alert,
-  Dimensions,
-  Keyboard,
-  Platform,
-  Pressable,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Alert, Dimensions, Platform, Pressable, StyleSheet, TouchableOpacity } from 'react-native';
 import { ChatAppBar, SelectedMessageProp } from '../../components/Chat/Chat-app-bar';
 import {
   ChatDeletedArchivalStaus,
@@ -67,7 +57,6 @@ import { openURL } from '../../utils/utils';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ReportModal } from '../../components/Chat/Reactions/Modal/ReportModal';
 import { useIntroductions } from '../../hooks/introductions/useIntroductions';
-import { useReanimatedKeyboardAnimation } from 'react-native-keyboard-controller';
 
 export type SelectedMessageState = {
   messageCordinates: { x: number; y: number };
@@ -78,8 +67,6 @@ export type SelectedMessageState = {
 const RENDERED_PAGE_SIZE = 50;
 export type ChatProp = NativeStackScreenProps<ChatStackParamList, 'ChatScreen'>;
 const ChatPage = memo(({ route, navigation }: ChatProp) => {
-  const { bottom } = useSafeAreaInsets();
-
   const [replyMessage, setReplyMessage] = useState<ChatMessageIMessage | null>(null);
   const identity = useAuth().getIdentity();
 
@@ -652,20 +639,10 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
     ]
   );
 
-  const { progress } = useReanimatedKeyboardAnimation();
-
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      paddingBottom: progress.value === 0 ? 8 : bottom,
-    };
-  }, []);
-
   if (!conversation) {
     if (isLoadingConversation) return null;
     return <NoConversationHeader title="No conversation found" goBack={doReturnToConversations} />;
   }
-
-  console.log(bottom, 'bottom');
 
   return (
     <BottomSheetModalProvider>
@@ -681,7 +658,6 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
               minHeight: Platform.OS === 'ios' ? Dimensions.get('window').height : undefined,
               backgroundColor: isDarkMode ? Colors.slate[900] : Colors.slate[50],
             },
-            animatedStyle,
           ]}
         >
           <ErrorBoundary>
