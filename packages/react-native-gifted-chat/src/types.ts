@@ -35,7 +35,7 @@ export interface MessageContainerProps<TMessage extends IMessage = IMessage> {
     scrollToBottomOffset?: number
     renderChatEmpty?(): React.ReactNode
     renderFooter?(props: MessageContainerProps<TMessage>): React.ReactNode
-    renderMessage?(props: MessageProps<TMessage>): React.ReactElement
+    renderMessage?(props: MessageProps<TMessage>): React.ReactNode
     renderDay?(props: DayProps): React.ReactNode
     renderLoadEarlier?(props: LoadEarlierProps): React.ReactNode
     renderTypingIndicator?(): React.ReactNode

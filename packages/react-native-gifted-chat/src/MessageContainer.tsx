@@ -25,10 +25,7 @@ import TypingIndicator from './TypingIndicator';
 import Color from './Color';
 import Item from './components/Item';
 import DayAnimated from './components/DayAnimated';
-import {
-  MessageContainerProps,
-  DaysPositions,
-} from '../MessageContainer/types';
+import { MessageContainerProps, DaysPositions } from './types';
 
 import { isSameDay } from './utils';
 import { warning } from './logging';
