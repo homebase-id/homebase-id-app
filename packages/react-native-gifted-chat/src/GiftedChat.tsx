@@ -59,7 +59,6 @@ import Animated, {
   useSharedValue,
   withTiming,
   runOnJS,
-  interpolate,
 } from 'react-native-reanimated';
 import {
   KeyboardProvider,

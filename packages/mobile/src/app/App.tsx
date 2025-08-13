@@ -90,12 +90,10 @@ const App = () => {
       <GestureHandlerRootView>
         <PushNotificationProvider>
           <RouteContextProvider>
-            <KeyboardProvider>
-              <DotYouClientProvider>
-                <RootStack />
-                <Toast />
-              </DotYouClientProvider>
-            </KeyboardProvider>
+            <DotYouClientProvider>
+              <RootStack />
+              <Toast />
+            </DotYouClientProvider>
           </RouteContextProvider>
         </PushNotificationProvider>
       </GestureHandlerRootView>
