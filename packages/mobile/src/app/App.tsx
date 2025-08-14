@@ -91,8 +91,10 @@ const App = () => {
         <PushNotificationProvider>
           <RouteContextProvider>
             <DotYouClientProvider>
-              <RootStack />
-              <Toast />
+              <KeyboardProvider>
+                <RootStack />
+                <Toast />
+              </KeyboardProvider>
             </DotYouClientProvider>
           </RouteContextProvider>
         </PushNotificationProvider>
