@@ -266,7 +266,6 @@ const LoginComponent = () => {
           // marginBottom: 16,
         }}
         onChangeText={onChangeOdinId}
-        value={odinId}
         autoCapitalize="none"
         autoCorrect={false}
         onSubmitEditing={onLogin}
