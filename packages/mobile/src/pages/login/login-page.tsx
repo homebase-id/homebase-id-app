@@ -31,6 +31,7 @@ import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanim
 import TextButton from '../../components/ui/Text/Text-Button';
 import { t } from 'homebase-id-app-common';
 import { cleanDomainString,cleanInteractiveDomainString } from '../../utils/utils';
+import { Dimensions } from 'react-native';
 
 type LoginProps = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 
@@ -38,6 +39,7 @@ export const LoginPage = (_props: LoginProps) => {
   return (
     <SafeAreaView>
       <Container style={{ flex: 1, flexDirection: 'column' }}>
+        <View style={{ height: Dimensions.get('window').height / 6 }} />
         <View
           style={{
             padding: 20,
@@ -45,7 +47,7 @@ export const LoginPage = (_props: LoginProps) => {
             gap: 10,
             minHeight: 120,
             flexDirection: 'row',
-            justifyContent: 'center',
+            justifyContent: 'center'
           }}
         >
           <Image source={logo} style={{ width: 40, height: 40 }} />
@@ -53,9 +55,10 @@ export const LoginPage = (_props: LoginProps) => {
         </View>
         <Animated.View
           style={{
+            flex: 1,
+            justifyContent: 'center',
             paddingHorizontal: 12,
-            paddingVertical: 15,
-            marginTop: 'auto',
+            paddingVertical: 15
           }}
         >
           <LoginComponent />
