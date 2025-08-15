@@ -272,6 +272,7 @@ export const ChatStack = ({ navigation }: NativeStackScreenProps<TabStackParamLi
           gestureEnabled: true,
           headerTitle: 'Message Info',
           headerShown: true,
+          headerBackTitle: 'Back',
         }}
       />
       <StackChat.Screen
