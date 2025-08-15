@@ -39,29 +39,33 @@ export const LoginPage = (_props: LoginProps) => {
   return (
     <SafeAreaView>
       <Container style={{ flex: 1, flexDirection: 'column' }}>
-        <View style={{ height: Dimensions.get('window').height / 6 }} />
         <View
-          style={{
+        style={{
+            minHeight: 120,
             padding: 20,
             alignItems: 'center',
             gap: 10,
-            minHeight: 120,
             flexDirection: 'row',
-            justifyContent: 'center'
-          }}
+            justifyContent: 'center',
+            position: 'relative',
+            top: 60 // adjust as needed to push the logo down a bit
+        }}
         >
-          <Image source={logo} style={{ width: 40, height: 40 }} />
-          <Text style={{ fontSize: 25 }}>Homebase</Text>
+        <View style={{ height: Math.max(0, Dimensions.get('window').height / 3 - 40) }} />
+        <Image source={logo} style={{ width: 40, height: 40 }} />
+        <Text style={{ fontSize: 25 }}>Homebase</Text>
         </View>
         <Animated.View
-          style={{
-            flex: 1,
-            justifyContent: 'center',
+        style={{
+
+            flex: 1, 
+            justifyContent: 'flex-start', 
             paddingHorizontal: 12,
-            paddingVertical: 15
-          }}
+            paddingVertical: 15,
+            marginTop: Math.max(0, Dimensions.get('window').height / 6 - 82) 
+        }}
         >
-          <LoginComponent />
+        <LoginComponent />
         </Animated.View>
 
         <View
