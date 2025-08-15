@@ -206,10 +206,13 @@ export function cleanInteractiveDomainString(input: string): string {
 
     // Step 2: Remove illegal characters (e.g., #, ?, /, \, &, %, @, !, *, (, ), [, ], {, }, :, ;, ', ", <, >, =, +, ~, `, | ) 
     // but allow Unicode letters and digits (for later Punycode conversion)
-    cleanedString = cleanedString.replace(/[ #?/\\&%@!*()[\]{}:;'",<>+=~`|]/g, '');
+    cleanedString = cleanedString.replace(/[ #?/\\&%@!*()[\]{}:;'",<>+=~`|]/g, '.');
 
     // Step 3: Replace multiple consecutive periods with a single period
     cleanedString = cleanedString.replace(/\.{2,}/g, '.');
+
+    // Step 4: Remove leading periods or dashes
+    cleanedString = cleanedString.replace(/^\.|^-/g, '');
 
     cleanedString = cleanedString.toLowerCase().trim();
 

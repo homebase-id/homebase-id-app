@@ -30,7 +30,7 @@ import { Divider } from '../../components/ui/Divider';
 import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 import TextButton from '../../components/ui/Text/Text-Button';
 import { t } from 'homebase-id-app-common';
-import { cleanInteractiveDomainString } from '../../utils/utils';
+import { cleanDomainString,cleanInteractiveDomainString } from '../../utils/utils';
 
 type LoginProps = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 
@@ -195,18 +195,23 @@ const LoginComponent = () => {
   useEffect(() => setInvalid(false), [odinId]);
 
   const onLogin = useCallback(async () => {
-    if (!odinId && !lastIdentity) {
+    // Determine the final domain: use odinId if provided, otherwise fall back to lastIdentity
+    const finalDomain = odinId ? cleanDomainString(odinId) : lastIdentity;
+
+    if (!finalDomain) {
       setInvalid(true);
       return;
     }
 
-    const identityReachable = await doCheckIdentity(odinId || (lastIdentity as string));
+    setOdinId(finalDomain);
+
+    const identityReachable = await doCheckIdentity(finalDomain);
     if (!identityReachable) {
       setInvalid(true);
       return;
     }
 
-    const url = `https://${odinId || lastIdentity}/api/owner/v1/youauth/authorize?${stringifyToQueryParams(
+    const url = `https://${finalDomain}/api/owner/v1/youauth/authorize?${stringifyToQueryParams(
       authParams as unknown
     )}`;
     if (await InAppBrowser.isAvailable()) {
