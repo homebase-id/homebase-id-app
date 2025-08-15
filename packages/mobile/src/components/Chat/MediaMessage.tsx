@@ -84,6 +84,8 @@ const InnerMediaMessage = memo(
     const navigation = useNavigation<NavigationProp<ChatStackParamList>>();
     const { width, height } = Dimensions.get('screen');
 
+    const hasText = !!currentMessage.text;
+
     const payloads = currentMessage.fileMetadata.payloads?.filter(
       (p) => p.key !== DEFAULT_PAYLOAD_KEY
     );
@@ -148,7 +150,10 @@ const InnerMediaMessage = memo(
           containerStyle={containerStyle}
           onLongPress={(e) => onLongPress(e, currentMessage)}
           style={{
-            borderRadius: 10,
+            borderTopLeftRadius: 10,
+            borderTopRightRadius: 10,
+            borderBottomLeftRadius: hasText ? 0 : 10,
+            borderBottomRightRadius: hasText ? 0 : 10,
             aspectRatio: aspectRatio,
           }}
           onClick={() => onClick(0)}
@@ -164,8 +169,12 @@ const InnerMediaMessage = memo(
         previewThumbnail={currentMessage.fileMetadata.appData.previewThumbnail}
         onLongPress={(e) => onLongPress(e, currentMessage)}
         onClick={(index) => onClick(index)}
+        hasText={hasText}
         style={{
-          borderRadius: 10,
+          borderTopLeftRadius: 10,
+          borderTopRightRadius: 10,
+          borderBottomLeftRadius: hasText ? 0 : 10,
+          borderBottomRightRadius: hasText ? 0 : 10,
           backgroundColor: isDarkMode ? Colors.black : Colors.white,
           maxWidth: width * 0.8,
         }}

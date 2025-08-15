@@ -8,7 +8,12 @@ import {
   RichText,
 } from '@homebase-id/js-lib/core';
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  interpolate,
+} from 'react-native-reanimated';
 import { Alert, Dimensions, Platform, Pressable, StyleSheet, TouchableOpacity } from 'react-native';
 import { ChatAppBar, SelectedMessageProp } from '../../components/Chat/Chat-app-bar';
 import {
@@ -57,6 +62,8 @@ import { openURL } from '../../utils/utils';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ReportModal } from '../../components/Chat/Reactions/Modal/ReportModal';
 import { useIntroductions } from '../../hooks/introductions/useIntroductions';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useReanimatedKeyboardAnimation } from 'react-native-keyboard-controller';
 
 export type SelectedMessageState = {
   messageCordinates: { x: number; y: number };
@@ -639,6 +646,15 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
     ]
   );
 
+  const { bottom } = useSafeAreaInsets();
+  const { progress } = useReanimatedKeyboardAnimation();
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      paddingBottom:
+        Platform.OS === 'ios' ? interpolate(progress.value, [0, 1], [bottom, 4]) : undefined,
+    };
+  }, [replyMessage]);
+
   if (!conversation) {
     if (isLoadingConversation) return null;
     return <NoConversationHeader title="No conversation found" goBack={doReturnToConversations} />;
@@ -651,13 +667,12 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
         <Animated.View
           style={[
             {
-              // paddingBottom:
-              //   Platform.OS === 'ios' && (replyMessage || Keyboard.isVisible()) ? 0 : bottom,
               flex: 1,
               // Force the height on iOS to better support the keyboard handling
               minHeight: Platform.OS === 'ios' ? Dimensions.get('window').height : undefined,
               backgroundColor: isDarkMode ? Colors.slate[900] : Colors.slate[50],
             },
+            animatedStyle,
           ]}
         >
           <ErrorBoundary>

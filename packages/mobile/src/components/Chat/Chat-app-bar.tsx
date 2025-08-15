@@ -67,7 +67,6 @@ export const ChatAppBar = ({
   const headerStyle = useMemo(
     () => ({
       backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
-      // zIndex: 1000,
     }),
     [isDarkMode]
   );
@@ -166,7 +165,12 @@ export const ChatAppBar = ({
     selectedMessageActions?.onReport,
   ]);
   return (
-    <Pressable onPress={onPress}>
+    <Pressable
+      style={{
+        zIndex: 10,
+      }}
+      onPress={onPress}
+    >
       <Header
         title={selectedMessage ? '' : !isSelf ? title : `${user?.firstName} ${user?.surName} (you)`}
         headerTitleAlign="left"

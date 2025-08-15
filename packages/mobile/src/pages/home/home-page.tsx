@@ -83,8 +83,8 @@ export const HomePage = (_props: HomeProps) => {
   const { top, bottom } = useSafeAreaInsets();
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <Container style={{ flex: 1, paddingTop: top, paddingBottom: bottom }}>
+    <SafeAreaView style={{ paddingTop: top, paddingBottom: bottom }}>
+      <Container style={{ flex: 1 }}>
         <FlatList
           ref={scrollRef}
           data={Object.keys(groupedNotificationsPerDay)}

@@ -46,6 +46,7 @@ export const MediaGallery = memo(
     globalTransitId,
     style,
     gestureRefs,
+    hasText,
   }: {
     fileId: string;
     globalTransitId?: string;
@@ -58,6 +59,7 @@ export const MediaGallery = memo(
     onClick?: (currIndex: number) => void;
     style?: StyleProp<ViewStyle>;
     gestureRefs?: React.RefObject<GestureType | undefined>[];
+    hasText?: boolean;
   }) => {
     const maxVisible = 4;
     const countExcludedFromView = payloads?.length - maxVisible;
@@ -109,6 +111,14 @@ export const MediaGallery = memo(
         {payloads.slice(0, maxVisible).map((item, index) => {
           const size = imageSize(index);
           if (!size) return null;
+
+          // Determine if this item should have bottom border radius
+          const isBottomLeft = index === 2 || (index === 0 && payloads.length === 2);
+          const isBottomRight =
+            index === 3 ||
+            (payloads.length === 3 && index === 2) ||
+            (index === 1 && payloads.length === 2);
+
           return (
             <MediaItem
               key={item.key || index}
@@ -126,15 +136,9 @@ export const MediaGallery = memo(
               }}
               style={{
                 borderTopLeftRadius: index === 0 ? 10 : 0,
-                borderBottomLeftRadius:
-                  index === 2 || (index === 0 && payloads.length === 2) ? 10 : 0,
+                borderBottomLeftRadius: isBottomLeft ? (hasText ? 0 : 10) : 0,
                 borderTopRightRadius: index === 1 ? 10 : 0,
-                borderBottomRightRadius:
-                  index === 3 ||
-                  (payloads.length === 3 && index === 2) ||
-                  (index === 1 && payloads.length === 2)
-                    ? 10
-                    : 0,
+                borderBottomRightRadius: isBottomRight ? (hasText ? 0 : 10) : 0,
               }}
               onLongPress={onLongPress}
               onClick={() => {
@@ -165,7 +169,7 @@ export const MediaGallery = memo(
                 alignItems: 'center',
                 justifyContent: 'center',
 
-                borderBottomRightRadius: 10,
+                borderBottomRightRadius: hasText ? 0 : 10,
               }}
               onLongPress={(e) =>
                 onLongPress?.({

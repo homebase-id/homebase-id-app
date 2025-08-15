@@ -320,6 +320,12 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
   const keyboardOffsetBottom = useSharedValue(0);
 
   const contentStyleAnim = useAnimatedStyle(() => {
+    console.log(
+      'keyboard.height.value',
+      keyboard.height.value,
+      keyboardOffsetBottom.value,
+      keyboard.height.value - keyboardOffsetBottom.value,
+    );
     return {
       transform: [
         { translateY: keyboard.height.value - keyboardOffsetBottom.value },
