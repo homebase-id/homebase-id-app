@@ -12,8 +12,6 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
-  useAnimatedKeyboard,
-  KeyboardState,
   interpolate,
 } from 'react-native-reanimated';
 import { Alert, Dimensions, Platform, Pressable, StyleSheet, TouchableOpacity } from 'react-native';
@@ -65,11 +63,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ReportModal } from '../../components/Chat/Reactions/Modal/ReportModal';
 import { useIntroductions } from '../../hooks/introductions/useIntroductions';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import {
-  useKeyboardAnimation,
-  useKeyboardState,
-  useReanimatedKeyboardAnimation,
-} from 'react-native-keyboard-controller';
+import { useReanimatedKeyboardAnimation } from 'react-native-keyboard-controller';
 
 export type SelectedMessageState = {
   messageCordinates: { x: number; y: number };
