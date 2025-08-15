@@ -215,16 +215,19 @@ export function cleanDomainString(input: string): string {
     cleanedString = cleanedString.replace(/[ #?/\\&%@!*()[\]{}:;'",<>+=~`|]/g, '');
     // Step 4: Replace multiple consecutive periods with a single period
     cleanedString = cleanedString.replace(/\.{2,}/g, '.');
+
     // Step 5: Enforce per-label rules (no start/end with '-', no consecutive '-')
-    const labels = cleanedString.split('.');
-    const cleanedLabels = labels.map(label => {
-        // Remove leading/trailing '-', replace consecutive '-'
-        label = label.replace(/^-+|-+$/g, '').replace(/-{2,}/g, '-');
-        return label;
-    });
-    cleanedString = cleanedLabels.filter(Boolean).join('.'); // Remove empty labels
+    // const labels = cleanedString.split('.');
+    // const cleanedLabels = labels.map(label => {
+    //     // Remove leading/trailing '-', replace consecutive '-'
+    //     label = label.replace(/^-+|-+$/g, '').replace(/-{2,}/g, '-');
+    //     return label;
+    // });
+    // cleanedString = cleanedLabels.filter(Boolean).join('.'); // Remove empty labels
+
     // Step 6: Remove leading or trailing periods (good for valid domains)
-    cleanedString = cleanedString.replace(/^\.|\.$/g, '');
+    // cleanedString = cleanedString.replace(/^\.|\.$/g, '');
+
     // Step 7: Ensure lowercase (domains are case-insensitive)
     cleanedString = cleanedString.toLowerCase().trim();
 

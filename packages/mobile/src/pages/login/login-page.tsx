@@ -265,6 +265,7 @@ const LoginComponent = () => {
           fontSize: Platform.OS === 'ios' ? 16 : 14,
           // marginBottom: 16,
         }}
+        value={odinId}
         onChangeText={onChangeOdinId}
         autoCapitalize="none"
         autoCorrect={false}
