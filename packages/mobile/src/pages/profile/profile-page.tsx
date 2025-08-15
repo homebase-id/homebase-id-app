@@ -76,8 +76,8 @@ export const ProfilePage = (_props: SettingsProps) => {
 
   const navigate = (target: keyof ProfileStackParamList) => _props.navigation.navigate(target);
   return (
-    <SafeAreaView>
-      <Container style={{ flex: 1, paddingTop: top, paddingBottom: bottom }}>
+    <SafeAreaView style={{ paddingTop: top, paddingBottom: bottom }}>
+      <Container>
         <ScrollView
           style={{ display: 'flex', flexDirection: 'column', paddingVertical: 12 }}
           showsVerticalScrollIndicator={false}
