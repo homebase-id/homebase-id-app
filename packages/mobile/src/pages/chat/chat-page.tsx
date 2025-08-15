@@ -673,8 +673,6 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
         <Animated.View
           style={[
             {
-              // paddingBottom:
-              //   Platform.OS === 'ios' && (replyMessage || Keyboard.isVisible()) ? 0 : bottom,
               flex: 1,
               // Force the height on iOS to better support the keyboard handling
               minHeight: Platform.OS === 'ios' ? Dimensions.get('window').height : undefined,
