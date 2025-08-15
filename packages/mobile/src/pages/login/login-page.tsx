@@ -30,7 +30,7 @@ import { Divider } from '../../components/ui/Divider';
 import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 import TextButton from '../../components/ui/Text/Text-Button';
 import { t } from 'homebase-id-app-common';
-import { cleanDomainString } from '../../utils/utils';
+import { cleanInteractiveDomainString } from '../../utils/utils';
 
 type LoginProps = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 
@@ -179,7 +179,7 @@ const LoginComponent = () => {
   const [odinId, setOdinId] = useState<string>('');
 
   const onChangeOdinId = useCallback((text: string) => {
-    const modifiedText = cleanDomainString(text);
+    const modifiedText = cleanInteractiveDomainString(text);
     setOdinId(modifiedText);
   }, []);
 
