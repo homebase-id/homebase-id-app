@@ -515,7 +515,10 @@ export default class Bubble<
         <View style={styles.content.usernameView}>
           <Text
             style={
-              [styles.content.username, this.props.usernameStyle] as TextStyle
+              [
+                styles.content.username,
+                this.props.usernameStyle,
+              ] as StyleProp<TextStyle>
             }
           >
             ~ {currentMessage.user.name}

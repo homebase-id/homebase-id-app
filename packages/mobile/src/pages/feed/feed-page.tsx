@@ -15,6 +15,7 @@ import { OfflineProfileAvatar, ProfileAvatar } from '../../app/ChatStack';
 import { View } from 'react-native';
 import { Text } from '../../components/ui/Text/Text';
 import { useDarkMode } from '../../hooks/useDarkMode';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type FeedProps = NativeStackScreenProps<FeedStackParamList, 'Posts'>;
 
@@ -22,8 +23,10 @@ export const FeedPage = memo((_: FeedProps) => {
   const isFocused = useIsFocused();
   useRemoveNotifications({ disabled: !isFocused, appId: FEED_APP_ID });
 
+  const { top, bottom } = useSafeAreaInsets();
+
   return (
-    <SafeAreaView>
+    <SafeAreaView style={{ flex: 1, paddingTop: top, paddingBottom: bottom }}>
       <FeedHeader />
       <SocialFeedMainContent />
       <FloatingActionButton />

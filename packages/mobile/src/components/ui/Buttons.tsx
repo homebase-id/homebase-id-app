@@ -44,6 +44,7 @@ export const BackButton = (props: {
       onPress={props.onPress}
       label={props.label ?? 'Cancel'}
       backImage={props.showArrow ? undefined : Platform.OS === 'ios' ? Empty : undefined}
+      displayMode="default"
       labelStyle={[
         {
           color: isDarkMode ? Colors.white : Colors.black,

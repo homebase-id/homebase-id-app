@@ -1,10 +1,9 @@
 import { useDotYouClientContext } from 'homebase-id-app-common';
 import { useRouteContext } from '../../RouteContext/RouteContext';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { ChatStackParamList } from '../../../app/ChatStack';
 import { useNotification } from '../../../hooks/notifications/useNotification';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
-import { CHAT_APP_ID, FEED_APP_ID } from '../../../app/constants';
+import { CHAT_APP_ID, COMMUNITY_APP_ID, FEED_APP_ID } from '../../../app/constants';
 import { bodyFormer, navigateOnNotification } from '../../Dashboard/NotificationsOverview';
 import Toast from 'react-native-toast-message';
 import { useCallback, useEffect } from 'react';
@@ -17,11 +16,11 @@ export const NotificationToaster = () => {
   const { route } = useRouteContext();
   const dotYouClient = useDotYouClientContext();
   const identity = useDotYouClientContext().getLoggedInIdentity() || '';
-  const chatNavigator = useNavigation<NavigationProp<ChatStackParamList>>();
   const tabNavigator = useNavigation<NavigationProp<TabStackParamList>>();
   const isConversationScreen = route?.name === 'Conversation' && !route.params;
   const isChatScreen = route?.name === 'ChatScreen' && route.params;
   const isFeedScreen = route?.name === 'Posts';
+  const isCommunityScreen = route?.name === 'Community' && route.params;
   const { top } = useSafeAreaInsets();
   const {
     fetch: { data: notifications },
@@ -39,6 +38,7 @@ export const NotificationToaster = () => {
       const body = bodyFormer(notification, false, appName, senderName);
       const isChatNotification = stringGuidsEqual(appId, CHAT_APP_ID);
       const isFeedNotification = stringGuidsEqual(appId, FEED_APP_ID);
+      const isCommunityNotification = stringGuidsEqual(appId, COMMUNITY_APP_ID);
       if (isChatNotification) {
         // if in conversation screen, don't show notification
         if (isConversationScreen) {
@@ -61,6 +61,9 @@ export const NotificationToaster = () => {
       } else if (isFeedNotification && isFeedScreen) {
         dismissNotification(notification);
         return;
+      } else if (isCommunityScreen && isCommunityNotification) {
+        dismissNotification(notification);
+        return;
       }
       return Toast.show({
         type: 'notification',
@@ -71,7 +74,7 @@ export const NotificationToaster = () => {
         visibilityTime: 4000,
         topOffset: top,
         onPress: () => {
-          navigateOnNotification(notification, identity, chatNavigator, tabNavigator);
+          navigateOnNotification(notification, identity, tabNavigator);
           Toast.hide();
         },
         onHide: () => dismissNotification(notification),
@@ -81,17 +84,17 @@ export const NotificationToaster = () => {
       });
     });
   }, [
-    chatNavigator,
-    dismissNotification,
-    dotYouClient,
-    tabNavigator,
-    identity,
-    isChatScreen,
-    isConversationScreen,
-    isFeedScreen,
     notifications,
-    route,
+    dotYouClient,
+    isFeedScreen,
+    isCommunityScreen,
     top,
+    isConversationScreen,
+    isChatScreen,
+    route?.params,
+    dismissNotification,
+    identity,
+    tabNavigator,
   ]);
 
   useEffect(() => {

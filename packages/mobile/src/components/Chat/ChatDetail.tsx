@@ -52,10 +52,8 @@ import { ChatDeletedArchivalStaus, ChatMessage } from '../../provider/chat/ChatP
 import { useAudioRecorder } from '../../hooks/audio/useAudioRecorderPlayer';
 import { Text } from '../ui/Text/Text';
 import { assetsToImageSource, fixDocumentURI, millisToMinutesAndSeconds } from '../../utils/utils';
-import { SafeAreaView } from '../ui/SafeAreaView/SafeAreaView';
-import Document from 'react-native-document-picker';
+import { keepLocalCopy, pick, types } from '@react-native-documents/picker';
 import { getLocales } from 'react-native-localize';
-import { type PastedFile } from '@mattermost/react-native-paste-input';
 import { useDraftMessage } from '../../hooks/chat/useDraftMessage';
 import { FlatList } from 'react-native-gesture-handler';
 import { MentionDropDown } from './Mention-Dropdown';
@@ -64,7 +62,7 @@ import { LinkPreview } from '@homebase-id/js-lib/media';
 import { EmptyChatContainer } from './EmptyChatContainer';
 import { ImageSource } from '../../provider/image/RNImageProvider';
 import { RenderBottomContainer } from './ui/RenderBottomContainer';
-import Animated from 'react-native-reanimated';
+import Animated, { SlideOutLeft } from 'react-native-reanimated';
 import { RenderMessageText } from './ui/RenderMessageText';
 import { RenderBubble } from './ui/RenderBubble';
 import { RenderReplyMessageView } from './ui/RenderReplyMessageView';
@@ -84,7 +82,6 @@ export const ChatDetail = memo(
     doOpenRetryModal,
     replyMessage,
     setReplyMessage,
-    onPaste,
     hasMoreMessages,
     fetchMoreMessages,
     conversationId,
@@ -108,7 +105,6 @@ export const ChatDetail = memo(
     doOpenMessageInfo: (message: ChatMessageIMessage) => void;
     doOpenReactionModal: (message: ChatMessageIMessage) => void;
     doOpenRetryModal: (message: ChatMessageIMessage) => void;
-    onPaste: (error: string | null | undefined, files: PastedFile[]) => void;
     conversationId: string;
     replyMessage: ChatMessageIMessage | null;
     setReplyMessage: (message: ChatMessageIMessage | null) => void;
@@ -231,26 +227,30 @@ export const ChatDetail = memo(
 
     const handleAttachmentButtonAction = useCallback(() => {
       requestAnimationFrame(async () => {
-        const document = await Document.pickSingle({
+        const [file] = await pick({
           copyTo: 'cachesDirectory',
-          type: [
-            Document.types.pdf,
-            Document.types.doc,
-            Document.types.docx,
-            Document.types.json,
-            Document.types.zip,
-          ], // Don't add support for all files. Keeping it pdf and docs for now
+          type: [types.pdf, types.doc, types.docx, types.json, types.zip], // Don't add support for all files. Keeping it pdf and docs for now
           mode: 'open',
         });
-        document.fileCopyUri = fixDocumentURI(document.fileCopyUri || document.uri);
+
+        const [document] = await keepLocalCopy({
+          files: [
+            {
+              uri: file.uri,
+              fileName: file.name ?? 'fallbackName',
+            },
+          ],
+          destination: 'documentDirectory',
+        });
+
         const asset: ImageSource = {
-          uri: document.fileCopyUri,
-          type: document.type || 'application/pdf',
-          fileSize: document.size || 0,
-          filepath: document.uri,
+          uri: fixDocumentURI(document.sourceUri || file.uri),
+          type: file.type || 'application/pdf',
+          fileSize: file.size || 0,
+          filepath: file.uri,
           height: 0,
           width: 0,
-          id: document.name || 'file',
+          id: file.name || 'file',
         };
         onAssetsAdded([asset]);
         setBottomContainerVisible(false);
@@ -314,7 +314,6 @@ export const ChatDetail = memo(
         borderRadius: 10,
         marginTop: Platform.OS === 'android' ? 'auto' : undefined,
         paddingHorizontal: 7,
-        paddingBottom: 7,
       };
     }, [isDarkMode]);
 
@@ -334,7 +333,7 @@ export const ChatDetail = memo(
 
     /* Component Function Callbacks */
     const renderMessageBox = useCallback(
-      ({ key, ...props }: MessageProps<ChatMessageIMessage>) => {
+      ({ ...props }: MessageProps<ChatMessageIMessage>) => {
         const enabled =
           props.currentMessage &&
           props.currentMessage.fileMetadata.appData.archivalStatus !== ChatDeletedArchivalStaus;
@@ -342,7 +341,6 @@ export const ChatDetail = memo(
         return (
           <Message
             {...props}
-            key={key}
             renderLeftIcon={<Info />}
             renderRightIcon={<Reply />}
             onLeftSwipeOpen={onLeftSwipe}
@@ -391,6 +389,7 @@ export const ChatDetail = memo(
             style={{
               backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
             }}
+            exiting={SlideOutLeft}
           >
             {isGroup && (
               <MentionDropDown
@@ -748,55 +747,52 @@ export const ChatDetail = memo(
     }, [textRef, replyMessage]);
 
     return (
-      <SafeAreaView>
-        <GiftedChat<ChatMessageIMessage>
-          messageContainerRef={messageContainerRef}
-          messages={messages}
-          onSend={_doSend}
-          locale={locale}
-          textInputRef={textRef}
-          onInputTextChanged={onTextInputChanged}
-          infiniteScroll
-          scrollToBottom
-          alwaysShowSend
-          onLongPress={(e, _, m: ChatMessageIMessage) => onLongPress(e, m)}
-          isKeyboardInternallyHandled={true}
-          keyboardShouldPersistTaps="never"
-          onPaste={onPaste}
-          renderMessageImage={renderMessageImage}
-          renderCustomView={renderCustomView}
-          renderBubble={(prop) => (
-            <RenderBubble
-              {...prop}
-              onReactionClick={doOpenReactionModal}
-              onRetryClick={doOpenRetryModal}
-            />
-          )}
-          renderMessageText={(prop) => <RenderMessageText {...prop} />}
-          renderMessage={renderMessageBox}
-          // renderChatFooter instead of renderFooter as the renderFooter renders within the scrollView
-          renderChatFooter={renderChatFooter}
-          showUserAvatar={false}
-          renderUsernameOnMessage={isGroup}
-          renderAvatar={isGroup ? renderAvatar : null}
-          renderInputToolbar={renderInputToolbar}
-          renderUsername={renderUsername}
-          user={{
-            _id: identity || '',
-          }}
-          loadEarlier={hasMoreMessages}
-          onLoadEarlier={fetchMoreMessages}
-          scrollToBottomStyle={scrollToBottomStyle}
-          renderBottomFooter={bottomContainerVisible ? renderBottomContainer : undefined}
-          scrollToBottomComponent={scrollToBottomComponent}
-          renderLoadEarlier={(prop) => <LoadEarlier {...prop} wrapperStyle={wrapperStyle} />}
-          listViewProps={{
-            removeClippedSubviews: true,
-            windowSize: 15,
-          }}
-          renderChatEmpty={renderEmptyChat}
-        />
-      </SafeAreaView>
+      <GiftedChat<ChatMessageIMessage>
+        messageContainerRef={messageContainerRef}
+        messages={messages}
+        onSend={_doSend}
+        locale={locale}
+        textInputRef={textRef}
+        onInputTextChanged={onTextInputChanged}
+        infiniteScroll
+        scrollToBottom
+        alwaysShowSend
+        onLongPress={(e, _, m: ChatMessageIMessage) => onLongPress(e, m)}
+        isKeyboardInternallyHandled={true}
+        keyboardShouldPersistTaps="never"
+        renderMessageImage={renderMessageImage}
+        renderCustomView={renderCustomView}
+        renderBubble={(prop) => (
+          <RenderBubble
+            {...prop}
+            onReactionClick={doOpenReactionModal}
+            onRetryClick={doOpenRetryModal}
+          />
+        )}
+        renderMessageText={(prop) => <RenderMessageText {...prop} />}
+        renderMessage={renderMessageBox}
+        // renderChatFooter instead of renderFooter as the renderFooter renders within the scrollView
+        renderChatFooter={renderChatFooter}
+        showUserAvatar={false}
+        renderUsernameOnMessage={isGroup}
+        renderAvatar={isGroup ? renderAvatar : null}
+        renderInputToolbar={renderInputToolbar}
+        renderUsername={renderUsername}
+        user={{
+          _id: identity || '',
+        }}
+        loadEarlier={hasMoreMessages}
+        onLoadEarlier={fetchMoreMessages}
+        scrollToBottomStyle={scrollToBottomStyle}
+        renderBottomFooter={renderBottomContainer}
+        scrollToBottomComponent={scrollToBottomComponent}
+        renderLoadEarlier={(prop) => <LoadEarlier {...prop} wrapperStyle={wrapperStyle} />}
+        listViewProps={{
+          removeClippedSubviews: true,
+          windowSize: 15,
+        }}
+        renderChatEmpty={renderEmptyChat}
+      />
     );
   }
 );

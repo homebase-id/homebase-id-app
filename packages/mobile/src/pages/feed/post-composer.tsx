@@ -8,7 +8,7 @@ import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { ChannelDefinition, BlogConfig, ReactAccess } from '@homebase-id/js-lib/public';
 import { t, useDotYouClientContext } from 'homebase-id-app-common';
 import { useState, useMemo, useCallback, useLayoutEffect, useRef, useEffect, memo } from 'react';
-import { View, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, TouchableOpacity, KeyboardAvoidingView, Platform, TextInput } from 'react-native';
 import { Asset, launchImageLibrary } from 'react-native-image-picker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useChannels } from '../../hooks/feed/channels/useChannels';
@@ -33,7 +33,6 @@ import { NativeStackNavigationProp, NativeStackScreenProps } from '@react-naviga
 import { LinkPreviewBar } from '../../components/Chat/Link-Preview-Bar';
 import { LinkPreview } from '@homebase-id/js-lib/media';
 import { Backdrop } from '../../components/ui/Modal/Backdrop';
-import PasteInput, { PastedFile } from '@mattermost/react-native-paste-input';
 import { ArticleComposer } from '../../components/Feed/Article/ArticleComposer';
 
 type PostComposerProps = NativeStackScreenProps<FeedStackParamList, 'Compose'>;
@@ -142,32 +141,32 @@ export const PostComposer = memo(
     );
     const canPost = caption?.length || assets?.length;
 
-    const onPaste = useCallback(
-      async (error: string | null | undefined, files: PastedFile[]) => {
-        if (error) {
-          console.error('Error while pasting:', error);
-          return;
-        }
-        const pastedItems: Asset[] = await Promise.all(
-          files
-            .map(async (file) => {
-              if (!file.type.startsWith('image')) return;
-              const { width, height } = await getImageSize(file.uri);
-              return {
-                uri: file.uri,
-                type: file.type,
-                fileName: file.fileName,
-                fileSize: file.fileSize,
-                height: height,
-                width: width,
-              } as Asset;
-            })
-            .filter(Boolean) as Promise<Asset>[]
-        );
-        setAssets(pastedItems);
-      },
-      [setAssets]
-    );
+    // const onPaste = useCallback(
+    //   async (error: string | null | undefined, files: PastedFile[]) => {
+    //     if (error) {
+    //       console.error('Error while pasting:', error);
+    //       return;
+    //     }
+    //     const pastedItems: Asset[] = await Promise.all(
+    //       files
+    //         .map(async (file) => {
+    //           if (!file.type.startsWith('image')) return;
+    //           const { width, height } = await getImageSize(file.uri);
+    //           return {
+    //             uri: file.uri,
+    //             type: file.type,
+    //             fileName: file.fileName,
+    //             fileSize: file.fileSize,
+    //             height: height,
+    //             width: width,
+    //           } as Asset;
+    //         })
+    //         .filter(Boolean) as Promise<Asset>[]
+    //     );
+    //     setAssets(pastedItems);
+    //   },
+    //   [setAssets]
+    // );
 
     const actionGroupOptions = useMemo(
       () => [
@@ -262,8 +261,7 @@ export const PostComposer = memo(
                 borderRadius: 6,
               }}
             >
-              <PasteInput
-                onPaste={onPaste}
+              <TextInput
                 placeholder="What's up?"
                 style={{
                   paddingVertical: 5,

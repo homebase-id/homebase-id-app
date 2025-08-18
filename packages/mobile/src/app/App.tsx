@@ -37,6 +37,7 @@ import {
   TabHouseIcon,
   TabChatIcon,
   TabMenuIcon,
+  TabCommunityIcon,
 } from '../components/Nav/TabStackIcons';
 import { AudioContextProvider } from '../components/AudioContext/AudioContext';
 import { WebSocketContextProvider } from '../components/WebSocketContext/WebSocketContext';
@@ -59,11 +60,12 @@ import { FeedStack, FeedStackParamList } from './FeedStack';
 import ChatSettingsProvider from '../components/Settings/ChatSettingsContext';
 import { useCacheCleanup } from '../hooks/file/useCacheCleanup';
 import { PendingUpgradeDialog } from '../components/PendingUpgrad/PendingUpgrade';
-import { CommunityStack, CommunityStackParamList } from './CommunityStack';
+import { KeyboardProvider } from 'react-native-keyboard-controller';
+import { CommunityPage } from '../pages/community/community-page';
 
 export type AuthStackParamList = {
   Login: undefined;
-  Authenticated: undefined;
+  Authenticated: NavigatorScreenParams<TabStackParamList> | undefined;
 };
 
 export type TabStackParamList = {
@@ -71,7 +73,10 @@ export type TabStackParamList = {
   Feed: NavigatorScreenParams<FeedStackParamList>;
   Profile: NavigatorScreenParams<ProfileStackParamList> | undefined;
   Chat: NavigatorScreenParams<ChatStackParamList>;
-  Community: NavigatorScreenParams<CommunityStackParamList>;
+  Community: {
+    typeId?: string;
+    tagId?: string;
+  };
 };
 
 export type HomeStackParamList = {
@@ -86,8 +91,10 @@ const App = () => {
         <PushNotificationProvider>
           <RouteContextProvider>
             <DotYouClientProvider>
-              <RootStack />
-              <Toast />
+              <KeyboardProvider>
+                <RootStack />
+                <Toast />
+              </KeyboardProvider>
             </DotYouClientProvider>
           </RouteContextProvider>
         </PushNotificationProvider>
@@ -119,7 +126,7 @@ const RootStack = () => {
       <StackRoot.Navigator
         screenOptions={{
           headerShown: false,
-          statusBarColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
+          // statusBarColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
           /// StatusBarStyle throws error when changin in Ios (even setting to Ui UIControllerbasedStatusBar to yes)
           statusBarStyle: Platform.OS === 'android' ? (isDarkMode ? 'light' : 'dark') : undefined,
           animation: 'slide_from_right',
@@ -256,17 +263,18 @@ const TabStack = memo(() => {
           }}
         />
         <TabBottom.Screen
+          name="Community"
+          component={CommunityPage}
+          initialParams={{}}
+          options={{
+            tabBarIcon: TabCommunityIcon,
+          }}
+        />
+        <TabBottom.Screen
           name="Profile"
           component={ProfileStack}
           options={{
             tabBarIcon: TabMenuIcon,
-          }}
-        />
-        <TabBottom.Screen
-          name="Community"
-          component={CommunityStack}
-          options={{
-            tabBarButton: () => null,
           }}
         />
       </TabBottom.Navigator>

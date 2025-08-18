@@ -13,6 +13,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set up Xcode 16
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: "16"
+
       - name: get-npm-version
         id: package-version
         uses: Saionaro/extract-package-version@v1.2.1
@@ -32,11 +37,11 @@ jobs:
 
       - name: Setup Ruby (bundle)
         uses: ruby/setup-ruby@v1
+
         with:
           working-directory: packages/mobile
-          ruby-version: 2.7.4
+          ruby-version: 3.1
           bundler-cache: true
-          cache-version: 1
 
       - name: Bump version
         uses: yanamura/ios-bump-version@v1
@@ -46,13 +51,16 @@ jobs:
           project-path: packages/mobile/ios
 
       - name: setup-cocoapods
-        uses: maxim-lobanov/setup-cocoapods@v1
+        uses: maxim-lobanov/setup-cocoapods@v1.4.0
         with:
           podfile-path: packages/mobile/ios/Podfile.lock
 
       - name: Install Pods
         run: pod install --repo-update
         working-directory: packages/mobile/ios
+
+      # - name: Select Xcode Version
+      #   run: sudo xcode-select -s /Applications/Xcode_15.4.app
 
       - name: Build IOS App
         uses: yukiarrr/ios-build-action@v1.12.0
@@ -120,6 +128,11 @@ jobs:
 
       # - name: Build libs
       #   run: npm run build:libs
+
+      - name: Set up local.properties
+        run: |
+          echo "GITHUB_USERNAME=github-actions[bot]" >> packages/mobile/android/local.properties
+          echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> packages/mobile/android/local.properties
 
       - name: Decode Homebase Keystore to file
         id: decode_keystore_file

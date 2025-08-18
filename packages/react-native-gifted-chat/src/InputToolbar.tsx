@@ -1,5 +1,5 @@
 import React, { memo, useEffect, useMemo, useState } from 'react';
-import { StyleSheet, View, Keyboard, StyleProp, ViewStyle } from 'react-native';
+import { StyleSheet, View, StyleProp, ViewStyle, Keyboard } from 'react-native';
 
 import { Composer, ComposerProps } from './Composer';
 import { Send, SendProps } from './Send';
@@ -44,21 +44,21 @@ export const InputToolbar = memo(
   <TMessage extends IMessage = IMessage>(
     props: InputToolbarProps<TMessage>,
   ) => {
-    const [position, setPosition] = useState('absolute');
-    useEffect(() => {
-      const keyboardWillShowListener = Keyboard.addListener(
-        'keyboardWillShow',
-        () => setPosition('relative'),
-      );
-      const keyboardWillHideListener = Keyboard.addListener(
-        'keyboardWillHide',
-        () => setPosition('absolute'),
-      );
-      return () => {
-        keyboardWillShowListener?.remove();
-        keyboardWillHideListener?.remove();
-      };
-    }, []);
+    // const [position, setPosition] = useState('absolute');
+    // useEffect(() => {
+    //   const keyboardWillShowListener = Keyboard.addListener(
+    //     'keyboardWillShow',
+    //     () => setPosition('relative'),
+    //   );
+    //   const keyboardWillHideListener = Keyboard.addListener(
+    //     'keyboardWillHide',
+    //     () => setPosition('absolute'),
+    //   );
+    //   return () => {
+    //     keyboardWillShowListener?.remove();
+    //     keyboardWillHideListener?.remove();
+    //   };
+    // }, []);
 
     const {
       containerStyle,
@@ -74,7 +74,13 @@ export const InputToolbar = memo(
     const hasText = useMemo(() => !!text, [text]);
     return (
       <View
-        style={[styles.container, { position }, containerStyle] as ViewStyle}
+        style={
+          [
+            styles.container,
+            // { position },
+            containerStyle,
+          ] as StyleProp<ViewStyle>
+        }
       >
         <View style={[styles.primary, props.primaryStyle]}>
           {renderActions?.(rest) ||

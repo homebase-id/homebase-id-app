@@ -11,13 +11,7 @@ export type SelectedMessageProp = {
   onDelete: () => void;
 };
 
-export const NoConversationHeader = ({
-  title,
-  goBack,
-}: {
-  title: string;
-  goBack: () => void;
-}) => {
+export const NoConversationHeader = ({ title, goBack }: { title: string; goBack: () => void }) => {
   const { isDarkMode } = useDarkMode();
   const headerLeft = useCallback(
     () => (
@@ -30,9 +24,7 @@ export const NoConversationHeader = ({
       >
         <HeaderBackButton
           style={{ left: 0, marginRight: Platform.OS === 'ios' ? -10 : 0 }}
-          canGoBack={true}
           onPress={goBack}
-          labelVisible={false}
           tintColor={isDarkMode ? Colors.white : Colors.black}
         />
       </View>
@@ -40,11 +32,5 @@ export const NoConversationHeader = ({
     [goBack, isDarkMode]
   );
 
-  return (
-    <Header
-      title={title}
-      headerTitleAlign="center"
-      headerLeft={headerLeft}
-    />
-  );
+  return <Header title={title} headerTitleAlign="center" headerLeft={headerLeft} />;
 };

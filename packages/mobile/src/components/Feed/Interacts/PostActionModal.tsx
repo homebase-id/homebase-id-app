@@ -37,7 +37,7 @@ export const PostModalAction = memo(
     const bottomSheetRef = useRef<BottomSheetModalMethods>(null);
     const [context, setContext] = useState<PostActionProps>();
     const [isEditOpen, setIsEditOpen] = useState(false);
-    const snapPoints = useSharedValue(['50%', '70%']);
+    const snapPoints = useSharedValue<(string | number)[]>(['50%', '70%']);
     const onClose = useCallback(() => {
       setContext(undefined);
       bottomSheetRef.current?.dismiss();

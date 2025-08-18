@@ -81,9 +81,7 @@ export const ChatAppBar = ({
       >
         <HeaderBackButton
           style={{ marginRight: Platform.OS === 'ios' ? -10 : 0 }}
-          canGoBack={true}
           onPress={goBack}
-          labelVisible={false}
           tintColor={isDarkMode ? Colors.white : Colors.black}
         />
         {selectedMessage ? null : !group ? (
@@ -167,7 +165,12 @@ export const ChatAppBar = ({
     selectedMessageActions?.onReport,
   ]);
   return (
-    <Pressable onPress={onPress}>
+    <Pressable
+      style={{
+        zIndex: 10,
+      }}
+      onPress={onPress}
+    >
       <Header
         title={selectedMessage ? '' : !isSelf ? title : `${user?.firstName} ${user?.surName} (you)`}
         headerTitleAlign="left"

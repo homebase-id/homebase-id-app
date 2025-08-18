@@ -30,6 +30,8 @@ import { Divider } from '../../components/ui/Divider';
 import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 import TextButton from '../../components/ui/Text/Text-Button';
 import { t } from 'homebase-id-app-common';
+import { cleanDomainString,cleanInteractiveDomainString } from '../../utils/utils';
+import { Dimensions } from 'react-native';
 
 type LoginProps = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 
@@ -38,26 +40,32 @@ export const LoginPage = (_props: LoginProps) => {
     <SafeAreaView>
       <Container style={{ flex: 1, flexDirection: 'column' }}>
         <View
-          style={{
+        style={{
+            minHeight: 120,
             padding: 20,
             alignItems: 'center',
             gap: 10,
-            minHeight: 120,
             flexDirection: 'row',
             justifyContent: 'center',
-          }}
+            position: 'relative',
+            top: 60 // adjust as needed to push the logo down a bit
+        }}
         >
-          <Image source={logo} style={{ width: 40, height: 40 }} />
-          <Text style={{ fontSize: 25 }}>Homebase</Text>
+        <View style={{ height: Math.max(0, Dimensions.get('window').height / 3 - 40) }} />
+        <Image source={logo} style={{ width: 40, height: 40 }} />
+        <Text style={{ fontSize: 25 }}>Homebase</Text>
         </View>
         <Animated.View
-          style={{
+        style={{
+
+            flex: 1, 
+            justifyContent: 'flex-start', 
             paddingHorizontal: 12,
             paddingVertical: 15,
-            marginTop: 'auto',
-          }}
+            marginTop: Math.max(0, Dimensions.get('window').height / 6 - 82) 
+        }}
         >
-          <LoginComponent />
+        <LoginComponent />
         </Animated.View>
 
         <View
@@ -128,6 +136,11 @@ const useFinalize = () => {
           const dataParams = url?.split(FINALIZE_PATH)[1];
           const params = new URLSearchParams(dataParams);
 
+          const error = params.get('error');
+          if (error) {
+            setState(null);
+            return;
+          }
           const identity = params.get('identity');
           const public_key = params.get('public_key');
           const salt = params.get('salt');
@@ -173,8 +186,8 @@ const LoginComponent = () => {
   const [odinId, setOdinId] = useState<string>('');
 
   const onChangeOdinId = useCallback((text: string) => {
-    text = text.trim();
-    setOdinId(text);
+    const modifiedText = cleanInteractiveDomainString(text);
+    setOdinId(modifiedText);
   }, []);
 
   const { data: authParams, refetch } = useParams();
@@ -189,18 +202,23 @@ const LoginComponent = () => {
   useEffect(() => setInvalid(false), [odinId]);
 
   const onLogin = useCallback(async () => {
-    if (!odinId && !lastIdentity) {
+    // Determine the final domain: use odinId if provided, otherwise fall back to lastIdentity
+    const finalDomain = odinId ? cleanDomainString(odinId) : lastIdentity;
+
+    if (!finalDomain) {
       setInvalid(true);
       return;
     }
 
-    const identityReachable = await doCheckIdentity(odinId || (lastIdentity as string));
+    setOdinId(finalDomain);
+
+    const identityReachable = await doCheckIdentity(finalDomain);
     if (!identityReachable) {
       setInvalid(true);
       return;
     }
 
-    const url = `https://${odinId || lastIdentity}/api/owner/v1/youauth/authorize?${stringifyToQueryParams(
+    const url = `https://${finalDomain}/api/owner/v1/youauth/authorize?${stringifyToQueryParams(
       authParams as unknown
     )}`;
     if (await InAppBrowser.isAvailable()) {
@@ -259,6 +277,7 @@ const LoginComponent = () => {
           fontSize: Platform.OS === 'ios' ? 16 : 14,
           // marginBottom: 16,
         }}
+        value={odinId}
         onChangeText={onChangeOdinId}
         autoCapitalize="none"
         autoCorrect={false}

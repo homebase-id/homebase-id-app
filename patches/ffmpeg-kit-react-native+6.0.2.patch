@@ -1,0 +1,396 @@
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build.gradle b/node_modules/ffmpeg-kit-react-native/android/build.gradle
+index 2909280..408bc6f 100644
+--- a/node_modules/ffmpeg-kit-react-native/android/build.gradle
++++ b/node_modules/ffmpeg-kit-react-native/android/build.gradle
+@@ -125,5 +125,6 @@ repositories {
+ 
+ dependencies {
+   api 'com.facebook.react:react-native:+'
+-  implementation 'com.arthenica:ffmpeg-kit-' + safePackageName(safeExtGet('ffmpegKitPackage', 'https')) + ':' + safePackageVersion(safeExtGet('ffmpegKitPackage', 'https'))
++ implementation 'com.homebase-id:ffmpeg-kit-' + safePackageName(safeExtGet('ffmpegKitPackage', 'full')) + ':' + safePackageVersion(safeExtGet('ffmpegKitPackage', 'full'))
++ implementation 'com.arthenica:smart-exception-java:0.2.1'  // Correct artifact and version for FFmpegKit
+ }
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/.transforms/9a031aaf9bcaa9cfa499d5d0b54d81e1/results.bin b/node_modules/ffmpeg-kit-react-native/android/build/.transforms/9a031aaf9bcaa9cfa499d5d0b54d81e1/results.bin
+new file mode 100644
+index 0000000..0d259dd
+--- /dev/null
++++ b/node_modules/ffmpeg-kit-react-native/android/build/.transforms/9a031aaf9bcaa9cfa499d5d0b54d81e1/results.bin
+@@ -0,0 +1 @@
++o/classes
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/.transforms/9a031aaf9bcaa9cfa499d5d0b54d81e1/transformed/classes/classes_dex/classes.dex b/node_modules/ffmpeg-kit-react-native/android/build/.transforms/9a031aaf9bcaa9cfa499d5d0b54d81e1/transformed/classes/classes_dex/classes.dex
+new file mode 100644
+index 0000000..89d9119
+Binary files /dev/null and b/node_modules/ffmpeg-kit-react-native/android/build/.transforms/9a031aaf9bcaa9cfa499d5d0b54d81e1/transformed/classes/classes_dex/classes.dex differ
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/.transforms/ce6d035a1ebd0cd5e57219693d43409e/results.bin b/node_modules/ffmpeg-kit-react-native/android/build/.transforms/ce6d035a1ebd0cd5e57219693d43409e/results.bin
+new file mode 100644
+index 0000000..7ed749e
+--- /dev/null
++++ b/node_modules/ffmpeg-kit-react-native/android/build/.transforms/ce6d035a1ebd0cd5e57219693d43409e/results.bin
+@@ -0,0 +1 @@
++o/bundleLibRuntimeToDirDebug
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/.transforms/ce6d035a1ebd0cd5e57219693d43409e/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/arthenica/ffmpegkit/reactnative/BuildConfig.dex b/node_modules/ffmpeg-kit-react-native/android/build/.transforms/ce6d035a1ebd0cd5e57219693d43409e/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/arthenica/ffmpegkit/reactnative/BuildConfig.dex
+new file mode 100644
+index 0000000..b494694
+Binary files /dev/null and b/node_modules/ffmpeg-kit-react-native/android/build/.transforms/ce6d035a1ebd0cd5e57219693d43409e/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/arthenica/ffmpegkit/reactnative/BuildConfig.dex differ
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/.transforms/ce6d035a1ebd0cd5e57219693d43409e/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/arthenica/ffmpegkit/reactnative/FFmpegKitReactNativeModule$1.dex b/node_modules/ffmpeg-kit-react-native/android/build/.transforms/ce6d035a1ebd0cd5e57219693d43409e/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/arthenica/ffmpegkit/reactnative/FFmpegKitReactNativeModule$1.dex
+new file mode 100644
+index 0000000..4177bcc
+Binary files /dev/null and b/node_modules/ffmpeg-kit-react-native/android/build/.transforms/ce6d035a1ebd0cd5e57219693d43409e/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/arthenica/ffmpegkit/reactnative/FFmpegKitReactNativeModule$1.dex differ
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/.transforms/ce6d035a1ebd0cd5e57219693d43409e/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/arthenica/ffmpegkit/reactnative/FFmpegKitReactNativeModule$2.dex b/node_modules/ffmpeg-kit-react-native/android/build/.transforms/ce6d035a1ebd0cd5e57219693d43409e/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/arthenica/ffmpegkit/reactnative/FFmpegKitReactNativeModule$2.dex
+new file mode 100644
+index 0000000..b92817c
+Binary files /dev/null and b/node_modules/ffmpeg-kit-react-native/android/build/.transforms/ce6d035a1ebd0cd5e57219693d43409e/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/arthenica/ffmpegkit/reactnative/FFmpegKitReactNativeModule$2.dex differ
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/.transforms/ce6d035a1ebd0cd5e57219693d43409e/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/arthenica/ffmpegkit/reactnative/FFmpegKitReactNativeModule.dex b/node_modules/ffmpeg-kit-react-native/android/build/.transforms/ce6d035a1ebd0cd5e57219693d43409e/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/arthenica/ffmpegkit/reactnative/FFmpegKitReactNativeModule.dex
+new file mode 100644
+index 0000000..8e2eb6e
+Binary files /dev/null and b/node_modules/ffmpeg-kit-react-native/android/build/.transforms/ce6d035a1ebd0cd5e57219693d43409e/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/arthenica/ffmpegkit/reactnative/FFmpegKitReactNativeModule.dex differ
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/.transforms/ce6d035a1ebd0cd5e57219693d43409e/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/arthenica/ffmpegkit/reactnative/FFmpegKitReactNativePackage.dex b/node_modules/ffmpeg-kit-react-native/android/build/.transforms/ce6d035a1ebd0cd5e57219693d43409e/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/arthenica/ffmpegkit/reactnative/FFmpegKitReactNativePackage.dex
+new file mode 100644
+index 0000000..cd83125
+Binary files /dev/null and b/node_modules/ffmpeg-kit-react-native/android/build/.transforms/ce6d035a1ebd0cd5e57219693d43409e/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/arthenica/ffmpegkit/reactnative/FFmpegKitReactNativePackage.dex differ
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/.transforms/ce6d035a1ebd0cd5e57219693d43409e/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/arthenica/ffmpegkit/reactnative/FFmpegSessionExecuteTask.dex b/node_modules/ffmpeg-kit-react-native/android/build/.transforms/ce6d035a1ebd0cd5e57219693d43409e/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/arthenica/ffmpegkit/reactnative/FFmpegSessionExecuteTask.dex
+new file mode 100644
+index 0000000..507b6d2
+Binary files /dev/null and b/node_modules/ffmpeg-kit-react-native/android/build/.transforms/ce6d035a1ebd0cd5e57219693d43409e/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/arthenica/ffmpegkit/reactnative/FFmpegSessionExecuteTask.dex differ
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/.transforms/ce6d035a1ebd0cd5e57219693d43409e/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/arthenica/ffmpegkit/reactnative/FFprobeSessionExecuteTask.dex b/node_modules/ffmpeg-kit-react-native/android/build/.transforms/ce6d035a1ebd0cd5e57219693d43409e/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/arthenica/ffmpegkit/reactnative/FFprobeSessionExecuteTask.dex
+new file mode 100644
+index 0000000..cf16efa
+Binary files /dev/null and b/node_modules/ffmpeg-kit-react-native/android/build/.transforms/ce6d035a1ebd0cd5e57219693d43409e/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/arthenica/ffmpegkit/reactnative/FFprobeSessionExecuteTask.dex differ
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/.transforms/ce6d035a1ebd0cd5e57219693d43409e/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/arthenica/ffmpegkit/reactnative/MediaInformationSessionExecuteTask.dex b/node_modules/ffmpeg-kit-react-native/android/build/.transforms/ce6d035a1ebd0cd5e57219693d43409e/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/arthenica/ffmpegkit/reactnative/MediaInformationSessionExecuteTask.dex
+new file mode 100644
+index 0000000..4cdd4df
+Binary files /dev/null and b/node_modules/ffmpeg-kit-react-native/android/build/.transforms/ce6d035a1ebd0cd5e57219693d43409e/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/arthenica/ffmpegkit/reactnative/MediaInformationSessionExecuteTask.dex differ
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/.transforms/ce6d035a1ebd0cd5e57219693d43409e/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/arthenica/ffmpegkit/reactnative/WriteToPipeTask.dex b/node_modules/ffmpeg-kit-react-native/android/build/.transforms/ce6d035a1ebd0cd5e57219693d43409e/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/arthenica/ffmpegkit/reactnative/WriteToPipeTask.dex
+new file mode 100644
+index 0000000..a680c1d
+Binary files /dev/null and b/node_modules/ffmpeg-kit-react-native/android/build/.transforms/ce6d035a1ebd0cd5e57219693d43409e/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/arthenica/ffmpegkit/reactnative/WriteToPipeTask.dex differ
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/.transforms/ce6d035a1ebd0cd5e57219693d43409e/transformed/bundleLibRuntimeToDirDebug/desugar_graph.bin b/node_modules/ffmpeg-kit-react-native/android/build/.transforms/ce6d035a1ebd0cd5e57219693d43409e/transformed/bundleLibRuntimeToDirDebug/desugar_graph.bin
+new file mode 100644
+index 0000000..bd1f0b6
+Binary files /dev/null and b/node_modules/ffmpeg-kit-react-native/android/build/.transforms/ce6d035a1ebd0cd5e57219693d43409e/transformed/bundleLibRuntimeToDirDebug/desugar_graph.bin differ
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/generated/source/buildConfig/debug/com/arthenica/ffmpegkit/reactnative/BuildConfig.java b/node_modules/ffmpeg-kit-react-native/android/build/generated/source/buildConfig/debug/com/arthenica/ffmpegkit/reactnative/BuildConfig.java
+new file mode 100644
+index 0000000..05aa55a
+--- /dev/null
++++ b/node_modules/ffmpeg-kit-react-native/android/build/generated/source/buildConfig/debug/com/arthenica/ffmpegkit/reactnative/BuildConfig.java
+@@ -0,0 +1,10 @@
++/**
++ * Automatically generated file. DO NOT MODIFY
++ */
++package com.arthenica.ffmpegkit.reactnative;
++
++public final class BuildConfig {
++  public static final boolean DEBUG = Boolean.parseBoolean("true");
++  public static final String LIBRARY_PACKAGE_NAME = "com.arthenica.ffmpegkit.reactnative";
++  public static final String BUILD_TYPE = "debug";
++}
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/AndroidManifest.xml b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/AndroidManifest.xml
+new file mode 100644
+index 0000000..e8dddb5
+--- /dev/null
++++ b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/AndroidManifest.xml
+@@ -0,0 +1,7 @@
++<?xml version="1.0" encoding="utf-8"?>
++<manifest xmlns:android="http://schemas.android.com/apk/res/android"
++    package="com.arthenica.ffmpegkit.reactnative" >
++
++    <uses-sdk android:minSdkVersion="24" />
++
++</manifest>
+\ No newline at end of file
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/output-metadata.json b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/output-metadata.json
+new file mode 100644
+index 0000000..7244c3c
+--- /dev/null
++++ b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/output-metadata.json
+@@ -0,0 +1,18 @@
++{
++  "version": 3,
++  "artifactType": {
++    "type": "AAPT_FRIENDLY_MERGED_MANIFESTS",
++    "kind": "Directory"
++  },
++  "applicationId": "com.arthenica.ffmpegkit.reactnative",
++  "variantName": "debug",
++  "elements": [
++    {
++      "type": "SINGLE",
++      "filters": [],
++      "attributes": [],
++      "outputFile": "AndroidManifest.xml"
++    }
++  ],
++  "elementType": "File"
++}
+\ No newline at end of file
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/intermediates/aar_metadata/debug/writeDebugAarMetadata/aar-metadata.properties b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/aar_metadata/debug/writeDebugAarMetadata/aar-metadata.properties
+new file mode 100644
+index 0000000..1211b1e
+--- /dev/null
++++ b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/aar_metadata/debug/writeDebugAarMetadata/aar-metadata.properties
+@@ -0,0 +1,6 @@
++aarFormatVersion=1.0
++aarMetadataVersion=1.0
++minCompileSdk=1
++minCompileSdkExtension=0
++minAndroidGradlePluginVersion=1.0.0
++coreLibraryDesugaringEnabled=false
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/intermediates/annotation_processor_list/debug/javaPreCompileDebug/annotationProcessors.json b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/annotation_processor_list/debug/javaPreCompileDebug/annotationProcessors.json
+new file mode 100644
+index 0000000..9e26dfe
+--- /dev/null
++++ b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/annotation_processor_list/debug/javaPreCompileDebug/annotationProcessors.json
+@@ -0,0 +1 @@
++{}
+\ No newline at end of file
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/intermediates/compile_library_classes_jar/debug/bundleLibCompileToJarDebug/classes.jar b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/compile_library_classes_jar/debug/bundleLibCompileToJarDebug/classes.jar
+new file mode 100644
+index 0000000..d9d4cf2
+Binary files /dev/null and b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/compile_library_classes_jar/debug/bundleLibCompileToJarDebug/classes.jar differ
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/intermediates/compile_r_class_jar/debug/generateDebugRFile/R.jar b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/compile_r_class_jar/debug/generateDebugRFile/R.jar
+new file mode 100644
+index 0000000..08483ad
+Binary files /dev/null and b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/compile_r_class_jar/debug/generateDebugRFile/R.jar differ
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/intermediates/compile_symbol_list/debug/generateDebugRFile/R.txt b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/compile_symbol_list/debug/generateDebugRFile/R.txt
+new file mode 100644
+index 0000000..e69de29
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/intermediates/incremental/debug/packageDebugResources/compile-file-map.properties b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/incremental/debug/packageDebugResources/compile-file-map.properties
+new file mode 100644
+index 0000000..6529157
+--- /dev/null
++++ b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/incremental/debug/packageDebugResources/compile-file-map.properties
+@@ -0,0 +1 @@
++#Wed Jul 30 16:34:34 CEST 2025
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/intermediates/incremental/debug/packageDebugResources/merger.xml b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/incremental/debug/packageDebugResources/merger.xml
+new file mode 100644
+index 0000000..f0c7cf6
+--- /dev/null
++++ b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/incremental/debug/packageDebugResources/merger.xml
+@@ -0,0 +1,2 @@
++<?xml version="1.0" encoding="utf-8"?>
++<merger version="3"><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="main$Generated" generated="true" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/biswa/Github/feed-mobile-app/node_modules/ffmpeg-kit-react-native/android/src/main/res"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="main" generated-set="main$Generated" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/biswa/Github/feed-mobile-app/node_modules/ffmpeg-kit-react-native/android/src/main/res"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="debug$Generated" generated="true" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/biswa/Github/feed-mobile-app/node_modules/ffmpeg-kit-react-native/android/src/debug/res"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="debug" generated-set="debug$Generated" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/biswa/Github/feed-mobile-app/node_modules/ffmpeg-kit-react-native/android/src/debug/res"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="generated$Generated" generated="true" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/biswa/Github/feed-mobile-app/node_modules/ffmpeg-kit-react-native/android/build/generated/res/resValues/debug"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="generated" generated-set="generated$Generated" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/biswa/Github/feed-mobile-app/node_modules/ffmpeg-kit-react-native/android/build/generated/res/resValues/debug"/></dataSet><mergedItems/></merger>
+\ No newline at end of file
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/intermediates/incremental/mergeDebugAssets/merger.xml b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/incremental/mergeDebugAssets/merger.xml
+new file mode 100644
+index 0000000..f73912f
+--- /dev/null
++++ b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/incremental/mergeDebugAssets/merger.xml
+@@ -0,0 +1,2 @@
++<?xml version="1.0" encoding="utf-8"?>
++<merger version="3"><dataSet config="main" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/biswa/Github/feed-mobile-app/node_modules/ffmpeg-kit-react-native/android/src/main/assets"/></dataSet><dataSet config="debug" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/biswa/Github/feed-mobile-app/node_modules/ffmpeg-kit-react-native/android/src/debug/assets"/></dataSet><dataSet config="generated" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/biswa/Github/feed-mobile-app/node_modules/ffmpeg-kit-react-native/android/build/intermediates/shader_assets/debug/compileDebugShaders/out"/></dataSet></merger>
+\ No newline at end of file
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/intermediates/incremental/mergeDebugJniLibFolders/merger.xml b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/incremental/mergeDebugJniLibFolders/merger.xml
+new file mode 100644
+index 0000000..6422caf
+--- /dev/null
++++ b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/incremental/mergeDebugJniLibFolders/merger.xml
+@@ -0,0 +1,2 @@
++<?xml version="1.0" encoding="utf-8"?>
++<merger version="3"><dataSet config="main" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/biswa/Github/feed-mobile-app/node_modules/ffmpeg-kit-react-native/android/src/main/jniLibs"/></dataSet><dataSet config="debug" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/biswa/Github/feed-mobile-app/node_modules/ffmpeg-kit-react-native/android/src/debug/jniLibs"/></dataSet></merger>
+\ No newline at end of file
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/intermediates/incremental/mergeDebugShaders/merger.xml b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/incremental/mergeDebugShaders/merger.xml
+new file mode 100644
+index 0000000..ed8c44d
+--- /dev/null
++++ b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/incremental/mergeDebugShaders/merger.xml
+@@ -0,0 +1,2 @@
++<?xml version="1.0" encoding="utf-8"?>
++<merger version="3"><dataSet config="main" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/biswa/Github/feed-mobile-app/node_modules/ffmpeg-kit-react-native/android/src/main/shaders"/></dataSet><dataSet config="debug" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/biswa/Github/feed-mobile-app/node_modules/ffmpeg-kit-react-native/android/src/debug/shaders"/></dataSet></merger>
+\ No newline at end of file
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/arthenica/ffmpegkit/reactnative/BuildConfig.class b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/arthenica/ffmpegkit/reactnative/BuildConfig.class
+new file mode 100644
+index 0000000..808b825
+Binary files /dev/null and b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/arthenica/ffmpegkit/reactnative/BuildConfig.class differ
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/arthenica/ffmpegkit/reactnative/FFmpegKitReactNativeModule$1.class b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/arthenica/ffmpegkit/reactnative/FFmpegKitReactNativeModule$1.class
+new file mode 100644
+index 0000000..7823a05
+Binary files /dev/null and b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/arthenica/ffmpegkit/reactnative/FFmpegKitReactNativeModule$1.class differ
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/arthenica/ffmpegkit/reactnative/FFmpegKitReactNativeModule$2.class b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/arthenica/ffmpegkit/reactnative/FFmpegKitReactNativeModule$2.class
+new file mode 100644
+index 0000000..06ac793
+Binary files /dev/null and b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/arthenica/ffmpegkit/reactnative/FFmpegKitReactNativeModule$2.class differ
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/arthenica/ffmpegkit/reactnative/FFmpegKitReactNativeModule.class b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/arthenica/ffmpegkit/reactnative/FFmpegKitReactNativeModule.class
+new file mode 100644
+index 0000000..404ab71
+Binary files /dev/null and b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/arthenica/ffmpegkit/reactnative/FFmpegKitReactNativeModule.class differ
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/arthenica/ffmpegkit/reactnative/FFmpegKitReactNativePackage.class b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/arthenica/ffmpegkit/reactnative/FFmpegKitReactNativePackage.class
+new file mode 100644
+index 0000000..a76bb52
+Binary files /dev/null and b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/arthenica/ffmpegkit/reactnative/FFmpegKitReactNativePackage.class differ
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/arthenica/ffmpegkit/reactnative/FFmpegSessionExecuteTask.class b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/arthenica/ffmpegkit/reactnative/FFmpegSessionExecuteTask.class
+new file mode 100644
+index 0000000..d5fda54
+Binary files /dev/null and b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/arthenica/ffmpegkit/reactnative/FFmpegSessionExecuteTask.class differ
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/arthenica/ffmpegkit/reactnative/FFprobeSessionExecuteTask.class b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/arthenica/ffmpegkit/reactnative/FFprobeSessionExecuteTask.class
+new file mode 100644
+index 0000000..f24923e
+Binary files /dev/null and b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/arthenica/ffmpegkit/reactnative/FFprobeSessionExecuteTask.class differ
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/arthenica/ffmpegkit/reactnative/MediaInformationSessionExecuteTask.class b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/arthenica/ffmpegkit/reactnative/MediaInformationSessionExecuteTask.class
+new file mode 100644
+index 0000000..b6b09e5
+Binary files /dev/null and b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/arthenica/ffmpegkit/reactnative/MediaInformationSessionExecuteTask.class differ
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/arthenica/ffmpegkit/reactnative/WriteToPipeTask.class b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/arthenica/ffmpegkit/reactnative/WriteToPipeTask.class
+new file mode 100644
+index 0000000..d633d93
+Binary files /dev/null and b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/arthenica/ffmpegkit/reactnative/WriteToPipeTask.class differ
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/intermediates/local_only_symbol_list/debug/parseDebugLocalResources/R-def.txt b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/local_only_symbol_list/debug/parseDebugLocalResources/R-def.txt
+new file mode 100644
+index 0000000..78ac5b8
+--- /dev/null
++++ b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/local_only_symbol_list/debug/parseDebugLocalResources/R-def.txt
+@@ -0,0 +1,2 @@
++R_DEF: Internal format may change without notice
++local
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/intermediates/manifest_merge_blame_file/debug/processDebugManifest/manifest-merger-blame-debug-report.txt b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/manifest_merge_blame_file/debug/processDebugManifest/manifest-merger-blame-debug-report.txt
+new file mode 100644
+index 0000000..d78ecb9
+--- /dev/null
++++ b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/manifest_merge_blame_file/debug/processDebugManifest/manifest-merger-blame-debug-report.txt
+@@ -0,0 +1,7 @@
++1<?xml version="1.0" encoding="utf-8"?>
++2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
++3    package="com.arthenica.ffmpegkit.reactnative" >
++4
++5    <uses-sdk android:minSdkVersion="24" />
++6
++7</manifest>
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml
+new file mode 100644
+index 0000000..e8dddb5
+--- /dev/null
++++ b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml
+@@ -0,0 +1,7 @@
++<?xml version="1.0" encoding="utf-8"?>
++<manifest xmlns:android="http://schemas.android.com/apk/res/android"
++    package="com.arthenica.ffmpegkit.reactnative" >
++
++    <uses-sdk android:minSdkVersion="24" />
++
++</manifest>
+\ No newline at end of file
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/intermediates/navigation_json/debug/extractDeepLinksDebug/navigation.json b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/navigation_json/debug/extractDeepLinksDebug/navigation.json
+new file mode 100644
+index 0000000..0637a08
+--- /dev/null
++++ b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/navigation_json/debug/extractDeepLinksDebug/navigation.json
+@@ -0,0 +1 @@
++[]
+\ No newline at end of file
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/intermediates/nested_resources_validation_report/debug/generateDebugResources/nestedResourcesValidationReport.txt b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/nested_resources_validation_report/debug/generateDebugResources/nestedResourcesValidationReport.txt
+new file mode 100644
+index 0000000..08f4ebe
+--- /dev/null
++++ b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/nested_resources_validation_report/debug/generateDebugResources/nestedResourcesValidationReport.txt
+@@ -0,0 +1 @@
++0 Warning/Error
+\ No newline at end of file
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/arthenica/ffmpegkit/reactnative/BuildConfig.class b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/arthenica/ffmpegkit/reactnative/BuildConfig.class
+new file mode 100644
+index 0000000..808b825
+Binary files /dev/null and b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/arthenica/ffmpegkit/reactnative/BuildConfig.class differ
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/arthenica/ffmpegkit/reactnative/FFmpegKitReactNativeModule$1.class b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/arthenica/ffmpegkit/reactnative/FFmpegKitReactNativeModule$1.class
+new file mode 100644
+index 0000000..7823a05
+Binary files /dev/null and b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/arthenica/ffmpegkit/reactnative/FFmpegKitReactNativeModule$1.class differ
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/arthenica/ffmpegkit/reactnative/FFmpegKitReactNativeModule$2.class b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/arthenica/ffmpegkit/reactnative/FFmpegKitReactNativeModule$2.class
+new file mode 100644
+index 0000000..06ac793
+Binary files /dev/null and b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/arthenica/ffmpegkit/reactnative/FFmpegKitReactNativeModule$2.class differ
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/arthenica/ffmpegkit/reactnative/FFmpegKitReactNativeModule.class b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/arthenica/ffmpegkit/reactnative/FFmpegKitReactNativeModule.class
+new file mode 100644
+index 0000000..404ab71
+Binary files /dev/null and b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/arthenica/ffmpegkit/reactnative/FFmpegKitReactNativeModule.class differ
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/arthenica/ffmpegkit/reactnative/FFmpegKitReactNativePackage.class b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/arthenica/ffmpegkit/reactnative/FFmpegKitReactNativePackage.class
+new file mode 100644
+index 0000000..a76bb52
+Binary files /dev/null and b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/arthenica/ffmpegkit/reactnative/FFmpegKitReactNativePackage.class differ
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/arthenica/ffmpegkit/reactnative/FFmpegSessionExecuteTask.class b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/arthenica/ffmpegkit/reactnative/FFmpegSessionExecuteTask.class
+new file mode 100644
+index 0000000..d5fda54
+Binary files /dev/null and b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/arthenica/ffmpegkit/reactnative/FFmpegSessionExecuteTask.class differ
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/arthenica/ffmpegkit/reactnative/FFprobeSessionExecuteTask.class b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/arthenica/ffmpegkit/reactnative/FFprobeSessionExecuteTask.class
+new file mode 100644
+index 0000000..f24923e
+Binary files /dev/null and b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/arthenica/ffmpegkit/reactnative/FFprobeSessionExecuteTask.class differ
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/arthenica/ffmpegkit/reactnative/MediaInformationSessionExecuteTask.class b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/arthenica/ffmpegkit/reactnative/MediaInformationSessionExecuteTask.class
+new file mode 100644
+index 0000000..b6b09e5
+Binary files /dev/null and b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/arthenica/ffmpegkit/reactnative/MediaInformationSessionExecuteTask.class differ
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/arthenica/ffmpegkit/reactnative/WriteToPipeTask.class b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/arthenica/ffmpegkit/reactnative/WriteToPipeTask.class
+new file mode 100644
+index 0000000..d633d93
+Binary files /dev/null and b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/arthenica/ffmpegkit/reactnative/WriteToPipeTask.class differ
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/intermediates/runtime_library_classes_jar/debug/bundleLibRuntimeToJarDebug/classes.jar b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/runtime_library_classes_jar/debug/bundleLibRuntimeToJarDebug/classes.jar
+new file mode 100644
+index 0000000..c48df1d
+Binary files /dev/null and b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/runtime_library_classes_jar/debug/bundleLibRuntimeToJarDebug/classes.jar differ
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/intermediates/symbol_list_with_package_name/debug/generateDebugRFile/package-aware-r.txt b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/symbol_list_with_package_name/debug/generateDebugRFile/package-aware-r.txt
+new file mode 100644
+index 0000000..aaad3a5
+--- /dev/null
++++ b/node_modules/ffmpeg-kit-react-native/android/build/intermediates/symbol_list_with_package_name/debug/generateDebugRFile/package-aware-r.txt
+@@ -0,0 +1 @@
++com.arthenica.ffmpegkit.reactnative
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/outputs/logs/manifest-merger-debug-report.txt b/node_modules/ffmpeg-kit-react-native/android/build/outputs/logs/manifest-merger-debug-report.txt
+new file mode 100644
+index 0000000..992c395
+--- /dev/null
++++ b/node_modules/ffmpeg-kit-react-native/android/build/outputs/logs/manifest-merger-debug-report.txt
+@@ -0,0 +1,17 @@
++-- Merging decision tree log ---
++manifest
++ADDED from /Users/biswa/Github/feed-mobile-app/node_modules/ffmpeg-kit-react-native/android/src/main/AndroidManifest.xml:1:1-3:12
++INJECTED from /Users/biswa/Github/feed-mobile-app/node_modules/ffmpeg-kit-react-native/android/src/main/AndroidManifest.xml:1:1-3:12
++	package
++		ADDED from /Users/biswa/Github/feed-mobile-app/node_modules/ffmpeg-kit-react-native/android/src/main/AndroidManifest.xml:2:11-56
++		INJECTED from /Users/biswa/Github/feed-mobile-app/node_modules/ffmpeg-kit-react-native/android/src/main/AndroidManifest.xml
++	xmlns:android
++		ADDED from /Users/biswa/Github/feed-mobile-app/node_modules/ffmpeg-kit-react-native/android/src/main/AndroidManifest.xml:1:11-69
++uses-sdk
++INJECTED from /Users/biswa/Github/feed-mobile-app/node_modules/ffmpeg-kit-react-native/android/src/main/AndroidManifest.xml reason: use-sdk injection requested
++INJECTED from /Users/biswa/Github/feed-mobile-app/node_modules/ffmpeg-kit-react-native/android/src/main/AndroidManifest.xml
++INJECTED from /Users/biswa/Github/feed-mobile-app/node_modules/ffmpeg-kit-react-native/android/src/main/AndroidManifest.xml
++	android:targetSdkVersion
++		INJECTED from /Users/biswa/Github/feed-mobile-app/node_modules/ffmpeg-kit-react-native/android/src/main/AndroidManifest.xml
++	android:minSdkVersion
++		INJECTED from /Users/biswa/Github/feed-mobile-app/node_modules/ffmpeg-kit-react-native/android/src/main/AndroidManifest.xml
+diff --git a/node_modules/ffmpeg-kit-react-native/android/build/tmp/compileDebugJavaWithJavac/previous-compilation-data.bin b/node_modules/ffmpeg-kit-react-native/android/build/tmp/compileDebugJavaWithJavac/previous-compilation-data.bin
+new file mode 100644
+index 0000000..207b1f0
+Binary files /dev/null and b/node_modules/ffmpeg-kit-react-native/android/build/tmp/compileDebugJavaWithJavac/previous-compilation-data.bin differ
+diff --git a/node_modules/ffmpeg-kit-react-native/android/gradle.properties b/node_modules/ffmpeg-kit-react-native/android/gradle.properties
+index a912028..d5c9ba3 100644
+--- a/node_modules/ffmpeg-kit-react-native/android/gradle.properties
++++ b/node_modules/ffmpeg-kit-react-native/android/gradle.properties
+@@ -1,3 +1,3 @@
+ android.useAndroidX=true
+-ffmpegKit.android.main.version=6.0-2
+-ffmpegKit.android.lts.version=6.0-2
++ffmpegKit.android.main.version=6.0.2
++ffmpegKit.android.lts.version=6.0.2
+diff --git a/node_modules/ffmpeg-kit-react-native/ffmpeg-kit-react-native.podspec b/node_modules/ffmpeg-kit-react-native/ffmpeg-kit-react-native.podspec
+index 889d3e8..f6eb8b5 100644
+--- a/node_modules/ffmpeg-kit-react-native/ffmpeg-kit-react-native.podspec
++++ b/node_modules/ffmpeg-kit-react-native/ffmpeg-kit-react-native.podspec
+@@ -14,9 +14,10 @@ Pod::Spec.new do |s|
+   s.requires_arc      = true
+   s.static_framework  = true
+ 
+-  s.source       = { :git => "https://github.com/arthenica/ffmpeg-kit.git", :tag => "react.native.v#{s.version}" }
++  s.source           = { :http => 'https://github.com/homebase-id/ffmpeg-kit/releases/download/v6.0.2/ffmpegkit-bundled.xcframework.zip' }
+ 
+-  s.default_subspec   = 'https'
++
++  s.default_subspec   = 'full'
+ 
+   s.dependency "React-Core"
+ 
+@@ -107,7 +108,7 @@ Pod::Spec.new do |s|
+   s.subspec 'full' do |ss|
+       ss.source_files      = '**/FFmpegKitReactNativeModule.m',
+                              '**/FFmpegKitReactNativeModule.h'
+-      ss.dependency 'ffmpeg-kit-ios-full', "6.0"
++      ss.dependency 'ffmpeg-kit-ios-full', "6.0.2"
+       ss.ios.deployment_target = '12.1'
+   end
+ 

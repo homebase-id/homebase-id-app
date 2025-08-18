@@ -36,17 +36,17 @@ export const processVideo = async (
   const thumbnail = await grabThumbnail(video);
   const thumbSource: ImageSource | null = thumbnail
     ? {
-        uri: thumbnail.uri,
-        width: video.width || 0,
-        height: video.height || 0,
-        type: thumbnail.type,
-      }
+      uri: thumbnail.uri,
+      width: video.width || 0,
+      height: video.height || 0,
+      type: thumbnail.type,
+    }
     : null;
   const { tinyThumb, additionalThumbnails } =
     thumbSource && thumbnail
       ? await createThumbnails(thumbSource, payloadKey, thumbnail.type as ImageContentType, [
-          { quality: 100, width: 250, height: 250 },
-        ])
+        { quality: 100, maxPixelDimension: 320, maxBytes: 26 * 1024 },
+      ])
       : { tinyThumb: undefined, additionalThumbnails: undefined };
 
   if (additionalThumbnails) {
@@ -57,7 +57,7 @@ export const processVideo = async (
   if (thumbnail) {
     try {
       await unlink(thumbnail.uri);
-    } catch {}
+    } catch { }
   }
 
   // Compress and segment video
@@ -67,6 +67,7 @@ export const processVideo = async (
     onUpdate ? (progress) => onUpdate('Compressing', progress) : undefined,
     keyHeader
   );
+
 
   if ('segments' in videoData) {
     // HLS

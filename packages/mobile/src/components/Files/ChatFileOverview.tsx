@@ -10,7 +10,6 @@ import {
   DimensionValue,
   Text,
   TextInput,
-  KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
 } from 'react-native';
@@ -37,6 +36,7 @@ import { AuthorName } from '../ui/Name';
 import { assetsToImageSource } from '../../utils/utils';
 import { grabThumbnail } from '../../provider/video/RNVideoSegmenter';
 import { BoringFileIcon } from '../ui/Media/BoringFile';
+import { KeyboardStickyView } from 'react-native-keyboard-controller';
 
 const FilePreview = ({
   asset,
@@ -304,7 +304,6 @@ export const ChatFileOverview = memo(
         <View
           style={{
             flex: 1,
-            backgroundColor: 'pink',
           }}
         >
           <Header title={title || 'Share'} headerLeft={headerLeft} />
@@ -526,8 +525,8 @@ export const ChatFileOverview = memo(
               }}
               onPress={() => setIsMessageInput(false)}
             >
-              <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+              <KeyboardStickyView
+                // behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={{
                   backgroundColor: isDarkMode ? colors.card : Colors.slate[50],
                 }}
@@ -582,7 +581,7 @@ export const ChatFileOverview = memo(
                     <SubtleCheck size={'md'} color={Colors.white} />
                   </TouchableOpacity>
                 </View>
-              </KeyboardAvoidingView>
+              </KeyboardStickyView>
             </TouchableOpacity>
           )}
         </View>

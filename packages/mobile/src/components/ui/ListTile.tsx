@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { useState } from 'react';
 import { IconProps } from './Icons/icons';
 import { ActivityIndicator, StyleProp, TouchableOpacity, ViewStyle } from 'react-native';
 import { Text } from './Text/Text';
@@ -10,7 +10,7 @@ export const ListTile = ({
   showLoader,
   style,
 }: {
-  icon: FC<IconProps>;
+  icon: (props: IconProps) => JSX.Element;
   title: string;
   onPress: () => void | Promise<void>;
   showLoader?: boolean;
