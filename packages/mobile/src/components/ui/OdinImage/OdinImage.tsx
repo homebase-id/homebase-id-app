@@ -1,5 +1,5 @@
 import { EmbeddedThumb, ImageSize, SystemFileType, TargetDrive } from '@homebase-id/js-lib/core';
-import { memo, useMemo, useRef, useState, useEffect } from 'react';
+import { memo, useMemo, useState, useEffect } from 'react';
 import { ImageStyle, Platform, View, TouchableWithoutFeedback } from 'react-native';
 import useImage from './hooks/useImage';
 import { SvgUri } from 'react-native-svg';

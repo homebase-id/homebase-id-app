@@ -2,6 +2,8 @@ apply plugin: "com.android.application"
 apply plugin: "com.facebook.react"
 apply plugin: "com.google.gms.google-services"
 
+import org.apache.tools.ant.taskdefs.condition.Os
+
 /**
  * This is the configuration block to customize your React Native Android app.
  * By default you don't need to apply any configuration, just uncomment the lines you need.
@@ -86,6 +88,17 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "0.0.1"
+
+        externalNativeBuild {
+            cmake {
+                def cmakeDir = "${android.sdkDirectory}/cmake/3.22.1/bin"
+                def ninjaExecutable = Os.isFamily(Os.FAMILY_WINDOWS) ? "ninja.exe" : "ninja"
+                def ninjaPath = "${cmakeDir}/${ninjaExecutable}".replace("\\", "/")
+
+                arguments "-DCMAKE_MAKE_PROGRAM=${ninjaPath}",
+                            "-DCMAKE_OBJECT_PATH_MAX=1024"
+            }
+        }
     }
     signingConfigs {
         release {

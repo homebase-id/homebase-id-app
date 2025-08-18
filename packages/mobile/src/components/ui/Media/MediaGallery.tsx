@@ -28,14 +28,14 @@ import { OdinAudio } from '../OdinAudio/OdinAudio';
 import { LinkPreviewFile } from './LinkPreviewFile';
 import { POST_LINKS_PAYLOAD_KEY } from '@homebase-id/js-lib/public';
 import { Colors } from '../../../app/Colors';
-import { memo, useMemo, useState, useRef } from 'react';
+import { memo, useMemo, useState } from 'react';
 import { LinkPreviewDescriptor } from '@homebase-id/js-lib/media';
 import { tryJsonParse } from '@homebase-id/js-lib/helpers';
 import { GestureType } from 'react-native-gesture-handler';
 
-const debounce = (func: (...args: any[]) => void, delay: number) => {
+const debounce = <Args extends unknown[]>(func: (...args: Args) => void, delay: number) => {
   let timeout: NodeJS.Timeout | null = null;
-  return (...args: any[]) => {
+  return (...args: Args) => {
     if (timeout) clearTimeout(timeout);
     timeout = setTimeout(() => func(...args), delay);
   };
