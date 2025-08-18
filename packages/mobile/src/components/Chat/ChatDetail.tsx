@@ -130,6 +130,7 @@ export const ChatDetail = memo(
 
     const [draftMessage, setdraftMessage] = useState<string | undefined>(initialMessage);
     const [bottomContainerVisible, setBottomContainerVisible] = useState(false);
+    const stableMessages = useMemo(() => messages, [messages]);
 
     // Icons Callback
     const microphoneIcon = useCallback(() => <Microphone />, []);
@@ -749,7 +750,7 @@ export const ChatDetail = memo(
     return (
       <GiftedChat<ChatMessageIMessage>
         messageContainerRef={messageContainerRef}
-        messages={messages}
+        messages={stableMessages}
         onSend={_doSend}
         locale={locale}
         textInputRef={textRef}

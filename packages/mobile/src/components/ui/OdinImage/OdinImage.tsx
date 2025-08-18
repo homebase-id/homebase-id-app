@@ -1,12 +1,11 @@
 import { EmbeddedThumb, ImageSize, SystemFileType, TargetDrive } from '@homebase-id/js-lib/core';
-import { memo, useMemo } from 'react';
-import { ImageStyle, Platform, TouchableWithoutFeedback } from 'react-native';
+import { memo, useMemo, useRef, useState, useEffect } from 'react';
+import { ImageStyle, Platform, View, TouchableWithoutFeedback } from 'react-native';
 import useImage from './hooks/useImage';
 import { SvgUri } from 'react-native-svg';
 import { ImageZoom, ImageZoomProps } from '@likashefqet/react-native-image-zoom';
-import Animated, { runOnJS } from 'react-native-reanimated';
+import Animated, { runOnJS, useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { Gesture, GestureDetector, GestureType } from 'react-native-gesture-handler';
-import React from 'react';
 import { drivesEqual } from '@homebase-id/js-lib/helpers';
 import { OdinBlob } from '../../../../polyfills/OdinBlob';
 
@@ -62,6 +61,10 @@ export const OdinImage = memo(
     } = props;
 
     // Don't set load size if it's a thumbnessLessContentType; As they don't have a thumb
+    // const renderCount = useRef(0);
+    // renderCount.current += 1;
+    // console.log(`OdinImage rendered ${renderCount.current} times for fileId: ${fileId}`);
+
     const loadSize = useMemo(
       () =>
         previewThumbnail?.contentType &&
@@ -112,6 +115,8 @@ export const OdinImage = memo(
 
     const uri = imageData?.url || embeddedThumbUrl || pendingFile?.uri;
     if (!uri) return null;
+    // console.log(`OdinImage URI updated to: ${uri} for fileId: ${fileId}`);
+    // console.log(`imageData present: ${!!imageData}`);
 
     if (enableZoom) {
       return (
@@ -156,7 +161,6 @@ export const OdinImage = memo(
     ) {
       return false;
     }
-
     return Object.keys(prevProps).every(
       (key) =>
         ['targetDrive', 'imageSize'].includes(key) ||
@@ -184,7 +188,6 @@ const InnerImage = memo(
       imageDrive: TargetDrive;
       size?: ImageSize;
     };
-
     contentType: string | undefined;
   }) => {
     const {
@@ -203,6 +206,27 @@ const InnerImage = memo(
     } = props;
 
     const { invalidateCache } = useImage();
+
+    const opacity = useSharedValue(0);
+
+    const [placeholderUri, setPlaceholderUri] = useState<string | undefined>(undefined);
+
+    useEffect(() => {
+      if (uri && uri !== placeholderUri) {
+        setPlaceholderUri(uri);
+        opacity.value = 0;
+      }
+    }, [uri]);
+
+    const animatedStyle = useAnimatedStyle(() => ({
+      opacity: opacity.value,
+    }));
+
+    const handleLoadEnd = () => {
+      opacity.value = withTiming(1, { duration: 300 });
+      if (onLoad) onLoad();
+    };
+
     const tapGesture = useMemo(() => {
       const tap = Gesture.Tap().onStart(() => {
         if (onPress) {
@@ -210,7 +234,10 @@ const InnerImage = memo(
         }
       });
       if (gestureRefs) {
-        tap.requireExternalGestureToFail(...gestureRefs);
+        const externalGestures = gestureRefs
+          .map((ref) => ref.current)
+          .filter(Boolean) as GestureType[];
+        tap.requireExternalGestureToFail(...externalGestures);
       }
       return tap;
     }, [gestureRefs, onPress]);
@@ -230,27 +257,58 @@ const InnerImage = memo(
         }),
       [onLongPress]
     );
+
     const composedGesture = useMemo(
       () => Gesture.Exclusive(longPressGesture, tapGesture),
       [longPressGesture, tapGesture]
     );
+
     return (
       <GestureDetector gesture={composedGesture}>
-        {contentType === 'image/svg+xml' ? (
-          <Animated.View
-            style={[
-              imageSize,
-              { overflow: 'hidden' },
-              // SVGs styling are not supported on Android
-              Platform.OS === 'android' ? style : undefined,
-            ]}
-          >
-            <SvgUri
-              width={imageSize?.width}
-              height={imageSize?.height}
-              uri={uri || null}
-              style={[{ overflow: 'hidden' }, Platform.OS === 'android' ? undefined : style]}
-              onLoad={onLoad}
+        <View style={{ position: 'relative', ...imageSize, ...style }}>
+          {placeholderUri && (
+            <Animated.Image
+              source={{ uri: placeholderUri }}
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                resizeMode: 'contain',
+              }}
+              blurRadius={blurRadius}
+            />
+          )}
+          {contentType === 'image/svg+xml' ? (
+            <Animated.View
+              style={[
+                { overflow: 'hidden' },
+                Platform.OS === 'android' ? style : undefined,
+              ]}
+            >
+              <SvgUri
+                width={imageSize?.width}
+                height={imageSize?.height}
+                uri={uri || null}
+                style={[{ overflow: 'hidden' }, Platform.OS === 'android' ? undefined : style]}
+                onLoad={handleLoadEnd}
+                onError={
+                  imageMeta
+                    ? () =>
+                        invalidateCache(
+                          imageMeta?.odinId,
+                          imageMeta?.imageFileId,
+                          imageMeta?.imageFileKey,
+                          imageMeta?.imageDrive,
+                          imageMeta?.size
+                        )
+                    : undefined
+                }
+              />
+            </Animated.View>
+          ) : (
+            <Animated.Image
               onError={
                 imageMeta
                   ? () =>
@@ -263,33 +321,20 @@ const InnerImage = memo(
                       )
                   : undefined
               }
+              onLoadEnd={handleLoadEnd}
+              source={uri ? { uri } : undefined}
+              alt={alt}
+              style={[
+                {
+                  resizeMode: fit,
+                  flex: 1,
+                },
+                animatedStyle,
+              ]}
+              blurRadius={0}
             />
-          </Animated.View>
-        ) : (
-          <Animated.Image
-            onError={
-              imageMeta
-                ? () =>
-                    invalidateCache(
-                      imageMeta?.odinId,
-                      imageMeta?.imageFileId,
-                      imageMeta?.imageFileKey,
-                      imageMeta?.imageDrive,
-                      imageMeta?.size
-                    )
-                : undefined
-            }
-            onLoadEnd={onLoad}
-            source={uri ? { uri } : undefined}
-            alt={alt}
-            style={{
-              resizeMode: fit,
-              ...imageSize,
-              ...style,
-            }}
-            blurRadius={blurRadius}
-          />
-        )}
+          )}
+        </View>
       </GestureDetector>
     );
   }
@@ -319,15 +364,34 @@ const ZoomableImage = memo(
       imageDrive: TargetDrive;
       size?: ImageSize;
     };
-
     imageZoomProps?: ImageZoomProps;
-
     alt?: string;
     style?: ImageStyle;
     onLoad?: () => void;
     blurRadius?: number;
   }) => {
     const { invalidateCache } = useImage();
+
+    const opacity = useSharedValue(0);
+
+    const [placeholderUri, setPlaceholderUri] = useState<string | undefined>(undefined);
+
+    useEffect(() => {
+      if (uri && uri !== placeholderUri) {
+        setPlaceholderUri(uri);
+        opacity.value = 0;
+      }
+    }, [uri]);
+
+    const animatedStyle = useAnimatedStyle(() => ({
+      opacity: opacity.value,
+    }));
+
+    const handleLoadEnd = () => {
+      opacity.value = withTiming(1, { duration: 300 });
+      if (onLoad) onLoad();
+    };
+
     return (
       <TouchableWithoutFeedback
         onPress={onPress}
@@ -340,39 +404,48 @@ const ZoomableImage = memo(
           })
         }
       >
-        <Animated.View
-          style={{
-            ...imageSize,
-          }}
-        >
-          <ImageZoom
-            uri={uri}
-            onLoadEnd={onLoad}
-            minScale={1}
-            maxScale={3}
-            isDoubleTapEnabled={true}
-            isPinchEnabled
-            resizeMode="contain"
-            style={{
-              ...imageSize,
-              ...style,
-            }}
-            onError={
-              imageMeta
-                ? () =>
-                    invalidateCache(
-                      imageMeta?.odinId,
-                      imageMeta?.imageFileId,
-                      imageMeta?.imageFileKey,
-                      imageMeta?.imageDrive,
-                      imageMeta?.size
-                    )
-                : undefined
-            }
-            alt={alt}
-            {...imageZoomProps}
-            blurRadius={blurRadius}
-          />
+        <Animated.View style={{ ...imageSize }}>
+          <View style={{ position: 'relative', flex: 1 }}>
+            {placeholderUri && (
+              <Animated.Image
+                source={{ uri: placeholderUri }}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  resizeMode: 'contain',
+                }}
+                blurRadius={blurRadius}
+              />
+            )}
+            <ImageZoom
+              uri={uri}
+              onLoadEnd={handleLoadEnd}
+              minScale={1}
+              maxScale={3}
+              isDoubleTapEnabled={true}
+              isPinchEnabled
+              resizeMode="contain"
+              style={[{ flex: 1, ...style }, animatedStyle]}
+              onError={
+                imageMeta
+                  ? () =>
+                      invalidateCache(
+                        imageMeta?.odinId,
+                        imageMeta?.imageFileId,
+                        imageMeta?.imageFileKey,
+                        imageMeta?.imageDrive,
+                        imageMeta?.size
+                      )
+                  : undefined
+              }
+              alt={alt}
+              {...imageZoomProps}
+              blurRadius={0}
+            />
+          </View>
         </Animated.View>
       </TouchableWithoutFeedback>
     );

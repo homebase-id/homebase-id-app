@@ -7,6 +7,7 @@ import {
   StyleSheet,
   View,
   ViewStyle,
+  Dimensions,
 } from 'react-native';
 import { BoringFile } from './BoringFile';
 import { OdinImage } from '../OdinImage/OdinImage';
@@ -27,10 +28,18 @@ import { OdinAudio } from '../OdinAudio/OdinAudio';
 import { LinkPreviewFile } from './LinkPreviewFile';
 import { POST_LINKS_PAYLOAD_KEY } from '@homebase-id/js-lib/public';
 import { Colors } from '../../../app/Colors';
-import { memo, useCallback, useMemo, useState } from 'react';
+import { memo, useMemo, useState, useRef } from 'react';
 import { LinkPreviewDescriptor } from '@homebase-id/js-lib/media';
 import { tryJsonParse } from '@homebase-id/js-lib/helpers';
 import { GestureType } from 'react-native-gesture-handler';
+
+const debounce = (func: (...args: any[]) => void, delay: number) => {
+  let timeout: NodeJS.Timeout | null = null;
+  return (...args: any[]) => {
+    if (timeout) clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), delay);
+  };
+};
 
 const GAP_SIZE = 2;
 export const MediaGallery = memo(
@@ -63,19 +72,20 @@ export const MediaGallery = memo(
   }) => {
     const maxVisible = 4;
     const countExcludedFromView = payloads?.length - maxVisible;
-    const [wrapperWidth, setWrapperWidth] = useState<number | undefined>(undefined);
+    const [wrapperWidth, setWrapperWidth] = useState(Dimensions.get('window').width * 0.8);
+    const debouncedSetWidth = useMemo(() => debounce(setWrapperWidth, 50), []);
 
-    const imageSize = useCallback(
-      (index: number) => {
-        if (!wrapperWidth) return null;
+    // const renderCount = useRef(0);
+    // renderCount.current += 1;
+    // console.log(`MediaGallery rendered ${renderCount.current} times for fileId: ${fileId}`);
 
-        return {
-          width: payloads.length === 3 && index === 2 ? wrapperWidth : wrapperWidth / 2 - GAP_SIZE,
-          height: wrapperWidth / 2 - GAP_SIZE,
-        };
-      },
-      [payloads.length, wrapperWidth]
-    );
+    const sizes = useMemo(() => {
+      if (!wrapperWidth) return [];
+      return Array.from({ length: maxVisible }, (_, index) => ({
+        width: payloads.length === 3 && index === 2 ? wrapperWidth : wrapperWidth / 2 - GAP_SIZE,
+        height: wrapperWidth / 2 - GAP_SIZE,
+      }));
+    }, [payloads.length, wrapperWidth, maxVisible]);  // maxVisible is const, but include for completeness
 
     const embeddedThumbUrl = useMemo(() => {
       if (!previewThumbnail) return;
@@ -94,9 +104,14 @@ export const MediaGallery = memo(
             position: 'relative',
           },
         ]}
-        onLayout={(e) => setWrapperWidth(e.nativeEvent.layout.width)}
+        onLayout={(e) => {
+          const newWidth = e.nativeEvent.layout.width;
+          if (Math.abs(newWidth - wrapperWidth) > 10) {  // Threshold to avoid unnecessary updates
+            debouncedSetWidth(newWidth);
+          }
+        }}
       >
-        <ImageBackground
+      <ImageBackground
           source={{ uri: embeddedThumbUrl }}
           style={{
             position: 'absolute',
@@ -109,7 +124,7 @@ export const MediaGallery = memo(
           blurRadius={2}
         />
         {payloads.slice(0, maxVisible).map((item, index) => {
-          const size = imageSize(index);
+          const size = sizes[index];
           if (!size) return null;
 
           // Determine if this item should have bottom border radius
@@ -161,7 +176,7 @@ export const MediaGallery = memo(
           >
             <Pressable
               style={{
-                ...(imageSize(3) || { width: 0, heigth: 0 }),
+                ...(sizes[3] || { width: 0, heigth: 0 }),
                 marginTop: 'auto',
                 marginLeft: 'auto',
 
@@ -234,6 +249,10 @@ export const MediaItem = memo(
     gestureRefs?: React.RefObject<GestureType | undefined>[];
   }) => {
     const { isDarkMode } = useDarkMode();
+
+    // const renderCount = useRef(0);
+    // renderCount.current += 1;
+    // console.log(`MediaItem rendered ${renderCount.current} times for payload key: ${payload.key}`);
 
     const isVideo =
       payload.contentType?.startsWith('video') ||
