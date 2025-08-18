@@ -71,6 +71,7 @@ export type ChatStackParamList = {
     createdAt?: number;
     probablyEncrypted?: boolean;
     transitOdinId?: string;
+    cachedUrl?: string; // Add this
   };
 };
 

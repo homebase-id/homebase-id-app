@@ -249,6 +249,8 @@ export const PreviewMedia = memo(({ route, navigation }: MediaProp) => {
               },
               isPanEnabled: !isVisible,
             }}
+            originalContentType={item.contentType}
+            cachedUrl={route.params.cachedUrl}
           />
         </View>
       ) : (

@@ -1,5 +1,5 @@
 import { EmbeddedThumb, ImageSize, SystemFileType, TargetDrive } from '@homebase-id/js-lib/core';
-import { memo, useMemo } from 'react';
+import { memo, useMemo, useEffect } from 'react';
 import { ImageStyle, Platform, TouchableWithoutFeedback } from 'react-native';
 import useImage from './hooks/useImage';
 import { SvgUri } from 'react-native-svg';
@@ -32,6 +32,8 @@ export interface OdinImageProps {
   systemFileType?: SystemFileType;
   gestureRefs?: React.RefObject<GestureType | undefined>[];
   pendingFile?: OdinBlob;
+  originalContentType?: string;
+  cachedUrl?: string;
 }
 
 const thumblessContentTypes = ['image/svg+xml', 'image/gif'];
@@ -59,13 +61,19 @@ export const OdinImage = memo(
       systemFileType,
       gestureRefs,
       pendingFile,
+      originalContentType,
+      cachedUrl,
     } = props;
+
+    const contentTypeForCheck = previewThumbnail?.contentType || originalContentType;
+    const isThumbless = contentTypeForCheck && thumblessContentTypes.includes(contentTypeForCheck);
+
+    // console.log(`OdinImage: Starting render for fileId: ${fileId || globalTransitId}, contentType: ${previewThumbnail?.contentType}, isThumbless: ${isThumbless}, hasCachedUrl: ${!!cachedUrl}, hasEmbeddedThumb: ${!!previewThumbnail}, hasPendingFile: ${!!pendingFile}`);
 
     // Don't set load size if it's a thumbnessLessContentType; As they don't have a thumb
     const loadSize = useMemo(
       () =>
-        previewThumbnail?.contentType &&
-        thumblessContentTypes.includes(previewThumbnail?.contentType)
+        isThumbless
           ? undefined
           : {
               pixelHeight:
@@ -80,10 +88,16 @@ export const OdinImage = memo(
       [enableZoom, imageSize, previewThumbnail]
     );
 
+    // New log after loadSize calc
+    // console.log(`OdinImage: Calculated loadSize for fileId: ${fileId || globalTransitId}: ${JSON.stringify(loadSize)}`);
+
     const embeddedThumbUrl = useMemo(() => {
       if (!previewThumbnail) return;
       return `data:${previewThumbnail.contentType};base64,${previewThumbnail.content}`;
     }, [previewThumbnail]);
+
+    // New log before calling useImage
+    // console.log(`OdinImage: About to call useImage for fileId: ${fileId || globalTransitId}, loadSize: ${JSON.stringify(loadSize)}, lastModified: ${lastModified}, hasImageData already: false (initial)`);
 
     const {
       fetch: { data: imageData },
@@ -98,7 +112,22 @@ export const OdinImage = memo(
       lastModified,
       systemFileType,
     });
+/*
+    // Insert here:
+    useEffect(() => {
+        // console.log(`OdinImage: imageData updated to ${imageData ? 'yes, url: ' + imageData.url : 'no'}`);
+    }, [imageData]);
 
+    useEffect(() => {
+        // console.log(`useImage: Fetch initiated or updated for fileId: ${fileId}, globalTransitId: ${globalTransitId}, loadSize: ${JSON.stringify(loadSize)}, lastModified: ${lastModified}`);
+    }, [fileId, globalTransitId, loadSize, lastModified]);
+
+    useEffect(() => {
+    if (imageData) {
+        // console.log(`useImage: Fetch completed with imageData URL: ${imageData.url}, type: ${imageData.type}, fileId: ${fileId}`);
+    }
+    }, [imageData, fileId]);
+*/
     const imageMeta = useMemo(
       () => ({
         odinId,
@@ -110,7 +139,17 @@ export const OdinImage = memo(
       [fileId, fileKey, loadSize, odinId, targetDrive]
     );
 
-    const uri = imageData?.url || embeddedThumbUrl || pendingFile?.uri;
+    // Updated URI calculation from previous suggestion
+    const uri = imageData?.url || (!isThumbless ? cachedUrl : undefined) || (!isThumbless ? embeddedThumbUrl : undefined) || pendingFile?.uri;
+
+    // New log for URI selection
+    // console.log(`OdinImage: URI selection for fileId: ${fileId || globalTransitId} - imageData.url: ${imageData?.url}, cachedUrl: ${cachedUrl}, embeddedThumbUrl: ${embeddedThumbUrl?.substring(0, 50)}..., pendingFile.uri: ${pendingFile?.uri}, selected uri: ${uri?.substring(0, 50)}..., isThumbless: ${isThumbless}`);
+
+    if (!uri) {
+      console.log(`OdinImage: No URI available yet for fileId: ${fileId || globalTransitId}, returning null`);
+      return null;
+    }
+    
     if (!uri) return null;
 
     if (enableZoom) {
@@ -125,11 +164,10 @@ export const OdinImage = memo(
           style={style}
           imageMeta={imageMeta}
           imageZoomProps={imageZoomProps}
-          blurRadius={!imageData ? 2 : 0}
+          blurRadius={!imageData && !props.cachedUrl ? 2 : 0}
         />
       );
-    }
-
+    }    
     return (
       <InnerImage
         key={`${fileId || globalTransitId}_${fileKey}_${imageData ? '1' : '0'}`}
@@ -140,7 +178,7 @@ export const OdinImage = memo(
         imageMeta={imageMeta}
         imageSize={imageSize}
         fit={fit}
-        blurRadius={!imageData ? 2 : 0}
+        blurRadius={!imageData && !props.cachedUrl ? 2 : 0}
         onPress={onClick}
         onLongPress={onLongPress}
         gestureRefs={gestureRefs}
@@ -234,6 +272,7 @@ const InnerImage = memo(
       () => Gesture.Exclusive(longPressGesture, tapGesture),
       [longPressGesture, tapGesture]
     );
+    // console.log(`InnerImage: Rendering image with URI: ${uri}, contentType: ${contentType}, blurRadius: ${blurRadius}, fileId: ${imageMeta?.imageFileId}`);
     return (
       <GestureDetector gesture={composedGesture}>
         {contentType === 'image/svg+xml' ? (
@@ -250,7 +289,10 @@ const InnerImage = memo(
               height={imageSize?.height}
               uri={uri || null}
               style={[{ overflow: 'hidden' }, Platform.OS === 'android' ? undefined : style]}
-              onLoad={onLoad}
+              onLoad={() => {
+                // console.log(`InnerImage: SVG loaded from URI: ${uri}`);
+                onLoad?.();
+              }}
               onError={
                 imageMeta
                   ? () =>
@@ -279,7 +321,10 @@ const InnerImage = memo(
                     )
                 : undefined
             }
-            onLoadEnd={onLoad}
+            onLoadEnd={() => {
+                // console.log(`InnerImage: Image loaded from URI: ${uri}, contentType: ${contentType}`);
+                onLoad?.();
+            }} 
             source={uri ? { uri } : undefined}
             alt={alt}
             style={{
@@ -288,6 +333,8 @@ const InnerImage = memo(
               ...style,
             }}
             blurRadius={blurRadius}
+            defaultSource={{ uri: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkqgcAAIUAgUW0RjgAAAAASUVORK5CYII=' }}
+            //defaultSource={{ uri: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==' }}          
           />
         )}
       </GestureDetector>
@@ -328,6 +375,7 @@ const ZoomableImage = memo(
     blurRadius?: number;
   }) => {
     const { invalidateCache } = useImage();
+    // console.log(`ZoomableImage: Rendering image with URI: ${uri}, blurRadius: ${blurRadius}, fileId: ${imageMeta?.imageFileId}`);    
     return (
       <TouchableWithoutFeedback
         onPress={onPress}
@@ -347,7 +395,10 @@ const ZoomableImage = memo(
         >
           <ImageZoom
             uri={uri}
-            onLoadEnd={onLoad}
+            onLoadEnd={() => {
+              // console.log(`ZoomableImage: Image loaded from URI: ${uri}`);
+              onLoad?.();
+            }}
             minScale={1}
             maxScale={3}
             isDoubleTapEnabled={true}

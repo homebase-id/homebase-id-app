@@ -7,6 +7,7 @@ import {
   StyleSheet,
   View,
   ViewStyle,
+  Dimensions,
 } from 'react-native';
 import { BoringFile } from './BoringFile';
 import { OdinImage } from '../OdinImage/OdinImage';
@@ -31,6 +32,14 @@ import { memo, useCallback, useMemo, useState } from 'react';
 import { LinkPreviewDescriptor } from '@homebase-id/js-lib/media';
 import { tryJsonParse } from '@homebase-id/js-lib/helpers';
 import { GestureType } from 'react-native-gesture-handler';
+
+const debounce = (func: (...args: any[]) => void, delay: number) => {
+  let timeout: NodeJS.Timeout | null = null;
+  return (...args: any[]) => {
+    if (timeout) clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), delay);
+  };
+};
 
 const GAP_SIZE = 2;
 export const MediaGallery = memo(
@@ -63,19 +72,16 @@ export const MediaGallery = memo(
   }) => {
     const maxVisible = 4;
     const countExcludedFromView = payloads?.length - maxVisible;
-    const [wrapperWidth, setWrapperWidth] = useState<number | undefined>(undefined);
+    const [wrapperWidth, setWrapperWidth] = useState(Dimensions.get('window').width * 0.8);
+    const debouncedSetWidth = useMemo(() => debounce(setWrapperWidth, 50), []);
 
-    const imageSize = useCallback(
-      (index: number) => {
-        if (!wrapperWidth) return null;
-
-        return {
-          width: payloads.length === 3 && index === 2 ? wrapperWidth : wrapperWidth / 2 - GAP_SIZE,
-          height: wrapperWidth / 2 - GAP_SIZE,
-        };
-      },
-      [payloads.length, wrapperWidth]
-    );
+    const sizes = useMemo(() => {
+      if (!wrapperWidth) return [];
+      return Array.from({ length: maxVisible }, (_, index) => ({
+        width: payloads.length === 3 && index === 2 ? wrapperWidth : wrapperWidth / 2 - GAP_SIZE,
+        height: wrapperWidth / 2 - GAP_SIZE,
+      }));
+    }, [payloads.length, wrapperWidth, maxVisible]);  // maxVisible is const, but include for completeness
 
     const embeddedThumbUrl = useMemo(() => {
       if (!previewThumbnail) return;
@@ -94,9 +100,14 @@ export const MediaGallery = memo(
             position: 'relative',
           },
         ]}
-        onLayout={(e) => setWrapperWidth(e.nativeEvent.layout.width)}
+        onLayout={(e) => {
+          const newWidth = e.nativeEvent.layout.width;
+          if (Math.abs(newWidth - wrapperWidth) > 10) {  // Threshold to avoid unnecessary updates
+            debouncedSetWidth(newWidth);
+          }
+        }}
       >
-        <ImageBackground
+      <ImageBackground
           source={{ uri: embeddedThumbUrl }}
           style={{
             position: 'absolute',
@@ -109,7 +120,7 @@ export const MediaGallery = memo(
           blurRadius={2}
         />
         {payloads.slice(0, maxVisible).map((item, index) => {
-          const size = imageSize(index);
+          const size = sizes[index];
           if (!size) return null;
 
           // Determine if this item should have bottom border radius
@@ -161,7 +172,7 @@ export const MediaGallery = memo(
           >
             <Pressable
               style={{
-                ...(imageSize(3) || { width: 0, heigth: 0 }),
+                ...(sizes[3] || { width: 0, heigth: 0 }),
                 marginTop: 'auto',
                 marginLeft: 'auto',
 
@@ -188,6 +199,22 @@ export const MediaGallery = memo(
           </View>
         )}
       </View>
+    );
+  },
+  (prevProps, nextProps) => {
+    return (
+      prevProps.fileId === nextProps.fileId &&
+      prevProps.targetDrive.alias === nextProps.targetDrive.alias &&
+      prevProps.probablyEncrypted === nextProps.probablyEncrypted &&
+      prevProps.onLongPress === nextProps.onLongPress &&
+      prevProps.onClick === nextProps.onClick &&
+      prevProps.hasText === nextProps.hasText &&
+      // Stable payloads check: Compare keys and contentTypes
+      JSON.stringify(prevProps.payloads.map(p => ({ key: p.key, contentType: p.contentType }))) ===
+      JSON.stringify(nextProps.payloads.map(p => ({ key: p.key, contentType: p.contentType }))) &&
+      // Preview thumb: Compare contentType (or full if needed)
+      prevProps.previewThumbnail?.contentType === nextProps.previewThumbnail?.contentType
+      // Skip style/gestureRefs—assume stable or add if changing often
     );
   }
 );

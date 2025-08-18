@@ -115,6 +115,8 @@ export const ChatDetail = memo(
 
     onAssetsAdded: (assets: ImageSource[]) => void;
   }) => {
+    // console.log('ChatDetail re-render');
+
     //Hooks
     const { isDarkMode } = useDarkMode();
     const identity = useAuth().getIdentity();
@@ -130,6 +132,7 @@ export const ChatDetail = memo(
 
     const [draftMessage, setdraftMessage] = useState<string | undefined>(initialMessage);
     const [bottomContainerVisible, setBottomContainerVisible] = useState(false);
+    const stableMessages = useMemo(() => messages, [messages]);
 
     // Icons Callback
     const microphoneIcon = useCallback(() => <Microphone />, []);
@@ -259,7 +262,10 @@ export const ChatDetail = memo(
 
     const handlePlusIconPress = useCallback(async () => {
       if (Keyboard.isVisible()) Keyboard.dismiss();
-      setBottomContainerVisible(!bottomContainerVisible);
+      setBottomContainerVisible((prev) => {
+          // console.log('ChatDetail: bottomContainerVisible updated to ' + !prev);
+          return !prev;
+      });
     }, [bottomContainerVisible]);
 
     const handleImageIconPress = useCallback(async () => {
@@ -697,7 +703,7 @@ export const ChatDetail = memo(
         const index = messages.findIndex(
           (m) => m._id === (message.fileMetadata.appData.uniqueId || message.fileId || '')
         );
-        console.log('onReplyMessagePressed', index);
+        // console.log('onReplyMessagePressed', index);
         if (index === -1) return;
         messageContainerRef.current?.scrollToIndex({ index, animated: true, viewPosition: 0.5 });
       },
@@ -729,6 +735,7 @@ export const ChatDetail = memo(
         const draft = await getDraftMessage();
         if (!draft) return;
         setdraftMessage(draft);
+        // console.log('ChatDetail: draftMessage updated');
       })();
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -749,7 +756,7 @@ export const ChatDetail = memo(
     return (
       <GiftedChat<ChatMessageIMessage>
         messageContainerRef={messageContainerRef}
-        messages={messages}
+        messages={stableMessages}
         onSend={_doSend}
         locale={locale}
         textInputRef={textRef}
