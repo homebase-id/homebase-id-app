@@ -8,11 +8,11 @@ import { Opts, TDate } from './interface';
  * @param locale
  * @param opts
  */
-export const formatToTimeAgo = (date: TDate, opts?: Opts): string => {
+export const formatToTimeAgo = (date: TDate, locale = 'en_short', opts?: Opts): string => {
   // diff seconds
   const sec = diffSec(date, opts && opts.relativeDate);
   // format it with locale
-  return formatDiff(sec, getLocale());
+  return formatDiff(sec, getLocale(locale));
 };
 
 export const formatToTimeAgoWithRelativeDetail = (
