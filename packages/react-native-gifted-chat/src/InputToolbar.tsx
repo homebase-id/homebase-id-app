@@ -1,5 +1,5 @@
-import React, { memo, useEffect, useMemo, useState } from 'react';
-import { StyleSheet, View, StyleProp, ViewStyle, Keyboard } from 'react-native';
+import React, { memo, useMemo } from 'react';
+import { StyleSheet, View, StyleProp, ViewStyle } from 'react-native';
 
 import { Composer, ComposerProps } from './Composer';
 import { Send, SendProps } from './Send';

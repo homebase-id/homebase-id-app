@@ -26,7 +26,7 @@
     "tsc:watch": "node_modules/.bin/tsc --watch --noEmit",
     "start": "cd example && expo start",
     "start:web": "cd example && expo start -w --dev",
-    "build": "rm -rf lib/ && node_modules/.bin/tsc && cp flow-typedefs/*.js.flow lib/",
+    "build": "rm -rf lib/ && node_modules/.bin/tsc",
     "prepublishOnly": "yarn lint && yarn build && yarn test"
   },
   "devDependencies": {
