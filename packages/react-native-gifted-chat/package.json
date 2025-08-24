@@ -65,7 +65,7 @@
     "react-native-keyboard-controller": "^1.18.3",
     "react-native-lightbox-v2": "0.9.0",
     "react-native-parsed-text": "0.0.22",
-    "react-native-reanimated": "^3.18.0",
+    "react-native-reanimated": "3.18.0",
     "react-native-typing-animation": "0.1.7",
     "uuid": "10.0.0"
   },
