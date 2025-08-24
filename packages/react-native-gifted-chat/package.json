@@ -26,7 +26,7 @@
     "tsc:watch": "node_modules/.bin/tsc --watch --noEmit",
     "start": "cd example && expo start",
     "start:web": "cd example && expo start -w --dev",
-    "build": "rimraf lib && npx tsc",
+    "build": "rimraf lib/ && tsc && cpy flow-typedefs/*.js.flow lib/",
     "prepublishOnly": "yarn lint && yarn build && yarn test"
   },
   "devDependencies": {
@@ -38,6 +38,7 @@
     "@types/react": "19.1.0",
     "@types/uuid": "10.0.0",
     "@typescript-eslint/parser": "8.8.1",
+    "cpy-cli": "^6.0.0",
     "eslint-config-prettier": "9.1.0",
     "flow-bin": "0.125.0",
     "husky": "4.2.5",

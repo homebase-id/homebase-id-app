@@ -18,10 +18,10 @@
   "dependencies": {
     "@homebase-id/js-lib": "0.0.7-alpha.61",
     "axios": "1.7.5",
+    "htmlparser2": "10.0.0",
     "patch-package": "8.0.0",
     "react": "19.1.0",
-    "react-native": "0.80.1",
-    "htmlparser2": "10.0.0"
+    "react-native": "0.80.1"
   },
   "overrides": {
     "browserify-sign": "4.2.2",
@@ -32,10 +32,12 @@
     "@eslint/js": "^8.56.0",
     "@react-native/eslint-config": "0.75.2",
     "@react-native/eslint-plugin": "0.75.2",
-    "typescript-eslint": "8.3.0",
-    "@typescript-eslint/parser": "8.3.0",
     "@typescript-eslint/eslint-plugin": "8.3.0",
+    "@typescript-eslint/parser": "8.3.0",
+    "cpy-cli": "^6.0.0",
     "eslint": "8.57.0",
-    "eslint-plugin-jest": "^28.8.1"
+    "eslint-plugin-jest": "^28.8.1",
+    "rimraf": "^6.0.1",
+    "typescript-eslint": "8.3.0"
   }
 }
