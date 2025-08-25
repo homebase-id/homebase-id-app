@@ -347,7 +347,7 @@ export const OfflineProfileAvatar = () => {
       <View
         style={[
           offlineDotStyle,
-          onlineManager.isOnline()
+          !onlineManager.isOnline()
             ? {
                 backgroundColor: Colors.red[500],
               }
