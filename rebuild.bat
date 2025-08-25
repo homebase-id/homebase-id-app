@@ -14,8 +14,7 @@ call npm install
 echo Installing npm dependencies in packages\mobile...
 cd /d "%ROOT_DIR%"
 cd packages\mobile 
-npm install
-
+call npm install
 
 echo Installing gifted-chat workspace dependencies...
 cd /d "%ROOT_DIR%"
