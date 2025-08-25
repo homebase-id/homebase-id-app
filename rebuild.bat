@@ -6,10 +6,24 @@ set ANDROID_DIR=%ROOT_DIR%\packages\mobile\android
 
 echo Running fresh build...
 
+cd /d "%ROOT_DIR%"
+
 echo Installing npm dependencies...
 call npm install
 
+echo Installing npm dependencies in packages\mobile...
+cd /d "%ROOT_DIR%"
+cd packages\mobile 
+npm install
+
+
+echo Installing gifted-chat workspace dependencies...
+cd /d "%ROOT_DIR%"
+cd packages\react-native-gifted-chat
+call npm install
+
 echo Building libs...
+cd /d "%ROOT_DIR%"
 call npm run build:libs
 
 cd /d "%ANDROID_DIR%"
