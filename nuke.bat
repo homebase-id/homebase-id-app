@@ -24,6 +24,10 @@ if exist "%ANDROID_DIR%\.gradle" (
     rd /s /q "%ANDROID_DIR%\.gradle"
 )
 
+echo More Gradle clean...
+rd /s /q "%USERPROFILE%\.gradle\caches\build-cache-1"
+
+
 if exist "%ANDROID_DIR%\build" (
     echo Deleting android/build...
     rd /s /q "%ANDROID_DIR%\build"

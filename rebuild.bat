@@ -15,7 +15,7 @@ call npm run build:libs
 cd /d "%ANDROID_DIR%"
 
 echo Running Gradle clean and refresh...
-call gradlew clean cleanBuildCache --no-daemon --refresh-dependencies
+call gradlew clean --no-daemon --refresh-dependencies
 
 echo Running Gradle assembleDebug...
 call gradlew assembleDebug --no-daemon
