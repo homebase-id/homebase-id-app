@@ -26,7 +26,7 @@
     "resolveJsonModule": true,
     "noFallthroughCasesInSwitch": true,
     "strictPropertyInitialization": false,
-    "lib": ["es6"],
+    "lib": ["es6", "es2019", "es2021"],
     "typeRoots": ["./node_modules/@types", "./@types"]
   },
   "include": ["src", "index.d.ts"],

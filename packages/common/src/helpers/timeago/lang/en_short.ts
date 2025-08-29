@@ -1,4 +1,4 @@
-export default function (number: number, index: number): [string, string] {
+export default function (_number : number, index: number): [string, string] {
   return [
     ['just now', 'right now'],
     ['%ss ago', 'in %ss'],
