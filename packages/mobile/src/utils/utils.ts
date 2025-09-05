@@ -25,6 +25,27 @@ export function millisToMinutesAndSeconds(millis: number | undefined): string {
   return seconds === 60 ? minutes + 1 + ':00' : minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
 }
 
+/**
+ * Compare two integer timestamps (milliseconds). If their absolute difference
+ * is smaller than `toleranceMs` (default 200ms) this function returns 0 to
+ * indicate "no difference". Otherwise the signed difference (a - b) is returned.
+ *
+ * Useful for UI logic where very small timing differences should be ignored.
+ */
+export function timeDifferenceWithTolerance(a: number, b: number, toleranceMs = 200): number {
+  if (a == null || b == null) return 0;
+  const diff = a - b;
+  return Math.abs(diff) < toleranceMs ? 0 : diff;
+}
+
+/**
+ * Helper that returns true when two timestamps are within the given tolerance.
+ */
+export function timesAreEqualWithinTolerance(a: number, b: number, toleranceMs = 200): boolean {
+  if (a == null || b == null) return false;
+  return Math.abs(a - b) < toleranceMs;
+}
+
 export async function openURL(url: string, alwaysExternal?: boolean): Promise<void> {
   if (!url) return;
   url = url.startsWith('http') ? url : `https://${url}`;
@@ -142,9 +163,9 @@ export const getImageSize = (uri: string): Promise<{ width: number; height: numb
 export const flattenInfinteData = <T>(
   rawData:
     | InfiniteData<{
-        results: T[];
-        cursorState: unknown;
-      }>
+      results: T[];
+      cursorState: unknown;
+    }>
     | undefined,
   pageSize?: number,
   sortFn?: (a: T, b: T) => number
@@ -199,24 +220,24 @@ export function cleanString(input: string): string {
  * @returns The cleaned domain string in lowercase.
  */
 export function cleanInteractiveDomainString(input: string): string {
-    let cleanedString = input;
+  let cleanedString = input;
 
-    // Step 1: Replace spaces and commas with periods
-    cleanedString = cleanedString.replace(/ /g, '.').replace(/,/g, '.');
+  // Step 1: Replace spaces and commas with periods
+  cleanedString = cleanedString.replace(/ /g, '.').replace(/,/g, '.');
 
-    // Step 2: Remove illegal characters (e.g., #, ?, /, \, &, %, @, !, *, (, ), [, ], {, }, :, ;, ', ", <, >, =, +, ~, `, | ) 
-    // but allow Unicode letters and digits (for later Punycode conversion)
-    cleanedString = cleanedString.replace(/[ #?/\\&%@!*()[\]{}:;'",<>+=~`|]/g, '.');
+  // Step 2: Remove illegal characters (e.g., #, ?, /, \, &, %, @, !, *, (, ), [, ], {, }, :, ;, ', ", <, >, =, +, ~, `, | ) 
+  // but allow Unicode letters and digits (for later Punycode conversion)
+  cleanedString = cleanedString.replace(/[ #?/\\&%@!*()[\]{}:;'",<>+=~`|]/g, '.');
 
-    // Step 3: Replace multiple consecutive periods with a single period
-    cleanedString = cleanedString.replace(/\.{2,}/g, '.');
+  // Step 3: Replace multiple consecutive periods with a single period
+  cleanedString = cleanedString.replace(/\.{2,}/g, '.');
 
-    // Step 4: Remove leading periods or dashes
-    cleanedString = cleanedString.replace(/^\.|^-/g, '');
+  // Step 4: Remove leading periods or dashes
+  cleanedString = cleanedString.replace(/^\.|^-/g, '');
 
-    cleanedString = cleanedString.toLowerCase().trim();
+  cleanedString = cleanedString.toLowerCase().trim();
 
-    return cleanedString;
+  return cleanedString;
 }
 
 
@@ -229,49 +250,49 @@ export function cleanInteractiveDomainString(input: string): string {
  * @returns The cleaned domain string in lowercase.
  */
 export function cleanDomainString(input: string): string {
-    let cleanedString = input.trim();
+  let cleanedString = input.trim();
 
-    if (!cleanedString) {
-        return '';
-    }
+  if (!cleanedString) {
+    return '';
+  }
 
-    // Step 1: Handle pasted URLs - Strip protocols (http/https:// or similar), paths (after /), and queries (after ?)
-    cleanedString = cleanedString
-        // Normalize common protocol typos
-        .replace(/\/{2,}/g, '//') // Collapses multiple consecutive slashes (2+) to //
-        .replace(/:\/(?!\/)/g, '://') // Fix :/ to :// (missing one slash)
-        .replace(/^([\w+-]+)(\/\/)/i, '$1:$2') // Fix scheme// to scheme:// (missing colon; no . in scheme)
-        // Remove general protocol (scheme:// where scheme can be any word-like string, but no . to avoid domain mismatches)
-        .replace(/^[\w+-]+:\/\//i, '')
-        .replace(/\?.*$/, '') // Remove query params after ?
-        .replace(/#.*$/, '') // Remove fragments after # (new addition to handle URL anchors)
-        .replace(/\/.*$/, ''); // Remove paths after /
+  // Step 1: Handle pasted URLs - Strip protocols (http/https:// or similar), paths (after /), and queries (after ?)
+  cleanedString = cleanedString
+    // Normalize common protocol typos
+    .replace(/\/{2,}/g, '//') // Collapses multiple consecutive slashes (2+) to //
+    .replace(/:\/(?!\/)/g, '://') // Fix :/ to :// (missing one slash)
+    .replace(/^([\w+-]+)(\/\/)/i, '$1:$2') // Fix scheme// to scheme:// (missing colon; no . in scheme)
+    // Remove general protocol (scheme:// where scheme can be any word-like string, but no . to avoid domain mismatches)
+    .replace(/^[\w+-]+:\/\//i, '')
+    .replace(/\?.*$/, '') // Remove query params after ?
+    .replace(/#.*$/, '') // Remove fragments after # (new addition to handle URL anchors)
+    .replace(/\/.*$/, ''); // Remove paths after /
 
-    // Step 2: Replace spaces and commas with periods
-    cleanedString = cleanedString.replace(/ /g, '.').replace(/,/g, '.');
+  // Step 2: Replace spaces and commas with periods
+  cleanedString = cleanedString.replace(/ /g, '.').replace(/,/g, '.');
 
-    // Step 3: Remove illegal characters (e.g., #, ?, /, \, &, %, @, !, *, (, ), [, ], {, }, :, ;, ', ", <, >, =, +, ~, `, | ) but allow Unicode letters and digits (for later Punycode conversion)
-    cleanedString = cleanedString.replace(/[ #?/\\&%@!*()[\]{}:;'",<>+=~`|]/g, '');
+  // Step 3: Remove illegal characters (e.g., #, ?, /, \, &, %, @, !, *, (, ), [, ], {, }, :, ;, ', ", <, >, =, +, ~, `, | ) but allow Unicode letters and digits (for later Punycode conversion)
+  cleanedString = cleanedString.replace(/[ #?/\\&%@!*()[\]{}:;'",<>+=~`|]/g, '');
 
-    // Step 4: Replace multiple consecutive periods with a single period
-    cleanedString = cleanedString.replace(/\.{2,}/g, '.');
+  // Step 4: Replace multiple consecutive periods with a single period
+  cleanedString = cleanedString.replace(/\.{2,}/g, '.');
 
-    // Step 5: Enforce per-label rules (no start/end with '-', no consecutive '-')
-    const labels = cleanedString.split('.');
-    const cleanedLabels = labels.map(label => {
-        // Remove leading/trailing '-', replace consecutive '-'
-        label = label.replace(/^-+|-+$/g, '').replace(/-{2,}/g, '-');
-        return label;
-    });
-    cleanedString = cleanedLabels.filter(Boolean).join('.'); // Remove empty labels
+  // Step 5: Enforce per-label rules (no start/end with '-', no consecutive '-')
+  const labels = cleanedString.split('.');
+  const cleanedLabels = labels.map(label => {
+    // Remove leading/trailing '-', replace consecutive '-'
+    label = label.replace(/^-+|-+$/g, '').replace(/-{2,}/g, '-');
+    return label;
+  });
+  cleanedString = cleanedLabels.filter(Boolean).join('.'); // Remove empty labels
 
-    // Step 6: Remove leading or trailing periods (good for valid domains)
-    cleanedString = cleanedString.replace(/^\.|\.$/g, '');
+  // Step 6: Remove leading or trailing periods (good for valid domains)
+  cleanedString = cleanedString.replace(/^\.|\.$/g, '');
 
-    // Step 7: Ensure lowercase (domains are case-insensitive)
-    cleanedString = cleanedString.toLowerCase().trim();
+  // Step 7: Ensure lowercase (domains are case-insensitive)
+  cleanedString = cleanedString.toLowerCase().trim();
 
-    return cleanedString;
+  return cleanedString;
 }
 
 
@@ -311,10 +332,10 @@ Extract VideoId from the given youtube url
 */
 export function extractVideoParams(url: string):
   | {
-      videoId: string | null | undefined;
-      start?: string | null | undefined;
-      end?: string | null | undefined;
-    }
+    videoId: string | null | undefined;
+    start?: string | null | undefined;
+    end?: string | null | undefined;
+  }
   | undefined {
   if (!url) return;
   if (url.includes('youtube.com') || url.includes('youtu.be')) {

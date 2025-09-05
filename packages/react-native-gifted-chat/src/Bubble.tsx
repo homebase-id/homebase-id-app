@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import React from 'react';
 import {
   Text,
@@ -22,7 +21,7 @@ import { MessageAudio } from './MessageAudio';
 import { Time, TimeProps } from './Time';
 
 import Color from './Color';
-import { StylePropType, isSameUser, isSameDay } from './utils';
+import { isSameUser, isSameDay } from './utils';
 import {
   User,
   IMessage,
@@ -110,6 +109,15 @@ const styles = {
       flexDirection: 'row',
       marginRight: 10,
     },
+    edited: {
+      fontSize: 11,
+      backgroundColor: Color.backgroundTransparent,
+      color: '#aaa',
+
+      marginRight: 7,
+      marginBottom: 5,
+      textAlign: 'left',
+    },
     username: {
       top: 0,
       left: 0,
@@ -179,6 +187,8 @@ export interface BubbleProps<TMessage extends IMessage> {
   quickReplyStyle?: StyleProp<ViewStyle>;
   quickReplyTextStyle?: StyleProp<TextStyle>;
   gradientWrapperStyle?: LeftRightStyle<BubbleGradient>;
+  editedStyle?: StyleProp<TextStyle>;
+  isEdited?: boolean;
   onPress?(context?: any, message?: any): void;
   onLongPress?(
     coords: {
@@ -204,6 +214,7 @@ export interface BubbleProps<TMessage extends IMessage> {
   renderCustomView?(bubbleProps: BubbleProps<TMessage>): React.ReactNode;
   renderTime?(timeProps: TimeProps<TMessage>): React.ReactNode;
   renderTicks?(currentMessage: TMessage): React.ReactNode;
+  renderEdited?(currentMessage: TMessage): React.ReactNode;
   renderUsername?(user?: TMessage['user']): React.ReactNode;
   renderQuickReplySend?(): React.ReactNode;
   renderReactions?(): React.ReactNode;
@@ -216,85 +227,6 @@ export default class Bubble<
   TMessage extends IMessage = IMessage,
 > extends React.Component<BubbleProps<TMessage>> {
   static contextType = GiftedChatContext;
-
-  static defaultProps = {
-    touchableProps: {},
-    onPress: null,
-    onLongPress: null,
-    renderMessageImage: null,
-    renderMessageVideo: null,
-    renderMessageAudio: null,
-    renderMessageText: null,
-    renderCustomView: null,
-    renderReactions: null,
-    renderUsername: null,
-    renderTicks: null,
-    renderTime: null,
-    renderQuickReplies: null,
-    onQuickReply: null,
-    position: 'left',
-    optionTitles: DEFAULT_OPTION_TITLES,
-    currentMessage: {
-      text: null,
-      createdAt: null,
-      image: null,
-    },
-    nextMessage: {},
-    previousMessage: {},
-    containerStyle: {},
-    wrapperStyle: {},
-    bottomContainerStyle: {},
-    tickStyle: {},
-    usernameStyle: {},
-    containerToNextStyle: {},
-    containerToPreviousStyle: {},
-  };
-
-  static propTypes = {
-    user: PropTypes.object.isRequired,
-    touchableProps: PropTypes.object,
-    onLongPress: PropTypes.func,
-    renderMessageImage: PropTypes.func,
-    renderMessageVideo: PropTypes.func,
-    renderMessageAudio: PropTypes.func,
-    renderMessageText: PropTypes.func,
-    renderCustomView: PropTypes.func,
-    renderReactions: PropTypes.func,
-    isCustomViewBottom: PropTypes.bool,
-    renderUsernameOnMessage: PropTypes.bool,
-    renderUsername: PropTypes.func,
-    renderTime: PropTypes.func,
-    renderTicks: PropTypes.func,
-    renderQuickReplies: PropTypes.func,
-    onQuickReply: PropTypes.func,
-    position: PropTypes.oneOf(['left', 'right']),
-    optionTitles: PropTypes.arrayOf(PropTypes.string),
-    currentMessage: PropTypes.object,
-    nextMessage: PropTypes.object,
-    previousMessage: PropTypes.object,
-    containerStyle: PropTypes.shape({
-      left: StylePropType,
-      right: StylePropType,
-    }),
-    wrapperStyle: PropTypes.shape({
-      left: StylePropType,
-      right: StylePropType,
-    }),
-    bottomContainerStyle: PropTypes.shape({
-      left: StylePropType,
-      right: StylePropType,
-    }),
-    tickStyle: StylePropType,
-    usernameStyle: StylePropType,
-    containerToNextStyle: PropTypes.shape({
-      left: StylePropType,
-      right: StylePropType,
-    }),
-    containerToPreviousStyle: PropTypes.shape({
-      left: StylePropType,
-      right: StylePropType,
-    }),
-  };
 
   onPress = () => {
     if (this.props.onPress) {
@@ -502,6 +434,21 @@ export default class Bubble<
     return null;
   }
 
+  renderEdited() {
+    const { currentMessage, renderEdited } = this.props;
+    if (renderEdited && currentMessage) {
+      return renderEdited(currentMessage);
+    }
+    if (currentMessage && this.props.isEdited) {
+      return (
+        <Text style={[styles.content.edited, this.props.editedStyle]}>
+          · Edited
+        </Text>
+      );
+    }
+    return null;
+  }
+
   renderUsername() {
     const { currentMessage, user, renderUsername } = this.props;
     if (this.props.renderUsernameOnMessage && currentMessage) {
@@ -620,6 +567,7 @@ export default class Bubble<
                   ]}
                 >
                   {this.renderTime()}
+                  {this.renderEdited()}
                   {this.renderTicks()}
                 </View>
                 {renderedReactions}
@@ -652,6 +600,7 @@ export default class Bubble<
                   ]}
                 >
                   {this.renderTime()}
+                  {this.renderEdited()}
                   {this.renderTicks()}
                 </View>
                 {renderedReactions}
