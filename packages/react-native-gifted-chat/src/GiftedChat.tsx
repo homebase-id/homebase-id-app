@@ -64,9 +64,7 @@ import {
   KeyboardProvider,
   useReanimatedKeyboardAnimation,
 } from 'react-native-keyboard-controller';
-import { AnimatedList } from './types';
-
-dayjs.extend(localizedFormat);
+import { AnimatedList, ListViewProps } from './types';
 
 export interface GiftedChatProps<TMessage extends IMessage = IMessage> {
   /* Message container ref */
@@ -126,7 +124,7 @@ export interface GiftedChatProps<TMessage extends IMessage = IMessage> {
   /* Minimum height of the input toolbar; default is 44 */
   minInputToolbarHeight?: number;
   /*Extra props to be passed to the messages <ListView>; some props can't be overridden, see the code in MessageContainer.render() for details */
-  listViewProps?: any;
+  listViewProps?: ListViewProps;
   /*  Extra props to be passed to the <TextInput> */
   textInputProps?: any;
   /*Determines whether the keyboard should stay visible after a tap; see <ScrollView> docs */
