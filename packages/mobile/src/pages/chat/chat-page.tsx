@@ -147,6 +147,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
                 ? value.fileMetadata.payloads.length.toString()
                 : undefined,
             ...value,
+            edited: value.fileMetadata.appData.content.isEdited || false,
           };
         }) || [],
     [chatMessages, identity]
@@ -868,6 +869,7 @@ const EditDialogBox = memo(({ visible, handleDialogClose, selectedMessage }: Edi
           content: {
             ...selectedMessage?.fileMetadata.appData.content,
             message: value,
+            isEdited: true,
           },
         },
       },

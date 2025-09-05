@@ -63,6 +63,7 @@ export interface IMessage {
   received?: boolean;
   pending?: boolean;
   quickReplies?: QuickReplies;
+  edited?: boolean;
 }
 
 export type IChatMessage = IMessage;

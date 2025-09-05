@@ -188,7 +188,6 @@ export interface BubbleProps<TMessage extends IMessage> {
   quickReplyTextStyle?: StyleProp<TextStyle>;
   gradientWrapperStyle?: LeftRightStyle<BubbleGradient>;
   editedStyle?: StyleProp<TextStyle>;
-  isEdited?: boolean;
   onPress?(context?: any, message?: any): void;
   onLongPress?(
     coords: {
@@ -439,7 +438,7 @@ export default class Bubble<
     if (renderEdited && currentMessage) {
       return renderEdited(currentMessage);
     }
-    if (currentMessage && this.props.isEdited) {
+    if (currentMessage && currentMessage?.edited) {
       return (
         <Text style={[styles.content.edited, this.props.editedStyle]}>
           · Edited
