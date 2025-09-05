@@ -103,6 +103,7 @@ export const RenderBubble = memo(
     return (
       <Bubble
         {...props}
+        // isEdited={isEdited}
         renderTicks={(message: ChatMessageIMessage) => (
           <ChatDeliveryIndicator msg={message} onPress={onRetryOpen} />
         )}

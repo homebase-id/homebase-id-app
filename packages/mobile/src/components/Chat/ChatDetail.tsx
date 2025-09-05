@@ -790,8 +790,10 @@ export const ChatDetail = memo(
         listViewProps={{
           removeClippedSubviews: true,
           windowSize: 15,
+          contentContainerStyle: { paddingTop: 10 },
         }}
         renderChatEmpty={renderEmptyChat}
+        bottomOffset={10}
       />
     );
   }

@@ -325,3 +325,4 @@ describe('htmlToRecord', () => {
         expect(htmlToRecord(html)).toEqual(expected);
     });
 });
+

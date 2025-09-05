@@ -1,4 +1,4 @@
-import { Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Colors } from '../../app/Colors';
 import { t } from 'homebase-id-app-common';
 import { onlineManager } from '@tanstack/react-query';
@@ -57,14 +57,16 @@ const NoInternetState = () => {
   );
 };
 
-const connectingStyles = {
+const connectingStyles = StyleSheet.create({
   container: {
     backgroundColor: Colors.slate[200],
     padding: 10,
+    zIndex: 200,
   },
   darkContainer: {
     backgroundColor: Colors.slate[700],
     padding: 10,
+    zIndex: 200,
   },
   text: {
     color: Colors.black,
@@ -72,14 +74,15 @@ const connectingStyles = {
   darkText: {
     color: Colors.white,
   },
-};
+});
 
-const noInternetStyles = {
+const noInternetStyles = StyleSheet.create({
   container: {
     backgroundColor: Colors.red[500],
     padding: 10,
+    zIndex: 200,
   },
   text: {
     color: Colors.white,
   },
-};
+});
