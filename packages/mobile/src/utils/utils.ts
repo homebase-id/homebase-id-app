@@ -25,26 +25,6 @@ export function millisToMinutesAndSeconds(millis: number | undefined): string {
   return seconds === 60 ? minutes + 1 + ':00' : minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
 }
 
-/**
- * Compare two integer timestamps (milliseconds). If their absolute difference
- * is smaller than `toleranceMs` (default 200ms) this function returns 0 to
- * indicate "no difference". Otherwise the signed difference (a - b) is returned.
- *
- * Useful for UI logic where very small timing differences should be ignored.
- */
-export function timeDifferenceWithTolerance(a: number, b: number, toleranceMs = 200): number {
-  if (a == null || b == null) return 0;
-  const diff = a - b;
-  return Math.abs(diff) < toleranceMs ? 0 : diff;
-}
-
-/**
- * Helper that returns true when two timestamps are within the given tolerance.
- */
-export function timesAreEqualWithinTolerance(a: number, b: number, toleranceMs = 200): boolean {
-  if (a == null || b == null) return false;
-  return Math.abs(a - b) < toleranceMs;
-}
 
 export async function openURL(url: string, alwaysExternal?: boolean): Promise<void> {
   if (!url) return;

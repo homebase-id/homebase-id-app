@@ -6,7 +6,7 @@ import { BubbleProps, IMessage, TimeProps, Time, Bubble } from 'react-native-gif
 import { uses24HourClock } from 'react-native-localize';
 import { useDarkMode } from '../../../hooks/useDarkMode';
 import { ChatDeletedArchivalStaus } from '../../../provider/chat/ChatProvider';
-import { isEmojiOnly, timesAreEqualWithinTolerance } from '../../../utils/utils';
+import { isEmojiOnly } from '../../../utils/utils';
 import { Colors } from '../../../app/Colors';
 import { useBubbleContext } from '../../BubbleContext/useBubbleContext';
 import { ChatDeliveryIndicator } from '../Chat-Delivery-Indicator';
@@ -100,15 +100,10 @@ export const RenderBubble = memo(
       [hasPayloadandNoText, isDarkMode, showBackground]
     );
 
-    const isEdited = !timesAreEqualWithinTolerance(
-      message?.fileMetadata.created,
-      message?.fileMetadata.updated
-    );
-
     return (
       <Bubble
         {...props}
-        isEdited={isEdited}
+        // isEdited={isEdited}
         renderTicks={(message: ChatMessageIMessage) => (
           <ChatDeliveryIndicator msg={message} onPress={onRetryOpen} />
         )}

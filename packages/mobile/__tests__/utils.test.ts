@@ -1,7 +1,7 @@
 
 import InAppBrowser from 'react-native-inappbrowser-reborn';
 import { Linking } from 'react-native';
-import { calculateScaledDimensions, extractUrls, extractVideoParams, htmlToRecord, isEmojiOnly, millisToMinutesAndSeconds, openURL, cleanDomainString, timeDifferenceWithTolerance, timesAreEqualWithinTolerance } from '../src/utils/utils';
+import { calculateScaledDimensions, extractUrls, extractVideoParams, htmlToRecord, isEmojiOnly, millisToMinutesAndSeconds, openURL, cleanDomainString } from '../src/utils/utils';
 
 jest.mock('react-native-inappbrowser-reborn', () => ({
     isAvailable: jest.fn(),
@@ -326,22 +326,3 @@ describe('htmlToRecord', () => {
     });
 });
 
-describe('time difference utilities', () => {
-    it('returns 0 when difference is less than 200ms and boolean equality is true', () => {
-        expect(timeDifferenceWithTolerance(1000, 1100)).toBe(0); // 100ms diff
-        expect(timeDifferenceWithTolerance(1000, 1199)).toBe(0); // 199ms diff
-        expect(timesAreEqualWithinTolerance(1000, 1199)).toBe(true);
-    });
-
-    it('returns signed difference when difference >= 200ms and equality is false', () => {
-        expect(timeDifferenceWithTolerance(2000, 1700)).toBe(300);
-        expect(timeDifferenceWithTolerance(1700, 2000)).toBe(-300);
-        expect(timesAreEqualWithinTolerance(1000, 1400)).toBe(false);
-    });
-
-    it('handles nullish inputs safely at runtime', () => {
-        // functions are typed to accept numbers; at runtime we still guard against null/undefined
-        expect(timeDifferenceWithTolerance(undefined as unknown as number, 1000 as number)).toBe(0);
-        expect(timesAreEqualWithinTolerance(undefined as unknown as number, 1000 as number)).toBe(false);
-    });
-});
