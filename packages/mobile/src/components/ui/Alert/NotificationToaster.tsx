@@ -9,14 +9,14 @@ import Toast from 'react-native-toast-message';
 import { useCallback, useEffect } from 'react';
 import { getContactByOdinId } from '@homebase-id/js-lib/network';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { TabStackParamList } from '../../../app/App';
+import { AuthStackParamList } from '../../../app/App';
 import { getAppName } from '../../../utils/utils';
 
 export const NotificationToaster = () => {
   const { route } = useRouteContext();
   const dotYouClient = useDotYouClientContext();
   const identity = useDotYouClientContext().getLoggedInIdentity() || '';
-  const tabNavigator = useNavigation<NavigationProp<TabStackParamList>>();
+  const tabNavigator = useNavigation<NavigationProp<AuthStackParamList, 'Authenticated'>>();
   const isConversationScreen = route?.name === 'Conversation' && !route.params;
   const isChatScreen = route?.name === 'ChatScreen' && route.params;
   const isFeedScreen = route?.name === 'Posts';
@@ -74,7 +74,7 @@ export const NotificationToaster = () => {
         visibilityTime: 4000,
         topOffset: top,
         onPress: () => {
-          navigateOnNotification(notification, identity, tabNavigator);
+          navigateOnNotification(notification, identity, tabNavigator, true);
           Toast.hide();
         },
         onHide: () => dismissNotification(notification),

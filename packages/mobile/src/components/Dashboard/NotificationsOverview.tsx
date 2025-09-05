@@ -16,14 +16,13 @@ import useContact from '../../hooks/contact/useContact';
 import { Colors } from '../../app/Colors';
 import { Times } from '../ui/Icons/icons';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { ChatStackParamList } from '../../app/ChatStack';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { getAppName, openURL } from '../../utils/utils';
 import { Text } from '../ui/Text/Text';
 import Toast from 'react-native-toast-message';
 import Clipboard from '@react-native-clipboard/clipboard';
 import { Avatar } from '../ui/Avatars/Avatar';
-import { TabStackParamList } from '../../app/App';
+import { AuthStackParamList, TabStackParamList } from '../../app/App';
 import { addLogs } from '../../provider/log/logger';
 
 export const NotificationDay = memo(
@@ -140,7 +139,7 @@ const NotificationGroup = ({
                 onOpen={() =>
                   canExpand && !isExpanded
                     ? setExpanded(true)
-                    : navigateOnNotification(notification, identity, tabNavigator)
+                    : navigateOnNotification(notification, identity, tabNavigator, false)
                 }
                 groupCount={isExpanded ? 0 : groupCount}
                 appName={appName}
@@ -313,7 +312,10 @@ export const bodyFormer = (
 export const navigateOnNotification = (
   notification: PushNotification,
   identity: string,
-  tabNavigator: NavigationProp<TabStackParamList>
+  tabNavigator:
+    | NavigationProp<TabStackParamList>
+    | NavigationProp<AuthStackParamList, 'Authenticated'>,
+  isAuthenticatedNavigator = false
 ) => {
   if (notification.options.appId === OWNER_APP_ID) {
     // Based on type, we show different messages
@@ -329,40 +331,108 @@ export const navigateOnNotification = (
       return openURL(`https://${identity}/owner/connections`);
     }
   } else if (notification.options.appId === CHAT_APP_ID) {
-    tabNavigator.navigate('Chat', {
-      screen: 'ChatScreen',
-      params: { convoId: notification.options.typeId },
-    });
+    if (isAuthenticatedNavigator) {
+      return (tabNavigator as NavigationProp<AuthStackParamList, 'Authenticated'>).navigate(
+        'Authenticated',
+        {
+          screen: 'Chat',
+          params: {
+            screen: 'ChatScreen',
+            params: { convoId: notification.options.typeId },
+          },
+        }
+      );
+    } else {
+      return (tabNavigator as NavigationProp<TabStackParamList>).navigate('Chat', {
+        screen: 'ChatScreen',
+        params: { convoId: notification.options.typeId },
+      });
+    }
   } else if (notification.options.appId === MAIL_APP_ID) {
     // Navigate to owner console:
     return openURL(`https://${identity}/apps/mail/inbox/${notification.options.typeId}`);
   } else if (notification.options.appId === FEED_APP_ID) {
     if (notification.options.typeId === FEED_NEW_CONTENT_TYPE_ID) {
-      return tabNavigator.navigate('Feed', {
-        screen: 'Posts',
-        params: {
-          postKey: notification.options.tagId,
-        },
-      });
+      if (isAuthenticatedNavigator) {
+        return (tabNavigator as NavigationProp<AuthStackParamList, 'Authenticated'>).navigate(
+          'Authenticated',
+          {
+            screen: 'Feed',
+            params: {
+              screen: 'Posts',
+              params: {
+                postKey: notification.options.tagId,
+              },
+            },
+          }
+        );
+      } else {
+        return (tabNavigator as NavigationProp<TabStackParamList>).navigate('Feed', {
+          screen: 'Posts',
+          params: {
+            postKey: notification.options.tagId,
+          },
+        });
+      }
     }
     if (
       [FEED_NEW_COMMENT_TYPE_ID, FEED_NEW_REACTION_TYPE_ID].includes(notification.options.typeId)
     ) {
-      return tabNavigator.navigate('Feed', {
-        screen: 'Post',
-        params: {
-          postKey: notification.options.tagId,
-        },
+      if (isAuthenticatedNavigator) {
+        return (tabNavigator as NavigationProp<AuthStackParamList, 'Authenticated'>).navigate(
+          'Authenticated',
+          {
+            screen: 'Feed',
+            params: {
+              screen: 'Post',
+              params: {
+                postKey: notification.options.tagId,
+              },
+            },
+          }
+        );
+      } else {
+        return (tabNavigator as NavigationProp<TabStackParamList>).navigate('Feed', {
+          screen: 'Post',
+          params: {
+            postKey: notification.options.tagId,
+          },
+        });
+      }
+    }
+    if (isAuthenticatedNavigator) {
+      return (tabNavigator as NavigationProp<AuthStackParamList, 'Authenticated'>).navigate(
+        'Authenticated',
+        {
+          screen: 'Feed',
+          params: {
+            screen: 'Posts',
+          },
+        }
+      );
+    } else {
+      return (tabNavigator as NavigationProp<TabStackParamList>).navigate('Feed', {
+        screen: 'Posts',
       });
     }
-    return tabNavigator.navigate('Feed', {
-      screen: 'Posts',
-    });
   } else if (notification.options.appId === COMMUNITY_APP_ID) {
-    return tabNavigator.navigate('Community', {
-      typeId: notification.options.typeId,
-      tagId: notification.options.tagId,
-    });
+    if (isAuthenticatedNavigator) {
+      return (tabNavigator as NavigationProp<AuthStackParamList, 'Authenticated'>).navigate(
+        'Authenticated',
+        {
+          screen: 'Community',
+          params: {
+            typeId: notification.options.typeId,
+            tagId: notification.options.tagId,
+          },
+        }
+      );
+    } else {
+      return (tabNavigator as NavigationProp<TabStackParamList>).navigate('Community', {
+        typeId: notification.options.typeId,
+        tagId: notification.options.tagId,
+      });
+    }
   } else {
     addLogs({
       type: 'critical',
