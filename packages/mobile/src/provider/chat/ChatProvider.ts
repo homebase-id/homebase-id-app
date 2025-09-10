@@ -37,6 +37,7 @@ import {
   patchFile,
   UpdateResult,
   UpdateLocalInstructionSet,
+  DEFAULT_PAYLOAD_DESCRIPTOR_KEY,
 } from '@homebase-id/js-lib/core';
 import {
   ChatDrive,
@@ -434,6 +435,7 @@ export const uploadChatMessage = async (
 
   for (let i = 0; files && i < files?.length; i++) {
     const payloadKey = `${CHAT_MESSAGE_PAYLOAD_KEY}${i}`;
+    const descriptorKey = `${DEFAULT_PAYLOAD_DESCRIPTOR_KEY}${i}`;
     const newMediaFile = files[i];
 
     if (newMediaFile.type?.startsWith('video/')) {
@@ -441,7 +443,7 @@ export const uploadChatMessage = async (
         tinyThumb: tinyThumbFromVideo,
         thumbnails: thumbnailsFromVideo,
         payloads: payloadsFromVideo,
-      } = await processVideo(newMediaFile, payloadKey, true, onUpdate, aesKey);
+      } = await processVideo(newMediaFile, payloadKey, descriptorKey, true, onUpdate, aesKey);
 
       thumbnails.push(...thumbnailsFromVideo);
       payloads.push(...payloadsFromVideo);

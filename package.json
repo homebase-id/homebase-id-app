@@ -16,7 +16,7 @@
     "lint": "npm run lint -workspaces --if-present"
   },
   "dependencies": {
-    "@homebase-id/js-lib": "0.0.7-alpha.61",
+    "@homebase-id/js-lib": "0.0.7-alpha.64",
     "axios": "1.7.5",
     "htmlparser2": "10.0.0",
     "patch-package": "8.0.0",
