@@ -12,7 +12,11 @@ import { MediaGallery, MediaItem } from '../ui/Media/MediaGallery';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { Colors } from '../../app/Colors';
 import { useAuth } from '../../hooks/auth/useAuth';
-import { DEFAULT_PAYLOAD_KEY, PayloadDescriptor } from '@homebase-id/js-lib/core';
+import {
+  DEFAULT_PAYLOAD_DESCRIPTOR_KEY,
+  DEFAULT_PAYLOAD_KEY,
+  PayloadDescriptor,
+} from '@homebase-id/js-lib/core';
 import { ChatDeletedArchivalStaus } from '../../provider/chat/ChatProvider';
 
 const MediaMessage = memo(
@@ -46,8 +50,9 @@ const MediaMessage = memo(
     if (
       !props.currentMessage ||
       !props.currentMessage.fileMetadata.payloads ||
-      !props.currentMessage.fileMetadata.payloads?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY)
-        .length
+      !props.currentMessage.fileMetadata.payloads?.filter(
+        (p) => p.key !== DEFAULT_PAYLOAD_KEY && !p.key.includes(DEFAULT_PAYLOAD_DESCRIPTOR_KEY)
+      ).length
     ) {
       return null;
     }
