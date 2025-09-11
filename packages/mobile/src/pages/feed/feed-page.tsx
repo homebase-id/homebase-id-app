@@ -28,10 +28,10 @@ export const FeedPage = memo((_: FeedProps) => {
 
   return (
     <SafeAreaView style={{ flex: 1, paddingTop: top, paddingBottom: bottom }}>
-      {/* <FeedHeader />
-      <SocialFeedMainContent />
-      <FloatingActionButton /> */}
+      <FeedHeader />
+      {/* <SocialFeedMainContent /> */}
       <SocialFeedWebView />
+      <FloatingActionButton />
     </SafeAreaView>
   );
 });
