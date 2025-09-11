@@ -186,16 +186,16 @@ export function cleanString(input: string): string {
 
 
 /**
- * Cleans a domain string interactively as the user is typing, removing invalid characters, 
+ * Cleans a domain string interactively as the user is typing, removing invalid characters,
  * and enforcing domain rules as well as you can. This is particularly beneficial for mobile
  * users - they can use the dictionary for typing and the auto-appended space becomes a period.
  * Supports Unicode characters for IDNs (to be Punycode-converted later) and handles common user input
  * typos. It's intended to be called with each character being input interactively (or pasted).
- * Since it's interactive we might e.g. end up with a period too much at the end, or a period in 
+ * Since it's interactive we might e.g. end up with a period too much at the end, or a period in
  * front. You should call cleanDomainString to fully clean the string.
- * 
+ *
  * See also: cleanDomainString()
- * 
+ *
  * @param input The raw input string (e.g., pasted URL or domain).
  * @returns The cleaned domain string in lowercase.
  */
@@ -205,7 +205,7 @@ export function cleanInteractiveDomainString(input: string): string {
   // Step 1: Replace spaces and commas with periods
   cleanedString = cleanedString.replace(/ /g, '.').replace(/,/g, '.');
 
-  // Step 2: Remove illegal characters (e.g., #, ?, /, \, &, %, @, !, *, (, ), [, ], {, }, :, ;, ', ", <, >, =, +, ~, `, | ) 
+  // Step 2: Remove illegal characters (e.g., #, ?, /, \, &, %, @, !, *, (, ), [, ], {, }, :, ;, ', ", <, >, =, +, ~, `, | )
   // but allow Unicode letters and digits (for later Punycode conversion)
   cleanedString = cleanedString.replace(/[ #?/\\&%@!*()[\]{}:;'",<>+=~`|]/g, '.');
 
@@ -290,6 +290,7 @@ export function assetsToImageSource(assets: Asset[], key?: string): ImageSource[
       id: value.id,
       fileSize: value.fileSize,
       key: assets?.length === 1 ? key : undefined,
+      playableDuration: value.duration,
     };
   });
 }
@@ -424,4 +425,19 @@ export const getAppName = (appId: string): string => {
             : stringGuidsEqual(appId, COMMUNITY_APP_ID)
               ? 'Homebase - Community'
               : `Unknown (${appId})`;
+};
+
+
+
+// Utility to format seconds to mm:ss or h:mm:ss
+export const formatDuration = (milliseconds?: number): string => {
+  if (!milliseconds || milliseconds <= 0) return '';
+  const totalSeconds = Math.floor(milliseconds / 1000);
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  const s = totalSeconds % 60;
+  if (h > 0) {
+    return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  }
+  return `${m}:${s.toString().padStart(2, '0')}`;
 };

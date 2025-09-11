@@ -11,6 +11,7 @@ import { Colors } from '../../../app/Colors';
 import { useBubbleContext } from '../../BubbleContext/useBubbleContext';
 import { ChatDeliveryIndicator } from '../Chat-Delivery-Indicator';
 import { ChatMessageIMessage } from '../ChatDetail';
+import { DEFAULT_PAYLOAD_DESCRIPTOR_KEY } from '@homebase-id/js-lib/core';
 
 export const RenderBubble = memo(
   (
@@ -49,7 +50,10 @@ export const RenderBubble = memo(
       message?.fileMetadata.payloads?.length > 0 &&
       !content?.message &&
       !message?.fileMetadata?.payloads?.some(
-        (val) => val.contentType.startsWith('audio') || val.contentType.startsWith('application')
+        (val) =>
+          val.contentType.startsWith('audio') ||
+          (val.contentType.startsWith('application') &&
+            !val.key.includes(DEFAULT_PAYLOAD_DESCRIPTOR_KEY))
       );
 
     const deleted = message?.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus;
