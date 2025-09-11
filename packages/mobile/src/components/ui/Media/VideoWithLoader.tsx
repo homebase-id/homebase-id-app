@@ -5,7 +5,7 @@ import {
   TargetDrive,
 } from '@homebase-id/js-lib/core';
 import { memo, useCallback, useState } from 'react';
-import { ActivityIndicator, ImageStyle, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, ImageStyle, TouchableOpacity, View, Text } from 'react-native';
 import { Colors } from '../../../app/Colors';
 import { Play } from '../Icons/icons';
 import { OdinImage } from '../OdinImage/OdinImage';
@@ -15,6 +15,9 @@ import Video from 'react-native-video';
 import { useDotYouClientContext } from 'homebase-id-app-common';
 import { useVideoMetadata } from '../../../hooks/video/useVideoMetadata';
 import { GestureType } from 'react-native-gesture-handler';
+import { tryJsonParse } from '@homebase-id/js-lib/helpers';
+import { BaseVideoMetadata } from '@homebase-id/js-lib/media';
+import { formatDuration } from '../../../utils/utils';
 
 interface VideoProps extends LocalVideoProps {
   previewThumbnail?: EmbeddedThumb;
@@ -60,6 +63,10 @@ export const VideoWithLoader = memo(
     ).fetchMetadata;
 
     if (preview) {
+      // Parse duration from payload.descriptorContent
+      const baseMeta = tryJsonParse<BaseVideoMetadata>(payload?.descriptorContent || '{}');
+      const duration = baseMeta?.duration;
+      console.log('duration', baseMeta);
       return (
         <View style={style}>
           <OdinImage
@@ -78,6 +85,7 @@ export const VideoWithLoader = memo(
             onLongPress={onLongPress}
             gestureRefs={gestureRefs}
           />
+          {/* Play overlay */}
           <View
             style={{
               position: 'absolute',
@@ -106,6 +114,28 @@ export const VideoWithLoader = memo(
               <Play size={'xl'} color={Colors.white} />
             </View>
           </View>
+          {/* Duration overlay (bottom right) */}
+          {duration && duration > 0 && (
+            <View
+              style={{
+                position: 'absolute',
+                left: 6,
+                bottom: 6,
+                backgroundColor: 'rgba(0,0,0,0.7)',
+                borderRadius: 4,
+                paddingHorizontal: 6,
+                paddingVertical: 2,
+                zIndex: 30,
+              }}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Play size={12} color={Colors.white} />
+                <Text style={{ color: 'white', fontSize: 12, marginLeft: 4 }}>
+                  {formatDuration(duration)}
+                </Text>
+              </View>
+            </View>
+          )}
         </View>
       );
     }

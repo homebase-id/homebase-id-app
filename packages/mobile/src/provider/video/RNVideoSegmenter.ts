@@ -174,12 +174,14 @@ const segmentVideo = async (
           type: 'application/vnd.apple.mpegurl',
           uri: playlistUri,
           filepath: playlistUri,
+          playableDuration: video.playableDuration,
         },
         segments: {
           ...video,
           type: 'video/mp2t',
           uri: segmentsUri,
           filepath: segmentsUri,
+          playableDuration: video.playableDuration,
         },
       };
     } catch (error) {
@@ -296,6 +298,7 @@ export const compressAndSegmentVideo = async (
       isSegmented: true,
       mimeType: 'application/vnd.apple.mpegurl',
       hlsPlaylist: playlistcontent,
+      duration: playlistOrFullVideo?.playableDuration ? Math.round(playlistOrFullVideo.playableDuration * 1000) : 0,
     };
 
     return {
@@ -308,6 +311,8 @@ export const compressAndSegmentVideo = async (
     mimeType: playlistOrFullVideo.type || 'video/mp4',
     fileSize: playlistOrFullVideo?.fileSize || 0,
     isSegmented: false,
+    duration: playlistOrFullVideo?.playableDuration ? Math.round(playlistOrFullVideo.playableDuration * 1000) : 0,
+
   };
   return {
     metadata,

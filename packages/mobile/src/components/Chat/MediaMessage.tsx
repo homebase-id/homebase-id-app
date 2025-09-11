@@ -92,7 +92,7 @@ const InnerMediaMessage = memo(
     const hasText = !!currentMessage.text;
 
     const payloads = currentMessage.fileMetadata.payloads?.filter(
-      (p) => p.key !== DEFAULT_PAYLOAD_KEY
+      (p) => p.key !== DEFAULT_PAYLOAD_KEY && !p.key.includes(DEFAULT_PAYLOAD_DESCRIPTOR_KEY)
     );
     const isMe =
       !currentMessage.fileMetadata.senderOdinId ||

@@ -79,6 +79,7 @@ export const processVideo = async (
     isSegmented: metadata.isSegmented,
     isDescriptorContentComplete: false,
     fileSize: metadata.fileSize,
+    duration: metadata.duration,
     key: descriptorKey || DEFAULT_PAYLOAD_DESCRIPTOR_KEY,
   });
 

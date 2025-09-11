@@ -16,6 +16,7 @@ import { View } from 'react-native';
 import { Text } from '../../components/ui/Text/Text';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SocialFeedWebView } from '../../components/Feed/MainContent/SocialFeedWebView';
 
 type FeedProps = NativeStackScreenProps<FeedStackParamList, 'Posts'>;
 
@@ -28,7 +29,8 @@ export const FeedPage = memo((_: FeedProps) => {
   return (
     <SafeAreaView style={{ flex: 1, paddingTop: top, paddingBottom: bottom }}>
       <FeedHeader />
-      <SocialFeedMainContent />
+      {/* <SocialFeedMainContent /> */}
+      <SocialFeedWebView />
       <FloatingActionButton />
     </SafeAreaView>
   );
