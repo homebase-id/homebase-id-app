@@ -656,8 +656,10 @@ export const softDeleteChatMessage = async (
 ) => {
   const _recipients = deleteForEveryone ? recipients : [];
 
-  message.fileMetadata.appData.archivalStatus = ChatDeletedArchivalStaus;
-  message.fileMetadata.appData.content.message = '';
+  const content = {
+    ...message.fileMetadata.appData.content,
+    message: '',
+  }
 
   const uploadMetadata: UploadFileMetadata = {
     versionTag: message?.fileMetadata.versionTag,
@@ -665,10 +667,10 @@ export const softDeleteChatMessage = async (
     appData: {
       uniqueId: message.fileMetadata.appData.uniqueId,
       groupId: message.fileMetadata.appData.groupId,
-      archivalStatus: (message.fileMetadata.appData as AppFileMetaData<ChatMessage>).archivalStatus,
+      archivalStatus: ChatDeletedArchivalStaus,
       previewThumbnail: message.fileMetadata.appData.previewThumbnail,
       fileType: CHAT_MESSAGE_FILE_TYPE,
-      content: jsonStringify64({ ...message.fileMetadata.appData.content }),
+      content: jsonStringify64({ ...content }),
     },
     isEncrypted: true,
     accessControlList: message.serverMetadata?.accessControlList || {
