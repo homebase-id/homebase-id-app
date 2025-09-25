@@ -1,18 +1,17 @@
-import React, { forwardRef, useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { LayoutChangeEvent, View } from 'react-native';
-
 import Animated, {
   interpolate,
   useAnimatedStyle,
   useDerivedValue,
   useSharedValue,
 } from 'react-native-reanimated';
-import { DaysPositions } from '../../types';
-import { ItemProps } from './types';
-import { IMessage, MessageProps } from '../../Models';
-import { isSameDay } from '../../utils';
-import { Day } from '../../Day';
+
 import Message from '../../Message';
+import { IMessage, MessageProps } from '../../Models';
+import { DaysPositions } from '../../types';
+import { DayWrapper } from './ItemBase';
+import { ItemProps } from './types';
 
 export * from './types';
 
@@ -96,31 +95,6 @@ export const useRelativeScrolledPositionToBottomOfDay = (
 
   return relativeScrolledPositionToBottomOfDay;
 };
-
-const DayWrapper = forwardRef<View, MessageProps<IMessage>>((props, ref) => {
-  const { renderDay: renderDayProp, currentMessage, previousMessage } = props;
-
-  if (!currentMessage?.createdAt || isSameDay(currentMessage, previousMessage))
-    return null;
-
-  const {
-    /* eslint-disable @typescript-eslint/no-unused-vars */
-    containerStyle,
-    onMessageLayout,
-    /* eslint-enable @typescript-eslint/no-unused-vars */
-    ...rest
-  } = props;
-
-  return (
-    <View ref={ref}>
-      {renderDayProp ? (
-        renderDayProp({ ...rest, createdAt: currentMessage.createdAt })
-      ) : (
-        <Day {...rest} createdAt={currentMessage.createdAt} />
-      )}
-    </View>
-  );
-});
 
 const Item = <TMessage extends IMessage>(props: ItemProps<TMessage>) => {
   const {
