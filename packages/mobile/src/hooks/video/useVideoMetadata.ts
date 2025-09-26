@@ -1,5 +1,5 @@
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
-import { HomebaseFile, TargetDrive, getFileHeader } from '@homebase-id/js-lib/core';
+import { DEFAULT_PAYLOAD_DESCRIPTOR_KEY, HomebaseFile, TargetDrive, getFileHeader, getPayloadAsJson } from '@homebase-id/js-lib/core';
 import { tryJsonParse } from '@homebase-id/js-lib/helpers';
 import {
   HlsVideoMetadata,
@@ -9,6 +9,8 @@ import {
 import {
   getFileHeaderBytesOverPeerByGlobalTransitId,
   getFileHeaderOverPeer,
+  getPayloadAsJsonOverPeer,
+  getPayloadAsJsonOverPeerByGlobalTransitId,
 } from '@homebase-id/js-lib/peer';
 import { t, useDotYouClientContext } from 'homebase-id-app-common';
 import { addLogs } from '../../provider/log/logger';
@@ -56,11 +58,11 @@ export const useVideoMetadata = (
         odinId !== identity
           ? videoGlobalTransitId
             ? await getFileHeaderBytesOverPeerByGlobalTransitId(
-                dotYouClient,
-                odinId,
-                videoDrive,
-                videoGlobalTransitId
-              )
+              dotYouClient,
+              odinId,
+              videoDrive,
+              videoGlobalTransitId
+            )
             : await getFileHeaderOverPeer(dotYouClient, odinId, videoDrive, videoFileId)
           : await getFileHeader(dotYouClient, videoDrive, videoFileId);
 
@@ -72,9 +74,27 @@ export const useVideoMetadata = (
       const parsedMetaData = tryJsonParse<
         PlainVideoMetadata | SegmentedVideoMetadata | HlsVideoMetadata
       >(descriptor);
-      // The fileHeader contains the most accurate file size; So we use that one.
-      parsedMetaData.fileSize = payloadData.bytesWritten;
-      return { metadata: parsedMetaData, fileHeader };
+      if (parsedMetaData?.isDescriptorContentComplete === false) {
+        const descriptorKey = parsedMetaData.key || DEFAULT_PAYLOAD_DESCRIPTOR_KEY;
+        const fullMetaData = odinId !== identity
+          ? videoGlobalTransitId
+            ? await getPayloadAsJsonOverPeerByGlobalTransitId<PlainVideoMetadata | SegmentedVideoMetadata | HlsVideoMetadata>(
+              dotYouClient, odinId, videoDrive, videoGlobalTransitId, descriptorKey,
+            ) : await getPayloadAsJsonOverPeer<PlainVideoMetadata | SegmentedVideoMetadata | HlsVideoMetadata>(
+              dotYouClient, odinId, videoDrive, videoFileId, descriptorKey,
+            ) : await getPayloadAsJson<PlainVideoMetadata | SegmentedVideoMetadata | HlsVideoMetadata>(
+              dotYouClient, videoDrive, videoFileId, descriptorKey,
+            );
+        if (!fullMetaData) return undefined;
+        // The fileHeader contains the most accurate file size; So we use that one.
+        fullMetaData.fileSize = payloadData.bytesWritten;
+        return { metadata: fullMetaData, fileHeader };
+      }
+      else {
+        // The fileHeader contains the most accurate file size; So we use that one.
+        parsedMetaData.fileSize = payloadData.bytesWritten;
+        return { metadata: parsedMetaData as PlainVideoMetadata | SegmentedVideoMetadata | HlsVideoMetadata, fileHeader };
+      }
     };
 
     return (await fetchMetaPromise()) || null;

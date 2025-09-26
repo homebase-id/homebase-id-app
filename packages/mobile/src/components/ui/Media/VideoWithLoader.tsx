@@ -66,7 +66,6 @@ export const VideoWithLoader = memo(
       // Parse duration from payload.descriptorContent
       const baseMeta = tryJsonParse<BaseVideoMetadata>(payload?.descriptorContent || '{}');
       const duration = baseMeta?.duration;
-      console.log('duration', baseMeta);
       return (
         <View style={style}>
           <OdinImage
