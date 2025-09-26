@@ -67,6 +67,7 @@ import { RenderMessageText } from './ui/RenderMessageText';
 import { RenderBubble } from './ui/RenderBubble';
 import { RenderReplyMessageView } from './ui/RenderReplyMessageView';
 import { ConversationWithYourselfId } from '../../provider/chat/ConversationProvider';
+import { useChatSettingsContext } from '../Settings/useChatSettingsContext';
 
 export type ChatMessageIMessage = IMessage & HomebaseFile<ChatMessage>;
 
@@ -119,6 +120,7 @@ export const ChatDetail = memo(
     const { isDarkMode } = useDarkMode();
     const identity = useAuth().getIdentity();
     const { record, stop, duration, isRecording } = useAudioRecorder();
+    const { useLegendList } = useChatSettingsContext();
 
     // We will fetch the draft message from the cache only once
     const {
@@ -794,6 +796,7 @@ export const ChatDetail = memo(
         }}
         renderChatEmpty={renderEmptyChat}
         bottomOffset={10}
+        useLegendList={useLegendList}
       />
     );
   }
