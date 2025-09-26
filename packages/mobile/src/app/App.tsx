@@ -159,7 +159,6 @@ const AuthenticatedRoot = memo(() => {
                   permissions={permissions}
                   // needsAllConnected={true}
                 />
-                <PendingUpgradeDialog />
                 <NotificationToaster />
                 <AppStackScreen />
               </ErrorBoundary>
