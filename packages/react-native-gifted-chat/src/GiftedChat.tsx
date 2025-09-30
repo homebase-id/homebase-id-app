@@ -1,12 +1,3 @@
-import React, {
-  createRef,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  useCallback,
-  RefObject,
-} from 'react';
 import {
   ActionSheetOptions,
   ActionSheetProvider,
@@ -14,18 +5,38 @@ import {
 } from '@expo/react-native-action-sheet';
 import dayjs from 'dayjs';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
+import React, {
+  createRef,
+  RefObject,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   FlatList,
-  Platform,
-  TextInput,
-  View,
   LayoutChangeEvent,
-  StyleSheet,
+  Platform,
   StyleProp,
-  ViewStyle,
+  StyleSheet,
+  TextInput,
   TextStyle,
+  View,
+  ViewStyle,
 } from 'react-native';
+import {
+  KeyboardProvider,
+  useReanimatedKeyboardAnimation,
+} from 'react-native-keyboard-controller';
 import { LightboxProps } from 'react-native-lightbox-v2';
+import Animated, {
+  runOnJS,
+  useAnimatedReaction,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import { Actions, ActionsProps } from './Actions';
 import { Avatar, AvatarProps } from './Avatar';
 import Bubble from './Bubble';
@@ -37,7 +48,7 @@ import { GiftedChatContext } from './GiftedChatContext';
 import { InputToolbar, InputToolbarProps } from './InputToolbar';
 import { LoadEarlier, LoadEarlierProps } from './LoadEarlier';
 import Message, { MessageProps } from './Message';
-import MessageContainer from './MessageContainer';
+import MessageContainer from './MessageContainerSwitch';
 import { MessageImage, MessageImageProps } from './MessageImage';
 import { MessageText, MessageTextProps } from './MessageText';
 import {
@@ -52,19 +63,8 @@ import { QuickRepliesProps } from './QuickReplies';
 import { Send, SendProps } from './Send';
 import { SystemMessage, SystemMessageProps } from './SystemMessage';
 import { Time, TimeProps } from './Time';
-import * as utils from './utils';
-import Animated, {
-  useAnimatedStyle,
-  useAnimatedReaction,
-  useSharedValue,
-  withTiming,
-  runOnJS,
-} from 'react-native-reanimated';
-import {
-  KeyboardProvider,
-  useReanimatedKeyboardAnimation,
-} from 'react-native-keyboard-controller';
 import { AnimatedList, ListViewProps } from './types';
+import * as utils from './utils';
 
 export interface GiftedChatProps<TMessage extends IMessage = IMessage> {
   /* Message container ref */
@@ -250,6 +250,8 @@ export interface GiftedChatProps<TMessage extends IMessage = IMessage> {
     nextProps: MessageProps<TMessage>,
   ): boolean;
   renderUsernameOnMessage?: boolean;
+  /* Use Legend List implementation instead of FlatList */
+  useLegendList?: boolean;
 }
 
 dayjs.extend(localizedFormat);
@@ -318,12 +320,12 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
   const keyboardOffsetBottom = useSharedValue(0);
 
   const contentStyleAnim = useAnimatedStyle(() => {
-    console.log(
-      'keyboard.height.value',
-      keyboard.height.value,
-      keyboardOffsetBottom.value,
-      keyboard.height.value - keyboardOffsetBottom.value,
-    );
+    // console.log(
+    //   'keyboard.height.value',
+    //   keyboard.height.value,
+    //   keyboardOffsetBottom.value,
+    //   keyboard.height.value - keyboardOffsetBottom.value,
+    // );
     return {
       transform: [
         { translateY: keyboard.height.value - keyboardOffsetBottom.value },
@@ -415,7 +417,7 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
 
     return (
       <View style={[{ flex: 1 }, messagesContainerStyle]}>
-        <MessageContainer<TMessage>
+        <MessageContainer
           {...messagesContainerProps}
           invertibleScrollViewProps={{
             inverted,
@@ -424,6 +426,7 @@ function GiftedChat<TMessage extends IMessage = IMessage>(
           messages={messages}
           forwardRef={messageContainerRef}
           isTyping={isTyping}
+          useLegendList={props.useLegendList}
         />
         {renderChatFooter?.(text, setText)}
       </View>
@@ -700,22 +703,22 @@ GiftedChatWrapper.prepend = <TMessage extends IMessage>(
 export * from './Models';
 
 export {
-  GiftedChatWrapper as GiftedChat,
   Actions,
   Avatar,
   Bubble,
-  SystemMessage,
-  MessageImage,
-  MessageText,
   Composer,
   Day,
+  GiftedAvatar,
+  GiftedChatWrapper as GiftedChat,
   InputToolbar,
   LoadEarlier,
   Message,
   MessageContainer,
+  MessageImage,
+  MessageText,
   Send,
+  SystemMessage,
   Time,
-  GiftedAvatar,
   utils,
 };
 
