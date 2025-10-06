@@ -1,4 +1,4 @@
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { BottomSheetModal, BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import {
   ApiType,
   DotYouClient,
@@ -7,63 +7,63 @@ import {
   RecipientTransferHistory,
   RichText,
 } from '@homebase-id/js-lib/core';
+import { getNewId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { LinkPreview } from '@homebase-id/js-lib/media';
+import Clipboard from '@react-native-clipboard/clipboard';
+import { BlurView } from '@react-native-community/blur';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { getPlainTextFromRichText, t } from 'homebase-id-app-common';
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  interpolate,
-} from 'react-native-reanimated';
 import { Alert, Dimensions, Platform, Pressable, StyleSheet, TouchableOpacity } from 'react-native';
+import Dialog from 'react-native-dialog';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { useReanimatedKeyboardAnimation } from 'react-native-keyboard-controller';
+import { Host } from 'react-native-portalize';
+import Animated, {
+  interpolate,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Toast from 'react-native-toast-message';
+import { ChatStackParamList } from '../../app/ChatStack';
+import { Colors } from '../../app/Colors';
 import { ChatAppBar, SelectedMessageProp } from '../../components/Chat/Chat-app-bar';
+import { ChatConnectedState } from '../../components/Chat/Chat-Connected-state';
+import { ChatForwardModal } from '../../components/Chat/Chat-Forward';
+import ChatReaction from '../../components/Chat/Chat-Reaction';
+import { ChatDetail, ChatMessageIMessage } from '../../components/Chat/ChatDetail';
+import { NoConversationHeader } from '../../components/Chat/NoConversationHeader';
+import { EmojiPickerModal } from '../../components/Chat/Reactions/Emoji-Picker/Emoji-Picker-Modal';
+import { ReactionsModal } from '../../components/Chat/Reactions/Modal/ReactionsModal';
+import { ReportModal } from '../../components/Chat/Reactions/Modal/ReportModal';
+import { RetryModal } from '../../components/Chat/Reactions/Modal/RetryModal';
+import { OfflineState } from '../../components/Platform/OfflineState';
+import { ErrorNotification } from '../../components/ui/Alert/ErrorNotification';
+import { ErrorBoundary } from '../../components/ui/ErrorBoundary/ErrorBoundary';
+import { Text } from '../../components/ui/Text/Text';
+import { useWebSocketContext } from '../../components/WebSocketContext/useWebSocketContext';
+import { useAuth } from '../../hooks/auth/useAuth';
+import { useChatMessage } from '../../hooks/chat/useChatMessage';
+import { useChatMessages } from '../../hooks/chat/useChatMessages';
+import { useConversation } from '../../hooks/chat/useConversation';
+import { useMarkMessagesAsRead } from '../../hooks/chat/useMarkMessagesAsRead';
+import useContact from '../../hooks/contact/useContact';
+import { useIntroductions } from '../../hooks/introductions/useIntroductions';
+import { useDarkMode } from '../../hooks/useDarkMode';
 import {
   ChatDeletedArchivalStaus,
   ChatDeliveryStatus,
   ChatMessage,
 } from '../../provider/chat/ChatProvider';
-import { useAuth } from '../../hooks/auth/useAuth';
-import { useChatMessages } from '../../hooks/chat/useChatMessages';
-import { useChatMessage } from '../../hooks/chat/useChatMessage';
-import { useConversation } from '../../hooks/chat/useConversation';
 import {
   ConversationMetadata,
   ConversationWithYourselfId,
   UnifiedConversation,
 } from '../../provider/chat/ConversationProvider';
 import { ImageSource } from '../../provider/image/RNImageProvider';
-import { getNewId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
-import useContact from '../../hooks/contact/useContact';
-import { useMarkMessagesAsRead } from '../../hooks/chat/useMarkMessagesAsRead';
-import ChatReaction from '../../components/Chat/Chat-Reaction';
-import { Host } from 'react-native-portalize';
-import { BottomSheetModal, BottomSheetModalProvider } from '@gorhom/bottom-sheet';
-import { EmojiPickerModal } from '../../components/Chat/Reactions/Emoji-Picker/Emoji-Picker-Modal';
-import { ReactionsModal } from '../../components/Chat/Reactions/Modal/ReactionsModal';
-import { ChatConnectedState } from '../../components/Chat/Chat-Connected-state';
-import { ErrorNotification } from '../../components/ui/Alert/ErrorNotification';
-import { ChatDetail, ChatMessageIMessage } from '../../components/Chat/ChatDetail';
-import Toast from 'react-native-toast-message';
-import Clipboard from '@react-native-clipboard/clipboard';
-import { ErrorBoundary } from '../../components/ui/ErrorBoundary/ErrorBoundary';
-import { ChatStackParamList } from '../../app/ChatStack';
-import { NoConversationHeader } from '../../components/Chat/NoConversationHeader';
-import { ChatForwardModal } from '../../components/Chat/Chat-Forward';
-import Dialog from 'react-native-dialog';
-import { BlurView } from '@react-native-community/blur';
-import { Colors } from '../../app/Colors';
-import { useDarkMode } from '../../hooks/useDarkMode';
-import { Text } from '../../components/ui/Text/Text';
-import { OfflineState } from '../../components/Platform/OfflineState';
-import { RetryModal } from '../../components/Chat/Reactions/Modal/RetryModal';
-import { getPlainTextFromRichText, t } from 'homebase-id-app-common';
-import { useWebSocketContext } from '../../components/WebSocketContext/useWebSocketContext';
-import { LinkPreview } from '@homebase-id/js-lib/media';
 import { openURL } from '../../utils/utils';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { ReportModal } from '../../components/Chat/Reactions/Modal/ReportModal';
-import { useIntroductions } from '../../hooks/introductions/useIntroductions';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useReanimatedKeyboardAnimation } from 'react-native-keyboard-controller';
 
 export type SelectedMessageState = {
   messageCordinates: { x: number; y: number };

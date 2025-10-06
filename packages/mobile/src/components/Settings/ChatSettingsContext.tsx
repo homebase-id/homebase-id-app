@@ -1,15 +1,16 @@
 import { createContext, memo, ReactNode } from 'react';
 import { useChatSettings } from '../../hooks/chat/useChatSettings';
+import type { ListImplementationType } from 'react-native-gifted-chat/lib/MessageContainerSwitch';
 
 export const ChatSettingsContext = createContext<{
   allowYoutubePlayback: boolean;
   setAllowYoutubePlayback: (allow: boolean) => void;
-  useLegendList: boolean;
-  setUseLegendList: (useLegend: boolean) => void;
+  listImplementation: ListImplementationType;
+  setListImplementation: (type: ListImplementationType) => void;
 } | null>(null);
 
 const ChatSettingsProvider = memo(({ children }: { children: ReactNode }) => {
-  const { allowYoutubePlayback, setYoutubePlayback, useLegendList, setLegendListUsage } =
+  const { allowYoutubePlayback, setYoutubePlayback, listImplementation, setListType } =
     useChatSettings();
 
   return (
@@ -17,8 +18,8 @@ const ChatSettingsProvider = memo(({ children }: { children: ReactNode }) => {
       value={{
         allowYoutubePlayback,
         setAllowYoutubePlayback: setYoutubePlayback,
-        useLegendList,
-        setUseLegendList: setLegendListUsage,
+        listImplementation,
+        setListImplementation: setListType,
       }}
     >
       {children}
