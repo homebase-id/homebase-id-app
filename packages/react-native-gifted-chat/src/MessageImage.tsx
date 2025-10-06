@@ -1,15 +1,14 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import {
-  Image,
   StyleSheet,
   View,
-  ImageProps,
   ViewStyle,
   StyleProp,
   ImageStyle,
   ImageURISource,
 } from 'react-native';
+import FastImage, { FastImageProps } from 'react-native-fast-image';
 import Lightbox, { LightboxProps } from 'react-native-lightbox-v2';
 import { IMessage } from './Models';
 import { StylePropType } from './utils';
@@ -34,7 +33,7 @@ export interface MessageImageProps<TMessage extends IMessage> {
   containerStyle?: StyleProp<ViewStyle>;
   imageSourceProps?: Partial<ImageURISource>;
   imageStyle?: StyleProp<ImageStyle>;
-  imageProps?: Partial<ImageProps>;
+  imageProps?: Partial<FastImageProps>;
   lightboxProps?: LightboxProps;
 }
 
@@ -59,10 +58,14 @@ export function MessageImage<TMessage extends IMessage = IMessage>({
         }}
         {...lightboxProps}
       >
-        <Image
+        <FastImage
           {...imageProps}
-          style={[styles.image, imageStyle]}
-          source={{ ...imageSourceProps, uri: currentMessage.image }}
+          style={[styles.image, imageStyle] as any}
+          source={{
+            uri: currentMessage.image,
+            priority: FastImage.priority.normal,
+          }}
+          resizeMode={imageProps?.resizeMode || FastImage.resizeMode.cover}
         />
       </Lightbox>
     </View>

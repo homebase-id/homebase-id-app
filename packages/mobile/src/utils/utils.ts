@@ -1,21 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { RichText } from '@homebase-id/js-lib/core';
 import { getNewId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { InfiniteData } from '@tanstack/react-query';
+import { DomHandler, Parser } from 'htmlparser2';
 import { Image, Linking } from 'react-native';
 import { CachesDirectoryPath, copyFile } from 'react-native-fs';
 import { Asset } from 'react-native-image-picker';
 import InAppBrowser from 'react-native-inappbrowser-reborn';
-import { ImageSource } from '../provider/image/RNImageProvider';
-import { Parser, DomHandler } from 'htmlparser2';
-import { RichText } from '@homebase-id/js-lib/core';
 import {
-  OWNER_APP_ID,
-  FEED_APP_ID,
   CHAT_APP_ID,
+  COMMUNITY_APP_ID,
+  FEED_APP_ID,
   FEED_CHAT_APP_ID,
   MAIL_APP_ID,
-  COMMUNITY_APP_ID,
+  OWNER_APP_ID,
 } from '../app/constants';
+import { ImageSource } from '../provider/image/RNImageProvider';
 
 //https://stackoverflow.com/a/21294619/15538463
 export function millisToMinutesAndSeconds(millis: number | undefined): string {
@@ -24,7 +24,6 @@ export function millisToMinutesAndSeconds(millis: number | undefined): string {
   const seconds = Number(((millis % 60000) / 1000).toFixed(0));
   return seconds === 60 ? minutes + 1 + ':00' : minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
 }
-
 
 export async function openURL(url: string, alwaysExternal?: boolean): Promise<void> {
   if (!url) return;
@@ -143,9 +142,9 @@ export const getImageSize = (uri: string): Promise<{ width: number; height: numb
 export const flattenInfinteData = <T>(
   rawData:
     | InfiniteData<{
-      results: T[];
-      cursorState: unknown;
-    }>
+        results: T[];
+        cursorState: unknown;
+      }>
     | undefined,
   pageSize?: number,
   sortFn?: (a: T, b: T) => number
@@ -184,7 +183,6 @@ export function cleanString(input: string): string {
   return cleanedString;
 }
 
-
 /**
  * Cleans a domain string interactively as the user is typing, removing invalid characters,
  * and enforcing domain rules as well as you can. This is particularly beneficial for mobile
@@ -219,7 +217,6 @@ export function cleanInteractiveDomainString(input: string): string {
 
   return cleanedString;
 }
-
 
 /**
  * Cleans a domain string. Also built to handle a full string like a pasted URL, removing invalid characters,
@@ -259,7 +256,7 @@ export function cleanDomainString(input: string): string {
 
   // Step 5: Enforce per-label rules (no start/end with '-', no consecutive '-')
   const labels = cleanedString.split('.');
-  const cleanedLabels = labels.map(label => {
+  const cleanedLabels = labels.map((label) => {
     // Remove leading/trailing '-', replace consecutive '-'
     label = label.replace(/^-+|-+$/g, '').replace(/-{2,}/g, '-');
     return label;
@@ -274,7 +271,6 @@ export function cleanDomainString(input: string): string {
 
   return cleanedString;
 }
-
 
 export function assetsToImageSource(assets: Asset[], key?: string): ImageSource[] {
   return assets.map((value) => {
@@ -313,10 +309,10 @@ Extract VideoId from the given youtube url
 */
 export function extractVideoParams(url: string):
   | {
-    videoId: string | null | undefined;
-    start?: string | null | undefined;
-    end?: string | null | undefined;
-  }
+      videoId: string | null | undefined;
+      start?: string | null | undefined;
+      end?: string | null | undefined;
+    }
   | undefined {
   if (!url) return;
   if (url.includes('youtube.com') || url.includes('youtu.be')) {
@@ -426,8 +422,6 @@ export const getAppName = (appId: string): string => {
               ? 'Homebase - Community'
               : `Unknown (${appId})`;
 };
-
-
 
 // Utility to format seconds to mm:ss or h:mm:ss
 export const formatDuration = (milliseconds?: number): string => {
