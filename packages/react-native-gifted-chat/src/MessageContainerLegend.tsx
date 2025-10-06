@@ -451,6 +451,7 @@ function MessageContainerLegend<TMessage extends IMessage = IMessage>(
         ListFooterComponent={ListFooterComponent}
         ListHeaderComponent={ListHeaderComponent}
         recycleItems
+        drawDistance={1000}
       />
 
       {isScrollToBottomEnabledFinal ? renderScrollToBottomWrapper() : null}

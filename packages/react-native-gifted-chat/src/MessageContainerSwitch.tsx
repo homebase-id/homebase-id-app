@@ -1,36 +1,39 @@
 /**
  * MessageContainer Switch
  *
- * This file dynamically exports either the original FlatList implementation
- * or the new @legendapp/list implementation based on configuration.
+ * This file dynamically exports either the original FlatList implementation,
+ * the @legendapp/list implementation, or the @shopify/flash-list implementation
+ * based on configuration.
  */
 
 import React from 'react';
 import MessageContainerOriginal from './MessageContainer';
-import { MessageContainerConfig } from './MessageContainerConfig';
 import MessageContainerLegend from './MessageContainerLegend';
+import MessageContainerFlash from './MessageContainerFlash';
+import { MessageContainerConfig, ListImplementationType } from './MessageContainerConfig';
 
 export interface MessageContainerSwitchProps {
-  useLegendList?: boolean; // New prop to control which implementation to use
+  listType?: ListImplementationType; // Control which list implementation to use
   [key: string]: any; // Allow other props to pass through
 }
 
 function MessageContainerSwitch(props: MessageContainerSwitchProps) {
-  const { useLegendList, ...otherProps } = props;
+  const { listType, ...otherProps } = props;
 
-  // Use the prop if provided, otherwise fall back to config
-  const shouldUseLegendList =
-    useLegendList !== undefined
-      ? useLegendList
-      : MessageContainerConfig.USE_LEGEND_LIST;
+  // Use provided listType or fall back to default config
+  const implementation = listType || MessageContainerConfig.DEFAULT_LIST_TYPE;
 
-  if (shouldUseLegendList) {
-    return <MessageContainerLegend {...otherProps} />;
+  switch (implementation) {
+    case 'flash':
+      return <MessageContainerFlash {...otherProps} />;
+    case 'legend':
+      return <MessageContainerLegend {...otherProps} />;
+    case 'legacy':
+    default:
+      return <MessageContainerOriginal {...otherProps} />;
   }
-
-  return <MessageContainerOriginal {...otherProps} />;
 }
 
 export default MessageContainerSwitch;
-export { MessageContainerConfig } from './MessageContainerConfig';
+export { MessageContainerConfig, type ListImplementationType } from './MessageContainerConfig';
 export type { MessageContainerProps } from './types';

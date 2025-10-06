@@ -3,12 +3,13 @@ import { ProfileStackParamList } from '../../app/ProfileStack';
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 
 import { t } from 'homebase-id-app-common';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { Switch } from 'react-native-gesture-handler';
 import { Colors } from '../../app/Colors';
 import { useChatSettingsContext } from '../../components/Settings/useChatSettingsContext';
 import { Text } from '../../components/ui/Text/Text';
 import { useDarkMode } from '../../hooks/useDarkMode';
+import type { ListImplementationType } from 'react-native-gifted-chat/lib/MessageContainerSwitch';
 
 interface SettingOptionProps {
   title: string;
@@ -50,11 +51,66 @@ const SettingOption = ({
   );
 };
 
+interface ListImplementationOptionProps {
+  title: string;
+  description: string;
+  value: ListImplementationType;
+  currentValue: ListImplementationType;
+  onValueChange: (value: ListImplementationType) => void;
+  isDarkMode: boolean;
+}
+
+const ListImplementationOption = ({
+  title,
+  description,
+  value,
+  currentValue,
+  onValueChange,
+  isDarkMode,
+}: ListImplementationOptionProps) => {
+  const isSelected = value === currentValue;
+
+  return (
+    <TouchableOpacity onPress={() => onValueChange(value)}>
+      <View
+        style={[
+          styles.optionContainer,
+          {
+            backgroundColor: isDarkMode ? Colors.indigo[900] : Colors.indigo[100],
+            borderWidth: isSelected ? 2 : 0,
+            borderColor: isSelected ? (isDarkMode ? Colors.indigo[400] : Colors.indigo[600]) : undefined,
+          },
+        ]}
+      >
+        <View style={{ flex: 1 }}>
+          <Text style={[styles.optionTitle, isSelected && { fontWeight: '600' }]}>{title}</Text>
+          <Text
+            style={[
+              styles.inlineDescription,
+              { color: isDarkMode ? Colors.slate[400] : Colors.slate[600] },
+            ]}
+          >
+            {description}
+          </Text>
+        </View>
+        {isSelected && (
+          <View style={[
+            styles.checkmark,
+            { backgroundColor: isDarkMode ? Colors.indigo[400] : Colors.indigo[600] }
+          ]}>
+            <Text style={{ color: 'white', fontSize: 12 }}>✓</Text>
+          </View>
+        )}
+      </View>
+    </TouchableOpacity>
+  );
+};
+
 type ChatSettingsPageProp = NativeStackScreenProps<ProfileStackParamList, 'ChatSettings'>;
 
 export const ChatSettingsPage = (_: ChatSettingsPageProp) => {
   const { isDarkMode } = useDarkMode();
-  const { allowYoutubePlayback, setAllowYoutubePlayback, useLegendList, setUseLegendList } =
+  const { allowYoutubePlayback, setAllowYoutubePlayback, listImplementation, setListImplementation } =
     useChatSettingsContext();
 
   return (
@@ -69,15 +125,41 @@ export const ChatSettingsPage = (_: ChatSettingsPageProp) => {
         isDarkMode={isDarkMode}
       />
 
-      <SettingOption
-        title={t('Optimized chat rendering')}
-        description={t(
-          'Enable optimized list rendering for better performance with large chat histories. Provides smoother scrolling and improved memory usage.'
-        )}
-        value={useLegendList}
-        onValueChange={setUseLegendList}
-        isDarkMode={isDarkMode}
-      />
+      <View style={styles.sectionContainer}>
+        <Text style={[
+          styles.sectionTitle,
+          { color: isDarkMode ? Colors.slate[300] : Colors.slate[700] }
+        ]}>
+          {t('Chat Rendering Engine')}
+        </Text>
+
+        <ListImplementationOption
+          title={t('Flash List')}
+          description={t('Newest high-performance list with optimized memory usage')}
+          value="flash"
+          currentValue={listImplementation}
+          onValueChange={setListImplementation}
+          isDarkMode={isDarkMode}
+        />
+
+        <ListImplementationOption
+          title={t('Legend List')}
+          description={t('Alternative optimized list with smooth scrolling')}
+          value="legend"
+          currentValue={listImplementation}
+          onValueChange={setListImplementation}
+          isDarkMode={isDarkMode}
+        />
+
+        <ListImplementationOption
+          title={t('Legacy')}
+          description={t('Original FlatList implementation')}
+          value="legacy"
+          currentValue={listImplementation}
+          onValueChange={setListImplementation}
+          isDarkMode={isDarkMode}
+        />
+      </View>
     </SafeAreaView>
   );
 };
@@ -104,5 +186,28 @@ const styles = StyleSheet.create({
   },
   descriptionText: {
     fontWeight: '300',
+  },
+  sectionContainer: {
+    marginTop: 24,
+  },
+  sectionTitle: {
+    fontSize: 13,
+    fontWeight: '600',
+    marginHorizontal: 22,
+    marginBottom: 8,
+    textTransform: 'uppercase',
+  },
+  inlineDescription: {
+    fontSize: 13,
+    fontWeight: '300',
+    marginTop: 4,
+  },
+  checkmark: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 12,
   },
 });
