@@ -1,9 +1,10 @@
 import { t } from 'homebase-id-app-common';
+import { Platform, TouchableHighlight, View } from 'react-native';
+import { Colors } from '../../app/Colors';
+import { useDarkMode } from '../../hooks/useDarkMode';
+import { useChatSettingsContext } from '../Settings/useChatSettingsContext';
 import { Container } from '../ui/Container/Container';
 import { Text } from '../ui/Text/Text';
-import { useDarkMode } from '../../hooks/useDarkMode';
-import { Colors } from '../../app/Colors';
-import { Platform, TouchableHighlight, View } from 'react-native';
 
 const STARTER_MESSAGES = [
   { text: t('Hello 👋') },
@@ -19,23 +20,29 @@ export const EmptyChatContainer = ({
   isMe?: boolean;
 }) => {
   const { isDarkMode } = useDarkMode();
+  const { useLegendList } = useChatSettingsContext();
+
   return (
     <Container
       style={{
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        transform: [
-          {
-            scaleY: -1,
-          },
-          {
-            scaleX: Platform.select({
-              android: -1,
-              default: 1,
+        ...(useLegendList
+          ? {}
+          : {
+              transform: [
+                {
+                  scaleY: -1,
+                },
+                {
+                  scaleX: Platform.select({
+                    android: -1,
+                    default: 1,
+                  }),
+                },
+              ], // Weird GiftedChat Style property that flips the empty component and STUPID REACT NATIVE
             }),
-          },
-        ], // Weird GiftedChat Style property that flips the empty component and STUPID REACT NATIVE
       }}
     >
       <Text
