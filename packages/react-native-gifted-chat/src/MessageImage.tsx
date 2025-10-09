@@ -60,7 +60,7 @@ export function MessageImage<TMessage extends IMessage = IMessage>({
       >
         <FastImage
           {...imageProps}
-          style={[styles.image, imageStyle] as any}
+          style={[styles.image, imageStyle] as StyleProp<ImageStyle>}
           source={{
             uri: currentMessage.image,
             priority: FastImage.priority.normal,
