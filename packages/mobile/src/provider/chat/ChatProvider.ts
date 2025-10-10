@@ -1,50 +1,44 @@
 import {
   AppFileMetaData,
+  DEFAULT_PAYLOAD_DESCRIPTOR_KEY,
+  DEFAULT_PAYLOAD_KEY,
   DotYouClient,
-  HomebaseFile,
   EmbeddedThumb,
+  EncryptedKeyHeader,
+  FailedTransferStatuses,
   FileQueryParams,
   GetBatchQueryResultOptions,
+  HomebaseFile,
   ImageContentType,
   KeyHeader,
+  MAX_HEADER_CONTENT_BYTES,
   NewHomebaseFile,
   PayloadFile,
+  PriorityOptions,
+  RecipientTransferHistory,
+  RecipientTransferSummary,
+  RichText,
   ScheduleOptions,
   SecurityGroupType,
   SendContents,
   TargetDrive,
   ThumbnailFile,
+  TransferStatus,
+  TransferUploadStatus,
+  UpdateLocalInstructionSet,
+  UpdateResult,
   UploadFileMetadata,
   UploadInstructionSet,
+  decryptJsonContent,
+  decryptKeyHeader,
+  deleteFile,
   deleteFilesByGroupId,
+  getFileHeader,
   getFileHeaderByUniqueId,
+  patchFile,
   queryBatch,
   uploadFile,
-  TransferUploadStatus,
-  FailedTransferStatuses,
-  PriorityOptions,
-  RecipientTransferHistory,
-  TransferStatus,
-  deleteFile,
-  RichText,
-  decryptKeyHeader,
-  EncryptedKeyHeader,
-  decryptJsonContent,
-  getFileHeader,
-  DEFAULT_PAYLOAD_KEY,
-  RecipientTransferSummary,
-  MAX_HEADER_CONTENT_BYTES,
-  patchFile,
-  UpdateResult,
-  UpdateLocalInstructionSet,
-  DEFAULT_PAYLOAD_DESCRIPTOR_KEY,
 } from '@homebase-id/js-lib/core';
-import {
-  ChatDrive,
-  ConversationMetadata,
-  ConversationWithYourselfId,
-  UnifiedConversation,
-} from './ConversationProvider';
 import {
   assertIfDefined,
   getNewId,
@@ -55,13 +49,19 @@ import {
   tryJsonParse,
   uint8ArrayToBase64,
 } from '@homebase-id/js-lib/helpers';
+import { LinkPreview, LinkPreviewDescriptor } from '@homebase-id/js-lib/media';
+import { sendReadReceipt } from '@homebase-id/js-lib/peer';
+import { ellipsisAtMaxChar, getPlainTextFromRichText } from 'homebase-id-app-common';
 import { OdinBlob } from '../../../polyfills/OdinBlob';
 import { ImageSource } from '../image/RNImageProvider';
 import { createThumbnails } from '../image/RNThumbnailProvider';
 import { processVideo } from '../video/RNVideoProcessor';
-import { LinkPreview, LinkPreviewDescriptor } from '@homebase-id/js-lib/media';
-import { sendReadReceipt } from '@homebase-id/js-lib/peer';
-import { ellipsisAtMaxChar, getPlainTextFromRichText } from 'homebase-id-app-common';
+import {
+  ChatDrive,
+  ConversationMetadata,
+  ConversationWithYourselfId,
+  UnifiedConversation,
+} from './ConversationProvider';
 
 const CHAT_APP_ID = '2d781401-3804-4b57-b4aa-d8e4e2ef39f4';
 
@@ -204,9 +204,9 @@ export const dsrToMessage = async (
         )
           ? ChatDeliveryStatus.Read
           : buildDeliveryStatus(
-            dsr.serverMetadata.originalRecipientCount,
-            dsr.serverMetadata.transferHistory.summary
-          );
+              dsr.serverMetadata.originalRecipientCount,
+              dsr.serverMetadata.transferHistory.summary
+            );
       }
     }
 
@@ -339,19 +339,19 @@ export const uploadChatMessage = async (
     },
     transitOptions: distribute
       ? {
-        recipients: [...recipients],
-        schedule: ScheduleOptions.SendLater,
-        priority: PriorityOptions.High,
-        sendContents: SendContents.All,
-        useAppNotification: true,
-        appNotificationOptions: {
-          appId: CHAT_APP_ID,
-          typeId: message.fileMetadata.appData.groupId || getNewId(),
-          tagId: message.fileMetadata.appData.uniqueId || getNewId(),
-          silent: false,
-          unEncryptedMessage: notificationBody,
-        },
-      }
+          recipients: [...recipients],
+          schedule: ScheduleOptions.SendLater,
+          priority: PriorityOptions.High,
+          sendContents: SendContents.All,
+          useAppNotification: true,
+          appNotificationOptions: {
+            appId: CHAT_APP_ID,
+            typeId: message.fileMetadata.appData.groupId || getNewId(),
+            tagId: message.fileMetadata.appData.uniqueId || getNewId(),
+            silent: false,
+            unEncryptedMessage: notificationBody,
+          },
+        }
       : undefined,
   };
 
@@ -368,10 +368,10 @@ export const uploadChatMessage = async (
   const content = shouldEmbedContent
     ? jsonContent
     : jsonStringify64({
-      message: ellipsisAtMaxChar(getPlainTextFromRichText(messageContent.message), 400),
-      replyId: messageContent.replyId,
-      deliveryStatus: messageContent.deliveryStatus,
-    }); // We only embed the content if it's less than 3kb
+        message: ellipsisAtMaxChar(getPlainTextFromRichText(messageContent.message), 400),
+        replyId: messageContent.replyId,
+        deliveryStatus: messageContent.deliveryStatus,
+      }); // We only embed the content if it's less than 3kb
 
   if (!shouldEmbedContent) {
     payloads.push({
@@ -413,10 +413,10 @@ export const uploadChatMessage = async (
 
     const imageSource: ImageSource | undefined = linkPreviewWithImage
       ? {
-        height: linkPreviewWithImage.imageHeight || 0,
-        width: linkPreviewWithImage.imageWidth || 0,
-        uri: linkPreviewWithImage.imageUrl,
-      }
+          height: linkPreviewWithImage.imageHeight || 0,
+          width: linkPreviewWithImage.imageWidth || 0,
+          uri: linkPreviewWithImage.imageUrl,
+        }
       : undefined;
 
     const { tinyThumb } = imageSource
@@ -465,7 +465,6 @@ export const uploadChatMessage = async (
           { quality: 76, maxPixelDimension: 1600, maxBytes: 640 * 1024 },
         ]
       );
-
 
       thumbnails.push(...additionalThumbnails);
       payloads.push({
@@ -591,10 +590,10 @@ export const updateChatMessage = async (
   const content = shouldEmbedContent
     ? jsonContent
     : jsonStringify64({
-      message: ellipsisAtMaxChar(getPlainTextFromRichText(messageContent.message), 400),
-      replyId: messageContent.replyId,
-      deliveryStatus: messageContent.deliveryStatus,
-    }); // We only embed the content if it's less than 3kb
+        message: ellipsisAtMaxChar(getPlainTextFromRichText(messageContent.message), 400),
+        replyId: messageContent.replyId,
+        deliveryStatus: messageContent.deliveryStatus,
+      }); // We only embed the content if it's less than 3kb
 
   const payloads: PayloadFile[] = [];
   if (!shouldEmbedContent) {
@@ -659,7 +658,7 @@ export const softDeleteChatMessage = async (
   const content = {
     ...message.fileMetadata.appData.content,
     message: '',
-  }
+  };
 
   const uploadMetadata: UploadFileMetadata = {
     versionTag: message?.fileMetadata.versionTag,

@@ -1,37 +1,37 @@
+import { stringifyToQueryParams } from '@homebase-id/js-lib/helpers';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback, useEffect, useState } from 'react';
 import {
-  View,
-  Linking,
-  Image,
-  TouchableOpacity,
   ActivityIndicator,
   Alert,
+  Image,
+  Linking,
   Platform,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { Text } from '../../components/ui/Text/Text';
+import { InAppBrowser } from 'react-native-inappbrowser-reborn';
 import { AuthStackParamList } from '../../app/App';
-import { useAuth, useYouAuthAuthorization } from '../../hooks/auth/useAuth';
+import { Colors } from '../../app/Colors';
 import { Container } from '../../components/ui/Container/Container';
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
-import { Colors } from '../../app/Colors';
-import { stringifyToQueryParams } from '@homebase-id/js-lib/helpers';
+import { Text } from '../../components/ui/Text/Text';
+import { useAuth, useYouAuthAuthorization } from '../../hooks/auth/useAuth';
 import { doCheckIdentity } from '../../hooks/checkIdentity/useCheckIdentity';
 import { VersionInfo } from '../profile/profile-page';
-import { InAppBrowser } from 'react-native-inappbrowser-reborn';
 
-import logo from '../../assets/homebase.png';
-import { Input } from '../../components/ui/Form/Input';
 import { YouAuthorizationParams } from '@homebase-id/js-lib/auth';
-import { AuthorName } from '../../components/ui/Name';
-import { PublicAvatar } from '../../components/ui/Avatars/Avatar';
-import { useDarkMode } from '../../hooks/useDarkMode';
-import { Divider } from '../../components/ui/Divider';
-import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
-import TextButton from '../../components/ui/Text/Text-Button';
 import { t } from 'homebase-id-app-common';
-import { cleanDomainString,cleanInteractiveDomainString } from '../../utils/utils';
 import { Dimensions } from 'react-native';
+import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
+import logo from '../../assets/homebase.png';
+import { PublicAvatar } from '../../components/ui/Avatars/Avatar';
+import { Divider } from '../../components/ui/Divider';
+import { Input } from '../../components/ui/Form/Input';
+import { AuthorName } from '../../components/ui/Name';
+import TextButton from '../../components/ui/Text/Text-Button';
+import { useDarkMode } from '../../hooks/useDarkMode';
+import { cleanDomainString, cleanInteractiveDomainString } from '../../utils/utils';
 
 type LoginProps = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 
@@ -40,7 +40,7 @@ export const LoginPage = (_props: LoginProps) => {
     <SafeAreaView>
       <Container style={{ flex: 1, flexDirection: 'column' }}>
         <View
-        style={{
+          style={{
             minHeight: 120,
             padding: 20,
             alignItems: 'center',
@@ -48,24 +48,23 @@ export const LoginPage = (_props: LoginProps) => {
             flexDirection: 'row',
             justifyContent: 'center',
             position: 'relative',
-            top: 60 // adjust as needed to push the logo down a bit
-        }}
+            top: 60, // adjust as needed to push the logo down a bit
+          }}
         >
-        <View style={{ height: Math.max(0, Dimensions.get('window').height / 3 - 40) }} />
-        <Image source={logo} style={{ width: 40, height: 40 }} />
-        <Text style={{ fontSize: 25 }}>Homebase</Text>
+          <View style={{ height: Math.max(0, Dimensions.get('window').height / 3 - 40) }} />
+          <Image source={logo} style={{ width: 40, height: 40 }} />
+          <Text style={{ fontSize: 25 }}>Homebase</Text>
         </View>
         <Animated.View
-        style={{
-
-            flex: 1, 
-            justifyContent: 'flex-start', 
+          style={{
+            flex: 1,
+            justifyContent: 'flex-start',
             paddingHorizontal: 12,
             paddingVertical: 15,
-            marginTop: Math.max(0, Dimensions.get('window').height / 6 - 82) 
-        }}
+            marginTop: Math.max(0, Dimensions.get('window').height / 6 - 82),
+          }}
         >
-        <LoginComponent />
+          <LoginComponent />
         </Animated.View>
 
         <View
