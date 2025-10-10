@@ -1,22 +1,20 @@
+import { Header } from '@react-navigation/elements';
+import { NavigationProp, useIsFocused, useNavigation } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { memo, useCallback, useMemo } from 'react';
-import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
-import { Platform, TouchableHighlight } from 'react-native';
-import { Colors } from '../../app/Colors';
-import { useRemoveNotifications } from '../../hooks/notifications/usePushNotifications';
-import { FEED_APP_ID } from '../../app/constants';
-import { Feed, Plus } from '../../components/ui/Icons/icons';
-import { NavigationProp, useIsFocused, useNavigation } from '@react-navigation/native';
-import SocialFeedMainContent from '../../components/Feed/MainContent/SocialFeed';
-import { FeedStackParamList } from '../../app/FeedStack';
-import { useLiveFeedProcessor } from '../../hooks/feed/useSocialFeed';
-import { Header } from '@react-navigation/elements';
-import { OfflineProfileAvatar, ProfileAvatar } from '../../app/ChatStack';
-import { View } from 'react-native';
-import { Text } from '../../components/ui/Text/Text';
-import { useDarkMode } from '../../hooks/useDarkMode';
+import { Platform, TouchableHighlight, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { OfflineProfileAvatar, ProfileAvatar } from '../../app/ChatStack';
+import { Colors } from '../../app/Colors';
+import { FEED_APP_ID } from '../../app/constants';
+import { FeedStackParamList } from '../../app/FeedStack';
 import { SocialFeedWebView } from '../../components/Feed/MainContent/SocialFeedWebView';
+import { Feed, Plus } from '../../components/ui/Icons/icons';
+import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
+import { Text } from '../../components/ui/Text/Text';
+import { useLiveFeedProcessor } from '../../hooks/feed/useSocialFeed';
+import { useRemoveNotifications } from '../../hooks/notifications/usePushNotifications';
+import { useDarkMode } from '../../hooks/useDarkMode';
 
 type FeedProps = NativeStackScreenProps<FeedStackParamList, 'Posts'>;
 

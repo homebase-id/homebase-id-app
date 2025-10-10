@@ -1,39 +1,46 @@
+import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import {
+  AccessControlList,
   HomebaseFile,
   NewHomebaseFile,
-  AccessControlList,
   SecurityGroupType,
 } from '@homebase-id/js-lib/core';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
-import { ChannelDefinition, BlogConfig, ReactAccess } from '@homebase-id/js-lib/public';
+import { LinkPreview } from '@homebase-id/js-lib/media';
+import { BlogConfig, ChannelDefinition, ReactAccess } from '@homebase-id/js-lib/public';
+import { NativeStackNavigationProp, NativeStackScreenProps } from '@react-navigation/native-stack';
 import { t, useDotYouClientContext } from 'homebase-id-app-common';
-import { useState, useMemo, useCallback, useLayoutEffect, useRef, useEffect, memo } from 'react';
-import { View, TouchableOpacity, KeyboardAvoidingView, Platform, TextInput } from 'react-native';
+import React, {
+  memo,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import { KeyboardAvoidingView, Platform, TextInput, TouchableOpacity, View } from 'react-native';
 import { Asset, launchImageLibrary } from 'react-native-image-picker';
+import Animated, { SlideInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Colors } from '../../app/Colors';
+import { FeedStackParamList } from '../../app/FeedStack';
+import { LinkPreviewBar } from '../../components/Chat/Link-Preview-Bar';
+import { ArticleComposer } from '../../components/Feed/Article/ArticleComposer';
+import { AclIcon, AclSummary } from '../../components/Feed/Composer/AclSummary';
+import { FileOverview } from '../../components/Files/FileOverview';
+import { ErrorNotification } from '../../components/ui/Alert/ErrorNotification';
+import { ActionGroup } from '../../components/ui/Form/ActionGroup';
+import { Option, Select } from '../../components/ui/Form/Select';
+import { Article, Ellipsis, Globe, Lock, Pencil, Plus } from '../../components/ui/Icons/icons';
+import { Backdrop } from '../../components/ui/Modal/Backdrop';
+import { Text } from '../../components/ui/Text/Text';
+import { useCircles } from '../../hooks/circles/useCircles';
 import { useChannels } from '../../hooks/feed/channels/useChannels';
 import { usePostComposer } from '../../hooks/feed/post/usePostComposer';
 import { useDarkMode } from '../../hooks/useDarkMode';
-import { ErrorNotification } from '../../components/ui/Alert/ErrorNotification';
-import { Plus, Ellipsis, Globe, Lock, Pencil, Article } from '../../components/ui/Icons/icons';
-import { FileOverview } from '../../components/Files/FileOverview';
-import { Select, Option } from '../../components/ui/Form/Select';
-import { AclIcon, AclSummary } from '../../components/Feed/Composer/AclSummary';
-import { Colors } from '../../app/Colors';
 import { ImageSource } from '../../provider/image/RNImageProvider';
-import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet';
-import { useCircles } from '../../hooks/circles/useCircles';
-import { Text } from '../../components/ui/Text/Text';
-import { ActionGroup } from '../../components/ui/Form/ActionGroup';
-import { getImageSize, openURL } from '../../utils/utils';
-import React from 'react';
-import Animated, { SlideInDown } from 'react-native-reanimated';
-import { FeedStackParamList } from '../../app/FeedStack';
-import { NativeStackNavigationProp, NativeStackScreenProps } from '@react-navigation/native-stack';
-import { LinkPreviewBar } from '../../components/Chat/Link-Preview-Bar';
-import { LinkPreview } from '@homebase-id/js-lib/media';
-import { Backdrop } from '../../components/ui/Modal/Backdrop';
-import { ArticleComposer } from '../../components/Feed/Article/ArticleComposer';
+import { openURL } from '../../utils/utils';
 
 type PostComposerProps = NativeStackScreenProps<FeedStackParamList, 'Compose'>;
 
