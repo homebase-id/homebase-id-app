@@ -4,9 +4,11 @@ import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Dimensions,
   Image,
   Linking,
   Platform,
+  StyleSheet,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -22,7 +24,6 @@ import { VersionInfo } from '../profile/profile-page';
 
 import { YouAuthorizationParams } from '@homebase-id/js-lib/auth';
 import { t } from 'homebase-id-app-common';
-import { Dimensions } from 'react-native';
 import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 import logo from '../../assets/homebase.png';
 import { PublicAvatar } from '../../components/ui/Avatars/Avatar';
@@ -38,54 +39,23 @@ type LoginProps = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 export const LoginPage = (_props: LoginProps) => {
   return (
     <SafeAreaView>
-      <Container style={{ flex: 1, flexDirection: 'column' }}>
-        <View
-          style={{
-            minHeight: 120,
-            padding: 20,
-            alignItems: 'center',
-            gap: 10,
-            flexDirection: 'row',
-            justifyContent: 'center',
-            position: 'relative',
-            top: 60, // adjust as needed to push the logo down a bit
-          }}
-        >
+      <Container style={styles.container}>
+        <View style={styles.logoContainer}>
           <View style={{ height: Math.max(0, Dimensions.get('window').height / 3 - 40) }} />
-          <Image source={logo} style={{ width: 40, height: 40 }} />
-          <Text style={{ fontSize: 25 }}>Homebase</Text>
+          <Image source={logo} style={styles.logo} />
+          <Text style={styles.logoText}>Homebase</Text>
         </View>
         <Animated.View
-          style={{
-            flex: 1,
-            justifyContent: 'flex-start',
-            paddingHorizontal: 12,
-            paddingVertical: 15,
-            marginTop: Math.max(0, Dimensions.get('window').height / 6 - 82),
-          }}
+          style={[
+            styles.formContainer,
+            { marginTop: Math.max(0, Dimensions.get('window').height / 6 - 82) },
+          ]}
         >
           <LoginComponent />
         </Animated.View>
 
-        <View
-          style={{
-            padding: 20,
-            marginTop: 'auto',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'flex-end',
-            minHeight: 120,
-          }}
-        >
+        <View style={styles.footer}>
           <VersionInfo />
-          {/* <CheckForUpdates
-            hideIcon={true}
-            style={{
-              alignItems: 'center',
-              paddingBottom: 12,
-            }}
-          /> */}
         </View>
       </Container>
     </SafeAreaView>
@@ -268,14 +238,10 @@ const LoginComponent = () => {
 
   return (
     <>
-      <Text style={{ fontSize: 18 }}>Your Homebase id</Text>
+      <Text style={styles.label}>Your Homebase id</Text>
       <Input
         placeholder="Homebase id"
-        style={{
-          // height: 40,
-          fontSize: Platform.OS === 'ios' ? 16 : 14,
-          // marginBottom: 16,
-        }}
+        style={{ fontSize: Platform.OS === 'ios' ? 16 : 14 }}
         value={odinId}
         onChangeText={onChangeOdinId}
         autoCapitalize="none"
@@ -284,22 +250,16 @@ const LoginComponent = () => {
       />
 
       {invalid ? (
-        <Animated.Text entering={FadeIn} style={{ color: Colors.red[500], marginBottom: 4 }}>
+        <Animated.Text entering={FadeIn} style={styles.errorText}>
           {t('Invalid homebase id')}
         </Animated.Text>
       ) : null}
 
       {finalizeState === 'error' ? (
-        <Text style={{ color: Colors.red[500], marginBottom: 4 }}>
-          {t('Something went wrong, please try again')}
-        </Text>
+        <Text style={styles.errorText}>{t('Something went wrong, please try again')}</Text>
       ) : null}
 
-      <View
-        style={{
-          alignItems: 'center',
-        }}
-      >
+      <View style={styles.buttonContainer}>
         <TextButton
           title="Login"
           onPress={onLogin}
@@ -309,55 +269,23 @@ const LoginComponent = () => {
           darkColor={Colors.indigo[800]}
           underlayColor={isDarkMode ? Colors.indigo[900] : Colors.indigo[300]}
           disabled={!odinId}
-          filledStyle={{
-            marginVertical: 8,
-          }}
-          textStyle={{
-            fontSize: 16,
-            lineHeight: 24,
-            fontWeight: '600',
-            color: Colors.white,
-          }}
+          filledStyle={styles.loginButtonFilled}
+          textStyle={styles.loginButtonText}
         />
       </View>
       {lastIdentity && !odinId && (
-        <Animated.View
-          style={{
-            marginTop: 24,
-            marginBottom: 4,
-          }}
-          layout={LinearTransition}
-          exiting={FadeOut}
-        >
-          {/* Render -----OR----- */}
+        <Animated.View style={styles.dividerContainer} layout={LinearTransition} exiting={FadeOut}>
           <Divider text="OR" />
           <TouchableOpacity
             onPress={onLogin}
-            style={{
-              flexShrink: 1,
-              backgroundColor: isDarkMode ? Colors.indigo[700] : Colors.indigo[100],
-              marginLeft: 'auto',
-              marginRight: 'auto',
-              borderRadius: 10,
-              paddingHorizontal: 8,
-            }}
+            style={[
+              styles.continueAsButton,
+              { backgroundColor: isDarkMode ? Colors.indigo[700] : Colors.indigo[100] },
+            ]}
           >
-            <View
-              style={{
-                flexDirection: 'row',
-                flexShrink: 1,
-                alignItems: 'center',
-                padding: 8,
-              }}
-            >
-              <PublicAvatar odinId={lastIdentity} style={{ width: 30, height: 30 }} />
-              <Text
-                style={{
-                  textAlign: 'center',
-                  fontSize: 16,
-                  marginLeft: 8,
-                }}
-              >
+            <View style={styles.continueAsRow}>
+              <PublicAvatar odinId={lastIdentity} style={styles.continueAsAvatar} />
+              <Text style={styles.continueAsText}>
                 Continue as {<AuthorName odinId={lastIdentity} />}
               </Text>
             </View>
@@ -365,21 +293,107 @@ const LoginComponent = () => {
         </Animated.View>
       )}
 
-      <View
-        style={{
-          flexDirection: 'row',
-          marginTop: 12,
-          justifyContent: 'center',
-          alignItems: 'center',
-          gap: 5,
-        }}
-      >
+      <View style={styles.signUpContainer}>
         <TouchableOpacity onPress={showSignUpAlert}>
-          <Text style={{ textDecorationLine: 'underline', fontSize: 14, lineHeight: 24 }}>
-            Don&apos;t have an account?
-          </Text>
+          <Text style={styles.signUpLink}>Don&apos;t have an account?</Text>
         </TouchableOpacity>
       </View>
     </>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    flexDirection: 'column',
+  },
+  logoContainer: {
+    minHeight: 120,
+    padding: 20,
+    alignItems: 'center',
+    gap: 10,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    position: 'relative',
+    top: 60,
+  },
+  logo: {
+    width: 40,
+    height: 40,
+  },
+  logoText: {
+    fontSize: 25,
+  },
+  formContainer: {
+    flex: 1,
+    justifyContent: 'flex-start',
+    paddingHorizontal: 12,
+    paddingVertical: 15,
+  },
+  footer: {
+    padding: 20,
+    marginTop: 'auto',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    minHeight: 120,
+  },
+  label: {
+    fontSize: 18,
+  },
+  errorText: {
+    color: Colors.red[500],
+    marginBottom: 4,
+  },
+  buttonContainer: {
+    alignItems: 'center',
+  },
+  loginButtonFilled: {
+    marginVertical: 8,
+  },
+  loginButtonText: {
+    fontSize: 16,
+    lineHeight: 24,
+    fontWeight: '600',
+    color: Colors.white,
+  },
+  dividerContainer: {
+    marginTop: 24,
+    marginBottom: 4,
+  },
+  continueAsButton: {
+    flexShrink: 1,
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    borderRadius: 10,
+    paddingHorizontal: 8,
+  },
+  continueAsRow: {
+    flexDirection: 'row',
+    flexShrink: 1,
+    alignItems: 'center',
+    padding: 8,
+  },
+  continueAsAvatar: {
+    width: 30,
+    height: 30,
+  },
+  continueAsText: {
+    textAlign: 'center',
+    fontSize: 16,
+    marginLeft: 8,
+  },
+  signUpContainer: {
+    flexDirection: 'row',
+    marginTop: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 5,
+  },
+  signUpLink: {
+    textDecorationLine: 'underline',
+    fontSize: 14,
+    lineHeight: 24,
+  },
+});

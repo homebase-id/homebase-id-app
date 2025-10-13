@@ -1,7 +1,7 @@
 import { ReactionContext } from '@homebase-id/js-lib/public';
 import { CanReactInfo, useReaction } from '../../../../hooks/reactions';
 import { t, useDotYouClientContext } from 'homebase-id-app-common';
-import { ActivityIndicator, Platform, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useDarkMode } from '../../../../hooks/useDarkMode';
 import { BottomSheetTextInput } from '@gorhom/bottom-sheet';
 
@@ -106,47 +106,27 @@ export const CommentComposer = memo(
     if (canReact?.canReact === true || canReact?.canReact === 'comment') {
       return (
         <Animated.View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'center',
-            alignItems: 'flex-end',
-            gap: 6,
-            paddingHorizontal: 7,
-            paddingTop: 10,
-            // height: 120,
-            paddingBottom: Platform.select({
-              ios: 7,
-              android: 12,
-            }),
-          }}
+          style={[
+            styles.composerContainer,
+            {
+              paddingBottom: Platform.select({
+                ios: 7,
+                android: 12,
+              }),
+            },
+          ]}
         >
           <ErrorNotification error={postCommentError} />
-          <OwnerAvatar
-            imageSize={{
-              width: 36,
-              height: 36,
-            }}
-          />
+          <OwnerAvatar imageSize={{ width: 36, height: 36 }} />
           <Animated.View
-            style={{
-              borderRadius: 20,
-              borderWidth: 0,
-              paddingHorizontal: 10,
-              paddingVertical: 5,
-              backgroundColor: isDarkMode ? Colors.slate[800] : Colors.indigo[50],
-              flex: 1,
-              alignItems: 'flex-start',
-            }}
+            style={[
+              styles.inputContainer,
+              { backgroundColor: isDarkMode ? Colors.slate[800] : Colors.indigo[50] },
+            ]}
           >
             {replyThreadId && (
               <Animated.View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  alignSelf: 'flex-start',
-                  marginTop: 2,
-                  marginHorizontal: 2,
-                }}
+                style={styles.replyIndicator}
                 entering={SlideInUp.withInitialValues({ originY: 10 })
                   .duration(150)
                   .easing(Easing.inOut(Easing.linear))}
@@ -154,40 +134,30 @@ export const CommentComposer = memo(
                 <Text
                   ellipsizeMode="tail"
                   numberOfLines={1}
-                  style={{ color: isDarkMode ? Colors.gray[400] : Colors.gray[500], flex: 1 }}
+                  style={[
+                    styles.replyText,
+                    { color: isDarkMode ? Colors.gray[400] : Colors.gray[500] },
+                  ]}
                 >
                   {t('Replying to')} {replyOdinId}
                 </Text>
-                <IconButton
-                  icon={<Close />}
-                  onPress={onReplyCancel}
-                  style={{
-                    padding: 0,
-                  }}
-                />
+                <IconButton icon={<Close />} onPress={onReplyCancel} style={styles.noPadding} />
               </Animated.View>
             )}
             {assets && <FileOverview assets={assets} setAssets={setAssets} />}
 
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-              }}
-            >
+            <View style={styles.inputRow}>
               {isBottomSheet ? (
                 <BottomSheetTextInput
                   value={comment}
                   onChangeText={setComment}
                   placeholder={t('Add a comment...')}
-                  style={{
-                    flex: 1,
-                    maxHeight: 80,
-                    paddingVertical: 8,
-                    color: isDarkMode ? Colors.white : Colors.black,
-                  }}
+                  style={[
+                    styles.textInput,
+                    { color: isDarkMode ? Colors.white : Colors.black },
+                  ]}
                   multiline
-                  textAlignVertical="center" // Android only
+                  textAlignVertical="center"
                   autoCapitalize="sentences"
                 />
               ) : (
@@ -195,14 +165,12 @@ export const CommentComposer = memo(
                   value={comment}
                   onChangeText={setComment}
                   placeholder={t('Add a comment...')}
-                  style={{
-                    flex: 1,
-                    maxHeight: 80,
-                    paddingVertical: 8,
-                    color: isDarkMode ? Colors.white : Colors.black,
-                  }}
+                  style={[
+                    styles.textInput,
+                    { color: isDarkMode ? Colors.white : Colors.black },
+                  ]}
                   multiline
-                  textAlignVertical="center" // Android only
+                  textAlignVertical="center"
                   autoCapitalize="sentences"
                 />
               )}
@@ -214,20 +182,10 @@ export const CommentComposer = memo(
             onPress={onPostComment}
             style={[
               chatStyles.send,
-              {
-                backgroundColor: disabled ? Colors.gray[300] : Colors.indigo[500],
-              },
+              { backgroundColor: disabled ? Colors.gray[300] : Colors.indigo[500] },
             ]}
           >
-            <View
-              style={{
-                transform: [
-                  {
-                    rotate: '50deg',
-                  },
-                ],
-              }}
-            >
+            <View style={styles.iconRotate}>
               <SendChat size={'md'} color={Colors.white} />
             </View>
           </TouchableOpacity>
@@ -272,33 +230,19 @@ export const CommentEditor = memo(
 
     return (
       <Animated.View
-        style={{
-          borderRadius: 20,
-          borderWidth: 0,
-          paddingHorizontal: 10,
-          paddingVertical: 5,
-          backgroundColor: isDarkMode ? Colors.slate[800] : Colors.indigo[50],
-          alignItems: 'flex-start',
-        }}
+        style={[
+          styles.editorContainer,
+          { backgroundColor: isDarkMode ? Colors.slate[800] : Colors.indigo[50] },
+        ]}
       >
-        <View
-          style={{
-            flexDirection: 'row',
-            gap: 8,
-          }}
-        >
+        <View style={styles.editorRow}>
           <BottomSheetTextInput
             value={body}
             onChangeText={setBody}
             autoFocus
-            style={{
-              flex: 1,
-              maxHeight: 80,
-              paddingVertical: 8,
-              color: isDarkMode ? Colors.white : Colors.black,
-            }}
+            style={[styles.textInput, { color: isDarkMode ? Colors.white : Colors.black }]}
             multiline
-            textAlignVertical="center" // Android only
+            textAlignVertical="center"
             autoCapitalize="sentences"
           />
           {onCancel && <TextButton title="Cancel" onPress={onCancel} />}
@@ -306,15 +250,7 @@ export const CommentEditor = memo(
             {postState === 'loading' ? (
               <ActivityIndicator size={'small'} color={Colors.indigo[500]} />
             ) : (
-              <View
-                style={{
-                  transform: [
-                    {
-                      rotate: '50deg',
-                    },
-                  ],
-                }}
-              >
+              <View style={styles.iconRotate}>
                 <SendChat
                   size={'md'}
                   color={
@@ -334,3 +270,58 @@ export const CommentEditor = memo(
     );
   }
 );
+
+const styles = StyleSheet.create({
+  composerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'flex-end',
+    gap: 6,
+    paddingHorizontal: 7,
+    paddingTop: 10,
+  },
+  inputContainer: {
+    borderRadius: 20,
+    borderWidth: 0,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    flex: 1,
+    alignItems: 'flex-start',
+  },
+  replyIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    marginTop: 2,
+    marginHorizontal: 2,
+  },
+  replyText: {
+    flex: 1,
+  },
+  noPadding: {
+    padding: 0,
+  },
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  textInput: {
+    flex: 1,
+    maxHeight: 80,
+    paddingVertical: 8,
+  },
+  iconRotate: {
+    transform: [{ rotate: '50deg' }],
+  },
+  editorContainer: {
+    borderRadius: 20,
+    borderWidth: 0,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    alignItems: 'flex-start',
+  },
+  editorRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+});

@@ -1,4 +1,4 @@
-import { Platform, TextInput, TextInputProps, ViewStyle } from 'react-native';
+import { Platform, StyleSheet, TextInput, TextInputProps, ViewStyle } from 'react-native';
 import { useDarkMode } from '../../../hooks/useDarkMode';
 import { Colors } from '../../../app/Colors';
 import Animated from 'react-native-reanimated';
@@ -13,28 +13,33 @@ export const Input = (props: InputProps) => {
   return (
     <Animated.View
       style={[
+        styles.container,
         {
           backgroundColor: isDarkMode ? `${Colors.indigo[700]}3A` : `${Colors.indigo[300]}3C`,
-          borderRadius: 8,
           padding: Platform.OS === 'ios' ? 16 : 4,
-          paddingLeft: 12,
-          marginVertical: 12,
         },
         props.viewStyle,
       ]}
     >
       <TextInput
         {...props}
-        style={{
-          // height: 40,
-          // borderWidth: 1,
-          // borderColor: isDarkMode ? Colors.slate[700] : Colors.slate[300],
-          // flex: 1,
-          fontSize: 16,
-          color: isDarkMode ? Colors.white : Colors.black,
-          ...((props.style as Record<string, unknown>) || {}),
-        }}
+        style={[
+          styles.input,
+          { color: isDarkMode ? Colors.white : Colors.black },
+          props.style,
+        ]}
       />
     </Animated.View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    borderRadius: 8,
+    paddingLeft: 12,
+    marginVertical: 12,
+  },
+  input: {
+    fontSize: 16,
+  },
+});

@@ -39,7 +39,7 @@ export const ActionGroup = ({ children, style, options }: SelectProps) => {
   );
 
   return (
-    <View style={[{ position: 'relative' }, style]}>
+    <View style={[styles.container, style]}>
       <TouchableOpacity onPress={() => setIsOpen((_isOpen) => !_isOpen)}>
         {children}
       </TouchableOpacity>
@@ -47,18 +47,13 @@ export const ActionGroup = ({ children, style, options }: SelectProps) => {
       {isOpen ? (
         <View
           key={'options'}
-          style={{
-            position: 'absolute',
-            top: 22,
-            minWidth: 180,
-            left: 0,
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-            zIndex: 20,
-            elevation: 20,
-            borderWidth: 1,
-            borderColor: isDarkMode ? Colors.slate[700] : Colors.gray[200],
-            borderRadius: 4,
-          }}
+          style={[
+            styles.menu,
+            {
+              backgroundColor: isDarkMode ? Colors.black : Colors.white,
+              borderColor: isDarkMode ? Colors.slate[700] : Colors.gray[200],
+            },
+          ]}
         >
           {options.map((child, index) => (
             <React.Fragment key={index}>
@@ -70,14 +65,10 @@ export const ActionGroup = ({ children, style, options }: SelectProps) => {
                     return;
                   } else setDialogVisible(true);
                 }}
-                style={{
-                  paddingHorizontal: 8,
-                  paddingVertical: 4,
-                  backgroundColor: isDarkMode ? Colors.black : Colors.white,
-                  flexDirection: 'row',
-                  gap: 6,
-                  alignItems: 'center',
-                }}
+                style={[
+                  styles.option,
+                  { backgroundColor: isDarkMode ? Colors.black : Colors.white },
+                ]}
               >
                 {child.icon && <child.icon size={'xs'} />}
                 <Text>{child.label}</Text>
@@ -113,3 +104,26 @@ export const ActionGroup = ({ children, style, options }: SelectProps) => {
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    position: 'relative',
+  },
+  menu: {
+    position: 'absolute',
+    top: 22,
+    minWidth: 180,
+    left: 0,
+    zIndex: 20,
+    elevation: 20,
+    borderWidth: 1,
+    borderRadius: 4,
+  },
+  option: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    flexDirection: 'row',
+    gap: 6,
+    alignItems: 'center',
+  },
+});
