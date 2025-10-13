@@ -165,15 +165,13 @@ export const InnerPostTeaserCard = memo(
             imageSize={postTeaserCardStyle.imageSize}
             style={postTeaserCardStyle.imageSize}
           />
-          <View style={{ flex: 1, zIndex: 100 }}>
-            <View style={{ flexDirection: 'row' }}>
+          <View style={postTeaserCardStyle.authorContainer}>
+            <View style={postTeaserCardStyle.authorRow}>
               <Text
-                style={{
-                  fontSize: 17,
-                  fontWeight: '400',
-                  opacity: 0.7,
-                  color: isDarkMode ? Colors.slate[50] : Colors.slate[900],
-                }}
+                style={[
+                  postTeaserCardStyle.authorName,
+                  { color: isDarkMode ? Colors.slate[50] : Colors.slate[900] },
+                ]}
               >
                 <AuthorName odinId={authorOdinId} />
               </Text>
@@ -236,5 +234,17 @@ export const postTeaserCardStyle = StyleSheet.create({
   imageSize: {
     height: 40,
     width: 40,
+  },
+  authorContainer: {
+    flex: 1,
+    zIndex: 100,
+  },
+  authorRow: {
+    flexDirection: 'row',
+  },
+  authorName: {
+    fontSize: 17,
+    fontWeight: '400',
+    opacity: 0.7,
   },
 });

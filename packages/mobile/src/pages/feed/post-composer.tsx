@@ -19,7 +19,14 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { KeyboardAvoidingView, Platform, TextInput, TouchableOpacity, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { Asset, launchImageLibrary } from 'react-native-image-picker';
 import Animated, { SlideInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -207,77 +214,40 @@ export const PostComposer = memo(
         <ErrorNotification error={error} />
         <Animated.View
           entering={SlideInDown}
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            paddingTop: insets.top + 8,
-            paddingBottom: 16,
-            paddingHorizontal: 8,
-            backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
-            zIndex: 0,
-          }}
+          style={[
+            styles.composerContainer,
+            {
+              paddingTop: insets.top + 8,
+              backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
+            },
+          ]}
         >
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              paddingBottom: 8,
-            }}
-          >
-            <TouchableOpacity
-              style={{
-                paddingHorizontal: 8,
-                paddingTop: 8,
-                paddingBottom: 12,
-              }}
-              onPress={() => navigation.goBack()}
-            >
-              <Text style={{ fontSize: 16 }}>{t('Cancel')}</Text>
+          <View style={styles.headerRow}>
+            <TouchableOpacity style={styles.cancelButton} onPress={() => navigation.goBack()}>
+              <Text style={styles.buttonText}>{t('Cancel')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={{
-                backgroundColor: Colors.indigo[500],
-                opacity: canPost ? 1 : 0.5,
-
-                paddingHorizontal: 8,
-                paddingVertical: 6,
-                borderRadius: 5,
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
-                zIndex: -1,
-              }}
+              style={[styles.postButton, { opacity: canPost ? 1 : 0.5 }]}
               disabled={!canPost}
               onPress={doPost}
             >
-              <Text style={{ color: Colors.white, fontSize: 16 }}>{t('Post')}</Text>
+              <Text style={styles.postButtonText}>{t('Post')}</Text>
             </TouchableOpacity>
           </View>
           <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
             <View
-              style={{
-                padding: 16,
-                backgroundColor: isDarkMode ? Colors.black : Colors.white,
-                borderWidth: 1,
-                borderColor: isDarkMode ? Colors.slate[800] : Colors.gray[100],
-                borderRadius: 6,
-              }}
+              style={[
+                styles.inputContainer,
+                {
+                  backgroundColor: isDarkMode ? Colors.black : Colors.white,
+                  borderColor: isDarkMode ? Colors.slate[800] : Colors.gray[100],
+                },
+              ]}
             >
               <TextInput
                 placeholder="What's up?"
-                style={{
-                  paddingVertical: 5,
-                  lineHeight: 20,
-                  fontSize: 16,
-                  minHeight: 124,
-                  color: isDarkMode ? Colors.white : Colors.black,
-                  textAlignVertical: 'top',
-                }}
+                style={[styles.textInput, { color: isDarkMode ? Colors.white : Colors.black }]}
                 multiline={true}
                 onChange={(event) => setCaption(event.nativeEvent.text)}
               />
@@ -858,3 +828,56 @@ const CircleSelector = memo(
     );
   }
 );
+
+const styles = StyleSheet.create({
+  composerContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingBottom: 16,
+    paddingHorizontal: 8,
+    zIndex: 0,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingBottom: 8,
+  },
+  cancelButton: {
+    paddingHorizontal: 8,
+    paddingTop: 8,
+    paddingBottom: 12,
+  },
+  buttonText: {
+    fontSize: 16,
+  },
+  postButton: {
+    backgroundColor: Colors.indigo[500],
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    borderRadius: 5,
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    zIndex: -1,
+  },
+  postButtonText: {
+    color: Colors.white,
+    fontSize: 16,
+  },
+  inputContainer: {
+    padding: 16,
+    borderWidth: 1,
+    borderRadius: 6,
+  },
+  textInput: {
+    paddingVertical: 5,
+    lineHeight: 20,
+    fontSize: 16,
+    minHeight: 124,
+    textAlignVertical: 'top',
+  },
+});

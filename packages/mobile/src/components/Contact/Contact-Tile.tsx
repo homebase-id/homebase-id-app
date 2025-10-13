@@ -51,13 +51,11 @@ export const ContactTile = ({
         <View
           style={[
             styles.tile,
-            {
-              backgroundColor: isDarkMode ? Colors.slate[900] : Colors.slate[50],
-            },
+            { backgroundColor: isDarkMode ? Colors.slate[900] : Colors.slate[50] },
           ]}
         >
           {contact && contactData && (
-            <View style={{ marginRight: 16 }}>
+            <View style={styles.avatarContainer}>
               <Avatar
                 odinId={profile.odinId}
                 style={styles.tinyLogo}
@@ -65,7 +63,7 @@ export const ContactTile = ({
               />
             </View>
           )}
-          <View style={[styles.content]}>
+          <View style={styles.content}>
             <Text style={styles.title}>
               {contact?.name?.displayName ??
                 contact?.name?.givenName ??
@@ -74,13 +72,7 @@ export const ContactTile = ({
             <Text style={styles.description}>{contact?.odinId}</Text>
           </View>
           {selectMode && (
-            <View
-              style={{
-                position: 'absolute',
-                right: 8,
-                top: 8,
-              }}
-            >
+            <View style={styles.selectModeIcon}>
               {isSelected ? <CheckCircle size={'lg'} /> : <CircleOutlined size={'lg'} />}
             </View>
           )}
@@ -105,28 +97,12 @@ export const Tile = ({
       <View
         style={[
           styles.tile,
-          {
-            marginVertical: 0,
-            marginTop: 2,
-            backgroundColor: isDarkMode ? Colors.slate[800] : Colors.white,
-          },
+          styles.tileVariant,
+          { backgroundColor: isDarkMode ? Colors.slate[800] : Colors.white },
         ]}
       >
-        <View
-          style={{
-            marginRight: 16,
-          }}
-        >
-          {icon}
-        </View>
-        <View
-          style={{
-            flexDirection: 'row',
-            display: 'flex',
-            justifyContent: 'space-between',
-            flexGrow: 1,
-          }}
-        >
+        <View style={styles.iconContainer}>{icon}</View>
+        <View style={styles.tileContent}>
           <Text style={styles.title1}>{title}</Text>
           <ChevronRight size={'lg'} />
         </View>
@@ -145,9 +121,30 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     borderRadius: 5,
   },
+  avatarContainer: {
+    marginRight: 16,
+  },
   content: {
     borderRadius: 8,
     alignSelf: 'center',
+  },
+  selectModeIcon: {
+    position: 'absolute',
+    right: 8,
+    top: 8,
+  },
+  tileVariant: {
+    marginVertical: 0,
+    marginTop: 2,
+  },
+  iconContainer: {
+    marginRight: 16,
+  },
+  tileContent: {
+    flexDirection: 'row',
+    display: 'flex',
+    justifyContent: 'space-between',
+    flexGrow: 1,
   },
   title: {
     fontSize: 18,

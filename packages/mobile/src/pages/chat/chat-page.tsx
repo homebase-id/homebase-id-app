@@ -730,14 +730,10 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
                       setIsOpen(false);
                       child.onPress();
                     }}
-                    style={{
-                      paddingHorizontal: 8,
-                      paddingVertical: 4,
-                      backgroundColor: isDarkMode ? Colors.black : Colors.white,
-                      flexDirection: 'row',
-                      gap: 6,
-                      alignItems: 'center',
-                    }}
+                    style={[
+                      styles.menuItem,
+                      { backgroundColor: isDarkMode ? Colors.black : Colors.white },
+                    ]}
                   >
                     <Text>{child.label}</Text>
                   </TouchableOpacity>
@@ -749,7 +745,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
               <Pressable
                 onPress={dismissSelectedMessage}
                 disabled={selectedMessage.selectedMessage === undefined}
-                style={{ flex: 1 }}
+                style={styles.flex1}
               >
                 <ErrorBoundary>
                   <ChatDetail
@@ -995,5 +991,18 @@ const DeleteDialogBox = memo(
     );
   }
 );
+
+const styles = StyleSheet.create({
+  menuItem: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    flexDirection: 'row',
+    gap: 6,
+    alignItems: 'center',
+  },
+  flex1: {
+    flex: 1,
+  },
+});
 
 export default ChatPage;
