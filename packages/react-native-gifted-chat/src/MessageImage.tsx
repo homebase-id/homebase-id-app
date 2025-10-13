@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
-import FastImage, { FastImageProps } from 'react-native-fast-image';
+import FastImage, { FastImageProps } from '@d11/react-native-fast-image';
 import Lightbox, { LightboxProps } from 'react-native-lightbox-v2';
 import { IMessage } from './Models';
 import { StylePropType } from './utils';

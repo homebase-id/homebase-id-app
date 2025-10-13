@@ -9,7 +9,7 @@ import {
   ImageStyle,
   TextStyle,
 } from 'react-native'
-import FastImage from 'react-native-fast-image'
+import FastImage from '@d11/react-native-fast-image'
 import Color from './Color'
 import { User } from './Models'
 import { StylePropType } from './utils'
