@@ -91,6 +91,7 @@ export const PublicAvatar = (props: {
           styles.tinyLogo,
           props.imageSize,
           props.style,
+          // On Android, SVG style props must be applied directly to ensure correct rendering.
           Platform.OS === 'android' ? props.style : undefined,
         ]}
       >
