@@ -1,19 +1,17 @@
-import PropTypes from 'prop-types';
-import React from 'react';
+import React, { memo, useCallback, useRef } from 'react';
 import { View, StyleSheet, ViewStyle, LayoutChangeEvent } from 'react-native';
 
 import { Avatar, AvatarProps } from './Avatar';
-import Bubble from './Bubble';
+import Bubble, { BubbleProps } from './Bubble';
 import { SystemMessage, SystemMessageProps } from './SystemMessage';
-import { Day, DayProps } from './Day';
+import { DayProps } from './Day';
 
-import { StylePropType, isSameDay, isSameUser } from './utils';
+import { isSameDay, isSameUser } from './utils';
 import { IMessage, User, LeftRightStyle } from './Models';
 import ReactNativeHapticFeedback, {
   HapticFeedbackTypes,
 } from 'react-native-haptic-feedback';
 import ReanimatedSwipeable, {
-  SwipeableMethods,
   SwipeableProps,
 } from 'react-native-gesture-handler/ReanimatedSwipeable';
 import Animated, {
@@ -46,8 +44,8 @@ const styles = {
   },
   iconWrapper: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: 'center' as const,
+    alignItems: 'center' as const,
   },
   replyImage: {
     width: 20,
@@ -65,17 +63,16 @@ const styles = {
 };
 
 export interface MessageProps<TMessage extends IMessage> {
-  key: any;
   showUserAvatar?: boolean;
   position: 'left' | 'right';
-  currentMessage?: TMessage;
+  currentMessage: TMessage;
   nextMessage?: TMessage;
   previousMessage?: TMessage;
   user: User;
   inverted?: boolean;
   containerStyle?: LeftRightStyle<ViewStyle>;
-  renderBubble?(props: Bubble['props']): React.ReactNode;
-  renderDay?(props: DayProps<TMessage>): React.ReactNode;
+  renderBubble?(props: BubbleProps<TMessage>): React.ReactNode;
+  renderDay?(props: DayProps): React.ReactNode;
   renderSystemMessage?(props: SystemMessageProps<TMessage>): React.ReactNode;
   renderAvatar?(props: AvatarProps<TMessage>): React.ReactNode;
   shouldUpdateMessage?(
@@ -91,282 +88,219 @@ export interface MessageProps<TMessage extends IMessage> {
   isSelected?: boolean;
 }
 
-export default class Message<
-  TMessage extends IMessage = IMessage,
-> extends React.Component<MessageProps<TMessage>> {
-  static defaultProps = {
-    renderAvatar: undefined,
-    renderBubble: null,
-    renderDay: null,
-    renderSystemMessage: null,
-    position: 'left',
-    currentMessage: {},
-    nextMessage: {},
-    previousMessage: {},
-    user: {},
-    containerStyle: {},
-    showUserAvatar: false,
-    inverted: true,
-    shouldUpdateMessage: undefined,
-    onMessageLayout: undefined,
-    onRightSwipeOpen: () => {},
-    onLeftSwipeOpen: () => {},
-    renderLeftIcon: undefined,
-    renderRightIcon: undefined,
-    swipeEnabled: true,
-    isSelected: false,
-  };
+let Message: React.FC<MessageProps<IMessage>> = (
+  props: MessageProps<IMessage>,
+) => {
+  const {
+    currentMessage,
+    renderBubble: renderBubbleProp,
+    renderSystemMessage: renderSystemMessageProp,
+    renderAvatar: renderAvatarProp,
+    onMessageLayout,
+    nextMessage,
+    position,
+    containerStyle,
+    user,
+    showUserAvatar,
+    onRightSwipeOpen,
+    onLeftSwipeOpen,
+    renderLeftIcon,
+    renderRightIcon,
+    swipeableProps,
+  } = props;
 
-  static propTypes = {
-    renderAvatar: PropTypes.func,
-    showUserAvatar: PropTypes.bool,
-    renderBubble: PropTypes.func,
-    renderDay: PropTypes.func,
-    renderSystemMessage: PropTypes.func,
-    position: PropTypes.oneOf(['left', 'right']),
-    currentMessage: PropTypes.object,
-    nextMessage: PropTypes.object,
-    previousMessage: PropTypes.object,
-    user: PropTypes.object,
-    inverted: PropTypes.bool,
-    containerStyle: PropTypes.shape({
-      left: StylePropType,
-      right: StylePropType,
-    }),
-    isSelected: PropTypes.bool,
-    shouldUpdateMessage: PropTypes.func,
-    onMessageLayout: PropTypes.func,
-  };
+  const swipeableRef = useRef<any>(null);
 
-  shouldComponentUpdate(nextProps: MessageProps<TMessage>) {
-    const next = nextProps.currentMessage!;
-    const current = this.props.currentMessage!;
-    const { previousMessage, nextMessage } = this.props;
-    const nextPropsMessage = nextProps.nextMessage;
-    const nextPropsPreviousMessage = nextProps.previousMessage;
+  const renderBubble = useCallback(() => {
+    const {
+      /* eslint-disable @typescript-eslint/no-unused-vars */
+      containerStyle,
+      onMessageLayout,
+      /* eslint-enable @typescript-eslint/no-unused-vars */
+      ...rest
+    } = props;
 
-    const shouldUpdate =
-      (this.props.shouldUpdateMessage &&
-        this.props.shouldUpdateMessage(this.props, nextProps)) ||
-      false;
+    if (renderBubbleProp) return renderBubbleProp(rest);
 
-    return (
-      next.sent !== current.sent ||
-      next.received !== current.received ||
-      next.pending !== current.pending ||
-      next.createdAt !== current.createdAt ||
-      next.text !== current.text ||
-      next.image !== current.image ||
-      next.video !== current.video ||
-      next.audio !== current.audio ||
-      previousMessage !== nextPropsPreviousMessage ||
-      nextMessage !== nextPropsMessage ||
-      shouldUpdate ||
-      this.props.isSelected !== nextProps.isSelected
-    );
-  }
+    return <Bubble {...rest} />;
+  }, [props, renderBubbleProp]);
 
-  renderDay() {
-    if (this.props.currentMessage && this.props.currentMessage.createdAt) {
-      const { containerStyle, ...props } = this.props;
-      if (this.props.renderDay) {
-        return this.props.renderDay(props);
-      }
-      return <Day {...props} />;
-    }
-    return null;
-  }
+  const renderSystemMessage = useCallback(() => {
+    const {
+      /* eslint-disable @typescript-eslint/no-unused-vars */
+      containerStyle,
+      onMessageLayout,
+      /* eslint-enable @typescript-eslint/no-unused-vars */
+      ...rest
+    } = props;
 
-  renderBubble() {
-    const { containerStyle, ...props } = this.props;
-    if (this.props.renderBubble) {
-      return this.props.renderBubble(props);
-    }
-    // @ts-ignore
-    return <Bubble {...props} />;
-  }
+    if (renderSystemMessageProp) return renderSystemMessageProp(rest);
 
-  renderSystemMessage() {
-    const { containerStyle, ...props } = this.props;
+    return <SystemMessage {...rest} />;
+  }, [props, renderSystemMessageProp]);
 
-    if (this.props.renderSystemMessage) {
-      return this.props.renderSystemMessage(props);
-    }
-    return <SystemMessage {...props} />;
-  }
-
-  renderAvatar() {
-    const { user, currentMessage, showUserAvatar } = this.props;
-
+  const renderAvatar = useCallback(() => {
     if (
-      user &&
-      user._id &&
-      currentMessage &&
-      currentMessage.user &&
+      user?._id &&
+      currentMessage?.user &&
       user._id === currentMessage.user._id &&
       !showUserAvatar
-    ) {
+    )
       return null;
-    }
 
-    if (
-      currentMessage &&
-      currentMessage.user &&
-      currentMessage.user.avatar === null
-    ) {
-      return null;
-    }
+    if (currentMessage?.user?.avatar === null) return null;
 
-    const { containerStyle, ...props } = this.props;
-    return <Avatar {...props} />;
-  }
-
-  isNextMyMessage =
-    this.props.currentMessage &&
-    this.props.nextMessage &&
-    isSameUser(this.props.currentMessage, this.props.nextMessage) &&
-    isSameDay(this.props.currentMessage, this.props.nextMessage);
-
-  renderRightAction = (progressAnimatedValue: SharedValue<number>) => {
-    const { renderLeftIcon } = this.props;
-
-    const animatedStyles = useAnimatedStyle(() => {
-      const size = interpolate(
-        progressAnimatedValue.value,
-        [0, 1, 100],
-        [0, 1, 1],
-      );
-      const trans = interpolate(
-        progressAnimatedValue.value,
-        [0, 1, 2],
-        [0, -12, -20],
-      );
-      return {
-        transform: [{ scale: size }, { translateX: trans }],
-      };
-    });
-
-    return (
-      <Animated.View
-        style={[
-          styles.container,
-          this.isNextMyMessage
-            ? styles.defaultBottomOffset
-            : styles.bottomOffsetNext,
-          this.props.position === 'right' && styles.leftOffsetValue,
-          animatedStyles,
-        ]}
-      >
-        <View
-          style={{
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          {renderLeftIcon}
-        </View>
-      </Animated.View>
-    );
-  };
-  renderLeftAction = (progressAnimatedValue: SharedValue<number>) => {
-    const animatedStyles = useAnimatedStyle(() => {
-      const size = interpolate(
-        progressAnimatedValue.value,
-        [0, 1, 100],
-        [0, 1, 1],
-      );
-      const trans = interpolate(
-        progressAnimatedValue.value,
-        [0, 1, 2],
-        [0, -12, -20],
-      );
-      return {
-        transform: [{ scale: size }, { translateX: trans }],
-      };
-    });
-
-    return (
-      <Animated.View
-        style={[
-          styles.container,
-          this.isNextMyMessage
-            ? styles.defaultBottomOffset
-            : styles.bottomOffsetNext,
-          this.props.position === 'right' && styles.leftOffsetValue,
-          animatedStyles,
-        ]}
-      >
-        <View
-          style={{
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          {this.props.renderRightIcon}
-        </View>
-      </Animated.View>
-    );
-  };
-
-  onSwipeOpenAction = (
-    direction: 'left' | 'right',
-    swipeable: SwipeableMethods,
-  ) => {
-    ReactNativeHapticFeedback.trigger(HapticFeedbackTypes.impactMedium, {
-      enableVibrateFallback: true,
-    });
-    if (this.props.currentMessage && direction === 'left') {
-      this.props.onRightSwipeOpen?.({ ...this.props.currentMessage });
-      swipeable.close();
-    } else {
-      this.props.currentMessage &&
-        this.props.onLeftSwipeOpen?.({ ...this.props.currentMessage });
-      swipeable.close();
-    }
-  };
-
-  render() {
     const {
-      currentMessage,
-      onMessageLayout,
-      nextMessage,
-      position,
+      /* eslint-disable @typescript-eslint/no-unused-vars */
       containerStyle,
-      swipeableProps,
-    } = this.props;
-    if (currentMessage) {
-      const sameUser = isSameUser(currentMessage, nextMessage!);
+      onMessageLayout,
+      /* eslint-enable @typescript-eslint/no-unused-vars */
+      ...rest
+    } = props;
+
+    if (renderAvatarProp) return renderAvatarProp(rest);
+
+    return <Avatar {...rest} />;
+  }, [props, user, currentMessage, showUserAvatar, renderAvatarProp]);
+
+  const isNextMyMessage =
+    currentMessage &&
+    nextMessage &&
+    isSameUser(currentMessage, nextMessage) &&
+    isSameDay(currentMessage, nextMessage);
+
+  const renderRightAction = useCallback(
+    (progressAnimatedValue: SharedValue<number>) => {
+      const animatedStyles = useAnimatedStyle(() => {
+        const size = interpolate(
+          progressAnimatedValue.value,
+          [0, 1, 100],
+          [0, 1, 1],
+        );
+        const trans = interpolate(
+          progressAnimatedValue.value,
+          [0, 1, 2],
+          [0, -12, -20],
+        );
+        return {
+          transform: [{ scale: size }, { translateX: trans }],
+        };
+      });
+
       return (
-        <View onLayout={onMessageLayout}>
-          {this.renderDay()}
-          {currentMessage.system ? (
-            this.renderSystemMessage()
-          ) : (
-            <View
-              style={[
-                styles[position].container,
-                { marginBottom: sameUser ? 2 : 10 },
-                !this.props.inverted && { marginBottom: 2 },
-                containerStyle && containerStyle[position],
-              ]}
-            >
-              {this.props.position === 'left' ? this.renderAvatar() : null}
-              <ReanimatedSwipeable
-                renderRightActions={this.renderRightAction}
-                renderLeftActions={this.renderLeftAction}
-                onSwipeableOpen={this.onSwipeOpenAction}
-                {...swipeableProps}
-              >
-                {this.renderBubble()}
-              </ReanimatedSwipeable>
-              {this.props.position === 'right' ? this.renderAvatar() : null}
-            </View>
-          )}
-        </View>
+        <Animated.View
+          style={[
+            styles.container,
+            isNextMyMessage
+              ? styles.defaultBottomOffset
+              : styles.bottomOffsetNext,
+            position === 'right' && styles.leftOffsetValue,
+            animatedStyles,
+          ]}
+        >
+          <View style={styles.iconWrapper}>{renderLeftIcon}</View>
+        </Animated.View>
       );
-    }
-    return null;
-  }
-}
+    },
+    [renderLeftIcon, isNextMyMessage, position],
+  );
+
+  const renderLeftAction = useCallback(
+    (progressAnimatedValue: SharedValue<number>) => {
+      const animatedStyles = useAnimatedStyle(() => {
+        const size = interpolate(
+          progressAnimatedValue.value,
+          [0, 1, 100],
+          [0, 1, 1],
+        );
+        const trans = interpolate(
+          progressAnimatedValue.value,
+          [0, 1, 2],
+          [0, -12, -20],
+        );
+        return {
+          transform: [{ scale: size }, { translateX: trans }],
+        };
+      });
+
+      return (
+        <Animated.View
+          style={[
+            styles.container,
+            isNextMyMessage
+              ? styles.defaultBottomOffset
+              : styles.bottomOffsetNext,
+            position === 'right' && styles.leftOffsetValue,
+            animatedStyles,
+          ]}
+        >
+          <View style={styles.iconWrapper}>{renderRightIcon}</View>
+        </Animated.View>
+      );
+    },
+    [renderRightIcon, isNextMyMessage, position],
+  );
+
+  const onSwipeOpenAction = useCallback(
+    (direction: 'left' | 'right') => {
+      ReactNativeHapticFeedback.trigger(HapticFeedbackTypes.impactMedium, {
+        enableVibrateFallback: true,
+      });
+      if (currentMessage && direction === 'left') {
+        onLeftSwipeOpen?.({ ...currentMessage });
+        swipeableRef.current?.close();
+      } else {
+        currentMessage && onRightSwipeOpen?.({ ...currentMessage });
+        swipeableRef.current?.close();
+      }
+    },
+    [currentMessage, onLeftSwipeOpen, onRightSwipeOpen],
+  );
+
+  if (!currentMessage) return null;
+
+  const sameUser = isSameUser(currentMessage, nextMessage!);
+
+  return (
+    <View onLayout={onMessageLayout}>
+      {currentMessage.system ? (
+        renderSystemMessage()
+      ) : (
+        <View
+          style={[
+            styles[position].container,
+            { marginBottom: sameUser ? 2 : 10 },
+            !props.inverted && { marginBottom: 2 },
+            containerStyle?.[position],
+          ]}
+        >
+          {position === 'left' ? renderAvatar() : null}
+          <ReanimatedSwipeable
+            ref={swipeableRef}
+            renderRightActions={renderRightAction}
+            renderLeftActions={renderLeftAction}
+            onSwipeableOpen={onSwipeOpenAction}
+            {...swipeableProps}
+          >
+            {renderBubble()}
+          </ReanimatedSwipeable>
+          {position === 'right' ? renderAvatar() : null}
+        </View>
+      )}
+    </View>
+  );
+};
+
+Message = memo(Message, (props, nextProps) => {
+  const shouldUpdate =
+    props.shouldUpdateMessage?.(props, nextProps) ||
+    props.currentMessage !== nextProps.currentMessage ||
+    props.previousMessage !== nextProps.previousMessage ||
+    props.nextMessage !== nextProps.nextMessage;
+
+  if (shouldUpdate) return false;
+
+  return true;
+});
+
+export default Message;

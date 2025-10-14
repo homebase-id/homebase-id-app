@@ -22,6 +22,7 @@ import {
   patchFile,
   GenerateKeyHeader,
   UpdateResult,
+  DEFAULT_PAYLOAD_DESCRIPTOR_KEY,
 } from '@homebase-id/js-lib/core';
 import {
   toGuidId,
@@ -105,7 +106,7 @@ export const savePost = async <T extends PostContent>(
   const encrypt = !(
     file.serverMetadata?.accessControlList?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
     file.serverMetadata?.accessControlList?.requiredSecurityGroup ===
-      SecurityGroupType.Authenticated
+    SecurityGroupType.Authenticated
   );
 
   const targetDrive = GetTargetDriveFromChannelId(channelId);
@@ -132,10 +133,10 @@ export const savePost = async <T extends PostContent>(
 
     const imageSource: ImageSource | undefined = linkPreviewWithImage
       ? {
-          height: linkPreviewWithImage.imageHeight || 0,
-          width: linkPreviewWithImage.imageWidth || 0,
-          uri: linkPreviewWithImage.imageUrl,
-        }
+        height: linkPreviewWithImage.imageHeight || 0,
+        width: linkPreviewWithImage.imageWidth || 0,
+        uri: linkPreviewWithImage.imageUrl,
+      }
       : undefined;
 
     const { tinyThumb } = imageSource
@@ -156,13 +157,14 @@ export const savePost = async <T extends PostContent>(
   for (let i = 0; newMediaFiles && i < newMediaFiles?.length; i++) {
     const newMediaFile = newMediaFiles[i];
     const payloadKey = newMediaFile.key || `${POST_MEDIA_PAYLOAD_KEY}${i}`;
+    const descriptorKey = `${DEFAULT_PAYLOAD_DESCRIPTOR_KEY}${i}`;
 
     if (newMediaFile.type?.startsWith('video/')) {
       const {
         tinyThumb: tinyThumbFromVideo,
         thumbnails: thumbnailsFromVideo,
         payloads: payloadsFromVideo,
-      } = await processVideo(newMediaFile, payloadKey, true, onUpdate, aesKey);
+      } = await processVideo(newMediaFile, payloadKey, descriptorKey, true, onUpdate, aesKey);
 
       thumbnails.push(...thumbnailsFromVideo);
       payloads.push(...payloadsFromVideo);
@@ -209,10 +211,10 @@ export const savePost = async <T extends PostContent>(
   if (file.fileMetadata.appData.content.type !== 'Article') {
     file.fileMetadata.appData.content.primaryMediaFile = payloads[0]
       ? {
-          fileId: undefined,
-          fileKey: payloads[0].key,
-          type: payloads[0].payload.type,
-        }
+        fileId: undefined,
+        fileKey: payloads[0].key,
+        type: payloads[0].payload.type,
+      }
       : undefined;
   }
 
@@ -259,7 +261,7 @@ const uploadPost = async <T extends PostContent>(
   const encrypt = !(
     file.serverMetadata?.accessControlList?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
     file.serverMetadata?.accessControlList?.requiredSecurityGroup ===
-      SecurityGroupType.Authenticated
+    SecurityGroupType.Authenticated
   );
 
   const instructionSet: UploadInstructionSet = {
@@ -288,9 +290,8 @@ const uploadPost = async <T extends PostContent>(
       !stringGuidsEqual(existingPostWithThisSlug?.fileId, file.fileId)
     ) {
       // There is clash with an existing slug
-      file.fileMetadata.appData.content.slug = `${
-        file.fileMetadata.appData.content.slug
-      }-${new Date().getTime()}`;
+      file.fileMetadata.appData.content.slug = `${file.fileMetadata.appData.content.slug
+        }-${new Date().getTime()}`;
     }
   }
   const uniqueId = file.fileMetadata.appData.content.slug
@@ -550,24 +551,24 @@ const updatePost = async <T extends PostContent>(
 
   const instructionSet: UpdateInstructionSet = odinId
     ? {
-        transferIv: getRandom16ByteArray(),
-        locale: 'peer',
-        file: {
-          globalTransitId: file.fileMetadata.globalTransitId as string,
-          targetDrive,
-        },
-        versionTag: file.fileMetadata.versionTag,
-        recipients: [odinId],
-      }
+      transferIv: getRandom16ByteArray(),
+      locale: 'peer',
+      file: {
+        globalTransitId: file.fileMetadata.globalTransitId as string,
+        targetDrive,
+      },
+      versionTag: file.fileMetadata.versionTag,
+      recipients: [odinId],
+    }
     : {
-        transferIv: getRandom16ByteArray(),
-        locale: 'local',
-        file: {
-          fileId: file.fileId,
-          targetDrive,
-        },
-        versionTag: file.fileMetadata.versionTag,
-      };
+      transferIv: getRandom16ByteArray(),
+      locale: 'local',
+      file: {
+        fileId: file.fileId,
+        targetDrive,
+      },
+      versionTag: file.fileMetadata.versionTag,
+    };
 
   const updateResult = await patchFile(
     dotYouClient,

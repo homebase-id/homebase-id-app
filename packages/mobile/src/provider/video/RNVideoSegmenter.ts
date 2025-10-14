@@ -72,6 +72,7 @@ const getVideoCodec = async (inputFilePath: string) => {
     // Command to get codec information
     const command = `-v error -select_streams v:0 -show_entries stream=codec_name -of default=noprint_wrappers=1 ${inputFilePath}`;
 
+    // throw new Error('FFmpegKit is not available currently.');
     FFprobeKit.execute(command)
       .then(async (session) => {
         const state = await session.getState();
@@ -144,6 +145,7 @@ const segmentVideo = async (
       command = `-i ${source} -c:v libx264 -preset fast -crf 23 -c:a aac ${encryptionInfo} -hls_time 6 -hls_list_size 0 -f hls -hls_flags single_file ${playlistUri}`;
     }
 
+
     try {
       const session = await FFmpegKit.execute(command);
       const state = await session.getState();
@@ -172,12 +174,14 @@ const segmentVideo = async (
           type: 'application/vnd.apple.mpegurl',
           uri: playlistUri,
           filepath: playlistUri,
+          playableDuration: video.playableDuration,
         },
         segments: {
           ...video,
           type: 'video/mp2t',
           uri: segmentsUri,
           filepath: segmentsUri,
+          playableDuration: video.playableDuration,
         },
       };
     } catch (error) {
@@ -221,7 +225,7 @@ export const grabThumbnail = async (video: ImageSource) => {
   // MDN docs (https://developer.mozilla.org/en-US/docs/Web/API/Media_Source_Extensions_API/Transcoding_assets_for_MSE#fragmenting)
   // FFMPEG fragmenting: https://ffmpeg.org/ffmpeg-formats.html#Fragmentation
   const command = `-i ${source} -frames:v 1 ${commandDestinationUri}`;
-
+  // throw new Error('FFmpegKit is not available currently.');
   try {
     const session = await FFmpegKit.execute(command);
     const state = await session.getState();
@@ -294,6 +298,7 @@ export const compressAndSegmentVideo = async (
       isSegmented: true,
       mimeType: 'application/vnd.apple.mpegurl',
       hlsPlaylist: playlistcontent,
+      duration: playlistOrFullVideo?.playableDuration ? Math.round(playlistOrFullVideo.playableDuration * 1000) : 0,
     };
 
     return {
@@ -306,6 +311,8 @@ export const compressAndSegmentVideo = async (
     mimeType: playlistOrFullVideo.type || 'video/mp4',
     fileSize: playlistOrFullVideo?.fileSize || 0,
     isSegmented: false,
+    duration: playlistOrFullVideo?.playableDuration ? Math.round(playlistOrFullVideo.playableDuration * 1000) : 0,
+
   };
   return {
     metadata,

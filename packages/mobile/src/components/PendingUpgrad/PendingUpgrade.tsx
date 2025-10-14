@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { t, useDotYouClientContext } from 'homebase-id-app-common';
 import { useEffect, useMemo } from 'react';
 import { Alert, Linking } from 'react-native';
@@ -7,8 +7,12 @@ import InAppBrowser from 'react-native-inappbrowser-reborn';
 export const PendingUpgradeDialog = () => {
   const dotYouClient = useDotYouClientContext();
   const { data: hasPendingUpgrade } = usePendingUpgrade();
+  const queryClient = useQueryClient();
 
-  const upgradeUrl = useMemo(() => `${dotYouClient.getRoot()}/owner`, [dotYouClient]);
+  const upgradeUrl = useMemo(
+    () => `${dotYouClient.getRoot()}/owner/settings/version-info`,
+    [dotYouClient]
+  );
 
   useEffect(() => {
     if (hasPendingUpgrade) {
@@ -27,6 +31,9 @@ export const PendingUpgradeDialog = () => {
                   enableDefaultShare: false,
                 });
               } else Linking.openURL(upgradeUrl);
+              setTimeout(async () => {
+                await queryClient.invalidateQueries({ queryKey: ['pending-upgrade'] });
+              }, 60 * 1000); // invalidate after 1 minute
             },
           },
           {
@@ -37,19 +44,18 @@ export const PendingUpgradeDialog = () => {
         ]
       );
     }
-  }, [hasPendingUpgrade, upgradeUrl]);
+  }, [hasPendingUpgrade, queryClient, upgradeUrl]);
 
   return null;
 };
 
 const usePendingUpgrade = () => {
   const dotYouClient = useDotYouClientContext();
-
   return useQuery({
     queryKey: ['pending-upgrade'],
     staleTime: 1000 * 60 * 60 * 24, // 24 hours
     refetchOnReconnect: false,
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true,
     refetchOnMount: false,
     queryFn: async () => {
       const client = dotYouClient.createAxiosClient();

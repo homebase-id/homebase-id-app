@@ -14,6 +14,17 @@ In order to get everything running you'll need the back-end web server, see the 
 
 Once you have the back-end running, you can start the mobile app by following the instructions below.
 
+### .npmrc setup for GitHub Packages
+
+If you are installing dependencies for the first time, you may need to create a `.npmrc` file in the project root to authenticate with GitHub Packages:
+
+```bash
+echo "@homebase-id:registry=https://npm.pkg.github.com" > .npmrc
+echo "//npm.pkg.github.com/:_authToken=YOUR_GITHUB_TOKEN" >> .npmrc
+```
+
+Replace `YOUR_GITHUB_TOKEN` with a GitHub personal access token that has at least `read:packages` scope. See [GitHub documentation](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-npm-registry#authenticating-to-github-packages) for more details.
+
 ### Install dependencies
 
 ```bash

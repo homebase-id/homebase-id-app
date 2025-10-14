@@ -1,15 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import {
-  Image,
-  StyleSheet,
-  View,
-  ImageProps,
-  ViewStyle,
-  StyleProp,
-  ImageStyle,
-  ImageURISource,
-} from 'react-native';
+import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
+import FastImage, { FastImageProps } from '@d11/react-native-fast-image';
 import Lightbox, { LightboxProps } from 'react-native-lightbox-v2';
 import { IMessage } from './Models';
 import { StylePropType } from './utils';
@@ -32,9 +24,8 @@ const styles = StyleSheet.create({
 export interface MessageImageProps<TMessage extends IMessage> {
   currentMessage?: TMessage;
   containerStyle?: StyleProp<ViewStyle>;
-  imageSourceProps?: Partial<ImageURISource>;
-  imageStyle?: StyleProp<ImageStyle>;
-  imageProps?: Partial<ImageProps>;
+  imageStyle?: FastImageProps['style'];
+  imageProps?: Partial<FastImageProps>;
   lightboxProps?: LightboxProps;
 }
 
@@ -42,7 +33,6 @@ export function MessageImage<TMessage extends IMessage = IMessage>({
   containerStyle,
   lightboxProps = {},
   imageProps = {},
-  imageSourceProps = {},
   imageStyle,
   currentMessage,
 }: MessageImageProps<TMessage>) {
@@ -59,10 +49,14 @@ export function MessageImage<TMessage extends IMessage = IMessage>({
         }}
         {...lightboxProps}
       >
-        <Image
+        <FastImage
           {...imageProps}
           style={[styles.image, imageStyle]}
-          source={{ ...imageSourceProps, uri: currentMessage.image }}
+          source={{
+            uri: currentMessage.image,
+            priority: FastImage.priority.normal,
+          }}
+          resizeMode={imageProps?.resizeMode || FastImage.resizeMode.cover}
         />
       </Lightbox>
     </View>
@@ -72,7 +66,6 @@ export function MessageImage<TMessage extends IMessage = IMessage>({
 MessageImage.propTypes = {
   currentMessage: PropTypes.object,
   containerStyle: StylePropType,
-  imageSourceProps: PropTypes.object,
   imageStyle: StylePropType,
   imageProps: PropTypes.object,
   lightboxProps: PropTypes.object,

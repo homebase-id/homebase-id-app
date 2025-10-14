@@ -89,7 +89,7 @@ export const GroupCreationPage = memo((props: GroupCreationPageProps) => {
       return BackButton({
         onPress: () => navigation.goBack(),
         prop: props,
-        label: '',
+        label: 'Back',
         style: { marginLeft: 10 },
       });
     },

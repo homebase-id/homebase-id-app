@@ -3,6 +3,7 @@ import {
   GestureResponderEvent,
   Platform,
   StyleProp,
+  StyleSheet,
   TextStyle,
   TouchableOpacity,
   TouchableOpacityProps,
@@ -24,7 +25,7 @@ export const HeaderActions = (props: {
   labelVisible?: boolean;
 }) => {
   return (
-    <TouchableOpacity style={{}} onPress={props.onPress}>
+    <TouchableOpacity onPress={props.onPress}>
       <ComposeChat />
     </TouchableOpacity>
   );
@@ -44,11 +45,10 @@ export const BackButton = (props: {
       onPress={props.onPress}
       label={props.label ?? 'Cancel'}
       backImage={props.showArrow ? undefined : Platform.OS === 'ios' ? Empty : undefined}
+      displayMode="default"
       labelStyle={[
-        {
-          color: isDarkMode ? Colors.white : Colors.black,
-          fontWeight: '600',
-        },
+        styles.backButtonLabel,
+        { color: isDarkMode ? Colors.white : Colors.black },
         props.style,
       ]}
       tintColor={isDarkMode ? Colors.white : Colors.black}
@@ -84,38 +84,35 @@ export const IconButton = memo(
       });
     }, []);
     return (
-      <View
-        style={
-          title
-            ? {
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: 8,
-              }
-            : undefined
-        }
-      >
+      <View style={title ? styles.iconButtonContainer : undefined}>
         <TouchableOpacity
           onPress={onPress || defaultActions}
-          style={[{ padding: 10 }, style]}
+          style={[styles.iconButtonTouchable, style]}
           {...touchableProps}
         >
           {icon}
         </TouchableOpacity>
-        {title && (
-          <Text
-            style={
-              textStyle || {
-                fontSize: 12,
-                fontWeight: '400',
-                textAlign: 'center',
-              }
-            }
-          >
-            {title}
-          </Text>
-        )}
+        {title && <Text style={textStyle || styles.iconButtonText}>{title}</Text>}
       </View>
     );
   }
 );
+
+const styles = StyleSheet.create({
+  backButtonLabel: {
+    fontWeight: '600',
+  },
+  iconButtonContainer: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: 8,
+  },
+  iconButtonTouchable: {
+    padding: 10,
+  },
+  iconButtonText: {
+    fontSize: 12,
+    fontWeight: '400',
+    textAlign: 'center',
+  },
+});

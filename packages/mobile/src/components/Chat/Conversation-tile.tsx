@@ -1,6 +1,5 @@
 import { memo, useMemo } from 'react';
 import {
-  StyleProp,
   StyleSheet,
   Text,
   TextStyle,
@@ -94,12 +93,10 @@ const ConversationTile = memo((props: ConversationTileProps) => {
         onPress={() => props.onPress?.(props.conversationId as string)}
         onLongPress={props.onLongPress}
         underlayColor={underlayColor}
-        style={{
-          marginTop: 4,
-        }}
+        style={styles.touchable}
       >
         <View style={[styles.tile, props.style]}>
-          <View style={{ marginRight: 16 }}>
+          <View style={styles.avatarContainer}>
             {!isGroup ? (
               props.isSelf ? (
                 <OwnerAvatar />
@@ -118,10 +115,7 @@ const ConversationTile = memo((props: ConversationTileProps) => {
           <View style={styles.content}>
             <Text
               numberOfLines={1}
-              style={{
-                ...styles.title,
-                color: isDarkMode ? Colors.white : Colors.slate[900],
-              }}
+              style={[styles.title, { color: isDarkMode ? Colors.white : Colors.slate[900] }]}
             >
               {isGroup || props.isSelf
                 ? props.conversation.title.trim()
@@ -134,29 +128,22 @@ const ConversationTile = memo((props: ConversationTileProps) => {
             {props.selectMode ? null : draftMessage ? (
               <DraftMessage message={draftMessage} />
             ) : lastMessage && lastMessageContent ? (
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignContent: 'flex-start',
-                }}
-              >
+              <View style={styles.messageContainer}>
                 <ChatDeliveryIndicator msg={lastMessage} showDefaultColor />
                 <Text
                   numberOfLines={1}
                   style={[
                     styles.description,
-                    {
-                      color: isDarkMode ? Colors.white : Colors.slate[900],
-                      flex: 1,
-                    },
+                    styles.descriptionFlex,
+                    { color: isDarkMode ? Colors.white : Colors.slate[900] },
                   ]}
                 >
                   {isGroup ? (
                     <Text
-                      style={{
-                        fontWeight: '500',
-                        color: isDarkMode ? Colors.indigo[400] : Colors.indigo[700],
-                      }}
+                      style={[
+                        styles.authorName,
+                        { color: isDarkMode ? Colors.indigo[400] : Colors.indigo[700] },
+                      ]}
                     >
                       <AuthorName odinId={lastMessageAuthor} showYou showFirstNameOnly />
                       {': '}
@@ -176,22 +163,11 @@ const ConversationTile = memo((props: ConversationTileProps) => {
             ) : null}
           </View>
           {props.selectMode ? (
-            <View
-              style={{
-                position: 'absolute',
-                right: 12,
-                top: 16,
-              }}
-            >
+            <View style={styles.selectModeIcon}>
               {props.isSelected ? <CheckCircle size={'lg'} /> : <CircleOutlined size={'lg'} />}
             </View>
           ) : (
-            <View
-              style={{
-                justifyContent: 'space-between',
-                display: 'flex',
-              }}
-            >
+            <View style={styles.timeContainer}>
               {
                 <ChatSentTimeIndicator
                   msg={lastMessage}
@@ -211,19 +187,13 @@ const ConversationTile = memo((props: ConversationTileProps) => {
 const DraftMessage = ({ message }: { message: string }) => {
   const { isDarkMode } = useDarkMode();
   return (
-    <Text
-      style={{
-        ...styles.description,
-        fontWeight: '500',
-        color: Colors.gray[500],
-      }}
-    >
+    <Text style={[styles.description, styles.draftLabel]}>
       Draft:{' '}
       <Text
-        style={{
-          color: isDarkMode ? Colors.slate[400] : Colors.slate[700],
-          fontWeight: '400',
-        }}
+        style={[
+          styles.draftMessage,
+          { color: isDarkMode ? Colors.slate[400] : Colors.slate[700] },
+        ]}
       >
         {ellipsisAtMaxChar(message, 30)}
       </Text>
@@ -234,23 +204,14 @@ const DraftMessage = ({ message }: { message: string }) => {
 const UnreadCount = ({ count }: { count: number }) => {
   const { isDarkMode } = useDarkMode();
 
-  const textStyle = useMemo(
-    () =>
-      ({
-        fontSize: 12,
-        textAlign: 'center',
-        color: isDarkMode ? Colors.white : Colors.blue[900],
-      }) as StyleProp<TextStyle>,
-    [isDarkMode]
-  );
   return (
     <View
-      style={{
-        ...styles.unreadStyle,
-        backgroundColor: isDarkMode ? Colors.blue[500] : Colors.blue[100],
-      }}
+      style={[
+        styles.unreadStyle,
+        { backgroundColor: isDarkMode ? Colors.blue[500] : Colors.blue[100] },
+      ]}
     >
-      <Text style={textStyle}>
+      <Text style={[styles.unreadText, { color: isDarkMode ? Colors.white : Colors.blue[900] }]}>
         {Math.min(count, 10)}
         {count >= 10 ? '+' : ''}
       </Text>
@@ -259,10 +220,16 @@ const UnreadCount = ({ count }: { count: number }) => {
 };
 
 const styles = StyleSheet.create({
+  touchable: {
+    marginTop: 4,
+  },
   tile: {
     padding: 16,
     flexDirection: 'row',
     borderRadius: 5,
+  },
+  avatarContainer: {
+    marginRight: 16,
   },
   deleted: {
     textDecorationLine: 'line-through',
@@ -282,6 +249,36 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '400',
   },
+  messageContainer: {
+    flexDirection: 'row',
+    alignContent: 'flex-start',
+  },
+  description: {
+    fontSize: 16,
+    marginVertical: 4,
+  },
+  descriptionFlex: {
+    flex: 1,
+  },
+  authorName: {
+    fontWeight: '500',
+  },
+  selectModeIcon: {
+    position: 'absolute',
+    right: 12,
+    top: 16,
+  },
+  timeContainer: {
+    justifyContent: 'space-between',
+    display: 'flex',
+  },
+  draftLabel: {
+    fontWeight: '500',
+    color: Colors.gray[500],
+  },
+  draftMessage: {
+    fontWeight: '400',
+  },
   unreadStyle: {
     borderRadius: 25,
     padding: 4,
@@ -291,10 +288,9 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-end',
     alignItems: 'center',
   },
-
-  description: {
-    fontSize: 16,
-    marginVertical: 4,
+  unreadText: {
+    fontSize: 12,
+    textAlign: 'center',
   },
 });
 

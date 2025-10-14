@@ -1,40 +1,53 @@
+import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import {
+  AccessControlList,
   HomebaseFile,
   NewHomebaseFile,
-  AccessControlList,
   SecurityGroupType,
 } from '@homebase-id/js-lib/core';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
-import { ChannelDefinition, BlogConfig, ReactAccess } from '@homebase-id/js-lib/public';
+import { LinkPreview } from '@homebase-id/js-lib/media';
+import { BlogConfig, ChannelDefinition, ReactAccess } from '@homebase-id/js-lib/public';
+import { NativeStackNavigationProp, NativeStackScreenProps } from '@react-navigation/native-stack';
 import { t, useDotYouClientContext } from 'homebase-id-app-common';
-import { useState, useMemo, useCallback, useLayoutEffect, useRef, useEffect, memo } from 'react';
-import { View, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
+import React, {
+  memo,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { Asset, launchImageLibrary } from 'react-native-image-picker';
+import Animated, { SlideInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Colors } from '../../app/Colors';
+import { FeedStackParamList } from '../../app/FeedStack';
+import { LinkPreviewBar } from '../../components/Chat/Link-Preview-Bar';
+import { ArticleComposer } from '../../components/Feed/Article/ArticleComposer';
+import { AclIcon, AclSummary } from '../../components/Feed/Composer/AclSummary';
+import { FileOverview } from '../../components/Files/FileOverview';
+import { ErrorNotification } from '../../components/ui/Alert/ErrorNotification';
+import { ActionGroup } from '../../components/ui/Form/ActionGroup';
+import { Option, Select } from '../../components/ui/Form/Select';
+import { Article, Ellipsis, Globe, Lock, Pencil, Plus } from '../../components/ui/Icons/icons';
+import { Backdrop } from '../../components/ui/Modal/Backdrop';
+import { Text } from '../../components/ui/Text/Text';
+import { useCircles } from '../../hooks/circles/useCircles';
 import { useChannels } from '../../hooks/feed/channels/useChannels';
 import { usePostComposer } from '../../hooks/feed/post/usePostComposer';
 import { useDarkMode } from '../../hooks/useDarkMode';
-import { ErrorNotification } from '../../components/ui/Alert/ErrorNotification';
-import { Plus, Ellipsis, Globe, Lock, Pencil, Article } from '../../components/ui/Icons/icons';
-import { FileOverview } from '../../components/Files/FileOverview';
-import { Select, Option } from '../../components/ui/Form/Select';
-import { AclIcon, AclSummary } from '../../components/Feed/Composer/AclSummary';
-import { Colors } from '../../app/Colors';
 import { ImageSource } from '../../provider/image/RNImageProvider';
-import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet';
-import { useCircles } from '../../hooks/circles/useCircles';
-import { Text } from '../../components/ui/Text/Text';
-import { ActionGroup } from '../../components/ui/Form/ActionGroup';
-import { getImageSize, openURL } from '../../utils/utils';
-import React from 'react';
-import Animated, { SlideInDown } from 'react-native-reanimated';
-import { FeedStackParamList } from '../../app/FeedStack';
-import { NativeStackNavigationProp, NativeStackScreenProps } from '@react-navigation/native-stack';
-import { LinkPreviewBar } from '../../components/Chat/Link-Preview-Bar';
-import { LinkPreview } from '@homebase-id/js-lib/media';
-import { Backdrop } from '../../components/ui/Modal/Backdrop';
-import PasteInput, { PastedFile } from '@mattermost/react-native-paste-input';
-import { ArticleComposer } from '../../components/Feed/Article/ArticleComposer';
+import { openURL } from '../../utils/utils';
 
 type PostComposerProps = NativeStackScreenProps<FeedStackParamList, 'Compose'>;
 
@@ -142,32 +155,32 @@ export const PostComposer = memo(
     );
     const canPost = caption?.length || assets?.length;
 
-    const onPaste = useCallback(
-      async (error: string | null | undefined, files: PastedFile[]) => {
-        if (error) {
-          console.error('Error while pasting:', error);
-          return;
-        }
-        const pastedItems: Asset[] = await Promise.all(
-          files
-            .map(async (file) => {
-              if (!file.type.startsWith('image')) return;
-              const { width, height } = await getImageSize(file.uri);
-              return {
-                uri: file.uri,
-                type: file.type,
-                fileName: file.fileName,
-                fileSize: file.fileSize,
-                height: height,
-                width: width,
-              } as Asset;
-            })
-            .filter(Boolean) as Promise<Asset>[]
-        );
-        setAssets(pastedItems);
-      },
-      [setAssets]
-    );
+    // const onPaste = useCallback(
+    //   async (error: string | null | undefined, files: PastedFile[]) => {
+    //     if (error) {
+    //       console.error('Error while pasting:', error);
+    //       return;
+    //     }
+    //     const pastedItems: Asset[] = await Promise.all(
+    //       files
+    //         .map(async (file) => {
+    //           if (!file.type.startsWith('image')) return;
+    //           const { width, height } = await getImageSize(file.uri);
+    //           return {
+    //             uri: file.uri,
+    //             type: file.type,
+    //             fileName: file.fileName,
+    //             fileSize: file.fileSize,
+    //             height: height,
+    //             width: width,
+    //           } as Asset;
+    //         })
+    //         .filter(Boolean) as Promise<Asset>[]
+    //     );
+    //     setAssets(pastedItems);
+    //   },
+    //   [setAssets]
+    // );
 
     const actionGroupOptions = useMemo(
       () => [
@@ -201,78 +214,40 @@ export const PostComposer = memo(
         <ErrorNotification error={error} />
         <Animated.View
           entering={SlideInDown}
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            paddingTop: insets.top + 8,
-            paddingBottom: 16,
-            paddingHorizontal: 8,
-            backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
-            zIndex: 0,
-          }}
+          style={[
+            styles.composerContainer,
+            {
+              paddingTop: insets.top + 8,
+              backgroundColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
+            },
+          ]}
         >
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              paddingBottom: 8,
-            }}
-          >
-            <TouchableOpacity
-              style={{
-                paddingHorizontal: 8,
-                paddingTop: 8,
-                paddingBottom: 12,
-              }}
-              onPress={() => navigation.goBack()}
-            >
-              <Text style={{ fontSize: 16 }}>{t('Cancel')}</Text>
+          <View style={styles.headerRow}>
+            <TouchableOpacity style={styles.cancelButton} onPress={() => navigation.goBack()}>
+              <Text style={styles.buttonText}>{t('Cancel')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={{
-                backgroundColor: Colors.indigo[500],
-                opacity: canPost ? 1 : 0.5,
-
-                paddingHorizontal: 8,
-                paddingVertical: 6,
-                borderRadius: 5,
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
-                zIndex: -1,
-              }}
+              style={[styles.postButton, { opacity: canPost ? 1 : 0.5 }]}
               disabled={!canPost}
               onPress={doPost}
             >
-              <Text style={{ color: Colors.white, fontSize: 16 }}>{t('Post')}</Text>
+              <Text style={styles.postButtonText}>{t('Post')}</Text>
             </TouchableOpacity>
           </View>
           <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
             <View
-              style={{
-                padding: 16,
-                backgroundColor: isDarkMode ? Colors.black : Colors.white,
-                borderWidth: 1,
-                borderColor: isDarkMode ? Colors.slate[800] : Colors.gray[100],
-                borderRadius: 6,
-              }}
+              style={[
+                styles.inputContainer,
+                {
+                  backgroundColor: isDarkMode ? Colors.black : Colors.white,
+                  borderColor: isDarkMode ? Colors.slate[800] : Colors.gray[100],
+                },
+              ]}
             >
-              <PasteInput
-                onPaste={onPaste}
+              <TextInput
                 placeholder="What's up?"
-                style={{
-                  paddingVertical: 5,
-                  lineHeight: 20,
-                  fontSize: 16,
-                  minHeight: 124,
-                  color: isDarkMode ? Colors.white : Colors.black,
-                  textAlignVertical: 'top',
-                }}
+                style={[styles.textInput, { color: isDarkMode ? Colors.white : Colors.black }]}
                 multiline={true}
                 onChange={(event) => setCaption(event.nativeEvent.text)}
               />
@@ -853,3 +828,56 @@ const CircleSelector = memo(
     );
   }
 );
+
+const styles = StyleSheet.create({
+  composerContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingBottom: 16,
+    paddingHorizontal: 8,
+    zIndex: 0,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingBottom: 8,
+  },
+  cancelButton: {
+    paddingHorizontal: 8,
+    paddingTop: 8,
+    paddingBottom: 12,
+  },
+  buttonText: {
+    fontSize: 16,
+  },
+  postButton: {
+    backgroundColor: Colors.indigo[500],
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    borderRadius: 5,
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    zIndex: -1,
+  },
+  postButtonText: {
+    color: Colors.white,
+    fontSize: 16,
+  },
+  inputContainer: {
+    padding: 16,
+    borderWidth: 1,
+    borderRadius: 6,
+  },
+  textInput: {
+    paddingVertical: 5,
+    lineHeight: 20,
+    fontSize: 16,
+    minHeight: 124,
+    textAlignVertical: 'top',
+  },
+});

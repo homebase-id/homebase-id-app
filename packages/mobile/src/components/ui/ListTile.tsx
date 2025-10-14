@@ -1,6 +1,6 @@
-import { FC, useState } from 'react';
+import { useState } from 'react';
 import { IconProps } from './Icons/icons';
-import { ActivityIndicator, StyleProp, TouchableOpacity, ViewStyle } from 'react-native';
+import { ActivityIndicator, StyleProp, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 import { Text } from './Text/Text';
 
 export const ListTile = ({
@@ -10,7 +10,7 @@ export const ListTile = ({
   showLoader,
   style,
 }: {
-  icon: FC<IconProps>;
+  icon: (props: IconProps) => JSX.Element;
   title: string;
   onPress: () => void | Promise<void>;
   showLoader?: boolean;
@@ -24,27 +24,25 @@ export const ListTile = ({
     setPending(false);
   };
   return (
-    <TouchableOpacity
-      onPress={() => onClick()}
-      style={[
-        {
-          display: 'flex',
-          flexDirection: 'row',
-          alignItems: 'center',
-          paddingVertical: 12,
-        },
-        style,
-      ]}
-    >
+    <TouchableOpacity onPress={() => onClick()} style={[styles.container, style]}>
       {icon({ size: 'lg' })}
-      <Text
-        style={{
-          marginLeft: 16,
-        }}
-      >
-        {title}
-      </Text>
-      {pending ? <ActivityIndicator style={{ marginLeft: 'auto' }} /> : null}
+      <Text style={styles.title}>{title}</Text>
+      {pending ? <ActivityIndicator style={styles.loader} /> : null}
     </TouchableOpacity>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+  },
+  title: {
+    marginLeft: 16,
+  },
+  loader: {
+    marginLeft: 'auto',
+  },
+});

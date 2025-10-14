@@ -1,4 +1,8 @@
-import { DEFAULT_PAYLOAD_KEY, HomebaseFile } from '@homebase-id/js-lib/core';
+import {
+  DEFAULT_PAYLOAD_DESCRIPTOR_KEY,
+  DEFAULT_PAYLOAD_KEY,
+  HomebaseFile,
+} from '@homebase-id/js-lib/core';
 import { getChannelDrive, PostContent } from '@homebase-id/js-lib/public';
 import { memo } from 'react';
 import { calculateScaledDimensions } from '../../../utils/utils';
@@ -15,7 +19,9 @@ type PostMediaProps = {
 };
 
 export const PostMedia = memo(({ post, gestureRefs, showPrimaryMedia }: PostMediaProps) => {
-  const payloads = post?.fileMetadata.payloads?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY);
+  const payloads = post?.fileMetadata.payloads?.filter(
+    (p) => p.key !== DEFAULT_PAYLOAD_KEY && !p.key.includes(DEFAULT_PAYLOAD_DESCRIPTOR_KEY)
+  );
   const fileId = post.fileId;
   const previewThumbnail = post.fileMetadata.appData.previewThumbnail;
   const odinId = post.fileMetadata.senderOdinId;

@@ -1,6 +1,6 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useLayoutEffect, useRef, useState } from 'react';
-import { Alert, ScrollView, Share, TouchableOpacity, View } from 'react-native';
+import { Alert, ScrollView, Share, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Text } from '../../components/ui/Text/Text';
 import { getVersion, getBuildNumber } from 'react-native-device-info';
 import { version } from '../../../package.json';
@@ -27,7 +27,7 @@ import { useAuthenticatedPushNotification } from '../../hooks/push-notification/
 
 import { ProfileInfo } from '../../components/Profile/ProfileInfo';
 import { t } from 'homebase-id-app-common';
-import { clearLogs, getLogs, shareLogs } from '../../provider/log/logger';
+import { addLogs, clearLogs, getLogs, shareLogs } from '../../provider/log/logger';
 import Toast from 'react-native-toast-message';
 import { ListTile } from '../../components/ui/ListTile';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
@@ -72,15 +72,13 @@ export const ProfilePage = (_props: SettingsProps) => {
       ]
     );
   };
+  const { top, bottom } = useSafeAreaInsets();
 
   const navigate = (target: keyof ProfileStackParamList) => _props.navigation.navigate(target);
   return (
-    <SafeAreaView>
+    <SafeAreaView style={{ paddingTop: top, paddingBottom: bottom }}>
       <Container>
-        <ScrollView
-          style={{ display: 'flex', flexDirection: 'column', paddingVertical: 12 }}
-          showsVerticalScrollIndicator={false}
-        >
+        <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
           <ProfileInfo />
           <ListTile title={t('Followers')} icon={People} onPress={() => navigate('Followers')} />
           <ListTile title={t('Following')} icon={People} onPress={() => navigate('Following')} />
@@ -157,7 +155,7 @@ export const VersionInfo = () => {
 
   return (
     <TouchableOpacity onPress={doLoadFullVersion}>
-      <Text style={{ paddingTop: 10 }}>{fullVersion || version}</Text>
+      <Text style={styles.versionText}>{fullVersion || version}</Text>
     </TouchableOpacity>
   );
 };
@@ -313,6 +311,23 @@ const DeleteCache = () => {
       exact: false,
     });
     setDone(true);
+    const cache = query.getQueryCache().findAll();
+    const validQueries = cache.filter((query) => query.state.data !== undefined);
+    const validQueryKeys = validQueries.map((query) => query.queryKey);
+    const jsonData = validQueryKeys.map((query) => {
+      return {
+        key: query,
+      };
+    });
+    addLogs({
+      message: 'Cache cleared. Leftover cache data',
+      type: 'info',
+      title: 'Cache',
+      details: {
+        title: 'Cache keys left',
+        stackTrace: JSON.stringify(jsonData),
+      },
+    });
     setTimeout(() => {
       setDone(false);
     }, 5000);
@@ -337,10 +352,24 @@ const DeleteCache = () => {
         Delete Cache
       </Text>
       {done ? (
-        <View style={{ marginLeft: 'auto' }}>
+        <View style={styles.autoMarginLeft}>
           <CheckCircle />
         </View>
       ) : null}
     </TouchableOpacity>
   );
 };
+
+const styles = StyleSheet.create({
+  scrollView: {
+    display: 'flex',
+    flexDirection: 'column',
+    paddingVertical: 12,
+  },
+  versionText: {
+    paddingTop: 10,
+  },
+  autoMarginLeft: {
+    marginLeft: 'auto',
+  },
+});

@@ -13,8 +13,10 @@ const STARTER_MESSAGES = [
 
 export const EmptyChatContainer = ({
   doSend,
+  isMe,
 }: {
   doSend: (message: { text: string }[]) => void;
+  isMe?: boolean;
 }) => {
   const { isDarkMode } = useDarkMode();
   return (
@@ -43,17 +45,21 @@ export const EmptyChatContainer = ({
           margin: 8,
         }}
       >
-        {t('Chat is empty')}
+        {isMe ? t('Your Personal Space') : t('Chat is empty')}
       </Text>
       <Text
         style={{
           fontSize: 18,
           margin: 2,
           marginBottom: 16,
+          textAlign: 'center',
+          marginHorizontal: 16,
           color: isDarkMode ? Colors.slate[300] : Colors.slate[500],
         }}
       >
-        {t('Be the one to break the ice')}
+        {isMe
+          ? t('Use this space to save your notes and important information')
+          : t('Be the one to break the ice')}
       </Text>
       {STARTER_MESSAGES.map((message, index) => (
         <StarterBubbles

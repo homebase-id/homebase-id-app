@@ -8,17 +8,13 @@ import {
   RichText,
 } from '@homebase-id/js-lib/core';
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import {
-  Alert,
-  Dimensions,
-  Keyboard,
-  Platform,
-  Pressable,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  interpolate,
+} from 'react-native-reanimated';
+import { Alert, Dimensions, Platform, Pressable, StyleSheet, TouchableOpacity } from 'react-native';
 import { ChatAppBar, SelectedMessageProp } from '../../components/Chat/Chat-app-bar';
 import {
   ChatDeletedArchivalStaus,
@@ -54,7 +50,6 @@ import { NoConversationHeader } from '../../components/Chat/NoConversationHeader
 import { ChatForwardModal } from '../../components/Chat/Chat-Forward';
 import Dialog from 'react-native-dialog';
 import { BlurView } from '@react-native-community/blur';
-import { PastedFile } from '@mattermost/react-native-paste-input';
 import { Colors } from '../../app/Colors';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { Text } from '../../components/ui/Text/Text';
@@ -63,11 +58,12 @@ import { RetryModal } from '../../components/Chat/Reactions/Modal/RetryModal';
 import { getPlainTextFromRichText, t } from 'homebase-id-app-common';
 import { useWebSocketContext } from '../../components/WebSocketContext/useWebSocketContext';
 import { LinkPreview } from '@homebase-id/js-lib/media';
-import { getImageSize } from '../../utils/utils';
 import { openURL } from '../../utils/utils';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ReportModal } from '../../components/Chat/Reactions/Modal/ReportModal';
 import { useIntroductions } from '../../hooks/introductions/useIntroductions';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useReanimatedKeyboardAnimation } from 'react-native-keyboard-controller';
 
 export type SelectedMessageState = {
   messageCordinates: { x: number; y: number };
@@ -78,8 +74,6 @@ export type SelectedMessageState = {
 const RENDERED_PAGE_SIZE = 50;
 export type ChatProp = NativeStackScreenProps<ChatStackParamList, 'ChatScreen'>;
 const ChatPage = memo(({ route, navigation }: ChatProp) => {
-  const insets = useSafeAreaInsets();
-
   const [replyMessage, setReplyMessage] = useState<ChatMessageIMessage | null>(null);
   const identity = useAuth().getIdentity();
 
@@ -153,6 +147,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
                 ? value.fileMetadata.payloads.length.toString()
                 : undefined,
             ...value,
+            edited: value.fileMetadata.appData.content.isEdited || false,
           };
         }) || [],
     [chatMessages, identity]
@@ -404,7 +399,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
   }, [initalSelectedMessageState]);
 
   const doReturnToConversations = useCallback(
-    () => navigation.navigate('Conversation'),
+    () => navigation.navigate('Conversation', undefined, { pop: true }),
     [navigation]
   );
 
@@ -487,33 +482,47 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
     [conversation, doSend, navigation, title]
   );
 
-  const onPaste = useCallback(
-    async (error: string | null | undefined, files: PastedFile[]) => {
-      if (error) {
-        console.error('Error while pasting:', error);
-        return;
-      }
-      const pastedItems: ImageSource[] = await Promise.all(
-        files
-          .map(async (file) => {
-            if (!file.type.startsWith('image')) return;
-            const { width, height } = await getImageSize(file.uri);
-            return {
-              uri: file.uri,
-              type: file.type,
-              fileName: file.fileName,
-              fileSize: file.fileSize,
-              height: height,
-              width: width,
-            } as ImageSource;
-          })
-          .filter(Boolean) as Promise<ImageSource>[]
-      );
-      onAssetsAdded(pastedItems);
-    },
-    [onAssetsAdded]
-  );
+  // const onPaste = useCallback(
+  //   async (error: string | null | undefined, files: PastedFile[]) => {
+  //     if (error) {
+  //       console.error('Error while pasting:', error);
+  //       return;
+  //     }
+  //     const pastedItems: ImageSource[] = await Promise.all(
+  //       files
+  //         .map(async (file) => {
+  //           if (!file.type.startsWith('image')) return;
+  //           const { width, height } = await getImageSize(file.uri);
+  //           return {
+  //             uri: file.uri,
+  //             type: file.type,
+  //             fileName: file.fileName,
+  //             fileSize: file.fileSize,
+  //             height: height,
+  //             width: width,
+  //           } as ImageSource;
+  //         })
+  //         .filter(Boolean) as Promise<ImageSource>[]
+  //     );
+  //     onAssetsAdded(pastedItems);
+  //   },
+  //   [onAssetsAdded]
+  // );
   const [isOpen, setIsOpen] = useState(false);
+  const menuAnim = useSharedValue(0);
+
+  useEffect(() => {
+    menuAnim.value = withTiming(isOpen ? 1 : 0, { duration: isOpen ? 180 : 120 });
+  }, [isOpen, menuAnim]);
+
+  const menuAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: menuAnim.value,
+    transform: [
+      {
+        translateY: menuAnim.value === 0 ? -30 : withTiming(0, { duration: 180 }),
+      },
+    ],
+  }));
   const { isDarkMode } = useDarkMode();
 
   const host = identity
@@ -638,6 +647,15 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
     ]
   );
 
+  const { bottom } = useSafeAreaInsets();
+  const { progress } = useReanimatedKeyboardAnimation();
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      paddingBottom:
+        Platform.OS === 'ios' ? interpolate(progress.value, [0, 1], [bottom, 4]) : undefined,
+    };
+  }, [replyMessage]);
+
   if (!conversation) {
     if (isLoadingConversation) return null;
     return <NoConversationHeader title="No conversation found" goBack={doReturnToConversations} />;
@@ -647,15 +665,16 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
     <BottomSheetModalProvider>
       <GestureHandlerRootView>
         <ErrorNotification error={clearChatError || deleteChatError} />
-        <View
-          style={{
-            paddingBottom:
-              Platform.OS === 'ios' && (replyMessage || Keyboard.isVisible()) ? 0 : insets.bottom,
-            flex: 1,
-            // Force the height on iOS to better support the keyboard handling
-            minHeight: Platform.OS === 'ios' ? Dimensions.get('window').height : undefined,
-            backgroundColor: isDarkMode ? Colors.slate[900] : Colors.slate[50],
-          }}
+        <Animated.View
+          style={[
+            {
+              flex: 1,
+              // Force the height on iOS to better support the keyboard handling
+              minHeight: Platform.OS === 'ios' ? Dimensions.get('window').height : undefined,
+              backgroundColor: isDarkMode ? Colors.slate[900] : Colors.slate[50],
+            },
+            animatedStyle,
+          ]}
         >
           <ErrorBoundary>
             <ChatAppBar
@@ -684,11 +703,13 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
                   : undefined
               }
             />
-            {isOpen ? (
-              <View
-                style={{
+            <Animated.View
+              pointerEvents={isOpen ? 'auto' : 'none'}
+              style={[
+                {
                   position: 'absolute',
-                  top: Platform.select({ ios: 90, android: 56 }),
+                  // Even more vertical offset for more separation from the app bar
+                  top: Platform.select({ ios: 80, android: 95 }),
                   minWidth: 180,
                   right: 4,
                   backgroundColor: isDarkMode ? Colors.black : Colors.white,
@@ -697,36 +718,34 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
                   borderWidth: 1,
                   borderColor: isDarkMode ? Colors.slate[700] : Colors.gray[200],
                   borderRadius: 4,
-                }}
-              >
-                {chatOptions.map((child, index) => (
+                },
+                menuAnimatedStyle,
+              ]}
+            >
+              {isOpen &&
+                chatOptions.map((child, index) => (
                   <TouchableOpacity
                     key={index}
                     onPress={() => {
                       setIsOpen(false);
                       child.onPress();
                     }}
-                    style={{
-                      paddingHorizontal: 8,
-                      paddingVertical: 4,
-                      backgroundColor: isDarkMode ? Colors.black : Colors.white,
-                      flexDirection: 'row',
-                      gap: 6,
-                      alignItems: 'center',
-                    }}
+                    style={[
+                      styles.menuItem,
+                      { backgroundColor: isDarkMode ? Colors.black : Colors.white },
+                    ]}
                   >
                     <Text>{child.label}</Text>
                   </TouchableOpacity>
                 ))}
-              </View>
-            ) : null}
+            </Animated.View>
             <ChatConnectedState {...conversation} />
             <OfflineState isConnected={isOnline} />
             <Host>
               <Pressable
                 onPress={dismissSelectedMessage}
                 disabled={selectedMessage.selectedMessage === undefined}
-                style={{ flex: 1 }}
+                style={styles.flex1}
               >
                 <ErrorBoundary>
                   <ChatDetail
@@ -741,7 +760,6 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
                     doOpenRetryModal={openRetryModal}
                     replyMessage={replyMessage}
                     setReplyMessage={setReplyMessage}
-                    onPaste={onPaste}
                     hasMoreMessages={hasMoreMessages}
                     fetchMoreMessages={fetchMoreMessages}
                     conversationId={route.params.convoId}
@@ -759,7 +777,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
               />
             </Host>
           </ErrorBoundary>
-        </View>
+        </Animated.View>
         <EmojiPickerModal
           ref={emojiPickerSheetModalRef}
           selectedMessage={selectedMessage.selectedMessage}
@@ -847,6 +865,7 @@ const EditDialogBox = memo(({ visible, handleDialogClose, selectedMessage }: Edi
           content: {
             ...selectedMessage?.fileMetadata.appData.content,
             message: value,
+            isEdited: true,
           },
         },
       },
@@ -972,5 +991,18 @@ const DeleteDialogBox = memo(
     );
   }
 );
+
+const styles = StyleSheet.create({
+  menuItem: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    flexDirection: 'row',
+    gap: 6,
+    alignItems: 'center',
+  },
+  flex1: {
+    flex: 1,
+  },
+});
 
 export default ChatPage;

@@ -7,6 +7,8 @@ import {
 } from '@react-navigation/native';
 
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { Platform } from 'react-native';
+import { DotYouClientProvider } from '../components/Auth/DotYouClientProvider';
 import {
   circleDrives,
   drives,
@@ -14,56 +16,55 @@ import {
   useAuth,
   useValidTokenCheck,
 } from '../hooks/auth/useAuth';
-import { DotYouClientProvider } from '../components/Auth/DotYouClientProvider';
-import { Platform } from 'react-native';
 
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { memo } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { memo } from 'react';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Colors } from './Colors';
 
 // Pages
+import { PushNotificationProvider } from '../components/push-notification/PushNotificationProvider';
+import { useOnlineManager } from '../hooks/platform/useOnlineManager';
+import { useRefetchOnFocus } from '../hooks/platform/useRefetchOnFocus';
+import { useAuthenticatedPushNotification } from '../hooks/push-notification/useAuthenticatedPushNotification';
+import { useDarkMode } from '../hooks/useDarkMode';
 import { HomePage } from '../pages/home/home-page';
 import { LoginPage } from '../pages/login/login-page';
-import { useDarkMode } from '../hooks/useDarkMode';
-import { useRefetchOnFocus } from '../hooks/platform/useRefetchOnFocus';
-import { useOnlineManager } from '../hooks/platform/useOnlineManager';
-import { PushNotificationProvider } from '../components/push-notification/PushNotificationProvider';
-import { useAuthenticatedPushNotification } from '../hooks/push-notification/useAuthenticatedPushNotification';
 
-import { ErrorToaster } from '../components/ui/Alert/ErrorToaster';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import { t } from 'homebase-id-app-common';
+import BootSplash from 'react-native-bootsplash';
+import { KeyboardProvider } from 'react-native-keyboard-controller';
+import { AudioContextProvider } from '../components/AudioContext/AudioContext';
+import BubbleColorProvider from '../components/BubbleContext/BubbleContext';
 import {
+  TabChatIcon,
+  TabCommunityIcon,
   TabFeedIcon,
   TabHouseIcon,
-  TabChatIcon,
   TabMenuIcon,
 } from '../components/Nav/TabStackIcons';
-import { AudioContextProvider } from '../components/AudioContext/AudioContext';
-import { WebSocketContextProvider } from '../components/WebSocketContext/WebSocketContext';
-import { useInitialPushNotification } from '../hooks/push-notification/useInitialPushNotification';
-import { ErrorBoundary } from '../components/ui/ErrorBoundary/ErrorBoundary';
-import { RouteContextProvider, useRouteContext } from '../components/RouteContext/RouteContext';
-import { useShareManager } from '../hooks/platform/useShareManager';
-import { OdinQueryClient } from './OdinQueryClient';
-import { ChatStack, ChatStackParamList } from './ChatStack';
-import { ProfileStack, ProfileStackParamList } from './ProfileStack';
-import BootSplash from 'react-native-bootsplash';
-import BubbleColorProvider from '../components/BubbleContext/BubbleContext';
-import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { ExtendPermissionDialog } from '../components/Permissions/ExtendPermissionDialog';
-import { t } from 'homebase-id-app-common';
-import { FEED_CHAT_APP_ID } from './constants';
-import { Toast } from '../components/ui/Toast/Toast';
-import { NotificationToaster } from '../components/ui/Alert/NotificationToaster';
-import { FeedStack, FeedStackParamList } from './FeedStack';
+import { RouteContextProvider, useRouteContext } from '../components/RouteContext/RouteContext';
 import ChatSettingsProvider from '../components/Settings/ChatSettingsContext';
+import { ErrorToaster } from '../components/ui/Alert/ErrorToaster';
+import { NotificationToaster } from '../components/ui/Alert/NotificationToaster';
+import { ErrorBoundary } from '../components/ui/ErrorBoundary/ErrorBoundary';
+import { Toast } from '../components/ui/Toast/Toast';
+import { WebSocketContextProvider } from '../components/WebSocketContext/WebSocketContext';
 import { useCacheCleanup } from '../hooks/file/useCacheCleanup';
-import { PendingUpgradeDialog } from '../components/PendingUpgrad/PendingUpgrade';
-import { CommunityStack, CommunityStackParamList } from './CommunityStack';
+import { useShareManager } from '../hooks/platform/useShareManager';
+import { useInitialPushNotification } from '../hooks/push-notification/useInitialPushNotification';
+import { CommunityPage } from '../pages/community/community-page';
+import { ChatStack, ChatStackParamList } from './ChatStack';
+import { FEED_CHAT_APP_ID } from './constants';
+import { FeedStack, FeedStackParamList } from './FeedStack';
+import { OdinQueryClient } from './OdinQueryClient';
+import { ProfileStack, ProfileStackParamList } from './ProfileStack';
 
 export type AuthStackParamList = {
   Login: undefined;
-  Authenticated: undefined;
+  Authenticated: NavigatorScreenParams<TabStackParamList> | undefined;
 };
 
 export type TabStackParamList = {
@@ -71,7 +72,10 @@ export type TabStackParamList = {
   Feed: NavigatorScreenParams<FeedStackParamList>;
   Profile: NavigatorScreenParams<ProfileStackParamList> | undefined;
   Chat: NavigatorScreenParams<ChatStackParamList>;
-  Community: NavigatorScreenParams<CommunityStackParamList>;
+  Community: {
+    typeId?: string;
+    tagId?: string;
+  };
 };
 
 export type HomeStackParamList = {
@@ -86,8 +90,10 @@ const App = () => {
         <PushNotificationProvider>
           <RouteContextProvider>
             <DotYouClientProvider>
-              <RootStack />
-              <Toast />
+              <KeyboardProvider>
+                <RootStack />
+                <Toast />
+              </KeyboardProvider>
             </DotYouClientProvider>
           </RouteContextProvider>
         </PushNotificationProvider>
@@ -119,7 +125,7 @@ const RootStack = () => {
       <StackRoot.Navigator
         screenOptions={{
           headerShown: false,
-          statusBarColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
+          // statusBarColor: isDarkMode ? Colors.gray[900] : Colors.slate[50],
           /// StatusBarStyle throws error when changin in Ios (even setting to Ui UIControllerbasedStatusBar to yes)
           statusBarStyle: Platform.OS === 'android' ? (isDarkMode ? 'light' : 'dark') : undefined,
           animation: 'slide_from_right',
@@ -152,7 +158,6 @@ const AuthenticatedRoot = memo(() => {
                   permissions={permissions}
                   // needsAllConnected={true}
                 />
-                <PendingUpgradeDialog />
                 <NotificationToaster />
                 <AppStackScreen />
               </ErrorBoundary>
@@ -256,17 +261,18 @@ const TabStack = memo(() => {
           }}
         />
         <TabBottom.Screen
+          name="Community"
+          component={CommunityPage}
+          initialParams={{}}
+          options={{
+            tabBarIcon: TabCommunityIcon,
+          }}
+        />
+        <TabBottom.Screen
           name="Profile"
           component={ProfileStack}
           options={{
             tabBarIcon: TabMenuIcon,
-          }}
-        />
-        <TabBottom.Screen
-          name="Community"
-          component={CommunityStack}
-          options={{
-            tabBarButton: () => null,
           }}
         />
       </TabBottom.Navigator>

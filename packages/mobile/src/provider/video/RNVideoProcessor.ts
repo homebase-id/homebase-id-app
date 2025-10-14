@@ -1,5 +1,5 @@
 import { ImageSource } from '../image/RNImageProvider';
-import { jsonStringify64 } from '@homebase-id/js-lib/helpers';
+import { jsonStringify64, stringToUint8Array } from '@homebase-id/js-lib/helpers';
 
 import { VideoContentType } from '@homebase-id/js-lib/media';
 import { OdinBlob } from '../../../polyfills/OdinBlob';
@@ -10,6 +10,8 @@ import {
   PayloadFile,
   ThumbnailFile,
   GenerateKeyHeader,
+  MAX_PAYLOAD_DESCRIPTOR_BYTES,
+  DEFAULT_PAYLOAD_DESCRIPTOR_KEY,
 } from '@homebase-id/js-lib/core';
 import { createThumbnails } from '../image/RNThumbnailProvider';
 import { grabThumbnail, compressAndSegmentVideo } from './RNVideoSegmenter';
@@ -18,6 +20,7 @@ import { unlink } from 'react-native-fs';
 export const processVideo = async (
   video: ImageSource,
   payloadKey: string,
+  descriptorKey?: string,
   compress?: boolean,
   onUpdate?: (phase: string, progress: number) => void,
   aesKey?: Uint8Array
@@ -36,17 +39,17 @@ export const processVideo = async (
   const thumbnail = await grabThumbnail(video);
   const thumbSource: ImageSource | null = thumbnail
     ? {
-        uri: thumbnail.uri,
-        width: video.width || 0,
-        height: video.height || 0,
-        type: thumbnail.type,
-      }
+      uri: thumbnail.uri,
+      width: video.width || 0,
+      height: video.height || 0,
+      type: thumbnail.type,
+    }
     : null;
   const { tinyThumb, additionalThumbnails } =
     thumbSource && thumbnail
       ? await createThumbnails(thumbSource, payloadKey, thumbnail.type as ImageContentType, [
-          { quality: 100, width: 250, height: 250 },
-        ])
+        { quality: 100, maxPixelDimension: 320, maxBytes: 26 * 1024 },
+      ])
       : { tinyThumb: undefined, additionalThumbnails: undefined };
 
   if (additionalThumbnails) {
@@ -57,7 +60,7 @@ export const processVideo = async (
   if (thumbnail) {
     try {
       await unlink(thumbnail.uri);
-    } catch {}
+    } catch { }
   }
 
   // Compress and segment video
@@ -67,6 +70,19 @@ export const processVideo = async (
     onUpdate ? (progress) => onUpdate('Compressing', progress) : undefined,
     keyHeader
   );
+
+  // get the metadata size
+  const shouldEmbedContent = jsonStringify64(metadata).length < MAX_PAYLOAD_DESCRIPTOR_BYTES;
+
+  const descriptorContent = shouldEmbedContent ? jsonStringify64(metadata) : jsonStringify64({
+    mimeType: metadata.mimeType,
+    isSegmented: metadata.isSegmented,
+    isDescriptorContentComplete: false,
+    fileSize: metadata.fileSize,
+    duration: metadata.duration,
+    key: descriptorKey || DEFAULT_PAYLOAD_DESCRIPTOR_KEY,
+  });
+
 
   if ('segments' in videoData) {
     // HLS
@@ -79,7 +95,7 @@ export const processVideo = async (
     payloads.push({
       key: payloadKey,
       payload: segmentsBlob,
-      descriptorContent: jsonStringify64(metadata),
+      descriptorContent: descriptorContent,
 
       ...(keyHeader && keyHeader.iv
         ? { skipEncryption: true, iv: keyHeader.iv }
@@ -94,7 +110,16 @@ export const processVideo = async (
     payloads.push({
       key: payloadKey,
       payload: payloadBlob,
-      descriptorContent: metadata ? jsonStringify64(metadata) : undefined,
+      descriptorContent: descriptorContent,
+    });
+  }
+
+  if (!shouldEmbedContent) {
+    payloads.push({
+      key: descriptorKey || DEFAULT_PAYLOAD_DESCRIPTOR_KEY,
+      payload: new OdinBlob([stringToUint8Array(jsonStringify64(metadata))], { type: 'application/json' }) as unknown as Blob,
+      descriptorContent: undefined,
+      skipEncryption: false,
     });
   }
 

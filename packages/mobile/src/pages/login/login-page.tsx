@@ -1,84 +1,61 @@
+import { stringifyToQueryParams } from '@homebase-id/js-lib/helpers';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback, useEffect, useState } from 'react';
 import {
-  View,
-  Linking,
-  Image,
-  TouchableOpacity,
   ActivityIndicator,
   Alert,
+  Dimensions,
+  Image,
+  Linking,
   Platform,
+  StyleSheet,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { Text } from '../../components/ui/Text/Text';
+import { InAppBrowser } from 'react-native-inappbrowser-reborn';
 import { AuthStackParamList } from '../../app/App';
-import { useAuth, useYouAuthAuthorization } from '../../hooks/auth/useAuth';
+import { Colors } from '../../app/Colors';
 import { Container } from '../../components/ui/Container/Container';
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
-import { Colors } from '../../app/Colors';
-import { stringifyToQueryParams } from '@homebase-id/js-lib/helpers';
+import { Text } from '../../components/ui/Text/Text';
+import { useAuth, useYouAuthAuthorization } from '../../hooks/auth/useAuth';
 import { doCheckIdentity } from '../../hooks/checkIdentity/useCheckIdentity';
 import { VersionInfo } from '../profile/profile-page';
-import { InAppBrowser } from 'react-native-inappbrowser-reborn';
 
-import logo from '../../assets/homebase.png';
-import { Input } from '../../components/ui/Form/Input';
 import { YouAuthorizationParams } from '@homebase-id/js-lib/auth';
-import { AuthorName } from '../../components/ui/Name';
-import { PublicAvatar } from '../../components/ui/Avatars/Avatar';
-import { useDarkMode } from '../../hooks/useDarkMode';
-import { Divider } from '../../components/ui/Divider';
-import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
-import TextButton from '../../components/ui/Text/Text-Button';
 import { t } from 'homebase-id-app-common';
+import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
+import logo from '../../assets/homebase.png';
+import { PublicAvatar } from '../../components/ui/Avatars/Avatar';
+import { Divider } from '../../components/ui/Divider';
+import { Input } from '../../components/ui/Form/Input';
+import { AuthorName } from '../../components/ui/Name';
+import TextButton from '../../components/ui/Text/Text-Button';
+import { useDarkMode } from '../../hooks/useDarkMode';
+import { cleanDomainString, cleanInteractiveDomainString } from '../../utils/utils';
 
 type LoginProps = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 
 export const LoginPage = (_props: LoginProps) => {
   return (
     <SafeAreaView>
-      <Container style={{ flex: 1, flexDirection: 'column' }}>
-        <View
-          style={{
-            padding: 20,
-            alignItems: 'center',
-            gap: 10,
-            minHeight: 120,
-            flexDirection: 'row',
-            justifyContent: 'center',
-          }}
-        >
-          <Image source={logo} style={{ width: 40, height: 40 }} />
-          <Text style={{ fontSize: 25 }}>Homebase</Text>
+      <Container style={styles.container}>
+        <View style={styles.logoContainer}>
+          <View style={{ height: Math.max(0, Dimensions.get('window').height / 3 - 40) }} />
+          <Image source={logo} style={styles.logo} />
+          <Text style={styles.logoText}>Homebase</Text>
         </View>
         <Animated.View
-          style={{
-            paddingHorizontal: 12,
-            paddingVertical: 15,
-            marginTop: 'auto',
-          }}
+          style={[
+            styles.formContainer,
+            { marginTop: Math.max(0, Dimensions.get('window').height / 6 - 82) },
+          ]}
         >
           <LoginComponent />
         </Animated.View>
 
-        <View
-          style={{
-            padding: 20,
-            marginTop: 'auto',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'flex-end',
-            minHeight: 120,
-          }}
-        >
+        <View style={styles.footer}>
           <VersionInfo />
-          {/* <CheckForUpdates
-            hideIcon={true}
-            style={{
-              alignItems: 'center',
-              paddingBottom: 12,
-            }}
-          /> */}
         </View>
       </Container>
     </SafeAreaView>
@@ -128,6 +105,11 @@ const useFinalize = () => {
           const dataParams = url?.split(FINALIZE_PATH)[1];
           const params = new URLSearchParams(dataParams);
 
+          const error = params.get('error');
+          if (error) {
+            setState(null);
+            return;
+          }
           const identity = params.get('identity');
           const public_key = params.get('public_key');
           const salt = params.get('salt');
@@ -171,6 +153,12 @@ const LoginComponent = () => {
 
   const [invalid, setInvalid] = useState<boolean>(false);
   const [odinId, setOdinId] = useState<string>('');
+
+  const onChangeOdinId = useCallback((text: string) => {
+    const modifiedText = cleanInteractiveDomainString(text);
+    setOdinId(modifiedText);
+  }, []);
+
   const { data: authParams, refetch } = useParams();
   const lastIdentity = useAuth().getLastIdentity();
   const { isDarkMode } = useDarkMode();
@@ -183,18 +171,23 @@ const LoginComponent = () => {
   useEffect(() => setInvalid(false), [odinId]);
 
   const onLogin = useCallback(async () => {
-    if (!odinId && !lastIdentity) {
+    // Determine the final domain: use odinId if provided, otherwise fall back to lastIdentity
+    const finalDomain = odinId ? cleanDomainString(odinId) : lastIdentity;
+
+    if (!finalDomain) {
       setInvalid(true);
       return;
     }
 
-    const identityReachable = await doCheckIdentity(odinId || (lastIdentity as string));
+    setOdinId(finalDomain);
+
+    const identityReachable = await doCheckIdentity(finalDomain);
     if (!identityReachable) {
       setInvalid(true);
       return;
     }
 
-    const url = `https://${odinId || lastIdentity}/api/owner/v1/youauth/authorize?${stringifyToQueryParams(
+    const url = `https://${finalDomain}/api/owner/v1/youauth/authorize?${stringifyToQueryParams(
       authParams as unknown
     )}`;
     if (await InAppBrowser.isAvailable()) {
@@ -245,37 +238,28 @@ const LoginComponent = () => {
 
   return (
     <>
-      <Text style={{ fontSize: 18 }}>Your Homebase id</Text>
+      <Text style={styles.label}>Your Homebase id</Text>
       <Input
         placeholder="Homebase id"
-        style={{
-          // height: 40,
-          fontSize: Platform.OS === 'ios' ? 16 : 14,
-          // marginBottom: 16,
-        }}
-        onChangeText={setOdinId}
+        style={{ fontSize: Platform.OS === 'ios' ? 16 : 14 }}
+        value={odinId}
+        onChangeText={onChangeOdinId}
         autoCapitalize="none"
         autoCorrect={false}
         onSubmitEditing={onLogin}
       />
 
       {invalid ? (
-        <Animated.Text entering={FadeIn} style={{ color: Colors.red[500], marginBottom: 4 }}>
+        <Animated.Text entering={FadeIn} style={styles.errorText}>
           {t('Invalid homebase id')}
         </Animated.Text>
       ) : null}
 
       {finalizeState === 'error' ? (
-        <Text style={{ color: Colors.red[500], marginBottom: 4 }}>
-          {t('Something went wrong, please try again')}
-        </Text>
+        <Text style={styles.errorText}>{t('Something went wrong, please try again')}</Text>
       ) : null}
 
-      <View
-        style={{
-          alignItems: 'center',
-        }}
-      >
+      <View style={styles.buttonContainer}>
         <TextButton
           title="Login"
           onPress={onLogin}
@@ -285,55 +269,23 @@ const LoginComponent = () => {
           darkColor={Colors.indigo[800]}
           underlayColor={isDarkMode ? Colors.indigo[900] : Colors.indigo[300]}
           disabled={!odinId}
-          filledStyle={{
-            marginVertical: 8,
-          }}
-          textStyle={{
-            fontSize: 16,
-            lineHeight: 24,
-            fontWeight: '600',
-            color: Colors.white,
-          }}
+          filledStyle={styles.loginButtonFilled}
+          textStyle={styles.loginButtonText}
         />
       </View>
       {lastIdentity && !odinId && (
-        <Animated.View
-          style={{
-            marginTop: 24,
-            marginBottom: 4,
-          }}
-          layout={LinearTransition}
-          exiting={FadeOut}
-        >
-          {/* Render -----OR----- */}
+        <Animated.View style={styles.dividerContainer} layout={LinearTransition} exiting={FadeOut}>
           <Divider text="OR" />
           <TouchableOpacity
             onPress={onLogin}
-            style={{
-              flexShrink: 1,
-              backgroundColor: isDarkMode ? Colors.indigo[700] : Colors.indigo[100],
-              marginLeft: 'auto',
-              marginRight: 'auto',
-              borderRadius: 10,
-              paddingHorizontal: 8,
-            }}
+            style={[
+              styles.continueAsButton,
+              { backgroundColor: isDarkMode ? Colors.indigo[700] : Colors.indigo[100] },
+            ]}
           >
-            <View
-              style={{
-                flexDirection: 'row',
-                flexShrink: 1,
-                alignItems: 'center',
-                padding: 8,
-              }}
-            >
-              <PublicAvatar odinId={lastIdentity} style={{ width: 30, height: 30 }} />
-              <Text
-                style={{
-                  textAlign: 'center',
-                  fontSize: 16,
-                  marginLeft: 8,
-                }}
-              >
+            <View style={styles.continueAsRow}>
+              <PublicAvatar odinId={lastIdentity} style={styles.continueAsAvatar} />
+              <Text style={styles.continueAsText}>
                 Continue as {<AuthorName odinId={lastIdentity} />}
               </Text>
             </View>
@@ -341,21 +293,107 @@ const LoginComponent = () => {
         </Animated.View>
       )}
 
-      <View
-        style={{
-          flexDirection: 'row',
-          marginTop: 12,
-          justifyContent: 'center',
-          alignItems: 'center',
-          gap: 5,
-        }}
-      >
+      <View style={styles.signUpContainer}>
         <TouchableOpacity onPress={showSignUpAlert}>
-          <Text style={{ textDecorationLine: 'underline', fontSize: 14, lineHeight: 24 }}>
-            Don&apos;t have an account?
-          </Text>
+          <Text style={styles.signUpLink}>Don&apos;t have an account?</Text>
         </TouchableOpacity>
       </View>
     </>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    flexDirection: 'column',
+  },
+  logoContainer: {
+    minHeight: 120,
+    padding: 20,
+    alignItems: 'center',
+    gap: 10,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    position: 'relative',
+    top: 60,
+  },
+  logo: {
+    width: 40,
+    height: 40,
+  },
+  logoText: {
+    fontSize: 25,
+  },
+  formContainer: {
+    flex: 1,
+    justifyContent: 'flex-start',
+    paddingHorizontal: 12,
+    paddingVertical: 15,
+  },
+  footer: {
+    padding: 20,
+    marginTop: 'auto',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    minHeight: 120,
+  },
+  label: {
+    fontSize: 18,
+  },
+  errorText: {
+    color: Colors.red[500],
+    marginBottom: 4,
+  },
+  buttonContainer: {
+    alignItems: 'center',
+  },
+  loginButtonFilled: {
+    marginVertical: 8,
+  },
+  loginButtonText: {
+    fontSize: 16,
+    lineHeight: 24,
+    fontWeight: '600',
+    color: Colors.white,
+  },
+  dividerContainer: {
+    marginTop: 24,
+    marginBottom: 4,
+  },
+  continueAsButton: {
+    flexShrink: 1,
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    borderRadius: 10,
+    paddingHorizontal: 8,
+  },
+  continueAsRow: {
+    flexDirection: 'row',
+    flexShrink: 1,
+    alignItems: 'center',
+    padding: 8,
+  },
+  continueAsAvatar: {
+    width: 30,
+    height: 30,
+  },
+  continueAsText: {
+    textAlign: 'center',
+    fontSize: 16,
+    marginLeft: 8,
+  },
+  signUpContainer: {
+    flexDirection: 'row',
+    marginTop: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 5,
+  },
+  signUpLink: {
+    textDecorationLine: 'underline',
+    fontSize: 14,
+    lineHeight: 24,
+  },
+});

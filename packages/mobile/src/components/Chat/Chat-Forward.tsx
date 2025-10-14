@@ -206,6 +206,7 @@ export const ChatForwardModal = memo(
 
       await Promise.all(promises);
       if (promises.length === 1) {
+        setIsLoading(false);
         if (selectedContact.length === 1) {
           const contact = selectedContact[0];
 

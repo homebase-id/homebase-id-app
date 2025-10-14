@@ -1,10 +1,10 @@
+
 import {
   ImageContentType,
   ImageSize,
   ThumbnailFile,
   EmbeddedThumb,
 } from '@homebase-id/js-lib/core';
-import { ThumbnailInstruction } from '@homebase-id/js-lib/media';
 import { base64ToUint8Array, getNewId, uint8ArrayToBase64 } from '@homebase-id/js-lib/helpers';
 import { Platform } from 'react-native';
 import { CachesDirectoryPath, copyFile, readFile, stat, unlink } from 'react-native-fs';
@@ -12,21 +12,78 @@ import ImageResizer, { ResizeFormat } from '@bam.tech/react-native-image-resizer
 import { ImageSource } from './RNImageProvider';
 import { OdinBlob } from '../../../polyfills/OdinBlob';
 import { isBase64ImageURI, getExtensionForMimeType } from '../../utils/utils';
+import { ThumbnailInstruction } from '@homebase-id/js-lib/media';
 
 export const baseThumbSizes: ThumbnailInstruction[] = [
-  { quality: 75, width: 250, height: 250 },
-  { quality: 75, width: 600, height: 600 },
-  { quality: 75, width: 1600, height: 1600 },
+  { quality: 84, maxPixelDimension: 320, maxBytes: 26 * 1024 },
+  { quality: 84, maxPixelDimension: 640, maxBytes: 102 * 1024 },
+  { quality: 76, maxPixelDimension: 1080, maxBytes: 291 * 1024 },
+  { quality: 76, maxPixelDimension: 1600, maxBytes: 640 * 1024 },
 ];
 
-const tinyThumbSize: ThumbnailInstruction = {
-  quality: 10,
-  width: 20,
-  height: 20,
+export const tinyThumbSize: ThumbnailInstruction = {
+  quality: 76,
+  maxPixelDimension: 20,
+  maxBytes: 768,
 };
 
 const svgType = 'image/svg+xml';
 const gifType = 'image/gif';
+
+
+// Adapted from browser code
+export const getRevisedThumbs = (
+  sourceSize: ImageSize,
+  thumbs: ThumbnailInstruction[]
+): ThumbnailInstruction[] => {
+  const sourceMax = Math.max(sourceSize.pixelWidth, sourceSize.pixelHeight);
+  const thresholdMin = Math.floor((90 * sourceMax) / 100);
+  const thresholdMax = Math.floor((110 * sourceMax) / 100);
+
+  // Filter thumbnails: keep those not larger than sourceMax and outside 10% range
+  const keptThumbs = thumbs.filter(
+    (t) =>
+      (t.maxPixelDimension ?? 0) <= sourceMax &&
+      ((t.maxPixelDimension ?? 0) < thresholdMin ||
+        (t.maxPixelDimension ?? 0) > thresholdMax)
+  );
+
+  // If any thumbnails were removed, add the source size as a thumbnail
+  if (keptThumbs.length < thumbs.length) {
+    // Find the thumbnail with closest maxPixelDimension
+    const nearestThumb = thumbs
+      .slice()
+      .sort(
+        (a, b) =>
+          Math.abs((a.maxPixelDimension ?? 0) - sourceMax) -
+          Math.abs((b.maxPixelDimension ?? 0) - sourceMax)
+      )[0];
+
+    let maxBytes: number;
+    if (
+      nearestThumb &&
+      nearestThumb.maxPixelDimension &&
+      nearestThumb.maxBytes
+    ) {
+      const scale = sourceMax / nearestThumb.maxPixelDimension;
+      maxBytes = Math.round(nearestThumb.maxBytes * scale);
+      // Clamp between 10KB and 1MB
+      maxBytes = Math.max(10 * 1024, Math.min(maxBytes, 1024 * 1024));
+    } else {
+      maxBytes = 300 * 1024;
+    }
+
+    keptThumbs.push({
+      quality: sourceMax <= 640 ? 84 : 76,
+      maxPixelDimension: sourceMax,
+      maxBytes,
+    });
+  }
+
+  return keptThumbs.sort(
+    (a, b) => (a.maxPixelDimension ?? 0) - (b.maxPixelDimension ?? 0)
+  );
+};
 
 const getEmbeddedThumbOfThumbnailFile = async (
   thumbnailFile: ThumbnailFile,
@@ -107,37 +164,29 @@ const innerCreateThumbnails = async (
   // Create a thumbnail that fits scaled into a 20 x 20 canvas
   const { naturalSize, thumb: tinyThumb } = await createImageThumbnail(photo, key, tinyThumbSize);
 
-  const applicableThumbSizes = (thumbSizes || baseThumbSizes).reduce((currArray, thumbSize) => {
-    if (tinyThumb.payload.type === svgType) return currArray;
 
-    if (naturalSize.pixelWidth < thumbSize.width && naturalSize.pixelHeight < thumbSize.height) {
-      return currArray;
-    }
+  // Use getRevisedThumbs for thumbnail selection
+  const applicableThumbSizes: ThumbnailInstruction[] = getRevisedThumbs(naturalSize, thumbSizes || baseThumbSizes);
 
-    return [...currArray, thumbSize];
-  }, [] as ThumbnailInstruction[]);
 
-  if (
-    applicableThumbSizes.length !== (thumbSizes || baseThumbSizes).length &&
-    !applicableThumbSizes.some((thumbSize) => thumbSize.width === naturalSize.pixelWidth)
-  ) {
-    // Source image is too small for some of the requested sizes so we add the source dimensions as exact size
-    applicableThumbSizes.push({
-      quality: 100,
-      width: naturalSize.pixelWidth,
-      height: naturalSize.pixelHeight,
-    });
+  // Avoid duplicate tinyThumb if its size matches natural size
+  const thumbFiles: ThumbnailFile[] = [];
+  if (tinyThumb.pixelWidth !== naturalSize.pixelWidth || tinyThumb.pixelHeight !== naturalSize.pixelHeight) {
+    thumbFiles.push(tinyThumb);
   }
 
-  // Create additionalThumbnails
-  const additionalThumbnails: ThumbnailFile[] = [
-    tinyThumb,
-    ...(await Promise.all(
-      applicableThumbSizes.map(
-        async (thumbSize) => await (await createImageThumbnail(photo, key, thumbSize)).thumb
+  // Add revised thumbs
+  thumbFiles.push(
+    ...(
+      await Promise.all(
+        applicableThumbSizes.map(
+          async (thumbSize) => (await createImageThumbnail(photo, key, thumbSize)).thumb
+        )
       )
-    )),
-  ];
+    )
+  );
+
+  const additionalThumbnails: ThumbnailFile[] = thumbFiles;
 
   return {
     naturalSize,
@@ -174,19 +223,68 @@ const createImageThumbnail = async (
 ): Promise<{ naturalSize: ImageSize; thumb: ThumbnailFile }> => {
   if (!photo.filepath && !photo.uri) throw new Error('No filepath found in image source');
 
-  return createResizedImage(photo, instruction, format).then(async (resizedData) => {
-    return {
-      naturalSize: rotateNaturalSize(photo, resizedData),
-      thumb: {
-        pixelWidth: resizedData.width,
-        pixelHeight: resizedData.height,
-        payload: new OdinBlob(resizedData.path, {
-          type: `image/${instruction.type || format}`,
-        }) as unknown as Blob,
-        key,
-      },
-    };
-  });
+  // Use maxPixelDimension for both width and height (ensure numbers)
+  let targetWidth = Math.max(1, instruction.maxPixelDimension || 1);
+  let targetHeight = Math.max(1, instruction.maxPixelDimension || 1);
+
+  // Byte-budget compression loop
+  const maxBytes = instruction.maxBytes ?? Number.POSITIVE_INFINITY;
+  const isTinyThumb = targetWidth <= tinyThumbSize.maxPixelDimension;
+  let quality = Math.max(1, Math.min(100, instruction.quality));
+  let sourcePath: string = (photo.filepath || photo.uri) as string;
+
+  // First resize attempt
+  let resizedData = await createResizedImage(
+    { ...photo, filepath: sourcePath, uri: sourcePath },
+    { ...instruction, width: targetWidth, height: targetHeight, quality },
+    format
+  );
+  let fileStats = await stat(resizedData.path);
+
+  // Reduce quality until size <= maxBytes or quality reaches 1
+  while (fileStats.size > maxBytes && quality > 1) {
+    const excessRatio = fileStats.size / maxBytes;
+    const qualityDrop = Math.min(40, Math.max(5, Math.floor(quality * excessRatio * 0.5)));
+    quality = Math.max(1, quality - qualityDrop);
+
+    // For tiny thumbs, progressively recompress from the last resized output.
+    // For larger thumbs, recompress from the original to avoid compounding artifacts.
+    sourcePath = isTinyThumb ? resizedData.path : ((photo.filepath || photo.uri) as string);
+
+    resizedData = await createResizedImage(
+      { ...photo, filepath: sourcePath, uri: sourcePath },
+      { ...instruction, width: targetWidth, height: targetHeight, quality },
+      format
+    );
+    fileStats = await stat(resizedData.path);
+
+    // If still too large at quality ~1 for tiny thumbs, shrink dimensions
+    if (fileStats.size > maxBytes && quality < 2 && isTinyThumb) {
+      if (targetWidth === 1) {
+        throw new Error(
+          'The world has ended. A 1x1 thumb in quality 1 takes up more than MaxBytes bytes...'
+        );
+      }
+
+      // Use the current resized output as next input and try smaller dimensions
+      sourcePath = resizedData.path;
+      quality = 2; // ensure loop runs again
+      targetWidth = Math.max(1, targetWidth - 5);
+      targetHeight = Math.max(1, targetHeight - 5);
+    }
+  }
+
+  return {
+    naturalSize: rotateNaturalSize(photo, resizedData),
+    thumb: {
+      pixelWidth: resizedData.width,
+      pixelHeight: resizedData.height,
+      payload: new OdinBlob(resizedData.path, {
+        type: `image/${instruction.type || format}`,
+      }) as unknown as Blob,
+      key,
+    },
+  };
 };
 
 const rotateNaturalSize = (
@@ -216,7 +314,7 @@ const rotateNaturalSize = (
 
 export const createResizedImage = async (
   photo: ImageSource,
-  instruction: ThumbnailInstruction,
+  instruction: ThumbnailInstruction & { width: number; height: number },
   format: 'webp' | 'png' | 'jpeg' = Platform.OS === 'android' ? 'webp' : 'jpeg'
 ) => {
   return await ImageResizer.createResizedImage(

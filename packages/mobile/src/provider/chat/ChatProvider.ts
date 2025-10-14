@@ -1,49 +1,44 @@
 import {
   AppFileMetaData,
+  DEFAULT_PAYLOAD_DESCRIPTOR_KEY,
+  DEFAULT_PAYLOAD_KEY,
   DotYouClient,
-  HomebaseFile,
   EmbeddedThumb,
+  EncryptedKeyHeader,
+  FailedTransferStatuses,
   FileQueryParams,
   GetBatchQueryResultOptions,
+  HomebaseFile,
   ImageContentType,
   KeyHeader,
+  MAX_HEADER_CONTENT_BYTES,
   NewHomebaseFile,
   PayloadFile,
+  PriorityOptions,
+  RecipientTransferHistory,
+  RecipientTransferSummary,
+  RichText,
   ScheduleOptions,
   SecurityGroupType,
   SendContents,
   TargetDrive,
   ThumbnailFile,
+  TransferStatus,
+  TransferUploadStatus,
+  UpdateLocalInstructionSet,
+  UpdateResult,
   UploadFileMetadata,
   UploadInstructionSet,
+  decryptJsonContent,
+  decryptKeyHeader,
+  deleteFile,
   deleteFilesByGroupId,
+  getFileHeader,
   getFileHeaderByUniqueId,
+  patchFile,
   queryBatch,
   uploadFile,
-  TransferUploadStatus,
-  FailedTransferStatuses,
-  PriorityOptions,
-  RecipientTransferHistory,
-  TransferStatus,
-  deleteFile,
-  RichText,
-  decryptKeyHeader,
-  EncryptedKeyHeader,
-  decryptJsonContent,
-  getFileHeader,
-  DEFAULT_PAYLOAD_KEY,
-  RecipientTransferSummary,
-  MAX_HEADER_CONTENT_BYTES,
-  patchFile,
-  UpdateResult,
-  UpdateLocalInstructionSet,
 } from '@homebase-id/js-lib/core';
-import {
-  ChatDrive,
-  ConversationMetadata,
-  ConversationWithYourselfId,
-  UnifiedConversation,
-} from './ConversationProvider';
 import {
   assertIfDefined,
   getNewId,
@@ -54,13 +49,19 @@ import {
   tryJsonParse,
   uint8ArrayToBase64,
 } from '@homebase-id/js-lib/helpers';
+import { LinkPreview, LinkPreviewDescriptor } from '@homebase-id/js-lib/media';
+import { sendReadReceipt } from '@homebase-id/js-lib/peer';
+import { ellipsisAtMaxChar, getPlainTextFromRichText } from 'homebase-id-app-common';
 import { OdinBlob } from '../../../polyfills/OdinBlob';
 import { ImageSource } from '../image/RNImageProvider';
 import { createThumbnails } from '../image/RNThumbnailProvider';
 import { processVideo } from '../video/RNVideoProcessor';
-import { LinkPreview, LinkPreviewDescriptor } from '@homebase-id/js-lib/media';
-import { sendReadReceipt } from '@homebase-id/js-lib/peer';
-import { ellipsisAtMaxChar, getPlainTextFromRichText } from 'homebase-id-app-common';
+import {
+  ChatDrive,
+  ConversationMetadata,
+  ConversationWithYourselfId,
+  UnifiedConversation,
+} from './ConversationProvider';
 
 const CHAT_APP_ID = '2d781401-3804-4b57-b4aa-d8e4e2ef39f4';
 
@@ -97,6 +98,7 @@ export interface ChatMessage {
 
   /// DeliveryStatus of the message. Indicates if the message is sent, delivered or read
   deliveryStatus: ChatDeliveryStatus;
+  isEdited?: boolean;
 }
 
 const CHAT_MESSAGE_PAYLOAD_KEY = 'chat_mbl';
@@ -433,6 +435,7 @@ export const uploadChatMessage = async (
 
   for (let i = 0; files && i < files?.length; i++) {
     const payloadKey = `${CHAT_MESSAGE_PAYLOAD_KEY}${i}`;
+    const descriptorKey = `${DEFAULT_PAYLOAD_DESCRIPTOR_KEY}${i}`;
     const newMediaFile = files[i];
 
     if (newMediaFile.type?.startsWith('video/')) {
@@ -440,7 +443,7 @@ export const uploadChatMessage = async (
         tinyThumb: tinyThumbFromVideo,
         thumbnails: thumbnailsFromVideo,
         payloads: payloadsFromVideo,
-      } = await processVideo(newMediaFile, payloadKey, true, onUpdate, aesKey);
+      } = await processVideo(newMediaFile, payloadKey, descriptorKey, true, onUpdate, aesKey);
 
       thumbnails.push(...thumbnailsFromVideo);
       payloads.push(...payloadsFromVideo);
@@ -458,8 +461,8 @@ export const uploadChatMessage = async (
         payloadKey,
         (newMediaFile?.type as ImageContentType) || undefined,
         [
-          { quality: 75, width: 250, height: 250 },
-          { quality: 75, width: 1600, height: 1600 },
+          { quality: 84, maxPixelDimension: 320, maxBytes: 26 * 1024 },
+          { quality: 76, maxPixelDimension: 1600, maxBytes: 640 * 1024 },
         ]
       );
 
@@ -652,8 +655,10 @@ export const softDeleteChatMessage = async (
 ) => {
   const _recipients = deleteForEveryone ? recipients : [];
 
-  message.fileMetadata.appData.archivalStatus = ChatDeletedArchivalStaus;
-  message.fileMetadata.appData.content.message = '';
+  const content = {
+    ...message.fileMetadata.appData.content,
+    message: '',
+  };
 
   const uploadMetadata: UploadFileMetadata = {
     versionTag: message?.fileMetadata.versionTag,
@@ -661,10 +666,10 @@ export const softDeleteChatMessage = async (
     appData: {
       uniqueId: message.fileMetadata.appData.uniqueId,
       groupId: message.fileMetadata.appData.groupId,
-      archivalStatus: (message.fileMetadata.appData as AppFileMetaData<ChatMessage>).archivalStatus,
+      archivalStatus: ChatDeletedArchivalStaus,
       previewThumbnail: message.fileMetadata.appData.previewThumbnail,
       fileType: CHAT_MESSAGE_FILE_TYPE,
-      content: jsonStringify64({ ...message.fileMetadata.appData.content }),
+      content: jsonStringify64({ ...content }),
     },
     isEncrypted: true,
     accessControlList: message.serverMetadata?.accessControlList || {

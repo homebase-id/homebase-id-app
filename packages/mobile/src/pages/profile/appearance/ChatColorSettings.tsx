@@ -60,7 +60,7 @@ export const ChatColorSettings = () => {
   const messageProps = useMemo(() => {
     const receiverMessageProp: MessageProps<IMessage> = {
       position: 'left',
-      key: '0',
+      // key: '0',
       user: {
         _id: 2,
         name: 'Receiver',
@@ -98,7 +98,7 @@ export const ChatColorSettings = () => {
     };
     const senderMessageProp: MessageProps<IMessage> = {
       position: 'right',
-      key: '1',
+      // key: '1',
       user: {
         _id: 1,
         name: 'Me',
@@ -168,8 +168,8 @@ export const ChatColorSettings = () => {
               },
             ]}
           >
-            <Message {...messageProps.receiver} />
-            <Message {...messageProps.sender} />
+            <Message {...messageProps.receiver} key={'receiver'} />
+            <Message {...messageProps.sender} key={'sender'} />
           </View>
 
           {/* Render Colors */}

@@ -50,12 +50,7 @@ export const ChatInfoPage = memo((prop: ChatInfoProp) => {
 
   const headerLeft = useCallback(
     () => (
-      <HeaderBackButton
-        canGoBack={true}
-        labelVisible={false}
-        onPress={goBack}
-        tintColor={isDarkMode ? Colors.white : Colors.black}
-      />
+      <HeaderBackButton onPress={goBack} tintColor={isDarkMode ? Colors.white : Colors.black} />
     ),
     [goBack, isDarkMode]
   );

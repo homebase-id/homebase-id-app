@@ -40,6 +40,7 @@ import { useConversations } from '../hooks/chat/useConversations';
 import { ListTile } from '../components/ui/ListTile';
 import { SearchBarCommands } from 'react-native-screens';
 import { useTextInput } from '../hooks/useTextInput';
+import { PendingUpgradeDialog } from '../components/PendingUpgrad/PendingUpgrade';
 
 type ConversationProp = NativeStackScreenProps<ChatStackParamList, 'Conversation'>;
 
@@ -77,7 +78,7 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
   useLayoutEffect(() => {
     navigation.setOptions({
       headerSearchBarOptions: {
-        ref: searchRef,
+        ref: searchRef as React.RefObject<SearchBarCommands>,
         hideWhenScrolling: true,
         headerIconColor: isDarkMode ? Colors.white : Colors.black,
         placeholder: 'Search people',
@@ -206,6 +207,8 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
         <RemoveNotifications />
         <FloatingActionButton />
         <OfflineState />
+        <PendingUpgradeDialog />
+
         {conversations && conversations?.length ? (
           <ErrorBoundary>
             <FlatList

@@ -8,6 +8,7 @@ import { t } from 'homebase-id-app-common';
 import WebView from 'react-native-webview';
 import { useErrors } from '../../../hooks/errors/useErrors';
 import { Colors } from '../../../app/Colors';
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 
 export const SocialFeedWebView = memo(() => {
   const { isDarkMode } = useDarkMode();
@@ -96,32 +97,34 @@ export const SocialFeedWebView = memo(() => {
             />
           }
         >
-          <WebView
-            ref={webviewRef}
-            source={{ uri }}
-            injectedJavaScriptBeforeContentLoaded={INJECTED_JAVASCRIPT}
-            pullToRefreshEnabled={true}
-            style={{ backgroundColor: isDarkMode ? Colors.slate[900] : Colors.slate[50] }}
-            originWhitelist={originWhitelist} // Keeps the WebView from navigating away from the feed-app; Any links that don't match will be opened by the system.. Eg: open in the browser
-            onScroll={handleScroll}
-            onLoadEnd={() => setRefreshing(false)}
-            forceDarkOn={isDarkMode}
-            onError={(error) => {
-              add(error);
-            }}
-            renderError={renderError}
-            allowsBackForwardNavigationGestures={true}
-            onNavigationStateChange={(navState) => {
-              const targetUrl = navState.url;
-              const shouldMoveToNewWindow = !targetUrl.startsWith(uri);
-              if (targetUrl && shouldMoveToNewWindow) {
-                // Disable loading any page that is not part of the feed-app; And open it in the browser
-                webviewRef.current?.stopLoading();
-                webviewRef.current?.goBack();
-                Linking.openURL(targetUrl);
-              }
-            }}
-          />
+          <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
+            <WebView
+              ref={webviewRef}
+              source={{ uri }}
+              injectedJavaScriptBeforeContentLoaded={INJECTED_JAVASCRIPT}
+              pullToRefreshEnabled={true}
+              style={{ backgroundColor: isDarkMode ? Colors.slate[900] : Colors.slate[50] }}
+              originWhitelist={originWhitelist} // Keeps the WebView from navigating away from the feed-app; Any links that don't match will be opened by the system.. Eg: open in the browser
+              onScroll={handleScroll}
+              onLoadEnd={() => setRefreshing(false)}
+              forceDarkOn={isDarkMode}
+              onError={(error) => {
+                add(error);
+              }}
+              renderError={renderError}
+              allowsBackForwardNavigationGestures={true}
+              onNavigationStateChange={(navState) => {
+                const targetUrl = navState.url;
+                const shouldMoveToNewWindow = !targetUrl.startsWith(uri);
+                if (targetUrl && shouldMoveToNewWindow) {
+                  // Disable loading any page that is not part of the feed-app; And open it in the browser
+                  webviewRef.current?.stopLoading();
+                  webviewRef.current?.goBack();
+                  Linking.openURL(targetUrl);
+                }
+              }}
+            />
+          </KeyboardAvoidingView>
         </ScrollView>
       ) : null}
     </>

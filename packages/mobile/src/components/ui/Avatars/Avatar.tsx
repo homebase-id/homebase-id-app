@@ -21,6 +21,7 @@ import { Colors } from '../../../app/Colors';
 import { SvgUri } from 'react-native-svg';
 import { EmbeddedThumb, TargetDrive } from '@homebase-id/js-lib/core';
 import Animated from 'react-native-reanimated';
+import { FallbackImg } from '../FallbackImg/FallbackImg';
 
 export const Avatar = memo(
   (props: {
@@ -32,7 +33,7 @@ export const Avatar = memo(
     const { data: contact, isLoading } = useContact(props.odinId).fetch;
     if (isLoading) {
       return (
-        <Animated.View style={{ ...styles.tinyLogo, ...props.style }}>
+        <Animated.View style={[styles.tinyLogo, props.style]}>
           <ActivityIndicator size="small" color={Colors.violet[500]} />
         </Animated.View>
       );
@@ -43,7 +44,7 @@ export const Avatar = memo(
       contact?.fileMetadata.payloads.some((p) => p.key === CONTACT_PROFILE_IMAGE_KEY)
     ) {
       return (
-        <View style={{ ...styles.tinyLogo, ...props.style }}>
+        <View style={[styles.tinyLogo, props.style]}>
           <OdinImage
             fileId={contact?.fileId}
             fileKey={CONTACT_PROFILE_IMAGE_KEY}
@@ -69,14 +70,12 @@ export const PublicAvatar = (props: {
   imageSize?: { width: number; height: number };
 }) => {
   const [isSvg, setIsSvg] = useState(false);
+
   if (!isSvg) {
     return (
       <Pressable onPress={props.onPress}>
         <Image
-          style={{
-            ...styles.tinyLogo,
-            ...props.style,
-          }}
+          style={[styles.tinyLogo, props.style]}
           onError={() => {
             // console.error('Error loading image', e.nativeEvent.error);
             setIsSvg(true);
@@ -89,12 +88,10 @@ export const PublicAvatar = (props: {
     return (
       <View
         style={[
-          {
-            ...styles.tinyLogo,
-            ...props.imageSize,
-            ...props.style,
-          },
-          // SVGs styling are not supported on Android
+          styles.tinyLogo,
+          props.imageSize,
+          props.style,
+          // On Android, SVG style props must be applied directly to ensure correct rendering.
           Platform.OS === 'android' ? props.style : undefined,
         ]}
       >
@@ -103,7 +100,8 @@ export const PublicAvatar = (props: {
             width={props.imageSize?.width}
             height={props.imageSize?.height}
             uri={`https://${props.odinId}/pub/image`}
-            style={{ overflow: 'hidden', ...props.style }}
+            style={[styles.svgOverflow, props.style]}
+            fallback={<FallbackImg odinId={props.odinId} style={props.style} />}
           />
         </Pressable>
       </View>
@@ -116,7 +114,7 @@ export const OwnerAvatar = memo(
     const { data: profileData } = useProfile();
 
     return (
-      <View style={{ ...styles.tinyLogo, ...(props.imageSize || {}), ...props.style }}>
+      <View style={[styles.tinyLogo, props.imageSize, props.style]}>
         <OdinImage
           fit="cover"
           targetDrive={GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId)}
@@ -158,33 +156,13 @@ export const GroupAvatar = memo(
     );
     if (!fileId || !fileKey || !targetDrive) {
       return (
-        <View
-          style={[
-            styles.tinyLogo,
-            {
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: backgroundColor,
-            },
-            style,
-          ]}
-        >
+        <View style={[styles.tinyLogo, styles.centered, { backgroundColor }, style]}>
           <Users size={iconSize} />
         </View>
       );
     }
     return (
-      <View
-        style={[
-          styles.tinyLogo,
-          {
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: backgroundColor,
-          },
-          style,
-        ]}
-      >
+      <View style={[styles.tinyLogo, styles.centered, { backgroundColor }, style]}>
         <OdinImage
           fileId={fileId}
           fileKey={fileKey}
@@ -209,17 +187,7 @@ export const DefaultGroupAvatar = memo(
       [isDarkMode]
     );
     return (
-      <View
-        style={[
-          styles.tinyLogo,
-          {
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: backgroundColor,
-          },
-          props.style,
-        ]}
-      >
+      <View style={[styles.tinyLogo, styles.centered, { backgroundColor }, props.style]}>
         <Users size={props.iconSize} />
       </View>
     );
@@ -233,6 +201,13 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
+    overflow: 'hidden',
+  },
+  centered: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  svgOverflow: {
     overflow: 'hidden',
   },
 });

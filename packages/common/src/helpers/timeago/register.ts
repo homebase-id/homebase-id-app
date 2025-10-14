@@ -25,7 +25,7 @@ export const register = (locale: string, func: LocaleFunc) => {
  * @param locale
  * @returns {*}
  */
-export const getLocale = (locale: string): LocaleFunc => {
+export const getLocale = (_locale : string): LocaleFunc => {
   // return Locales[locale] || Locales['en_US'];
 
   //TODO: Extend when we support more locales

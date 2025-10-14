@@ -1,21 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { RichText } from '@homebase-id/js-lib/core';
 import { getNewId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { InfiniteData } from '@tanstack/react-query';
+import { DomHandler, Parser } from 'htmlparser2';
 import { Image, Linking } from 'react-native';
 import { CachesDirectoryPath, copyFile } from 'react-native-fs';
 import { Asset } from 'react-native-image-picker';
 import InAppBrowser from 'react-native-inappbrowser-reborn';
-import { ImageSource } from '../provider/image/RNImageProvider';
-import { Parser, DomHandler } from 'htmlparser2';
-import { RichText } from '@homebase-id/js-lib/core';
 import {
-  OWNER_APP_ID,
-  FEED_APP_ID,
   CHAT_APP_ID,
+  COMMUNITY_APP_ID,
+  FEED_APP_ID,
   FEED_CHAT_APP_ID,
   MAIL_APP_ID,
-  COMMUNITY_APP_ID,
+  OWNER_APP_ID,
 } from '../app/constants';
+import { ImageSource } from '../provider/image/RNImageProvider';
 
 //https://stackoverflow.com/a/21294619/15538463
 export function millisToMinutesAndSeconds(millis: number | undefined): string {
@@ -183,6 +183,95 @@ export function cleanString(input: string): string {
   return cleanedString;
 }
 
+/**
+ * Cleans a domain string interactively as the user is typing, removing invalid characters,
+ * and enforcing domain rules as well as you can. This is particularly beneficial for mobile
+ * users - they can use the dictionary for typing and the auto-appended space becomes a period.
+ * Supports Unicode characters for IDNs (to be Punycode-converted later) and handles common user input
+ * typos. It's intended to be called with each character being input interactively (or pasted).
+ * Since it's interactive we might e.g. end up with a period too much at the end, or a period in
+ * front. You should call cleanDomainString to fully clean the string.
+ *
+ * See also: cleanDomainString()
+ *
+ * @param input The raw input string (e.g., pasted URL or domain).
+ * @returns The cleaned domain string in lowercase.
+ */
+export function cleanInteractiveDomainString(input: string): string {
+  let cleanedString = input;
+
+  // Step 1: Replace spaces and commas with periods
+  cleanedString = cleanedString.replace(/ /g, '.').replace(/,/g, '.');
+
+  // Step 2: Remove illegal characters (e.g., #, ?, /, \, &, %, @, !, *, (, ), [, ], {, }, :, ;, ', ", <, >, =, +, ~, `, | )
+  // but allow Unicode letters and digits (for later Punycode conversion)
+  cleanedString = cleanedString.replace(/[ #?/\\&%@!*()[\]{}:;'",<>+=~`|]/g, '.');
+
+  // Step 3: Replace multiple consecutive periods with a single period
+  cleanedString = cleanedString.replace(/\.{2,}/g, '.');
+
+  // Step 4: Remove leading periods or dashes
+  cleanedString = cleanedString.replace(/^\.|^-/g, '');
+
+  cleanedString = cleanedString.toLowerCase().trim();
+
+  return cleanedString;
+}
+
+/**
+ * Cleans a domain string. Also built to handle a full string like a pasted URL, removing invalid characters,
+ *  and enforcing domain rules.
+ * Supports Unicode characters for IDNs (to be Punycode-converted later) and handles common user input
+ * typos. It's intended to be called with each character being input interactively (or pasted).
+ * @param input The raw input string (e.g., pasted URL or domain).
+ * @returns The cleaned domain string in lowercase.
+ */
+export function cleanDomainString(input: string): string {
+  let cleanedString = input.trim();
+
+  if (!cleanedString) {
+    return '';
+  }
+
+  // Step 1: Handle pasted URLs - Strip protocols (http/https:// or similar), paths (after /), and queries (after ?)
+  cleanedString = cleanedString
+    // Normalize common protocol typos
+    .replace(/\/{2,}/g, '//') // Collapses multiple consecutive slashes (2+) to //
+    .replace(/:\/(?!\/)/g, '://') // Fix :/ to :// (missing one slash)
+    .replace(/^([\w+-]+)(\/\/)/i, '$1:$2') // Fix scheme// to scheme:// (missing colon; no . in scheme)
+    // Remove general protocol (scheme:// where scheme can be any word-like string, but no . to avoid domain mismatches)
+    .replace(/^[\w+-]+:\/\//i, '')
+    .replace(/\?.*$/, '') // Remove query params after ?
+    .replace(/#.*$/, '') // Remove fragments after # (new addition to handle URL anchors)
+    .replace(/\/.*$/, ''); // Remove paths after /
+
+  // Step 2: Replace spaces and commas with periods
+  cleanedString = cleanedString.replace(/ /g, '.').replace(/,/g, '.');
+
+  // Step 3: Remove illegal characters (e.g., #, ?, /, \, &, %, @, !, *, (, ), [, ], {, }, :, ;, ', ", <, >, =, +, ~, `, | ) but allow Unicode letters and digits (for later Punycode conversion)
+  cleanedString = cleanedString.replace(/[ #?/\\&%@!*()[\]{}:;'",<>+=~`|]/g, '');
+
+  // Step 4: Replace multiple consecutive periods with a single period
+  cleanedString = cleanedString.replace(/\.{2,}/g, '.');
+
+  // Step 5: Enforce per-label rules (no start/end with '-', no consecutive '-')
+  const labels = cleanedString.split('.');
+  const cleanedLabels = labels.map((label) => {
+    // Remove leading/trailing '-', replace consecutive '-'
+    label = label.replace(/^-+|-+$/g, '').replace(/-{2,}/g, '-');
+    return label;
+  });
+  cleanedString = cleanedLabels.filter(Boolean).join('.'); // Remove empty labels
+
+  // Step 6: Remove leading or trailing periods (good for valid domains)
+  cleanedString = cleanedString.replace(/^\.|\.$/g, '');
+
+  // Step 7: Ensure lowercase (domains are case-insensitive)
+  cleanedString = cleanedString.toLowerCase().trim();
+
+  return cleanedString;
+}
+
 export function assetsToImageSource(assets: Asset[], key?: string): ImageSource[] {
   return assets.map((value) => {
     return {
@@ -197,6 +286,7 @@ export function assetsToImageSource(assets: Asset[], key?: string): ImageSource[
       id: value.id,
       fileSize: value.fileSize,
       key: assets?.length === 1 ? key : undefined,
+      playableDuration: value.duration,
     };
   });
 }
@@ -331,4 +421,17 @@ export const getAppName = (appId: string): string => {
             : stringGuidsEqual(appId, COMMUNITY_APP_ID)
               ? 'Homebase - Community'
               : `Unknown (${appId})`;
+};
+
+// Utility to format seconds to mm:ss or h:mm:ss
+export const formatDuration = (milliseconds?: number): string => {
+  if (!milliseconds || milliseconds <= 0) return '';
+  const totalSeconds = Math.floor(milliseconds / 1000);
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  const s = totalSeconds % 60;
+  if (h > 0) {
+    return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  }
+  return `${m}:${s.toString().padStart(2, '0')}`;
 };

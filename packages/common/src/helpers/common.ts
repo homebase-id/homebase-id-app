@@ -1,4 +1,4 @@
-import { RichText } from '@homebase-id/js-lib/core';
+import {} from '@homebase-id/js-lib/core';
 
 export const ellipsisAtMaxChar = (str?: string, maxChar?: number) => {
   if (!str || !maxChar) {

@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types'
 import React from 'react'
 import {
-  Image,
   Text,
   TouchableOpacity,
   View,
@@ -10,6 +9,7 @@ import {
   ImageStyle,
   TextStyle,
 } from 'react-native'
+import FastImage from '@d11/react-native-fast-image'
 import Color from './Color'
 import { User } from './Models'
 import { StylePropType } from './utils'
@@ -112,16 +112,21 @@ export default class GiftedAvatar extends React.Component<GiftedAvatarProps> {
         return user.avatar([styles.avatarStyle, this.props.avatarStyle])
       } else if (typeof user.avatar === 'string') {
         return (
-          <Image
-            source={{ uri: user.avatar }}
-            style={[styles.avatarStyle, this.props.avatarStyle]}
+          <FastImage
+            source={{
+              uri: user.avatar,
+              priority: FastImage.priority.normal,
+            }}
+            style={[styles.avatarStyle, this.props.avatarStyle] as any}
+            resizeMode={FastImage.resizeMode.cover}
           />
         )
       } else if (typeof user.avatar === 'number') {
         return (
-          <Image
+          <FastImage
             source={user.avatar}
-            style={[styles.avatarStyle, this.props.avatarStyle]}
+            style={[styles.avatarStyle, this.props.avatarStyle] as any}
+            resizeMode={FastImage.resizeMode.cover}
           />
         )
       }

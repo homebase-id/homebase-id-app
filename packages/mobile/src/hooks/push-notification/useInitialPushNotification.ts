@@ -5,26 +5,24 @@ import { navigateOnNotification } from '../../components/Dashboard/Notifications
 import { PushNotification } from '@homebase-id/js-lib/core';
 import { useDotYouClientContext } from 'homebase-id-app-common';
 import { useCallback, useEffect } from 'react';
-import { ChatStackParamList } from '../../app/ChatStack';
 import notifee, { Event, EventType } from '@notifee/react-native';
 import { AppState, Platform } from 'react-native';
-import { TabStackParamList } from '../../app/App';
+import { AuthStackParamList } from '../../app/App';
 const handledNotifications: unknown[] = [];
 
 export const useInitialPushNotification = () => {
   const identity = useDotYouClientContext().getLoggedInIdentity() || '';
-  const chatNavigator = useNavigation<NavigationProp<ChatStackParamList>>();
-  const tabNavigator = useNavigation<NavigationProp<TabStackParamList>>();
+  const tabNavigator = useNavigation<NavigationProp<AuthStackParamList, 'Authenticated'>>();
 
   const handleInitialNotification = useCallback(
     async (stringifiedData: string) => {
       const notification: PushNotification = tryJsonParse<PushNotification>(stringifiedData);
       if (notification) {
         await notifee.decrementBadgeCount();
-        navigateOnNotification(notification, identity, chatNavigator, tabNavigator);
+        navigateOnNotification(notification, identity, tabNavigator, true);
       }
     },
-    [chatNavigator, tabNavigator, identity]
+    [tabNavigator, identity]
   );
 
   const getInitialNotification = useCallback(() => {

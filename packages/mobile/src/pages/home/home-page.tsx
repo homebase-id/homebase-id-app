@@ -16,6 +16,7 @@ import { PushNotification } from '@homebase-id/js-lib/core';
 import { NotificationDay } from '../../components/Dashboard/NotificationsOverview';
 import { useScrollToTop } from '@react-navigation/native';
 import { Text } from '../../components/ui/Text/Text';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type HomeProps = NativeStackScreenProps<TabStackParamList, 'Home'>;
 
@@ -53,7 +54,7 @@ export const HomePage = (_props: HomeProps) => {
 
   const renderHeader = useCallback(
     () => (
-      <>
+      <Container>
         <ProfileInfo />
         <Dashboard />
         {flattenedNotifications.length ? (
@@ -67,7 +68,7 @@ export const HomePage = (_props: HomeProps) => {
             </TouchableOpacity>
           </View>
         ) : null}
-      </>
+      </Container>
     ),
     [doClearAll, flattenedNotifications]
   );
@@ -79,13 +80,16 @@ export const HomePage = (_props: HomeProps) => {
     [groupedNotificationsPerDay]
   );
 
+  const { top, bottom } = useSafeAreaInsets();
+
   return (
-    <SafeAreaView>
+    <SafeAreaView style={{ paddingTop: top, paddingBottom: bottom }}>
       <Container style={{ flex: 1 }}>
         <FlatList
           ref={scrollRef}
           data={Object.keys(groupedNotificationsPerDay)}
           showsVerticalScrollIndicator={false}
+          style={{ flex: 1 }}
           contentContainerStyle={{ gap: 8 }}
           ListHeaderComponent={renderHeader}
           renderItem={renderItem}

@@ -14,10 +14,10 @@
 			<dict>
 				<key>NSExtensionActivationSupportsFileWithMaxCount</key>
 				<integer>5</integer>
-				<key>NSExtensionActivationSupportsMovieWithMaxCount</key>
-				<integer>1</integer>
 				<key>NSExtensionActivationSupportsImageWithMaxCount</key>
 				<integer>5</integer>
+				<key>NSExtensionActivationSupportsMovieWithMaxCount</key>
+				<integer>1</integer>
 				<key>NSExtensionActivationSupportsText</key>
 				<true/>
 				<key>NSExtensionActivationSupportsWebURLWithMaxCount</key>
@@ -29,5 +29,7 @@
 		<key>NSExtensionPointIdentifier</key>
 		<string>com.apple.share-services</string>
 	</dict>
+	<key>RCTNewArchEnabled</key>
+	<true/>
 </dict>
 </plist>

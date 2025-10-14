@@ -1,5 +1,5 @@
 import { ReactElement, useState, useMemo, memo, ReactNode } from 'react';
-import { StyleProp, ViewStyle, View, TouchableOpacity, Text, Pressable } from 'react-native';
+import { StyleProp, StyleSheet, ViewStyle, View, TouchableOpacity, Text, Pressable } from 'react-native';
 
 import { ArrowDown } from '../Icons/icons';
 import { Colors } from '../../../app/Colors';
@@ -39,45 +39,23 @@ export const Select = memo(({ defaultValue, children, style, onChange }: SelectP
       <Pressable
         onPress={() => setIsOpen(!isOpen)}
         style={[
-          {
-            padding: 8,
-            borderWidth: 1,
-            borderColor: isDarkMode ? Colors.slate[700] : Colors.gray[200],
-            borderRadius: 4,
-            position: 'relative',
-            zIndex: 20,
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 4,
-          },
+          styles.selectButton,
+          { borderColor: isDarkMode ? Colors.slate[700] : Colors.gray[200] },
         ]}
       >
-        <Text
-          style={{
-            color: isDarkMode ? Colors.white : Colors.black,
-          }}
-        >
-          {currentLabel}
-        </Text>
+        <Text style={{ color: isDarkMode ? Colors.white : Colors.black }}>{currentLabel}</Text>
         <ArrowDown size={'sm'} />
       </Pressable>
 
       {isOpen ? (
         <View
-          style={{
-            position: 'absolute',
-            top: '100%',
-            minWidth: 180,
-            right: 0,
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-            zIndex: 20,
-            elevation: 20,
-
-            borderWidth: 1,
-            borderColor: isDarkMode ? Colors.slate[700] : Colors.gray[200],
-            borderRadius: 4,
-          }}
+          style={[
+            styles.dropdownMenu,
+            {
+              backgroundColor: isDarkMode ? Colors.black : Colors.white,
+              borderColor: isDarkMode ? Colors.slate[700] : Colors.gray[200],
+            },
+          ]}
         >
           {flatOptions.map((child) => (
             <TouchableOpacity
@@ -114,8 +92,36 @@ interface OptionProps {
 export const Option = ({ children }: OptionProps) => {
   const { isDarkMode } = useDarkMode();
   return (
-    <View style={{ paddingHorizontal: 8, paddingVertical: 4 }}>
+    <View style={styles.option}>
       <Text style={{ color: isDarkMode ? Colors.white : Colors.black }}>{children}</Text>
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  selectButton: {
+    padding: 8,
+    borderWidth: 1,
+    borderRadius: 4,
+    position: 'relative',
+    zIndex: 20,
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  dropdownMenu: {
+    position: 'absolute',
+    top: '100%',
+    minWidth: 180,
+    right: 0,
+    zIndex: 20,
+    elevation: 20,
+    borderWidth: 1,
+    borderRadius: 4,
+  },
+  option: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+});
