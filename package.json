@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@homebase-id/js-lib": "0.0.7-alpha.65",
-    "axios": "1.12.2",
+    "axios": "1.12.0",
     "htmlparser2": "10.0.0",
     "patch-package": "8.0.1",
     "react": "19.1.0",
