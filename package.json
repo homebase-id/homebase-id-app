@@ -17,9 +17,9 @@
   },
   "dependencies": {
     "@homebase-id/js-lib": "0.0.7-alpha.65",
-    "axios": "1.7.5",
+    "axios": "1.12.2",
     "htmlparser2": "10.0.0",
-    "patch-package": "8.0.0",
+    "patch-package": "8.0.1",
     "react": "19.1.0",
     "react-native": "0.80.1"
   },
