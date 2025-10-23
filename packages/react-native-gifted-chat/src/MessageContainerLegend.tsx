@@ -443,7 +443,11 @@ function MessageContainerLegend<TMessage extends IMessage = IMessage>(
         maintainScrollAtEndThreshold={0.1}
         getEstimatedItemSize={getItemSize}
         maintainVisibleContentPosition
-        initialScrollIndex={Math.max(0, reversedMessages.length - 1)}
+        initialScrollIndex={
+          reversedMessages.messages.length > 0
+            ? reversedMessages.messages.length - 1
+            : undefined
+        }
         automaticallyAdjustContentInsets={false}
         onStartReached={onEndReached}
         onStartReachedThreshold={0.1}
@@ -451,7 +455,7 @@ function MessageContainerLegend<TMessage extends IMessage = IMessage>(
         ListFooterComponent={ListFooterComponent}
         ListHeaderComponent={ListHeaderComponent}
         recycleItems
-        drawDistance={1000}
+        drawDistance={1500}
       />
 
       {isScrollToBottomEnabledFinal ? renderScrollToBottomWrapper() : null}

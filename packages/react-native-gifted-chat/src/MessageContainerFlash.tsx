@@ -255,7 +255,7 @@ function MessageContainerFlash<TMessage extends IMessage = IMessage>(
 
       return null;
     },
-    [props, reversedMessages, user, renderDayProp, renderMessageProp],
+    [],
   );
 
   const renderChatEmpty = useCallback(() => {
@@ -443,7 +443,6 @@ function MessageContainerFlash<TMessage extends IMessage = IMessage>(
         keyExtractor={keyExtractor}
         data={reversedMessages}
         renderItem={renderItem as any}
-        estimatedItemSize={100}
         automaticallyAdjustContentInsets={false}
         {...invertibleScrollViewProps}
         ListEmptyComponent={renderChatEmpty}
@@ -458,7 +457,7 @@ function MessageContainerFlash<TMessage extends IMessage = IMessage>(
         onStartReached={onEndReached}
         onStartReachedThreshold={0.1}
         onLayout={onLayoutList}
-        drawDistance={800}
+        drawDistance={1500}
         CellRendererComponent={renderCell}
         {...cleanListViewProps}
       />
