@@ -96,18 +96,19 @@ export const MediaGallery = memo(
         ]}
         onLayout={(e) => setWrapperWidth(e.nativeEvent.layout.width)}
       >
-        <ImageBackground
-          source={{ uri: embeddedThumbUrl }}
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            bottom: 0,
-            right: 0,
-            opacity: wrapperWidth ? 0 : 1,
-          }}
-          blurRadius={2}
-        />
+        {embeddedThumbUrl && !wrapperWidth && (
+          <ImageBackground
+            source={{ uri: embeddedThumbUrl }}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              bottom: 0,
+              right: 0,
+            }}
+            blurRadius={2}
+          />
+        )}
         {payloads.slice(0, maxVisible).map((item, index) => {
           const size = imageSize(index);
           if (!size) return null;

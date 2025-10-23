@@ -116,7 +116,7 @@ export const OdinImage = memo(
     if (enableZoom) {
       return (
         <ZoomableImage
-          key={`${fileId || globalTransitId}_${fileKey}_${imageData ? '1' : '0'}`}
+          key={`${fileId || globalTransitId}_${fileKey}`}
           uri={uri}
           imageSize={imageSize}
           alt={alt || title}
@@ -132,7 +132,7 @@ export const OdinImage = memo(
 
     return (
       <InnerImage
-        key={`${fileId || globalTransitId}_${fileKey}_${imageData ? '1' : '0'}`}
+        key={`${fileId || globalTransitId}_${fileKey}`}
         uri={uri}
         contentType={imageData?.type || previewThumbnail?.contentType}
         style={style}
