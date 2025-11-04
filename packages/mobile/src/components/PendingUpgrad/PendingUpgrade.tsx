@@ -53,7 +53,8 @@ const usePendingUpgrade = () => {
   const dotYouClient = useDotYouClientContext();
   return useQuery({
     queryKey: ['pending-upgrade'],
-    staleTime: 1000 * 60 * 60 * 24, // 24 hours
+    // staleTime: 1000 * 60 * 60 * 24, // 24 hours
+    staleTime: 1000 * 60 * 60, // 24 hours
     refetchOnReconnect: false,
     refetchOnWindowFocus: true,
     refetchOnMount: false,
