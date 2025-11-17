@@ -1,3 +1,19 @@
+import { HomebaseFile } from '@homebase-id/js-lib/core';
+import { LinkPreview } from '@homebase-id/js-lib/media';
+import { keepLocalCopy, pick, types } from '@react-native-documents/picker';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  Keyboard,
+  Platform,
+  StatusBar,
+  StyleProp,
+  StyleSheet,
+  TextInput,
+  TextStyle,
+  View,
+  ViewStyle,
+} from 'react-native';
+import { FlatList } from 'react-native-gesture-handler';
 import {
   Actions,
   Avatar,
@@ -17,18 +33,12 @@ import {
   SendProps,
   User,
 } from 'react-native-gifted-chat';
-import React, { useCallback, memo, useMemo, useRef, useEffect, useState } from 'react';
-import {
-  Keyboard,
-  Platform,
-  StatusBar,
-  StyleProp,
-  StyleSheet,
-  TextInput,
-  TextStyle,
-  View,
-  ViewStyle,
-} from 'react-native';
+import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
+import { getLocales } from 'react-native-localize';
+import Animated, { SlideOutLeft } from 'react-native-reanimated';
+import { Colors, getOdinIdColor } from '../../app/Colors';
+import ReplyMessageBar from '../../components/Chat/Reply-Message-bar';
+import { Avatar as AppAvatar, OwnerAvatar } from '../../components/ui/Avatars/Avatar';
 import {
   ArrowDown,
   Camera,
@@ -39,34 +49,25 @@ import {
   SendChat,
   Times,
 } from '../../components/ui/Icons/icons';
-import MediaMessage from './MediaMessage';
-import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
-import { useAuth } from '../../hooks/auth/useAuth';
-import { Colors, getOdinIdColor } from '../../app/Colors';
-import ReplyMessageBar from '../../components/Chat/Reply-Message-bar';
-import { useDarkMode } from '../../hooks/useDarkMode';
-import { Avatar as AppAvatar, OwnerAvatar } from '../../components/ui/Avatars/Avatar';
 import { ConnectionName } from '../../components/ui/Name';
-import { HomebaseFile } from '@homebase-id/js-lib/core';
-import { ChatDeletedArchivalStaus, ChatMessage } from '../../provider/chat/ChatProvider';
 import { useAudioRecorder } from '../../hooks/audio/useAudioRecorderPlayer';
-import { Text } from '../ui/Text/Text';
-import { assetsToImageSource, fixDocumentURI, millisToMinutesAndSeconds } from '../../utils/utils';
-import { keepLocalCopy, pick, types } from '@react-native-documents/picker';
-import { getLocales } from 'react-native-localize';
+import { useAuth } from '../../hooks/auth/useAuth';
 import { useDraftMessage } from '../../hooks/chat/useDraftMessage';
-import { FlatList } from 'react-native-gesture-handler';
-import { MentionDropDown } from './Mention-Dropdown';
-import { LinkPreviewBar } from './Link-Preview-Bar';
-import { LinkPreview } from '@homebase-id/js-lib/media';
-import { EmptyChatContainer } from './EmptyChatContainer';
-import { ImageSource } from '../../provider/image/RNImageProvider';
-import { RenderBottomContainer } from './ui/RenderBottomContainer';
-import Animated, { SlideOutLeft } from 'react-native-reanimated';
-import { RenderMessageText } from './ui/RenderMessageText';
-import { RenderBubble } from './ui/RenderBubble';
-import { RenderReplyMessageView } from './ui/RenderReplyMessageView';
+import { useDarkMode } from '../../hooks/useDarkMode';
+import { ChatDeletedArchivalStaus, ChatMessage } from '../../provider/chat/ChatProvider';
 import { ConversationWithYourselfId } from '../../provider/chat/ConversationProvider';
+import { ImageSource } from '../../provider/image/RNImageProvider';
+import { assetsToImageSource, fixDocumentURI, millisToMinutesAndSeconds } from '../../utils/utils';
+import { useChatSettingsContext } from '../Settings/useChatSettingsContext';
+import { Text } from '../ui/Text/Text';
+import { EmptyChatContainer } from './EmptyChatContainer';
+import { LinkPreviewBar } from './Link-Preview-Bar';
+import MediaMessage from './MediaMessage';
+import { MentionDropDown } from './Mention-Dropdown';
+import { RenderBottomContainer } from './ui/RenderBottomContainer';
+import { RenderBubble } from './ui/RenderBubble';
+import { RenderMessageText } from './ui/RenderMessageText';
+import { RenderReplyMessageView } from './ui/RenderReplyMessageView';
 
 export type ChatMessageIMessage = IMessage & HomebaseFile<ChatMessage>;
 
@@ -119,6 +120,7 @@ export const ChatDetail = memo(
     const { isDarkMode } = useDarkMode();
     const identity = useAuth().getIdentity();
     const { record, stop, duration, isRecording } = useAudioRecorder();
+    const { listImplementation } = useChatSettingsContext();
 
     // We will fetch the draft message from the cache only once
     const {
@@ -794,6 +796,7 @@ export const ChatDetail = memo(
         }}
         renderChatEmpty={renderEmptyChat}
         bottomOffset={10}
+        listType={listImplementation}
       />
     );
   }
