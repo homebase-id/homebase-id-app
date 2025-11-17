@@ -18,7 +18,7 @@ export const ChatSentTimeIndicator = memo(
   }) => {
     const { isDarkMode } = useDarkMode();
     const date = useMemo(
-      () => new Date(msg?.fileMetadata.created || conversationLastUpdated),
+      () => new Date(msg?.fileMetadata.transitCreated || conversationLastUpdated),
       [msg, conversationLastUpdated]
     );
     const [_, setStateIndex] = useState(0);

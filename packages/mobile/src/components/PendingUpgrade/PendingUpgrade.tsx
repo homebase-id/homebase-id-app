@@ -1,8 +1,9 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { t, useDotYouClientContext } from 'homebase-id-app-common';
 import { useEffect, useMemo } from 'react';
 import { Alert, Linking } from 'react-native';
 import InAppBrowser from 'react-native-inappbrowser-reborn';
+import { usePendingUpgrade } from './usePendingUpgrade';
 
 export const PendingUpgradeDialog = () => {
   const dotYouClient = useDotYouClientContext();
@@ -47,21 +48,4 @@ export const PendingUpgradeDialog = () => {
   }, [hasPendingUpgrade, queryClient, upgradeUrl]);
 
   return null;
-};
-
-const usePendingUpgrade = () => {
-  const dotYouClient = useDotYouClientContext();
-  return useQuery({
-    queryKey: ['pending-upgrade'],
-    // staleTime: 1000 * 60 * 60 * 24, // 24 hours
-    staleTime: 1000 * 60 * 60, // 24 hours
-    refetchOnReconnect: false,
-    refetchOnWindowFocus: true,
-    refetchOnMount: false,
-    queryFn: async () => {
-      const client = dotYouClient.createAxiosClient();
-      const response = await client.get('/auth/verifytoken');
-      return !!response.headers['X-REQUIRES-UPGRADE'];
-    },
-  });
 };
