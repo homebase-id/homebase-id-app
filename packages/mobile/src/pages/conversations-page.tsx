@@ -40,7 +40,7 @@ import { useConversations } from '../hooks/chat/useConversations';
 import { ListTile } from '../components/ui/ListTile';
 import { SearchBarCommands } from 'react-native-screens';
 import { useTextInput } from '../hooks/useTextInput';
-import { PendingUpgradeDialog } from '../components/PendingUpgrad/PendingUpgrade';
+import { PendingUpgradeDialog } from '../components/PendingUpgrade/PendingUpgrade';
 
 type ConversationProp = NativeStackScreenProps<ChatStackParamList, 'Conversation'>;
 
