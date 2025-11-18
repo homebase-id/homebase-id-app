@@ -61,7 +61,9 @@ export const MessageInfoPage = ({ route }: MessageInfoProp) => {
         <Text style={styles.title}>
           Sent:{' '}
           <Text style={styles.content}>
-            {new Date(message.fileMetadata.created).toLocaleDateString(undefined, dateTimeFormat)}
+            {new Date(
+              message.fileMetadata.appData.userDate || message.fileMetadata.created
+            ).toLocaleDateString(undefined, dateTimeFormat)}
           </Text>
         </Text>
         <Text style={styles.title}>
