@@ -122,7 +122,7 @@ const ChatPage = memo(({ route, navigation }: ChatProp) => {
           return {
             // Prefer uniqueId to avoid duplicates between onMutate and actual data
             _id: value.fileMetadata.appData.uniqueId || value.fileId || getNewId(),
-            createdAt: value.fileMetadata.created,
+            createdAt: value.fileMetadata.appData.userDate || value.fileMetadata.created,
             text:
               value.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus
                 ? 'This message was deleted.'
