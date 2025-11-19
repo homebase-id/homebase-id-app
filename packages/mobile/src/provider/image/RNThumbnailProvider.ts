@@ -230,7 +230,9 @@ const createImageThumbnail = async (
   // Byte-budget compression loop
   const maxBytes = instruction.maxBytes ?? Number.POSITIVE_INFINITY;
   const isTinyThumb = targetWidth <= tinyThumbSize.maxPixelDimension;
-  let quality = Math.max(1, Math.min(100, instruction.quality));
+
+  // FIX 1: Apply platform-specific quality adjustment from the start
+  let quality = instruction.quality;
   let sourcePath: string = (photo.filepath || photo.uri) as string;
 
   // First resize attempt
@@ -312,18 +314,33 @@ const rotateNaturalSize = (
   }
 };
 
+const getQualityForPlatform = (quality: number): number => {
+  if (Platform.OS === 'ios') {
+    // iOS encoder is more conservative, needs ~30% lower quality to match Android file sizes
+    return Math.round(quality * 0.7);
+  }
+  return quality;
+};
+
 export const createResizedImage = async (
   photo: ImageSource,
   instruction: ThumbnailInstruction & { width: number; height: number },
   format: 'webp' | 'png' | 'jpeg' = Platform.OS === 'android' ? 'webp' : 'jpeg'
 ) => {
+  const platformQuality = getQualityForPlatform(instruction.quality);
+
   return await ImageResizer.createResizedImage(
     (photo.filepath || photo.uri) as string,
     instruction.width,
     instruction.height,
     format.toUpperCase() as ResizeFormat,
-    instruction.quality,
+    platformQuality,
+    0,
     undefined,
-    undefined
+    false,
+    {
+      mode: 'cover', // Use 'cover' for square thumbnails to crop, or 'contain' to fit
+      onlyScaleDown: false,
+    }
   );
 };
