@@ -1,0 +1,1049 @@
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/.transforms/09c7a0089e03bb60fd5ef6fca6a4eefc/results.bin b/node_modules/@bam.tech/react-native-image-resizer/android/build/.transforms/09c7a0089e03bb60fd5ef6fca6a4eefc/results.bin
+new file mode 100644
+index 0000000..0d259dd
+--- /dev/null
++++ b/node_modules/@bam.tech/react-native-image-resizer/android/build/.transforms/09c7a0089e03bb60fd5ef6fca6a4eefc/results.bin
+@@ -0,0 +1 @@
++o/classes
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/.transforms/09c7a0089e03bb60fd5ef6fca6a4eefc/transformed/classes/classes_dex/classes.dex b/node_modules/@bam.tech/react-native-image-resizer/android/build/.transforms/09c7a0089e03bb60fd5ef6fca6a4eefc/transformed/classes/classes_dex/classes.dex
+new file mode 100644
+index 0000000..42c3d62
+Binary files /dev/null and b/node_modules/@bam.tech/react-native-image-resizer/android/build/.transforms/09c7a0089e03bb60fd5ef6fca6a4eefc/transformed/classes/classes_dex/classes.dex differ
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/.transforms/74105999a934828a8a67a442fc0670b6/results.bin b/node_modules/@bam.tech/react-native-image-resizer/android/build/.transforms/74105999a934828a8a67a442fc0670b6/results.bin
+new file mode 100644
+index 0000000..7ed749e
+--- /dev/null
++++ b/node_modules/@bam.tech/react-native-image-resizer/android/build/.transforms/74105999a934828a8a67a442fc0670b6/results.bin
+@@ -0,0 +1 @@
++o/bundleLibRuntimeToDirDebug
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/.transforms/74105999a934828a8a67a442fc0670b6/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/reactnativeimageresizer/BuildConfig.dex b/node_modules/@bam.tech/react-native-image-resizer/android/build/.transforms/74105999a934828a8a67a442fc0670b6/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/reactnativeimageresizer/BuildConfig.dex
+new file mode 100644
+index 0000000..46d24d8
+Binary files /dev/null and b/node_modules/@bam.tech/react-native-image-resizer/android/build/.transforms/74105999a934828a8a67a442fc0670b6/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/reactnativeimageresizer/BuildConfig.dex differ
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/.transforms/74105999a934828a8a67a442fc0670b6/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/reactnativeimageresizer/ImageResizer.dex b/node_modules/@bam.tech/react-native-image-resizer/android/build/.transforms/74105999a934828a8a67a442fc0670b6/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/reactnativeimageresizer/ImageResizer.dex
+new file mode 100644
+index 0000000..b607b6a
+Binary files /dev/null and b/node_modules/@bam.tech/react-native-image-resizer/android/build/.transforms/74105999a934828a8a67a442fc0670b6/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/reactnativeimageresizer/ImageResizer.dex differ
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/.transforms/74105999a934828a8a67a442fc0670b6/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/reactnativeimageresizer/ImageResizerModule$1.dex b/node_modules/@bam.tech/react-native-image-resizer/android/build/.transforms/74105999a934828a8a67a442fc0670b6/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/reactnativeimageresizer/ImageResizerModule$1.dex
+new file mode 100644
+index 0000000..dea67d5
+Binary files /dev/null and b/node_modules/@bam.tech/react-native-image-resizer/android/build/.transforms/74105999a934828a8a67a442fc0670b6/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/reactnativeimageresizer/ImageResizerModule$1.dex differ
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/.transforms/74105999a934828a8a67a442fc0670b6/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/reactnativeimageresizer/ImageResizerModule.dex b/node_modules/@bam.tech/react-native-image-resizer/android/build/.transforms/74105999a934828a8a67a442fc0670b6/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/reactnativeimageresizer/ImageResizerModule.dex
+new file mode 100644
+index 0000000..d87fe02
+Binary files /dev/null and b/node_modules/@bam.tech/react-native-image-resizer/android/build/.transforms/74105999a934828a8a67a442fc0670b6/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/reactnativeimageresizer/ImageResizerModule.dex differ
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/.transforms/74105999a934828a8a67a442fc0670b6/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/reactnativeimageresizer/ImageResizerPackage.dex b/node_modules/@bam.tech/react-native-image-resizer/android/build/.transforms/74105999a934828a8a67a442fc0670b6/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/reactnativeimageresizer/ImageResizerPackage.dex
+new file mode 100644
+index 0000000..b917ac8
+Binary files /dev/null and b/node_modules/@bam.tech/react-native-image-resizer/android/build/.transforms/74105999a934828a8a67a442fc0670b6/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/reactnativeimageresizer/ImageResizerPackage.dex differ
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/.transforms/74105999a934828a8a67a442fc0670b6/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/reactnativeimageresizer/ImageResizerSpec.dex b/node_modules/@bam.tech/react-native-image-resizer/android/build/.transforms/74105999a934828a8a67a442fc0670b6/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/reactnativeimageresizer/ImageResizerSpec.dex
+new file mode 100644
+index 0000000..226e97e
+Binary files /dev/null and b/node_modules/@bam.tech/react-native-image-resizer/android/build/.transforms/74105999a934828a8a67a442fc0670b6/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/reactnativeimageresizer/ImageResizerSpec.dex differ
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/.transforms/74105999a934828a8a67a442fc0670b6/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/reactnativeimageresizer/NativeImageResizerSpec.dex b/node_modules/@bam.tech/react-native-image-resizer/android/build/.transforms/74105999a934828a8a67a442fc0670b6/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/reactnativeimageresizer/NativeImageResizerSpec.dex
+new file mode 100644
+index 0000000..b263b15
+Binary files /dev/null and b/node_modules/@bam.tech/react-native-image-resizer/android/build/.transforms/74105999a934828a8a67a442fc0670b6/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/reactnativeimageresizer/NativeImageResizerSpec.dex differ
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/.transforms/74105999a934828a8a67a442fc0670b6/transformed/bundleLibRuntimeToDirDebug/desugar_graph.bin b/node_modules/@bam.tech/react-native-image-resizer/android/build/.transforms/74105999a934828a8a67a442fc0670b6/transformed/bundleLibRuntimeToDirDebug/desugar_graph.bin
+new file mode 100644
+index 0000000..0bc1d7d
+Binary files /dev/null and b/node_modules/@bam.tech/react-native-image-resizer/android/build/.transforms/74105999a934828a8a67a442fc0670b6/transformed/bundleLibRuntimeToDirDebug/desugar_graph.bin differ
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/buildConfig/debug/com/reactnativeimageresizer/BuildConfig.java b/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/buildConfig/debug/com/reactnativeimageresizer/BuildConfig.java
+new file mode 100644
+index 0000000..85417cf
+--- /dev/null
++++ b/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/buildConfig/debug/com/reactnativeimageresizer/BuildConfig.java
+@@ -0,0 +1,12 @@
++/**
++ * Automatically generated file. DO NOT MODIFY
++ */
++package com.reactnativeimageresizer;
++
++public final class BuildConfig {
++  public static final boolean DEBUG = Boolean.parseBoolean("true");
++  public static final String LIBRARY_PACKAGE_NAME = "com.reactnativeimageresizer";
++  public static final String BUILD_TYPE = "debug";
++  // Field from default config.
++  public static final boolean IS_NEW_ARCHITECTURE_ENABLED = true;
++}
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/java/com/reactnativeimageresizer/NativeImageResizerSpec.java b/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/java/com/reactnativeimageresizer/NativeImageResizerSpec.java
+new file mode 100644
+index 0000000..f115d69
+--- /dev/null
++++ b/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/java/com/reactnativeimageresizer/NativeImageResizerSpec.java
+@@ -0,0 +1,39 @@
++
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GenerateModuleJavaSpec.js
++ *
++ * @nolint
++ */
++
++package com.reactnativeimageresizer;
++
++import com.facebook.proguard.annotations.DoNotStrip;
++import com.facebook.react.bridge.Promise;
++import com.facebook.react.bridge.ReactApplicationContext;
++import com.facebook.react.bridge.ReactContextBaseJavaModule;
++import com.facebook.react.bridge.ReactMethod;
++import com.facebook.react.turbomodule.core.interfaces.TurboModule;
++import javax.annotation.Nonnull;
++import javax.annotation.Nullable;
++
++public abstract class NativeImageResizerSpec extends ReactContextBaseJavaModule implements TurboModule {
++  public static final String NAME = "ImageResizer";
++
++  public NativeImageResizerSpec(ReactApplicationContext reactContext) {
++    super(reactContext);
++  }
++
++  @Override
++  public @Nonnull String getName() {
++    return NAME;
++  }
++
++  @ReactMethod
++  @DoNotStrip
++  public abstract void createResizedImage(String uri, double width, double height, String format, double quality, String mode, boolean onlyScaleDown, @Nullable Double rotation, @Nullable String outputPath, @Nullable Boolean keepMeta, Promise promise);
++}
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/jni/CMakeLists.txt b/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/jni/CMakeLists.txt
+new file mode 100644
+index 0000000..c7216b9
+--- /dev/null
++++ b/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/jni/CMakeLists.txt
+@@ -0,0 +1,36 @@
++# Copyright (c) Meta Platforms, Inc. and affiliates.
++#
++# This source code is licensed under the MIT license found in the
++# LICENSE file in the root directory of this source tree.
++
++cmake_minimum_required(VERSION 3.13)
++set(CMAKE_VERBOSE_MAKEFILE on)
++
++file(GLOB react_codegen_SRCS CONFIGURE_DEPENDS *.cpp react/renderer/components/RNImageResizerSpec/*.cpp)
++
++add_library(
++  react_codegen_RNImageResizerSpec
++  OBJECT
++  ${react_codegen_SRCS}
++)
++
++target_include_directories(react_codegen_RNImageResizerSpec PUBLIC . react/renderer/components/RNImageResizerSpec)
++
++target_link_libraries(
++  react_codegen_RNImageResizerSpec
++  fbjni
++  jsi
++  # We need to link different libraries based on whether we are building rncore or not, that's necessary
++  # because we want to break a circular dependency between react_codegen_rncore and reactnative
++  reactnative
++)
++
++target_compile_options(
++  react_codegen_RNImageResizerSpec
++  PRIVATE
++  -DLOG_TAG=\"ReactNative\"
++  -fexceptions
++  -frtti
++  -std=c++20
++  -Wall
++)
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/jni/RNImageResizerSpec-generated.cpp b/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/jni/RNImageResizerSpec-generated.cpp
+new file mode 100644
+index 0000000..688fc35
+--- /dev/null
++++ b/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/jni/RNImageResizerSpec-generated.cpp
+@@ -0,0 +1,32 @@
++
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GenerateModuleJniCpp.js
++ */
++
++#include "RNImageResizerSpec.h"
++
++namespace facebook::react {
++
++static facebook::jsi::Value __hostFunction_NativeImageResizerSpecJSI_createResizedImage(facebook::jsi::Runtime& rt, TurboModule &turboModule, const facebook::jsi::Value* args, size_t count) {
++  static jmethodID cachedMethodId = nullptr;
++  return static_cast<JavaTurboModule &>(turboModule).invokeJavaMethod(rt, PromiseKind, "createResizedImage", "(Ljava/lang/String;DDLjava/lang/String;DLjava/lang/String;ZLjava/lang/Double;Ljava/lang/String;Ljava/lang/Boolean;Lcom/facebook/react/bridge/Promise;)V", args, count, cachedMethodId);
++}
++
++NativeImageResizerSpecJSI::NativeImageResizerSpecJSI(const JavaTurboModule::InitParams &params)
++  : JavaTurboModule(params) {
++  methodMap_["createResizedImage"] = MethodMetadata {10, __hostFunction_NativeImageResizerSpecJSI_createResizedImage};
++}
++
++std::shared_ptr<TurboModule> RNImageResizerSpec_ModuleProvider(const std::string &moduleName, const JavaTurboModule::InitParams &params) {
++  if (moduleName == "ImageResizer") {
++    return std::make_shared<NativeImageResizerSpecJSI>(params);
++  }
++  return nullptr;
++}
++
++} // namespace facebook::react
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/jni/RNImageResizerSpec.h b/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/jni/RNImageResizerSpec.h
+new file mode 100644
+index 0000000..c6f6482
+--- /dev/null
++++ b/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/jni/RNImageResizerSpec.h
+@@ -0,0 +1,31 @@
++
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GenerateModuleJniH.js
++ */
++
++#pragma once
++
++#include <ReactCommon/JavaTurboModule.h>
++#include <ReactCommon/TurboModule.h>
++#include <jsi/jsi.h>
++
++namespace facebook::react {
++
++/**
++ * JNI C++ class for module 'NativeImageResizer'
++ */
++class JSI_EXPORT NativeImageResizerSpecJSI : public JavaTurboModule {
++public:
++  NativeImageResizerSpecJSI(const JavaTurboModule::InitParams &params);
++};
++
++
++JSI_EXPORT
++std::shared_ptr<TurboModule> RNImageResizerSpec_ModuleProvider(const std::string &moduleName, const JavaTurboModule::InitParams &params);
++
++} // namespace facebook::react
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/jni/react/renderer/components/RNImageResizerSpec/ComponentDescriptors.cpp b/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/jni/react/renderer/components/RNImageResizerSpec/ComponentDescriptors.cpp
+new file mode 100644
+index 0000000..27054b5
+--- /dev/null
++++ b/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/jni/react/renderer/components/RNImageResizerSpec/ComponentDescriptors.cpp
+@@ -0,0 +1,22 @@
++
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GenerateComponentDescriptorCpp.js
++ */
++
++#include <react/renderer/components/RNImageResizerSpec/ComponentDescriptors.h>
++#include <react/renderer/core/ConcreteComponentDescriptor.h>
++#include <react/renderer/componentregistry/ComponentDescriptorProviderRegistry.h>
++
++namespace facebook::react {
++
++void RNImageResizerSpec_registerComponentDescriptorsFromCodegen(
++  std::shared_ptr<const ComponentDescriptorProviderRegistry> registry) {
++
++}
++
++} // namespace facebook::react
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/jni/react/renderer/components/RNImageResizerSpec/ComponentDescriptors.h b/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/jni/react/renderer/components/RNImageResizerSpec/ComponentDescriptors.h
+new file mode 100644
+index 0000000..12ca282
+--- /dev/null
++++ b/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/jni/react/renderer/components/RNImageResizerSpec/ComponentDescriptors.h
+@@ -0,0 +1,24 @@
++
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GenerateComponentDescriptorH.js
++ */
++
++#pragma once
++
++#include <react/renderer/components/RNImageResizerSpec/ShadowNodes.h>
++#include <react/renderer/core/ConcreteComponentDescriptor.h>
++#include <react/renderer/componentregistry/ComponentDescriptorProviderRegistry.h>
++
++namespace facebook::react {
++
++
++
++void RNImageResizerSpec_registerComponentDescriptorsFromCodegen(
++  std::shared_ptr<const ComponentDescriptorProviderRegistry> registry);
++
++} // namespace facebook::react
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/jni/react/renderer/components/RNImageResizerSpec/EventEmitters.cpp b/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/jni/react/renderer/components/RNImageResizerSpec/EventEmitters.cpp
+new file mode 100644
+index 0000000..09af8e4
+--- /dev/null
++++ b/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/jni/react/renderer/components/RNImageResizerSpec/EventEmitters.cpp
+@@ -0,0 +1,16 @@
++
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GenerateEventEmitterCpp.js
++ */
++
++#include <react/renderer/components/RNImageResizerSpec/EventEmitters.h>
++
++
++namespace facebook::react {
++
++} // namespace facebook::react
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/jni/react/renderer/components/RNImageResizerSpec/EventEmitters.h b/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/jni/react/renderer/components/RNImageResizerSpec/EventEmitters.h
+new file mode 100644
+index 0000000..2845a63
+--- /dev/null
++++ b/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/jni/react/renderer/components/RNImageResizerSpec/EventEmitters.h
+@@ -0,0 +1,17 @@
++
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GenerateEventEmitterH.js
++ */
++#pragma once
++
++#include <react/renderer/components/view/ViewEventEmitter.h>
++
++
++namespace facebook::react {
++
++} // namespace facebook::react
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/jni/react/renderer/components/RNImageResizerSpec/Props.cpp b/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/jni/react/renderer/components/RNImageResizerSpec/Props.cpp
+new file mode 100644
+index 0000000..a59c5ac
+--- /dev/null
++++ b/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/jni/react/renderer/components/RNImageResizerSpec/Props.cpp
+@@ -0,0 +1,19 @@
++
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GeneratePropsCpp.js
++ */
++
++#include <react/renderer/components/RNImageResizerSpec/Props.h>
++#include <react/renderer/core/PropsParserContext.h>
++#include <react/renderer/core/propsConversions.h>
++
++namespace facebook::react {
++
++
++
++} // namespace facebook::react
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/jni/react/renderer/components/RNImageResizerSpec/Props.h b/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/jni/react/renderer/components/RNImageResizerSpec/Props.h
+new file mode 100644
+index 0000000..870864b
+--- /dev/null
++++ b/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/jni/react/renderer/components/RNImageResizerSpec/Props.h
+@@ -0,0 +1,18 @@
++
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GeneratePropsH.js
++ */
++#pragma once
++
++
++
++namespace facebook::react {
++
++
++
++} // namespace facebook::react
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/jni/react/renderer/components/RNImageResizerSpec/RNImageResizerSpecJSI-generated.cpp b/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/jni/react/renderer/components/RNImageResizerSpec/RNImageResizerSpecJSI-generated.cpp
+new file mode 100644
+index 0000000..f0de570
+--- /dev/null
++++ b/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/jni/react/renderer/components/RNImageResizerSpec/RNImageResizerSpecJSI-generated.cpp
+@@ -0,0 +1,36 @@
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GenerateModuleCpp.js
++ */
++
++#include "RNImageResizerSpecJSI.h"
++
++namespace facebook::react {
++
++static jsi::Value __hostFunction_NativeImageResizerCxxSpecJSI_createResizedImage(jsi::Runtime &rt, TurboModule &turboModule, const jsi::Value* args, size_t count) {
++  return static_cast<NativeImageResizerCxxSpecJSI *>(&turboModule)->createResizedImage(
++    rt,
++    count <= 0 ? throw jsi::JSError(rt, "Expected argument in position 0 to be passed") : args[0].asString(rt),
++    count <= 1 ? throw jsi::JSError(rt, "Expected argument in position 1 to be passed") : args[1].asNumber(),
++    count <= 2 ? throw jsi::JSError(rt, "Expected argument in position 2 to be passed") : args[2].asNumber(),
++    count <= 3 ? throw jsi::JSError(rt, "Expected argument in position 3 to be passed") : args[3].asString(rt),
++    count <= 4 ? throw jsi::JSError(rt, "Expected argument in position 4 to be passed") : args[4].asNumber(),
++    count <= 5 ? throw jsi::JSError(rt, "Expected argument in position 5 to be passed") : args[5].asString(rt),
++    count <= 6 ? throw jsi::JSError(rt, "Expected argument in position 6 to be passed") : args[6].asBool(),
++    count <= 7 || args[7].isUndefined() ? std::nullopt : std::make_optional(args[7].asNumber()),
++    count <= 8 || args[8].isNull() || args[8].isUndefined() ? std::nullopt : std::make_optional(args[8].asString(rt)),
++    count <= 9 || args[9].isUndefined() ? std::nullopt : std::make_optional(args[9].asBool())
++  );
++}
++
++NativeImageResizerCxxSpecJSI::NativeImageResizerCxxSpecJSI(std::shared_ptr<CallInvoker> jsInvoker)
++  : TurboModule("ImageResizer", jsInvoker) {
++  methodMap_["createResizedImage"] = MethodMetadata {10, __hostFunction_NativeImageResizerCxxSpecJSI_createResizedImage};
++}
++
++
++} // namespace facebook::react
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/jni/react/renderer/components/RNImageResizerSpec/RNImageResizerSpecJSI.h b/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/jni/react/renderer/components/RNImageResizerSpec/RNImageResizerSpecJSI.h
+new file mode 100644
+index 0000000..77837b5
+--- /dev/null
++++ b/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/jni/react/renderer/components/RNImageResizerSpec/RNImageResizerSpecJSI.h
+@@ -0,0 +1,71 @@
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GenerateModuleH.js
++ */
++
++#pragma once
++
++#include <ReactCommon/TurboModule.h>
++#include <react/bridging/Bridging.h>
++
++namespace facebook::react {
++
++
++  class JSI_EXPORT NativeImageResizerCxxSpecJSI : public TurboModule {
++protected:
++  NativeImageResizerCxxSpecJSI(std::shared_ptr<CallInvoker> jsInvoker);
++
++public:
++  virtual jsi::Value createResizedImage(jsi::Runtime &rt, jsi::String uri, double width, double height, jsi::String format, double quality, jsi::String mode, bool onlyScaleDown, std::optional<double> rotation, std::optional<jsi::String> outputPath, std::optional<bool> keepMeta) = 0;
++
++};
++
++template <typename T>
++class JSI_EXPORT NativeImageResizerCxxSpec : public TurboModule {
++public:
++  jsi::Value create(jsi::Runtime &rt, const jsi::PropNameID &propName) override {
++    return delegate_.create(rt, propName);
++  }
++
++  std::vector<jsi::PropNameID> getPropertyNames(jsi::Runtime& runtime) override {
++    return delegate_.getPropertyNames(runtime);
++  }
++
++  static constexpr std::string_view kModuleName = "ImageResizer";
++
++protected:
++  NativeImageResizerCxxSpec(std::shared_ptr<CallInvoker> jsInvoker)
++    : TurboModule(std::string{NativeImageResizerCxxSpec::kModuleName}, jsInvoker),
++      delegate_(reinterpret_cast<T*>(this), jsInvoker) {}
++
++
++private:
++  class Delegate : public NativeImageResizerCxxSpecJSI {
++  public:
++    Delegate(T *instance, std::shared_ptr<CallInvoker> jsInvoker) :
++      NativeImageResizerCxxSpecJSI(std::move(jsInvoker)), instance_(instance) {
++
++    }
++
++    jsi::Value createResizedImage(jsi::Runtime &rt, jsi::String uri, double width, double height, jsi::String format, double quality, jsi::String mode, bool onlyScaleDown, std::optional<double> rotation, std::optional<jsi::String> outputPath, std::optional<bool> keepMeta) override {
++      static_assert(
++          bridging::getParameterCount(&T::createResizedImage) == 11,
++          "Expected createResizedImage(...) to have 11 parameters");
++
++      return bridging::callFromJs<jsi::Value>(
++          rt, &T::createResizedImage, jsInvoker_, instance_, std::move(uri), std::move(width), std::move(height), std::move(format), std::move(quality), std::move(mode), std::move(onlyScaleDown), std::move(rotation), std::move(outputPath), std::move(keepMeta));
++    }
++
++  private:
++    friend class NativeImageResizerCxxSpec;
++    T *instance_;
++  };
++
++  Delegate delegate_;
++};
++
++} // namespace facebook::react
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/jni/react/renderer/components/RNImageResizerSpec/ShadowNodes.cpp b/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/jni/react/renderer/components/RNImageResizerSpec/ShadowNodes.cpp
+new file mode 100644
+index 0000000..f238a2b
+--- /dev/null
++++ b/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/jni/react/renderer/components/RNImageResizerSpec/ShadowNodes.cpp
+@@ -0,0 +1,17 @@
++
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GenerateShadowNodeCpp.js
++ */
++
++#include <react/renderer/components/RNImageResizerSpec/ShadowNodes.h>
++
++namespace facebook::react {
++
++
++
++} // namespace facebook::react
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/jni/react/renderer/components/RNImageResizerSpec/ShadowNodes.h b/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/jni/react/renderer/components/RNImageResizerSpec/ShadowNodes.h
+new file mode 100644
+index 0000000..9075251
+--- /dev/null
++++ b/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/jni/react/renderer/components/RNImageResizerSpec/ShadowNodes.h
+@@ -0,0 +1,23 @@
++
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GenerateShadowNodeH.js
++ */
++
++#pragma once
++
++#include <react/renderer/components/RNImageResizerSpec/EventEmitters.h>
++#include <react/renderer/components/RNImageResizerSpec/Props.h>
++#include <react/renderer/components/RNImageResizerSpec/States.h>
++#include <react/renderer/components/view/ConcreteViewShadowNode.h>
++#include <jsi/jsi.h>
++
++namespace facebook::react {
++
++
++
++} // namespace facebook::react
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/jni/react/renderer/components/RNImageResizerSpec/States.cpp b/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/jni/react/renderer/components/RNImageResizerSpec/States.cpp
+new file mode 100644
+index 0000000..c3545a1
+--- /dev/null
++++ b/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/jni/react/renderer/components/RNImageResizerSpec/States.cpp
+@@ -0,0 +1,16 @@
++
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GenerateStateCpp.js
++ */
++#include <react/renderer/components/RNImageResizerSpec/States.h>
++
++namespace facebook::react {
++
++
++
++} // namespace facebook::react
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/jni/react/renderer/components/RNImageResizerSpec/States.h b/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/jni/react/renderer/components/RNImageResizerSpec/States.h
+new file mode 100644
+index 0000000..c011ed8
+--- /dev/null
++++ b/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/jni/react/renderer/components/RNImageResizerSpec/States.h
+@@ -0,0 +1,19 @@
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GenerateStateH.js
++ */
++#pragma once
++
++#ifdef ANDROID
++#include <folly/dynamic.h>
++#endif
++
++namespace facebook::react {
++
++
++
++} // namespace facebook::react
+\ No newline at end of file
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/schema.json b/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/schema.json
+new file mode 100644
+index 0000000..76f23b1
+--- /dev/null
++++ b/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/source/codegen/schema.json
+@@ -0,0 +1 @@
++{"modules":{"NativeImageResizer":{"type":"NativeModule","aliasMap":{},"enumMap":{},"spec":{"eventEmitters":[],"methods":[{"name":"createResizedImage","optional":false,"typeAnnotation":{"type":"FunctionTypeAnnotation","returnTypeAnnotation":{"type":"PromiseTypeAnnotation","elementType":{"type":"ObjectTypeAnnotation","properties":[{"name":"path","optional":false,"typeAnnotation":{"type":"StringTypeAnnotation"}},{"name":"uri","optional":false,"typeAnnotation":{"type":"StringTypeAnnotation"}},{"name":"size","optional":false,"typeAnnotation":{"type":"NumberTypeAnnotation"}},{"name":"name","optional":false,"typeAnnotation":{"type":"StringTypeAnnotation"}},{"name":"width","optional":false,"typeAnnotation":{"type":"NumberTypeAnnotation"}},{"name":"height","optional":false,"typeAnnotation":{"type":"NumberTypeAnnotation"}},{"name":"base64","optional":false,"typeAnnotation":{"type":"StringTypeAnnotation"}}]}},"params":[{"name":"uri","optional":false,"typeAnnotation":{"type":"StringTypeAnnotation"}},{"name":"width","optional":false,"typeAnnotation":{"type":"NumberTypeAnnotation"}},{"name":"height","optional":false,"typeAnnotation":{"type":"NumberTypeAnnotation"}},{"name":"format","optional":false,"typeAnnotation":{"type":"StringTypeAnnotation"}},{"name":"quality","optional":false,"typeAnnotation":{"type":"NumberTypeAnnotation"}},{"name":"mode","optional":false,"typeAnnotation":{"type":"StringTypeAnnotation"}},{"name":"onlyScaleDown","optional":false,"typeAnnotation":{"type":"BooleanTypeAnnotation"}},{"name":"rotation","optional":true,"typeAnnotation":{"type":"NumberTypeAnnotation"}},{"name":"outputPath","optional":true,"typeAnnotation":{"type":"NullableTypeAnnotation","typeAnnotation":{"type":"StringTypeAnnotation"}}},{"name":"keepMeta","optional":true,"typeAnnotation":{"type":"BooleanTypeAnnotation"}}]}}]},"moduleName":"ImageResizer"}}}
+\ No newline at end of file
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/AndroidManifest.xml b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/AndroidManifest.xml
+new file mode 100644
+index 0000000..fec7c50
+--- /dev/null
++++ b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/AndroidManifest.xml
+@@ -0,0 +1,7 @@
++<?xml version="1.0" encoding="utf-8"?>
++<manifest xmlns:android="http://schemas.android.com/apk/res/android"
++    package="com.reactnativeimageresizer" >
++
++    <uses-sdk android:minSdkVersion="24" />
++
++</manifest>
+\ No newline at end of file
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/output-metadata.json b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/output-metadata.json
+new file mode 100644
+index 0000000..d338b06
+--- /dev/null
++++ b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/output-metadata.json
+@@ -0,0 +1,18 @@
++{
++  "version": 3,
++  "artifactType": {
++    "type": "AAPT_FRIENDLY_MERGED_MANIFESTS",
++    "kind": "Directory"
++  },
++  "applicationId": "com.reactnativeimageresizer",
++  "variantName": "debug",
++  "elements": [
++    {
++      "type": "SINGLE",
++      "filters": [],
++      "attributes": [],
++      "outputFile": "AndroidManifest.xml"
++    }
++  ],
++  "elementType": "File"
++}
+\ No newline at end of file
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/aar_metadata/debug/writeDebugAarMetadata/aar-metadata.properties b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/aar_metadata/debug/writeDebugAarMetadata/aar-metadata.properties
+new file mode 100644
+index 0000000..1211b1e
+--- /dev/null
++++ b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/aar_metadata/debug/writeDebugAarMetadata/aar-metadata.properties
+@@ -0,0 +1,6 @@
++aarFormatVersion=1.0
++aarMetadataVersion=1.0
++minCompileSdk=1
++minCompileSdkExtension=0
++minAndroidGradlePluginVersion=1.0.0
++coreLibraryDesugaringEnabled=false
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/annotation_processor_list/debug/javaPreCompileDebug/annotationProcessors.json b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/annotation_processor_list/debug/javaPreCompileDebug/annotationProcessors.json
+new file mode 100644
+index 0000000..9e26dfe
+--- /dev/null
++++ b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/annotation_processor_list/debug/javaPreCompileDebug/annotationProcessors.json
+@@ -0,0 +1 @@
++{}
+\ No newline at end of file
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/compile_library_classes_jar/debug/bundleLibCompileToJarDebug/classes.jar b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/compile_library_classes_jar/debug/bundleLibCompileToJarDebug/classes.jar
+new file mode 100644
+index 0000000..51eeb77
+Binary files /dev/null and b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/compile_library_classes_jar/debug/bundleLibCompileToJarDebug/classes.jar differ
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/compile_r_class_jar/debug/generateDebugRFile/R.jar b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/compile_r_class_jar/debug/generateDebugRFile/R.jar
+new file mode 100644
+index 0000000..5880394
+Binary files /dev/null and b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/compile_r_class_jar/debug/generateDebugRFile/R.jar differ
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/compile_symbol_list/debug/generateDebugRFile/R.txt b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/compile_symbol_list/debug/generateDebugRFile/R.txt
+new file mode 100644
+index 0000000..e69de29
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/incremental/debug/packageDebugResources/compile-file-map.properties b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/incremental/debug/packageDebugResources/compile-file-map.properties
+new file mode 100644
+index 0000000..7095ef4
+--- /dev/null
++++ b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/incremental/debug/packageDebugResources/compile-file-map.properties
+@@ -0,0 +1 @@
++#Wed Aug 13 17:12:14 CEST 2025
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/incremental/debug/packageDebugResources/merger.xml b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/incremental/debug/packageDebugResources/merger.xml
+new file mode 100644
+index 0000000..51625b1
+--- /dev/null
++++ b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/incremental/debug/packageDebugResources/merger.xml
+@@ -0,0 +1,2 @@
++<?xml version="1.0" encoding="utf-8"?>
++<merger version="3"><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="main$Generated" generated="true" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/biswa/Github/feed-mobile-app/node_modules/@bam.tech/react-native-image-resizer/android/src/main/res"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="main" generated-set="main$Generated" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/biswa/Github/feed-mobile-app/node_modules/@bam.tech/react-native-image-resizer/android/src/main/res"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="debug$Generated" generated="true" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/biswa/Github/feed-mobile-app/node_modules/@bam.tech/react-native-image-resizer/android/src/debug/res"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="debug" generated-set="debug$Generated" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/biswa/Github/feed-mobile-app/node_modules/@bam.tech/react-native-image-resizer/android/src/debug/res"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="generated$Generated" generated="true" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/biswa/Github/feed-mobile-app/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/res/resValues/debug"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="generated" generated-set="generated$Generated" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/biswa/Github/feed-mobile-app/node_modules/@bam.tech/react-native-image-resizer/android/build/generated/res/resValues/debug"/></dataSet><mergedItems/></merger>
+\ No newline at end of file
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/incremental/mergeDebugAssets/merger.xml b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/incremental/mergeDebugAssets/merger.xml
+new file mode 100644
+index 0000000..bade6bb
+--- /dev/null
++++ b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/incremental/mergeDebugAssets/merger.xml
+@@ -0,0 +1,2 @@
++<?xml version="1.0" encoding="utf-8"?>
++<merger version="3"><dataSet config="main" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/biswa/Github/feed-mobile-app/node_modules/@bam.tech/react-native-image-resizer/android/src/main/assets"/></dataSet><dataSet config="debug" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/biswa/Github/feed-mobile-app/node_modules/@bam.tech/react-native-image-resizer/android/src/debug/assets"/></dataSet><dataSet config="generated" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/biswa/Github/feed-mobile-app/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/shader_assets/debug/compileDebugShaders/out"/></dataSet></merger>
+\ No newline at end of file
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/incremental/mergeDebugJniLibFolders/merger.xml b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/incremental/mergeDebugJniLibFolders/merger.xml
+new file mode 100644
+index 0000000..e1762c4
+--- /dev/null
++++ b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/incremental/mergeDebugJniLibFolders/merger.xml
+@@ -0,0 +1,2 @@
++<?xml version="1.0" encoding="utf-8"?>
++<merger version="3"><dataSet config="main" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/biswa/Github/feed-mobile-app/node_modules/@bam.tech/react-native-image-resizer/android/src/main/jniLibs"/></dataSet><dataSet config="debug" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/biswa/Github/feed-mobile-app/node_modules/@bam.tech/react-native-image-resizer/android/src/debug/jniLibs"/></dataSet></merger>
+\ No newline at end of file
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/incremental/mergeDebugShaders/merger.xml b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/incremental/mergeDebugShaders/merger.xml
+new file mode 100644
+index 0000000..0b0b8d4
+--- /dev/null
++++ b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/incremental/mergeDebugShaders/merger.xml
+@@ -0,0 +1,2 @@
++<?xml version="1.0" encoding="utf-8"?>
++<merger version="3"><dataSet config="main" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/biswa/Github/feed-mobile-app/node_modules/@bam.tech/react-native-image-resizer/android/src/main/shaders"/></dataSet><dataSet config="debug" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/biswa/Github/feed-mobile-app/node_modules/@bam.tech/react-native-image-resizer/android/src/debug/shaders"/></dataSet></merger>
+\ No newline at end of file
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/reactnativeimageresizer/BuildConfig.class b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/reactnativeimageresizer/BuildConfig.class
+new file mode 100644
+index 0000000..f7b13bc
+Binary files /dev/null and b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/reactnativeimageresizer/BuildConfig.class differ
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/reactnativeimageresizer/ImageResizer.class b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/reactnativeimageresizer/ImageResizer.class
+new file mode 100644
+index 0000000..94f5f7d
+Binary files /dev/null and b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/reactnativeimageresizer/ImageResizer.class differ
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/reactnativeimageresizer/ImageResizerModule$1.class b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/reactnativeimageresizer/ImageResizerModule$1.class
+new file mode 100644
+index 0000000..6342a4f
+Binary files /dev/null and b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/reactnativeimageresizer/ImageResizerModule$1.class differ
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/reactnativeimageresizer/ImageResizerModule.class b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/reactnativeimageresizer/ImageResizerModule.class
+new file mode 100644
+index 0000000..a95e9cc
+Binary files /dev/null and b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/reactnativeimageresizer/ImageResizerModule.class differ
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/reactnativeimageresizer/ImageResizerPackage.class b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/reactnativeimageresizer/ImageResizerPackage.class
+new file mode 100644
+index 0000000..7db7424
+Binary files /dev/null and b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/reactnativeimageresizer/ImageResizerPackage.class differ
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/reactnativeimageresizer/ImageResizerSpec.class b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/reactnativeimageresizer/ImageResizerSpec.class
+new file mode 100644
+index 0000000..c5f9bff
+Binary files /dev/null and b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/reactnativeimageresizer/ImageResizerSpec.class differ
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/reactnativeimageresizer/NativeImageResizerSpec.class b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/reactnativeimageresizer/NativeImageResizerSpec.class
+new file mode 100644
+index 0000000..58b1d78
+Binary files /dev/null and b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/reactnativeimageresizer/NativeImageResizerSpec.class differ
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/local_only_symbol_list/debug/parseDebugLocalResources/R-def.txt b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/local_only_symbol_list/debug/parseDebugLocalResources/R-def.txt
+new file mode 100644
+index 0000000..78ac5b8
+--- /dev/null
++++ b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/local_only_symbol_list/debug/parseDebugLocalResources/R-def.txt
+@@ -0,0 +1,2 @@
++R_DEF: Internal format may change without notice
++local
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/manifest_merge_blame_file/debug/processDebugManifest/manifest-merger-blame-debug-report.txt b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/manifest_merge_blame_file/debug/processDebugManifest/manifest-merger-blame-debug-report.txt
+new file mode 100644
+index 0000000..65d42e8
+--- /dev/null
++++ b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/manifest_merge_blame_file/debug/processDebugManifest/manifest-merger-blame-debug-report.txt
+@@ -0,0 +1,7 @@
++1<?xml version="1.0" encoding="utf-8"?>
++2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
++3    package="com.reactnativeimageresizer" >
++4
++5    <uses-sdk android:minSdkVersion="24" />
++6
++7</manifest>
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml
+new file mode 100644
+index 0000000..fec7c50
+--- /dev/null
++++ b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml
+@@ -0,0 +1,7 @@
++<?xml version="1.0" encoding="utf-8"?>
++<manifest xmlns:android="http://schemas.android.com/apk/res/android"
++    package="com.reactnativeimageresizer" >
++
++    <uses-sdk android:minSdkVersion="24" />
++
++</manifest>
+\ No newline at end of file
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/navigation_json/debug/extractDeepLinksDebug/navigation.json b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/navigation_json/debug/extractDeepLinksDebug/navigation.json
+new file mode 100644
+index 0000000..0637a08
+--- /dev/null
++++ b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/navigation_json/debug/extractDeepLinksDebug/navigation.json
+@@ -0,0 +1 @@
++[]
+\ No newline at end of file
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/nested_resources_validation_report/debug/generateDebugResources/nestedResourcesValidationReport.txt b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/nested_resources_validation_report/debug/generateDebugResources/nestedResourcesValidationReport.txt
+new file mode 100644
+index 0000000..08f4ebe
+--- /dev/null
++++ b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/nested_resources_validation_report/debug/generateDebugResources/nestedResourcesValidationReport.txt
+@@ -0,0 +1 @@
++0 Warning/Error
+\ No newline at end of file
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/reactnativeimageresizer/BuildConfig.class b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/reactnativeimageresizer/BuildConfig.class
+new file mode 100644
+index 0000000..f7b13bc
+Binary files /dev/null and b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/reactnativeimageresizer/BuildConfig.class differ
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/reactnativeimageresizer/ImageResizer.class b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/reactnativeimageresizer/ImageResizer.class
+new file mode 100644
+index 0000000..94f5f7d
+Binary files /dev/null and b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/reactnativeimageresizer/ImageResizer.class differ
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/reactnativeimageresizer/ImageResizerModule$1.class b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/reactnativeimageresizer/ImageResizerModule$1.class
+new file mode 100644
+index 0000000..6342a4f
+Binary files /dev/null and b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/reactnativeimageresizer/ImageResizerModule$1.class differ
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/reactnativeimageresizer/ImageResizerModule.class b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/reactnativeimageresizer/ImageResizerModule.class
+new file mode 100644
+index 0000000..a95e9cc
+Binary files /dev/null and b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/reactnativeimageresizer/ImageResizerModule.class differ
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/reactnativeimageresizer/ImageResizerPackage.class b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/reactnativeimageresizer/ImageResizerPackage.class
+new file mode 100644
+index 0000000..7db7424
+Binary files /dev/null and b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/reactnativeimageresizer/ImageResizerPackage.class differ
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/reactnativeimageresizer/ImageResizerSpec.class b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/reactnativeimageresizer/ImageResizerSpec.class
+new file mode 100644
+index 0000000..c5f9bff
+Binary files /dev/null and b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/reactnativeimageresizer/ImageResizerSpec.class differ
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/reactnativeimageresizer/NativeImageResizerSpec.class b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/reactnativeimageresizer/NativeImageResizerSpec.class
+new file mode 100644
+index 0000000..58b1d78
+Binary files /dev/null and b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/reactnativeimageresizer/NativeImageResizerSpec.class differ
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/runtime_library_classes_jar/debug/bundleLibRuntimeToJarDebug/classes.jar b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/runtime_library_classes_jar/debug/bundleLibRuntimeToJarDebug/classes.jar
+new file mode 100644
+index 0000000..e4eabce
+Binary files /dev/null and b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/runtime_library_classes_jar/debug/bundleLibRuntimeToJarDebug/classes.jar differ
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/symbol_list_with_package_name/debug/generateDebugRFile/package-aware-r.txt b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/symbol_list_with_package_name/debug/generateDebugRFile/package-aware-r.txt
+new file mode 100644
+index 0000000..92e94e8
+--- /dev/null
++++ b/node_modules/@bam.tech/react-native-image-resizer/android/build/intermediates/symbol_list_with_package_name/debug/generateDebugRFile/package-aware-r.txt
+@@ -0,0 +1 @@
++com.reactnativeimageresizer
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/outputs/logs/manifest-merger-debug-report.txt b/node_modules/@bam.tech/react-native-image-resizer/android/build/outputs/logs/manifest-merger-debug-report.txt
+new file mode 100644
+index 0000000..9f4acee
+--- /dev/null
++++ b/node_modules/@bam.tech/react-native-image-resizer/android/build/outputs/logs/manifest-merger-debug-report.txt
+@@ -0,0 +1,17 @@
++-- Merging decision tree log ---
++manifest
++ADDED from /Users/biswa/Github/feed-mobile-app/node_modules/@bam.tech/react-native-image-resizer/android/src/main/AndroidManifest.xml:1:1-3:12
++INJECTED from /Users/biswa/Github/feed-mobile-app/node_modules/@bam.tech/react-native-image-resizer/android/src/main/AndroidManifest.xml:1:1-3:12
++	package
++		ADDED from /Users/biswa/Github/feed-mobile-app/node_modules/@bam.tech/react-native-image-resizer/android/src/main/AndroidManifest.xml:1:70-107
++		INJECTED from /Users/biswa/Github/feed-mobile-app/node_modules/@bam.tech/react-native-image-resizer/android/src/main/AndroidManifest.xml
++	xmlns:android
++		ADDED from /Users/biswa/Github/feed-mobile-app/node_modules/@bam.tech/react-native-image-resizer/android/src/main/AndroidManifest.xml:1:11-69
++uses-sdk
++INJECTED from /Users/biswa/Github/feed-mobile-app/node_modules/@bam.tech/react-native-image-resizer/android/src/main/AndroidManifest.xml reason: use-sdk injection requested
++INJECTED from /Users/biswa/Github/feed-mobile-app/node_modules/@bam.tech/react-native-image-resizer/android/src/main/AndroidManifest.xml
++INJECTED from /Users/biswa/Github/feed-mobile-app/node_modules/@bam.tech/react-native-image-resizer/android/src/main/AndroidManifest.xml
++	android:targetSdkVersion
++		INJECTED from /Users/biswa/Github/feed-mobile-app/node_modules/@bam.tech/react-native-image-resizer/android/src/main/AndroidManifest.xml
++	android:minSdkVersion
++		INJECTED from /Users/biswa/Github/feed-mobile-app/node_modules/@bam.tech/react-native-image-resizer/android/src/main/AndroidManifest.xml
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/android/build/tmp/compileDebugJavaWithJavac/previous-compilation-data.bin b/node_modules/@bam.tech/react-native-image-resizer/android/build/tmp/compileDebugJavaWithJavac/previous-compilation-data.bin
+new file mode 100644
+index 0000000..d6079e4
+Binary files /dev/null and b/node_modules/@bam.tech/react-native-image-resizer/android/build/tmp/compileDebugJavaWithJavac/previous-compilation-data.bin differ
+diff --git a/node_modules/@bam.tech/react-native-image-resizer/ios/ImageResizer.mm b/node_modules/@bam.tech/react-native-image-resizer/ios/ImageResizer.mm
+index ac23dd8..bc2371e 100644
+--- a/node_modules/@bam.tech/react-native-image-resizer/ios/ImageResizer.mm
++++ b/node_modules/@bam.tech/react-native-image-resizer/ios/ImageResizer.mm
+@@ -2,6 +2,7 @@
+ #import <React/RCTLog.h>
+ #import <AssetsLibrary/AssetsLibrary.h>
+ #import <MobileCoreServices/MobileCoreServices.h>
++#import <UniformTypeIdentifiers/UniformTypeIdentifiers.h>
+ 
+ #if __has_include(<React/RCTLog.h>)
+ #import <React/RCTLog.h>
+@@ -11,6 +12,8 @@
+ #import "RCTImageLoader.h"
+ #endif
+ 
++#import <MobileCoreServices/MobileCoreServices.h>
++
+ NSString *moduleName = @"ImageResizer";
+ 
+ @implementation ImageResizer
+@@ -67,14 +70,49 @@ RCT_REMAP_METHOD(createResizedImage, uri:(NSString *)uri width:(double)width hei
+     });
+ }
+ 
+-
++// FIX 1: Helper function to check if image has alpha channel
++BOOL imageHasAlpha(UIImage *image)
++{
++    if (image.CGImage == NULL) {
++        return NO;
++    }
++    CGImageAlphaInfo alpha = CGImageGetAlphaInfo(image.CGImage);
++    return (alpha == kCGImageAlphaFirst || 
++            alpha == kCGImageAlphaLast || 
++            alpha == kCGImageAlphaPremultipliedFirst || 
++            alpha == kCGImageAlphaPremultipliedLast);
++}
+ 
+ bool saveImage(NSString * fullPath, UIImage * image, NSString * format, float quality, NSMutableDictionary *metadata)
+ {
+     if(metadata == nil){
+         NSData* data = nil;
++        
+         if ([format isEqualToString:@"JPEG"]) {
+-            data = UIImageJPEGRepresentation(image, quality / 100.0);
++            // Use kUTTypeJPEG from MobileCoreServices (already imported in your file)
++            NSMutableDictionary *jpegOptions = [NSMutableDictionary dictionary];
++            [jpegOptions setObject:@(quality / 100.0) forKey:(__bridge NSString *)kCGImageDestinationLossyCompressionQuality];
++            
++            NSMutableData *jpegData = [NSMutableData data];
++            
++            // kUTTypeJPEG is already a CFStringRef, no need to bridge
++            CGImageDestinationRef destination = CGImageDestinationCreateWithData(
++                (__bridge CFMutableDataRef)jpegData,
++                kUTTypeJPEG,
++                1,
++                NULL
++            );
++            
++            if (destination != NULL) {
++                CGImageDestinationSetProperties(destination, (__bridge CFDictionaryRef)jpegOptions);
++                CGImageDestinationAddImage(destination, image.CGImage, NULL);
++                
++                if (CGImageDestinationFinalize(destination)) {
++                    data = jpegData;
++                }
++                CFRelease(destination);
++            }
++            
+         } else if ([format isEqualToString:@"PNG"]) {
+             data = UIImagePNGRepresentation(image);
+         }
+@@ -88,11 +126,11 @@ bool saveImage(NSString * fullPath, UIImage * image, NSString * format, float qu
+     }
+     
+     // process / write metadata together with image data
+-    else{
+-        
+-        CFStringRef imgType = kUTTypeJPEG;
++    else {
++        CFStringRef imgType;
+         
+         if ([format isEqualToString:@"JPEG"]) {
++            imgType = kUTTypeJPEG;
+             [metadata setObject:@(quality / 100.0) forKey:(__bridge NSString *)kCGImageDestinationLossyCompressionQuality];
+         }
+         else if([format isEqualToString:@"PNG"]){
+@@ -109,9 +147,7 @@ bool saveImage(NSString * fullPath, UIImage * image, NSString * format, float qu
+         @try{
+             CGImageDestinationAddImage(destination, image.CGImage, (__bridge CFDictionaryRef) metadata);
+             
+-            // write final image data with metadata to our destination
+             if (CGImageDestinationFinalize(destination)){
+-                
+                 NSFileManager* fileManager = [NSFileManager defaultManager];
+                 return [fileManager createFileAtPath:fullPath contents:destData attributes:nil];
+             }
+@@ -130,6 +166,8 @@ bool saveImage(NSString * fullPath, UIImage * image, NSString * format, float qu
+     }
+ }
+ 
++
++
+ NSString * generateFilePath(NSString * ext, NSString * outputPath)
+ {
+     NSString* directory;
+@@ -226,10 +264,7 @@ float getScaleForProportionalResize(CGSize theSize, CGSize intoSize, bool onlySc
+ }
+ 
+ 
+-// returns a resized image keeping aspect ratio and considering
+-// any :image scale factor.
+-// The returned image is an unscaled image (scale = 1.0)
+-// so no additional scaling math needs to be done to get its pixel dimensions
++// FIX 2: Optimized scaleImage function with opaque context for better compression
+ UIImage* scaleImage (UIImage* image, CGSize toSize, NSString* mode, bool onlyScaleDown)
+ {
+     
+@@ -261,14 +296,24 @@ UIImage* scaleImage (UIImage* image, CGSize toSize, NSString* mode, bool onlySca
+         newSize = CGSizeMake(roundf(imageSize.width * scale), roundf(imageSize.height * scale));
+     }
+     
+-    UIGraphicsBeginImageContextWithOptions(newSize, NO, 1.0);
++    // FIX: Use opaque context (YES) for images without alpha channel to improve JPEG compression
++    BOOL opaque = !imageHasAlpha(image);
++    
++    UIGraphicsBeginImageContextWithOptions(newSize, opaque, 1.0);
++    
++    // FIX: Fill background with white for opaque images (prevents transparency artifacts)
++    if (opaque) {
++        [[UIColor whiteColor] setFill];
++        UIRectFill(CGRectMake(0, 0, newSize.width, newSize.height));
++    }
++    
+     [image drawInRect:CGRectMake(0, 0, newSize.width, newSize.height)];
+     UIImage *newImage = UIGraphicsGetImageFromCurrentImageContext();
+     UIGraphicsEndImageContext();
+     return newImage;
+ }
+ 
+-// Returns the image's metadata, or nil if failed to retrieve it.
++// FIX 3: Optimized metadata handling - removes heavy metadata
+ NSMutableDictionary * getImageMeta(NSString * path)
+ {
+     if([path hasPrefix:@"assets-library"]) {
+@@ -378,11 +423,25 @@ NSDictionary * transformImage(UIImage *image,
+         
+         metadata = getImageMeta(originalPath);
+         
+-        // remove orientation (since we fix it)
+-        // width/height meta is adjusted automatically
+-        // NOTE: This might still leave some stale values due to resize
+-        metadata[(NSString*)kCGImagePropertyOrientation] = @(1);
++        // FIX: Remove heavy metadata to reduce file size
++        if (metadata != nil) {
++            // Remove GPS data (can be 10-50KB)
++            [metadata removeObjectForKey:(NSString*)kCGImagePropertyGPSDictionary];
+             
++            // Remove maker-specific data (can be 50-200KB)
++            [metadata removeObjectForKey:(NSString*)kCGImagePropertyMakerAppleDictionary];
++            [metadata removeObjectForKey:(NSString*)kCGImagePropertyMakerCanonDictionary];
++            [metadata removeObjectForKey:(NSString*)kCGImagePropertyMakerNikonDictionary];
++            
++            // Remove TIFF dictionary (often contains duplicate/large data)
++            [metadata removeObjectForKey:(NSString*)kCGImagePropertyTIFFDictionary];
++            
++            // Remove raw image data if present
++            [metadata removeObjectForKey:(NSString*)kCGImagePropertyRawDictionary];
++            
++            // Keep only essential orientation (and fix it to normal)
++            metadata[(NSString*)kCGImagePropertyOrientation] = @(1);
++        }
+     }
+     
+     // Compress and save the image
+@@ -415,3 +474,5 @@ NSDictionary * transformImage(UIImage *image,
+ }
+ #endif
+ @end
++
++
