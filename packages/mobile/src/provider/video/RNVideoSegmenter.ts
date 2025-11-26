@@ -93,102 +93,176 @@ const getVideoCodec = async (inputFilePath: string) => {
   });
 };
 
+// Proper ffprobe side_data_list JSON structure (only what we need)
+interface FfprobeSideData {
+  side_data_type: string;
+  rotation?: string; // ffprobe outputs rotation as string like "-90"
+}
+
+interface FfprobeStream {
+  side_data_list?: FfprobeSideData[];
+}
+
+interface FfprobeOutput {
+  streams?: FfprobeStream[];
+  side_data_list?: FfprobeSideData[]; // sometimes it's at root level
+}
+
+const getRotationFromFile = async (filePath: string): Promise<number> => {
+  try {
+    const session = await FFprobeKit.execute(
+      `-v quiet -select_streams v:0 -show_entries side_data_list=side_data_type,rotation -of json=compact=1 "${filePath}"`
+    );
+
+    const output = await session.getOutput();
+    if (!output?.trim()) return 0;
+
+    let data: FfprobeOutput;
+    try {
+      data = JSON.parse(output) as FfprobeOutput;
+    } catch {
+      console.warn('Failed to parse ffprobe JSON:', output);
+      return 0;
+    }
+
+    // Try stream-level side data first, then root-level (some ffprobe versions differ)
+    const sideDataList: FfprobeSideData[] | undefined =
+      data.streams?.[0]?.side_data_list ?? data.side_data_list;
+
+    if (!Array.isArray(sideDataList)) return 0;
+
+    const displayEntry = sideDataList.find(
+      (entry): entry is FfprobeSideData & { rotation: string } =>
+        entry.side_data_type === 'Display Matrix' && typeof entry.rotation === 'string'
+    );
+
+    if (!displayEntry) return 0;
+
+    const rotation = parseInt(displayEntry.rotation);
+
+    // Final sanity check
+    return isNaN(rotation) || rotation < -360 || rotation > 360 ? 0 : rotation;
+  } catch (error) {
+    console.warn('getRotationFromFile failed:', error);
+    return 0;
+  }
+};
+
 const segmentVideo = async (
   video: ImageSource,
   keyHeader?: KeyHeader
 ): Promise<ImageSource | HLSVideo | null> => {
   try {
     const source = video.filepath || video.uri;
-
     if (!source || !(await exists(source))) {
       throw new Error(`File not found: ${source}`);
     }
 
-    const sourceFileSize = await stat(source).then((stats) => stats.size);
+    const sourceFileSize = await stat(source).then((s) => s.size);
     if (sourceFileSize < 5 * MB) {
-      return {
-        ...video,
-      };
+      return { ...video };
     }
 
     const dirPath = CachesDirectoryPath;
-    const destinationPrefix = Platform.OS === 'ios' ? '' : 'file://';
+    const prefix = Platform.OS === 'ios' ? '' : 'file://';
+    const playlistUri = `${prefix}${dirPath}/ffmpeg-segmented-${getNewId()}.m3u8`;
+    const segmentUri = playlistUri.replace('.m3u8', '.ts');
 
-    const { keyInfoUri, pathsToClean } =
-      (await (async () => {
-        if (keyHeader) {
-          const keyUrl = 'http://example.com/path/to/encryption.key';
-          const keyUri = `${destinationPrefix}${dirPath}/hls-encryption.key`;
-          // const ivUri = `${destinationPrefix}${dirPath}/hls-iv.bin`;
-          const keyInfoUri = `${destinationPrefix}${dirPath}/hls-key_inf.txt`;
+    // === ROTATION DETECTION ===
+    const rotation = await getRotationFromFile(source);
+    const absRot = Math.abs(((rotation % 360) + 360) % 360);
+    const needsRotationFix = absRot === 90 || absRot === 270;
 
-          await writeFile(keyUri, uint8ArrayToBase64(keyHeader.aesKey), 'base64');
+    // === ENCRYPTION SETUP ===
+    const { keyInfoUri, pathsToClean } = await (async () => {
+      if (keyHeader) {
+        const keyUri = `${prefix}${dirPath}/hls-encryption.key`;
+        const keyInfoUri = `${prefix}${dirPath}/hls-key_inf.txt`;
 
-          const keyInfo = `${keyUrl}\n${keyUri}\n${toHexString(keyHeader.iv)}`;
+        await writeFile(keyUri, uint8ArrayToBase64(keyHeader.aesKey), 'base64');
+        const keyInfo = `http://example.com/key\n${keyUri}\n${toHexString(keyHeader.iv)}`;
+        await writeFile(keyInfoUri, keyInfo, 'utf8');
 
-          await writeFile(keyInfoUri, keyInfo, 'utf8');
+        return { keyInfoUri, pathsToClean: [keyUri, keyInfoUri] };
+      }
+      return { keyInfoUri: undefined, pathsToClean: [] };
+    })();
 
-          return { keyInfoUri, pathsToClean: [keyUri, keyInfoUri] };
-        }
-      })()) || {};
+    const encryptionArgs = keyHeader ? ['-hls_key_info_file', keyInfoUri!] : [];
 
-    const playlistUri = `${destinationPrefix}${dirPath}/ffmpeg-segmented-${getNewId()}.m3u8`;
-    const encryptionInfo = keyHeader
-      ? `-hls_key_info_file ${keyInfoUri}` // -hls_enc 1`
-      : '';
+    // === BUILD COMMAND ===
+    let commandArgs: string[] = [];
 
-    let command;
-    const codec = await getVideoCodec(source);
-    if (codec === 'h264') {
-      command = `-i ${source} -codec: copy ${encryptionInfo} -hls_time 6 -hls_list_size 0 -f hls -hls_flags single_file ${playlistUri}`;
+    if (!needsRotationFix) {
+      // Pure copy — fastest, no rotation needed
+      commandArgs = [
+        '-i', source,
+        '-codec:v', 'copy',
+        '-codec:a', 'copy',
+        ...encryptionArgs,
+        '-hls_time', '6',
+        '-hls_list_size', '0',
+        '-hls_flags', 'single_file',
+        '-f', 'hls',
+        playlistUri,
+      ];
     } else {
-      command = `-i ${source} -c:v libx264 -preset fast -crf 23 -c:a aac ${encryptionInfo} -hls_time 6 -hls_list_size 0 -f hls -hls_flags single_file ${playlistUri}`;
+      // Re-encode only when rotated → preserves rotation + smaller file
+      commandArgs = [
+        '-i', source,
+        '-c:v', 'libx264',
+        '-preset', 'veryfast',     // ultrafast → veryfast = huge size win, still fast
+        '-crf', '23',
+        '-g', '30',                // 1-second GOP → enables B-frames
+        '-bf', '2',                // allow 2 B-frames → massive compression gain
+        '-c:a', 'copy',
+        ...encryptionArgs,
+        '-hls_time', '6',
+        '-hls_list_size', '0',
+        '-hls_flags', 'single_file',
+        '-f', 'hls',
+        playlistUri,
+      ];
     }
 
+    const command = commandArgs.join(' ');
+    console.log('FFmpeg command:', command);
 
+    const session = await FFmpegKit.execute(command);
+    const state = await session.getState();
+    const returnCode = await session.getReturnCode();
+
+    if (state === SessionState.FAILED || !returnCode?.isValueSuccess()) {
+      const logs = await session.getLogs();
+      console.error('FFmpeg failed:', logs.map(l => l.getMessage()).join('\n'));
+      throw new Error(`FFmpeg failed: ${state}, rc: ${returnCode}`);
+    }
+
+    // Cleanup
     try {
-      const session = await FFmpegKit.execute(command);
-      const state = await session.getState();
-      const returnCode = await session.getReturnCode();
-
-      if (state === SessionState.FAILED || !returnCode.isValueSuccess()) {
-        throw new Error(`FFmpeg process failed with state: ${state} and rc: ${returnCode}.`);
-      }
-
-      const segmentsUri = playlistUri.replace('.m3u8', '.ts');
-
-      try {
-        pathsToClean?.forEach(async (path) => {
-          unlink(path);
-        });
-
-        unlink(source);
-      } catch (error) {
-        console.warn(`Failed to clean up video files: ${error}`);
-      }
-
-      return {
-        playlist: {
-          ...video,
-          fileSize: (await stat(playlistUri).then((stats) => stats.size)) || video.fileSize,
-          type: 'application/vnd.apple.mpegurl',
-          uri: playlistUri,
-          filepath: playlistUri,
-          playableDuration: video.playableDuration,
-        },
-        segments: {
-          ...video,
-          type: 'video/mp2t',
-          uri: segmentsUri,
-          filepath: segmentsUri,
-          playableDuration: video.playableDuration,
-        },
-      };
-    } catch (error) {
-      throw new Error(`FFmpeg process failed with error: ${error}`);
+      pathsToClean.forEach(path => unlink(path).catch(() => { }));
+      if (video.filepath) unlink(video.filepath).catch(() => { });
+    } catch (e) {
+      console.warn('Cleanup failed', e);
     }
+
+    return {
+      playlist: {
+        ...video,
+        uri: playlistUri,
+        filepath: playlistUri,
+        type: 'application/vnd.apple.mpegurl',
+        fileSize: await stat(playlistUri).then(s => s.size),
+      },
+      segments: {
+        ...video,
+        uri: segmentUri,
+        filepath: segmentUri,
+        type: 'video/mp2t',
+      },
+    };
   } catch (ex) {
-    console.error('failed to fragment video', ex);
+    console.error('failed to segment video', ex);
     return null;
   }
 };
