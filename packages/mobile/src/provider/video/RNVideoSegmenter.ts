@@ -67,31 +67,31 @@ interface HLSVideo {
 }
 
 // Function to get video codec information
-const getVideoCodec = async (inputFilePath: string) => {
-  return new Promise((resolve, reject) => {
-    // Command to get codec information
-    const command = `-v error -select_streams v:0 -show_entries stream=codec_name -of default=noprint_wrappers=1 ${inputFilePath}`;
+// const getVideoCodec = async (inputFilePath: string) => {
+//   return new Promise((resolve, reject) => {
+//     // Command to get codec information
+//     const command = `-v error -select_streams v:0 -show_entries stream=codec_name -of default=noprint_wrappers=1 ${inputFilePath}`;
 
-    // throw new Error('FFmpegKit is not available currently.');
-    FFprobeKit.execute(command)
-      .then(async (session) => {
-        const state = await session.getState();
-        const returnCode = await session.getReturnCode();
-        const output = await session.getOutput();
+//     // throw new Error('FFmpegKit is not available currently.');
+//     FFprobeKit.execute(command)
+//       .then(async (session) => {
+//         const state = await session.getState();
+//         const returnCode = await session.getReturnCode();
+//         const output = await session.getOutput();
 
-        if (state === SessionState.FAILED || !returnCode.isValueSuccess()) {
-          reject(new Error(`FFmpeg process failed with state: ${state} and rc: ${returnCode}`));
-        } else {
-          // Process output to extract codec name
-          const codec = output.trim().split('=')[1];
-          resolve(codec);
-        }
-      })
-      .catch((error) => {
-        reject(new Error(`FFmpeg process failed with error: ${error}`));
-      });
-  });
-};
+//         if (state === SessionState.FAILED || !returnCode.isValueSuccess()) {
+//           reject(new Error(`FFmpeg process failed with state: ${state} and rc: ${returnCode}`));
+//         } else {
+//           // Process output to extract codec name
+//           const codec = output.trim().split('=')[1];
+//           resolve(codec);
+//         }
+//       })
+//       .catch((error) => {
+//         reject(new Error(`FFmpeg process failed with error: ${error}`));
+//       });
+//   });
+// };
 
 // Proper ffprobe side_data_list JSON structure (only what we need)
 interface FfprobeSideData {
