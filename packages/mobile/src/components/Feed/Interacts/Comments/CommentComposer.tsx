@@ -8,7 +8,7 @@ import { BottomSheetTextInput } from '@gorhom/bottom-sheet';
 import { memo, useCallback, useState } from 'react';
 import { chatStyles } from '../../../Chat/ChatDetail';
 import { Close, Images, SendChat } from '../../../ui/Icons/icons';
-import { Colors } from '../../../../app/Colors';
+import { Colors, LumiColors } from '../../../../app/Colors';
 import { OwnerAvatar } from '../../../ui/Avatars/Avatar';
 import { ErrorNotification } from '../../../ui/Alert/ErrorNotification';
 import { CantReactInfo } from '../../CanReactInfo';
@@ -121,7 +121,7 @@ export const CommentComposer = memo(
           <Animated.View
             style={[
               styles.inputContainer,
-              { backgroundColor: isDarkMode ? Colors.slate[800] : Colors.indigo[50] },
+              { backgroundColor: isDarkMode ? Colors.slate[800] : LumiColors[50] },
             ]}
           >
             {replyThreadId && (
@@ -182,7 +182,7 @@ export const CommentComposer = memo(
             onPress={onPostComment}
             style={[
               chatStyles.send,
-              { backgroundColor: disabled ? Colors.gray[300] : Colors.indigo[500] },
+              { backgroundColor: disabled ? Colors.gray[300] : LumiColors[500] },
             ]}
           >
             <View style={styles.iconRotate}>
@@ -232,7 +232,7 @@ export const CommentEditor = memo(
       <Animated.View
         style={[
           styles.editorContainer,
-          { backgroundColor: isDarkMode ? Colors.slate[800] : Colors.indigo[50] },
+          { backgroundColor: isDarkMode ? Colors.slate[800] : LumiColors[50] },
         ]}
       >
         <View style={styles.editorRow}>
@@ -248,7 +248,7 @@ export const CommentEditor = memo(
           {onCancel && <TextButton title="Cancel" onPress={onCancel} />}
           <TouchableOpacity disabled={!hasContent} onPress={() => doPost(body, attachment)}>
             {postState === 'loading' ? (
-              <ActivityIndicator size={'small'} color={Colors.indigo[500]} />
+              <ActivityIndicator size={'small'} color={LumiColors[500]} />
             ) : (
               <View style={styles.iconRotate}>
                 <SendChat

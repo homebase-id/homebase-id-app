@@ -10,7 +10,7 @@ import { ChatStackParamList } from '../../app/ChatStack';
 import { Avatar, GroupAvatar, OwnerAvatar } from '../../components/ui/Avatars/Avatar';
 
 import { useDarkMode } from '../../hooks/useDarkMode';
-import { Colors } from '../../app/Colors';
+import { Colors, LumiColors } from '../../app/Colors';
 import { t, useAllConnections } from 'homebase-id-app-common';
 import { ChatDrive } from '../../provider/chat/ConversationProvider';
 import { useAuth } from '../../hooks/auth/useAuth';
@@ -383,7 +383,7 @@ const ContactsBottomModal = memo(
           <BottomSheetTextInput
             placeholder="Search..."
             style={{
-              backgroundColor: isDarkMode ? `${Colors.indigo[700]}3A` : `${Colors.indigo[300]}3C`,
+              backgroundColor: isDarkMode ? `${LumiColors[700]}3A` : `${LumiColors[300]}3C`,
               borderRadius: 20,
               paddingVertical: Platform.OS === 'ios' ? 16 : undefined,
               marginHorizontal: 12,

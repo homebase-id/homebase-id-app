@@ -1,7 +1,7 @@
 import { BottomSheetFlatList, BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 import { forwardRef, memo, useCallback, useMemo, useState } from 'react';
 import { ActivityIndicator, ListRenderItemInfo, ScrollView, Text, View } from 'react-native';
-import { Colors } from '../../../../app/Colors';
+import { Colors, LumiColors } from '../../../../app/Colors';
 import { useDarkMode } from '../../../../hooks/useDarkMode';
 
 import { ChatMessageIMessage } from '../../ChatDetail';
@@ -49,8 +49,8 @@ export const ReactionsModal = memo(
                   backgroundColor:
                     activeEmoji === 'all'
                       ? isDarkMode
-                        ? Colors.violet[900]
-                        : Colors.violet[200]
+                        ? LumiColors[900]
+                        : LumiColors[200]
                       : undefined,
                   borderRadius: 8,
                   padding: 8,
@@ -68,8 +68,8 @@ export const ReactionsModal = memo(
                     backgroundColor:
                       activeEmoji === reaction || filteredEmojis?.length === 1
                         ? isDarkMode
-                          ? Colors.violet[900]
-                          : Colors.violet[200]
+                          ? LumiColors[900]
+                          : LumiColors[200]
                         : undefined,
                     borderRadius: 8,
                     padding: 8,

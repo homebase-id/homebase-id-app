@@ -4,7 +4,7 @@ import { ActivityIndicator, StyleProp, TextStyle, View, ViewStyle } from 'react-
 import Animated, { AnimatedProps, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { useDarkMode } from '../../../hooks/useDarkMode';
 import { useState } from 'react';
-import { Colors } from '../../../app/Colors';
+import { Colors, LumiColors } from '../../../app/Colors';
 
 const AnimatedTouchableHighlight = Animated.createAnimatedComponent(TouchableHighlight);
 
@@ -110,7 +110,7 @@ function TextButton({
           style={{
             fontSize: 16,
             fontWeight: '600',
-            color: Colors.purple[500],
+            color: LumiColors[500],
             ...textStyle,
           }}
         >

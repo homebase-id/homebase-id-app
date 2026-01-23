@@ -5,7 +5,7 @@ import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { Text } from '../../components/ui/Text/Text';
 import { t } from 'homebase-id-app-common';
-import { Colors } from '../../app/Colors';
+import { Colors, LumiColors } from '../../app/Colors';
 import { View } from 'react-native';
 import { Switch } from 'react-native-gesture-handler';
 import { useChatSettingsContext } from '../../components/Settings/useChatSettingsContext';
@@ -18,7 +18,7 @@ export const ChatSettingsPage = (_: ChatSettingsPageProp) => {
     <SafeAreaView>
       <View
         style={{
-          backgroundColor: isDarkMode ? Colors.indigo[900] : Colors.indigo[100],
+          backgroundColor: isDarkMode ? LumiColors[900] : LumiColors[100],
           marginTop: 16,
           marginHorizontal: 16,
           paddingHorizontal: 16,

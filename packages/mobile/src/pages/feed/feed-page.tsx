@@ -5,7 +5,7 @@ import { memo, useCallback, useMemo } from 'react';
 import { Platform, StyleSheet, TouchableHighlight, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { OfflineProfileAvatar, ProfileAvatar } from '../../app/ChatStack';
-import { Colors } from '../../app/Colors';
+import { LumiColors } from '../../app/Colors';
 import { FEED_APP_ID } from '../../app/constants';
 import { FeedStackParamList } from '../../app/FeedStack';
 import { SocialFeedWebView } from '../../components/Feed/MainContent/SocialFeedWebView';
@@ -36,7 +36,7 @@ export const FeedPage = memo((_: FeedProps) => {
 const FloatingActionButton = memo(() => {
   const { isDarkMode } = useDarkMode();
   const backgroundColor = useMemo(
-    () => (isDarkMode ? Colors.indigo[500] : Colors.indigo[200]),
+    () => (isDarkMode ? LumiColors[500] : LumiColors[200]),
     [isDarkMode]
   );
   const navigation = useNavigation<NavigationProp<FeedStackParamList>>();
@@ -54,7 +54,7 @@ const FloatingActionButton = memo(() => {
           backgroundColor,
         },
       ]}
-      underlayColor={Colors.indigo[300]}
+      underlayColor={LumiColors[300]}
     >
       <Plus size={'md'} />
     </TouchableHighlight>

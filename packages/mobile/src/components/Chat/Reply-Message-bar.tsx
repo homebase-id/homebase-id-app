@@ -1,7 +1,7 @@
 import { Text, StyleSheet, View, TouchableOpacity } from 'react-native';
 import { Close, Reply } from '../ui/Icons/icons';
 import { ChatDrive } from '../../provider/chat/ConversationProvider';
-import { Colors, getOdinIdColor } from '../../app/Colors';
+import { Colors, LumiColors, getOdinIdColor } from '../../app/Colors';
 import { OdinImage } from '../ui/OdinImage/OdinImage';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { ChatMessageIMessage } from './ChatDetail';
@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
     paddingLeft: 8,
     paddingRight: 6,
     borderRightWidth: 2,
-    borderRightColor: Colors.indigo[500],
+    borderRightColor: LumiColors[500],
     marginRight: 6,
     height: '100%',
     justifyContent: 'center',

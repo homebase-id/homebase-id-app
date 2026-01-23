@@ -9,7 +9,7 @@ import {
 import { forwardRef, memo, useCallback, useMemo, useState } from 'react';
 import { Text } from '../ui/Text/Text';
 import { useDarkMode } from '../../hooks/useDarkMode';
-import { Colors } from '../../app/Colors';
+import { Colors, LumiColors } from '../../app/Colors';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import { t, useAllConnections } from 'homebase-id-app-common';
 import {
@@ -353,7 +353,7 @@ export const ChatForwardModal = memo(
         <BottomSheetTextInput
           placeholder="Search..."
           style={{
-            backgroundColor: isDarkMode ? `${Colors.indigo[700]}3A` : `${Colors.indigo[300]}3C`,
+            backgroundColor: isDarkMode ? `${LumiColors[700]}3A` : `${LumiColors[300]}3C`,
             borderRadius: 20,
             paddingVertical: Platform.OS === 'ios' ? 16 : undefined,
             marginHorizontal: 12,
@@ -752,7 +752,7 @@ const styles = StyleSheet.create({
     margin: 12,
     alignSelf: 'flex-end',
     borderRadius: 12,
-    backgroundColor: '#80f',
+    backgroundColor: LumiColors.primary,
   },
   namesContainer: {
     flexDirection: 'row',

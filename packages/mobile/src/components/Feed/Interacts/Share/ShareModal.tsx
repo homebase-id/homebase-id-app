@@ -29,7 +29,7 @@ import {
   View,
 } from 'react-native';
 import { useDarkMode } from '../../../../hooks/useDarkMode';
-import { Colors } from '../../../../app/Colors';
+import { Colors, LumiColors } from '../../../../app/Colors';
 import {
   ChainLink,
   Facebook,
@@ -192,7 +192,7 @@ const ShareModalListWrapper = memo(
           <BottomSheetTextInput
             placeholder="Search..."
             style={{
-              backgroundColor: isDarkMode ? `${Colors.indigo[700]}3A` : `${Colors.indigo[300]}3C`,
+              backgroundColor: isDarkMode ? `${LumiColors[700]}3A` : `${LumiColors[300]}3C`,
               borderRadius: 20,
               paddingVertical: Platform.OS === 'ios' ? 16 : undefined,
               marginHorizontal: 12,

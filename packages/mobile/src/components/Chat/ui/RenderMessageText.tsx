@@ -12,7 +12,7 @@ import { isEmojiOnly, openURL, URL_PATTERN } from '../../../utils/utils';
 import { AuthorName } from '../../ui/Name';
 import { ChatMessageIMessage } from '../ChatDetail';
 import Clipboard from '@react-native-clipboard/clipboard';
-import { Colors } from '../../../app/Colors';
+import { Colors, LumiColors } from '../../../app/Colors';
 import { RichTextRenderer } from '../../ui/Text/RichTextRenderer';
 
 export const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
@@ -100,10 +100,10 @@ export const RenderMessageText = memo((props: MessageTextProps<IMessage>) => {
       renderRichText={RichTextRenderer}
       linkStyle={{
         left: {
-          color: isDarkMode ? Colors.indigo[300] : Colors.indigo[500],
+          color: isDarkMode ? LumiColors[300] : LumiColors[500],
         },
         right: {
-          color: isDarkMode ? Colors.violet[100] : Colors.violet[100],
+          color: isDarkMode ? LumiColors[100] : LumiColors[100],
           fontWeight: '500',
         },
       }}

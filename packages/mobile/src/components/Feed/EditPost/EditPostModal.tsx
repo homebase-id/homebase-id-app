@@ -11,7 +11,7 @@ import { ErrorNotification } from '../../ui/Alert/ErrorNotification';
 import { BottomSheetScrollView, BottomSheetTextInput } from '@gorhom/bottom-sheet';
 import { t } from 'homebase-id-app-common';
 import { useDarkMode } from '../../../hooks/useDarkMode';
-import { Colors } from '../../../app/Colors';
+import { Colors, LumiColors } from '../../../app/Colors';
 import { Platform, View } from 'react-native';
 import TextButton from '../../ui/Text/Text-Button';
 import { ImageSource } from '../../../provider/image/RNImageProvider';
@@ -91,7 +91,7 @@ export const EditPostModal = memo(
         >
           <BottomSheetTextInput
             style={{
-              backgroundColor: isDarkMode ? `${Colors.indigo[700]}3A` : `${Colors.indigo[300]}3C`,
+              backgroundColor: isDarkMode ? `${LumiColors[700]}3A` : `${LumiColors[300]}3C`,
               borderRadius: 8,
               padding: Platform.OS === 'ios' ? 16 : 4,
               paddingLeft: 12,

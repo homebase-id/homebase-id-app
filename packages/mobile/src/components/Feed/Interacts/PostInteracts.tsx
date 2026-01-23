@@ -24,7 +24,7 @@ import { ErrorNotification } from '../../ui/Alert/ErrorNotification';
 import { PostReactionBar } from './Reactions/PostReactionBar';
 import { IconButton } from '../../ui/Buttons';
 import { Text } from '../../ui/Text/Text';
-import { Colors } from '../../../app/Colors';
+import { Colors, LumiColors } from '../../../app/Colors';
 import { useDarkMode } from '../../../hooks/useDarkMode';
 
 export const PostInteracts = memo(
@@ -291,7 +291,7 @@ export const CommentSummary = memo(
           ·{'  '}
           <Text
             style={{
-              color: Colors.indigo[isDarkMode ? 200 : 500],
+              color: LumiColors[isDarkMode ? 200 : 500],
             }}
           >
             {totalCount} {(totalCount || 0) > 1 ? t('comments') : t('comment')}

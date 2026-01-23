@@ -5,7 +5,7 @@ import { t, useDotYouClientContext, useIsConnected } from 'homebase-id-app-commo
 import { StyleSheet, View } from 'react-native';
 import { Text } from '../../ui/Text/Text';
 import { useDarkMode } from '../../../hooks/useDarkMode';
-import { Colors } from '../../../app/Colors';
+import { Colors, LumiColors } from '../../../app/Colors';
 import { openURL } from '../../../utils/utils';
 import { Lock, Users } from '../../ui/Icons/icons';
 import { aclEqual } from '@homebase-id/js-lib/helpers';
@@ -90,7 +90,7 @@ export const PostMeta = memo(
             onPress={() => channelLink && openURL(channelLink)}
             style={[styles.pressableContainer, { flexShrink: 1 }]}
           >
-            {postFile?.fileMetadata.isEncrypted && <Lock size={'xs'} color={Colors.indigo[500]} />}
+            {postFile?.fileMetadata.isEncrypted && <Lock size={'xs'} color={LumiColors[500]} />}
             <Text style={styles.aclText} numberOfLines={1}>
               {(isAuthor || !odinId) &&
               channel?.serverMetadata &&
@@ -152,7 +152,7 @@ export const ToGroupBlock = memo(
               ? `${channel?.fileMetadata.appData.content.name}`
               : ''}
           </Text>
-          <Users color={Colors.indigo[500]} size={'sm'} />
+          <Users color={LumiColors[500]} size={'sm'} />
         </TouchableOpacity>
       </View>
     );
@@ -178,12 +178,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   aclText: {
-    color: Colors.indigo[500],
+    color: LumiColors[500],
     fontWeight: '500',
     fontSize: 13,
   },
   channelText: {
-    color: Colors.indigo[500],
+    color: LumiColors[500],
     fontWeight: '500',
     textDecorationStyle: 'solid',
   },

@@ -13,7 +13,7 @@ import {
 import { Input } from '../../components/ui/Form/Input';
 import TextButton from '../../components/ui/Text/Text-Button';
 import { GroupAvatar } from '../../components/ui/Avatars/Avatar';
-import { Colors } from '../../app/Colors';
+import { Colors, LumiColors } from '../../app/Colors';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { Header, HeaderBackButtonProps } from '@react-navigation/elements';
 import { ImageSource } from '../../provider/image/RNImageProvider';
@@ -170,7 +170,7 @@ export const GroupCreationPage = memo((props: GroupCreationPageProps) => {
               right: -5,
               padding: 6,
               borderRadius: 50,
-              backgroundColor: isDarkMode ? Colors.indigo[700] : Colors.indigo[200],
+              backgroundColor: isDarkMode ? LumiColors[700] : LumiColors[200],
             }}
             onPress={pickAvatar}
           >

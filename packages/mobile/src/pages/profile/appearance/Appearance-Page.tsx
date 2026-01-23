@@ -2,7 +2,7 @@ import { FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from '../../../components/ui/SafeAreaView/SafeAreaView';
 import { Text } from '../../../components/ui/Text/Text';
 import { Container } from '../../../components/ui/Container/Container';
-import { Colors } from '../../../app/Colors';
+import { Colors, LumiColors } from '../../../app/Colors';
 import { Divider } from '../../../components/ui/Divider';
 import React, { useCallback, useState } from 'react';
 import Dialog from 'react-native-dialog';
@@ -51,7 +51,7 @@ export const AppearancePage = ({ navigation }: AppearanceProp) => {
             styles.tile,
             {
               paddingBottom: index === tiles.length - 1 ? 16 : 0,
-              backgroundColor: isDarkMode ? Colors.indigo[900] : Colors.indigo[100],
+              backgroundColor: isDarkMode ? LumiColors[900] : LumiColors[100],
               marginBottom: index === tiles.length - 1 ? 8 : 0,
               borderTopStartRadius: index === 0 ? 16 : 0,
               borderTopEndRadius: index === 0 ? 16 : 0,
@@ -122,7 +122,7 @@ export const AppearancePage = ({ navigation }: AppearanceProp) => {
           onBackdropPress={() => setDialogVisible(false)}
           contentStyle={{
             borderRadius: 15,
-            backgroundColor: isDarkMode ? Colors.indigo[900] : Colors.indigo[100],
+            backgroundColor: isDarkMode ? LumiColors[900] : LumiColors[100],
           }}
         >
           <Dialog.Title>Theme</Dialog.Title>
@@ -175,7 +175,7 @@ const RadioButtonTile = ({
             width: 24,
             borderRadius: 12,
             borderWidth: 2,
-            borderColor: isDarkMode ? Colors.indigo[700] : Colors.indigo[500],
+            borderColor: isDarkMode ? LumiColors[700] : LumiColors[500],
             alignItems: 'center',
             justifyContent: 'center',
           },
@@ -187,7 +187,7 @@ const RadioButtonTile = ({
               height: 12,
               width: 12,
               borderRadius: 6,
-              backgroundColor: isDarkMode ? Colors.indigo[700] : Colors.indigo[500],
+              backgroundColor: isDarkMode ? LumiColors[700] : LumiColors[500],
             }}
           />
         ) : null}

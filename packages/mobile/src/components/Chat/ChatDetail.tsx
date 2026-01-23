@@ -42,7 +42,7 @@ import {
 import MediaMessage from './MediaMessage';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { useAuth } from '../../hooks/auth/useAuth';
-import { Colors, getOdinIdColor } from '../../app/Colors';
+import { Colors, getOdinIdColor, LumiColors } from '../../app/Colors';
 import ReplyMessageBar from '../../components/Chat/Reply-Message-bar';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { Avatar as AppAvatar, OwnerAvatar } from '../../components/ui/Avatars/Avatar';
@@ -326,7 +326,7 @@ export const ChatDetail = memo(
 
     const wrapperStyle: StyleProp<ViewStyle> = useMemo(() => {
       return {
-        backgroundColor: isDarkMode ? Colors.indigo[900] : Colors.slate[50],
+        backgroundColor: isDarkMode ? LumiColors[900] : Colors.slate[50],
         opacity: 1,
       };
     }, [isDarkMode]);
@@ -358,9 +358,9 @@ export const ChatDetail = memo(
             containerStyle={
               isSelected
                 ? {
-                    left: { backgroundColor: isDarkMode ? Colors.indigo[900] : Colors.indigo[100] },
+                    left: { backgroundColor: isDarkMode ? LumiColors[900] : LumiColors[100] },
                     right: {
-                      backgroundColor: isDarkMode ? Colors.indigo[900] : Colors.indigo[100],
+                      backgroundColor: isDarkMode ? LumiColors[900] : LumiColors[100],
                     },
                   }
                 : undefined
@@ -829,6 +829,6 @@ export const chatStyles = StyleSheet.create({
     width: 40,
     justifyContent: 'center',
     borderRadius: 20,
-    backgroundColor: Colors.indigo[500],
+    backgroundColor: LumiColors[500],
   },
 });

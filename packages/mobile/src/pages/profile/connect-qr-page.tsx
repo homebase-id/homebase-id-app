@@ -23,7 +23,7 @@ export const ConnectQrPage = (_props: ConnectQrProps) => {
           value={`https://anon.homebase.id/redirect/connections/${identity}/connect`}
           size={Dimensions.get('screen').width - 100}
           enableLinearGradient={true}
-          linearGradient={['#C68CFF', '#8CD9FF']}
+          linearGradient={['#68B1FF', '#34679E']}
         />
         <Text style={{ marginTop: 10 }}>{t('Scan to connect')}</Text>
       </View>

@@ -9,7 +9,7 @@ import { CommentMedia } from './CommentMedia';
 import { openURL, URL_PATTERN } from '../../../../utils/utils';
 import { useDarkMode } from '../../../../hooks/useDarkMode';
 import ParsedText, { ParseShape } from 'react-native-parsed-text';
-import { Colors } from '../../../../app/Colors';
+import { Colors, LumiColors } from '../../../../app/Colors';
 import { CommentEditor } from './CommentComposer';
 import { Asset } from 'react-native-image-picker';
 
@@ -46,7 +46,7 @@ export const CommentBody = memo(
           pattern: URL_PATTERN,
           onPress: (url) => openURL(url),
           style: {
-            color: isDarkMode ? Colors.indigo[200] : Colors.indigo[500],
+            color: isDarkMode ? LumiColors[200] : LumiColors[500],
           },
         },
       ],

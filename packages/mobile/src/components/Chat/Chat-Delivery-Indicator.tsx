@@ -3,7 +3,7 @@ import { ChatDeliveryStatus, ChatMessage } from '../../provider/chat/ChatProvide
 import { t, useDotYouClientContext } from 'homebase-id-app-common';
 import { Pressable, StyleProp, Text, TextStyle, View, ViewStyle } from 'react-native';
 import { Clock, SubtleCheck, Times } from '../ui/Icons/icons';
-import { Colors } from '../../app/Colors';
+import { Colors, LumiColors } from '../../app/Colors';
 import { ChatMessageIMessage } from './ChatDetail';
 import { useCallback } from 'react';
 
@@ -111,19 +111,19 @@ export const InnerDeliveryIndicator = ({
           <>
             <SubtleCheck
               size={'sm'}
-              color={isRead ? (showDefault ? Colors.indigo[400] : Colors.white) : Colors.gray[400]}
+              color={isRead ? (showDefault ? LumiColors[400] : Colors.white) : Colors.gray[400]}
               style={{ position: 'relative', left: -2 }}
             />
             <SubtleCheck
               size={'sm'}
-              color={isRead ? (showDefault ? Colors.indigo[400] : Colors.white) : Colors.gray[400]}
+              color={isRead ? (showDefault ? LumiColors[400] : Colors.white) : Colors.gray[400]}
               style={{ position: 'absolute', left: -11 }}
             />
           </>
         ) : isSent ? (
           <SubtleCheck
             size={'sm'}
-            color={isRead ? (showDefault ? Colors.indigo[400] : Colors.white) : Colors.gray[400]}
+            color={isRead ? (showDefault ? LumiColors[400] : Colors.white) : Colors.gray[400]}
           />
         ) : (
           <Clock size={'xs'} color={Colors.gray[200]} />

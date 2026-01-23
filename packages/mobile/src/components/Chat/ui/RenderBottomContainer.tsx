@@ -7,7 +7,7 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 import { ImageLibrary, PaperClip } from '../../ui/Icons/icons';
-import { Colors } from '../../../app/Colors';
+import { Colors, LumiColors } from '../../../app/Colors';
 import { Platform, View } from 'react-native';
 import { Text } from '../../ui/Text/Text';
 import { BaseButton } from 'react-native-gesture-handler';
@@ -83,11 +83,11 @@ const MediaPickerComponent = ({
     >
       <BaseButton
         onPress={onPress}
-        rippleColor={isDarkMode ? Colors.indigo[900] : Colors.indigo[300]}
+        rippleColor={isDarkMode ? LumiColors[900] : LumiColors[300]}
         style={{
           padding: 18,
           borderRadius: 10,
-          backgroundColor: isDarkMode ? Colors.indigo[800] : Colors.indigo[200],
+          backgroundColor: isDarkMode ? LumiColors[800] : LumiColors[200],
           margin: 10,
         }}
       >

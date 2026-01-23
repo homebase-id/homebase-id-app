@@ -3,7 +3,7 @@ import { Text } from '../../ui/Text/Text';
 import { View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { useDarkMode } from '../../../hooks/useDarkMode';
-import { Colors } from '../../../app/Colors';
+import { Colors, LumiColors } from '../../../app/Colors';
 import { memo } from 'react';
 
 export const EmptyFeed = memo(() => {
@@ -147,7 +147,7 @@ const EmptyPostIllustration = (props: { color?: string }) => {
         <Path
           d="M628.91345,392.76672l-66.90992-7.651a3.847,3.847,0,0,1-3.38133-4.25447l6.81048-59.55914a3.847,3.847,0,0,1,4.25446-3.38133l66.90993,7.651a3.847,3.847,0,0,1,3.38132,4.25446l-6.81047,59.55915A3.847,3.847,0,0,1,628.91345,392.76672Z"
           transform="translate(-178.21027 -129.74161)"
-          fill={isDarkMode ? Colors.indigo[700] : Colors.indigo[500]}
+          fill={isDarkMode ? LumiColors[700] : LumiColors[500]}
         />
       </Svg>
     </View>

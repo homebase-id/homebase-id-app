@@ -10,7 +10,7 @@ import {
   useState,
 } from 'react';
 import { Backdrop } from '../../../ui/Modal/Backdrop';
-import { Colors } from '../../../../app/Colors';
+import { Colors, LumiColors } from '../../../../app/Colors';
 import { Text } from '../../../ui/Text/Text';
 import { ListRenderItemInfo, View } from 'react-native';
 import { useDarkMode } from '../../../../hooks/useDarkMode';
@@ -129,8 +129,8 @@ const ReactionsModal = memo(
                     backgroundColor:
                       activeEmoji === reaction.emoji
                         ? isDarkMode
-                          ? Colors.violet[900]
-                          : Colors.violet[200]
+                          ? LumiColors[900]
+                          : LumiColors[200]
                         : undefined,
                     borderRadius: 8,
                     padding: 8,

@@ -8,7 +8,7 @@ import {
   ViewStyle,
 } from 'react-native';
 import { EmbeddedThumb, HomebaseFile } from '@homebase-id/js-lib/core';
-import { Colors } from '../../app/Colors';
+import { Colors, LumiColors } from '../../app/Colors';
 import { ChatDrive, UnifiedConversation } from '../../provider/chat/ConversationProvider';
 import { useChatMessages } from '../../hooks/chat/useChatMessages';
 import { ChatDeletedArchivalStaus, ChatMessage } from '../../provider/chat/ChatProvider';
@@ -142,7 +142,7 @@ const ConversationTile = memo((props: ConversationTileProps) => {
                     <Text
                       style={[
                         styles.authorName,
-                        { color: isDarkMode ? Colors.indigo[400] : Colors.indigo[700] },
+                        { color: isDarkMode ? LumiColors[400] : LumiColors[700] },
                       ]}
                     >
                       <AuthorName odinId={lastMessageAuthor} showYou showFirstNameOnly />

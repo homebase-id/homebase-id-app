@@ -289,6 +289,22 @@ export const Colors = {
   },
 } as const;
 
+// Lumi Brand Colors
+export const LumiColors = {
+  primary: '#4A98E9',
+  50:  '#f0f7ff',
+  100: '#e0effe',
+  200: '#b8dcfd',
+  300: '#7ec3fc',
+  400: '#68B1FF',
+  500: '#4A98E9',
+  600: '#3a7fd0',
+  700: '#34679E',
+  800: '#2a5280',
+  900: '#1f3d5f',
+  950: '#142740',
+} as const;
+
 export interface OdinIdColorValue {
   readonly lightTheme: string;
   readonly darkTheme: string;

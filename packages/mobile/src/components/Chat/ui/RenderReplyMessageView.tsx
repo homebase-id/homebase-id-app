@@ -2,7 +2,7 @@ import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { memo } from 'react';
 import { Pressable, View, Text } from 'react-native';
 import { BubbleProps } from 'react-native-gifted-chat';
-import { getOdinIdColor, Colors } from '../../../app/Colors';
+import { getOdinIdColor, Colors, LumiColors } from '../../../app/Colors';
 import { useChatMessage } from '../../../hooks/chat/useChatMessage';
 import { useDarkMode } from '../../../hooks/useDarkMode';
 import { ChatMessage } from '../../../provider/chat/ChatProvider';
@@ -36,8 +36,8 @@ export const RenderReplyMessageView = memo(
               chatStyles.replyMessageContainer,
               {
                 borderLeftColor:
-                  props.position === 'left' ? color.color(isDarkMode) : Colors.purple[500],
-                backgroundColor: `${Colors.indigo[500]}1A`,
+                  props.position === 'left' ? color.color(isDarkMode) : LumiColors[500],
+                backgroundColor: `${LumiColors[500]}1A`,
               },
             ]}
           >

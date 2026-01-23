@@ -13,7 +13,7 @@ import {
   OWNER_APP_ID,
 } from '../../app/constants';
 import useContact from '../../hooks/contact/useContact';
-import { Colors } from '../../app/Colors';
+import { Colors, LumiColors } from '../../app/Colors';
 import { Times } from '../ui/Icons/icons';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { useDarkMode } from '../../hooks/useDarkMode';
@@ -245,7 +245,7 @@ const NotificationItem = ({
             </Text>
           ) : null}
           {groupCount ? (
-            <Text style={{ color: Colors.indigo[500] }}>
+            <Text style={{ color: LumiColors[500] }}>
               {groupCount} {'more'}
             </Text>
           ) : null}

@@ -1,4 +1,4 @@
-import { Colors } from '../app/Colors';
+import { Colors, LumiColors } from '../app/Colors';
 
 export type Gradient = {
     colors: string[];
@@ -32,13 +32,19 @@ const ChatColorValues = {
         id: 'Default',
         isBuiltIn: true,
         creationTimestamp: 0,
-        color: Colors.indigo[500],
+        color: LumiColors.primary,
+    },
+    lumi: {
+        id: 'Lumi',
+        gradient: createGradient([LumiColors[400], LumiColors[700]], 180),
+        isBuiltIn: true,
+        creationTimestamp: 0.5,
     },
     ultramarine: {
         id: 'Ultramarine',
         gradient: createGradient(['#0553F0', '#2C6CED'], 0),
         isBuiltIn: true,
-        creationTimestamp: 0,
+        creationTimestamp: 1,
     },
     crimson: {
         id: 'Crimson',
@@ -170,6 +176,7 @@ const ChatColorValues = {
 
 export const BUBBLE_COLORS: ChatColor[] = [
     ChatColorValues.default,
+    ChatColorValues.lumi,
     ChatColorValues.ultramarine,
     ChatColorValues.crimson,
     ChatColorValues.vermilion,

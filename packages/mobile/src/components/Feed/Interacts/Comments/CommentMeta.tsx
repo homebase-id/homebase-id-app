@@ -7,7 +7,7 @@ import { ErrorNotification } from '../../../ui/Alert/ErrorNotification';
 import { formatToTimeAgo, t, useDotYouClientContext } from 'homebase-id-app-common';
 import { Text } from '../../../ui/Text/Text';
 import { memo } from 'react';
-import { Colors } from '../../../../app/Colors';
+import { Colors, LumiColors } from '../../../../app/Colors';
 
 export const CommentMeta = memo(
   ({
@@ -50,7 +50,7 @@ export const CommentMeta = memo(
             textStyle={{
               fontSize: 14,
               fontWeight: '600',
-              color: Colors.purple[500],
+              color: LumiColors[500],
             }}
             onPress={doLike}
           />
@@ -62,7 +62,7 @@ export const CommentMeta = memo(
             textStyle={{
               fontSize: 14,
               fontWeight: '600',
-              color: Colors.purple[500],
+              color: LumiColors[500],
             }}
             onPress={onReply}
           />

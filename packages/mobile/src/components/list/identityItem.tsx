@@ -1,6 +1,6 @@
 import { View, Text } from 'react-native';
 import useContact from '../../hooks/contact/useContact';
-import { Colors } from '../../app/Colors';
+import { Colors, LumiColors } from '../../app/Colors';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { Avatar } from '../ui/Avatars/Avatar';
 
@@ -26,7 +26,7 @@ export const IdentityItem = ({ odinId }: { odinId: string }) => {
         />
       ) : (
         <View
-          style={{ width: 50, height: 50, borderRadius: 25, backgroundColor: Colors.indigo[100] }}
+          style={{ width: 50, height: 50, borderRadius: 25, backgroundColor: LumiColors[100] }}
         />
       )}
       <View>

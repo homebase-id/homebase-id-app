@@ -13,7 +13,7 @@ import { Home } from '../../components/ui/Icons/icons';
 import { memo, useCallback, useMemo } from 'react';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 
-import { Colors } from '../../app/Colors';
+import { Colors, LumiColors } from '../../app/Colors';
 import { useAuth } from '../../hooks/auth/useAuth';
 import { Header, HeaderBackButton } from '@react-navigation/elements';
 import { useDarkMode } from '../../hooks/useDarkMode';
@@ -184,7 +184,7 @@ const RenderListHeader = memo(
         )}
         {/* <Text
             style={{
-              backgroundColor: Colors.indigo[500],
+              backgroundColor: LumiColors[500],
               color: Colors.white,
               padding: 5,
               borderRadius: 10,
@@ -224,7 +224,7 @@ const RenderListHeader = memo(
                 style={[
                   styles.subtitle,
                   {
-                    color: isDarkMode ? Colors.purple[300] : Colors.purple[800],
+                    color: isDarkMode ? LumiColors[300] : LumiColors[800],
                   },
                 ]}
               >

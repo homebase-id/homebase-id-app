@@ -1,5 +1,5 @@
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
-import { Colors } from '../../../app/Colors';
+import { Colors, LumiColors } from '../../../app/Colors';
 import { useDarkMode } from '../../../hooks/useDarkMode';
 import { memo } from 'react';
 
@@ -9,7 +9,7 @@ export const FeedLoader = memo(() => {
     <View style={styles.container}>
       <ActivityIndicator
         size="large"
-        color={isDarkMode ? Colors.indigo[400] : Colors.indigo[700]}
+        color={isDarkMode ? LumiColors[400] : LumiColors[700]}
       />
     </View>
   );

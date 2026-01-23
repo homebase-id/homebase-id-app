@@ -7,7 +7,7 @@ import {
 } from '@10play/tentap-editor';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
-import { Colors } from '../../../app/Colors';
+import { Colors, LumiColors } from '../../../app/Colors';
 import { t, useDotYouClientContext } from 'homebase-id-app-common';
 import { useDarkMode } from '../../../hooks/useDarkMode';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -309,7 +309,7 @@ export const ArticleComposer = ({
         <TextButton
           title="Publish"
           unFilledStyle={{
-            backgroundColor: isDarkMode ? Colors.indigo[500] : Colors.indigo[400],
+            backgroundColor: isDarkMode ? LumiColors[500] : LumiColors[400],
             opacity: !cannotPost ? 1 : 0.5,
             borderRadius: 5,
             paddingHorizontal: 16,

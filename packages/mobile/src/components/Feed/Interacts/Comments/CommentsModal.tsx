@@ -15,7 +15,7 @@ import {
   useState,
 } from 'react';
 import { useDarkMode } from '../../../../hooks/useDarkMode';
-import { Colors } from '../../../../app/Colors';
+import { Colors, LumiColors } from '../../../../app/Colors';
 import { ActivityIndicator, Platform, StyleSheet, View } from 'react-native';
 import { Text } from '../../../ui/Text/Text';
 
@@ -195,7 +195,7 @@ export const CommentsLoader = () => {
     <View style={styles.container}>
       <ActivityIndicator
         size="large"
-        color={isDarkMode ? Colors.indigo[400] : Colors.indigo[700]}
+        color={isDarkMode ? LumiColors[400] : LumiColors[700]}
       />
     </View>
   );

@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { InAppBrowser } from 'react-native-inappbrowser-reborn';
 import { AuthStackParamList } from '../../app/App';
-import { Colors } from '../../app/Colors';
+import { Colors, LumiColors } from '../../app/Colors';
 import { Container } from '../../components/ui/Container/Container';
 import { SafeAreaView } from '../../components/ui/SafeAreaView/SafeAreaView';
 import { Text } from '../../components/ui/Text/Text';
@@ -25,7 +25,7 @@ import { VersionInfo } from '../profile/profile-page';
 import { YouAuthorizationParams } from '@homebase-id/js-lib/auth';
 import { t } from 'homebase-id-app-common';
 import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
-import logo from '../../assets/homebase.png';
+import logo from '../../assets/lumi_social.png';
 import { PublicAvatar } from '../../components/ui/Avatars/Avatar';
 import { Divider } from '../../components/ui/Divider';
 import { Input } from '../../components/ui/Form/Input';
@@ -43,7 +43,7 @@ export const LoginPage = (_props: LoginProps) => {
         <View style={styles.logoContainer}>
           <View style={{ height: Math.max(0, Dimensions.get('window').height / 3 - 40) }} />
           <Image source={logo} style={styles.logo} />
-          <Text style={styles.logoText}>Homebase</Text>
+          <Text style={styles.logoText}>Lumi</Text>
         </View>
         <Animated.View
           style={[
@@ -265,9 +265,9 @@ const LoginComponent = () => {
           onPress={onLogin}
           showLoaderOnPress={true}
           filled={true}
-          lightColor={Colors.indigo[400]}
-          darkColor={Colors.indigo[800]}
-          underlayColor={isDarkMode ? Colors.indigo[900] : Colors.indigo[300]}
+          lightColor={LumiColors[400]}
+          darkColor={LumiColors[700]}
+          underlayColor={isDarkMode ? LumiColors[800] : LumiColors[300]}
           disabled={!odinId}
           filledStyle={styles.loginButtonFilled}
           textStyle={styles.loginButtonText}
@@ -280,7 +280,7 @@ const LoginComponent = () => {
             onPress={onLogin}
             style={[
               styles.continueAsButton,
-              { backgroundColor: isDarkMode ? Colors.indigo[700] : Colors.indigo[100] },
+              { backgroundColor: isDarkMode ? LumiColors[700] : LumiColors[100] },
             ]}
           >
             <View style={styles.continueAsRow}>

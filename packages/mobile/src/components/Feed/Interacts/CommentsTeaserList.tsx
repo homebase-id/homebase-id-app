@@ -3,7 +3,7 @@ import { Divider } from '../../ui/Divider';
 import { t } from 'homebase-id-app-common';
 import { Text } from '../../ui/Text/Text';
 import { CommentTeaser } from './Comments/Comment';
-import { Colors } from '../../../app/Colors';
+import { Colors, LumiColors } from '../../../app/Colors';
 import { memo } from 'react';
 import { CommentsReactionSummary } from '@homebase-id/js-lib/public';
 
@@ -38,7 +38,7 @@ export const CommentTeaserList = memo(
             <Pressable onPress={onExpand}>
               <Text
                 style={{
-                  color: Colors.indigo[500],
+                  color: LumiColors[500],
                   fontWeight: '700',
                   opacity: 0.8,
                   fontSize: 14,

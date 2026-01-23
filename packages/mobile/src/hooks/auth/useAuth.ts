@@ -119,8 +119,8 @@ export const circleDrives: TargetDriveAccessRequest[] = [
     permissions: [DrivePermissionType.Write, DrivePermissionType.React],
   },
 ];
-export const appName = 'Homebase - Feed & Chat';
-export const appId = 'b4a2a939-45d3-42af-95bf-7d241016e3bf';
+export const appName = 'Lumi Social';
+export const appId = '029fa4bd-4b52-4669-a903-f75f6515ff1f';
 export const corsHost = undefined;
 
 // Split up, just checks if the token is valid, and logs out if not

@@ -24,7 +24,7 @@ import { memo, useCallback, useLayoutEffect, useMemo, useRef, useState } from 'r
 import { useRemoveNotifications } from '../hooks/notifications/usePushNotifications';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useDotYouClientContext } from 'homebase-id-app-common';
-import { Colors } from '../app/Colors';
+import { Colors, LumiColors } from '../app/Colors';
 import { useDarkMode } from '../hooks/useDarkMode';
 import { CHAT_APP_ID } from '../app/constants';
 import { ErrorBoundary } from '../components/ui/ErrorBoundary/ErrorBoundary';
@@ -238,7 +238,7 @@ export const ConversationsPage = memo(({ navigation }: ConversationProp) => {
 const FloatingActionButton = memo(() => {
   const { isDarkMode } = useDarkMode();
   const backgroundColor = useMemo(
-    () => (isDarkMode ? Colors.indigo[700] : Colors.indigo[200]),
+    () => (isDarkMode ? LumiColors[700] : LumiColors[200]),
     [isDarkMode]
   );
   const navigation = useNavigation<NavigationProp<ChatStackParamList>>();

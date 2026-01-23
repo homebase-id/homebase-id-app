@@ -3,7 +3,7 @@ import { t, useDotYouClientContext, useIsConnected } from 'homebase-id-app-commo
 import { StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 import { Text } from '../ui/Text/Text';
 import { useDarkMode } from '../../hooks/useDarkMode';
-import { Colors } from '../../app/Colors';
+import { Colors, LumiColors } from '../../app/Colors';
 import { ReactNode, useEffect, useState } from 'react';
 import { openURL } from '../../utils/utils';
 import {
@@ -227,7 +227,7 @@ const Button = (props: { children: ReactNode; disabled?: boolean; onPress: () =>
       disabled={props.disabled}
       onPress={props.onPress}
       style={{
-        backgroundColor: props.disabled ? Colors.slate[500] : Colors.indigo[500],
+        backgroundColor: props.disabled ? Colors.slate[500] : LumiColors[500],
         padding: 8,
         borderRadius: 5,
       }}

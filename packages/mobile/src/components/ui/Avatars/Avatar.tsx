@@ -17,7 +17,7 @@ import { useProfile } from '../../../hooks/profile/useProfile';
 import { useDarkMode } from '../../../hooks/useDarkMode';
 import { Users } from '../Icons/icons';
 import { OdinImage } from '../OdinImage/OdinImage';
-import { Colors } from '../../../app/Colors';
+import { Colors, LumiColors } from '../../../app/Colors';
 import { SvgUri } from 'react-native-svg';
 import { EmbeddedThumb, TargetDrive } from '@homebase-id/js-lib/core';
 import Animated from 'react-native-reanimated';
@@ -34,7 +34,7 @@ export const Avatar = memo(
     if (isLoading) {
       return (
         <Animated.View style={[styles.tinyLogo, props.style]}>
-          <ActivityIndicator size="small" color={Colors.violet[500]} />
+          <ActivityIndicator size="small" color={LumiColors[500]} />
         </Animated.View>
       );
     }
@@ -151,7 +151,7 @@ export const GroupAvatar = memo(
   }) => {
     const { isDarkMode } = useDarkMode();
     const backgroundColor = useMemo(
-      () => (isDarkMode ? Colors.indigo[900] : Colors.violet[200]),
+      () => (isDarkMode ? LumiColors[900] : LumiColors[200]),
       [isDarkMode]
     );
     if (!fileId || !fileKey || !targetDrive) {
@@ -183,7 +183,7 @@ export const DefaultGroupAvatar = memo(
   }) => {
     const { isDarkMode } = useDarkMode();
     const backgroundColor = useMemo(
-      () => (isDarkMode ? Colors.indigo[900] : Colors.violet[200]),
+      () => (isDarkMode ? LumiColors[900] : LumiColors[200]),
       [isDarkMode]
     );
     return (

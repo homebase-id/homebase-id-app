@@ -20,7 +20,7 @@ import {
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { memo } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { Colors } from './Colors';
+import { Colors, LumiColors } from './Colors';
 
 // Pages
 import { PushNotificationProvider } from '../components/push-notification/PushNotificationProvider';
@@ -151,7 +151,7 @@ const AuthenticatedRoot = memo(() => {
             <ChatSettingsProvider>
               <ErrorBoundary>
                 <ExtendPermissionDialog
-                  appName={t('Homebase Feed & Chat')}
+                  appName={t('Lumi Social')}
                   appId={FEED_CHAT_APP_ID}
                   drives={drives}
                   circleDrives={circleDrives}
@@ -218,11 +218,11 @@ const TabStack = memo(() => {
           headerShown: false,
           tabBarInactiveTintColor: isDarkMode ? Colors.white : Colors.black,
           tabBarActiveTintColor: isDarkMode ? Colors.white : Colors.black,
-          tabBarActiveBackgroundColor: isDarkMode ? Colors.indigo[700] : Colors.indigo[200],
+          tabBarActiveBackgroundColor: isDarkMode ? LumiColors[700] : LumiColors[200],
           tabBarShowLabel: false,
           tabBarHideOnKeyboard: true,
           tabBarStyle: {
-            backgroundColor: isDarkMode ? Colors.indigo[900] : Colors.indigo[100],
+            backgroundColor: isDarkMode ? LumiColors[900] : LumiColors[100],
           },
         }}
         initialRouteName="Chat"
@@ -243,7 +243,7 @@ const TabStack = memo(() => {
               ? Platform.OS === 'android'
                 ? { height: 0, overflow: 'hidden', opacity: 0 }
                 : { display: 'none' }
-              : { backgroundColor: isDarkMode ? Colors.indigo[900] : Colors.indigo[100] },
+              : { backgroundColor: isDarkMode ? LumiColors[900] : LumiColors[100] },
             // lazy: false,
           }}
         />
@@ -257,7 +257,7 @@ const TabStack = memo(() => {
               ? Platform.OS === 'android'
                 ? { height: 0, overflow: 'hidden', opacity: 0 }
                 : { display: 'none' }
-              : { backgroundColor: isDarkMode ? Colors.indigo[900] : Colors.indigo[100] },
+              : { backgroundColor: isDarkMode ? LumiColors[900] : LumiColors[100] },
           }}
         />
         <TabBottom.Screen

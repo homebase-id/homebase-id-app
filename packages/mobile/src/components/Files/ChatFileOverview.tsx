@@ -16,7 +16,7 @@ import {
 import { launchImageLibrary } from 'react-native-image-picker';
 import { Play, Plus, SendChat, SubtleCheck, Trash } from '../ui/Icons/icons';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { Colors } from '../../app/Colors';
+import { Colors, LumiColors } from '../../app/Colors';
 import { Header, HeaderBackButtonProps } from '@react-navigation/elements';
 import { BackButton } from '../ui/Buttons';
 import { useDarkMode } from '../../hooks/useDarkMode';
@@ -348,7 +348,7 @@ export const ChatFileOverview = memo(
                   style={{
                     borderWidth: 3,
                     borderRadius: 15,
-                    borderColor: currentIndex === index ? Colors.indigo[400] : '',
+                    borderColor: currentIndex === index ? LumiColors[400] : '',
                   }}
                   imageStyle={{
                     objectFit: 'cover',
@@ -405,7 +405,7 @@ export const ChatFileOverview = memo(
                   backgroundColor: isDarkMode ? Colors.slate[800] : Colors.slate[200],
                 }}
               >
-                <Plus size={'md'} color={Colors.indigo[400]} />
+                <Plus size={'md'} color={LumiColors[400]} />
               </TouchableOpacity>
             </View>
           </ScrollView>
@@ -437,7 +437,7 @@ export const ChatFileOverview = memo(
                     ? {
                         borderRadius: 20,
                         overflow: 'hidden',
-                        backgroundColor: isDarkMode ? Colors.slate[800] : Colors.indigo[50],
+                        backgroundColor: isDarkMode ? Colors.slate[800] : LumiColors[50],
                         flex: 1,
                         padding: 10,
                       }
@@ -552,7 +552,7 @@ export const ChatFileOverview = memo(
                       borderWidth: 0,
                       paddingHorizontal: 10,
                       paddingVertical: 5,
-                      backgroundColor: isDarkMode ? Colors.slate[800] : Colors.indigo[50],
+                      backgroundColor: isDarkMode ? Colors.slate[800] : LumiColors[50],
                       flex: 1,
                       alignItems: 'center',
                       flexDirection: 'row',

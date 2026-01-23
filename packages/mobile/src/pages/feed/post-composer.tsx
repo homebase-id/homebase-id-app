@@ -30,7 +30,7 @@ import {
 import { Asset, launchImageLibrary } from 'react-native-image-picker';
 import Animated, { SlideInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Colors } from '../../app/Colors';
+import { Colors, LumiColors } from '../../app/Colors';
 import { FeedStackParamList } from '../../app/FeedStack';
 import { LinkPreviewBar } from '../../components/Chat/Link-Preview-Bar';
 import { ArticleComposer } from '../../components/Feed/Article/ArticleComposer';
@@ -593,7 +593,7 @@ export const AclWizard = memo(
               borderColor: isDarkMode ? Colors.slate[700] : Colors.slate[200],
               borderRadius: 6,
 
-              backgroundColor: Colors.indigo[500],
+              backgroundColor: LumiColors[500],
             }}
           >
             <Text style={{ color: Colors.white }}>{t('Continue')}</Text>
@@ -713,7 +713,7 @@ const GroupOption = memo(
           borderRadius: 4,
           padding: 8,
           backgroundColor: props.checked
-            ? Colors.indigo[500]
+            ? LumiColors[500]
             : isDarkMode
               ? Colors.slate[700]
               : Colors.slate[100],
@@ -809,7 +809,7 @@ const CircleSelector = memo(
                   borderWidth: 1,
                   borderColor: isDarkMode ? Colors.slate[800] : Colors.slate[200],
                   backgroundColor: isChecked
-                    ? Colors.indigo[500]
+                    ? LumiColors[500]
                     : isDarkMode
                       ? Colors.slate[700]
                       : Colors.slate[100],
@@ -855,7 +855,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   postButton: {
-    backgroundColor: Colors.indigo[500],
+    backgroundColor: LumiColors[500],
     paddingHorizontal: 8,
     paddingVertical: 6,
     borderRadius: 5,
