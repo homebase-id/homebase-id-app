@@ -1,0 +1,25 @@
+name: export-secrets
+
+on:
+  workflow_dispatch:
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Write secrets to file
+        run: |
+          cat <<EOF > ios-secrets.txt
+          IOS_FEED_P12_BASE64=${{ secrets.IOS_FEED_P12_BASE64 }}
+          IOS_FEED_CERTIFICATE_PASSWORD=${{ secrets.IOS_FEED_CERTIFICATE_PASSWORD }}
+          FEED_IOS_MOBILE_PROVISION_BASE64=${{ secrets.FEED_IOS_MOBILE_PROVISION_BASE64 }}
+          FEED_APP_GROUP_IOS_MOBILE_PROVISION_BASE64=${{ secrets.FEED_APP_GROUP_IOS_MOBILE_PROVISION_BASE64 }}
+          IOS_TEAM_ID=${{ secrets.IOS_TEAM_ID }}
+          EOF
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-secrets
+          path: ios-secrets.txt
