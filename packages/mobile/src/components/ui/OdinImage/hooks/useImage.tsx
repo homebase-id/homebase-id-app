@@ -318,10 +318,8 @@ const useImage = (props?: {
           lastModified,
           systemFileType
         ),
-      // Stale time is 0, to always trigger a fetch,
-      //   while the fetch checks if we have anything in cache from before and confirms it on disk
-      staleTime: 0,
-      refetchOnMount: true,
+      staleTime: 1000 * 60 * 5,
+      refetchOnMount: false,
       refetchOnWindowFocus: false,
       enabled: !!imageFileId && imageFileId !== '',
     }),
